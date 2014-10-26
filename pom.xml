@@ -25,8 +25,11 @@
   </properties>
 
   <modules>
-    <module>doobry-ear</module>
+    <module>doobry-ash</module>
+    <module>doobry-elm</module>
+    <module>doobry-fig</module>
     <module>doobry-web</module>
+    <module>doobry-ear</module>
   </modules>
 
   <dependencyManagement>
