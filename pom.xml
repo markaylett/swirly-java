@@ -12,8 +12,15 @@
 
   <name>doobry</name>
   
+  <scm>
+	<url>https://github.com/doobry-org/doobryj</url>
+	<connection>scm:git:git://github.com/doobry-org/doobryj.git</connection>
+	<developerConnection>scm:git:git@github.com:doobry-org/doobryj.git</developerConnection>
+  </scm>
+
   <properties>
     <appengine.app.version>1</appengine.app.version>
+    <appengine.target.version>1.9.14</appengine.target.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -28,7 +35,7 @@
       <dependency>
         <groupId>com.google.appengine</groupId>
         <artifactId>appengine-api-1.0-sdk</artifactId>
-        <version>1.9.14</version>
+        <version>${appengine.target.version}</version>
       </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
@@ -56,13 +63,13 @@
       <dependency>
         <groupId>com.google.appengine</groupId>
         <artifactId>appengine-testing</artifactId>
-        <version>1.9.14</version>
+        <version>${appengine.target.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.google.appengine</groupId>
         <artifactId>appengine-api-stubs</artifactId>
-        <version>1.9.14</version>
+        <version>${appengine.target.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
@@ -78,6 +85,28 @@
           <configuration>
             <source>1.7</source>
             <target>1.7</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>2.4</version>
+          <configuration>
+            <archiveClasses>true</archiveClasses>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>com.google.appengine</groupId>
+          <artifactId>appengine-maven-plugin</artifactId>
+          <version>${appengine.target.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-ear-plugin</artifactId>
+          <version>2.9</version>
+          <configuration>
+            <unpackTypes>war</unpackTypes>
+            <applicationXml>${project.basedir}/src/main/application/META-INF/application.xml</applicationXml>
           </configuration>
         </plugin>
       </plugins>
