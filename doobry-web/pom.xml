@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>org.doobry</groupId>
-      <artifactId>doobry-elm</artifactId>
+      <artifactId>doobry-fig</artifactId>
 	  <version>${project.version}</version>
     </dependency>
     <!-- Compile/runtime dependencies -->

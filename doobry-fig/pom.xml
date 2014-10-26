@@ -17,6 +17,11 @@
   <name>doobry-fig</name>
 
   <dependencies>
+    <dependency>
+      <groupId>org.doobry</groupId>
+      <artifactId>doobry-elm</artifactId>
+	  <version>${project.version}</version>
+    </dependency>
     <!-- Compile/runtime dependencies -->
     <dependency>
 	  <groupId>com.google.code.findbugs</groupId>
