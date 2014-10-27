@@ -5,11 +5,11 @@
  *******************************************************************************/
 package org.doobry.domain;
 
-import static org.doobry.util.Date.*;
-import static org.doobry.mock.MockContr.*;
-import static org.doobry.mock.MockParty.*;
-import static org.junit.Assert.*;
+import static org.doobry.util.Date.ymdToJd;
+import static org.junit.Assert.assertEquals;
 
+import org.doobry.mock.MockContr;
+import org.doobry.mock.MockParty;
 import org.doobry.util.DlNode;
 import org.doobry.util.RbNode;
 import org.junit.Test;
@@ -32,10 +32,13 @@ public final class SideTest {
     @Test
     public final void testOrders() {
         long now = System.currentTimeMillis();
+        final Contr contr = MockContr.newContr("EURUSD");
+        final Party trader = MockParty.newParty("WRAMIREZ");
+        final Party giveup = MockParty.newParty("DBRA");
         // Two orders at the same price level.
-        final Order apple = new Order(1, WRAMIREZ, DBRA, EURUSD, ymdToJd(2014, 3, 14), "apple",
+        final Order apple = new Order(1, trader, giveup, contr, ymdToJd(2014, 3, 14), "apple",
                 Action.BUY, 12345, 10, 0, now);
-        final Order orange = new Order(2, WRAMIREZ, DBRA, EURUSD, ymdToJd(2014, 3, 14), "orange",
+        final Order orange = new Order(2, trader, giveup, contr, ymdToJd(2014, 3, 14), "orange",
                 Action.BUY, 12345, 20, 0, now);
         final Side side = new Side();
 
@@ -129,13 +132,16 @@ public final class SideTest {
     @Test
     public final void testLevels() {
         long now = System.currentTimeMillis();
+        final Contr contr = MockContr.newContr("EURUSD");
+        final Party trader = MockParty.newParty("WRAMIREZ");
+        final Party giveup = MockParty.newParty("DBRA");
         // Two orders at the same price level.
-        final Order apple = new Order(1, WRAMIREZ, DBRA, EURUSD, ymdToJd(2014, 3, 14), "apple",
+        final Order apple = new Order(1, trader, giveup, contr, ymdToJd(2014, 3, 14), "apple",
                 Action.BUY, 12345, 10, 0, now);
-        final Order orange = new Order(2, WRAMIREZ, DBRA, EURUSD, ymdToJd(2014, 3, 14), "orange",
+        final Order orange = new Order(2, trader, giveup, contr, ymdToJd(2014, 3, 14), "orange",
                 Action.BUY, 12345, 20, 0, now);
         // Best inserted last.
-        final Order pear = new Order(3, WRAMIREZ, DBRA, EURUSD, ymdToJd(2014, 3, 14), "pear",
+        final Order pear = new Order(3, trader, giveup, contr, ymdToJd(2014, 3, 14), "pear",
                 Action.BUY, 12346, 25, 0, now);
         final Side side = new Side();
 

@@ -23,7 +23,7 @@ import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;
 import org.doobry.util.Tree;
 
-public final class Serv {
+public final class Serv implements AutoCloseable {
     private static int CACHE_BUCKETS = 257;
     private static int ORDIDX_BUCKETS = 257;
     private final Bank bank;
@@ -125,7 +125,11 @@ public final class Serv {
         this.journ = journ;
     }
 
-    void load(Model model) {
+    @Override
+    public final void close() {
+    }
+
+    public final void load(Model model) {
         insertRecList(model, RecType.ASSET);
         insertRecList(model, RecType.CONTR);
         insertRecList(model, RecType.PARTY);

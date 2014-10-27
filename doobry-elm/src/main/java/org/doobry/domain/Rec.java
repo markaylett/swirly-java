@@ -10,6 +10,8 @@ import org.doobry.util.Identifiable;
 import org.doobry.util.Memorable;
 
 public abstract class Rec extends BasicSlNode implements Identifiable, Memorable {
+    private transient Rec idNext;
+    private transient Rec mnemNext;
     private final RecType type;
     private final long id;
     private final String mnem;
@@ -20,6 +22,22 @@ public abstract class Rec extends BasicSlNode implements Identifiable, Memorable
         this.id = id;
         this.mnem = mnem;
         this.display = display;
+    }
+
+    public final void setIdNext(Rec idNext) {
+        this.idNext = idNext;
+    }
+
+    public final Rec idNext() {
+        return idNext;
+    }
+    
+    public final void setMnemNext(Rec mnemNext) {
+        this.mnemNext = mnemNext;
+    }
+
+    public final Rec mnemNext() {
+        return mnemNext;
     }
 
     public final RecType getType() {

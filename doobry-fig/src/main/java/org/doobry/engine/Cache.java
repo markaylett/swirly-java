@@ -45,14 +45,14 @@ public final class Cache {
     private final void insertId(Rec rec) {
         final int bucket = hashCode(rec.getType().intValue(), rec.getId()) % nBuckets;
         final Rec first = buckets[bucket][ID];
-        rec.setNext(first);
+        rec.setIdNext(first);
         buckets[bucket][ID] = rec;
     }
 
     private final void insertMnem(Rec rec) {
         final int bucket = hashCode(rec.getType().intValue(), rec.getMnem()) % nBuckets;
         final Rec first = buckets[bucket][MNEM];
-        rec.setNext(first);
+        rec.setMnemNext(first);
         buckets[bucket][MNEM] = rec;
     }
 
@@ -90,8 +90,7 @@ public final class Cache {
 
     public final Rec findId(RecType type, long id) {
         final int bucket = hashCode(type.intValue(), id) % nBuckets;
-        for (SlNode node = buckets[bucket][ID]; node != null; node = node.slNext()) {
-            final Rec rec = (Rec) node;
+        for (Rec rec = buckets[bucket][ID]; rec != null; rec = rec.idNext()) {
             if (rec.getType() == type && rec.getId() == id)
                 return rec;
         }
@@ -100,8 +99,7 @@ public final class Cache {
 
     public final Rec findMnem(RecType type, String mnem) {
         final int bucket = hashCode(type.intValue(), mnem) % nBuckets;
-        for (SlNode node = buckets[bucket][MNEM]; node != null; node = node.slNext()) {
-            final Rec rec = (Rec) node;
+        for (Rec rec = buckets[bucket][MNEM]; rec != null; rec = rec.mnemNext()) {
             if (rec.getType() == type && rec.getMnem().equals(mnem))
                 return rec;
         }

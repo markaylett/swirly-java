@@ -5,31 +5,64 @@
  *******************************************************************************/
 package org.doobry.mock;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.doobry.domain.Party;
+import org.doobry.function.NullaryFunction;
+import org.doobry.util.Queue;
 
 public final class MockParty {
+    private static final Map<String, NullaryFunction<Party>> FACTORIES = new HashMap<String, NullaryFunction<Party>>();
+
+    private static void put(final long id, final String mnem, final String display,
+            final String email) {
+        FACTORIES.put(mnem, new NullaryFunction<Party>() {
+            @Override
+            public final Party call() {
+                return new Party(id, mnem, display, email);
+            }
+        });
+    }
+
+    static {
+        int i = 1;
+        put(i++, "WRAMIREZ", "Wayne Ramirez", "wayne.ramirez@doobry.org");
+        put(i++, "SFLORES", "Steven Flores", "steven.flores@doobry.org");
+        put(i++, "JWRIGHT", "Juan Wright", "juan.wright@doobry.org");
+        put(i++, "VCAMPBEL", "Virginia Campbell", "virginia.campbell@doobry.org");
+        put(i++, "GWILSON", "George Wilson", "george.wilson@doobry.org");
+        put(i++, "BJONES", "Bobby Jones", "bobby.jones@doobry.org");
+        put(i++, "TLEE", "Todd Lee", "todd.lee@doobry.org");
+        put(i++, "EEDWARDS", "Emily Edwards", "emily.edwards@doobry.org");
+        put(i++, "RALEXAND", "Raymond Alexander", "raymond.alexander@doobry.org");
+        put(i++, "JTHOMAS", "Joseph Thomas", "joseph.thomas@doobry.org");
+        put(i++, "DBRA", "Account A", "dbra@doobry.org");
+        put(i++, "DBRB", "Account B", "dbrb@doobry.org");
+    }
+
     private MockParty() {
     }
 
-    public static final Party WRAMIREZ = new Party(1, "WRAMIREZ", "Wayne Ramirez",
-            "wayne.ramirez@doobry.org");
-    public static final Party SFLORES = new Party(2, "SFLORES", "Steven Flores",
-            "steven.flores@doobry.org");
-    public static final Party JWRIGHT = new Party(3, "JWRIGHT", "Juan Wright",
-            "juan.wright@doobry.org");
-    public static final Party VCAMPBEL = new Party(4, "VCAMPBEL", "Virginia Campbell",
-            "virginia.campbell@doobry.org");
-    public static final Party GWILSON = new Party(5, "GWILSON", "George Wilson",
-            "george.wilson@doobry.org");
-    public static final Party BJONES = new Party(6, "BJONES", "Bobby Jones",
-            "bobby.jones@doobry.org");
-    public static final Party TLEE = new Party(7, "TLEE", "Todd Lee", "todd.lee@doobry.org");
-    public static final Party EEDWARDS = new Party(8, "EEDWARDS", "Emily Edwards",
-            "emily.edwards@doobry.org");
-    public static final Party RALEXAND = new Party(9, "RALEXAND", "Raymond Alexander",
-            "raymond.alexander@doobry.org");
-    public static final Party JTHOMAS = new Party(10, "JTHOMAS", "Joseph Thomas",
-            "joseph.thomas@doobry.org");
-    public static final Party DBRA = new Party(11, "DBRA", "Account A", "dbra@doobry.org");
-    public static final Party DBRB = new Party(12, "DBRB", "Account B", "dbrb@doobry.org");
+    public static Party newParty(String mnem) {
+        return FACTORIES.get(mnem).call();
+    }
+
+    public static Party[] newPartyArray() {
+        int i = 0;
+        final Party[] arr = new Party[FACTORIES.size()];
+        for (final Entry<String, NullaryFunction<Party>> entry : FACTORIES.entrySet()) {
+            arr[i++] = entry.getValue().call();
+        }
+        return arr;
+    }
+
+    public static Party newPartyList() {
+        final Queue q = new Queue();
+        for (final Entry<String, NullaryFunction<Party>> entry : FACTORIES.entrySet()) {
+            q.insertBack(entry.getValue().call());
+        }
+        return (Party) q.getFirst();
+    }
 }

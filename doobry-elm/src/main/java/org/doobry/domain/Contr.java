@@ -9,8 +9,9 @@ import static org.doobry.domain.Conv.fractToReal;
 import static org.doobry.domain.Conv.realToDp;
 
 public final class Contr extends Rec {
-    private final Asset asset;
-    private final Asset ccy;
+    private final AssetType assetType;
+    private final String asset;
+    private final String ccy;
     private final int tickNumer;
     private final int tickDenom;
     private final transient double priceInc;
@@ -23,9 +24,11 @@ public final class Contr extends Rec {
     private final long minLots;
     private final long maxLots;
 
-    public Contr(long id, String mnem, String display, Asset asset, Asset ccy, int tickNumer,
-            int tickDenom, int lotNumer, int lotDenom, int pipDp, long minLots, long maxLots) {
+    public Contr(long id, String mnem, String display, AssetType assetType, String asset,
+            String ccy, int tickNumer, int tickDenom, int lotNumer, int lotDenom, int pipDp,
+            long minLots, long maxLots) {
         super(RecType.CONTR, id, mnem, display);
+        this.assetType = assetType;
         this.asset = asset;
         this.ccy = ccy;
         this.tickNumer = tickNumer;
@@ -42,14 +45,14 @@ public final class Contr extends Rec {
     }
 
     public final AssetType getAssetType() {
-        return asset.getAssetType();
+        return assetType;
     }
 
-    public final Asset getAsset() {
+    public final String getAsset() {
         return asset;
     }
 
-    public final Asset getCcy() {
+    public final String getCcy() {
         return ccy;
     }
 
