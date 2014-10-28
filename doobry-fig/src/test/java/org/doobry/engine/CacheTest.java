@@ -8,6 +8,7 @@ package org.doobry.engine;
 import static org.junit.Assert.*;
 
 import org.doobry.domain.Model;
+import org.doobry.domain.Rec;
 import org.doobry.domain.RecType;
 import org.doobry.mock.MockModel;
 import org.junit.Test;
@@ -32,8 +33,9 @@ public final class CacheTest {
         c.insertList(model.readRec(RecType.ASSET));
         assertFalse(c.isEmpty(RecType.ASSET));
         assertEquals("AUD", c.getFirst(RecType.ASSET).getMnem());
-        assertEquals("CAD", c.findMnem(RecType.ASSET, "CAD").getMnem());
-        assertEquals("CHF", c.findId(RecType.ASSET, 3).getMnem());
+        assertEquals("CAD", ((Rec) c.getFirst(RecType.ASSET).slNext()).getMnem());
+        assertEquals("CHF", c.findMnem(RecType.ASSET, "CHF").getMnem());
+        assertEquals("CZK", c.findId(RecType.ASSET, 4).getMnem());
     }
 
     @Test
@@ -42,8 +44,9 @@ public final class CacheTest {
         c.insertList(model.readRec(RecType.CONTR));
         assertFalse(c.isEmpty(RecType.CONTR));
         assertEquals("AUDUSD", c.getFirst(RecType.CONTR).getMnem());
-        assertEquals("EURCHF", c.findMnem(RecType.CONTR, "EURCHF").getMnem());
-        assertEquals("EURCZK", c.findId(RecType.CONTR, 3).getMnem());
+        assertEquals("EURCHF", ((Rec) c.getFirst(RecType.CONTR).slNext()).getMnem());
+        assertEquals("EURCZK", c.findMnem(RecType.CONTR, "EURCZK").getMnem());
+        assertEquals("EURDKK", c.findId(RecType.CONTR, 4).getMnem());
     }
 
     @Test
@@ -52,7 +55,8 @@ public final class CacheTest {
         c.insertList(model.readRec(RecType.PARTY));
         assertFalse(c.isEmpty(RecType.PARTY));
         assertEquals("BJONES", c.getFirst(RecType.PARTY).getMnem());
-        assertEquals("DBRA", c.findMnem(RecType.PARTY, "DBRA").getMnem());
-        assertEquals("DBRB", c.findId(RecType.PARTY, 3).getMnem());
+        assertEquals("DBRA", ((Rec) c.getFirst(RecType.PARTY).slNext()).getMnem());
+        assertEquals("DBRB", c.findMnem(RecType.PARTY, "DBRB").getMnem());
+        assertEquals("EEDWARDS", c.findId(RecType.PARTY, 4).getMnem());
     }
 }
