@@ -60,14 +60,7 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void insertRecList(Model model, RecType type) {
-        final Rec[] recs = model.readRec(type);
-        Rec first = null;
-        for (int i = recs.length - 1; i >= 0; --i) {
-            final Rec rec = recs[i];
-            rec.setNext(first);
-            first = rec;
-        }
-        cache.insertList(first);
+        cache.insertList(model.readRec(type));
     }
 
     private final void insertOrders(Model model) {

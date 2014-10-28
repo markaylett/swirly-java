@@ -6,7 +6,7 @@
 package org.doobry.domain;
 
 public interface Model {
-    Rec[] readRec(RecType type);
+    Rec readRec(RecType type);
     Order[] readOrder();
     Exec[] readTrade();
     Posn[] readPosn();

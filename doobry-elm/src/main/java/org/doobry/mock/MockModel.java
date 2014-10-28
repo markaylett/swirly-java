@@ -15,20 +15,20 @@ import org.doobry.domain.RecType;
 public final class MockModel implements Model {
 
     @Override
-    public final Rec[] readRec(RecType type) {
-        Rec[] arr = null;
+    public final Rec readRec(RecType type) {
+        Rec first = null;
         switch (type) {
         case ASSET:
-            arr = MockAsset.newAssetArray();
+            first = MockAsset.newAssetList();
             break;
         case CONTR:
-            arr = MockContr.newContrArray();
+            first = MockContr.newContrList();
             break;
         case PARTY:
-            arr = MockParty.newPartyArray();
+            first = MockParty.newPartyList();
             break;
         }
-        return arr;
+        return first;
     }
 
     @Override

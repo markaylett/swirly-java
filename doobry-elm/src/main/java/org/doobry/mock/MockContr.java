@@ -5,9 +5,9 @@
  *******************************************************************************/
 package org.doobry.mock;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.doobry.domain.AssetType;
 import org.doobry.domain.Contr;
@@ -16,7 +16,7 @@ import org.doobry.util.Queue;
 
 public final class MockContr {
 
-    private static final Map<String, NullaryFunction<Contr>> FACTORIES = new HashMap<String, NullaryFunction<Contr>>();
+    private static final Map<String, NullaryFunction<Contr>> FACTORIES = new TreeMap<String, NullaryFunction<Contr>>();
 
     private static void put(final long id, final String mnem, final String display,
             final AssetType assetType, final String asset, final String ccy, final int tickNumer,
@@ -33,12 +33,28 @@ public final class MockContr {
 
     static {
         int i = 1;
+        put(i++, "AUDUSD", "AUDUSD", AssetType.CURRENCY, "AUD", "USD", 1, 10000, 1000000, 1, 4, 1,
+                10);
+        put(i++, "EURCHF", "EURCHF", AssetType.CURRENCY, "EUR", "CHF", 1, 10000, 1000000, 1, 4, 1,
+                10);
+        put(i++, "EURCZK", "EURCZK", AssetType.CURRENCY, "EUR", "CZK", 1, 100, 1000000, 1, 2, 1, 10);
+        put(i++, "EURDKK", "EURDKK", AssetType.CURRENCY, "EUR", "DKK", 1, 1000, 1000000, 1, 3, 1,
+                10);
+        put(i++, "EURGBP", "EURGBP", AssetType.CURRENCY, "EUR", "GBP", 1, 10000, 1000000, 1, 4, 1,
+                10);
+        put(i++, "EURHUF", "EURHUF", AssetType.CURRENCY, "EUR", "HUF", 1, 100, 1000000, 1, 2, 1, 10);
+        put(i++, "EURJPY", "EURJPY", AssetType.CURRENCY, "EUR", "JPY", 1, 100, 1000000, 1, 2, 1, 10);
+        put(i++, "EURNOK", "EURNOK", AssetType.CURRENCY, "EUR", "NOK", 1, 1000, 1000000, 1, 3, 1,
+                10);
+        put(i++, "EURPLN", "EURPLN", AssetType.CURRENCY, "EUR", "PLN", 1, 1000, 1000000, 1, 3, 1,
+                10);
+        put(i++, "EURRON", "EURRON", AssetType.CURRENCY, "EUR", "RON", 1, 1000, 1000000, 1, 3, 1,
+                10);
+        put(i++, "EURSEK", "EURSEK", AssetType.CURRENCY, "EUR", "SEK", 1, 1000, 1000000, 1, 3, 1,
+                10);
         put(i++, "EURUSD", "EURUSD", AssetType.CURRENCY, "EUR", "USD", 1, 10000, 1000000, 1, 4, 1,
                 10);
-
         put(i++, "GBPUSD", "GBPUSD", AssetType.CURRENCY, "GBP", "USD", 1, 10000, 1000000, 1, 4, 1,
-                10);
-        put(i++, "AUDUSD", "AUDUSD", AssetType.CURRENCY, "AUD", "USD", 1, 10000, 1000000, 1, 4, 1,
                 10);
         put(i++, "NZDUSD", "NZDUSD", AssetType.CURRENCY, "NZD", "USD", 1, 10000, 1000000, 1, 4, 1,
                 10);
@@ -46,45 +62,23 @@ public final class MockContr {
                 10);
         put(i++, "USDCHF", "USDCHF", AssetType.CURRENCY, "USD", "CHF", 1, 10000, 1000000, 1, 4, 1,
                 10);
-        put(i++, "USDTRY", "USDTRY", AssetType.CURRENCY, "USD", "TRY", 1, 1000, 1000000, 1, 4, 1,
-                10);
-        put(i++, "USDSGD", "USDSGD", AssetType.CURRENCY, "USD", "SGD", 1, 10000, 1000000, 1, 4, 1,
-                10);
-        put(i++, "EURRON", "EURRON", AssetType.CURRENCY, "EUR", "RON", 1, 1000, 1000000, 1, 3, 1,
-                10);
-        put(i++, "EURPLN", "EURPLN", AssetType.CURRENCY, "EUR", "PLN", 1, 1000, 1000000, 1, 3, 1,
+        put(i++, "USDHKD", "USDHKD", AssetType.CURRENCY, "USD", "HKD", 1, 1000, 1000000, 1, 3, 1,
                 10);
         put(i++, "USDILS", "USDILS", AssetType.CURRENCY, "USD", "ILS", 1, 1000, 1000000, 1, 3, 1,
                 10);
-        put(i++, "EURDKK", "EURDKK", AssetType.CURRENCY, "EUR", "DKK", 1, 1000, 1000000, 1, 3, 1,
+        put(i++, "USDJPY", "USDJPY", AssetType.CURRENCY, "USD", "JPY", 1, 100, 1000000, 1, 2, 1, 10);
+        put(i++, "USDMXN", "USDMXN", AssetType.CURRENCY, "USD", "MXN", 1, 1000, 1000000, 1, 3, 1,
+                10);
+        put(i++, "USDSGD", "USDSGD", AssetType.CURRENCY, "USD", "SGD", 1, 10000, 1000000, 1, 4, 1,
+                10);
+        put(i++, "USDTHB", "USDTHB", AssetType.CURRENCY, "USD", "THB", 1, 100, 1000000, 1, 2, 1, 10);
+        put(i++, "USDTRY", "USDTRY", AssetType.CURRENCY, "USD", "TRY", 1, 1000, 1000000, 1, 4, 1,
                 10);
         put(i++, "USDZAR", "USDZAR", AssetType.CURRENCY, "USD", "ZAR", 1, 1000, 1000000, 1, 3, 1,
                 10);
-        put(i++, "EURNOK", "EURNOK", AssetType.CURRENCY, "EUR", "NOK", 1, 1000, 1000000, 1, 3, 1,
-                10);
-        put(i++, "EURSEK", "EURSEK", AssetType.CURRENCY, "EUR", "SEK", 1, 1000, 1000000, 1, 3, 1,
-                10);
-        put(i++, "USDHKD", "USDHKD", AssetType.CURRENCY, "USD", "HKD", 1, 1000, 1000000, 1, 3, 1,
-                10);
-        put(i++, "USDMXN", "USDMXN", AssetType.CURRENCY, "USD", "MXN", 1, 1000, 1000000, 1, 3, 1,
-                10);
-        put(i++, "EURCZK", "EURCZK", AssetType.CURRENCY, "EUR", "CZK", 1, 100, 1000000, 1, 2, 1, 10);
-        put(i++, "USDTHB", "USDTHB", AssetType.CURRENCY, "USD", "THB", 1, 100, 1000000, 1, 2, 1, 10);
-        put(i++, "USDJPY", "USDJPY", AssetType.CURRENCY, "USD", "JPY", 1, 100, 1000000, 1, 2, 1, 10);
-        put(i++, "EURHUF", "EURHUF", AssetType.CURRENCY, "EUR", "HUF", 1, 100, 1000000, 1, 2, 1, 10);
-
-        // Crosses.
-
-        put(i++, "EURGBP", "EURGBP", AssetType.CURRENCY, "EUR", "GBP", 1, 10000, 1000000, 1, 4, 1,
-                10);
-        put(i++, "EURCHF", "EURCHF", AssetType.CURRENCY, "EUR", "CHF", 1, 10000, 1000000, 1, 4, 1,
-                10);
-        put(i++, "EURJPY", "EURJPY", AssetType.CURRENCY, "EUR", "JPY", 1, 100, 1000000, 1, 2, 1, 10);
-
         put(i++, "ZC", "ZC", AssetType.COMMODITY, "ZC", "USD", 1, 400, 5000, 1, 2, 1, 10);
         put(i++, "ZS", "ZS", AssetType.COMMODITY, "ZS", "USD", 1, 400, 5000, 1, 2, 1, 10);
         put(i++, "ZW", "ZW", AssetType.COMMODITY, "ZW", "USD", 1, 400, 5000, 1, 2, 1, 10);
-
     }
 
     private MockContr() {
@@ -92,15 +86,6 @@ public final class MockContr {
 
     public static Contr newContr(String mnem) {
         return FACTORIES.get(mnem).call();
-    }
-
-    public static Contr[] newContrArray() {
-        int i = 0;
-        final Contr[] arr = new Contr[FACTORIES.size()];
-        for (final Entry<String, NullaryFunction<Contr>> entry : FACTORIES.entrySet()) {
-            arr[i++] = entry.getValue().call();
-        }
-        return arr;
     }
 
     public static Contr newContrList() {

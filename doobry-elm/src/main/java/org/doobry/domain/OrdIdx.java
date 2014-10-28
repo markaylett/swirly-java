@@ -18,10 +18,6 @@ public final class OrdIdx {
         return (int) (id ^ id >>> 32);
     }
 
-    private static int indexOf(int hash, int length) {
-        return hash & length - 1;
-    }
-
     private static int hashCode(long trid, String ref) {
         assert ref != null;
         final int prime = 31;
@@ -29,6 +25,10 @@ public final class OrdIdx {
         result = prime * result + hashCode(trid);
         result = prime * result + ref.hashCode();
         return result;
+    }
+
+    private static int indexFor(int hash, int length) {
+        return (hash & 0x7fffffff) % length;
     }
 
     public OrdIdx(int nBuckets) {
@@ -39,22 +39,22 @@ public final class OrdIdx {
     public final void insert(Order order) {
         assert order != null;
         if (order.getRef() != null) {
-            final int bucket = indexOf(hashCode(order.getTrader().getId(), order.getRef()),
-                    this.buckets.length);
-            order.nextRef = this.buckets[bucket];
-            this.buckets[bucket] = order;
+            final int bucket = indexFor(hashCode(order.getTrader().getId(), order.getRef()),
+                    buckets.length);
+            order.nextRef = buckets[bucket];
+            buckets[bucket] = order;
         }
     }
 
     public final Order remove(long trid, String ref) {
         assert ref != null;
-        final int bucket = indexOf(hashCode(trid, ref), this.buckets.length);
-        Order it = this.buckets[bucket];
+        final int bucket = indexFor(hashCode(trid, ref), this.buckets.length);
+        Order it = buckets[bucket];
         if (it == null) {
             return null;
         }
         if (equals(it, trid, ref)) {
-            this.buckets[bucket] = it.nextRef;
+            buckets[bucket] = it.nextRef;
             return it;
         }
         for (; it.nextRef != null; it = it.nextRef) {
@@ -69,8 +69,8 @@ public final class OrdIdx {
 
     public final Order find(long trid, String ref) {
         assert ref != null;
-        final int bucket = indexOf(hashCode(trid, ref), this.buckets.length);
-        for (Order it = this.buckets[bucket]; it != null; it = it.nextRef) {
+        final int bucket = indexFor(hashCode(trid, ref), buckets.length);
+        for (Order it = buckets[bucket]; it != null; it = it.nextRef) {
             if (equals(it, trid, ref)) {
                 return it;
             }
