@@ -178,7 +178,7 @@ public final class Serv implements AutoCloseable {
         // any unfilled quantity.
         boolean success = false;
         try {
-            journ.insertExecList((Exec) trans.execs.getFirst(), true);
+            journ.insertExecList((Exec) trans.execs.getFirst());
             success = true;
         } finally {
             if (!success && !order.isDone()) {
@@ -207,7 +207,7 @@ public final class Serv implements AutoCloseable {
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.revise(lots);
-        journ.insertExec(exec, true);
+        journ.insertExec(exec);
 
         // Final commit phase cannot fail.
         final Book book = findBook(order.getContr(), order.getSettlDay());
@@ -241,7 +241,7 @@ public final class Serv implements AutoCloseable {
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.cancel();
-        journ.insertExec(exec, true);
+        journ.insertExec(exec);
 
         // Final commit phase cannot fail.
         final Book book = findBook(order.getContr(), order.getSettlDay());

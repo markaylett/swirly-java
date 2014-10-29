@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.doobry.domain;
 
+import org.doobry.util.DlNode;
 import org.doobry.util.List;
 import org.doobry.util.RbNode;
 import org.doobry.util.Tree;
@@ -150,12 +151,12 @@ public final class Side {
         order.modified = now;
     }
 
-    public final Order getFirstOrder() {
-        return (Order) orders.getFirst();
+    public final DlNode getFirstOrder() {
+        return orders.getFirst();
     }
 
-    public final Order getLastOrder() {
-        return (Order) orders.getLast();
+    public final DlNode getLastOrder() {
+        return orders.getLast();
     }
 
     public final boolean isEmptyOrder() {

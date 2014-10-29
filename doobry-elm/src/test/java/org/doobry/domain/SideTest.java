@@ -70,8 +70,8 @@ public final class SideTest {
         assertEquals(1, size(side.getFirstLevel()));
         assertEquals(2, size((DlNode) side.getFirstOrder()));
 
-        assertEquals("apple", side.getFirstOrder().getRef());
-        assertEquals("orange", side.getLastOrder().getRef());
+        assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
+        assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
         Level level = side.getFirstLevel();
         assertEquals(12345, level.getTicks());
@@ -95,8 +95,8 @@ public final class SideTest {
         assertEquals(1, size(side.getFirstLevel()));
         assertEquals(2, size((DlNode) side.getFirstOrder()));
 
-        assertEquals("apple", side.getFirstOrder().getRef());
-        assertEquals("orange", side.getLastOrder().getRef());
+        assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
+        assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
         level = side.getFirstLevel();
         assertEquals(12345, level.getTicks());
@@ -120,8 +120,8 @@ public final class SideTest {
         assertEquals(1, size(side.getFirstLevel()));
         assertEquals(1, size((DlNode) side.getFirstOrder()));
 
-        assertEquals("apple", side.getFirstOrder().getRef());
-        assertEquals("apple", side.getLastOrder().getRef());
+        assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
+        assertEquals("apple", ((Order) side.getLastOrder()).getRef());
 
         level = side.getFirstLevel();
         assertEquals(12345, level.getTicks());
@@ -152,8 +152,8 @@ public final class SideTest {
         assertEquals(2, size(side.getFirstLevel()));
         assertEquals(3, size((DlNode) side.getFirstOrder()));
 
-        assertEquals("pear", side.getFirstOrder().getRef());
-        assertEquals("orange", side.getLastOrder().getRef());
+        assertEquals("pear", ((Order) side.getFirstOrder()).getRef());
+        assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
         Level level = side.getFirstLevel();
         assertEquals(12346, level.getTicks());

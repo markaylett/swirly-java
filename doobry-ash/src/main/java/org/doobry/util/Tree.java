@@ -220,7 +220,7 @@ public final class Tree {
             root = node;
         }
         insertColor(node);
-        return null;
+        return node;
     }
 
     public final void pinsert(RbNode node, RbNode parent) {
