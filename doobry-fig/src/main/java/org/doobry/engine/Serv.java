@@ -323,13 +323,16 @@ public final class Serv implements AutoCloseable {
         return getLazyBook(contr, settlDay);
     }
 
-    @Deprecated
-    public final Book findBook(long cid, int settlDay) {
-        return (Book) books.find(Book.toKey(cid, settlDay));
-    }
-
     public final Book findBook(Contr contr, int settlDay) {
         return (Book) books.find(Book.toKey(contr.getId(), settlDay));
+    }
+
+    public final Book findBook(String mnem, int settlDay) {
+        final Contr contr = (Contr) cache.findRecMnem(RecType.CONTR, mnem);
+        if (contr == null) {
+            throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
+        }
+        return findBook(contr, settlDay);
     }
 
     public final RbNode getFirstBook() {

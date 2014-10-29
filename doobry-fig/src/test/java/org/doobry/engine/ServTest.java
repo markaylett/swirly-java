@@ -27,7 +27,8 @@ public final class ServTest {
             final Accnt giveup = s.getLazyAccnt("DBRA");
             final int settlDay = ymdToJd(2014, 3, 14);
             final Book book = s.getLazyBook("EURUSD", settlDay);
-            final Order order = s.placeOrder(trader, giveup, book, "", Action.BUY, 12345, 1, 1);
+
+            final Order order = s.placeOrder(trader, giveup, book, "", Action.BUY, 12345, 5, 1);
             assertEquals(trader.getParty(), order.getTrader());
             assertEquals(giveup.getParty(), order.getGiveup());
             assertEquals(book.getContr(), order.getContr());
@@ -36,13 +37,30 @@ public final class ServTest {
             assertEquals(State.NEW, order.getState());
             assertEquals(Action.BUY, order.getAction());
             assertEquals(12345, order.getTicks());
-            assertEquals(1, order.getLots());
-            assertEquals(1, order.getResd());
+            assertEquals(5, order.getLots());
+            assertEquals(5, order.getResd());
             assertEquals(0, order.getExec());
             assertEquals(0, order.getLastTicks());
             assertEquals(0, order.getLastLots());
             assertEquals(1, order.getMinLots());
             assertEquals(order.getCreated(), order.getModified());
+
+            s.reviseOrder(trader, order, 4);
+            assertEquals(trader.getParty(), order.getTrader());
+            assertEquals(giveup.getParty(), order.getGiveup());
+            assertEquals(book.getContr(), order.getContr());
+            assertEquals(settlDay, order.getSettlDay());
+            assertEquals("", order.getRef());
+            assertEquals(State.REVISE, order.getState());
+            assertEquals(Action.BUY, order.getAction());
+            assertEquals(12345, order.getTicks());
+            assertEquals(4, order.getLots());
+            assertEquals(4, order.getResd());
+            assertEquals(0, order.getExec());
+            assertEquals(0, order.getLastTicks());
+            assertEquals(0, order.getLastLots());
+            assertEquals(1, order.getMinLots());
+
         } finally {
             s.close();
         }
