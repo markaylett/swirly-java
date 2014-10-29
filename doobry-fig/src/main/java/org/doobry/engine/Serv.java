@@ -54,11 +54,6 @@ public final class Serv implements AutoCloseable {
         posn.enrich(party, contr);
     }
 
-    private final Book getBook(Contr contr, int settlDay) {
-        final long key = Book.toKey(contr.getId(), settlDay);
-        return (Book) books.find(key);
-    }
-
     private final void insertRecList(Model model, RecType type) {
         cache.insertList(model.readRec(type));
     }
@@ -151,6 +146,14 @@ public final class Serv implements AutoCloseable {
         return Accnt.getLazyAccnt(party, ordIdx);
     }
 
+    public final Accnt getLazyAccnt(String mnem) {
+        final Party party = (Party) cache.findMnem(RecType.PARTY, mnem);
+        if (party == null) {
+            throw new IllegalArgumentException(String.format("invalid party '%s'", mnem));
+        }
+        return getLazyAccnt(party);
+    }
+
     public final Order placeOrder(Accnt trader, Accnt giveup, Book book, String ref, Action action,
             long ticks, long lots, long minLots) {
         if (lots == 0 || lots < minLots) {
@@ -207,7 +210,7 @@ public final class Serv implements AutoCloseable {
         journ.insertExec(exec, true);
 
         // Final commit phase cannot fail.
-        final Book book = getBook(order.getContr(), order.getSettlDay());
+        final Book book = findBook(order.getContr(), order.getSettlDay());
         assert book != null;
         book.reviseOrder(order, lots, now);
         execs.insertBack(exec);
@@ -241,7 +244,7 @@ public final class Serv implements AutoCloseable {
         journ.insertExec(exec, true);
 
         // Final commit phase cannot fail.
-        final Book book = getBook(order.getContr(), order.getSettlDay());
+        final Book book = findBook(order.getContr(), order.getSettlDay());
         assert book != null;
         book.cancelOrder(order, now);
         execs.insertBack(exec);
@@ -268,7 +271,7 @@ public final class Serv implements AutoCloseable {
     public final void ackTrade(Accnt trader, long id) {
         final Exec trade = trader.findTradeId(id);
         if (trade != null) {
-            throw new IllegalArgumentException(String.format("no such trade '%d'", id));            
+            throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
         final long now = System.currentTimeMillis();
         journ.updateExec(id, now);
@@ -285,7 +288,7 @@ public final class Serv implements AutoCloseable {
                 final Party trader = exec.getTrader();
                 final Accnt accnt = (Accnt) trader.getAccnt();
                 assert accnt != null;
-                accnt.releaseOrderId(exec.getOrder());  
+                accnt.releaseOrderId(exec.getOrder());
             }
         }
     }
@@ -312,8 +315,21 @@ public final class Serv implements AutoCloseable {
         return book;
     }
 
+    public final Book getLazyBook(String mnem, int settlDay) {
+        final Contr contr = (Contr) cache.findMnem(RecType.CONTR, mnem);
+        if (contr == null) {
+            throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
+        }
+        return getLazyBook(contr, settlDay);
+    }
+
+    @Deprecated
     public final Book findBook(long cid, int settlDay) {
         return (Book) books.find(Book.toKey(cid, settlDay));
+    }
+
+    public final Book findBook(Contr contr, int settlDay) {
+        return (Book) books.find(Book.toKey(contr.getId(), settlDay));
     }
 
     public final Book getFirstBook() {
