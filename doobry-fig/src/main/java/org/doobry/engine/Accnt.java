@@ -99,12 +99,12 @@ public final class Accnt {
         return ordIdx.find(party.getId(), ref);
     }
 
-    public final Order getFirstOrder() {
-        return (Order) orders.getFirst();
+    public final RbNode getFirstOrder() {
+        return orders.getFirst();
     }
 
-    public final Order getLastOrder() {
-        return (Order) orders.getLast();
+    public final RbNode getLastOrder() {
+        return orders.getLast();
     }
 
     public final boolean isEmptyOrder() {
@@ -133,12 +133,12 @@ public final class Accnt {
         return (Exec) trades.find(id);
     }
 
-    public final Exec getFirstTrade() {
-        return (Exec) trades.getFirst();
+    public final RbNode getFirstTrade() {
+        return trades.getFirst();
     }
 
-    public final Exec getLastTrade() {
-        return (Exec) trades.getLast();
+    public final RbNode getLastTrade() {
+        return trades.getLast();
     }
 
     public final boolean isEmptyTrade() {
@@ -190,12 +190,12 @@ public final class Accnt {
         return (Posn) posns.find(id);
     }
 
-    public final Posn getFirstPosn() {
-        return (Posn) posns.getFirst();
+    public final RbNode getFirstPosn() {
+        return posns.getFirst();
     }
 
-    public final Posn getLastPosn() {
-        return (Posn) posns.getLast();
+    public final RbNode getLastPosn() {
+        return posns.getLast();
     }
 
     public final boolean isEmptyPosn() {

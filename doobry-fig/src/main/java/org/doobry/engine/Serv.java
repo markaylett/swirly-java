@@ -34,28 +34,28 @@ public final class Serv implements AutoCloseable {
     private final Queue execs = new Queue();
 
     private final void enrichOrder(Order order) {
-        final Party trader = (Party) cache.findId(RecType.PARTY, order.getTraderId());
-        final Party giveup = (Party) cache.findId(RecType.PARTY, order.getGiveupId());
-        final Contr contr = (Contr) cache.findId(RecType.CONTR, order.getContrId());
+        final Party trader = (Party) cache.findRecId(RecType.PARTY, order.getTraderId());
+        final Party giveup = (Party) cache.findRecId(RecType.PARTY, order.getGiveupId());
+        final Contr contr = (Contr) cache.findRecId(RecType.CONTR, order.getContrId());
         order.enrich(trader, giveup, contr);
     }
 
     private final void enrichTrade(Exec trade) {
-        final Party trader = (Party) cache.findId(RecType.PARTY, trade.getTraderId());
-        final Party giveup = (Party) cache.findId(RecType.PARTY, trade.getGiveupId());
-        final Contr contr = (Contr) cache.findId(RecType.CONTR, trade.getContrId());
-        final Contr cpty = (Contr) cache.findId(RecType.CONTR, trade.getCptyId());
+        final Party trader = (Party) cache.findRecId(RecType.PARTY, trade.getTraderId());
+        final Party giveup = (Party) cache.findRecId(RecType.PARTY, trade.getGiveupId());
+        final Contr contr = (Contr) cache.findRecId(RecType.CONTR, trade.getContrId());
+        final Contr cpty = (Contr) cache.findRecId(RecType.CONTR, trade.getCptyId());
         trade.enrich(trader, giveup, contr, cpty);
     }
 
     private final void enrichPosn(Posn posn) {
-        final Party party = (Party) cache.findId(RecType.PARTY, posn.getPartyId());
-        final Contr contr = (Contr) cache.findId(RecType.CONTR, posn.getContrId());
+        final Party party = (Party) cache.findRecId(RecType.PARTY, posn.getPartyId());
+        final Contr contr = (Contr) cache.findRecId(RecType.CONTR, posn.getContrId());
         posn.enrich(party, contr);
     }
 
     private final void insertRecList(Model model, RecType type) {
-        cache.insertList(model.readRec(type));
+        cache.insertList(type, model.readRec(type));
     }
 
     private final void insertOrders(Model model) {
@@ -127,19 +127,19 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Rec findRecId(RecType type, long id) {
-        return cache.findId(type, id);
+        return cache.findRecId(type, id);
     }
 
     public final Rec findRecMnem(RecType type, String mnem) {
-        return cache.findMnem(type, mnem);
+        return cache.findRecMnem(type, mnem);
     }
 
-    public final Rec getFirstRec(RecType type) {
-        return cache.getFirst(type);
+    public final SlNode getFirstRec(RecType type) {
+        return cache.getFirstRec(type);
     }
 
     public final boolean isEmptyRec(RecType type) {
-        return cache.isEmpty(type);
+        return cache.isEmptyRec(type);
     }
 
     public final Accnt getLazyAccnt(Party party) {
@@ -147,7 +147,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Accnt getLazyAccnt(String mnem) {
-        final Party party = (Party) cache.findMnem(RecType.PARTY, mnem);
+        final Party party = (Party) cache.findRecMnem(RecType.PARTY, mnem);
         if (party == null) {
             throw new IllegalArgumentException(String.format("invalid party '%s'", mnem));
         }
@@ -293,8 +293,8 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    public final Exec getFirstExec() {
-        return (Exec) execs.getFirst();
+    public final SlNode getFirstExec() {
+        return execs.getFirst();
     }
 
     public final boolean isEmptyExec() {
@@ -316,7 +316,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Book getLazyBook(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findMnem(RecType.CONTR, mnem);
+        final Contr contr = (Contr) cache.findRecMnem(RecType.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }
@@ -332,12 +332,12 @@ public final class Serv implements AutoCloseable {
         return (Book) books.find(Book.toKey(contr.getId(), settlDay));
     }
 
-    public final Book getFirstBook() {
-        return (Book) books.getFirst();
+    public final RbNode getFirstBook() {
+        return books.getFirst();
     }
 
-    public final Book getLastBook() {
-        return (Book) books.getLast();
+    public final RbNode getLastBook() {
+        return books.getLast();
     }
 
     public final boolean isEmptyBook() {

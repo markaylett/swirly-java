@@ -73,7 +73,7 @@ public final class SideTest {
         assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
-        Level level = side.getFirstLevel();
+        Level level = (Level) side.getFirstLevel();
         assertEquals(12345, level.getTicks());
         // Sum of lots.
         assertEquals(30, level.getLots());
@@ -98,7 +98,7 @@ public final class SideTest {
         assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
-        level = side.getFirstLevel();
+        level = (Level) side.getFirstLevel();
         assertEquals(12345, level.getTicks());
         // Sum of lots.
         assertEquals(25, level.getLots());
@@ -123,7 +123,7 @@ public final class SideTest {
         assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
         assertEquals("apple", ((Order) side.getLastOrder()).getRef());
 
-        level = side.getFirstLevel();
+        level = (Level) side.getFirstLevel();
         assertEquals(12345, level.getTicks());
         assertEquals(5, level.getLots());
         assertEquals(1, level.getCount());
@@ -155,12 +155,12 @@ public final class SideTest {
         assertEquals("pear", ((Order) side.getFirstOrder()).getRef());
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
-        Level level = side.getFirstLevel();
+        Level level = (Level) side.getFirstLevel();
         assertEquals(12346, level.getTicks());
         assertEquals(25, level.getLots());
         assertEquals(1, level.getCount());
 
-        level = side.getLastLevel();
+        level = (Level) side.getLastLevel();
         assertEquals(12345, level.getTicks());
         assertEquals(30, level.getLots());
         assertEquals(2, level.getCount());

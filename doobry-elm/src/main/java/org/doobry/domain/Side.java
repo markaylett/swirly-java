@@ -167,12 +167,12 @@ public final class Side {
         return (Level) levels.find(key);
     }
 
-    public final Level getFirstLevel() {
-        return (Level) levels.getFirst();
+    public final RbNode getFirstLevel() {
+        return levels.getFirst();
     }
 
-    public final Level getLastLevel() {
-        return (Level) levels.getLast();
+    public final RbNode getLastLevel() {
+        return levels.getLast();
     }
 
     public final boolean isEmptyLevel() {

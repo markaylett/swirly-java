@@ -5,9 +5,6 @@
  *******************************************************************************/
 package org.doobry.engine;
 
-import org.doobry.domain.Asset;
-import org.doobry.domain.Contr;
-import org.doobry.domain.Party;
 import org.doobry.domain.Rec;
 import org.doobry.domain.RecType;
 import org.doobry.util.SlNode;
@@ -17,9 +14,9 @@ public final class Cache {
     private static int MNEM = 1;
     private static int COLS = 2;
     private final int nBuckets;
-    private Asset firstAsset;
-    private Contr firstContr;
-    private Party firstParty;
+    private SlNode firstAsset;
+    private SlNode firstContr;
+    private SlNode firstParty;
     private final Rec[][] buckets;
 
     private static int hashCode(long id) {
@@ -60,7 +57,7 @@ public final class Cache {
         buckets[bucket][MNEM] = rec;
     }
 
-    private final void updateIndex(Rec first) {
+    private final void updateIndex(SlNode first) {
         for (SlNode node = first; node != null; node = node.slNext()) {
             final Rec rec = (Rec) node;
             insertId(rec);
@@ -74,25 +71,25 @@ public final class Cache {
         buckets = new Rec[nBuckets][COLS];
     }
 
-    public final void insertList(Rec first) {
-        switch (first.getType()) {
+    public final void insertList(RecType type, SlNode first) {
+        switch (type) {
         case ASSET:
             assert firstAsset == null;
-            firstAsset = (Asset) first;
+            firstAsset = first;
             break;
         case CONTR:
             assert firstContr == null;
-            firstContr = (Contr) first;
+            firstContr = first;
             break;
         case PARTY:
             assert firstParty == null;
-            firstParty = (Party) first;
+            firstParty = first;
             break;
         }
         updateIndex(first);
     }
 
-    public final Rec findId(RecType type, long id) {
+    public final Rec findRecId(RecType type, long id) {
         final int bucket = indexFor(hashCode(type.intValue(), id), nBuckets);
         for (Rec rec = buckets[bucket][ID]; rec != null; rec = rec.idNext()) {
             if (rec.getType() == type && rec.getId() == id)
@@ -101,7 +98,7 @@ public final class Cache {
         return null;
     }
 
-    public final Rec findMnem(RecType type, String mnem) {
+    public final Rec findRecMnem(RecType type, String mnem) {
         final int bucket = indexFor(hashCode(type.intValue(), mnem), nBuckets);
         for (Rec rec = buckets[bucket][MNEM]; rec != null; rec = rec.mnemNext()) {
             if (rec.getType() == type && rec.getMnem().equals(mnem))
@@ -110,8 +107,8 @@ public final class Cache {
         return null;
     }
 
-    public final Rec getFirst(RecType type) {
-        Rec first = null;
+    public final SlNode getFirstRec(RecType type) {
+        SlNode first = null;
         switch (type) {
         case ASSET:
             first = firstAsset;
@@ -126,7 +123,7 @@ public final class Cache {
         return first;
     }
 
-    public final boolean isEmpty(RecType type) {
-        return getFirst(type) == null;
+    public final boolean isEmptyRec(RecType type) {
+        return getFirstRec(type) == null;
     }
 }

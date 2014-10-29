@@ -6,6 +6,7 @@
 package org.doobry.domain;
 
 import org.doobry.util.BasicRbNode;
+import org.doobry.util.DlNode;
 
 /**
  * A level is an aggregation of orders by price.
@@ -50,7 +51,7 @@ public final class Level extends BasicRbNode {
         ++count;
     }
 
-    public final Order getFirstOrder() {
+    public final DlNode getFirstOrder() {
         return firstOrder;
     }
 
