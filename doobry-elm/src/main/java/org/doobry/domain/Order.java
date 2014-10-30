@@ -5,11 +5,13 @@
  *******************************************************************************/
 package org.doobry.domain;
 
+import static org.doobry.util.Date.*;
 import org.doobry.util.BasicRbDlNode;
 import org.doobry.util.Identifiable;
+import org.doobry.util.Printable;
 import org.doobry.util.RbNode;
 
-public final class Order extends BasicRbDlNode implements Identifiable, Instruct {
+public final class Order extends BasicRbDlNode implements Identifiable, Printable, Instruct {
 
     // Internals.
     // Singly-linked buckets.
@@ -55,6 +57,10 @@ public final class Order extends BasicRbDlNode implements Identifiable, Instruct
     long created;
     long modified;
 
+    private static String getRecMnem(Identifiable iden) {
+        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId()); 
+    }
+    
     public Order(long id, Identifiable trader, Identifiable giveup, Identifiable contr,
             int settlDay, String ref, Action action, long ticks, long lots, long minLots,
             long created) {
@@ -79,6 +85,33 @@ public final class Order extends BasicRbDlNode implements Identifiable, Instruct
         this.minLots = minLots;
         this.created = created;
         this.modified = created;
+    }
+
+    @Override
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder();
+        print(sb);
+        return sb.toString();
+    }
+
+    @Override
+    public final void print(StringBuilder sb) {
+        sb.append("{\"id\":").append(id).append(",");
+        sb.append("\"trader\":\"").append(getRecMnem(trader)).append("\",");
+        sb.append("\"giveup\":\"").append(getRecMnem(giveup)).append("\",");
+        sb.append("\"contr\":\"").append(getRecMnem(contr)).append("\",");
+        sb.append("\"settl_date\":").append(jdToIso(settlDay)).append(",");
+        sb.append("\"ref\":\"").append(ref).append("\",");
+        sb.append("\"state\":\"").append(state).append("\",");
+        sb.append("\"action\":\"").append(action).append("\",");
+        sb.append("\"ticks\":").append(ticks).append(",");
+        sb.append("\"lots\":").append(lots).append(",");
+        sb.append("\"resd\":").append(resd).append(",");
+        sb.append("\"exec\":").append(exec).append(",");
+        sb.append("\"last_ticks\":").append(lastTicks).append(",");
+        sb.append("\"last_lots\":").append(lastLots).append(",");
+        sb.append("\"created\":").append(created).append(",");
+        sb.append("\"modified\":").append(modified).append("}");
     }
 
     public final void enrich(Party trader, Party giveup, Contr contr) {
