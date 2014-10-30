@@ -5,10 +5,13 @@
  *******************************************************************************/
 package org.doobry.domain;
 
+import static org.doobry.util.Date.jdToIso;
+
 import org.doobry.util.BasicRbSlNode;
 import org.doobry.util.Identifiable;
+import org.doobry.util.Printable;
 
-public final class Exec extends BasicRbSlNode implements Identifiable, Instruct {
+public final class Exec extends BasicRbSlNode implements Identifiable, Printable, Instruct {
 
     private final long id;
     private final long orderId;
@@ -52,6 +55,10 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Instruct 
     private Identifiable cpty;
     private long created;
 
+    private static String getRecMnem(Identifiable iden) {
+        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId()); 
+    }
+
     public Exec(long id, long order, Instruct instruct, long created) {
         this.id = id;
         this.orderId = order;
@@ -66,21 +73,55 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Instruct 
         this.lots = instruct.getLots();
         this.resd = instruct.getResd();
         this.exec = instruct.getExec();
-        this.lastTicks = instruct.getTicks();
+        this.lastTicks = instruct.getLastTicks();
         this.lastLots = instruct.getLastLots();
         this.minLots = instruct.getMinLots();
         this.created = created;
     }
 
-    public final void enrich(Party trader, Party giveup, Contr contr, Identifiable cpty) {
+    @Override
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder();
+        print(sb);
+        return sb.toString();
+    }
+
+    @Override
+    public final void print(StringBuilder sb) {
+        sb.append("{\"id\":").append(id).append(",");
+        sb.append("\"order\":").append(orderId).append(",");
+        sb.append("\"trader\":\"").append(getRecMnem(trader)).append("\",");
+        sb.append("\"giveup\":\"").append(getRecMnem(giveup)).append("\",");
+        sb.append("\"contr\":\"").append(getRecMnem(contr)).append("\",");
+        sb.append("\"settl_date\":").append(jdToIso(settlDay)).append(",");
+        sb.append("\"ref\":\"").append(ref).append("\",");
+        sb.append("\"state\":\"").append(state).append("\",");
+        sb.append("\"action\":\"").append(action).append("\",");
+        sb.append("\"ticks\":").append(ticks).append(",");
+        sb.append("\"lots\":").append(lots).append(",");
+        sb.append("\"resd\":").append(resd).append(",");
+        sb.append("\"exec\":").append(exec).append(",");
+        sb.append("\"last_ticks\":").append(lastTicks).append(",");
+        sb.append("\"last_lots\":").append(lastLots).append(",");
+        if (state == State.TRADE) {
+            sb.append("\"match\":").append(matchId).append(",");
+            sb.append("\"role\":\"").append(role).append("\",");
+            sb.append("\"cpty\":\"").append(getRecMnem(cpty)).append("\",");
+        }
+        sb.append("\"created\":").append(created).append("}");
+    }
+
+    public final void enrich(Party trader, Party giveup, Contr contr, Party cpty) {
         assert this.trader.getId() == trader.getId();
         assert this.giveup.getId() == giveup.getId();
         assert this.contr.getId() == contr.getId();
-        assert this.cpty.getId() == cpty.getId();
         this.trader = trader;
         this.giveup = giveup;
         this.contr = contr;
-        this.cpty = cpty;
+        if (state == State.TRADE) {
+            assert this.cpty.getId() == cpty.getId();
+            this.cpty = cpty;
+        }
     }
 
     public final void revise(long lots) {
@@ -106,6 +147,10 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Instruct 
         this.matchId = matchId;
         this.role = role;
         this.cpty = cpty;
+    }
+
+    public final void trade(long lastTicks, long lastLots, long matchId, Role role, Party cpty) {
+        trade(lastLots, lastTicks, lastLots, matchId, role, cpty);
     }
 
     @Override

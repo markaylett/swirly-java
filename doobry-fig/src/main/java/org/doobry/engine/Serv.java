@@ -44,7 +44,7 @@ public final class Serv implements AutoCloseable {
         final Party trader = (Party) cache.findRecId(RecType.PARTY, trade.getTraderId());
         final Party giveup = (Party) cache.findRecId(RecType.PARTY, trade.getGiveupId());
         final Contr contr = (Contr) cache.findRecId(RecType.CONTR, trade.getContrId());
-        final Contr cpty = (Contr) cache.findRecId(RecType.CONTR, trade.getCptyId());
+        final Party cpty = (Party) cache.findRecId(RecType.PARTY, trade.getCptyId());
         trade.enrich(trader, giveup, contr, cpty);
     }
 

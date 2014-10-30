@@ -5,7 +5,8 @@
  *******************************************************************************/
 package org.doobry.domain;
 
-import static org.doobry.util.Date.*;
+import static org.doobry.util.Date.jdToIso;
+
 import org.doobry.util.BasicRbDlNode;
 import org.doobry.util.Identifiable;
 import org.doobry.util.Printable;
