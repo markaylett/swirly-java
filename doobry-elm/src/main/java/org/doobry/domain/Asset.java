@@ -11,7 +11,23 @@ public final class Asset extends Rec {
         super(RecType.ASSET, id, mnem, display);
         this.type = type;
     }
+
+    @Override
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder();
+        print(sb);
+        return sb.toString();
+    }
+
+    @Override
+    public final void print(StringBuilder sb) {
+        sb.append("{\"mnem\":\"").append(mnem).append("\",");
+        sb.append("\"display\":\"").append(display).append("\",");
+        sb.append("\"type\":\"").append(type).append("\"}");
+    }
+
     public final AssetType getAssetType() {
         return type;
     }
+
 }

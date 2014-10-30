@@ -14,6 +14,20 @@ public final class Party extends Rec {
         this.email = email;
     }
 
+    @Override
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder();
+        print(sb);
+        return sb.toString();
+    }
+
+    @Override
+    public final void print(StringBuilder sb) {
+        sb.append("{\"mnem\":\"").append(mnem).append("\",");
+        sb.append("\"display\":\"").append(display).append("\",");
+        sb.append("\"email\":\"").append(email).append("\"}");
+    }
+
     public final void setAccnt(Object accnt) {
         this.accnt = accnt;
     }

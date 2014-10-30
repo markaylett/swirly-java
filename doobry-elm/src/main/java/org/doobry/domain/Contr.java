@@ -44,6 +44,31 @@ public final class Contr extends Rec {
         this.maxLots = maxLots;
     }
 
+    @Override
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder();
+        print(sb);
+        return sb.toString();
+    }
+
+    @Override
+    public final void print(StringBuilder sb) {
+        sb.append("{\"mnem\":\"").append(mnem).append("\",");
+        sb.append("\"display\":\"").append(display).append("\",");
+        sb.append("\"asset_type\":\"").append(assetType).append("\",");
+        sb.append("\"asset\":\"").append(asset).append("\",");
+        sb.append("\"ccy\":\"").append(ccy).append("\",");
+        sb.append("\"tick_numer\":").append(tickNumer).append(",");
+        sb.append("\"tick_denom\":").append(tickDenom).append(",");
+        sb.append("\"lot_numer\":").append(lotNumer).append(",");
+        sb.append("\"lot_denom\":").append(lotDenom).append(",");
+        sb.append("\"price_dp\":").append(priceDp).append(",");
+        sb.append("\"pip_dp\":").append(pipDp).append(",");
+        sb.append("\"qty_dp\":").append(qtyDp).append(",");
+        sb.append("\"min_lots\":").append(minLots).append(",");
+        sb.append("\"max_lots\":").append(maxLots).append("}");
+    }
+
     public final AssetType getAssetType() {
         return assetType;
     }

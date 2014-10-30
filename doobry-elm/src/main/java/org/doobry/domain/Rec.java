@@ -8,14 +8,15 @@ package org.doobry.domain;
 import org.doobry.util.BasicSlNode;
 import org.doobry.util.Identifiable;
 import org.doobry.util.Memorable;
+import org.doobry.util.Printable;
 
-public abstract class Rec extends BasicSlNode implements Identifiable, Memorable {
+public abstract class Rec extends BasicSlNode implements Identifiable, Memorable, Printable {
     private transient Rec idNext;
     private transient Rec mnemNext;
-    private final RecType type;
-    private final long id;
-    private final String mnem;
-    private final String display;
+    protected final RecType type;
+    protected final long id;
+    protected final String mnem;
+    protected final String display;
 
     public Rec(RecType type, long id, String mnem, String display) {
         this.type = type;
