@@ -5,11 +5,14 @@
  *******************************************************************************/
 package org.doobry.domain;
 
+import static org.doobry.util.Date.jdToIso;
+
 import org.doobry.util.BasicRbNode;
 import org.doobry.util.Date;
 import org.doobry.util.Identifiable;
+import org.doobry.util.Printable;
 
-public final class Posn extends BasicRbNode {
+public final class Posn extends BasicRbNode implements Printable {
 
     private final long key;
     private Identifiable party;
@@ -20,11 +23,33 @@ public final class Posn extends BasicRbNode {
     private long sellLicks;
     private long sellLots;
 
+    private static String getRecMnem(Identifiable iden) {
+        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId()); 
+    }
+
     public Posn(Identifiable party, Identifiable contr, int settlDay) {
         this.key = toKey(party.getId(), contr.getId(), settlDay);
         this.party = party;
         this.contr = contr;
         this.settlDay = settlDay;
+    }
+
+    @Override
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder();
+        print(sb);
+        return sb.toString();
+    }
+
+    @Override
+    public final void print(StringBuilder sb) {
+        sb.append("{\"accnt\":\"").append(getRecMnem(party)).append("\",");
+        sb.append("\"contr\":\"").append(getRecMnem(contr)).append("\",");
+        sb.append("\"settl_date\":").append(jdToIso(settlDay)).append(",");
+        sb.append("\"buy_licks\":").append(buyLicks).append(",");
+        sb.append("\"buy_lots\":").append(buyLots).append(",");
+        sb.append("\"sell_licks\":").append(sellLicks).append(",");
+        sb.append("\"sell_lots\":").append(sellLots).append("}");
     }
 
     public final void enrich(Party party, Contr contr) {
