@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.doobry.web;
 
-import static org.doobry.util.Date.*;
+import static org.doobry.util.Date.isoToJd;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +28,9 @@ import org.doobry.mock.MockModel;
 import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;
 
+import com.google.appengine.api.ThreadManager;
+import com.google.apphosting.api.ApiProxy;
+
 public final class Ctx {
     private static class CtxHolder {
         private static final Ctx INSTANCE = new Ctx();
@@ -37,7 +40,11 @@ public final class Ctx {
     private final Serv serv;
 
     private Ctx() {
-        pool = Executors.newFixedThreadPool(1);
+        if (ApiProxy.getCurrentEnvironment() != null) {
+            pool = Executors.newFixedThreadPool(1, ThreadManager.currentRequestThreadFactory());
+        } else {
+            pool = Executors.newFixedThreadPool(1);
+        }
         serv = new Serv(new MockBank(Reg.values().length), new MockJourn());
         serv.load(new MockModel());
     }

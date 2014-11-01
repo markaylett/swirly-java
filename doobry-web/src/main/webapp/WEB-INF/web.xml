@@ -7,18 +7,55 @@
     <servlet-class>org.doobry.web.SignGuestbookServlet</servlet-class>
   </servlet>
   <servlet>
-    <servlet-name>guestbook</servlet-name>
-    <servlet-class>org.doobry.web.GuestbookServlet</servlet-class>
+    <servlet-name>asset</servlet-name>
+    <servlet-class>org.doobry.web.RecServlet</servlet-class>
+    <init-param>
+      <param-name>recType</param-name>
+      <param-value>ASSET</param-value>
+    </init-param>
+  </servlet>
+  <servlet>
+    <servlet-name>contr</servlet-name>
+    <servlet-class>org.doobry.web.RecServlet</servlet-class>
+    <init-param>
+      <param-name>recType</param-name>
+      <param-value>CONTR</param-value>
+    </init-param>
+  </servlet>
+  <servlet>
+    <servlet-name>party</servlet-name>
+    <servlet-class>org.doobry.web.RecServlet</servlet-class>
+    <init-param>
+      <param-name>recType</param-name>
+      <param-value>PARTY</param-value>
+    </init-param>
   </servlet>
   <servlet-mapping>
     <servlet-name>sign</servlet-name>
     <url-pattern>/sign</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-    <servlet-name>guestbook</servlet-name>
-    <url-pattern>/guestbook</url-pattern>
+    <servlet-name>asset</servlet-name>
+    <url-pattern>/api/asset</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>contr</servlet-name>
+    <url-pattern>/api/contr</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>party</servlet-name>
+    <url-pattern>/api/party</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>guestbook.jsp</welcome-file>
   </welcome-file-list>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>api</web-resource-name>
+      <url-pattern>/api/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
 </web-app>
