@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doobry Trader</title>
+	<link href="/css/jquery-ui-1.11.0.css" rel="stylesheet">
+	<link href="/css/1200.css" rel="stylesheet">
+	<link href="/css/doobry.css" rel="stylesheet">
+	<script src="/js/jquery-1.11.1.js"></script>
+	<script src="/js/jquery-ui-1.11.0.js"></script>
+    <script src="/js/doobry.js"></script>
+    <script>
+      $(documentReady);
+    </script>
+  </head>
+  <body>
+    <div class="container_12">
+      <div class="grid_10">
+        <h1>Doobry Trader</h1>
+      </div>
+      <div class="clear">
+      </div>
+      <div class="grid_9">
+        <div id="view">
+          <p>
+	        <label for="contr" class="ui-widget">Contr:</label>
+	        <input type="text" id="contr" class="text ui-widget-content ui-corner-all"/>
+	        <label for="settl-date" class="ui-widget">Settl Date:</label>
+	        <input type="text" id="settl-date" class="text ui-widget-content ui-corner-all"/>
+	        <label for="price" class="ui-widget">Price:</label>
+	        <input type="text" id="price" class="text ui-widget-content ui-corner-all"/>
+	        <label for="lots" class="ui-widget">Lots:</label>
+	        <input id="lots"/>
+            <button id="buy">Buy</button>
+            <button id="sell">Sell</button>
+          </p>
+          <div id="toolbar" class="ui-widget-header ui-corner-all">
+            <button id="subscribe">Subscribe</button>
+            <button id="unsubscribe">Unsubscribe</button>
+            <button id="revise">Revise Order</button>
+            <button id="cancel">Cancel Order</button>
+            <button id="ack">Ack Trade</button>
+          </div>
+          <table class="ui-widget ui-widget-content">
+            <thead>
+              <tr class="ui-widget-header">
+                <th><input type="checkbox" id="contr-all"/></th>
+                <th>Contr</th>
+                <th>Settl Date</th>
+                <th>Bid Price</th>
+                <th>Bid Lots</th>
+                <th>Bid Count</th>
+                <th>Offer Price</th>
+                <th>Offer Lots</th>
+                <th>Offer Count</th>
+              </tr>
+            </thead>
+	        <tbody id="view-tbody">
+	        </tbody>
+          </table>
+        </div>
+        <div id="tabs">
+          <ul>
+            <li><a href="#order-tab">Order</a></li>
+            <li><a href="#trade-tab">Trade</a></li>
+            <li><a href="#posn-tab">Posn</a></li>
+          </ul>
+          <div id="order-tab">
+            <table class="ui-widget ui-widget-content">
+              <thead>
+                <tr class="ui-widget-header">
+                  <th><input type="checkbox" id="order-all"/></th>
+                  <th>Id</th>
+                  <th>Giveup</th>
+                  <th>Contr</th>
+                  <th>Settl Date</th>
+                  <th>State</th>
+                  <th>Action</th>
+                  <th>Price</th>
+                  <th>Lots</th>
+                  <th>Resd</th>
+                  <th>Exec</th>
+                  <th>Last Price</th>
+                  <th>Last Lots</th>
+                </tr>
+              </thead>
+	          <tbody id="order-tbody">
+	          </tbody>
+            </table>
+          </div>
+          <div id="trade-tab">
+            <table class="ui-widget ui-widget-content">
+              <thead>
+                <tr class="ui-widget-header">
+                  <th><input type="checkbox" id="trade-all"/></th>
+                  <th>Id</th>
+                  <th>Order</th>
+                  <th>Giveup</th>
+                  <th>Contr</th>
+                  <th>Settl Date</th>
+                  <th>Action</th>
+                  <th>Price</th>
+                  <th>Lots</th>
+                  <th>Resd</th>
+                  <th>Exec</th>
+                  <th>Last Price</th>
+                  <th>Last Lots</th>
+                </tr>
+              </thead>
+	          <tbody id="trade-tbody">
+	          </tbody>
+            </table>
+          </div>
+          <div id="posn-tab">
+            <table class="ui-widget ui-widget-content">
+              <thead>
+                <tr class="ui-widget-header">
+                  <th><input type="checkbox" id="posn-all"/></th>
+                  <th>Accnt</th>
+                  <th>Contr</th>
+                  <th>Settl Date</th>
+                  <th>Buy Price</th>
+                  <th>Buy Lots</th>
+                  <th>Sell Price</th>
+                  <th>Sell Lots</th>
+                </tr>
+              </thead>
+	          <tbody id="posn-tbody">
+	          </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="grid_3">
+        <div id="info" class="ui-widget-content ui-corner-all">
+        </div>
+      </div>
+    </div>
+    <div id="error-dialog" title="Error">
+	  <p><strong><span id="error-num"></span>:</strong>
+        <span id="error-msg"></span></p>
+    </div>
+  </body>
+</html>

@@ -11,8 +11,10 @@ public final class WebUtil {
     private WebUtil() {
     }
 
-    public static void writeError(PrintWriter pw, String msg) {
-        pw.write("{\"msg\":\"");
+    public static void writeError(PrintWriter pw, int num, String msg) {
+        pw.write("{\"num\":");
+        pw.write(num);
+        pw.write(",\"msg\":\"");
         pw.write(msg);
         pw.write("\"}");
     }

@@ -3,10 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
   <servlet>
-    <servlet-name>sign</servlet-name>
-    <servlet-class>org.doobry.web.SignGuestbookServlet</servlet-class>
-  </servlet>
-  <servlet>
     <servlet-name>asset</servlet-name>
     <servlet-class>org.doobry.web.RecServlet</servlet-class>
     <init-param>
@@ -31,10 +27,6 @@
     </init-param>
   </servlet>
   <servlet-mapping>
-    <servlet-name>sign</servlet-name>
-    <url-pattern>/sign</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
     <servlet-name>asset</servlet-name>
     <url-pattern>/api/asset</url-pattern>
   </servlet-mapping>
@@ -47,8 +39,24 @@
     <url-pattern>/api/party</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
-    <welcome-file>guestbook.jsp</welcome-file>
+    <welcome-file>index.html</welcome-file>
   </welcome-file-list>
+  <error-page>
+    <error-code>400</error-code>
+    <location>/error/400.json</location>
+  </error-page>
+  <error-page>
+    <error-code>404</error-code>
+    <location>/error/404.json</location>
+  </error-page>
+  <error-page>
+    <error-code>405</error-code>
+    <location>/error/405.json</location>
+  </error-page>
+  <error-page>
+    <error-code>500</error-code>
+    <location>/error/500.json</location>
+  </error-page>
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>api</web-resource-name>

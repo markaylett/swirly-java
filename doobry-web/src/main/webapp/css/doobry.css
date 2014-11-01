@@ -1,0 +1,84 @@
+body {
+    color: #fff;
+    background-color: #333;
+    font-family: "Trebuchet MS", "Arial", "Helvetica", "Verdana", "sans-serif";
+}
+
+body input.text {
+    padding: .3em;
+}
+
+h1 {
+    text-align: center;
+}
+
+#toolbar {
+    padding: .3em;
+    display: inline-block;
+    width: 100%;
+}
+
+#view {
+    font-size: .7em;
+}
+
+#view tbody tr:hover, #tabs tbody tr:hover {
+    background: #333;
+    cursor: pointer;
+}
+
+#view table, #tabs table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+}
+
+#view table td, #view table th, #tabs table td, #tabs table th {
+    border: 1px solid #eee;
+    padding: .6em 10px;
+    text-align: left;
+}
+
+#tabs {
+    font-size: .8em;
+}
+
+#info {
+    font-size: .9em;
+    min-height: 380px;
+    padding: 2em 0;
+}
+
+#info .dbr-field-name {
+    display: block;
+    float: left;
+    padding: 0 1em;
+    text-align: right;
+    width: 35%;
+}
+
+#info .dbr-field-value {
+    display: block;
+    float: left;
+    width: 45%;
+}
+
+#info br {
+    clear: left;
+}
+
+.dbr-form fieldset {
+    border: 0;
+}
+
+.dbr-form input.text {
+    width: 95%;
+}
+
+.dbr-form label, fieldset input {
+    display: block;
+}
+
+.ui-dialog .ui-state-error {
+    padding: .3em;
+}

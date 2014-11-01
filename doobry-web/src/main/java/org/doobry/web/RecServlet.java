@@ -5,11 +5,7 @@
  *******************************************************************************/
 package org.doobry.web;
 
-import static org.doobry.web.WebUtil.writeError;
-
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -43,15 +39,9 @@ public class RecServlet extends HttpServlet {
             return;
         }
 
-        final Future<CharSequence> fsb = Ctx.getInstance().getRec(recType);
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setStatus(HttpServletResponse.SC_OK);
-        try {
-            resp.getWriter().append(fsb.get());
-        } catch (InterruptedException | ExecutionException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            writeError(resp.getWriter(), e.getLocalizedMessage());
-        }
+        resp.getWriter().append(Ctx.getInstance().getRec(recType));
     }
 }
