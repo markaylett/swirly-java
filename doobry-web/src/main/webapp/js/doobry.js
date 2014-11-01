@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
+ *
+ * All rights reserved.
+ *******************************************************************************/
 (function() {
 
     // Window in browser.
@@ -183,7 +188,7 @@ function Model(trader, giveup, pass, ready) {
 
     $.ajax({
         type: 'get',
-        url: '/api/accnt'
+        url: '/api/party'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {

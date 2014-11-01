@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
+ *
+ * All rights reserved.
+ *******************************************************************************/
 module('conversion');
 
 test('fraction to real', function() {
