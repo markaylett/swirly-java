@@ -88,27 +88,29 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
 
     @Override
     public final void print(StringBuilder sb) {
-        sb.append("{\"id\":").append(id).append(",");
-        sb.append("\"order\":").append(orderId).append(",");
-        sb.append("\"trader\":\"").append(getRecMnem(trader)).append("\",");
-        sb.append("\"giveup\":\"").append(getRecMnem(giveup)).append("\",");
-        sb.append("\"contr\":\"").append(getRecMnem(contr)).append("\",");
-        sb.append("\"settl_date\":").append(jdToIso(settlDay)).append(",");
-        sb.append("\"ref\":\"").append(ref).append("\",");
-        sb.append("\"state\":\"").append(state).append("\",");
-        sb.append("\"action\":\"").append(action).append("\",");
-        sb.append("\"ticks\":").append(ticks).append(",");
-        sb.append("\"lots\":").append(lots).append(",");
-        sb.append("\"resd\":").append(resd).append(",");
-        sb.append("\"exec\":").append(exec).append(",");
-        sb.append("\"last_ticks\":").append(lastTicks).append(",");
-        sb.append("\"last_lots\":").append(lastLots).append(",");
+        sb.append("{\"id\":").append(id);
+        sb.append(",\"order\":").append(orderId);
+        sb.append(",\"trader\":\"").append(getRecMnem(trader));
+        sb.append("\",\"giveup\":\"").append(getRecMnem(giveup));
+        sb.append("\",\"contr\":\"").append(getRecMnem(contr));
+        sb.append("\",\"settl_date\":").append(jdToIso(settlDay));
+        sb.append(",\"ref\":\"").append(ref);
+        sb.append("\",\"state\":\"").append(state);
+        sb.append("\",\"action\":\"").append(action);
+        sb.append("\",\"ticks\":").append(ticks);
+        sb.append(",\"lots\":").append(lots);
+        sb.append(",\"resd\":").append(resd);
+        sb.append(",\"exec\":").append(exec);
+        sb.append(",\"last_ticks\":").append(lastTicks);
+        sb.append(",\"last_lots\":").append(lastLots);
         if (state == State.TRADE) {
-            sb.append("\"match\":").append(matchId).append(",");
-            sb.append("\"role\":\"").append(role).append("\",");
-            sb.append("\"cpty\":\"").append(getRecMnem(cpty)).append("\",");
+            sb.append(",\"match\":").append(matchId);
+            sb.append(",\"role\":\"").append(role);
+            sb.append("\",\"cpty\":\"").append(getRecMnem(cpty));
+            sb.append("\"");
         }
-        sb.append("\"created\":").append(created).append("}");
+        sb.append(",\"created\":").append(created);
+        sb.append("}");
     }
 
     public final void enrich(Party trader, Party giveup, Contr contr, Party cpty) {

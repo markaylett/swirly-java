@@ -43,13 +43,14 @@ public final class Posn extends BasicRbNode implements Printable {
 
     @Override
     public final void print(StringBuilder sb) {
-        sb.append("{\"accnt\":\"").append(getRecMnem(party)).append("\",");
-        sb.append("\"contr\":\"").append(getRecMnem(contr)).append("\",");
-        sb.append("\"settl_date\":").append(jdToIso(settlDay)).append(",");
-        sb.append("\"buy_licks\":").append(buyLicks).append(",");
-        sb.append("\"buy_lots\":").append(buyLots).append(",");
-        sb.append("\"sell_licks\":").append(sellLicks).append(",");
-        sb.append("\"sell_lots\":").append(sellLots).append("}");
+        sb.append("{\"accnt\":\"").append(getRecMnem(party));
+        sb.append("\",\"contr\":\"").append(getRecMnem(contr));
+        sb.append("\",\"settl_date\":").append(jdToIso(settlDay));
+        sb.append(",\"buy_licks\":").append(buyLicks);
+        sb.append(",\"buy_lots\":").append(buyLots);
+        sb.append(",\"sell_licks\":").append(sellLicks);
+        sb.append(",\"sell_lots\":").append(sellLots);
+        sb.append("}");
     }
 
     public final void enrich(Party party, Contr contr) {

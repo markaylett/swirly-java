@@ -53,20 +53,21 @@ public final class Contr extends Rec {
 
     @Override
     public final void print(StringBuilder sb) {
-        sb.append("{\"mnem\":\"").append(mnem).append("\",");
-        sb.append("\"display\":\"").append(display).append("\",");
-        sb.append("\"asset_type\":\"").append(assetType).append("\",");
-        sb.append("\"asset\":\"").append(asset).append("\",");
-        sb.append("\"ccy\":\"").append(ccy).append("\",");
-        sb.append("\"tick_numer\":").append(tickNumer).append(",");
-        sb.append("\"tick_denom\":").append(tickDenom).append(",");
-        sb.append("\"lot_numer\":").append(lotNumer).append(",");
-        sb.append("\"lot_denom\":").append(lotDenom).append(",");
-        sb.append("\"price_dp\":").append(priceDp).append(",");
-        sb.append("\"pip_dp\":").append(pipDp).append(",");
-        sb.append("\"qty_dp\":").append(qtyDp).append(",");
-        sb.append("\"min_lots\":").append(minLots).append(",");
-        sb.append("\"max_lots\":").append(maxLots).append("}");
+        sb.append("{\"mnem\":\"").append(mnem);
+        sb.append("\",\"display\":\"").append(display);
+        sb.append("\",\"asset_type\":\"").append(assetType);
+        sb.append("\",\"asset\":\"").append(asset);
+        sb.append("\",\"ccy\":\"").append(ccy);
+        sb.append("\",\"tick_numer\":").append(tickNumer);
+        sb.append(",\"tick_denom\":").append(tickDenom);
+        sb.append(",\"lot_numer\":").append(lotNumer);
+        sb.append(",\"lot_denom\":").append(lotDenom);
+        sb.append(",\"price_dp\":").append(priceDp);
+        sb.append(",\"pip_dp\":").append(pipDp);
+        sb.append(",\"qty_dp\":").append(qtyDp);
+        sb.append(",\"min_lots\":").append(minLots);
+        sb.append(",\"max_lots\":").append(maxLots);
+        sb.append("}");
     }
 
     public final AssetType getAssetType() {

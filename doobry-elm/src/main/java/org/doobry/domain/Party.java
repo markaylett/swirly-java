@@ -23,9 +23,10 @@ public final class Party extends Rec {
 
     @Override
     public final void print(StringBuilder sb) {
-        sb.append("{\"mnem\":\"").append(mnem).append("\",");
-        sb.append("\"display\":\"").append(display).append("\",");
-        sb.append("\"email\":\"").append(email).append("\"}");
+        sb.append("{\"mnem\":\"").append(mnem);
+        sb.append("\",\"display\":\"").append(display);
+        sb.append("\",\"email\":\"").append(email);
+        sb.append("\"}");
     }
 
     public final void setAccnt(Object accnt) {

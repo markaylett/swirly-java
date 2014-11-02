@@ -21,9 +21,10 @@ public final class Asset extends Rec {
 
     @Override
     public final void print(StringBuilder sb) {
-        sb.append("{\"mnem\":\"").append(mnem).append("\",");
-        sb.append("\"display\":\"").append(display).append("\",");
-        sb.append("\"type\":\"").append(type).append("\"}");
+        sb.append("{\"mnem\":\"").append(mnem);
+        sb.append("\",\"display\":\"").append(display);
+        sb.append("\",\"type\":\"").append(type);
+        sb.append("\"}");
     }
 
     public final AssetType getAssetType() {
