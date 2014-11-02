@@ -15,19 +15,23 @@ public final class TreeTest {
     private static final class Node extends BasicRbNode {
         private final long key;
         private final String name;
+
         Node(long key, String name) {
             this.key = key;
             this.name = name;
         }
+
         @Override
         public final long getKey() {
             return key;
         }
+
         @Override
         public final String toString() {
             return name;
         }
     }
+
     @Test
     public final void test() {
         final Tree t = new Tree();
@@ -41,18 +45,18 @@ public final class TreeTest {
         t.insert(first);
         assertNotEquals(first.getColor(), 0);
         assertFalse(t.isEmpty());
-        assertSame(first,t.getFirst());
-        assertSame(first,t.getLast());
+        assertSame(first, t.getFirst());
+        assertSame(first, t.getLast());
         t.insert(second);
-        assertSame(first,t.getFirst());
-        assertSame(second,t.getLast());
+        assertSame(first, t.getFirst());
+        assertSame(second, t.getLast());
         t.insert(third);
-        assertSame(first,t.getFirst());
-        assertSame(third,t.getLast());
+        assertSame(first, t.getFirst());
+        assertSame(third, t.getLast());
         t.remove(first);
         assertEquals(first.getColor(), 0);
-        assertSame(second,t.getFirst());
-        assertSame(third,t.getLast());
+        assertSame(second, t.getFirst());
+        assertSame(third, t.getLast());
         t.remove(second);
         t.remove(third);
         assertTrue(t.isEmpty());

@@ -12,9 +12,11 @@ public final class MockJourn implements Journ {
     @Override
     public final void insertExecList(Exec first) {
     }
+
     @Override
     public final void insertExec(Exec exec) {
     }
+
     @Override
     public final void updateExec(long id, long modified) {
     }

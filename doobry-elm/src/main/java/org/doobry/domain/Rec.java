@@ -32,7 +32,7 @@ public abstract class Rec extends BasicSlNode implements Identifiable, Memorable
     public final Rec idNext() {
         return idNext;
     }
-    
+
     public final void setMnemNext(Rec mnemNext) {
         this.mnemNext = mnemNext;
     }

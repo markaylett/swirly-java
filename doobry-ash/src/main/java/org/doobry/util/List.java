@@ -11,11 +11,13 @@ public final class List {
             this.setPrev(this);
             this.setNext(this);
         }
+
         @Override
         public final boolean isEnd() {
             return true;
         }
     };
+
     public final void insertFront(BasicDlNode newNode) {
         newNode.insertBefore(end.dlNext());
     }

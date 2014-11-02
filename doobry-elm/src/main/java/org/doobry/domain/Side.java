@@ -118,7 +118,7 @@ public final class Side {
 
         // This will increase order revision.
         reduce(order, delta);
-        
+
         order.state = State.REVISE;
         order.lots = lots;
         order.modified = now;

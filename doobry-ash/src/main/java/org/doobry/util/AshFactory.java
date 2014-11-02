@@ -8,6 +8,7 @@ package org.doobry.util;
 public final class AshFactory {
     private AshFactory() {
     }
+
     public static Identifiable newId(final long id) {
         return new Identifiable() {
             @Override
@@ -16,5 +17,6 @@ public final class AshFactory {
             }
         };
     }
+
     public static final Identifiable ZERO_ID = newId(0);
 }

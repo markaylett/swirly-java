@@ -59,9 +59,9 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
     long modified;
 
     private static String getRecMnem(Identifiable iden) {
-        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId()); 
+        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
     }
-    
+
     public Order(long id, Identifiable trader, Identifiable giveup, Identifiable contr,
             int settlDay, String ref, Action action, long ticks, long lots, long minLots,
             long created) {

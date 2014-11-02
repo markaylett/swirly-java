@@ -24,7 +24,7 @@ public final class Posn extends BasicRbNode implements Printable {
     private long sellLots;
 
     private static String getRecMnem(Identifiable iden) {
-        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId()); 
+        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
     }
 
     public Posn(Identifiable party, Identifiable contr, int settlDay) {

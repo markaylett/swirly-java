@@ -56,7 +56,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     private long created;
 
     private static String getRecMnem(Identifiable iden) {
-        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId()); 
+        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
     }
 
     public Exec(long id, long order, Instruct instruct, long created) {
