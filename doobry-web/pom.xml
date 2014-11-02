@@ -39,6 +39,10 @@
 	  <groupId>com.google.code.findbugs</groupId>
 	  <artifactId>jsr305</artifactId>
     </dependency>
+    <dependency>
+	  <groupId>com.googlecode.json-simple</groupId>
+	  <artifactId>json-simple</artifactId>
+    </dependency>
     <!-- Test Dependencies -->
     <dependency>
       <groupId>junit</groupId>
