@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 import org.doobry.domain.Action;
 import org.junit.Test;
 
-public class CtxTest {
+public final class CtxTest {
     @Test
     public final void test() {
         final CharSequence expected = Ctx.getInstance().postOrderByAccnt("WRAMIREZ", "DBRA",

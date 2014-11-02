@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
+ *
+ * All rights reserved.
+ *******************************************************************************/
 package org.doobry.engine;
 
 import static org.doobry.util.Date.jdToIso;

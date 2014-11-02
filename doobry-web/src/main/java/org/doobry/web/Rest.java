@@ -1,10 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
+ *
+ * All rights reserved.
+ *******************************************************************************/
 package org.doobry.web;
 
 import java.io.IOException;
 
 import org.doobry.domain.Action;
 import org.json.simple.parser.ContentHandler;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public final class Rest implements ContentHandler {
@@ -21,7 +25,7 @@ public final class Rest implements ContentHandler {
     public static final int MIN_LOTS = 1 << 9;
 
     private transient String key;
-    private boolean end;
+    private boolean valid;
     private int fields;
     private long id;
     private String accnt;
@@ -42,7 +46,7 @@ public final class Rest implements ContentHandler {
 
     @Override
     public final void endJSON() throws ParseException, IOException {
-        end = true;
+        valid = true;
     }
 
     @Override
@@ -57,7 +61,6 @@ public final class Rest implements ContentHandler {
 
     @Override
     public final boolean primitive(Object value) throws ParseException, IOException {
-        System.out.println(key + "=" + value.getClass().getCanonicalName());
         if (key.equals("id")) {
             if (!(value instanceof Long) || (fields & ID) != 0)
                 return false;
@@ -134,8 +137,8 @@ public final class Rest implements ContentHandler {
         return true;
     }
 
-    public final boolean isEnd() {
-        return end;
+    public final boolean isValid() {
+        return valid;
     }
 
     public final int getFields() {
@@ -180,12 +183,5 @@ public final class Rest implements ContentHandler {
 
     public final long getMinLots() {
         return minLots;
-    }
-
-    public static void main(String[] args) throws ParseException {
-        final JSONParser p = new JSONParser();
-        final Rest r = new Rest();
-        p.parse("{\"giveup\":101}", r);
-        System.out.println(r.isEnd());
     }
 }
