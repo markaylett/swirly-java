@@ -21,10 +21,10 @@ public final class CacheTest {
         final Cache c = new Cache(257);
         assertTrue(c.isEmptyRec(RecType.ASSET));
         assertTrue(c.isEmptyRec(RecType.CONTR));
-        assertTrue(c.isEmptyRec(RecType.PARTY));
+        assertTrue(c.isEmptyRec(RecType.USER));
         assertNull(c.getFirstRec(RecType.ASSET));
         assertNull(c.getFirstRec(RecType.CONTR));
-        assertNull(c.getFirstRec(RecType.PARTY));
+        assertNull(c.getFirstRec(RecType.USER));
     }
 
     @Test
@@ -50,13 +50,13 @@ public final class CacheTest {
     }
 
     @Test
-    public final void testParty() {
+    public final void testUser() {
         final Cache c = new Cache(257);
-        c.insertList(RecType.PARTY, model.readRec(RecType.PARTY));
-        assertFalse(c.isEmptyRec(RecType.PARTY));
-        assertEquals("BJONES", ((Rec) c.getFirstRec(RecType.PARTY)).getMnem());
-        assertEquals("DBRA", ((Rec) c.getFirstRec(RecType.PARTY).slNext()).getMnem());
-        assertEquals("DBRB", c.findRecMnem(RecType.PARTY, "DBRB").getMnem());
-        assertEquals("EEDWARDS", c.findRecId(RecType.PARTY, 4).getMnem());
+        c.insertList(RecType.USER, model.readRec(RecType.USER));
+        assertFalse(c.isEmptyRec(RecType.USER));
+        assertEquals("BJONES", ((Rec) c.getFirstRec(RecType.USER)).getMnem());
+        assertEquals("EEDWARDS", ((Rec) c.getFirstRec(RecType.USER).slNext()).getMnem());
+        assertEquals("GWILSON", c.findRecMnem(RecType.USER, "GWILSON").getMnem());
+        assertEquals("JTHOMAS", c.findRecId(RecType.USER, 4).getMnem());
     }
 }

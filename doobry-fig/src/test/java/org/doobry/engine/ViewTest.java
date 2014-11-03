@@ -11,9 +11,9 @@ import static org.junit.Assert.assertEquals;
 import org.doobry.domain.Action;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Order;
-import org.doobry.domain.Party;
+import org.doobry.domain.User;
 import org.doobry.mock.MockContr;
-import org.doobry.mock.MockParty;
+import org.doobry.mock.MockUser;
 import org.junit.Test;
 
 public final class ViewTest {
@@ -23,18 +23,17 @@ public final class ViewTest {
         final int settlDay = ymdToJd(2014, 3, 14);
         final Book book = new Book(contr, settlDay);
 
-        final Party trader = MockParty.newParty("WRAMIREZ");
-        final Party giveup = MockParty.newParty("DBRA");
+        final User user = MockUser.newUser("WRAMIREZ");
         final long now = 1414932078620L;
 
-        book.placeOrder(new Order(1, trader, giveup, contr, settlDay, "apple", Action.BUY, 12343,
-                10, 0, now), now);
-        book.placeOrder(new Order(1, trader, giveup, contr, settlDay, "orange", Action.BUY, 12344,
-                5, 0, now), now);
-        book.placeOrder(new Order(1, trader, giveup, contr, settlDay, "pear", Action.SELL, 12346,
-                5, 0, now), now);
-        book.placeOrder(new Order(1, trader, giveup, contr, settlDay, "banana", Action.SELL, 12346,
-                2, 0, now), now);
+        book.placeOrder(
+                new Order(1, user, contr, settlDay, "apple", Action.BUY, 12343, 10, 0, now), now);
+        book.placeOrder(
+                new Order(1, user, contr, settlDay, "orange", Action.BUY, 12344, 5, 0, now), now);
+        book.placeOrder(new Order(1, user, contr, settlDay, "pear", Action.SELL, 12346, 5, 0, now),
+                now);
+        book.placeOrder(
+                new Order(1, user, contr, settlDay, "banana", Action.SELL, 12346, 2, 0, now), now);
 
         final StringBuilder sb = new StringBuilder();
         View.print(sb, book, now);

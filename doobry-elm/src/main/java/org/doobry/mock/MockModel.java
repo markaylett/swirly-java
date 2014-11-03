@@ -24,8 +24,8 @@ public final class MockModel implements Model {
         case CONTR:
             first = MockContr.newContrList();
             break;
-        case PARTY:
-            first = MockParty.newPartyList();
+        case USER:
+            first = MockUser.newUserList();
             break;
         }
         return first;

@@ -10,9 +10,9 @@ import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
 import org.doobry.domain.Journ;
 import org.doobry.domain.Model;
-import org.doobry.domain.OrdIdx;
+import org.doobry.domain.RefIdx;
 import org.doobry.domain.Order;
-import org.doobry.domain.Party;
+import org.doobry.domain.User;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
 import org.doobry.domain.RecType;
@@ -25,33 +25,31 @@ import org.doobry.util.Tree;
 
 public final class Serv implements AutoCloseable {
     private static int CACHE_BUCKETS = 257;
-    private static int ORDIDX_BUCKETS = 257;
+    private static int REFIDX_BUCKETS = 257;
     private final Bank bank;
     private final Journ journ;
     private final Cache cache = new Cache(CACHE_BUCKETS);
-    private final OrdIdx ordIdx = new OrdIdx(ORDIDX_BUCKETS);
+    private final RefIdx refIdx = new RefIdx(REFIDX_BUCKETS);
     private final Tree books = new Tree();
     private final Queue execs = new Queue();
 
     private final void enrichOrder(Order order) {
-        final Party trader = (Party) cache.findRecId(RecType.PARTY, order.getTraderId());
-        final Party giveup = (Party) cache.findRecId(RecType.PARTY, order.getGiveupId());
+        final User user = (User) cache.findRecId(RecType.USER, order.getUserId());
         final Contr contr = (Contr) cache.findRecId(RecType.CONTR, order.getContrId());
-        order.enrich(trader, giveup, contr);
+        order.enrich(user, contr);
     }
 
     private final void enrichTrade(Exec trade) {
-        final Party trader = (Party) cache.findRecId(RecType.PARTY, trade.getTraderId());
-        final Party giveup = (Party) cache.findRecId(RecType.PARTY, trade.getGiveupId());
+        final User user = (User) cache.findRecId(RecType.USER, trade.getUserId());
         final Contr contr = (Contr) cache.findRecId(RecType.CONTR, trade.getContrId());
-        final Party cpty = (Party) cache.findRecId(RecType.PARTY, trade.getCptyId());
-        trade.enrich(trader, giveup, contr, cpty);
+        final User cpty = (User) cache.findRecId(RecType.USER, trade.getCptyId());
+        trade.enrich(user, contr, cpty);
     }
 
     private final void enrichPosn(Posn posn) {
-        final Party party = (Party) cache.findRecId(RecType.PARTY, posn.getPartyId());
+        final User user = (User) cache.findRecId(RecType.USER, posn.getUserId());
         final Contr contr = (Contr) cache.findRecId(RecType.CONTR, posn.getContrId());
-        posn.enrich(party, contr);
+        posn.enrich(user, contr);
     }
 
     private final void insertRecList(Model model, RecType type) {
@@ -61,23 +59,23 @@ public final class Serv implements AutoCloseable {
     private final void insertOrders(Model model) {
         for (final Order order : model.readOrder()) {
             enrichOrder(order);
-            final Accnt trader = Accnt.getLazyAccnt(order.getTrader(), ordIdx);
-            trader.insertOrder(order);
+            final Accnt user = Accnt.getLazyAccnt(order.getUser(), refIdx);
+            user.insertOrder(order);
         }
     }
 
     private final void insertTrades(Model model) {
         for (final Exec trade : model.readTrade()) {
             enrichTrade(trade);
-            final Accnt trader = Accnt.getLazyAccnt(trade.getTrader(), ordIdx);
-            trader.insertTrade(trade);
+            final Accnt user = Accnt.getLazyAccnt(trade.getUser(), refIdx);
+            user.insertTrade(trade);
         }
     }
 
     private final void insertPosns(Model model) {
         for (final Posn posn : model.readPosn()) {
             enrichPosn(posn);
-            final Accnt accnt = Accnt.getLazyAccnt(posn.getParty(), ordIdx);
+            final Accnt accnt = Accnt.getLazyAccnt(posn.getUser(), refIdx);
             accnt.insertPosn(posn);
         }
     }
@@ -96,7 +94,7 @@ public final class Serv implements AutoCloseable {
             // Reduce maker.
             book.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
-            final Accnt maker = Accnt.getLazyAccnt(makerOrder.getTrader(), ordIdx);
+            final Accnt maker = Accnt.getLazyAccnt(makerOrder.getUser(), refIdx);
             // Maker updated first because this is consistent with last-look semantics.
             // Update maker.
             maker.insertTrade(match.makerTrade);
@@ -120,7 +118,7 @@ public final class Serv implements AutoCloseable {
     public final void load(Model model) {
         insertRecList(model, RecType.ASSET);
         insertRecList(model, RecType.CONTR);
-        insertRecList(model, RecType.PARTY);
+        insertRecList(model, RecType.USER);
         insertOrders(model);
         insertTrades(model);
         insertPosns(model);
@@ -142,20 +140,20 @@ public final class Serv implements AutoCloseable {
         return cache.isEmptyRec(type);
     }
 
-    public final Accnt getLazyAccnt(Party party) {
-        return Accnt.getLazyAccnt(party, ordIdx);
+    public final Accnt getLazyAccnt(User user) {
+        return Accnt.getLazyAccnt(user, refIdx);
     }
 
     public final Accnt getLazyAccnt(String mnem) {
-        final Party party = (Party) cache.findRecMnem(RecType.PARTY, mnem);
-        if (party == null) {
-            throw new IllegalArgumentException(String.format("invalid party '%s'", mnem));
+        final User user = (User) cache.findRecMnem(RecType.USER, mnem);
+        if (user == null) {
+            throw new IllegalArgumentException(String.format("invalid user '%s'", mnem));
         }
-        return getLazyAccnt(party);
+        return getLazyAccnt(user);
     }
 
-    public final Order placeOrder(Accnt trader, Accnt giveup, Book book, String ref, Action action,
-            long ticks, long lots, long minLots) {
+    public final Order placeOrder(Accnt user, Book book, String ref, Action action, long ticks,
+            long lots, long minLots) {
         if (lots == 0 || lots < minLots) {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
@@ -163,13 +161,13 @@ public final class Serv implements AutoCloseable {
         final long orderId = bank.addFetch(Reg.ORDER_ID.intValue(), 1);
         final Contr contr = book.getContr();
         final int settlDay = book.getSettlDay();
-        final Order order = new Order(orderId, trader.getParty(), giveup.getParty(), contr,
-                settlDay, ref, action, ticks, lots, minLots, now);
+        final Order order = new Order(orderId, user.getUser(), contr, settlDay, ref, action, ticks,
+                lots, minLots, now);
         final Exec newExec = newExec(order, now);
         final Trans trans = new Trans();
         trans.execs.insertBack(newExec);
         // Order fields are updated on match.
-        Broker.matchOrders(book, order, bank, ordIdx, trans);
+        Broker.matchOrders(book, order, bank, refIdx, trans);
         // Place incomplete order in book.
         if (!order.isDone()) {
             book.insertOrder(order);
@@ -186,13 +184,13 @@ public final class Serv implements AutoCloseable {
             }
         }
         // Final commit phase cannot fail.
-        trader.insertOrder(order);
+        user.insertOrder(order);
         // Commit trans to cycle and free matches.
-        commitTrans(trader, book, trans, now);
+        commitTrans(user, book, trans, now);
         return order;
     }
 
-    public final void reviseOrder(Accnt trader, Order order, long lots) {
+    public final void reviseOrder(Accnt user, Order order, long lots) {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
@@ -216,25 +214,25 @@ public final class Serv implements AutoCloseable {
         execs.insertBack(exec);
     }
 
-    public final Order reviseOrderId(Accnt trader, long id, long lots) {
-        final Order order = trader.findOrderId(id);
+    public final Order reviseOrderId(Accnt user, long id, long lots) {
+        final Order order = user.findOrderId(id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
-        reviseOrder(trader, order, lots);
+        reviseOrder(user, order, lots);
         return order;
     }
 
-    public final Order reviseOrderRef(Accnt trader, String ref, long lots) {
-        final Order order = trader.findOrderRef(ref);
+    public final Order reviseOrderRef(Accnt user, String ref, long lots) {
+        final Order order = user.findOrderRef(ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
-        reviseOrder(trader, order, lots);
+        reviseOrder(user, order, lots);
         return order;
     }
 
-    public final void cancelOrder(Accnt trader, Order order) {
+    public final void cancelOrder(Accnt user, Order order) {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
@@ -250,26 +248,26 @@ public final class Serv implements AutoCloseable {
         execs.insertBack(exec);
     }
 
-    public final Order cancelOrderId(Accnt trader, long id) {
-        final Order order = trader.findOrderId(id);
+    public final Order cancelOrderId(Accnt user, long id) {
+        final Order order = user.findOrderId(id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
-        cancelOrder(trader, order);
+        cancelOrder(user, order);
         return order;
     }
 
-    public final Order cancelOrderRef(Accnt trader, String ref) {
-        final Order order = trader.findOrderRef(ref);
+    public final Order cancelOrderRef(Accnt user, String ref) {
+        final Order order = user.findOrderRef(ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
-        cancelOrder(trader, order);
+        cancelOrder(user, order);
         return order;
     }
 
-    public final void ackTrade(Accnt trader, long id) {
-        final Exec trade = trader.findTradeId(id);
+    public final void ackTrade(Accnt user, long id) {
+        final Exec trade = user.findTradeId(id);
         if (trade != null) {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
@@ -278,15 +276,15 @@ public final class Serv implements AutoCloseable {
 
         // No need to update timestamps on trade because it is immediately freed.
 
-        trader.removeTrade(trade);
+        user.removeTrade(trade);
     }
 
     public final void clear() {
         while (!execs.isEmpty()) {
             final Exec exec = (Exec) execs.removeFirst();
             if (exec.isDone()) {
-                final Party trader = exec.getTrader();
-                final Accnt accnt = (Accnt) trader.getAccnt();
+                final User user = exec.getUser();
+                final Accnt accnt = (Accnt) user.getAccnt();
                 assert accnt != null;
                 accnt.releaseOrderId(exec.getOrder());
             }

@@ -82,11 +82,9 @@ public final class Ctx {
     public final synchronized CharSequence postOrderByAccnt(final String tmnem, final String gmnem,
             final String cmnem, final int settlDate, final String ref, final Action action,
             final long ticks, final long lots, final long minLots) {
-        final Accnt trader = serv.getLazyAccnt(tmnem);
-        final Accnt giveup = serv.getLazyAccnt(gmnem);
+        final Accnt user = serv.getLazyAccnt(tmnem);
         final Book book = serv.getLazyBook(cmnem, isoToJd(settlDate));
-        final Order order = serv
-                .placeOrder(trader, giveup, book, ref, action, ticks, lots, minLots);
+        final Order order = serv.placeOrder(user, book, ref, action, ticks, lots, minLots);
         final StringBuilder sb = new StringBuilder();
         order.print(sb);
         return sb;
@@ -104,9 +102,9 @@ public final class Ctx {
 
     public final synchronized CharSequence putOrderByAccntAndId(final String tmnem, final long id,
             final long lots) {
-        final Accnt trader = serv.getLazyAccnt(tmnem);
-        final Order order = lots > 0 ? serv.reviseOrderId(trader, id, lots) : serv.cancelOrderId(
-                trader, id);
+        final Accnt user = serv.getLazyAccnt(tmnem);
+        final Order order = lots > 0 ? serv.reviseOrderId(user, id, lots) : serv.cancelOrderId(
+                user, id);
         final StringBuilder sb = new StringBuilder();
         order.print(sb);
         return sb;

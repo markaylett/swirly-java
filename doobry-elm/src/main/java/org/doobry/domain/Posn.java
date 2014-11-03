@@ -15,7 +15,7 @@ import org.doobry.util.Printable;
 public final class Posn extends BasicRbNode implements Printable {
 
     private final long key;
-    private Identifiable party;
+    private Identifiable user;
     private Identifiable contr;
     private final int settlDay;
     private long buyLicks;
@@ -27,9 +27,9 @@ public final class Posn extends BasicRbNode implements Printable {
         return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
     }
 
-    public Posn(Identifiable party, Identifiable contr, int settlDay) {
-        this.key = toKey(party.getId(), contr.getId(), settlDay);
-        this.party = party;
+    public Posn(Identifiable user, Identifiable contr, int settlDay) {
+        this.key = toKey(user.getId(), contr.getId(), settlDay);
+        this.user = user;
         this.contr = contr;
         this.settlDay = settlDay;
     }
@@ -43,7 +43,7 @@ public final class Posn extends BasicRbNode implements Printable {
 
     @Override
     public final void print(StringBuilder sb) {
-        sb.append("{\"accnt\":\"").append(getRecMnem(party));
+        sb.append("{\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));
         sb.append("\",\"settl_date\":").append(jdToIso(settlDay));
         sb.append(",\"buy_licks\":").append(buyLicks);
@@ -53,10 +53,10 @@ public final class Posn extends BasicRbNode implements Printable {
         sb.append("}");
     }
 
-    public final void enrich(Party party, Contr contr) {
-        assert this.party.getId() == party.getId();
+    public final void enrich(User user, Contr contr) {
+        assert this.user.getId() == user.getId();
         assert this.contr.getId() == contr.getId();
-        this.party = party;
+        this.user = user;
         this.contr = contr;
     }
 
@@ -107,12 +107,12 @@ public final class Posn extends BasicRbNode implements Printable {
         return key;
     }
 
-    public final long getPartyId() {
-        return party.getId();
+    public final long getUserId() {
+        return user.getId();
     }
 
-    public final Party getParty() {
-        return (Party) party;
+    public final User getUser() {
+        return (User) user;
     }
 
     public final long getContrId() {

@@ -15,9 +15,9 @@ public enum RecType {
      */
     CONTR(2),
     /**
-     * Party.
+     * User.
      */
-    PARTY(3);
+    USER(3);
     private final int value;
 
     private RecType(int value) {

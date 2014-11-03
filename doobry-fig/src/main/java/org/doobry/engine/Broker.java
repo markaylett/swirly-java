@@ -9,7 +9,7 @@ import org.doobry.domain.Action;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Direct;
 import org.doobry.domain.Exec;
-import org.doobry.domain.OrdIdx;
+import org.doobry.domain.RefIdx;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Reg;
@@ -31,7 +31,7 @@ public final class Broker {
     }
 
     private static void matchOrders(Book book, Order takerOrder, Side side, Direct direct,
-            Bank bank, OrdIdx ordIdx, Trans trans) {
+            Bank bank, RefIdx refIdx, Trans trans) {
 
         final long now = takerOrder.getCreated();
 
@@ -54,7 +54,7 @@ public final class Broker {
             final long takerId = bank.addFetch(Reg.EXEC_ID.intValue(), 1L);
             final long makerId = bank.addFetch(Reg.EXEC_ID.intValue(), 1L);
 
-            final Accnt makerAccnt = Accnt.getLazyAccnt(makerOrder.getGiveup(), ordIdx);
+            final Accnt makerAccnt = Accnt.getLazyAccnt(makerOrder.getUser(), refIdx);
             final Posn makerPosn = makerAccnt.getLazyPosn(contr, settlDay);
 
             final Match match = new Match(matchId);
@@ -69,12 +69,12 @@ public final class Broker {
 
             final Exec makerTrade = new Exec(makerId, makerOrder.getId(), makerOrder, now);
             makerTrade.trade(match.lots, match.ticks, match.lots, match.id, Role.MAKER,
-                    takerOrder.getGiveup());
+                    takerOrder.getUser());
             match.makerTrade = makerTrade;
 
             final Exec takerTrade = new Exec(takerId, takerOrder.getId(), takerOrder, now);
             takerTrade.trade(taken, match.ticks, match.lots, match.id, Role.TAKER,
-                    makerOrder.getGiveup());
+                    makerOrder.getUser());
             match.takerTrade = takerTrade;
 
             trans.matches.insertBack(match);
@@ -87,13 +87,13 @@ public final class Broker {
 
         if (!trans.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
-            final Accnt takerAccnt = Accnt.getLazyAccnt(takerOrder.getGiveup(), ordIdx);
+            final Accnt takerAccnt = Accnt.getLazyAccnt(takerOrder.getUser(), refIdx);
             trans.takerPosn = takerAccnt.getLazyPosn(contr, settlDay);
             takerOrder.trade(taken, lastTicks, lastLots, now);
         }
     }
 
-    public static void matchOrders(Book book, Order taker, Bank bank, OrdIdx ordIdx, Trans trans) {
+    public static void matchOrders(Book book, Order taker, Bank bank, RefIdx refIdx, Trans trans) {
         Side side;
         Direct direct;
         if (taker.getAction() == Action.BUY) {
@@ -106,6 +106,6 @@ public final class Broker {
             side = book.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(book, taker, side, direct, bank, ordIdx, trans);
+        matchOrders(book, taker, side, direct, bank, refIdx, trans);
     }
 }

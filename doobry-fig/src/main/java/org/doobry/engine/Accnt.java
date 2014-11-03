@@ -7,36 +7,36 @@ package org.doobry.engine;
 
 import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
-import org.doobry.domain.OrdIdx;
+import org.doobry.domain.RefIdx;
 import org.doobry.domain.Order;
-import org.doobry.domain.Party;
+import org.doobry.domain.User;
 import org.doobry.domain.Posn;
 import org.doobry.util.RbNode;
 import org.doobry.util.Tree;
 
 public final class Accnt {
-    private final Party party;
-    private final OrdIdx ordIdx;
+    private final User user;
+    private final RefIdx refIdx;
     private final Tree orders = new Tree();
     private final Tree trades = new Tree();
     private final Tree posns = new Tree();
 
-    private Accnt(Party party, OrdIdx ordIdx) {
-        this.party = party;
-        this.ordIdx = ordIdx;
+    private Accnt(User user, RefIdx refIdx) {
+        this.user = user;
+        this.refIdx = refIdx;
     }
 
-    public static Accnt getLazyAccnt(Party party, OrdIdx ordIdx) {
-        Accnt accnt = (Accnt) party.getAccnt();
+    public static Accnt getLazyAccnt(User user, RefIdx refIdx) {
+        Accnt accnt = (Accnt) user.getAccnt();
         if (accnt == null) {
-            accnt = new Accnt(party, ordIdx);
-            party.setAccnt(accnt);
+            accnt = new Accnt(user, refIdx);
+            user.setAccnt(accnt);
         }
         return accnt;
     }
 
-    public final Party getParty() {
-        return party;
+    public final User getUser() {
+        return user;
     }
 
     /**
@@ -47,7 +47,7 @@ public final class Accnt {
         final RbNode node = orders.insert(order);
         assert node == order;
         if (!order.getRef().isEmpty())
-            ordIdx.insert(order);
+            refIdx.insert(order);
     }
 
     /**
@@ -55,10 +55,10 @@ public final class Accnt {
      */
 
     public final void releaseOrder(Order order) {
-        assert party.getId() == order.getTrader().getId();
+        assert user.getId() == order.getUser().getId();
         orders.remove(order);
         if (!order.getRef().isEmpty())
-            ordIdx.remove(party.getId(), order.getRef());
+            refIdx.remove(user.getId(), order.getRef());
     }
 
     /**
@@ -79,7 +79,7 @@ public final class Accnt {
      */
 
     public final Order releaseOrderRef(String ref) {
-        final Order order = ordIdx.remove(party.getId(), ref);
+        final Order order = refIdx.remove(user.getId(), ref);
         if (order != null) {
             orders.remove(order);
         }
@@ -96,7 +96,7 @@ public final class Accnt {
 
     public final Order findOrderRef(String ref) {
         assert ref != null && !ref.isEmpty();
-        return ordIdx.find(party.getId(), ref);
+        return refIdx.find(user.getId(), ref);
     }
 
     public final RbNode getFirstOrder() {
@@ -157,7 +157,7 @@ public final class Accnt {
 
             // Update existing position.
 
-            assert exist.getParty().equals(posn.getParty());
+            assert exist.getUser().equals(posn.getUser());
             assert exist.getContr().equals(posn.getContr());
             assert exist.getSettlDay() == posn.getSettlDay();
 
@@ -174,10 +174,10 @@ public final class Accnt {
     public final Posn getLazyPosn(Contr contr, int settlDay) {
 
         Posn posn;
-        final long key = Posn.toKey(party.getId(), contr.getId(), settlDay);
+        final long key = Posn.toKey(user.getId(), contr.getId(), settlDay);
         final RbNode node = posns.pfind(key);
         if (node == null || node.getKey() != key) {
-            posn = new Posn(party, contr, settlDay);
+            posn = new Posn(user, contr, settlDay);
             final RbNode parent = node;
             posns.pinsert(posn, parent);
         } else {

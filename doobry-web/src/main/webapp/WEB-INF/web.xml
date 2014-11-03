@@ -19,12 +19,16 @@
     </init-param>
   </servlet>
   <servlet>
-    <servlet-name>party</servlet-name>
+    <servlet-name>user</servlet-name>
     <servlet-class>org.doobry.web.RecServlet</servlet-class>
     <init-param>
       <param-name>recType</param-name>
-      <param-value>PARTY</param-value>
+      <param-value>USER</param-value>
     </init-param>
+  </servlet>
+  <servlet>
+    <servlet-name>order</servlet-name>
+    <servlet-class>org.doobry.web.OrderServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>asset</servlet-name>
@@ -35,8 +39,12 @@
     <url-pattern>/api/contr</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-    <servlet-name>party</servlet-name>
-    <url-pattern>/api/party</url-pattern>
+    <servlet-name>user</servlet-name>
+    <url-pattern>/api/user</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>order</servlet-name>
+    <url-pattern>/api/order/*</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>

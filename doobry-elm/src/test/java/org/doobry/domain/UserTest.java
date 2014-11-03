@@ -7,14 +7,14 @@ package org.doobry.domain;
 
 import static org.junit.Assert.assertEquals;
 
-import org.doobry.mock.MockParty;
+import org.doobry.mock.MockUser;
 import org.junit.Test;
 
-public final class PartyTest {
+public final class UserTest {
     @Test
     public final void test() {
         assertEquals(
                 "{\"mnem\":\"WRAMIREZ\",\"display\":\"Wayne Ramirez\",\"email\":\"wayne.ramirez@doobry.org\"}",
-                MockParty.newParty("WRAMIREZ").toString());
+                MockUser.newUser("WRAMIREZ").toString());
     }
 }

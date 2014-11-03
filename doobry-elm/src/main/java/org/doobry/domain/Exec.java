@@ -18,11 +18,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     /**
      * The executing trader.
      */
-    private Identifiable trader;
-    /**
-     * The give-up counter-party.
-     */
-    private Identifiable giveup;
+    private Identifiable user;
     private Identifiable contr;
     private final int settlDay;
     /**
@@ -62,8 +58,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     public Exec(long id, long order, Instruct instruct, long created) {
         this.id = id;
         this.orderId = order;
-        this.trader = instruct.getTrader();
-        this.giveup = instruct.getGiveup();
+        this.user = instruct.getUser();
         this.contr = instruct.getContr();
         this.settlDay = instruct.getSettlDay();
         this.ref = instruct.getRef();
@@ -90,8 +85,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     public final void print(StringBuilder sb) {
         sb.append("{\"id\":").append(id);
         sb.append(",\"order\":").append(orderId);
-        sb.append(",\"trader\":\"").append(getRecMnem(trader));
-        sb.append("\",\"giveup\":\"").append(getRecMnem(giveup));
+        sb.append(",\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));
         sb.append("\",\"settl_date\":").append(jdToIso(settlDay));
         sb.append(",\"ref\":\"").append(ref);
@@ -113,12 +107,10 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         sb.append("}");
     }
 
-    public final void enrich(Party trader, Party giveup, Contr contr, Party cpty) {
-        assert this.trader.getId() == trader.getId();
-        assert this.giveup.getId() == giveup.getId();
+    public final void enrich(User user, Contr contr, User cpty) {
+        assert this.user.getId() == user.getId();
         assert this.contr.getId() == contr.getId();
-        this.trader = trader;
-        this.giveup = giveup;
+        this.user = user;
         this.contr = contr;
         if (state == State.TRADE) {
             assert this.cpty.getId() == cpty.getId();
@@ -140,7 +132,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     }
 
     public final void trade(long lots, long lastTicks, long lastLots, long matchId, Role role,
-            Party cpty) {
+            User cpty) {
         state = State.TRADE;
         resd -= lots;
         exec += lots;
@@ -151,7 +143,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         this.cpty = cpty;
     }
 
-    public final void trade(long lastTicks, long lastLots, long matchId, Role role, Party cpty) {
+    public final void trade(long lastTicks, long lastLots, long matchId, Role role, User cpty) {
         trade(lastLots, lastTicks, lastLots, matchId, role, cpty);
     }
 
@@ -170,23 +162,13 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     }
 
     @Override
-    public final long getTraderId() {
-        return trader.getId();
+    public final long getUserId() {
+        return user.getId();
     }
 
     @Override
-    public final Party getTrader() {
-        return (Party) trader;
-    }
-
-    @Override
-    public final long getGiveupId() {
-        return giveup.getId();
-    }
-
-    @Override
-    public final Party getGiveup() {
-        return (Party) giveup;
+    public final User getUser() {
+        return (User) user;
     }
 
     @Override
@@ -271,8 +253,8 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         return cpty != null ? cpty.getId() : 0;
     }
 
-    public final Party getCpty() {
-        return (Party) cpty;
+    public final User getCpty() {
+        return (User) cpty;
     }
 
     public final long getCreated() {

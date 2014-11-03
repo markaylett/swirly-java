@@ -30,10 +30,10 @@ public final class RestTest {
 
     @Test
     public final void testString() throws ParseException {
-        final Rest r = parse("{\"accnt\":\"DBRA\"}");
+        final Rest r = parse("{\"user\":\"WRAMIREZ\"}");
         assertTrue(r.isValid());
         assertEquals(Rest.ACCNT, r.getFields());
-        assertEquals("DBRA", r.getAccnt());
+        assertEquals("WRAMIREZ", r.getAccnt());
     }
 
     @Test
@@ -55,7 +55,7 @@ public final class RestTest {
 
     @Test
     public final void testDuplicate() throws ParseException {
-        final Rest r = parse("{\"accnt\":\"DBRA\",\"accnt\":\"DBRB\"}");
+        final Rest r = parse("{\"user\":\"WRAMIREZ\",\"user\":\"WRAMIREZ\"}");
         assertTrue(!r.isValid());
     }
 

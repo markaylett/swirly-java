@@ -11,13 +11,9 @@ package org.doobry.domain;
 
 public interface Instruct {
 
-    long getTraderId();
+    long getUserId();
 
-    Party getTrader();
-
-    long getGiveupId();
-
-    Party getGiveup();
+    User getUser();
 
     long getContrId();
 

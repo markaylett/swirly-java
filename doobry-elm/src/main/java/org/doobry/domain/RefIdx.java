@@ -5,13 +5,13 @@
  *******************************************************************************/
 package org.doobry.domain;
 
-public final class OrdIdx {
+public final class RefIdx {
 
     private final Order[] buckets;
 
     private static boolean equals(Order order, long trid, String ref) {
         assert ref != null;
-        return order.getTrader().getId() == trid && order.getRef().equals(ref);
+        return order.getUser().getId() == trid && order.getRef().equals(ref);
     }
 
     private static int hashCode(long id) {
@@ -31,7 +31,7 @@ public final class OrdIdx {
         return (hash & 0x7fffffff) % length;
     }
 
-    public OrdIdx(int nBuckets) {
+    public RefIdx(int nBuckets) {
         assert nBuckets > 0;
         this.buckets = new Order[nBuckets];
     }
@@ -39,7 +39,7 @@ public final class OrdIdx {
     public final void insert(Order order) {
         assert order != null;
         if (order.getRef() != null) {
-            final int bucket = indexFor(hashCode(order.getTrader().getId(), order.getRef()),
+            final int bucket = indexFor(hashCode(order.getUser().getId(), order.getRef()),
                     buckets.length);
             order.nextRef = buckets[bucket];
             buckets[bucket] = order;

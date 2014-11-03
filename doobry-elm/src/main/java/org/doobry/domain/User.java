@@ -5,12 +5,12 @@
  *******************************************************************************/
 package org.doobry.domain;
 
-public final class Party extends Rec {
+public final class User extends Rec {
     private final String email;
     private transient Object accnt;
 
-    public Party(long id, String mnem, String display, String email) {
-        super(RecType.PARTY, id, mnem, display);
+    public User(long id, String mnem, String display, String email) {
+        super(RecType.USER, id, mnem, display);
         this.email = email;
     }
 

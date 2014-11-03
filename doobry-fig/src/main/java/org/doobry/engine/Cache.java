@@ -16,7 +16,7 @@ public final class Cache {
     private final int nBuckets;
     private SlNode firstAsset;
     private SlNode firstContr;
-    private SlNode firstParty;
+    private SlNode firstUser;
     private final Rec[][] buckets;
 
     private static int hashCode(long id) {
@@ -81,9 +81,9 @@ public final class Cache {
             assert firstContr == null;
             firstContr = first;
             break;
-        case PARTY:
-            assert firstParty == null;
-            firstParty = first;
+        case USER:
+            assert firstUser == null;
+            firstUser = first;
             break;
         }
         updateIndex(first);
@@ -116,8 +116,8 @@ public final class Cache {
         case CONTR:
             first = firstContr;
             break;
-        case PARTY:
-            first = firstParty;
+        case USER:
+            first = firstUser;
             break;
         }
         return first;
