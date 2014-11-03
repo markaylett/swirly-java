@@ -54,7 +54,7 @@ public final class Ctx {
         return sb;
     }
 
-    public final synchronized CharSequence getRecByMnem(final RecType type, final String mnem) {
+    public final synchronized CharSequence getRec(final RecType type, final String mnem) {
         final StringBuilder sb = new StringBuilder();
         final Rec rec = serv.findRecMnem(type, mnem);
         if (rec != null) {
@@ -63,8 +63,8 @@ public final class Ctx {
         return sb;
     }
 
-    public final synchronized CharSequence getOrderByAccnt(final String amnem) {
-        final Accnt accnt = serv.getLazyAccnt(amnem);
+    public final synchronized CharSequence getOrder(final String user) {
+        final Accnt accnt = serv.getLazyAccnt(user);
         final StringBuilder sb = new StringBuilder();
         sb.append('[');
         RbNode node = accnt.getFirstOrder();
@@ -79,19 +79,8 @@ public final class Ctx {
         return sb;
     }
 
-    public final synchronized CharSequence postOrderByAccnt(final String tmnem, final String gmnem,
-            final String cmnem, final int settlDate, final String ref, final Action action,
-            final long ticks, final long lots, final long minLots) {
-        final Accnt user = serv.getLazyAccnt(tmnem);
-        final Book book = serv.getLazyBook(cmnem, isoToJd(settlDate));
-        final Order order = serv.placeOrder(user, book, ref, action, ticks, lots, minLots);
-        final StringBuilder sb = new StringBuilder();
-        order.print(sb);
-        return sb;
-    }
-
-    public final synchronized CharSequence getOrderByAccntAndId(final String amnem, final long id) {
-        final Accnt accnt = serv.getLazyAccnt(amnem);
+    public final synchronized CharSequence getOrder(final String user, final long id) {
+        final Accnt accnt = serv.getLazyAccnt(user);
         final StringBuilder sb = new StringBuilder();
         final Order order = accnt.findOrderId(id);
         if (order != null) {
@@ -100,18 +89,29 @@ public final class Ctx {
         return sb;
     }
 
-    public final synchronized CharSequence putOrderByAccntAndId(final String tmnem, final long id,
-            final long lots) {
-        final Accnt user = serv.getLazyAccnt(tmnem);
-        final Order order = lots > 0 ? serv.reviseOrderId(user, id, lots) : serv.cancelOrderId(
-                user, id);
+    public final synchronized CharSequence postOrder(final String user, final String contr,
+            final int settlDate, final String ref, final Action action, final long ticks,
+            final long lots, final long minLots) {
+        final Accnt accnt = serv.getLazyAccnt(user);
+        final Book book = serv.getLazyBook(contr, isoToJd(settlDate));
+        final Order order = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots);
         final StringBuilder sb = new StringBuilder();
         order.print(sb);
         return sb;
     }
 
-    public final synchronized CharSequence getTradeByAccnt(final String amnem) {
-        final Accnt accnt = serv.getLazyAccnt(amnem);
+    public final synchronized CharSequence putOrder(final String user, final long id,
+            final long lots) {
+        final Accnt accnt = serv.getLazyAccnt(user);
+        final Order order = lots > 0 ? serv.reviseOrderId(accnt, id, lots) : serv.cancelOrderId(
+                accnt, id);
+        final StringBuilder sb = new StringBuilder();
+        order.print(sb);
+        return sb;
+    }
+
+    public final synchronized CharSequence getTrade(final String user) {
+        final Accnt accnt = serv.getLazyAccnt(user);
         final StringBuilder sb = new StringBuilder();
         sb.append('[');
         RbNode node = accnt.getFirstTrade();
@@ -126,14 +126,8 @@ public final class Ctx {
         return sb;
     }
 
-    public final synchronized CharSequence deleteTradeByAccntAndId(final String amnem, final long id) {
-        final Accnt accnt = serv.getLazyAccnt(amnem);
-        serv.ackTrade(accnt, id);
-        return "";
-    }
-
-    public final synchronized CharSequence getTradeByAccntAndId(final String amnem, final long id) {
-        final Accnt accnt = serv.getLazyAccnt(amnem);
+    public final synchronized CharSequence getTrade(final String user, final long id) {
+        final Accnt accnt = serv.getLazyAccnt(user);
         final StringBuilder sb = new StringBuilder();
         final Exec trade = accnt.findTradeId(id);
         if (trade != null) {
@@ -142,8 +136,14 @@ public final class Ctx {
         return sb;
     }
 
-    public final synchronized CharSequence getPosnByAccnt(final String amnem) {
-        final Accnt accnt = serv.getLazyAccnt(amnem);
+    public final synchronized CharSequence deleteTrade(final String user, final long id) {
+        final Accnt accnt = serv.getLazyAccnt(user);
+        serv.ackTrade(accnt, id);
+        return "";
+    }
+
+    public final synchronized CharSequence getPosn(final String user) {
+        final Accnt accnt = serv.getLazyAccnt(user);
         final StringBuilder sb = new StringBuilder();
         sb.append('[');
         RbNode node = accnt.getFirstPosn();

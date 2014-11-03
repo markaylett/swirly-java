@@ -59,16 +59,16 @@ public final class Serv implements AutoCloseable {
     private final void insertOrders(Model model) {
         for (final Order order : model.readOrder()) {
             enrichOrder(order);
-            final Accnt user = Accnt.getLazyAccnt(order.getUser(), refIdx);
-            user.insertOrder(order);
+            final Accnt accnt = Accnt.getLazyAccnt(order.getUser(), refIdx);
+            accnt.insertOrder(order);
         }
     }
 
     private final void insertTrades(Model model) {
         for (final Exec trade : model.readTrade()) {
             enrichTrade(trade);
-            final Accnt user = Accnt.getLazyAccnt(trade.getUser(), refIdx);
-            user.insertTrade(trade);
+            final Accnt accnt = Accnt.getLazyAccnt(trade.getUser(), refIdx);
+            accnt.insertTrade(trade);
         }
     }
 
@@ -152,7 +152,7 @@ public final class Serv implements AutoCloseable {
         return getLazyAccnt(user);
     }
 
-    public final Order placeOrder(Accnt user, Book book, String ref, Action action, long ticks,
+    public final Order placeOrder(Accnt accnt, Book book, String ref, Action action, long ticks,
             long lots, long minLots) {
         if (lots == 0 || lots < minLots) {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
@@ -161,8 +161,8 @@ public final class Serv implements AutoCloseable {
         final long orderId = bank.addFetch(Reg.ORDER_ID.intValue(), 1);
         final Contr contr = book.getContr();
         final int settlDay = book.getSettlDay();
-        final Order order = new Order(orderId, user.getUser(), contr, settlDay, ref, action, ticks,
-                lots, minLots, now);
+        final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
+                ticks, lots, minLots, now);
         final Exec newExec = newExec(order, now);
         final Trans trans = new Trans();
         trans.execs.insertBack(newExec);
@@ -184,13 +184,13 @@ public final class Serv implements AutoCloseable {
             }
         }
         // Final commit phase cannot fail.
-        user.insertOrder(order);
+        accnt.insertOrder(order);
         // Commit trans to cycle and free matches.
-        commitTrans(user, book, trans, now);
+        commitTrans(accnt, book, trans, now);
         return order;
     }
 
-    public final void reviseOrder(Accnt user, Order order, long lots) {
+    public final void reviseOrder(Accnt accnt, Order order, long lots) {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
@@ -214,25 +214,25 @@ public final class Serv implements AutoCloseable {
         execs.insertBack(exec);
     }
 
-    public final Order reviseOrderId(Accnt user, long id, long lots) {
-        final Order order = user.findOrderId(id);
+    public final Order reviseOrderId(Accnt accnt, long id, long lots) {
+        final Order order = accnt.findOrderId(id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
-        reviseOrder(user, order, lots);
+        reviseOrder(accnt, order, lots);
         return order;
     }
 
-    public final Order reviseOrderRef(Accnt user, String ref, long lots) {
-        final Order order = user.findOrderRef(ref);
+    public final Order reviseOrderRef(Accnt accnt, String ref, long lots) {
+        final Order order = accnt.findOrderRef(ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
-        reviseOrder(user, order, lots);
+        reviseOrder(accnt, order, lots);
         return order;
     }
 
-    public final void cancelOrder(Accnt user, Order order) {
+    public final void cancelOrder(Accnt accnt, Order order) {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
@@ -248,26 +248,26 @@ public final class Serv implements AutoCloseable {
         execs.insertBack(exec);
     }
 
-    public final Order cancelOrderId(Accnt user, long id) {
-        final Order order = user.findOrderId(id);
+    public final Order cancelOrderId(Accnt accnt, long id) {
+        final Order order = accnt.findOrderId(id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
-        cancelOrder(user, order);
+        cancelOrder(accnt, order);
         return order;
     }
 
-    public final Order cancelOrderRef(Accnt user, String ref) {
-        final Order order = user.findOrderRef(ref);
+    public final Order cancelOrderRef(Accnt accnt, String ref) {
+        final Order order = accnt.findOrderRef(ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
-        cancelOrder(user, order);
+        cancelOrder(accnt, order);
         return order;
     }
 
-    public final void ackTrade(Accnt user, long id) {
-        final Exec trade = user.findTradeId(id);
+    public final void ackTrade(Accnt accnt, long id) {
+        final Exec trade = accnt.findTradeId(id);
         if (trade != null) {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
@@ -276,7 +276,7 @@ public final class Serv implements AutoCloseable {
 
         // No need to update timestamps on trade because it is immediately freed.
 
-        user.removeTrade(trade);
+        accnt.removeTrade(trade);
     }
 
     public final void clear() {

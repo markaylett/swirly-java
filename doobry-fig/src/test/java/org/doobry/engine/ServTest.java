@@ -23,12 +23,12 @@ public final class ServTest {
         final Serv s = new Serv(new MockBank(Reg.values().length), new MockJourn());
         try {
             s.load(new MockModel());
-            final Accnt user = s.getLazyAccnt("WRAMIREZ");
+            final Accnt accnt = s.getLazyAccnt("WRAMIREZ");
             final int settlDay = ymdToJd(2014, 3, 14);
             final Book book = s.getLazyBook("EURUSD", settlDay);
 
-            final Order order = s.placeOrder(user, book, "", Action.BUY, 12345, 5, 1);
-            assertEquals(user.getUser(), order.getUser());
+            final Order order = s.placeOrder(accnt, book, "", Action.BUY, 12345, 5, 1);
+            assertEquals(accnt.getUser(), order.getUser());
             assertEquals(book.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());
             assertEquals("", order.getRef());
@@ -43,8 +43,8 @@ public final class ServTest {
             assertEquals(1, order.getMinLots());
             assertEquals(order.getCreated(), order.getModified());
 
-            s.reviseOrder(user, order, 4);
-            assertEquals(user.getUser(), order.getUser());
+            s.reviseOrder(accnt, order, 4);
+            assertEquals(accnt.getUser(), order.getUser());
             assertEquals(book.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());
             assertEquals("", order.getRef());
