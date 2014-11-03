@@ -39,8 +39,15 @@ public final class Ctx {
         return CtxHolder.INSTANCE;
     }
 
-    public final synchronized CharSequence getRec(final RecType type) {
-        final StringBuilder sb = new StringBuilder();
+    public final synchronized void getRec(StringBuilder sb) {
+        sb.append("{\"asset\":");
+        getRec(sb, RecType.ASSET);
+        sb.append(",\"contr\":");
+        getRec(sb, RecType.CONTR);
+        sb.append("}");
+    }
+
+    public final synchronized void getRec(StringBuilder sb, RecType type) {
         sb.append('[');
         SlNode node = serv.getFirstRec(type);
         for (int i = 0; node != null; node = node.slNext()) {
@@ -51,21 +58,17 @@ public final class Ctx {
             rec.print(sb);
         }
         sb.append(']');
-        return sb;
     }
 
-    public final synchronized CharSequence getRec(final RecType type, final String mnem) {
-        final StringBuilder sb = new StringBuilder();
+    public final synchronized void getRec(StringBuilder sb, RecType type, String mnem) {
         final Rec rec = serv.findRecMnem(type, mnem);
         if (rec != null) {
             rec.print(sb);
         }
-        return sb;
     }
 
-    public final synchronized CharSequence getOrder(final String user) {
+    public final synchronized void getOrder(StringBuilder sb, String user) {
         final Accnt accnt = serv.getLazyAccnt(user);
-        final StringBuilder sb = new StringBuilder();
         sb.append('[');
         RbNode node = accnt.getFirstOrder();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -76,43 +79,33 @@ public final class Ctx {
             order.print(sb);
         }
         sb.append(']');
-        return sb;
     }
 
-    public final synchronized CharSequence getOrder(final String user, final long id) {
+    public final synchronized void getOrder(StringBuilder sb, String user, long id) {
         final Accnt accnt = serv.getLazyAccnt(user);
-        final StringBuilder sb = new StringBuilder();
         final Order order = accnt.findOrderId(id);
         if (order != null) {
             order.print(sb);
         }
-        return sb;
     }
 
-    public final synchronized CharSequence postOrder(final String user, final String contr,
-            final int settlDate, final String ref, final Action action, final long ticks,
-            final long lots, final long minLots) {
+    public final synchronized void postOrder(StringBuilder sb, String user, String contr,
+            int settlDate, String ref, Action action, long ticks, long lots, long minLots) {
         final Accnt accnt = serv.getLazyAccnt(user);
         final Book book = serv.getLazyBook(contr, isoToJd(settlDate));
         final Order order = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots);
-        final StringBuilder sb = new StringBuilder();
         order.print(sb);
-        return sb;
     }
 
-    public final synchronized CharSequence putOrder(final String user, final long id,
-            final long lots) {
+    public final synchronized void putOrder(StringBuilder sb, String user, long id, long lots) {
         final Accnt accnt = serv.getLazyAccnt(user);
         final Order order = lots > 0 ? serv.reviseOrderId(accnt, id, lots) : serv.cancelOrderId(
                 accnt, id);
-        final StringBuilder sb = new StringBuilder();
         order.print(sb);
-        return sb;
     }
 
-    public final synchronized CharSequence getTrade(final String user) {
+    public final synchronized void getTrade(StringBuilder sb, String user) {
         final Accnt accnt = serv.getLazyAccnt(user);
-        final StringBuilder sb = new StringBuilder();
         sb.append('[');
         RbNode node = accnt.getFirstTrade();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -123,28 +116,23 @@ public final class Ctx {
             trade.print(sb);
         }
         sb.append(']');
-        return sb;
     }
 
-    public final synchronized CharSequence getTrade(final String user, final long id) {
+    public final synchronized void getTrade(StringBuilder sb, String user, long id) {
         final Accnt accnt = serv.getLazyAccnt(user);
-        final StringBuilder sb = new StringBuilder();
         final Exec trade = accnt.findTradeId(id);
         if (trade != null) {
             trade.print(sb);
         }
-        return sb;
     }
 
-    public final synchronized CharSequence deleteTrade(final String user, final long id) {
+    public final synchronized void deleteTrade(StringBuilder sb, String user, long id) {
         final Accnt accnt = serv.getLazyAccnt(user);
         serv.ackTrade(accnt, id);
-        return "";
     }
 
-    public final synchronized CharSequence getPosn(final String user) {
+    public final synchronized void getPosn(StringBuilder sb, String user) {
         final Accnt accnt = serv.getLazyAccnt(user);
-        final StringBuilder sb = new StringBuilder();
         sb.append('[');
         RbNode node = accnt.getFirstPosn();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -155,6 +143,21 @@ public final class Ctx {
             posn.print(sb);
         }
         sb.append(']');
-        return sb;
+    }
+
+    public final synchronized void getPosn(StringBuilder sb, String user, String contr) {
+    }
+
+    public final synchronized void getPosn(StringBuilder sb, String user, String contr,
+            int settlDate) {
+    }
+
+    public final synchronized void getBook(StringBuilder sb) {
+    }
+
+    public final synchronized void getBook(StringBuilder sb, String contr) {
+    }
+
+    public final synchronized void getBook(StringBuilder sb, String contr, int settlDate) {
     }
 }

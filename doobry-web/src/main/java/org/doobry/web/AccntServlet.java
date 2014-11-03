@@ -6,6 +6,7 @@
 package org.doobry.web;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +17,8 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 @SuppressWarnings("serial")
-public final class OrderServlet extends HttpServlet {
+public final class AccntServlet extends HttpServlet {
+    private static final Pattern PATTERN = Pattern.compile("/");
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -28,6 +30,16 @@ public final class OrderServlet extends HttpServlet {
             return;
         }
 
+        final String pathInfo = req.getPathInfo();
+        if (pathInfo == null) {
+        } else {
+            final String[] parts = PATTERN.split(pathInfo);
+            if (parts[0].equals("order")) {
+            } else if (parts[0].equals("trade")) {
+            } else if (parts[0].equals("posn")) {
+            }
+        }
+
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("text/plain");
         resp.setStatus(HttpServletResponse.SC_OK);
@@ -35,6 +47,5 @@ public final class OrderServlet extends HttpServlet {
         resp.getWriter().println("nickname: " + currentUser.getNickname());
         resp.getWriter().println("user-id: " + currentUser.getUserId());
         resp.getWriter().println(req.getPathInfo());
-
     }
 }
