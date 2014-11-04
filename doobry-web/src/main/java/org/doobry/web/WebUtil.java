@@ -6,9 +6,33 @@
 package org.doobry.web;
 
 import java.io.PrintWriter;
+import java.util.regex.Pattern;
 
 public final class WebUtil {
+    private static final String[] EMPTY = {};
+    private static final Pattern PATTERN = Pattern.compile("/");
+
     private WebUtil() {
+    }
+
+    public static String[] splitPathInfo(String pathInfo) {
+        if (pathInfo == null) {
+            return EMPTY;
+        }
+        int begin = 0;
+        int end = pathInfo.length();
+        if (end > 0) {
+            if (pathInfo.charAt(0) == '/') {
+                ++begin;
+            }
+            if (end > 1 && pathInfo.charAt(end - 1) == '/') {
+                --end;
+            }
+        }
+        if (end - begin == 0) {
+            return EMPTY;
+        }
+        return PATTERN.split(pathInfo.substring(begin, end));
     }
 
     public static void writeError(PrintWriter pw, int num, String msg) {

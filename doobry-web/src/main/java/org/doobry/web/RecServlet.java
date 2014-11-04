@@ -5,8 +5,9 @@
  *******************************************************************************/
 package org.doobry.web;
 
+import static org.doobry.web.WebUtil.splitPathInfo;
+
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +17,6 @@ import org.doobry.domain.RecType;
 
 @SuppressWarnings("serial")
 public final class RecServlet extends HttpServlet {
-    private static final Pattern PATTERN = Pattern.compile("/");
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -25,22 +25,25 @@ public final class RecServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
-        if (pathInfo == null || pathInfo.equals("/")) {
+        final String[] parts = splitPathInfo(pathInfo);
+        if (parts.length == 0) {
             ctx.getRec(sb);
         } else {
-            final String[] parts = PATTERN.split(pathInfo.substring(1), 2);
-            System.out.println("parts[0]=" + parts[0]);
             if (parts[0].equals("asset")) {
                 if (parts.length == 1) {
                     ctx.getRec(sb, RecType.ASSET);
-                } else {
+                } else if (parts.length == 2) {
                     ctx.getRec(sb, RecType.ASSET, parts[1]);
+                } else {
+                    // FIXME
                 }
             } else if (parts[0].equals("contr")) {
                 if (parts.length == 1) {
                     ctx.getRec(sb, RecType.CONTR);
-                } else {
+                } else if (parts.length == 2) {
                     ctx.getRec(sb, RecType.CONTR, parts[1]);
+                } else {
+                    // FIXME
                 }
             }
         }
