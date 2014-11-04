@@ -60,11 +60,16 @@ public final class Ctx {
         sb.append(']');
     }
 
-    public final synchronized void getRec(StringBuilder sb, RecType type, String mnem) {
+    public final synchronized boolean getRec(StringBuilder sb, RecType type, String mnem) {
         final Rec rec = serv.findRecMnem(type, mnem);
-        if (rec != null) {
-            rec.print(sb);
+        if (rec == null) {
+            return false;
         }
+        rec.print(sb);
+        return true;
+    }
+
+    public final synchronized void getAccnt(StringBuilder sb, String user) {
     }
 
     public final synchronized void getOrder(StringBuilder sb, String user) {

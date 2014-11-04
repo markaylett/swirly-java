@@ -28,23 +28,29 @@ public final class RecServlet extends HttpServlet {
         final String[] parts = splitPathInfo(pathInfo);
         if (parts.length == 0) {
             ctx.getRec(sb);
-        } else {
-            if (parts[0].equals("asset")) {
-                if (parts.length == 1) {
-                    ctx.getRec(sb, RecType.ASSET);
-                } else if (parts.length == 2) {
-                    ctx.getRec(sb, RecType.ASSET, parts[1]);
-                } else {
-                    // FIXME
+        } else if (parts[0].equals("asset")) {
+            if (parts.length == 1) {
+                ctx.getRec(sb, RecType.ASSET);
+            } else if (parts.length == 2) {
+                if (!ctx.getRec(sb, RecType.ASSET, parts[1])) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
                 }
-            } else if (parts[0].equals("contr")) {
-                if (parts.length == 1) {
-                    ctx.getRec(sb, RecType.CONTR);
-                } else if (parts.length == 2) {
-                    ctx.getRec(sb, RecType.CONTR, parts[1]);
-                } else {
-                    // FIXME
+            } else {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+        } else if (parts[0].equals("contr")) {
+            if (parts.length == 1) {
+                ctx.getRec(sb, RecType.CONTR);
+            } else if (parts.length == 2) {
+                if (!ctx.getRec(sb, RecType.CONTR, parts[1])) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
                 }
+            } else {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
             }
         }
 

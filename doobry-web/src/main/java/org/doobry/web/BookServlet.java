@@ -5,6 +5,8 @@
  *******************************************************************************/
 package org.doobry.web;
 
+import static org.doobry.web.WebUtil.splitPathInfo;
+
 import java.io.IOException;
 
 import javax.servlet.http.HttpServlet;
@@ -16,9 +18,24 @@ public final class BookServlet extends HttpServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+        final Ctx ctx = Ctx.getInstance();
+        final StringBuilder sb = new StringBuilder();
+
+        final String pathInfo = req.getPathInfo();
+        final String[] parts = splitPathInfo(pathInfo);
+        if (parts.length == 0) {
+            ctx.getBook(sb);
+        } else if (parts.length == 1) {
+            ctx.getBook(sb, parts[1]);
+        } else {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
         resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("text/plain");
+        resp.setContentType("application/json");
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().println("BookServlet");
+        resp.getWriter().append(sb);
     }
 }

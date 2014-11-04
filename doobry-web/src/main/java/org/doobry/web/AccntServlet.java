@@ -5,8 +5,9 @@
  *******************************************************************************/
 package org.doobry.web;
 
+import static org.doobry.web.WebUtil.splitPathInfo;
+
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,34 +19,50 @@ import com.google.appengine.api.users.UserServiceFactory;
 
 @SuppressWarnings("serial")
 public final class AccntServlet extends HttpServlet {
-    private static final Pattern PATTERN = Pattern.compile("/");
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         final UserService userService = UserServiceFactory.getUserService();
-        final User currentUser = userService.getCurrentUser();
-        if (currentUser == null) {
+        final User user = userService.getCurrentUser();
+        if (user == null) {
             resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
             return;
         }
 
+        final Ctx ctx = Ctx.getInstance();
+        final StringBuilder sb = new StringBuilder();
+
         final String pathInfo = req.getPathInfo();
-        if (pathInfo == null) {
-        } else {
-            final String[] parts = PATTERN.split(pathInfo);
-            if (parts[0].equals("order")) {
-            } else if (parts[0].equals("trade")) {
-            } else if (parts[0].equals("posn")) {
+        final String[] parts = splitPathInfo(pathInfo);
+        if (parts.length == 0) {
+            ctx.getAccnt(sb, user.getUserId());
+        } else if (parts[0].equals("order")) {
+            if (parts.length == 1) {
+                ctx.getOrder(sb, user.getUserId());
+            } else {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+        } else if (parts[0].equals("trade")) {
+            if (parts.length == 1) {
+                ctx.getTrade(sb, user.getUserId());
+            } else {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+        } else if (parts[0].equals("posn")) {
+            if (parts.length == 1) {
+                ctx.getPosn(sb, user.getUserId());
+            } else {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
             }
         }
 
         resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("text/plain");
+        resp.setContentType("application/json");
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().println("email: " + currentUser.getEmail());
-        resp.getWriter().println("nickname: " + currentUser.getNickname());
-        resp.getWriter().println("user-id: " + currentUser.getUserId());
-        resp.getWriter().println(req.getPathInfo());
+        resp.getWriter().append(sb);
     }
 }
