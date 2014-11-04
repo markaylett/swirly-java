@@ -186,8 +186,9 @@ public final class Accnt {
         return posn;
     }
 
-    public final Posn findPosnId(long id) {
-        return (Posn) posns.find(id);
+    public final Posn findPosn(Contr contr, int settlDay) {
+        final long key = Posn.toKey(user.getId(), contr.getId(), settlDay);
+        return (Posn) posns.find(key);
     }
 
     public final RbNode getFirstPosn() {

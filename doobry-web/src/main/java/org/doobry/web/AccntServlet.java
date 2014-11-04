@@ -36,24 +36,41 @@ public final class AccntServlet extends HttpServlet {
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPathInfo(pathInfo);
         if (parts.length == 0) {
-            ctx.getAccnt(sb, user.getUserId());
+            ctx.getAccnt(sb, user.getEmail());
         } else if (parts[0].equals("order")) {
             if (parts.length == 1) {
-                ctx.getOrder(sb, user.getUserId());
+                ctx.getOrder(sb, user.getEmail());
+            } else if (parts.length == 2) {
+                if (!ctx.getOrder(sb, user.getEmail(), Integer.parseInt(parts[1]))) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
         } else if (parts[0].equals("trade")) {
             if (parts.length == 1) {
-                ctx.getTrade(sb, user.getUserId());
+                ctx.getTrade(sb, user.getEmail());
+            } else if (parts.length == 2) {
+                if (!ctx.getTrade(sb, user.getEmail(), Integer.parseInt(parts[1]))) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
         } else if (parts[0].equals("posn")) {
             if (parts.length == 1) {
-                ctx.getPosn(sb, user.getUserId());
+                ctx.getPosn(sb, user.getEmail());
+            } else if (parts.length == 2) {
+                ctx.getPosn(sb, user.getEmail(), parts[1]);
+            } else if (parts.length == 3) {
+                if (!ctx.getPosn(sb, user.getEmail(), parts[1], Integer.parseInt(parts[2]))) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;

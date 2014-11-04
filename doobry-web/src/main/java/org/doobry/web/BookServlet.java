@@ -27,7 +27,12 @@ public final class BookServlet extends HttpServlet {
         if (parts.length == 0) {
             ctx.getBook(sb);
         } else if (parts.length == 1) {
-            ctx.getBook(sb, parts[1]);
+            ctx.getBook(sb, parts[0]);
+        } else if (parts.length == 2) {
+            if (!ctx.getBook(sb, parts[0], Integer.parseInt(parts[1]))) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
         } else {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;

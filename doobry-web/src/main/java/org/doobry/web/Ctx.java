@@ -8,6 +8,7 @@ package org.doobry.web;
 import static org.doobry.util.Date.isoToJd;
 
 import org.doobry.domain.Action;
+import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
@@ -17,6 +18,7 @@ import org.doobry.domain.Reg;
 import org.doobry.engine.Accnt;
 import org.doobry.engine.Book;
 import org.doobry.engine.Serv;
+import org.doobry.engine.View;
 import org.doobry.mock.MockBank;
 import org.doobry.mock.MockJourn;
 import org.doobry.mock.MockModel;
@@ -52,10 +54,11 @@ public final class Ctx {
         SlNode node = serv.getFirstRec(type);
         for (int i = 0; node != null; node = node.slNext()) {
             final Rec rec = (Rec) node;
-            if (i++ > 0) {
+            if (i > 0) {
                 sb.append(',');
             }
             rec.print(sb);
+            ++i;
         }
         sb.append(']');
     }
@@ -69,48 +72,58 @@ public final class Ctx {
         return true;
     }
 
-    public final synchronized void getAccnt(StringBuilder sb, String user) {
+    public final synchronized void getAccnt(StringBuilder sb, String umnem) {
+        sb.append("{\"order\":");
+        getOrder(sb, umnem);
+        sb.append(",\"trade\":");
+        getTrade(sb, umnem);
+        sb.append(",\"posn\":");
+        getPosn(sb, umnem);
+        sb.append("}");
     }
 
-    public final synchronized void getOrder(StringBuilder sb, String user) {
-        final Accnt accnt = serv.getLazyAccnt(user);
+    public final synchronized void getOrder(StringBuilder sb, String umnem) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
         sb.append('[');
         RbNode node = accnt.getFirstOrder();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Order order = (Order) node;
-            if (i++ > 0) {
+            if (i > 0) {
                 sb.append(',');
             }
             order.print(sb);
+            ++i;
         }
         sb.append(']');
     }
 
-    public final synchronized void getOrder(StringBuilder sb, String user, long id) {
-        final Accnt accnt = serv.getLazyAccnt(user);
+    public final synchronized boolean getOrder(StringBuilder sb, String umnem, long id) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
         final Order order = accnt.findOrderId(id);
-        if (order != null) {
-            order.print(sb);
+        if (order == null) {
+            return false;
         }
+        order.print(sb);
+        return true;
     }
 
-    public final synchronized void postOrder(StringBuilder sb, String user, String contr,
+    public final synchronized void postOrder(StringBuilder sb, String umnem, String cmnem,
             int settlDate, String ref, Action action, long ticks, long lots, long minLots) {
-        final Accnt accnt = serv.getLazyAccnt(user);
-        final Book book = serv.getLazyBook(contr, isoToJd(settlDate));
+        final Accnt accnt = serv.getLazyAccnt(umnem);
+        final Book book = serv.getLazyBook(cmnem, isoToJd(settlDate));
         final Order order = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots);
         order.print(sb);
     }
 
-    public final synchronized void putOrder(StringBuilder sb, String user, long id, long lots) {
-        final Accnt accnt = serv.getLazyAccnt(user);
+    public final synchronized void putOrder(StringBuilder sb, String umnem, long id, long lots) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
         final Order order = lots > 0 ? serv.reviseOrderId(accnt, id, lots) : serv.cancelOrderId(
                 accnt, id);
         order.print(sb);
     }
 
-    public final synchronized void getTrade(StringBuilder sb, String user) {
-        final Accnt accnt = serv.getLazyAccnt(user);
+    public final synchronized void getTrade(StringBuilder sb, String umnem) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
         sb.append('[');
         RbNode node = accnt.getFirstTrade();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -123,46 +136,114 @@ public final class Ctx {
         sb.append(']');
     }
 
-    public final synchronized void getTrade(StringBuilder sb, String user, long id) {
-        final Accnt accnt = serv.getLazyAccnt(user);
+    public final synchronized boolean getTrade(StringBuilder sb, String umnem, long id) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
         final Exec trade = accnt.findTradeId(id);
-        if (trade != null) {
-            trade.print(sb);
+        if (trade == null) {
+            return false;
         }
+        trade.print(sb);
+        return true;
     }
 
-    public final synchronized void deleteTrade(StringBuilder sb, String user, long id) {
-        final Accnt accnt = serv.getLazyAccnt(user);
+    public final synchronized void deleteTrade(StringBuilder sb, String umnem, long id) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
         serv.ackTrade(accnt, id);
     }
 
-    public final synchronized void getPosn(StringBuilder sb, String user) {
-        final Accnt accnt = serv.getLazyAccnt(user);
+    public final synchronized void getPosn(StringBuilder sb, String umnem) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
         sb.append('[');
         RbNode node = accnt.getFirstPosn();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Posn posn = (Posn) node;
-            if (i++ > 0) {
+            if (i > 0) {
                 sb.append(',');
             }
             posn.print(sb);
+            ++i;
         }
         sb.append(']');
     }
 
-    public final synchronized void getPosn(StringBuilder sb, String user, String contr) {
+    public final synchronized void getPosn(StringBuilder sb, String umnem, String cmnem) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
+        sb.append('[');
+        RbNode node = accnt.getFirstPosn();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Posn posn = (Posn) node;
+            if (!posn.getContr().getMnem().equals(cmnem)) {
+                continue;
+            }
+            if (i > 0) {
+                sb.append(',');
+            }
+            posn.print(sb);
+            ++i;
+        }
+        sb.append(']');
     }
 
-    public final synchronized void getPosn(StringBuilder sb, String user, String contr,
+    public final synchronized boolean getPosn(StringBuilder sb, String umnem, String cmnem,
             int settlDate) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
+        final Contr contr = (Contr) serv.findRecMnem(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final Posn posn = accnt.findPosn(contr, settlDay);
+        if (posn == null) {
+            return false;
+        }
+        posn.print(sb);
+        return true;
     }
 
     public final synchronized void getBook(StringBuilder sb) {
+        sb.append('[');
+        RbNode node = serv.getFirstBook();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Book book = (Book) node;
+            if (i > 0) {
+                sb.append(',');
+            }
+            // FIXME: timestamp.
+            View.print(sb, book, System.currentTimeMillis());
+            ++i;
+        }
+        sb.append(']');
     }
 
-    public final synchronized void getBook(StringBuilder sb, String contr) {
+    public final synchronized void getBook(StringBuilder sb, String cmnem) {
+        sb.append('[');
+        RbNode node = serv.getFirstBook();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Book book = (Book) node;
+            if (!book.getContr().getMnem().equals(cmnem)) {
+                continue;
+            }
+            if (i > 0) {
+                sb.append(',');
+            }
+            // FIXME: timestamp.
+            View.print(sb, book, System.currentTimeMillis());
+            ++i;
+        }
+        sb.append(']');
     }
 
-    public final synchronized void getBook(StringBuilder sb, String contr, int settlDate) {
+    public final synchronized boolean getBook(StringBuilder sb, String cmnem, int settlDate) {
+        final Contr contr = (Contr) serv.findRecMnem(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final Book book = serv.findBook(contr, settlDay);
+        if (book == null) {
+            return false;
+        }
+        View.print(sb, book, System.currentTimeMillis());
+        return true;
     }
 }
