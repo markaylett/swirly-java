@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
- *
+ * 
  * All rights reserved.
- *******************************************************************************/
+ ******************************************************************************/
 (function() {
 
     // Window in browser.
@@ -38,11 +38,11 @@
         }
         return value;
     };
-    dbr.setViewFilter = function(filter) {
-        dbr.setCookie('views', filter.join(','));
+    dbr.setBookFilter = function(filter) {
+        dbr.setCookie('books', filter.join(','));
     }
-    dbr.getViewFilter = function() {
-        var cookie = dbr.getCookie('views');
+    dbr.getBookFilter = function() {
+        var cookie = dbr.getCookie('books');
         return cookie ? cookie.split(',') : [];
     }
     dbr.fractToReal = function(numer, denom) {
@@ -75,30 +75,29 @@
     };
 
     dbr.eachKey = function(arr, fn) {
-        for (var k in arr) {
+        for ( var k in arr) {
             fn(k);
         }
     };
     dbr.eachValue = function(arr, fn) {
-        for (var k in arr) {
+        for ( var k in arr) {
             fn(arr[k]);
         }
     };
     dbr.eachPair = function(arr, fn) {
-        for (var k in arr) {
+        for ( var k in arr) {
             fn(k, arr[k]);
         }
     };
     dbr.mapValue = function(arr, fn) {
         var out = [];
-        for (var k in arr) {
+        for ( var k in arr) {
             out.push(fn(arr[k]));
         }
         return out;
     }
     dbr.createRow = function() {
         var tr = document.createElement('tr');
-
         var cb = document.createElement('input');
         cb.type = 'checkbox';
         var td = document.createElement('td');
@@ -128,24 +127,20 @@
     root.dbr = dbr;
 }).call(this);
 
-function Model(trader, giveup, pass, ready) {
+function Model(ready) {
 
     var that = this;
 
-    this.trader = trader;
-    this.giveup = giveup;
     this.filter = [];
-
-    this.accnts = undefined;
     this.contrs = undefined;
 
     this.orders = undefined;
     this.trades = undefined;
     this.posns = undefined;
 
-    this.views = undefined;
+    this.books = undefined;
 
-    var auth = 'Basic ' + btoa(trader + ':' + pass);
+    var auth = 'Basic ' + btoa(user + ':' + pass);
     $.ajaxSetup({
         beforeSend: function(xhr) {
             xhr.setRequestHeader('Authorization', auth);
@@ -153,17 +148,14 @@ function Model(trader, giveup, pass, ready) {
     });
 
     var enrich = function() {
-        if (that.accnts === undefined
-            || that.contrs === undefined
-            || that.views === undefined)
+        if (that.contrs === undefined || that.books === undefined)
             return;
 
-        dbr.eachValue(that.accnts, that.enrichAccnt.bind(that));
         dbr.eachValue(that.contrs, that.enrichContr.bind(that));
-        dbr.eachValue(that.views, that.enrichView.bind(that));
+        dbr.eachValue(that.books, that.enrichBook.bind(that));
 
-        var filter = dbr.getViewFilter();
-        console.log('view filter is ' + filter);
+        var filter = dbr.getBookFilter();
+        console.log('book filter is ' + filter);
         dbr.eachValue(filter, function(k) {
             if (k in model.contrs) {
                 console.log('set filter for ' + k);
@@ -171,8 +163,8 @@ function Model(trader, giveup, pass, ready) {
             }
         });
 
-        $('#view-tbody').replaceWith(that.createViews());
-        $('#view-tbody button').button({
+        $('#book-tbody').replaceWith(that.createBooks());
+        $('#book-tbody button').button({
             icons: {
                 primary: 'ui-icon-trash'
             }
@@ -188,18 +180,6 @@ function Model(trader, giveup, pass, ready) {
 
     $.ajax({
         type: 'get',
-        url: '/api/party'
-    }).done(function(arr) {
-        var dict = [];
-        $.each(arr, function(k, v) {
-            dict[v.mnem] = v;
-        });
-        that.accnts = dict;
-        enrich();
-    });
-
-    $.ajax({
-        type: 'get',
         url: '/api/contr'
     }).done(function(arr) {
         var dict = [];
@@ -212,13 +192,13 @@ function Model(trader, giveup, pass, ready) {
 
     $.ajax({
         type: 'get',
-        url: '/api/view'
+        url: '/api/book'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
-            dict[[v.contr, v.settl_date]] = v;
+            dict[[ v.contr, v.settl_date ]] = v;
         });
-        that.views = dict;
+        that.books = dict;
         enrich();
     });
 }
@@ -227,9 +207,9 @@ Model.prototype.subscribe = function(k) {
     console.log('subscribe: ' + k);
     if (k in this.contrs) {
         this.filter[k] = true;
-        dbr.setViewFilter(Object.keys(this.filter));
-        $('#view-tbody').replaceWith(this.createViews());
-        $('#view-tbody button').button({
+        dbr.setBookFilter(Object.keys(this.filter));
+        $('#book-tbody').replaceWith(this.createBooks());
+        $('#book-tbody button').button({
             icons: {
                 primary: 'ui-icon-trash'
             }
@@ -241,9 +221,9 @@ Model.prototype.unsubscribe = function(k) {
     console.log('unsubscribe: ' + k);
     if (k in this.filter) {
         delete this.filter[k];
-        dbr.setViewFilter(Object.keys(this.filter));
-        $('#view-tbody').replaceWith(this.createViews());
-        $('#view-tbody button').button({
+        dbr.setBookFilter(Object.keys(this.filter));
+        $('#book-tbody').replaceWith(this.createBooks());
+        $('#book-tbody button').button({
             icons: {
                 primary: 'ui-icon-trash'
             }
@@ -291,7 +271,7 @@ Model.prototype.enrichPosn = function(v) {
     v.sell_price = dbr.ticksToPrice(v.sell_ticks, v.contr);
 };
 
-Model.prototype.enrichView = function(v) {
+Model.prototype.enrichBook = function(v) {
     v.contr = this.contrs[v.contr];
     v.bid_price = dbr.mapValue(v.bid_ticks, function(w) {
         return dbr.ticksToPrice(w, v.contr);
@@ -307,19 +287,8 @@ Model.prototype.createOrders = function() {
     var ks = Object.keys(this.orders).sort();
     for (var i = 0; i < ks.length; ++i) {
         var v = this.orders[ks[i]];
-        var tr = dbr.createRow(
-            v.id,
-            v.giveup,
-            v.contr.mnem,
-            v.settl_date,
-            v.state,
-            v.action,
-            v.price,
-            v.lots,
-            v.resd,
-            v.exec,
-            v.last_price,
-            v.last_lots);
+        var tr = dbr.createRow(v.id, v.contr.mnem, v.settl_date, v.state, v.action, v.price,
+                v.lots, v.resd, v.exec, v.last_price, v.last_lots);
         tr.onclick = this.setContext.bind(this, v.contr.mnem, v.settl_date, v.price, v.lots);
         tr.onmouseleave = this.clearInfo.bind(this);
         tr.onmouseover = this.setOrderInfo.bind(this, v);
@@ -334,19 +303,8 @@ Model.prototype.createTrades = function() {
     var ks = Object.keys(this.trades).sort();
     for (var i = 0; i < ks.length; ++i) {
         var v = this.trades[ks[i]];
-        var tr = dbr.createRow(
-            v.id,
-            v.order,
-            v.giveup,
-            v.contr.mnem,
-            v.settl_date,
-            v.action,
-            v.price,
-            v.lots,
-            v.resd,
-            v.exec,
-            v.last_price,
-            v.last_lots);
+        var tr = dbr.createRow(v.id, v.order, v.contr.mnem, v.settl_date, v.action, v.price,
+                v.lots, v.resd, v.exec, v.last_price, v.last_lots);
         tr.onclick = this.setContext.bind(this, v.contr.mnem, v.settl_date, v.price, v.lots);
         tr.onmouseleave = this.clearInfo.bind(this);
         tr.onmouseover = this.setTradeInfo.bind(this, v);
@@ -361,38 +319,23 @@ Model.prototype.createPosns = function() {
     var ks = Object.keys(this.posns).sort();
     for (var i = 0; i < ks.length; ++i) {
         var v = this.posns[ks[i]];
-        tbody.appendChild(dbr.createRow(
-            v.accnt,
-            v.contr.mnem,
-            v.settl_date,
-            v.buy_price,
-            v.buy_lots,
-            v.sell_price,
-            v.sell_lots
-        ));
+        tbody.appendChild(dbr.createRow(v.contr.mnem, v.settl_date, v.buy_price, v.buy_lots,
+                v.sell_price, v.sell_lots));
     }
     return tbody;
 };
 
-Model.prototype.createViews = function() {
+Model.prototype.createBooks = function() {
     var tbody = document.createElement('tbody');
-    tbody.id = 'view-tbody';
-    var ks = Object.keys(this.views).sort();
+    tbody.id = 'book-tbody';
+    var ks = Object.keys(this.books).sort();
     for (var i = 0; i < ks.length; ++i) {
         var k = ks[i];
         if (!(k.split(',')[0] in this.filter))
             continue;
-        var v = this.views[k];
-        var tr = dbr.createRow(
-            v.contr.mnem,
-            v.settl_date,
-            v.bid_price[0],
-            v.bid_lots[0],
-            v.bid_count[0],
-            v.offer_price[0],
-            v.offer_lots[0],
-            v.offer_count[0]
-        );
+        var v = this.books[k];
+        var tr = dbr.createRow(v.contr.mnem, v.settl_date, v.bid_price[0], v.bid_lots[0],
+                v.bid_count[0], v.offer_price[0], v.offer_lots[0], v.offer_count[0]);
         tr.onclick = this.setContext.bind(this, v.contr.mnem, v.settl_date, '', '');
         tr.onmouseleave = this.clearInfo.bind(this);
         tr.onmouseover = this.setContrInfo.bind(this, v.contr);
@@ -405,14 +348,14 @@ Model.prototype.refresh = function() {
     this.refreshOrders();
     this.refreshTrades();
     this.refreshPosns();
-    this.refreshViews();
+    this.refreshBooks();
 }
 
 Model.prototype.refreshOrders = function() {
     var that = this;
     $.ajax({
         type: 'get',
-        url: '/api/order/' + that.trader
+        url: '/api/accnt/order'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
@@ -429,7 +372,7 @@ Model.prototype.refreshTrades = function() {
     var that = this;
     $.ajax({
         type: 'get',
-        url: '/api/trade/' + that.trader
+        url: '/api/accnt/trade'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
@@ -446,11 +389,11 @@ Model.prototype.refreshPosns = function() {
     var that = this;
     $.ajax({
         type: 'get',
-        url: '/api/posn/' + that.giveup
+        url: '/api/accnt/posn'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
-            dict[[v.group, v.contr, v.settl_date]] = v;
+            dict[[ v.group, v.contr, v.settl_date ]] = v;
         });
         that.posns = dict;
         dbr.eachValue(that.posns, that.enrichPosn.bind(that));
@@ -458,20 +401,20 @@ Model.prototype.refreshPosns = function() {
     });
 };
 
-Model.prototype.refreshViews = function() {
+Model.prototype.refreshBooks = function() {
     var that = this;
     $.ajax({
         type: 'get',
-        url: '/api/view'
+        url: '/api/book'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
-            dict[[v.contr, v.settl_date]] = v;
+            dict[[ v.contr, v.settl_date ]] = v;
         });
-        that.views = dict;
-        dbr.eachValue(that.views, that.enrichView.bind(that));
-        $('#view-tbody').replaceWith(that.createViews());
-        $('#view-tbody button').button({
+        that.books = dict;
+        dbr.eachValue(that.books, that.enrichBook.bind(that));
+        $('#book-tbody').replaceWith(that.createBooks());
+        $('#book-tbody button').button({
             icons: {
                 primary: 'ui-icon-trash'
             }
@@ -480,17 +423,17 @@ Model.prototype.refreshViews = function() {
 };
 
 Model.prototype.clearContext = function() {
-	$('#contr').val('');
-	$('#settl-date').val('');
-	$('#price').val('');
-	$('#lots').val('');
+    $('#contr').val('');
+    $('#settl-date').val('');
+    $('#price').val('');
+    $('#lots').val('');
 }
 
 Model.prototype.setContext = function(contr, settl_date, price, lots) {
-	$('#contr').val(contr);
-	$('#settl-date').val(settl_date);
-	$('#price').val(price);
-	$('#lots').val(lots);
+    $('#contr').val(contr);
+    $('#settl-date').val(settl_date);
+    $('#price').val(price);
+    $('#lots').val(lots);
 }
 
 Model.prototype.clearInfo = function() {
@@ -525,8 +468,7 @@ Model.prototype.setTradeInfo = function(v) {
     div.className = 'ui-widget-content ui-corner-all';
     dbr.appendField(div, 'Id', v.id);
     dbr.appendField(div, 'Order', v.order);
-    dbr.appendField(div, 'Trader', v.trader);
-    dbr.appendField(div, 'Giveup', v.giveup);
+    dbr.appendField(div, 'User', v.user);
     dbr.appendField(div, 'Contr', v.contr.mnem);
     dbr.appendField(div, 'Settl Date', v.settl_date);
     dbr.appendField(div, 'Ref', v.ref);
@@ -550,8 +492,7 @@ Model.prototype.setOrderInfo = function(v) {
     div.id = 'info';
     div.className = 'ui-widget-content ui-corner-all';
     dbr.appendField(div, 'Id', v.id);
-    dbr.appendField(div, 'Trader', v.trader);
-    dbr.appendField(div, 'Giveup', v.giveup);
+    dbr.appendField(div, 'User', v.user);
     dbr.appendField(div, 'Contr', v.contr.mnem);
     dbr.appendField(div, 'Settl Date', v.settl_date);
     dbr.appendField(div, 'Ref', v.ref);
@@ -574,9 +515,8 @@ Model.prototype.submitOrder = function(contr, settl_date, action, price, lots) {
     var ticks = dbr.priceToTicks(price, contr);
     $.ajax({
         type: 'post',
-        url: '/api/order/' + that.trader,
+        url: '/api/order/',
         data: JSON.stringify({
-            giveup: that.giveup,
             contr: contr.mnem,
             settl_date: parseInt(settl_date),
             ref: '',
@@ -591,7 +531,7 @@ Model.prototype.submitOrder = function(contr, settl_date, action, price, lots) {
         var v = $.parseJSON(r.responseText);
         $('#error-num').html(v.num);
         $('#error-msg').html(v.msg);
-		$('#error-dialog').dialog('open');
+        $('#error-dialog').dialog('open');
     });
 };
 
@@ -599,7 +539,7 @@ Model.prototype.cancelOrder = function(id) {
     var that = this;
     $.ajax({
         type: 'put',
-        url: '/api/order/' + that.trader + '/' + id,
+        url: '/api/order/' + that.user + '/' + id,
         data: '{"lots":0}'
     }).done(function(v) {
         v.contr = that.contrs[v.contr];
@@ -613,7 +553,7 @@ Model.prototype.cancelOrder = function(id) {
         var v = $.parseJSON(r.responseText);
         $('#error-num').html(v.num);
         $('#error-msg').html(v.msg);
-		$('#error-dialog').dialog('open');
+        $('#error-dialog').dialog('open');
     });
 };
 
@@ -621,7 +561,7 @@ Model.prototype.ackTrade = function(id) {
     var that = this;
     $.ajax({
         type: 'delete',
-        url: '/api/trade/' + that.trader + '/' + id
+        url: '/api/trade/' + that.user + '/' + id
     }).done(function(v) {
         delete that.trades['_' + id];
         $('#trade-tbody').replaceWith(that.createTrades());
@@ -630,7 +570,7 @@ Model.prototype.ackTrade = function(id) {
         var v = $.parseJSON(r.responseText);
         $('#error-num').html(v.num);
         $('#error-msg').html(v.msg);
-		$('#error-dialog').dialog('open');
+        $('#error-dialog').dialog('open');
     });
 };
 
@@ -640,33 +580,26 @@ var model = null;
 
 function documentReady() {
 
-	var contr = $('#contr'),
-        settl_date = $('#settl-date'),
-	    price = $('#price'),
-	    lots = $('#lots');
+    var contr = $('#contr'), settl_date = $('#settl-date'), price = $('#price'), lots = $('#lots');
 
-    model = new Model('WRAMIREZ', 'DBRA', 'test', function(model) {
-	    contr.autocomplete({
-		    source: Object.keys(model.contrs)
-	    });
+    model = new Model(function(model) {
+        contr.autocomplete({
+            source: Object.keys(model.contrs)
+        });
     });
 
-    $('#subscribe').button()
-        .click(function(event) {
-            model.subscribe(contr.val());
-		});
-    $('#unsubscribe').button()
-        .click(function(event) {
-            model.unsubscribe(contr.val());
-		});
-    $('#buy').button()
-	    .click(function() {
-            model.submitOrder(contr.val(), settl_date.val(), 'BUY', price.val(), lots.val());
-		});
-    $('#sell').button()
-	    .click(function() {
-            model.submitOrder(contr.val(), settl_date.val(), 'SELL', price.val(), lots.val());
-		});
+    $('#subscribe').button().click(function(event) {
+        model.subscribe(contr.val());
+    });
+    $('#unsubscribe').button().click(function(event) {
+        model.unsubscribe(contr.val());
+    });
+    $('#buy').button().click(function() {
+        model.submitOrder(contr.val(), settl_date.val(), 'BUY', price.val(), lots.val());
+    });
+    $('#sell').button().click(function() {
+        model.submitOrder(contr.val(), settl_date.val(), 'SELL', price.val(), lots.val());
+    });
     $('#revise').button();
     $('#cancel').button();
     $('#ack').button();
@@ -674,13 +607,13 @@ function documentReady() {
     $('#lots').spinner();
     $('#tabs').tabs();
 
-	$('#error-dialog').dialog({
-		autoOpen: false,
-		modal: true,
-		buttons: {
-			Ok: function() {
-	            $(this).dialog('close');
-	        }
-		}
-	});
+    $('#error-dialog').dialog({
+        autoOpen: false,
+        modal: true,
+        buttons: {
+            Ok: function() {
+                $(this).dialog('close');
+            }
+        }
+    });
 }

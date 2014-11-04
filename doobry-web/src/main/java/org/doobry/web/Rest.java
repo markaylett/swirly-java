@@ -14,20 +14,18 @@ import org.json.simple.parser.ParseException;
 public final class Rest implements ContentHandler {
 
     public static final int ID = 1 << 0;
-    public static final int ACCNT = 1 << 1;
-    public static final int CONTR = 1 << 2;
-    public static final int SETTL_DATE = 1 << 3;
-    public static final int REF = 1 << 4;
-    public static final int ACTION = 1 << 5;
-    public static final int TICKS = 1 << 6;
-    public static final int LOTS = 1 << 7;
-    public static final int MIN_LOTS = 1 << 8;
+    public static final int CONTR = 1 << 1;
+    public static final int SETTL_DATE = 1 << 2;
+    public static final int REF = 1 << 3;
+    public static final int ACTION = 1 << 4;
+    public static final int TICKS = 1 << 5;
+    public static final int LOTS = 1 << 6;
+    public static final int MIN_LOTS = 1 << 7;
 
     private transient String key;
     private boolean valid;
     private int fields;
     private long id;
-    private String accnt;
     private String contr;
     private int settlDate;
     private String ref;
@@ -64,11 +62,6 @@ public final class Rest implements ContentHandler {
                 return false;
             fields |= ID;
             id = (Long) value;
-        } else if (key.equals("user")) {
-            if (!(value instanceof String) || (fields & ACCNT) != 0)
-                return false;
-            fields |= ACCNT;
-            accnt = (String) value;
         } else if (key.equals("contr")) {
             if (!(value instanceof String) || (fields & CONTR) != 0)
                 return false;
@@ -140,10 +133,6 @@ public final class Rest implements ContentHandler {
 
     public final long getId() {
         return id;
-    }
-
-    public final String getAccnt() {
-        return accnt;
     }
 
     public final String getContr() {

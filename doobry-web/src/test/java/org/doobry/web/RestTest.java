@@ -30,10 +30,10 @@ public final class RestTest {
 
     @Test
     public final void testString() throws ParseException {
-        final Rest r = parse("{\"user\":\"WRAMIREZ\"}");
+        final Rest r = parse("{\"contr\":\"EURUSD\"}");
         assertTrue(r.isValid());
-        assertEquals(Rest.ACCNT, r.getFields());
-        assertEquals("WRAMIREZ", r.getAccnt());
+        assertEquals(Rest.CONTR, r.getFields());
+        assertEquals("EURUSD", r.getContr());
     }
 
     @Test

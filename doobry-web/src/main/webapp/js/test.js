@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
- *
+ * 
  * All rights reserved.
- *******************************************************************************/
+ ******************************************************************************/
 module('conversion');
 
 test('fraction to real', function() {
@@ -34,7 +34,7 @@ asyncTest('get all contracts', function() {
     expect(1);
     $.ajax({
         type: 'get',
-        url: '/api/contr/'
+        url: '/api/rec/contr/'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
@@ -51,7 +51,7 @@ asyncTest('get single contract', function() {
     expect(14);
     $.ajax({
         type: 'get',
-        url: '/api/contr/EURJPY'
+        url: '/api/rec/contr/EURJPY'
     }).done(function(v) {
         equal(v.mnem, 'EURJPY', 'mnem');
         equal(v.display, 'EURJPY', 'display');
@@ -67,37 +67,6 @@ asyncTest('get single contract', function() {
         equal(v.qty_dp, 0, 'qty_dp');
         equal(v.min_lots, 1, 'min_lots');
         equal(v.max_lots, 10, 'max_lots');
-    }).always(function() {
-        start();
-    });
-});
-
-asyncTest('get all accounts', function() {
-    expect(1);
-    $.ajax({
-        type: 'get',
-        url: '/api/accnt/'
-    }).done(function(arr) {
-        var dict = [];
-        $.each(arr, function(k, v) {
-            dict[v.mnem] = v;
-        });
-        var v = dict['WRAMIREZ'];
-        equal(v !== undefined ? v.mnem : undefined, 'WRAMIREZ', 'mnem');
-    }).always(function() {
-        start();
-    });
-});
-
-asyncTest('get single accnt', function() {
-    expect(3);
-    $.ajax({
-        type: 'get',
-        url: '/api/accnt/WRAMIREZ'
-    }).done(function(v) {
-        equal(v.mnem, 'WRAMIREZ', 'mnem');
-        equal(v.display, 'Wayne Ramirez', 'display');
-        equal(v.email, 'wayne.ramirez@doobry.org', 'email');
     }).always(function() {
         start();
     });
