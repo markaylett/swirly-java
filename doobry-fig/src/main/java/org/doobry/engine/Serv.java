@@ -34,21 +34,21 @@ public final class Serv implements AutoCloseable {
     private final Queue execs = new Queue();
 
     private final void enrichOrder(Order order) {
-        final User user = (User) cache.findRecId(RecType.USER, order.getUserId());
-        final Contr contr = (Contr) cache.findRecId(RecType.CONTR, order.getContrId());
+        final User user = (User) cache.findRec(RecType.USER, order.getUserId());
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, order.getContrId());
         order.enrich(user, contr);
     }
 
     private final void enrichTrade(Exec trade) {
-        final User user = (User) cache.findRecId(RecType.USER, trade.getUserId());
-        final Contr contr = (Contr) cache.findRecId(RecType.CONTR, trade.getContrId());
-        final User cpty = (User) cache.findRecId(RecType.USER, trade.getCptyId());
+        final User user = (User) cache.findRec(RecType.USER, trade.getUserId());
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, trade.getContrId());
+        final User cpty = (User) cache.findRec(RecType.USER, trade.getCptyId());
         trade.enrich(user, contr, cpty);
     }
 
     private final void enrichPosn(Posn posn) {
-        final User user = (User) cache.findRecId(RecType.USER, posn.getUserId());
-        final Contr contr = (Contr) cache.findRecId(RecType.CONTR, posn.getContrId());
+        final User user = (User) cache.findRec(RecType.USER, posn.getUserId());
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, posn.getContrId());
         posn.enrich(user, contr);
     }
 
@@ -124,12 +124,12 @@ public final class Serv implements AutoCloseable {
         insertPosns(model);
     }
 
-    public final Rec findRecId(RecType type, long id) {
-        return cache.findRecId(type, id);
+    public final Rec findRec(RecType type, long id) {
+        return cache.findRec(type, id);
     }
 
-    public final Rec findRecMnem(RecType type, String mnem) {
-        return cache.findRecMnem(type, mnem);
+    public final Rec findRec(RecType type, String mnem) {
+        return cache.findRec(type, mnem);
     }
 
     public final SlNode getFirstRec(RecType type) {
@@ -145,7 +145,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Accnt getLazyAccnt(String mnem) {
-        final User user = (User) cache.findRecMnem(RecType.USER, mnem);
+        final User user = (User) cache.findRec(RecType.USER, mnem);
         if (user == null) {
             throw new IllegalArgumentException(String.format("invalid user '%s'", mnem));
         }
@@ -214,8 +214,8 @@ public final class Serv implements AutoCloseable {
         execs.insertBack(exec);
     }
 
-    public final Order reviseOrderId(Accnt accnt, long id, long lots) {
-        final Order order = accnt.findOrderId(id);
+    public final Order reviseOrder(Accnt accnt, long id, long lots) {
+        final Order order = accnt.findOrder(id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
@@ -223,8 +223,8 @@ public final class Serv implements AutoCloseable {
         return order;
     }
 
-    public final Order reviseOrderRef(Accnt accnt, String ref, long lots) {
-        final Order order = accnt.findOrderRef(ref);
+    public final Order reviseOrder(Accnt accnt, String ref, long lots) {
+        final Order order = accnt.findOrder(ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
@@ -248,8 +248,8 @@ public final class Serv implements AutoCloseable {
         execs.insertBack(exec);
     }
 
-    public final Order cancelOrderId(Accnt accnt, long id) {
-        final Order order = accnt.findOrderId(id);
+    public final Order cancelOrder(Accnt accnt, long id) {
+        final Order order = accnt.findOrder(id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
@@ -257,8 +257,8 @@ public final class Serv implements AutoCloseable {
         return order;
     }
 
-    public final Order cancelOrderRef(Accnt accnt, String ref) {
-        final Order order = accnt.findOrderRef(ref);
+    public final Order cancelOrder(Accnt accnt, String ref) {
+        final Order order = accnt.findOrder(ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
@@ -267,7 +267,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final void ackTrade(Accnt accnt, long id) {
-        final Exec trade = accnt.findTradeId(id);
+        final Exec trade = accnt.findTrade(id);
         if (trade != null) {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
@@ -286,7 +286,7 @@ public final class Serv implements AutoCloseable {
                 final User user = exec.getUser();
                 final Accnt accnt = (Accnt) user.getAccnt();
                 assert accnt != null;
-                accnt.releaseOrderId(exec.getOrder());
+                accnt.releaseOrder(exec.getOrder());
             }
         }
     }
@@ -314,7 +314,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Book getLazyBook(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findRecMnem(RecType.CONTR, mnem);
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }
@@ -326,7 +326,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Book findBook(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findRecMnem(RecType.CONTR, mnem);
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }

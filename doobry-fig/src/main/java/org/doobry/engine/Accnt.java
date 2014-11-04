@@ -65,7 +65,7 @@ public final class Accnt {
      * Release ownership from accnt.
      */
 
-    public final Order releaseOrderId(long id) {
+    public final Order releaseOrder(long id) {
         final RbNode node = orders.find(id);
         if (node == null)
             return null;
@@ -78,7 +78,7 @@ public final class Accnt {
      * Release ownership from accnt.
      */
 
-    public final Order releaseOrderRef(String ref) {
+    public final Order releaseOrder(String ref) {
         final Order order = refIdx.remove(user.getId(), ref);
         if (order != null) {
             orders.remove(order);
@@ -86,7 +86,7 @@ public final class Accnt {
         return order;
     }
 
-    public final Order findOrderId(long id) {
+    public final Order findOrder(long id) {
         return (Order) orders.find(id);
     }
 
@@ -94,7 +94,7 @@ public final class Accnt {
      * Returns order directly because hash lookup is not a node-based container.
      */
 
-    public final Order findOrderRef(String ref) {
+    public final Order findOrder(String ref) {
         assert ref != null && !ref.isEmpty();
         return refIdx.find(user.getId(), ref);
     }
@@ -120,7 +120,7 @@ public final class Accnt {
         trades.remove(trade);
     }
 
-    public final boolean removeTradeId(long id) {
+    public final boolean removeTrade(long id) {
         final RbNode node = trades.find(id);
         if (node == null)
             return false;
@@ -129,7 +129,7 @@ public final class Accnt {
         return true;
     }
 
-    public final Exec findTradeId(long id) {
+    public final Exec findTrade(long id) {
         return (Exec) trades.find(id);
     }
 

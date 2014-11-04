@@ -64,7 +64,7 @@ public final class Ctx {
     }
 
     public final synchronized boolean getRec(StringBuilder sb, RecType type, String mnem) {
-        final Rec rec = serv.findRecMnem(type, mnem);
+        final Rec rec = serv.findRec(type, mnem);
         if (rec == null) {
             return false;
         }
@@ -99,7 +99,7 @@ public final class Ctx {
 
     public final synchronized boolean getOrder(StringBuilder sb, String umnem, long id) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
-        final Order order = accnt.findOrderId(id);
+        final Order order = accnt.findOrder(id);
         if (order == null) {
             return false;
         }
@@ -117,7 +117,7 @@ public final class Ctx {
 
     public final synchronized void putOrder(StringBuilder sb, String umnem, long id, long lots) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
-        final Order order = lots > 0 ? serv.reviseOrderId(accnt, id, lots) : serv.cancelOrderId(
+        final Order order = lots > 0 ? serv.reviseOrder(accnt, id, lots) : serv.cancelOrder(
                 accnt, id);
         order.print(sb);
     }
@@ -138,7 +138,7 @@ public final class Ctx {
 
     public final synchronized boolean getTrade(StringBuilder sb, String umnem, long id) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
-        final Exec trade = accnt.findTradeId(id);
+        final Exec trade = accnt.findTrade(id);
         if (trade == null) {
             return false;
         }
@@ -187,7 +187,7 @@ public final class Ctx {
     public final synchronized boolean getPosn(StringBuilder sb, String umnem, String cmnem,
             int settlDate) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
-        final Contr contr = (Contr) serv.findRecMnem(RecType.CONTR, cmnem);
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
         }
@@ -234,7 +234,7 @@ public final class Ctx {
     }
 
     public final synchronized boolean getBook(StringBuilder sb, String cmnem, int settlDate) {
-        final Contr contr = (Contr) serv.findRecMnem(RecType.CONTR, cmnem);
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
         }

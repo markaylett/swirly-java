@@ -89,7 +89,7 @@ public final class Cache {
         updateIndex(first);
     }
 
-    public final Rec findRecId(RecType type, long id) {
+    public final Rec findRec(RecType type, long id) {
         final int bucket = indexFor(hashCode(type.intValue(), id), nBuckets);
         for (Rec rec = buckets[bucket][ID]; rec != null; rec = rec.idNext()) {
             if (rec.getType() == type && rec.getId() == id)
@@ -98,7 +98,7 @@ public final class Cache {
         return null;
     }
 
-    public final Rec findRecMnem(RecType type, String mnem) {
+    public final Rec findRec(RecType type, String mnem) {
         final int bucket = indexFor(hashCode(type.intValue(), mnem), nBuckets);
         for (Rec rec = buckets[bucket][MNEM]; rec != null; rec = rec.mnemNext()) {
             if (rec.getType() == type && rec.getMnem().equals(mnem))

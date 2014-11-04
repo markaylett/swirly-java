@@ -34,8 +34,8 @@ public final class CacheTest {
         assertFalse(c.isEmptyRec(RecType.ASSET));
         assertEquals("AUD", ((Rec) c.getFirstRec(RecType.ASSET)).getMnem());
         assertEquals("CAD", ((Rec) c.getFirstRec(RecType.ASSET).slNext()).getMnem());
-        assertEquals("CHF", c.findRecMnem(RecType.ASSET, "CHF").getMnem());
-        assertEquals("CZK", c.findRecId(RecType.ASSET, 4).getMnem());
+        assertEquals("CHF", c.findRec(RecType.ASSET, "CHF").getMnem());
+        assertEquals("CZK", c.findRec(RecType.ASSET, 4).getMnem());
     }
 
     @Test
@@ -45,8 +45,8 @@ public final class CacheTest {
         assertFalse(c.isEmptyRec(RecType.CONTR));
         assertEquals("AUDUSD", ((Rec) c.getFirstRec(RecType.CONTR)).getMnem());
         assertEquals("EURCHF", ((Rec) c.getFirstRec(RecType.CONTR).slNext()).getMnem());
-        assertEquals("EURCZK", c.findRecMnem(RecType.CONTR, "EURCZK").getMnem());
-        assertEquals("EURDKK", c.findRecId(RecType.CONTR, 4).getMnem());
+        assertEquals("EURCZK", c.findRec(RecType.CONTR, "EURCZK").getMnem());
+        assertEquals("EURDKK", c.findRec(RecType.CONTR, 4).getMnem());
     }
 
     @Test
@@ -56,7 +56,7 @@ public final class CacheTest {
         assertFalse(c.isEmptyRec(RecType.USER));
         assertEquals("BJONES", ((Rec) c.getFirstRec(RecType.USER)).getMnem());
         assertEquals("EEDWARDS", ((Rec) c.getFirstRec(RecType.USER).slNext()).getMnem());
-        assertEquals("GWILSON", c.findRecMnem(RecType.USER, "GWILSON").getMnem());
-        assertEquals("JTHOMAS", c.findRecId(RecType.USER, 4).getMnem());
+        assertEquals("GWILSON", c.findRec(RecType.USER, "GWILSON").getMnem());
+        assertEquals("JTHOMAS", c.findRec(RecType.USER, 4).getMnem());
     }
 }
