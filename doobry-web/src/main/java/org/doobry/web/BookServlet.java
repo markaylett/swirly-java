@@ -40,6 +40,7 @@ public final class BookServlet extends HttpServlet {
 
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
+        resp.addHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.getWriter().append(sb);
     }

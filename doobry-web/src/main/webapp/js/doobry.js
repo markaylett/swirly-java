@@ -140,13 +140,6 @@ function Model(ready) {
 
     this.books = undefined;
 
-    var auth = 'Basic ' + btoa(user + ':' + pass);
-    $.ajaxSetup({
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader('Authorization', auth);
-        }
-    });
-
     var enrich = function() {
         if (that.contrs === undefined || that.books === undefined)
             return;
@@ -173,14 +166,14 @@ function Model(ready) {
         console.log('ready');
         ready(that);
 
-        setInterval(function() {
-            that.refresh();
-        }, 2000);
+        // setInterval(function() {
+        //     that.refresh();
+        // }, 10000);
     };
 
     $.ajax({
         type: 'get',
-        url: '/api/contr'
+        url: '/api/rec/contr'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
@@ -515,7 +508,7 @@ Model.prototype.submitOrder = function(contr, settl_date, action, price, lots) {
     var ticks = dbr.priceToTicks(price, contr);
     $.ajax({
         type: 'post',
-        url: '/api/order/',
+        url: '/api/accnt/order/',
         data: JSON.stringify({
             contr: contr.mnem,
             settl_date: parseInt(settl_date),
@@ -539,7 +532,7 @@ Model.prototype.cancelOrder = function(id) {
     var that = this;
     $.ajax({
         type: 'put',
-        url: '/api/order/' + that.user + '/' + id,
+        url: '/api/accnt/order/' + id,
         data: '{"lots":0}'
     }).done(function(v) {
         v.contr = that.contrs[v.contr];
@@ -561,7 +554,7 @@ Model.prototype.ackTrade = function(id) {
     var that = this;
     $.ajax({
         type: 'delete',
-        url: '/api/trade/' + that.user + '/' + id
+        url: '/api/accnt/trade/' + id
     }).done(function(v) {
         delete that.trades['_' + id];
         $('#trade-tbody').replaceWith(that.createTrades());
@@ -603,6 +596,9 @@ function documentReady() {
     $('#revise').button();
     $('#cancel').button();
     $('#ack').button();
+    $('#refresh').button().click(function() {
+        model.refresh();
+    });
 
     $('#lots').spinner();
     $('#tabs').tabs();
