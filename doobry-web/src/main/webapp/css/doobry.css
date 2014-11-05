@@ -18,22 +18,22 @@ h1 {
     width: 100%;
 }
 
-#view {
+#book {
     font-size: .7em;
 }
 
-#view tbody tr:hover, #tabs tbody tr:hover {
+#book tbody tr:hover, #tabs tbody tr:hover {
     background: #333;
     cursor: pointer;
 }
 
-#view table, #tabs table {
+#book table, #tabs table {
     border-collapse: collapse;
     margin: 1em 0;
     width: 100%;
 }
 
-#view table td, #view table th, #tabs table td, #tabs table th {
+#book table td, #book table th, #tabs table td, #tabs table th {
     border: 1px solid #eee;
     padding: .6em 10px;
     text-align: left;

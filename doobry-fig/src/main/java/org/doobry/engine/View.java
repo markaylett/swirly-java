@@ -25,7 +25,7 @@ public final class View {
     public static void print(StringBuilder sb, Book book, long now) {
         final Contr contr = book.getContr();
         final int settlDay = book.getSettlDay();
-        sb.append("{contr\":\"").append(contr.getMnem()).append("\",");
+        sb.append("{\"contr\":\"").append(contr.getMnem()).append("\",");
         sb.append("\"settl_date\":").append(jdToIso(settlDay)).append(",");
 
         final Side bidSide = book.getBidSide();

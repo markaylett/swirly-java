@@ -38,7 +38,7 @@ public final class ViewTest {
         final StringBuilder sb = new StringBuilder();
         View.print(sb, book, now);
         assertEquals(
-                "{contr\":\"EURUSD\",\"settl_date\":20140314,\"bid_ticks\":[12344,12343,0],\"bid_lots\":[5,10,0],\"bid_count\":[1,1,0],\"offer_ticks\":[12346,0,0],\"offer_lots\":[7,0,0],\"offer_count\":[2,0,0],\"created\":1414932078620}",
+                "{\"contr\":\"EURUSD\",\"settl_date\":20140314,\"bid_ticks\":[12344,12343,0],\"bid_lots\":[5,10,0],\"bid_count\":[1,1,0],\"offer_ticks\":[12346,0,0],\"offer_lots\":[7,0,0],\"offer_count\":[2,0,0],\"created\":1414932078620}",
                 sb.toString());
     }
 }
