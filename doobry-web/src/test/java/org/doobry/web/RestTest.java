@@ -5,69 +5,31 @@
  *******************************************************************************/
 package org.doobry.web;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.doobry.domain.Action;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 public final class RestTest {
-    private static final Rest parse(String s) throws ParseException {
-        final JSONParser p = new JSONParser();
-        final Rest r = new Rest();
-        p.parse(s, r);
-        return r;
+    @Test
+    public final void testOne() {
+        final Rest ctx = new Rest();
+        final StringBuilder expected = new StringBuilder();
+        ctx.postOrder(expected, "WRAMIREZ", "EURUSD", 20141031, "test", Action.BUY, 12345, 5, 1);
+        final StringBuilder actual = new StringBuilder();
+        ctx.getOrder(actual, "WRAMIREZ", 1);
+        assertEquals(expected.toString(), actual.toString());
     }
 
     @Test
-    public final void testLong() throws ParseException {
-        final Rest r = parse("{\"id\":101}");
-        assertTrue(r.isValid());
-        assertEquals(Rest.ID, r.getFields());
-        assertEquals(101, r.getId());
-    }
-
-    @Test
-    public final void testString() throws ParseException {
-        final Rest r = parse("{\"contr\":\"EURUSD\"}");
-        assertTrue(r.isValid());
-        assertEquals(Rest.CONTR, r.getFields());
-        assertEquals("EURUSD", r.getContr());
-    }
-
-    @Test
-    public final void testAction() throws ParseException {
-        final Rest r = parse("{\"action\":\"SELL\"}");
-        assertTrue(r.isValid());
-        assertEquals(Rest.ACTION, r.getFields());
-        assertEquals(Action.SELL, r.getAction());
-    }
-
-    @Test
-    public final void testMulti() throws ParseException {
-        final Rest r = parse("{\"contr\":\"EURUSD\",\"settl_date\":20140314}");
-        assertTrue(r.isValid());
-        assertEquals(Rest.CONTR | Rest.SETTL_DATE, r.getFields());
-        assertEquals("EURUSD", r.getContr());
-        assertEquals(20140314, r.getSettlDate());
-    }
-
-    @Test
-    public final void testDuplicate() throws ParseException {
-        final Rest r = parse("{\"user\":\"WRAMIREZ\",\"user\":\"WRAMIREZ\"}");
-        assertTrue(!r.isValid());
-    }
-
-    @Test
-    public final void testWrongType() throws ParseException {
-        final Rest r = parse("{\"ticks\":\"101\"}");
-        assertTrue(!r.isValid());
-    }
-
-    @Test
-    public final void testArray() throws ParseException {
-        final Rest r = parse("[{\"ticks\":101}]");
-        assertTrue(!r.isValid());
+    public final void testAll() {
+        final Rest ctx = new Rest();
+        final StringBuilder expected = new StringBuilder();
+        expected.append('[');
+        ctx.postOrder(expected, "WRAMIREZ", "EURUSD", 20141031, "test", Action.BUY, 12345, 5, 1);
+        expected.append(']');
+        final StringBuilder actual = new StringBuilder();
+        ctx.getOrder(actual, "WRAMIREZ");
+        assertEquals(expected.toString(), actual.toString());
     }
 }

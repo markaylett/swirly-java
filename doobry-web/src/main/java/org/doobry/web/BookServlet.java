@@ -19,7 +19,7 @@ public final class BookServlet extends HttpServlet {
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-        final Ctx ctx = Ctx.getInstance();
+        final Rest ctx = Context.getRest();
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();

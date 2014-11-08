@@ -23,7 +23,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 
 @SuppressWarnings("serial")
 public final class AccntServlet extends HttpServlet {
-
+    
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
@@ -34,18 +34,18 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
 
-        final Ctx ctx = Ctx.getInstance();
+        final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPathInfo(pathInfo);
         if (parts.length == 0) {
-            ctx.getAccnt(sb, user.getEmail());
+            rest.getAccnt(sb, user.getEmail());
         } else if (parts[0].equals("order")) {
             if (parts.length == 1) {
-                ctx.getOrder(sb, user.getEmail());
+                rest.getOrder(sb, user.getEmail());
             } else if (parts.length == 2) {
-                if (!ctx.getOrder(sb, user.getEmail(), Integer.parseInt(parts[1]))) {
+                if (!rest.getOrder(sb, user.getEmail(), Integer.parseInt(parts[1]))) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -55,9 +55,9 @@ public final class AccntServlet extends HttpServlet {
             }
         } else if (parts[0].equals("trade")) {
             if (parts.length == 1) {
-                ctx.getTrade(sb, user.getEmail());
+                rest.getTrade(sb, user.getEmail());
             } else if (parts.length == 2) {
-                if (!ctx.getTrade(sb, user.getEmail(), Integer.parseInt(parts[1]))) {
+                if (!rest.getTrade(sb, user.getEmail(), Integer.parseInt(parts[1]))) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -67,11 +67,11 @@ public final class AccntServlet extends HttpServlet {
             }
         } else if (parts[0].equals("posn")) {
             if (parts.length == 1) {
-                ctx.getPosn(sb, user.getEmail());
+                rest.getPosn(sb, user.getEmail());
             } else if (parts.length == 2) {
-                ctx.getPosn(sb, user.getEmail(), parts[1]);
+                rest.getPosn(sb, user.getEmail(), parts[1]);
             } else if (parts.length == 3) {
-                if (!ctx.getPosn(sb, user.getEmail(), parts[1], Integer.parseInt(parts[2]))) {
+                if (!rest.getPosn(sb, user.getEmail(), parts[1], Integer.parseInt(parts[2]))) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -84,6 +84,7 @@ public final class AccntServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setStatus(HttpServletResponse.SC_OK);
+        log(sb.toString());
         resp.getWriter().append(sb);
     }
 
@@ -98,7 +99,7 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
 
-        final Ctx ctx = Ctx.getInstance();
+        final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
@@ -109,24 +110,25 @@ public final class AccntServlet extends HttpServlet {
         }
 
         final JSONParser p = new JSONParser();
-        final Rest r = new Rest();
+        final Request r = new Request();
         try {
             p.parse(req.getReader(), r);
         } catch (ParseException e) {
             throw new IOException(e);
         }
-        if (r.getFields() != (Rest.CONTR | Rest.SETTL_DATE | Rest.REF | Rest.ACTION | Rest.TICKS
-                | Rest.LOTS | Rest.MIN_LOTS)) {
+        if (r.getFields() != (Request.CONTR | Request.SETTL_DATE | Request.REF | Request.ACTION | Request.TICKS
+                | Request.LOTS | Request.MIN_LOTS)) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        ctx.postOrder(sb, user.getEmail(), r.getContr(), r.getSettlDate(), r.getRef(),
+        rest.postOrder(sb, user.getEmail(), r.getContr(), r.getSettlDate(), r.getRef(),
                 r.getAction(), r.getTicks(), r.getLots(), r.getMinLots());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.addHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
+        log(sb.toString());
         resp.getWriter().append(sb);
     }
 
@@ -141,7 +143,7 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
 
-        final Ctx ctx = Ctx.getInstance();
+        final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
@@ -153,21 +155,22 @@ public final class AccntServlet extends HttpServlet {
         final long id = Integer.parseInt(parts[1]);
 
         final JSONParser p = new JSONParser();
-        final Rest r = new Rest();
+        final Request r = new Request();
         try {
             p.parse(req.getReader(), r);
         } catch (ParseException e) {
             throw new IOException(e);
         }
-        if (r.getFields() != Rest.MIN_LOTS) {
+        if (r.getFields() != Request.MIN_LOTS) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        ctx.putOrder(sb, user.getEmail(), id, r.getLots());
+        rest.putOrder(sb, user.getEmail(), id, r.getLots());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.addHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
+        log(sb.toString());
         resp.getWriter().append(sb);
     }
 }

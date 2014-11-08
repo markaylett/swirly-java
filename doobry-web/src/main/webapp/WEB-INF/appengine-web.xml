@@ -5,10 +5,13 @@
   <version>1</version>
   <threadsafe>true</threadsafe>
   <instance-class>B2</instance-class>
-  <basic-scaling>
-    <max-instances>2</max-instances>
+  <!--basic-scaling>
+    <max-instances>1</max-instances>
     <idle-timeout>10m</idle-timeout>
-  </basic-scaling>
+  </basic-scaling-->
+  <manual-scaling>
+    <instances>1</instances>
+    </manual-scaling>
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
   </system-properties>
