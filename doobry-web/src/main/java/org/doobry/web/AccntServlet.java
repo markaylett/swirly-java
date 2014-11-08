@@ -23,7 +23,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 
 @SuppressWarnings("serial")
 public final class AccntServlet extends HttpServlet {
-    
+
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
@@ -116,8 +116,8 @@ public final class AccntServlet extends HttpServlet {
         } catch (ParseException e) {
             throw new IOException(e);
         }
-        if (r.getFields() != (Request.CONTR | Request.SETTL_DATE | Request.REF | Request.ACTION | Request.TICKS
-                | Request.LOTS | Request.MIN_LOTS)) {
+        if (r.getFields() != (Request.CONTR | Request.SETTL_DATE | Request.REF | Request.ACTION
+                | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }

@@ -16,6 +16,7 @@ import javax.servlet.ServletContextListener;
 public final class Context implements ServletContextListener {
     private static final class Holder {
         private static final Rest rest = new Rest();
+
         private static void init() {
             // Force static initialisation.
         }

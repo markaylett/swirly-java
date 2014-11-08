@@ -275,7 +275,6 @@ public final class Serv implements AutoCloseable {
         journ.updateExec(id, now);
 
         // No need to update timestamps on trade because it is immediately freed.
-
         accnt.removeTrade(trade);
     }
 
