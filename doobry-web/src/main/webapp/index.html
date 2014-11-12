@@ -1,142 +1,96 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>Cloud Trader</title>
-	<link href="/css/jquery-ui-1.11.0.css" rel="stylesheet">
-	<link href="/css/1200.css" rel="stylesheet">
-	<link href="/css/doobry.css" rel="stylesheet">
-	<script src="/js/jquery-1.11.1.js"></script>
-	<script src="/js/jquery-ui-1.11.0.js"></script>
-    <script src="/js/doobry.js"></script>
-    <script>
+    <title>Getting Started</title>
+
+    <link rel="stylesheet" href="/jqwidgets/styles/jqx.base.css" type="text/css"/>
+    <link rel="stylesheet" href="/jqwidgets/styles/jqx.energyblue.css" type="text/css"/>
+
+    <script type="text/javascript" src="/scripts/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxcore.js"></script>
+
+    <script type="text/javascript" src="/jqwidgets/jqxbuttongroup.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxbuttons.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxcalendar.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxdata.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxdatatable.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxdatetimeinput.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxdropdownlist.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxinput.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxlistbox.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxnumberinput.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxscrollbar.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxswitchbutton.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxtabs.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxwindow.js"></script>
+
+    <script type="text/javascript" src="/scripts/doobry.js"></script>
+
+    <script type="text/javascript">
       $(documentReady);
     </script>
   </head>
-  <body>
-    <div class="container_12">
-      <div class="grid_10">
-        <h2>Cloud Trader</h2>
-      </div>
-      <div class="clear">
-      </div>
-      <div class="grid_9">
-        <div id="book">
-          <p>
-	        <label for="contr" class="ui-widget">Contr:</label>
-	        <input type="text" id="contr" class="text ui-widget-content ui-corner-all"/>
-	        <label for="settl-date" class="ui-widget">Settl Date:</label>
-	        <input type="text" id="settl-date" class="text ui-widget-content ui-corner-all"/>
-	        <label for="price" class="ui-widget">Price:</label>
-	        <input type="text" id="price" class="text ui-widget-content ui-corner-all"/>
-	        <label for="lots" class="ui-widget">Lots:</label>
-	        <input id="lots"/>
-            <button id="buy">Buy</button>
-            <button id="sell">Sell</button>
-          </p>
-          <div id="toolbar" class="ui-widget-header ui-corner-all">
-            <button id="subscribe">Subscribe</button>
-            <button id="unsubscribe">Unsubscribe</button>
-            <button id="revise">Revise Order</button>
-            <button id="cancel">Cancel Order</button>
-            <button id="ack">Ack Trade</button>
-            <button id="refresh">Refresh</button>
-          </div>
-          <table class="ui-widget ui-widget-content">
-            <thead>
-              <tr class="ui-widget-header">
-                <th><input type="checkbox" id="contr-all"/></th>
-                <th>Contr</th>
-                <th>Settl Date</th>
-                <th>Bid Price</th>
-                <th>Bid Lots</th>
-                <th>Bid Count</th>
-                <th>Offer Price</th>
-                <th>Offer Lots</th>
-                <th>Offer Count</th>
-              </tr>
-            </thead>
-	        <tbody id="book-tbody">
-	        </tbody>
-          </table>
+  <body class="default">
+    <div id="tabs">
+      <ul>
+        <li>Contract</li>
+      </ul>
+      <div>
+        <div id="toolbar">
+          <button id="newOrder" style="padding:8px 16px;">New Order</button>
+          <button id="reviseOrder" style="padding:8px 16px;">Revise Order</button>
+          <button id="cancelOrder" style="padding:8px 16px;">Cancel Order</button>
+          <button id="refresh" style="padding:8px 16px;">Refresh</button>
         </div>
-        <div id="tabs">
-          <ul>
-            <li><a href="#order-tab">Order</a></li>
-            <li><a href="#trade-tab">Trade</a></li>
-            <li><a href="#posn-tab">Posn</a></li>
-          </ul>
-          <div id="order-tab">
-            <table class="ui-widget ui-widget-content">
-              <thead>
-                <tr class="ui-widget-header">
-                  <th><input type="checkbox" id="order-all"/></th>
-                  <th>Id</th>
-                  <th>Contr</th>
-                  <th>Settl Date</th>
-                  <th>State</th>
-                  <th>Action</th>
-                  <th>Price</th>
-                  <th>Lots</th>
-                  <th>Resd</th>
-                  <th>Exec</th>
-                  <th>Last Price</th>
-                  <th>Last Lots</th>
-                </tr>
-              </thead>
-	          <tbody id="order-tbody">
-	          </tbody>
-            </table>
-          </div>
-          <div id="trade-tab">
-            <table class="ui-widget ui-widget-content">
-              <thead>
-                <tr class="ui-widget-header">
-                  <th><input type="checkbox" id="trade-all"/></th>
-                  <th>Id</th>
-                  <th>Order</th>
-                  <th>Contr</th>
-                  <th>Settl Date</th>
-                  <th>Action</th>
-                  <th>Price</th>
-                  <th>Lots</th>
-                  <th>Resd</th>
-                  <th>Exec</th>
-                  <th>Last Price</th>
-                  <th>Last Lots</th>
-                </tr>
-              </thead>
-	          <tbody id="trade-tbody">
-	          </tbody>
-            </table>
-          </div>
-          <div id="posn-tab">
-            <table class="ui-widget ui-widget-content">
-              <thead>
-                <tr class="ui-widget-header">
-                  <th><input type="checkbox" id="posn-all"/></th>
-                  <th>Contr</th>
-                  <th>Settl Date</th>
-                  <th>Buy Price</th>
-                  <th>Buy Lots</th>
-                  <th>Sell Price</th>
-                  <th>Sell Lots</th>
-                </tr>
-              </thead>
-	          <tbody id="posn-tbody">
-	          </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="grid_3">
-        <div id="info" class="ui-widget-content ui-corner-all">
+        <div id="contrTab">
         </div>
       </div>
     </div>
-    <div id="error-dialog" title="Error">
-	  <p><strong><span id="error-num"></span>:</strong>
-        <span id="error-msg"></span></p>
+    <div id="orderDialog" style="visibility: hidden;">
+      <div>Order</div>
+      <div style="overflow: hidden;">
+        <table style="table-layout: fixed; border-style: none;">
+          <tr>
+            <td align="right">Contract:</td>
+            <td align="left">
+              <input id="orderContr"></input>
+            </td>
+          </tr>
+          <tr>
+            <td align="right">Settl Date:</td>
+            <td align="left">
+              <div id="orderSettlDate"></div>
+            </td>
+          </tr>
+          <tr>
+            <td align="right">Action:</td>
+            <td align="left">
+              <div id="orderAction"></div>
+            </td>
+          </tr>
+          <tr>
+            <td align="right">Price:</td>
+            <td align="left">
+              <div id="orderPrice"></div>
+            </td>
+          </tr>
+          <tr>
+            <td align="right">Lots:</td>
+            <td align="left">
+              <div id="orderLots"></div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" align="right">
+              <br/>
+              <button id="submitOrder">Submit</button>
+              <button style="margin-left: 5px;" id="closeOrder">Cancel</button>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
   </body>
 </html>

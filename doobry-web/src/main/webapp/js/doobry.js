@@ -1,8 +1,8 @@
-/*******************************************************************************
+/***************************************************************************************************
  * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
  * 
  * All rights reserved.
- ******************************************************************************/
+ **************************************************************************************************/
 (function() {
 
     // Window in browser.
@@ -167,7 +167,7 @@ function Model(ready) {
         ready(that);
 
         // setInterval(function() {
-        //     that.refresh();
+        // that.refresh();
         // }, 10000);
     };
 
@@ -189,7 +189,7 @@ function Model(ready) {
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
-            dict[[ v.contr, v.settl_date ]] = v;
+            dict[[v.contr, v.settl_date]] = v;
         });
         that.books = dict;
         enrich();
@@ -386,7 +386,7 @@ Model.prototype.refreshPosns = function() {
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
-            dict[[ v.group, v.contr, v.settl_date ]] = v;
+            dict[[v.group, v.contr, v.settl_date]] = v;
         });
         that.posns = dict;
         dbr.eachValue(that.posns, that.enrichPosn.bind(that));
@@ -402,7 +402,7 @@ Model.prototype.refreshBooks = function() {
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
-            dict[[ v.contr, v.settl_date ]] = v;
+            dict[[v.contr, v.settl_date]] = v;
         });
         that.books = dict;
         dbr.eachValue(that.books, that.enrichBook.bind(that));
@@ -593,8 +593,10 @@ function documentReady() {
     $('#sell').button().click(function() {
         model.submitOrder(contr.val(), settl_date.val(), 'SELL', price.val(), lots.val());
     });
-    $('#revise').button();
-    $('#cancel').button();
+    $('#revise').button().click(function() {
+    });
+    $('#cancel').button().click(function() {
+    });
     $('#ack').button();
     $('#refresh').button().click(function() {
         model.refresh();
