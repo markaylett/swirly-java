@@ -26,16 +26,18 @@ public final class SortedList<T> implements Collection<T> {
 
     public SortedList(Comparator<? super T> comp) {
         this.comp = comp;
-        this.list = new LinkedList<T>();
+        this.list = new LinkedList<>();
     }
 
     // Collection.
 
+    @Override
     public final boolean add(T element) {
         addElement(element);
         return true;
     }
 
+    @Override
     public final boolean addAll(Collection<? extends T> c) {
         for (final T node : c) {
             add(node);
@@ -43,15 +45,18 @@ public final class SortedList<T> implements Collection<T> {
         return true;
     }
 
+    @Override
     public final void clear() {
         list.clear();
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public final boolean contains(Object o) {
         return 0 <= containsElement((T) o);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public final boolean containsAll(Collection<?> c) {
         for (final Object o : c) {
@@ -62,19 +67,23 @@ public final class SortedList<T> implements Collection<T> {
         return true;
     }
 
+    @Override
     public final boolean isEmpty() {
         return list.isEmpty();
     }
 
+    @Override
     public final Iterator<T> iterator() {
         return list.iterator();
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public final boolean remove(Object o) {
         return 0 <= removeElement((T) o);
     }
 
+    @Override
     public final boolean removeAll(Collection<?> c) {
         boolean changed = false;
         for (final Object o : c) {
@@ -85,18 +94,22 @@ public final class SortedList<T> implements Collection<T> {
         return changed;
     }
 
+    @Override
     public final boolean retainAll(Collection<?> c) {
         return list.retainAll(c);
     }
 
+    @Override
     public final int size() {
         return list.size();
     }
 
+    @Override
     public final Object[] toArray() {
         return list.toArray();
     }
 
+    @Override
     public final <U> U[] toArray(U[] a) {
         return list.toArray(a);
     }

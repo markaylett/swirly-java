@@ -15,6 +15,7 @@ public final class OrdPair<T extends Comparable<? super T>, U extends Comparable
         super(first, second);
     }
 
+    @Override
     public final int compareTo(OrdPair<T, U> rhs) {
         int n = first.compareTo(rhs.first);
         if (0 == n) {

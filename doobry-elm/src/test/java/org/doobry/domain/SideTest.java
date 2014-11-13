@@ -67,7 +67,7 @@ public final class SideTest {
         assertEquals(now, apple.getModified());
 
         assertEquals(1, size(side.getFirstLevel()));
-        assertEquals(2, size((DlNode) side.getFirstOrder()));
+        assertEquals(2, size(side.getFirstOrder()));
 
         assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());
@@ -92,7 +92,7 @@ public final class SideTest {
         assertEquals(now, apple.getModified());
 
         assertEquals(1, size(side.getFirstLevel()));
-        assertEquals(2, size((DlNode) side.getFirstOrder()));
+        assertEquals(2, size(side.getFirstOrder()));
 
         assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());
@@ -117,7 +117,7 @@ public final class SideTest {
         assertEquals(now, orange.getModified());
 
         assertEquals(1, size(side.getFirstLevel()));
-        assertEquals(1, size((DlNode) side.getFirstOrder()));
+        assertEquals(1, size(side.getFirstOrder()));
 
         assertEquals("apple", ((Order) side.getFirstOrder()).getRef());
         assertEquals("apple", ((Order) side.getLastOrder()).getRef());
@@ -148,7 +148,7 @@ public final class SideTest {
         side.placeOrder(pear, now);
 
         assertEquals(2, size(side.getFirstLevel()));
-        assertEquals(3, size((DlNode) side.getFirstOrder()));
+        assertEquals(3, size(side.getFirstOrder()));
 
         assertEquals("pear", ((Order) side.getFirstOrder()).getRef());
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());

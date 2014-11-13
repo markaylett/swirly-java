@@ -87,7 +87,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         sb.append(",\"order\":").append(orderId);
         sb.append(",\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));
-        sb.append("\",\"settl_date\":").append(jdToIso(settlDay));
+        sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
         sb.append(",\"ref\":\"").append(ref);
         sb.append("\",\"state\":\"").append(state);
         sb.append("\",\"action\":\"").append(action);
@@ -95,8 +95,8 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         sb.append(",\"lots\":").append(lots);
         sb.append(",\"resd\":").append(resd);
         sb.append(",\"exec\":").append(exec);
-        sb.append(",\"last_ticks\":").append(lastTicks);
-        sb.append(",\"last_lots\":").append(lastLots);
+        sb.append(",\"lastTicks\":").append(lastTicks);
+        sb.append(",\"lastLots\":").append(lastLots);
         if (state == State.TRADE) {
             sb.append(",\"match\":").append(matchId);
             sb.append(",\"role\":\"").append(role);

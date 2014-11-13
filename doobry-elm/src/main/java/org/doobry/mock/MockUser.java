@@ -14,7 +14,7 @@ import org.doobry.function.NullaryFunction;
 import org.doobry.util.Queue;
 
 public final class MockUser {
-    private static final Map<String, NullaryFunction<User>> FACTORIES = new TreeMap<String, NullaryFunction<User>>();
+    private static final Map<String, NullaryFunction<User>> FACTORIES = new TreeMap<>();
 
     private static void put(final long id, final String mnem, final String display,
             final String email) {

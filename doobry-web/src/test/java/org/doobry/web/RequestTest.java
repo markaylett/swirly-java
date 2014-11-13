@@ -46,7 +46,7 @@ public final class RequestTest {
 
     @Test
     public final void testMulti() throws ParseException {
-        final Request r = parse("{\"contr\":\"EURUSD\",\"settl_date\":20140314}");
+        final Request r = parse("{\"contr\":\"EURUSD\",\"settlDate\":20140314}");
         assertTrue(r.isValid());
         assertEquals(Request.CONTR | Request.SETTL_DATE, r.getFields());
         assertEquals("EURUSD", r.getContr());

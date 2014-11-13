@@ -15,7 +15,7 @@ import org.doobry.function.NullaryFunction;
 import org.doobry.util.Queue;
 
 public final class MockAsset {
-    private static final Map<String, NullaryFunction<Asset>> FACTORIES = new TreeMap<String, NullaryFunction<Asset>>();
+    private static final Map<String, NullaryFunction<Asset>> FACTORIES = new TreeMap<>();
 
     private static void put(final long id, final String mnem, final String display,
             final AssetType type) {

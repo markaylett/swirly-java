@@ -33,19 +33,23 @@
     </script>
   </head>
   <body class="default">
+    <div id="toolbar">
+      <button id="newOrder" style="padding:8px 16px;">New Order</button>
+      <button id="reviseOrder" style="padding:8px 16px;">Revise Order</button>
+      <button id="cancelOrder" style="padding:8px 16px;">Cancel Order</button>
+      <button id="refresh" style="padding:8px 16px;">Refresh</button>
+    </div>
     <div id="tabs">
       <ul>
-        <li>Contract</li>
+        <li>Order</li>
+        <li>Trade</li>
+        <li>Posn</li>
       </ul>
-      <div>
-        <div id="toolbar">
-          <button id="newOrder" style="padding:8px 16px;">New Order</button>
-          <button id="reviseOrder" style="padding:8px 16px;">Revise Order</button>
-          <button id="cancelOrder" style="padding:8px 16px;">Cancel Order</button>
-          <button id="refresh" style="padding:8px 16px;">Refresh</button>
-        </div>
-        <div id="contrTab">
-        </div>
+      <div id="orderTable">
+      </div>
+      <div id="tradeTable">
+      </div>
+      <div id="posnTable">
       </div>
     </div>
     <div id="orderDialog" style="visibility: hidden;">

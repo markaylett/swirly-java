@@ -55,18 +55,18 @@ public final class Contr extends Rec {
     public final void print(StringBuilder sb) {
         sb.append("{\"mnem\":\"").append(mnem);
         sb.append("\",\"display\":\"").append(display);
-        sb.append("\",\"asset_type\":\"").append(assetType);
+        sb.append("\",\"assetType\":\"").append(assetType);
         sb.append("\",\"asset\":\"").append(asset);
         sb.append("\",\"ccy\":\"").append(ccy);
-        sb.append("\",\"tick_numer\":").append(tickNumer);
-        sb.append(",\"tick_denom\":").append(tickDenom);
-        sb.append(",\"lot_numer\":").append(lotNumer);
-        sb.append(",\"lot_denom\":").append(lotDenom);
-        sb.append(",\"price_dp\":").append(priceDp);
-        sb.append(",\"pip_dp\":").append(pipDp);
-        sb.append(",\"qty_dp\":").append(qtyDp);
-        sb.append(",\"min_lots\":").append(minLots);
-        sb.append(",\"max_lots\":").append(maxLots);
+        sb.append("\",\"tickNumer\":").append(tickNumer);
+        sb.append(",\"tickDenom\":").append(tickDenom);
+        sb.append(",\"lotNumer\":").append(lotNumer);
+        sb.append(",\"lotDenom\":").append(lotDenom);
+        sb.append(",\"priceDp\":").append(priceDp);
+        sb.append(",\"pipDp\":").append(pipDp);
+        sb.append(",\"qtyDp\":").append(qtyDp);
+        sb.append(",\"minLots\":").append(minLots);
+        sb.append(",\"maxLots\":").append(maxLots);
         sb.append("}");
     }
 

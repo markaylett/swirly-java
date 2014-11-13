@@ -12,9 +12,9 @@ import org.doobry.util.Date;
 import org.doobry.util.Identifiable;
 import org.doobry.util.Printable;
 
-public final class Posn extends BasicRbNode implements Printable {
+public final class Posn extends BasicRbNode implements Identifiable, Printable {
 
-    private final long key;
+    private final long id;
     private Identifiable user;
     private Identifiable contr;
     private final int settlDay;
@@ -28,7 +28,7 @@ public final class Posn extends BasicRbNode implements Printable {
     }
 
     public Posn(Identifiable user, Identifiable contr, int settlDay) {
-        this.key = toKey(user.getId(), contr.getId(), settlDay);
+        this.id = toKey(user.getId(), contr.getId(), settlDay);
         this.user = user;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -43,13 +43,14 @@ public final class Posn extends BasicRbNode implements Printable {
 
     @Override
     public final void print(StringBuilder sb) {
-        sb.append("{\"user\":\"").append(getRecMnem(user));
+        sb.append("{\"id\":").append(id);
+        sb.append(",\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));
-        sb.append("\",\"settl_date\":").append(jdToIso(settlDay));
-        sb.append(",\"buy_licks\":").append(buyLicks);
-        sb.append(",\"buy_lots\":").append(buyLots);
-        sb.append(",\"sell_licks\":").append(sellLicks);
-        sb.append(",\"sell_lots\":").append(sellLots);
+        sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
+        sb.append(",\"buyLicks\":").append(buyLicks);
+        sb.append(",\"buyLots\":").append(buyLots);
+        sb.append(",\"sellLicks\":").append(sellLicks);
+        sb.append(",\"sellLots\":").append(sellLots);
         sb.append("}");
     }
 
@@ -103,8 +104,14 @@ public final class Posn extends BasicRbNode implements Printable {
         this.sellLots = sellLots;
     }
 
+    @Override
     public final long getKey() {
-        return key;
+        return id;
+    }
+
+    @Override
+    public final long getId() {
+        return id;
     }
 
     public final long getUserId() {

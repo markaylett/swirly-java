@@ -13,30 +13,30 @@
     dbr.fractToReal = function(numer, denom) {
         return numer / denom;
     };
-    dbr.realToIncs = function(real, inc_size) {
-        return Math.round(real / inc_size);
+    dbr.realToIncs = function(real, incSize) {
+        return Math.round(real / incSize);
     };
-    dbr.incsToReal = function(incs, inc_size) {
-        return incs * inc_size;
+    dbr.incsToReal = function(incs, incSize) {
+        return incs * incSize;
     };
     dbr.qtyToLots = function(qty, contr) {
-        return dbr.realToIncs(qty, contr.qty_inc);
+        return dbr.realToIncs(qty, contr.qtyInc);
     };
     dbr.lotsToQty = function(lots, contr) {
-        return dbr.incsToReal(lots, contr.qty_inc).toFixed(contr.qty_dp);
+        return dbr.incsToReal(lots, contr.qtyInc).toFixed(contr.qtyDp);
     };
     dbr.priceToTicks = function(price, contr) {
-        return dbr.realToIncs(price, contr.price_inc);
+        return dbr.realToIncs(price, contr.priceInc);
     };
     dbr.ticksToPrice = function(ticks, contr) {
-        return dbr.incsToReal(ticks, contr.price_inc).toFixed(contr.price_dp);
+        return dbr.incsToReal(ticks, contr.priceInc).toFixed(contr.priceDp);
     };
 
     dbr.qtyInc = function(contr) {
-        return dbr.fractToReal(contr.lot_numer, contr.lot_denom).toFixed(contr.qty_dp);
+        return dbr.fractToReal(contr.lotNumer, contr.lotDenom).toFixed(contr.qtyDp);
     };
     dbr.priceInc = function(contr) {
-        return dbr.fractToReal(contr.tick_numer, contr.tick_denom).toFixed(contr.price_dp);
+        return dbr.fractToReal(contr.tickNumer, contr.tickDenom).toFixed(contr.priceDp);
     };
 
     dbr.eachKey = function(arr, fn) {
@@ -89,16 +89,13 @@ function Model(ready) {
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
-            v.price_inc = dbr.priceInc(v);
-            v.qty_inc = dbr.qtyInc(v);
+            v.priceInc = dbr.priceInc(v);
+            v.qtyInc = dbr.qtyInc(v);
             dict[v.mnem] = v;
         });
         that.contrs = dict;
         maybeReady();
     });
-}
-
-Model.prototype.refresh = function() {
 }
 
 Model.prototype.submitOrder = function(contr, settlDate, action, price, lots) {
@@ -111,12 +108,12 @@ Model.prototype.submitOrder = function(contr, settlDate, action, price, lots) {
         url: '/api/accnt/order/',
         data: JSON.stringify({
             contr: contr.mnem,
-            settl_date: settlDate,
+            settlDate: settlDate,
             ref: '',
             action: action,
             ticks: ticks,
             lots: parseInt(lots),
-            min_lots: 0
+            minLots: 0
         })
     }).done(function(v) {
         // TODO: display pending new.
@@ -133,18 +130,124 @@ function documentReady() {
 
     model = new Model(function(model) {
 
-        var url = '/api/rec/contr';
-        var source = {
+        var orderSource = {
             dataType: 'json',
             dataFields: [
-                { name: 'mnem', type: 'string' },
-                { name: 'display', type: 'string' }
+                { name: 'id', type: 'int' },
+                { name: 'user', type: 'string' },
+                { name: 'contr', type: 'string' },
+                { name: 'settlDate', type: 'int' },
+                { name: 'ref', type: 'string' },
+                { name: 'state', type: 'string' },
+                { name: 'action', type: 'string' },
+                { name: 'ticks', type: 'int' },
+                { name: 'lots', type: 'int' },
+                { name: 'resd', type: 'int' },
+                { name: 'exec', type: 'int' },
+                { name: 'lastTicks', type: 'int' },
+                { name: 'lastLots', type: 'int' },
+                { name: 'created', type: 'date', format: 'yyyy-MM-dd' },
+                { name: 'modified', type: 'date', format: 'yyyy-MM-dd' }
             ],
-            id: 'mnem',
-            url: url
+            id: 'id',
+            url: '/api/accnt/order'
         };
+        var orderAdapter = new $.jqx.dataAdapter(orderSource, {
+            beforeLoadComplete: function (rs) {
+                for (var i = 0; i < rs.length; ++i) {
+                    var r = rs[i];
+                    var contr = model.contrs[r.contr];
+                    r.price = dbr.ticksToPrice(r.ticks, contr);
+                    r.lastPrice = dbr.ticksToPrice(r.last_ticks, contr);
+                    r.created = new Date(r.created);
+                    r.modified = new Date(r.modified);
+                }
+                return rs;
+            }
+        });
+        var tradeSource = {
+            dataType: 'json',
+            dataFields: [
+                { name: 'id', type: 'int' },
+                { name: 'order', type: 'int' },
+                { name: 'user', type: 'string' },
+                { name: 'contr', type: 'string' },
+                { name: 'settlDate', type: 'int' },
+                { name: 'ref', type: 'string' },
+                { name: 'state', type: 'string' },
+                { name: 'action', type: 'string' },
+                { name: 'ticks', type: 'int' },
+                { name: 'lots', type: 'int' },
+                { name: 'resd', type: 'int' },
+                { name: 'exec', type: 'int' },
+                { name: 'lastTicks', type: 'int' },
+                { name: 'lastLots', type: 'int' },
 
-        var dataAdapter = new $.jqx.dataAdapter(source);
+                { name: 'match', type: 'int' },
+                { name: 'role', type: 'string' },
+                { name: 'cpty', type: 'string' },
+
+                { name: 'created', type: 'date', format: 'yyyy-MM-dd' }
+            ],
+            id: 'id',
+            url: '/api/accnt/trade'
+        };
+        var tradeAdapter = new $.jqx.dataAdapter(tradeSource, {
+            beforeLoadComplete: function (rs) {
+                for (var i = 0; i < rs.length; ++i) {
+                    var r = rs[i];
+                    var contr = model.contrs[r.contr];
+                    r.price = dbr.ticksToPrice(r.ticks, contr);
+                    r.lastPrice = dbr.ticksToPrice(r.last_ticks, contr);
+                    r.created = new Date(r.created);
+                    r.modified = new Date(r.modified);
+                }
+                return rs;
+            }
+        });
+        var posnSource = {
+            dataType: 'json',
+            dataFields: [
+                { name: 'id', type: 'int' },
+                { name: 'user', type: 'string' },
+                { name: 'contr', type: 'string' },
+                { name: 'settlDate', type: 'int' },
+                { name: 'ref', type: 'string' },
+                { name: 'state', type: 'string' },
+                { name: 'action', type: 'string' },
+                { name: 'ticks', type: 'int' },
+                { name: 'lots', type: 'int' },
+                { name: 'resd', type: 'int' },
+                { name: 'exec', type: 'int' },
+                { name: 'lastTicks', type: 'int' },
+                { name: 'lastLots', type: 'int' },
+                { name: 'created', type: 'date', format: 'yyyy-MM-dd' },
+                { name: 'modified', type: 'date', format: 'yyyy-MM-dd' }
+            ],
+            id: 'id',
+            url: '/api/accnt/posn'
+        };
+        var posnAdapter = new $.jqx.dataAdapter(posnSource, {
+            beforeLoadComplete: function (rs) {
+                for (var i = 0; i < rs.length; ++i) {
+                    var r = rs[i];
+                    var contr = model.contrs[r.contr];
+                    if (r.buyLots > 0) {
+                        r.buyTicks = dbr.fractToReal(r.buyLicks, r.buyLots);
+                    } else {
+                        r.buyTicks = 0;
+                    }
+                    if (r.sellLots > 0) {
+                        r.sellTicks = dbr.fractToReal(r.sellLicks, r.sellLots);
+                    } else {
+                        r.sellTicks = 0;
+                    }
+                    r.buyPrice = dbr.ticksToPrice(r.buyTicks, contr);
+                    r.sellPrice = dbr.ticksToPrice(r.sellTicks, contr);
+                }
+                return rs;
+            }
+        });
 
         var theme = 'energyblue';
 
@@ -158,24 +261,55 @@ function documentReady() {
             if (id === 'newOrder') {
                 $('#orderDialog').jqxWindow('open');
             } else if (id === 'refresh') {
-                model.refresh();
+                $("#orderTable").jqxDataTable('updateBoundData');
+                $("#tradeTable").jqxDataTable('updateBoundData');
             }
         });
         $('#tabs').jqxTabs({
             theme: theme,
+            height: 240,
             width: '90%',
             position: 'top'
         });
-        $('#contrTab').jqxDataTable({
+        $('#orderTable').jqxDataTable({
             theme: theme,
             columns: [
-                { text: 'Mnem', dataField: 'mnem' },
-                { text: 'Display', dataField: 'display' }
+                { text: 'Id', dataField: 'id', width: 80 },
+                { text: 'Contr', dataField: 'contr', width: 80 },
+                { text: 'Settl Date', dataField: 'settlDate', width: 80 },
+                { text: 'State', dataField: 'state', width: 80 },
+                { text: 'Action', dataField: 'action', width: 80 },
+                { text: 'Price', dataField: 'price', width: 80 },
+                { text: 'Lots', dataField: 'lots', width: 80 },
+                { text: 'Resd', dataField: 'resd', width: 80 },
+                { text: 'Exec', dataField: 'exec', width: 80 },
+                { text: 'Last Price', dataField: 'lastPrice', width: 80 },
+                { text: 'Last Lots', dataField: 'lastLots', width: 80 }
             ],
             columnsResize: true,
             pageable: true,
             pagerButtonsCount: 10,
-            source: dataAdapter
+            source: orderAdapter
+        });
+        $('#tradeTable').jqxDataTable({
+            theme: theme,
+            columns: [
+                { text: 'Id', dataField: 'id', width: 80 },
+                { text: 'Order', dataField: 'order', width: 80 },
+                { text: 'Contr', dataField: 'contr', width: 80 },
+                { text: 'Settl Date', dataField: 'settlDate', width: 80 },
+                { text: 'Action', dataField: 'action', width: 80 },
+                { text: 'Price', dataField: 'price', width: 80 },
+                { text: 'Lots', dataField: 'lots', width: 80 },
+                { text: 'Resd', dataField: 'resd', width: 80 },
+                { text: 'Exec', dataField: 'exec', width: 80 },
+                { text: 'Last Price', dataField: 'lastPrice', width: 80 },
+                { text: 'Last Lots', dataField: 'lastLots', width: 80 }
+            ],
+            columnsResize: true,
+            pageable: true,
+            pagerButtonsCount: 10,
+            source: tradeAdapter
         });
         $('#orderContr').jqxInput({
             theme: theme,
@@ -186,11 +320,11 @@ function documentReady() {
         $('#orderContr').on('select', function () {
             var contr = model.contrs[$('#orderContr').val()];
             $('#orderPrice').jqxNumberInput({
-                'decimalDigits': contr.price_dp
+                'decimalDigits': contr.priceDp
             });
             $('#orderLots').jqxNumberInput({
-                'min': contr.min_lots,
-                'max': contr.max_lots
+                'min': contr.minLots,
+                'max': contr.maxLots
             });
         });
         $('#orderSettlDate').jqxDateTimeInput({

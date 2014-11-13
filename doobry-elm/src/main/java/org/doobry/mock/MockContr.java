@@ -16,7 +16,7 @@ import org.doobry.util.Queue;
 
 public final class MockContr {
 
-    private static final Map<String, NullaryFunction<Contr>> FACTORIES = new TreeMap<String, NullaryFunction<Contr>>();
+    private static final Map<String, NullaryFunction<Contr>> FACTORIES = new TreeMap<>();
 
     private static void put(final long id, final String mnem, final String display,
             final AssetType assetType, final String asset, final String ccy, final int tickNumer,

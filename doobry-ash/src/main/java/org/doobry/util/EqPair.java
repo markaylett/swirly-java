@@ -36,10 +36,12 @@ public class EqPair<T, U> implements Pair<T, U> {
         return String.format("(%s, %s)", first, second);
     }
 
+    @Override
     public final T getFirst() {
         return first;
     }
 
+    @Override
     public final U getSecond() {
         return second;
     }

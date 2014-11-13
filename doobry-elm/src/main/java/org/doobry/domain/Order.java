@@ -93,7 +93,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         sb.append("{\"id\":").append(id);
         sb.append(",\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));
-        sb.append("\",\"settl_date\":").append(jdToIso(settlDay));
+        sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
         sb.append(",\"ref\":\"").append(ref);
         sb.append("\",\"state\":\"").append(state);
         sb.append("\",\"action\":\"").append(action);
@@ -101,8 +101,8 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         sb.append(",\"lots\":").append(lots);
         sb.append(",\"resd\":").append(resd);
         sb.append(",\"exec\":").append(exec);
-        sb.append(",\"last_ticks\":").append(lastTicks);
-        sb.append(",\"last_lots\":").append(lastLots);
+        sb.append(",\"lastTicks\":").append(lastTicks);
+        sb.append(",\"lastLots\":").append(lastLots);
         sb.append(",\"created\":").append(created);
         sb.append(",\"modified\":").append(modified);
         sb.append("}");

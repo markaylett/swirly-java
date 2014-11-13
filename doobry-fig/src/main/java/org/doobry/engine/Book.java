@@ -68,6 +68,7 @@ public final class Book extends BasicRbNode {
         side(order.getAction()).takeOrder(order, lots, now);
     }
 
+    @Override
     public final long getKey() {
         return key;
     }

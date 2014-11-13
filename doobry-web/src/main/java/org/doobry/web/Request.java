@@ -67,7 +67,7 @@ public final class Request implements ContentHandler {
                 return false;
             fields |= CONTR;
             contr = (String) value;
-        } else if (key.equals("settl_date")) {
+        } else if (key.equals("settlDate")) {
             if (!(value instanceof Long) || (fields & SETTL_DATE) != 0)
                 return false;
             fields |= SETTL_DATE;
@@ -92,7 +92,7 @@ public final class Request implements ContentHandler {
                 return false;
             fields |= LOTS;
             lots = (Long) value;
-        } else if (key.equals("min_lots")) {
+        } else if (key.equals("minLots")) {
             if (!(value instanceof Long) || (fields & MIN_LOTS) != 0)
                 return false;
             fields |= MIN_LOTS;

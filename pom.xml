@@ -13,9 +13,9 @@
   <name>doobry</name>
   
   <scm>
-	<url>https://github.com/doobry-org/doobryj</url>
-	<connection>scm:git:git://github.com/doobry-org/doobryj.git</connection>
-	<developerConnection>scm:git:git@github.com:doobry-org/doobryj.git</developerConnection>
+    <url>https://github.com/doobry-org/doobryj</url>
+    <connection>scm:git:git://github.com/doobry-org/doobryj.git</connection>
+    <developerConnection>scm:git:git@github.com:doobry-org/doobryj.git</developerConnection>
   </scm>
 
   <properties>
@@ -52,14 +52,14 @@
         <version>1.2</version>
       </dependency>
       <dependency>
-	    <groupId>com.google.code.findbugs</groupId>
-	    <artifactId>jsr305</artifactId>
-	    <version>3.0.0</version>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.0</version>
       </dependency>
       <dependency>
-	    <groupId>com.googlecode.json-simple</groupId>
-	    <artifactId>json-simple</artifactId>
-	    <version>1.1.1</version>
+        <groupId>com.googlecode.json-simple</groupId>
+        <artifactId>json-simple</artifactId>
+        <version>1.1.1</version>
       </dependency>
       <!-- Test Dependencies -->
       <dependency>

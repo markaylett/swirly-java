@@ -20,8 +20,7 @@ import org.junit.Test;
 public final class ServTest {
     @Test
     public final void test() {
-        final Serv s = new Serv(new MockBank(Reg.values().length), new MockJourn());
-        try {
+        try (final Serv s = new Serv(new MockBank(Reg.values().length), new MockJourn())) {
             s.load(new MockModel());
             final Accnt accnt = s.getLazyAccnt("WRAMIREZ");
             final int settlDay = ymdToJd(2014, 3, 14);
@@ -57,9 +56,6 @@ public final class ServTest {
             assertEquals(0, order.getLastTicks());
             assertEquals(0, order.getLastLots());
             assertEquals(1, order.getMinLots());
-
-        } finally {
-            s.close();
         }
     }
 }
