@@ -41,7 +41,7 @@ public final class AccntServlet extends HttpServlet {
         final String[] parts = splitPathInfo(pathInfo);
         if (parts.length == 0) {
             rest.getAccnt(sb, user.getEmail());
-        } else if (parts[0].equals("order")) {
+        } else if ("order".equals(parts[0])) {
             if (parts.length == 1) {
                 rest.getOrder(sb, user.getEmail());
             } else if (parts.length == 2) {
@@ -53,7 +53,7 @@ public final class AccntServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-        } else if (parts[0].equals("trade")) {
+        } else if ("trade".equals(parts[0])) {
             if (parts.length == 1) {
                 rest.getTrade(sb, user.getEmail());
             } else if (parts.length == 2) {
@@ -65,7 +65,7 @@ public final class AccntServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-        } else if (parts[0].equals("posn")) {
+        } else if ("posn".equals(parts[0])) {
             if (parts.length == 1) {
                 rest.getPosn(sb, user.getEmail());
             } else if (parts.length == 2) {
@@ -104,7 +104,7 @@ public final class AccntServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPathInfo(pathInfo);
-        if (parts.length != 1 || !parts[0].equals("order")) {
+        if (parts.length != 1 || !"order".equals(parts[0])) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -148,7 +148,7 @@ public final class AccntServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPathInfo(pathInfo);
-        if (parts.length != 2 || !parts[0].equals("order")) {
+        if (parts.length != 2 || !"order".equals(parts[0])) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -161,7 +161,7 @@ public final class AccntServlet extends HttpServlet {
         } catch (ParseException e) {
             throw new IOException(e);
         }
-        if (r.getFields() != Request.MIN_LOTS) {
+        if (r.getFields() != Request.LOTS) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }

@@ -60,7 +60,7 @@ public final class RequestTest {
     }
 
     @Test
-    public final void testWrongType() throws ParseException {
+    public final void testBadType() throws ParseException {
         final Request r = parse("{\"ticks\":\"101\"}");
         assertTrue(!r.isValid());
     }

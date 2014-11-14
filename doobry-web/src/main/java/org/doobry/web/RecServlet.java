@@ -28,7 +28,7 @@ public final class RecServlet extends HttpServlet {
         final String[] parts = splitPathInfo(pathInfo);
         if (parts.length == 0) {
             rest.getRec(sb);
-        } else if (parts[0].equals("asset")) {
+        } else if ("asset".equals(parts[0])) {
             if (parts.length == 1) {
                 rest.getRec(sb, RecType.ASSET);
             } else if (parts.length == 2) {
@@ -40,7 +40,7 @@ public final class RecServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-        } else if (parts[0].equals("contr")) {
+        } else if ("contr".equals(parts[0])) {
             if (parts.length == 1) {
                 rest.getRec(sb, RecType.CONTR);
             } else if (parts.length == 2) {

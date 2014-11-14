@@ -1,6 +1,6 @@
 /***************************************************************************************************
  * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
- * 
+ *
  * All rights reserved.
  **************************************************************************************************/
 (function() {
@@ -122,6 +122,19 @@ Model.prototype.submitOrder = function(contr, settlDate, action, price, lots) {
     });
 };
 
+Model.prototype.cancelOrder = function(id) {
+    var that = this;
+    $.ajax({
+        type: 'put',
+        url: '/api/accnt/order/' + id,
+        data: '{"lots":0}'
+    }).done(function(v) {
+        // TODO: display pending new.
+    }).fail(function(r) {
+        var v = $.parseJSON(r.responseText);
+    });
+};
+
 var model = null;
 
 // Lifecycle phases.
@@ -158,7 +171,7 @@ function documentReady() {
                     var r = rs[i];
                     var contr = model.contrs[r.contr];
                     r.price = dbr.ticksToPrice(r.ticks, contr);
-                    r.lastPrice = dbr.ticksToPrice(r.last_ticks, contr);
+                    r.lastPrice = dbr.ticksToPrice(r.lastTicks, contr);
                     r.created = new Date(r.created);
                     r.modified = new Date(r.modified);
                 }
@@ -198,7 +211,7 @@ function documentReady() {
                     var r = rs[i];
                     var contr = model.contrs[r.contr];
                     r.price = dbr.ticksToPrice(r.ticks, contr);
-                    r.lastPrice = dbr.ticksToPrice(r.last_ticks, contr);
+                    r.lastPrice = dbr.ticksToPrice(r.lastTicks, contr);
                     r.created = new Date(r.created);
                     r.modified = new Date(r.modified);
                 }
@@ -212,17 +225,10 @@ function documentReady() {
                 { name: 'user', type: 'string' },
                 { name: 'contr', type: 'string' },
                 { name: 'settlDate', type: 'int' },
-                { name: 'ref', type: 'string' },
-                { name: 'state', type: 'string' },
-                { name: 'action', type: 'string' },
-                { name: 'ticks', type: 'int' },
-                { name: 'lots', type: 'int' },
-                { name: 'resd', type: 'int' },
-                { name: 'exec', type: 'int' },
-                { name: 'lastTicks', type: 'int' },
-                { name: 'lastLots', type: 'int' },
-                { name: 'created', type: 'date', format: 'yyyy-MM-dd' },
-                { name: 'modified', type: 'date', format: 'yyyy-MM-dd' }
+                { name: 'buyLicks', type: 'int' },
+                { name: 'buyLots', type: 'int' },
+                { name: 'sellLicks', type: 'int' },
+                { name: 'sellLots', type: 'int' }
             ],
             id: 'id',
             url: '/api/accnt/posn'
@@ -260,16 +266,38 @@ function documentReady() {
             var id = button[0].id;
             if (id === 'newOrder') {
                 $('#orderDialog').jqxWindow('open');
+            } else if (id === 'reviseOrder') {
+            } else if (id === 'cancelOrder') {
+                var rows = $("#orderTable").jqxDataTable('getSelection');
+                for (var i = 0; i < rows.length; i++) {
+	                var row = rows[i];
+                    model.cancelOrder(row.id);
+                }
             } else if (id === 'refresh') {
-                $("#orderTable").jqxDataTable('updateBoundData');
-                $("#tradeTable").jqxDataTable('updateBoundData');
+                var item = $('#tabs').jqxTabs('selectedItem');
+                if (item === 0) {
+                    $("#orderTable").jqxDataTable('updateBoundData');
+                } else if (item === 1) {
+                    $("#tradeTable").jqxDataTable('updateBoundData');
+                } else if (item === 2) {
+                    $("#posnTable").jqxDataTable('updateBoundData');
+                }
             }
         });
         $('#tabs').jqxTabs({
             theme: theme,
-            height: 240,
             width: '90%',
             position: 'top'
+        });
+        $('#tabs').on('selected', function (event) {
+            var item = event.args.item;
+            if (item === 0) {
+                $("#orderTable").jqxDataTable('updateBoundData');
+            } else if (item === 1) {
+                $("#tradeTable").jqxDataTable('updateBoundData');
+            } else if (item === 2) {
+                $("#posnTable").jqxDataTable('updateBoundData');
+            }
         });
         $('#orderTable').jqxDataTable({
             theme: theme,
@@ -310,6 +338,21 @@ function documentReady() {
             pageable: true,
             pagerButtonsCount: 10,
             source: tradeAdapter
+        });
+        $('#posnTable').jqxDataTable({
+            theme: theme,
+            columns: [
+                { text: 'Contr', dataField: 'contr', width: 80 },
+                { text: 'Settl Date', dataField: 'settlDate', width: 80 },
+                { text: 'Buy Price', dataField: 'buyPrice', width: 80 },
+                { text: 'Buy Lots', dataField: 'buyLots', width: 80 },
+                { text: 'Sell Price', dataField: 'sellPrice', width: 80 },
+                { text: 'Sell Lots', dataField: 'sellLots', width: 80 }
+            ],
+            columnsResize: true,
+            pageable: true,
+            pagerButtonsCount: 10,
+            source: posnAdapter
         });
         $('#orderContr').jqxInput({
             theme: theme,
