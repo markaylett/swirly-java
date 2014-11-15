@@ -16,7 +16,7 @@ import org.doobry.mock.MockContr;
 import org.doobry.mock.MockUser;
 import org.junit.Test;
 
-public final class ViewTest {
+public final class BookTest {
     @Test
     public final void test() {
         final Contr contr = MockContr.newContr("EURUSD");
@@ -36,9 +36,9 @@ public final class ViewTest {
                 new Order(1, user, contr, settlDay, "banana", Action.SELL, 12346, 2, 0, now), now);
 
         final StringBuilder sb = new StringBuilder();
-        View.print(sb, book, now);
+        book.print(sb);
         assertEquals(
-                "{\"contr\":\"EURUSD\",\"settl_date\":20140314,\"bid_ticks\":[12344,12343,0],\"bid_lots\":[5,10,0],\"bid_count\":[1,1,0],\"offer_ticks\":[12346,0,0],\"offer_lots\":[7,0,0],\"offer_count\":[2,0,0],\"created\":1414932078620}",
+                "{\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344,12343,0,0,0],\"bidLots\":[5,10,0,0,0],\"bidCount\":[1,1,0,0,0],\"offerTicks\":[12346,0,0,0,0],\"offerLots\":[7,0,0,0,0],\"offerCount\":[2,0,0,0,0]}",
                 sb.toString());
     }
 }

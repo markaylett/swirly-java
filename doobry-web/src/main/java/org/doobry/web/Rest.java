@@ -18,7 +18,6 @@ import org.doobry.domain.Reg;
 import org.doobry.engine.Accnt;
 import org.doobry.engine.Book;
 import org.doobry.engine.Serv;
-import org.doobry.engine.View;
 import org.doobry.mock.MockBank;
 import org.doobry.mock.MockJourn;
 import org.doobry.mock.MockModel;
@@ -201,8 +200,7 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            // FIXME: timestamp.
-            View.print(sb, book, System.currentTimeMillis());
+            book.print(sb);
             ++i;
         }
         sb.append(']');
@@ -219,8 +217,7 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            // FIXME: timestamp.
-            View.print(sb, book, System.currentTimeMillis());
+            book.print(sb);
             ++i;
         }
         sb.append(']');
@@ -236,7 +233,7 @@ public final class Rest {
         if (book == null) {
             return false;
         }
-        View.print(sb, book, System.currentTimeMillis());
+        book.print(sb);
         return true;
     }
 }

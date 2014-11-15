@@ -5,15 +5,27 @@
  *******************************************************************************/
 package org.doobry.engine;
 
+import static org.doobry.util.Date.jdToIso;
+
 import org.doobry.domain.Action;
 import org.doobry.domain.Contr;
+import org.doobry.domain.Level;
 import org.doobry.domain.Order;
 import org.doobry.domain.Side;
 import org.doobry.util.BasicRbNode;
 import org.doobry.util.Date;
+import org.doobry.util.Identifiable;
+import org.doobry.util.Printable;
+import org.doobry.util.RbNode;
 
-public final class Book extends BasicRbNode {
-    private final long key;
+public final class Book extends BasicRbNode implements Identifiable, Printable {
+
+    /**
+     * Maximum price levels in view.
+     */
+    private static final int LEVEL_MAX = 5;
+
+    private final long id;
     private final Contr contr;
     private final int settlDay;
     private final Side bidSide = new Side();
@@ -24,7 +36,7 @@ public final class Book extends BasicRbNode {
     }
 
     public Book(Contr contr, int settlDay) {
-        this.key = toKey(contr.getId(), settlDay);
+        this.id = toKey(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
     }
@@ -42,6 +54,108 @@ public final class Book extends BasicRbNode {
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);
         return ((cid & ID_MASK) << 16) | (tjd & JD_MASK);
+    }
+
+    @Override
+    public final String toString() {
+        final StringBuilder sb = new StringBuilder();
+        print(sb);
+        return sb.toString();
+    }
+
+    @Override
+    public final void print(StringBuilder sb) {
+        sb.append("{\"contr\":\"").append(contr.getMnem()).append("\",");
+        sb.append("\"settlDate\":").append(jdToIso(settlDay)).append(",");
+
+        final RbNode bidFirst = bidSide.getFirstLevel();
+        final RbNode offerFirst = offerSide.getFirstLevel();
+
+        sb.append("\"bidTicks\":[");
+        RbNode node = bidFirst;
+        for (int i = 0; i < LEVEL_MAX; ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                sb.append(level.getTicks());
+                node = node.rbNext();
+            } else {
+                sb.append('0');
+            }
+        }
+        sb.append("],\"bidLots\":[");
+        node = bidFirst;
+        for (int i = 0; i < LEVEL_MAX; ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                sb.append(level.getLots());
+                node = node.rbNext();
+            } else {
+                sb.append('0');
+            }
+        }
+        sb.append("],\"bidCount\":[");
+        node = bidFirst;
+        for (int i = 0; i < LEVEL_MAX; ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                sb.append(level.getCount());
+                node = node.rbNext();
+            } else {
+                sb.append('0');
+            }
+        }
+        sb.append("],\"offerTicks\":[");
+        node = offerFirst;
+        for (int i = 0; i < LEVEL_MAX; ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                sb.append(level.getTicks());
+                node = node.rbNext();
+            } else {
+                sb.append('0');
+            }
+        }
+        sb.append("],\"offerLots\":[");
+        node = offerFirst;
+        for (int i = 0; i < LEVEL_MAX; ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                sb.append(level.getLots());
+                node = node.rbNext();
+            } else {
+                sb.append('0');
+            }
+        }
+        sb.append("],\"offerCount\":[");
+        node = offerFirst;
+        for (int i = 0; i < LEVEL_MAX; ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                sb.append(level.getCount());
+                node = node.rbNext();
+            } else {
+                sb.append('0');
+            }
+        }
+        sb.append("]}");
     }
 
     public final void insertOrder(Order order) {
@@ -70,7 +184,12 @@ public final class Book extends BasicRbNode {
 
     @Override
     public final long getKey() {
-        return key;
+        return id;
+    }
+
+    @Override
+    public final long getId() {
+        return id;
     }
 
     public final Contr getContr() {
