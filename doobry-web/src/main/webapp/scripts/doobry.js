@@ -98,7 +98,7 @@ function Model(ready) {
     });
 }
 
-Model.prototype.submitOrder = function(contr, settlDate, action, price, lots) {
+Model.prototype.submitOrder = function(contr, settlDate, action, price, lots, fn) {
     var that = this;
     contr = this.contrs[contr];
     settlDate = parseInt(settlDate);
@@ -116,20 +116,30 @@ Model.prototype.submitOrder = function(contr, settlDate, action, price, lots) {
             minLots: 0
         })
     }).done(function(v) {
-        // TODO: display pending new.
+        var contr = model.contrs[v.contr];
+        v.price = dbr.ticksToPrice(v.ticks, contr);
+        v.lastPrice = dbr.ticksToPrice(v.lastTicks, contr);
+        v.created = new Date(v.created);
+        v.modified = new Date(v.modified);
+        fn(v);
     }).fail(function(r) {
         var v = $.parseJSON(r.responseText);
     });
 };
 
-Model.prototype.cancelOrder = function(id) {
+Model.prototype.cancelOrder = function(data, fn) {
     var that = this;
     $.ajax({
         type: 'put',
-        url: '/api/accnt/order/' + id,
+        url: '/api/accnt/order/' + data.id,
         data: '{"lots":0}'
     }).done(function(v) {
-        // TODO: display pending new.
+        var contr = model.contrs[v.contr];
+        v.price = dbr.ticksToPrice(v.ticks, contr);
+        v.lastPrice = dbr.ticksToPrice(v.lastTicks, contr);
+        v.created = new Date(v.created);
+        v.modified = new Date(v.modified);
+        fn(data, v);
     }).fail(function(r) {
         var v = $.parseJSON(r.responseText);
     });
@@ -257,31 +267,50 @@ function documentReady() {
 
         var theme = 'energyblue';
 
-        $("#toolbar").jqxButtonGroup({
+        $('#newOrder').jqxButton({
             theme: theme,
-            mode: 'default'
+            height: 27,
+            template: 'primary'
         });
-        $("#toolbar").on('buttonclick', function (event) {
-            var button = event.args.button;
-            var id = button[0].id;
-            if (id === 'newOrder') {
-                $('#orderDialog').jqxWindow('open');
-            } else if (id === 'reviseOrder') {
-            } else if (id === 'cancelOrder') {
-                var rows = $("#orderTable").jqxDataTable('getSelection');
-                for (var i = 0; i < rows.length; i++) {
-	                var row = rows[i];
-                    model.cancelOrder(row.id);
-                }
-            } else if (id === 'refresh') {
-                var item = $('#tabs').jqxTabs('selectedItem');
-                if (item === 0) {
-                    $("#orderTable").jqxDataTable('updateBoundData');
-                } else if (item === 1) {
-                    $("#tradeTable").jqxDataTable('updateBoundData');
-                } else if (item === 2) {
-                    $("#posnTable").jqxDataTable('updateBoundData');
-                }
+        $('#newOrder').on('click', function () {
+            $('#orderDialog').jqxWindow('open');
+        });
+        $('#reviseOrder').jqxButton({
+            theme: theme,
+            height: 27,
+            template: 'primary'
+        });
+        $('#reviseOrder').on('click', function () {
+        });
+        $('#cancelOrder').jqxButton({
+            theme: theme,
+            height: 27,
+            template: 'primary'
+        });
+        $('#cancelOrder').on('click', function () {
+            var selection = $('#orderTable').jqxDataTable('getSelection');
+            for (var i = 0; i < selection.length; ++i) {
+                var data = selection[i];
+                model.cancelOrder(data, function(data, v) {
+                    var rows = $('#orderTable').jqxDataTable('getRows');
+                    var index = rows.indexOf(data);
+                    $("#orderTable").jqxDataTable('updateRow', index, v);
+                });
+            }
+        });
+        $('#refresh').jqxButton({
+            theme: theme,
+            height: 27,
+            template: 'primary'
+        });
+        $('#refresh').on('click', function () {
+            var item = $('#tabs').jqxTabs('selectedItem');
+            if (item === 0) {
+                $('#orderTable').jqxDataTable('updateBoundData');
+            } else if (item === 1) {
+                $('#tradeTable').jqxDataTable('updateBoundData');
+            } else if (item === 2) {
+                $('#posnTable').jqxDataTable('updateBoundData');
             }
         });
         $('#tabs').jqxTabs({
@@ -292,11 +321,11 @@ function documentReady() {
         $('#tabs').on('selected', function (event) {
             var item = event.args.item;
             if (item === 0) {
-                $("#orderTable").jqxDataTable('updateBoundData');
+                $('#orderTable').jqxDataTable('updateBoundData');
             } else if (item === 1) {
-                $("#tradeTable").jqxDataTable('updateBoundData');
+                $('#tradeTable').jqxDataTable('updateBoundData');
             } else if (item === 2) {
-                $("#posnTable").jqxDataTable('updateBoundData');
+                $('#posnTable').jqxDataTable('updateBoundData');
             }
         });
         $('#orderTable').jqxDataTable({
@@ -383,7 +412,7 @@ function documentReady() {
             onLabel: 'BUY',
             offLabel: 'SELL'
         });
-        $("#orderPrice").jqxNumberInput({
+        $('#orderPrice').jqxNumberInput({
             theme: theme,
             width: 160,
             height: 27,
@@ -404,22 +433,24 @@ function documentReady() {
             width: 80,
             height: 27
         });
-        $("#submitOrder").on('click', function () {
-            $("#orderDialog").jqxWindow('close');
+        $('#submitOrder').on('click', function () {
+            $('#orderDialog').jqxWindow('close');
             var contr = $('#orderContr').val();
             var settlDate = $('#orderSettlDate').val();
             var action = $('#orderAction').val() ? 'BUY' : 'SELL';
             var price = $('#orderPrice').val();
             var lots = $('#orderLots').val();
-            model.submitOrder(contr, settlDate, action, price, lots);
+            model.submitOrder(contr, settlDate, action, price, lots, function(v) {
+                $("#orderTable").jqxDataTable('addRow', v.id, v);
+            });
         });
         $('#closeOrder').jqxButton({
             theme: theme,
             width: 80,
             height: 27
         });
-        $("#closeOrder").on('click', function () {
-            $("#orderDialog").jqxWindow('close');
+        $('#closeOrder').on('click', function () {
+            $('#orderDialog').jqxWindow('close');
         });
         $('#orderDialog').jqxWindow({
             theme: theme,
@@ -427,6 +458,6 @@ function documentReady() {
             autoOpen: false,
             resizable: false
         });
-        $("#orderDialog").css('visibility', 'visible');
+        $('#orderDialog').css('visibility', 'visible');
     });
 }
