@@ -28,7 +28,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
     }
 
     public Posn(Identifiable user, Identifiable contr, int settlDay) {
-        this.id = toKey(user.getId(), contr.getId(), settlDay);
+        this.id = toId(user.getId(), contr.getId(), settlDay);
         this.user = user;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -62,10 +62,10 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
     }
 
     /**
-     * Synthetic position key.
+     * Synthetic position id.
      */
 
-    public static long toKey(long aid, long cid, int settlDay) {
+    public static long toId(long aid, long cid, int settlDay) {
         // 16 million ids.
         final int ID_MASK = (1 << 24) - 1;
         // 16 bits is sufficient for truncated Julian day.
@@ -102,11 +102,6 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
 
     public final void setSellLots(long sellLots) {
         this.sellLots = sellLots;
-    }
-
-    @Override
-    public final long getKey() {
-        return id;
     }
 
     @Override

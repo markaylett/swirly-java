@@ -34,7 +34,7 @@ public final class BookTest {
         final StringBuilder sb = new StringBuilder();
         book.print(sb);
         assertEquals(
-                "{\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344,12343,0,0,0],\"bidLots\":[5,10,0,0,0],\"bidCount\":[1,1,0,0,0],\"offerTicks\":[12346,0,0,0,0],\"offerLots\":[7,0,0,0,0],\"offerCount\":[2,0,0,0,0]}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344,12343,0,0,0],\"bidLots\":[5,10,0,0,0],\"bidCount\":[1,1,0,0,0],\"offerTicks\":[12346,0,0,0,0],\"offerLots\":[7,0,0,0,0],\"offerCount\":[2,0,0,0,0]}",
                 sb.toString());
     }
 }

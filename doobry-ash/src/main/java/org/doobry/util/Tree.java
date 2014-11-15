@@ -200,7 +200,7 @@ public final class Tree {
         tmp = root;
         while (tmp != null) {
             parent = tmp;
-            comp = cmp(node.getKey(), parent.getKey());
+            comp = cmp(node.getId(), parent.getId());
             if (comp < 0) {
                 tmp = tmp.getLeft();
             } else if (comp > 0) {
@@ -227,7 +227,7 @@ public final class Tree {
         assert node.getColor() == NONE;
         set(node, parent);
         if (parent != null) {
-            final int comp = cmp(node.getKey(), parent.getKey());
+            final int comp = cmp(node.getId(), parent.getId());
             if (comp < 0) {
                 parent.setLeft(node);
             } else {
@@ -321,14 +321,14 @@ public final class Tree {
     }
 
     /**
-     * Finds the node with the same key as node.
+     * Finds the node with the same id as node.
      */
 
-    public final RbNode find(long key) {
+    public final RbNode find(long id) {
         RbNode tmp = root;
         int comp;
         while (tmp != null) {
-            comp = cmp(key, tmp.getKey());
+            comp = cmp(id, tmp.getId());
             if (comp < 0) {
                 tmp = tmp.getLeft();
             } else if (comp > 0) {
@@ -341,15 +341,15 @@ public final class Tree {
     }
 
     /**
-     * Finds the first node greater than or equal to the search key.
+     * Finds the first node greater than or equal to the search id.
      */
 
-    public final RbNode nfind(long key) {
+    public final RbNode nfind(long id) {
         RbNode tmp = root;
         RbNode res = null;
         int comp;
         while (tmp != null) {
-            comp = cmp(key, tmp.getKey());
+            comp = cmp(id, tmp.getId());
             if (comp < 0) {
                 res = tmp;
                 tmp = tmp.getLeft();
@@ -368,11 +368,11 @@ public final class Tree {
      * Return match or parent.
      */
 
-    public final RbNode pfind(long key) {
+    public final RbNode pfind(long id) {
         RbNode tmp = root, parent = null;
         while (tmp != null) {
             parent = tmp;
-            final int comp = cmp(key, tmp.getKey());
+            final int comp = cmp(id, tmp.getId());
             if (comp < 0) {
                 tmp = tmp.getLeft();
             } else if (comp > 0) {

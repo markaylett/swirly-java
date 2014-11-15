@@ -174,9 +174,9 @@ public final class Accnt {
     public final Posn getLazyPosn(Contr contr, int settlDay) {
 
         Posn posn;
-        final long key = Posn.toKey(user.getId(), contr.getId(), settlDay);
-        final RbNode node = posns.pfind(key);
-        if (node == null || node.getKey() != key) {
+        final long id = Posn.toId(user.getId(), contr.getId(), settlDay);
+        final RbNode node = posns.pfind(id);
+        if (node == null || node.getId() != id) {
             posn = new Posn(user, contr, settlDay);
             final RbNode parent = node;
             posns.pinsert(posn, parent);
@@ -187,8 +187,8 @@ public final class Accnt {
     }
 
     public final Posn findPosn(Contr contr, int settlDay) {
-        final long key = Posn.toKey(user.getId(), contr.getId(), settlDay);
-        return (Posn) posns.find(key);
+        final long id = Posn.toId(user.getId(), contr.getId(), settlDay);
+        return (Posn) posns.find(id);
     }
 
     public final RbNode getFirstPosn() {

@@ -13,17 +13,17 @@ import org.junit.Test;
 
 public final class TreeTest {
     private static final class Node extends BasicRbNode {
-        private final long key;
+        private final long id;
         private final String name;
 
-        Node(long key, String name) {
-            this.key = key;
+        Node(long id, String name) {
+            this.id = id;
             this.name = name;
         }
 
         @Override
-        public final long getKey() {
-            return key;
+        public final long getId() {
+            return id;
         }
 
         @Override

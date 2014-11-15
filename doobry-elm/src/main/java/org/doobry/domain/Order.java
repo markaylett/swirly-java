@@ -151,11 +151,6 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
     }
 
     @Override
-    public final long getKey() {
-        return id;
-    }
-
-    @Override
     public final long getId() {
         return id;
     }

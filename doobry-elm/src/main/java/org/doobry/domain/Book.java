@@ -31,16 +31,16 @@ public final class Book extends BasicRbNode implements Identifiable, Printable {
     }
 
     public Book(Contr contr, int settlDay) {
-        this.id = toKey(contr.getId(), settlDay);
+        this.id = toId(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
     }
 
     /**
-     * Synthetic book key.
+     * Synthetic book id.
      */
 
-    public static long toKey(long cid, int settlDay) {
+    public static long toId(long cid, int settlDay) {
         // 16 million ids.
         final int ID_MASK = (1 << 24) - 1;
         // 16 bits is sufficient for truncated Julian day.
@@ -60,7 +60,8 @@ public final class Book extends BasicRbNode implements Identifiable, Printable {
 
     @Override
     public final void print(StringBuilder sb) {
-        sb.append("{\"contr\":\"").append(contr.getMnem()).append("\",");
+        sb.append("{\"id\":").append(id).append(",");
+        sb.append("\"contr\":\"").append(contr.getMnem()).append("\",");
         sb.append("\"settlDate\":").append(jdToIso(settlDay)).append(",");
 
         final RbNode bidFirst = bidSide.getFirstLevel();
@@ -175,11 +176,6 @@ public final class Book extends BasicRbNode implements Identifiable, Printable {
 
     public final void takeOrder(Order order, long lots, long now) {
         side(order.getAction()).takeOrder(order, lots, now);
-    }
-
-    @Override
-    public final long getKey() {
-        return id;
     }
 
     @Override

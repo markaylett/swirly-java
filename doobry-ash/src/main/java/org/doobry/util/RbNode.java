@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.doobry.util;
 
-public interface RbNode {
+public interface RbNode extends Identifiable {
 
     RbNode setLeft(RbNode left);
 
@@ -18,8 +18,6 @@ public interface RbNode {
     RbNode rbNext();
 
     RbNode rbPrev();
-
-    long getKey();
 
     RbNode getLeft();
 

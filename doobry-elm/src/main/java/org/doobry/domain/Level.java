@@ -13,7 +13,7 @@ import org.doobry.util.DlNode;
  */
 public final class Level extends BasicRbNode {
     Order firstOrder;
-    final long key;
+    final long id;
     final long ticks;
     /**
      * Must be greater than zero.
@@ -27,23 +27,23 @@ public final class Level extends BasicRbNode {
     public Level(Order order) {
         final long ticks = order.getTicks();
         this.firstOrder = order;
-        this.key = toKey(order.getAction(), ticks);
+        this.id = toId(order.getAction(), ticks);
         this.ticks = ticks;
         this.lots = order.getResd();
         this.count = 1;
     }
 
     /**
-     * Synthetic position key.
+     * Synthetic position id.
      */
 
-    public static long toKey(Action action, long ticks) {
+    public static long toId(Action action, long ticks) {
         return action == Action.BUY ? -ticks : ticks;
     }
 
     @Override
-    public final long getKey() {
-        return key;
+    public final long getId() {
+        return id;
     }
 
     public final void addOrder(Order order) {

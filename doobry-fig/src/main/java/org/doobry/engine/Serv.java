@@ -301,9 +301,9 @@ public final class Serv implements AutoCloseable {
 
     public final Book getLazyBook(Contr contr, int settlDay) {
         Book book;
-        final long key = Book.toKey(contr.getId(), settlDay);
-        final RbNode node = books.pfind(key);
-        if (node == null || node.getKey() != key) {
+        final long id = Book.toId(contr.getId(), settlDay);
+        final RbNode node = books.pfind(id);
+        if (node == null || node.getId() != id) {
             book = new Book(contr, settlDay);
             final RbNode parent = node;
             books.pinsert(book, parent);
@@ -322,7 +322,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Book findBook(Contr contr, int settlDay) {
-        return (Book) books.find(Book.toKey(contr.getId(), settlDay));
+        return (Book) books.find(Book.toId(contr.getId(), settlDay));
     }
 
     public final Book findBook(String mnem, int settlDay) {
