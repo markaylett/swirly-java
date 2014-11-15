@@ -37,12 +37,12 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
     @Override
     public final String toString() {
         final StringBuilder sb = new StringBuilder();
-        print(sb);
+        print(sb, null);
         return sb.toString();
     }
 
     @Override
-    public final void print(StringBuilder sb) {
+    public final void print(StringBuilder sb, Object arg) {
         sb.append("{\"id\":").append(id);
         sb.append(",\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));

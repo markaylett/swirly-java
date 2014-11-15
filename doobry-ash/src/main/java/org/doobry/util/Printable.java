@@ -6,5 +6,5 @@
 package org.doobry.util;
 
 public interface Printable {
-    void print(StringBuilder sb);
+    void print(StringBuilder sb, Object arg);
 }

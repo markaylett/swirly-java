@@ -153,6 +153,33 @@ function documentReady() {
 
     model = new Model(function(model) {
 
+        var bookSource = {
+            dataType: 'json',
+            dataFields: [
+                { name: 'id', type: 'int' },
+                { name: 'contr', type: 'string' },
+                { name: 'settlDate', type: 'int' },
+                { name: 'bidTicks', type: 'int' },
+                { name: 'bidLots', type: 'int' },
+                { name: 'bidCount', type: 'int' },
+                { name: 'offerTicks', type: 'int' },
+                { name: 'offerLots', type: 'int' },
+                { name: 'offerCount', type: 'int' }
+            ],
+            id: 'id',
+            url: '/api/book'
+        };
+        var bookAdapter = new $.jqx.dataAdapter(bookSource, {
+            beforeLoadComplete: function (rs) {
+                for (var i = 0; i < rs.length; ++i) {
+                    var r = rs[i];
+                    var contr = model.contrs[r.contr];
+                    r.bidPrice = dbr.ticksToPrice(r.bidTicks, contr);
+                    r.offerPrice = dbr.ticksToPrice(r.offerTicks, contr);
+                }
+                return rs;
+            }
+        });
         var orderSource = {
             dataType: 'json',
             dataFields: [
@@ -304,6 +331,7 @@ function documentReady() {
             template: 'primary'
         });
         $('#refresh').on('click', function () {
+            $('#bookTable').jqxDataTable('updateBoundData');
             var item = $('#tabs').jqxTabs('selectedItem');
             if (item === 0) {
                 $('#orderTable').jqxDataTable('updateBoundData');
@@ -312,6 +340,24 @@ function documentReady() {
             } else if (item === 2) {
                 $('#posnTable').jqxDataTable('updateBoundData');
             }
+        });
+        $('#bookTable').jqxDataTable({
+            theme: theme,
+            columns: [
+                { text: 'Id', dataField: 'id', width: 80 },
+                { text: 'Contr', dataField: 'contr', width: 80 },
+                { text: 'Settl Date', dataField: 'settlDate', width: 80 },
+                { text: 'Bid Price', dataField: 'bidPrice', width: 80 },
+                { text: 'Bid Lots', dataField: 'bidLots', width: 80 },
+                { text: 'Bid Count', dataField: 'bidCount', width: 80 },
+                { text: 'Offer Price', dataField: 'offerPrice', width: 80 },
+                { text: 'Offer Lots', dataField: 'offerLots', width: 80 },
+                { text: 'Offer Count', dataField: 'offerCount', width: 80 }
+            ],
+            columnsResize: true,
+            pageable: true,
+            pagerButtonsCount: 10,
+            source: bookAdapter
         });
         $('#tabs').jqxTabs({
             theme: theme,

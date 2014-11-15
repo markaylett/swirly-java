@@ -84,12 +84,12 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
     @Override
     public final String toString() {
         final StringBuilder sb = new StringBuilder();
-        print(sb);
+        print(sb, null);
         return sb.toString();
     }
 
     @Override
-    public final void print(StringBuilder sb) {
+    public final void print(StringBuilder sb, Object arg) {
         sb.append("{\"id\":").append(id);
         sb.append(",\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));

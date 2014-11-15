@@ -49,7 +49,7 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            rec.print(sb);
+            rec.print(sb, null);
             ++i;
         }
         sb.append(']');
@@ -60,7 +60,7 @@ public final class Rest {
         if (rec == null) {
             return false;
         }
-        rec.print(sb);
+        rec.print(sb, null);
         return true;
     }
 
@@ -83,7 +83,7 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            order.print(sb);
+            order.print(sb, null);
             ++i;
         }
         sb.append(']');
@@ -95,7 +95,7 @@ public final class Rest {
         if (order == null) {
             return false;
         }
-        order.print(sb);
+        order.print(sb, null);
         return true;
     }
 
@@ -104,14 +104,14 @@ public final class Rest {
         final Accnt accnt = serv.getLazyAccnt(umnem);
         final Book book = serv.getLazyBook(cmnem, isoToJd(settlDate));
         final Order order = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots);
-        order.print(sb);
+        order.print(sb, null);
     }
 
     public final synchronized void putOrder(StringBuilder sb, String umnem, long id, long lots) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
         final Order order = lots > 0 ? serv.reviseOrder(accnt, id, lots) //
                 : serv.cancelOrder(accnt, id);
-        order.print(sb);
+        order.print(sb, null);
     }
 
     public final synchronized void getTrade(StringBuilder sb, String umnem) {
@@ -123,7 +123,7 @@ public final class Rest {
             if (i++ > 0) {
                 sb.append(',');
             }
-            trade.print(sb);
+            trade.print(sb, null);
         }
         sb.append(']');
     }
@@ -134,7 +134,7 @@ public final class Rest {
         if (trade == null) {
             return false;
         }
-        trade.print(sb);
+        trade.print(sb, null);
         return true;
     }
 
@@ -152,7 +152,7 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            posn.print(sb);
+            posn.print(sb, null);
             ++i;
         }
         sb.append(']');
@@ -170,7 +170,7 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            posn.print(sb);
+            posn.print(sb, null);
             ++i;
         }
         sb.append(']');
@@ -188,7 +188,7 @@ public final class Rest {
         if (posn == null) {
             return false;
         }
-        posn.print(sb);
+        posn.print(sb, null);
         return true;
     }
 
@@ -200,7 +200,7 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            book.print(sb);
+            book.print(sb, null);
             ++i;
         }
         sb.append(']');
@@ -217,7 +217,7 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            book.print(sb);
+            book.print(sb, null);
             ++i;
         }
         sb.append(']');
@@ -233,7 +233,7 @@ public final class Rest {
         if (book == null) {
             return false;
         }
-        book.print(sb);
+        book.print(sb, null);
         return true;
     }
 }
