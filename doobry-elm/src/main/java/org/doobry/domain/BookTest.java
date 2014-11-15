@@ -3,15 +3,11 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package org.doobry.engine;
+package org.doobry.domain;
 
 import static org.doobry.util.Date.ymdToJd;
 import static org.junit.Assert.assertEquals;
 
-import org.doobry.domain.Action;
-import org.doobry.domain.Contr;
-import org.doobry.domain.Order;
-import org.doobry.domain.User;
 import org.doobry.mock.MockContr;
 import org.doobry.mock.MockUser;
 import org.junit.Test;

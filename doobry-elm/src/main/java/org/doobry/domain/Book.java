@@ -3,15 +3,10 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package org.doobry.engine;
+package org.doobry.domain;
 
 import static org.doobry.util.Date.jdToIso;
 
-import org.doobry.domain.Action;
-import org.doobry.domain.Contr;
-import org.doobry.domain.Level;
-import org.doobry.domain.Order;
-import org.doobry.domain.Side;
 import org.doobry.util.BasicRbNode;
 import org.doobry.util.Date;
 import org.doobry.util.Identifiable;

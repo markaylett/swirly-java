@@ -9,6 +9,7 @@ import static org.doobry.util.Date.ymdToJd;
 import static org.junit.Assert.assertEquals;
 
 import org.doobry.domain.Action;
+import org.doobry.domain.Book;
 import org.doobry.domain.Order;
 import org.doobry.domain.Reg;
 import org.doobry.domain.State;

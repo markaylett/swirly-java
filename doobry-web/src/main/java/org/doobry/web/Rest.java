@@ -8,6 +8,7 @@ package org.doobry.web;
 import static org.doobry.util.Date.isoToJd;
 
 import org.doobry.domain.Action;
+import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
 import org.doobry.domain.Order;
@@ -16,7 +17,6 @@ import org.doobry.domain.Rec;
 import org.doobry.domain.RecType;
 import org.doobry.domain.Reg;
 import org.doobry.engine.Accnt;
-import org.doobry.engine.Book;
 import org.doobry.engine.Serv;
 import org.doobry.mock.MockBank;
 import org.doobry.mock.MockJourn;
