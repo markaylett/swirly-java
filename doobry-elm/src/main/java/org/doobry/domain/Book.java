@@ -14,10 +14,10 @@ import org.doobry.util.Printable;
 import org.doobry.util.RbNode;
 
 public final class Book extends BasicRbNode implements Identifiable, Printable {
-        /**
-         * Maximum price levels in view.
-         */
-        private static final int LEVEL_MAX = 5;
+    /**
+     * Maximum price levels in view.
+     */
+    private static final int LEVEL_MAX = 5;
 
     private final long id;
     private final Contr contr;

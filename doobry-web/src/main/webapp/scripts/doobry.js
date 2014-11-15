@@ -174,8 +174,8 @@ function documentReady() {
                 for (var i = 0; i < rs.length; ++i) {
                     var r = rs[i];
                     var contr = model.contrs[r.contr];
-                    r.bidPrice = dbr.ticksToPrice(r.bidTicks, contr);
-                    r.offerPrice = dbr.ticksToPrice(r.offerTicks, contr);
+                    r.bidPrice = dbr.ticksToPrice(r.bidTicks[0], contr);
+                    r.offerPrice = dbr.ticksToPrice(r.offerTicks[0], contr);
                 }
                 return rs;
             }

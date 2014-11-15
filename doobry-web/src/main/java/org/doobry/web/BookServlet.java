@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public final class BookServlet extends HttpServlet {
 
+    private static final Integer LEVELS = Integer.valueOf(5);
+
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
@@ -25,11 +27,11 @@ public final class BookServlet extends HttpServlet {
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPathInfo(pathInfo);
         if (parts.length == 0) {
-            ctx.getBook(sb);
+            ctx.getBook(sb, LEVELS);
         } else if (parts.length == 1) {
-            ctx.getBook(sb, parts[0]);
+            ctx.getBook(sb, parts[0], LEVELS);
         } else if (parts.length == 2) {
-            if (!ctx.getBook(sb, parts[0], Integer.parseInt(parts[1]))) {
+            if (!ctx.getBook(sb, parts[0], Integer.parseInt(parts[1]), LEVELS)) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }

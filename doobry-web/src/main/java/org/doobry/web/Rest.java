@@ -192,7 +192,7 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized void getBook(StringBuilder sb) {
+    public final synchronized void getBook(StringBuilder sb, Integer levels) {
         sb.append('[');
         RbNode node = serv.getFirstBook();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -200,13 +200,13 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            book.print(sb, null);
+            book.print(sb, levels);
             ++i;
         }
         sb.append(']');
     }
 
-    public final synchronized void getBook(StringBuilder sb, String cmnem) {
+    public final synchronized void getBook(StringBuilder sb, String cmnem, Integer levels) {
         sb.append('[');
         RbNode node = serv.getFirstBook();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -217,13 +217,14 @@ public final class Rest {
             if (i > 0) {
                 sb.append(',');
             }
-            book.print(sb, null);
+            book.print(sb, levels);
             ++i;
         }
         sb.append(']');
     }
 
-    public final synchronized boolean getBook(StringBuilder sb, String cmnem, int settlDate) {
+    public final synchronized boolean getBook(StringBuilder sb, String cmnem, int settlDate,
+            Integer levels) {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
@@ -233,7 +234,7 @@ public final class Rest {
         if (book == null) {
             return false;
         }
-        book.print(sb, null);
+        book.print(sb, levels);
         return true;
     }
 }
