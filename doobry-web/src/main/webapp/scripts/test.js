@@ -12,18 +12,18 @@ test('fraction to real', function() {
 
 test('price increment', function() {
     var contr = {
-        tick_numer: 1,
-        tick_denom: 10000,
-        price_dp: 4
+        tickNumer: 1,
+        tickDenom: 10000,
+        priceDp: 4
     };
     equal(dbr.priceInc(contr), "0.0001", 'one ten thousandth');
 });
 
 test('quantity increment', function() {
     var contr = {
-        lot_numer: 1000000,
-        lot_denom: 1,
-        lot_dp: 1
+        lotNumer: 1000000,
+        lotDenom: 1,
+        lotDp: 1
     };
     equal(dbr.qtyInc(contr), 1000000, 'one million');
 });
@@ -55,18 +55,18 @@ asyncTest('get single contract', function() {
     }).done(function(v) {
         equal(v.mnem, 'EURJPY', 'mnem');
         equal(v.display, 'EURJPY', 'display');
-        equal(v.asset_type, 'CURRENCY', 'asset_type');
+        equal(v.assetType, 'CURRENCY', 'assetType');
         equal(v.asset, 'EUR', 'asset');
         equal(v.ccy, 'JPY', 'ccy');
-        equal(v.tick_numer, 1, 'tick_numer');
-        equal(v.tick_denom, 100, 'tick_denom');
-        equal(v.lot_numer, 1000000, 'lot_numer');
-        equal(v.lot_denom, 1, 'lot_denom');
-        equal(v.price_dp, 2, 'price_dp');
-        equal(v.pip_dp, 2, 'pip_dp');
-        equal(v.qty_dp, 0, 'qty_dp');
-        equal(v.min_lots, 1, 'min_lots');
-        equal(v.max_lots, 10, 'max_lots');
+        equal(v.tickNumer, 1, 'tickNumer');
+        equal(v.tickDenom, 100, 'tickDenom');
+        equal(v.lotNumer, 1000000, 'lotNumer');
+        equal(v.lotDenom, 1, 'lotDenom');
+        equal(v.priceDp, 2, 'priceDp');
+        equal(v.pipDp, 2, 'pipDp');
+        equal(v.qtyDp, 0, 'qtyDp');
+        equal(v.minLots, 1, 'minLots');
+        equal(v.maxLots, 10, 'maxLots');
     }).always(function() {
         start();
     });
