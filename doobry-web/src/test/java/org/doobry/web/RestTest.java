@@ -8,12 +8,14 @@ package org.doobry.web;
 import static org.junit.Assert.assertEquals;
 
 import org.doobry.domain.Action;
+import org.doobry.mock.MockBank;
+import org.doobry.mock.MockJourn;
 import org.junit.Test;
 
 public final class RestTest {
     @Test
     public final void testOne() {
-        final Rest ctx = new Rest();
+        final Rest ctx = new Rest(new MockBank(), new MockJourn());
         final StringBuilder expected = new StringBuilder();
         ctx.postOrder(expected, "WRAMIREZ", "EURUSD", 20141031, "test", Action.BUY, 12345, 5, 1);
         final StringBuilder actual = new StringBuilder();
@@ -23,7 +25,7 @@ public final class RestTest {
 
     @Test
     public final void testAll() {
-        final Rest ctx = new Rest();
+        final Rest ctx = new Rest(new MockBank(), new MockJourn());
         final StringBuilder expected = new StringBuilder();
         expected.append('[');
         ctx.postOrder(expected, "WRAMIREZ", "EURUSD", 20141031, "test", Action.BUY, 12345, 5, 1);

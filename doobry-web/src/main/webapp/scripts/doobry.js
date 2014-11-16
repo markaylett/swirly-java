@@ -351,7 +351,6 @@ function documentReady() {
         $('#bookTable').jqxDataTable({
             theme: theme,
             columns: [
-                { text: 'Id', dataField: 'id', width: 80 },
                 { text: 'Contr', dataField: 'contr', width: 80 },
                 { text: 'Settl Date', dataField: 'settlDate', width: 80 },
                 { text: 'Bid Price', dataField: 'bidPrice0', width: 80 },
@@ -368,7 +367,6 @@ function documentReady() {
         });
         $('#tabs').jqxTabs({
             theme: theme,
-            width: '90%',
             position: 'top'
         });
         $('#tabs').on('selected', function (event) {

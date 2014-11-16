@@ -15,5 +15,5 @@ public interface Bank {
     /**
      * Allocate contiguous sequence of identifiers and return the first.
      */
-    long allocIds(Kind kind, long val);
+    long allocIds(Kind kind, long num);
 }

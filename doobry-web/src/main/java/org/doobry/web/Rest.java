@@ -11,14 +11,14 @@ import org.doobry.domain.Action;
 import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
+import org.doobry.domain.Journ;
 import org.doobry.domain.Kind;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
 import org.doobry.engine.Accnt;
+import org.doobry.engine.Bank;
 import org.doobry.engine.Serv;
-import org.doobry.mock.MockBank;
-import org.doobry.mock.MockJourn;
 import org.doobry.mock.MockModel;
 import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;
@@ -27,8 +27,8 @@ public final class Rest {
 
     private final Serv serv;
 
-    public Rest() {
-        serv = new Serv(new MockBank(), new MockJourn());
+    public Rest(Bank bank, Journ journ) {
+        serv = new Serv(bank, journ);
         serv.load(new MockModel());
     }
 

@@ -19,9 +19,9 @@ public final class MockBank implements Bank {
     }
 
     @Override
-    public final long allocIds(Kind kind, long val) {
+    public final long allocIds(Kind kind, long num) {
         final long nextId = arr[kind.ordinal()]; 
-        arr[kind.ordinal()] += val;
+        arr[kind.ordinal()] += num;
         return nextId;
     }
 }

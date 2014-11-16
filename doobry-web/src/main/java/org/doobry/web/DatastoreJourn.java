@@ -10,28 +10,20 @@
  *******************************************************************************/
 package org.doobry.web;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import org.doobry.domain.Exec;
+import org.doobry.domain.Journ;
 
-public final class Context implements ServletContextListener {
-    private static final class Holder {
-        private static final Rest rest = new Rest(new DatastoreBank(), new DatastoreJourn());
+public final class DatastoreJourn implements Journ {
 
-        private static void init() {
-            // Force static initialisation.
-        }
+    @Override
+    public final void insertExecList(Exec first) {
     }
 
     @Override
-    public final void contextInitialized(ServletContextEvent event) {
-        Holder.init();
+    public final void insertExec(Exec exec) {
     }
 
     @Override
-    public final void contextDestroyed(ServletContextEvent event) {
-    }
-
-    public static Rest getRest() {
-        return Holder.rest;
+    public final void updateExec(long id, long modified) {
     }
 }
