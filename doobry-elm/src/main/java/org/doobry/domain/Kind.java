@@ -9,30 +9,36 @@ public enum Kind {
     /**
      * Asset.
      */
-    ASSET(1),
+    ASSET(1, "Asset"),
     /**
      * Contract.
      */
-    CONTR(2),
+    CONTR(2, "Contr"),
     /**
      * User.
      */
-    USER(3),
+    USER(3, "User"),
     /**
      * Order.
      */
-    ORDER(4),
+    ORDER(4, "Order"),
     /**
      * Execution.
      */
-    EXEC(5);
+    EXEC(5, "Exec");
     private final int value;
+    private final String camelName;
 
-    private Kind(int value) {
+    private Kind(int value, String camelName) {
         this.value = value;
+        this.camelName = camelName;
     }
 
     public final int intValue() {
         return this.value;
+    }
+
+    public final String camelName() {
+        return camelName;
     }
 }

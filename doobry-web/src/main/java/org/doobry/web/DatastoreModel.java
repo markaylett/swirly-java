@@ -25,7 +25,7 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final long allocIds(Kind kind, long num) {
-        final KeyRange range = datastore.allocateIds(kind.name().toLowerCase(), num);
+        final KeyRange range = datastore.allocateIds(kind.camelName(), num);
         return range.getStart().getId();
     }
 
