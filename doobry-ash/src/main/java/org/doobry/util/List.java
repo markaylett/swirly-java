@@ -8,8 +8,8 @@ package org.doobry.util;
 public final class List {
     private final DlNode end = new BasicDlNode() {
         {
-            this.setPrev(this);
-            this.setNext(this);
+            this.setDlPrev(this);
+            this.setDlNext(this);
         }
 
         @Override

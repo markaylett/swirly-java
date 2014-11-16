@@ -15,9 +15,9 @@ public interface DlNode {
 
     void remove();
 
-    void setPrev(DlNode prev);
+    void setDlPrev(DlNode prev);
 
-    void setNext(DlNode next);
+    void setDlNext(DlNode next);
 
     DlNode dlNext();
 

@@ -11,12 +11,12 @@ public final class Queue {
 
     public final void insertBack(SlNode node) {
         if (!isEmpty()) {
-            last.setNext(node);
+            last.setSlNext(node);
         } else {
             first = node;
         }
         last = node;
-        node.setNext(null);
+        node.setSlNext(null);
     }
 
     public final SlNode removeFirst() {
@@ -33,7 +33,7 @@ public final class Queue {
     public final void join(Queue rhs) {
         if (!rhs.isEmpty()) {
             if (!isEmpty())
-                last.setNext(rhs.first);
+                last.setSlNext(rhs.first);
             else
                 first = rhs.first;
             last = rhs.last;

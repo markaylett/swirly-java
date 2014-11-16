@@ -9,12 +9,12 @@ public final class Stack {
     private SlNode first;
 
     public final void insertAfter(SlNode node, SlNode newNode) {
-        newNode.setNext(node.slNext());
-        node.setNext(newNode);
+        newNode.setSlNext(node.slNext());
+        node.setSlNext(newNode);
     }
 
     public final void insertFront(SlNode newNode) {
-        newNode.setNext(first);
+        newNode.setSlNext(first);
         first = newNode;
     }
 

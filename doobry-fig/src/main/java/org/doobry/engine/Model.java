@@ -5,6 +5,8 @@
  *******************************************************************************/
 package org.doobry.engine;
 
+import java.util.Collection;
+
 import org.doobry.domain.Exec;
 import org.doobry.domain.Kind;
 import org.doobry.domain.Order;
@@ -26,9 +28,9 @@ public interface Model {
 
     Rec readRec(Kind kind);
 
-    Order[] readOrder();
+    Collection<Order> readOrder();
 
-    Exec[] readTrade();
+    Collection<Exec> readTrade();
 
-    Posn[] readPosn();
+    Collection<Posn> readPosn();
 }

@@ -5,6 +5,9 @@
  *******************************************************************************/
 package org.doobry.web;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.doobry.domain.Exec;
 import org.doobry.domain.Kind;
 import org.doobry.domain.Order;
@@ -64,17 +67,17 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final Order[] readOrder() {
-        return new Order[] {};
+    public final Collection<Order> readOrder() {
+        return Collections.emptyList();
     }
 
     @Override
-    public final Exec[] readTrade() {
-        return new Exec[] {};
+    public final Collection<Exec> readTrade() {
+        return Collections.emptyList();
     }
 
     @Override
-    public final Posn[] readPosn() {
-        return new Posn[] {};
+    public final Collection<Posn> readPosn() {
+        return Collections.emptyList();
     }
 }

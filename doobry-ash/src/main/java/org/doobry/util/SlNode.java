@@ -7,7 +7,7 @@ package org.doobry.util;
 
 public interface SlNode {
 
-    void setNext(SlNode next);
+    void setSlNext(SlNode next);
 
     SlNode slNext();
 }

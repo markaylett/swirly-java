@@ -9,7 +9,7 @@ public abstract class BasicSlNode implements SlNode {
     private transient SlNode next;
 
     @Override
-    public final void setNext(SlNode next) {
+    public final void setSlNext(SlNode next) {
         this.next = next;
     }
 

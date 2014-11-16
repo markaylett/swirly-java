@@ -16,11 +16,11 @@ public abstract class BasicDlNode implements DlNode {
         assert prev != null;
         assert next != null;
 
-        prev.setNext(this);
-        this.setPrev(prev);
+        prev.setDlNext(this);
+        this.setDlPrev(prev);
 
-        next.setPrev(this);
-        this.setNext(next);
+        next.setDlPrev(this);
+        this.setDlNext(next);
     }
 
     @Override
@@ -37,19 +37,19 @@ public abstract class BasicDlNode implements DlNode {
 
     @Override
     public final void remove() {
-        dlNext().setPrev(prev);
-        dlPrev().setNext(next);
-        setPrev(null);
-        setNext(null);
+        dlNext().setDlPrev(prev);
+        dlPrev().setDlNext(next);
+        setDlPrev(null);
+        setDlNext(null);
     }
 
     @Override
-    public void setPrev(DlNode prev) {
+    public void setDlPrev(DlNode prev) {
         this.prev = prev;
     }
 
     @Override
-    public void setNext(DlNode next) {
+    public void setDlNext(DlNode next) {
         this.next = next;
     }
 

@@ -5,10 +5,11 @@
  *******************************************************************************/
 package org.doobry.util;
 
-public abstract class BasicRbDlNode extends BasicRbNode implements DlNode {
+public abstract class BasicRbDlSlNode extends BasicRbNode implements DlNode, SlNode {
 
     private transient DlNode prev;
     private transient DlNode next;
+    private transient SlNode slNext;
 
     @Override
     public final void insert(DlNode prev, DlNode next) {
@@ -66,5 +67,15 @@ public abstract class BasicRbDlNode extends BasicRbNode implements DlNode {
     @Override
     public boolean isEnd() {
         return false;
+    }
+
+    @Override
+    public final void setSlNext(SlNode next) {
+        this.slNext = next;
+    }
+
+    @Override
+    public final SlNode slNext() {
+        return slNext;
     }
 }
