@@ -3,14 +3,15 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package org.doobry.domain;
+package org.doobry.engine;
 
-public interface Model {
-    Rec readRec(Kind kind);
+import org.doobry.domain.Exec;
 
-    Order[] readOrder();
+public interface Journ {
 
-    Exec[] readTrade();
+    void insertExecList(Exec first);
 
-    Posn[] readPosn();
+    void insertExec(Exec exec);
+
+    void updateExec(long id, long modified);
 }

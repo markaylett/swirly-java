@@ -7,7 +7,6 @@ package org.doobry.engine;
 
 import static org.junit.Assert.*;
 
-import org.doobry.domain.Model;
 import org.doobry.domain.Rec;
 import org.doobry.domain.Kind;
 import org.doobry.mock.MockModel;

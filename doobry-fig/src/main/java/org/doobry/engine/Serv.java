@@ -9,8 +9,6 @@ import org.doobry.domain.Action;
 import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
-import org.doobry.domain.Journ;
-import org.doobry.domain.Model;
 import org.doobry.domain.RefIdx;
 import org.doobry.domain.Order;
 import org.doobry.domain.User;

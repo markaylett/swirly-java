@@ -6,7 +6,7 @@
 package org.doobry.mock;
 
 import org.doobry.domain.Exec;
-import org.doobry.domain.Journ;
+import org.doobry.engine.Journ;
 
 public final class MockJourn implements Journ {
     @Override
