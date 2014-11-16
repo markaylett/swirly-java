@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.doobry.mock;
 
-import org.doobry.util.Bank;
+import org.doobry.engine.Bank;
 
 public final class MockBank implements Bank {
     private final long[] arr;

@@ -17,8 +17,6 @@ import org.doobry.domain.User;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
 import org.doobry.domain.RecType;
-import org.doobry.domain.Reg;
-import org.doobry.util.Bank;
 import org.doobry.util.Queue;
 import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;

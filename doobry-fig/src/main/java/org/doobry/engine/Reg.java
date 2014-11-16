@@ -3,7 +3,7 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package org.doobry.domain;
+package org.doobry.engine;
 
 public enum Reg {
     /**

@@ -13,10 +13,8 @@ import org.doobry.domain.Exec;
 import org.doobry.domain.RefIdx;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
-import org.doobry.domain.Reg;
 import org.doobry.domain.Role;
 import org.doobry.domain.Side;
-import org.doobry.util.Bank;
 import org.doobry.util.DlNode;
 
 public final class Broker {
