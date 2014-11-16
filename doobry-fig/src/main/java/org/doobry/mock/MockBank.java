@@ -5,27 +5,23 @@
  *******************************************************************************/
 package org.doobry.mock;
 
+import java.util.Arrays;
+
+import org.doobry.domain.Kind;
 import org.doobry.engine.Bank;
 
 public final class MockBank implements Bank {
     private final long[] arr;
 
-    public MockBank(int n) {
-        arr = new long[n];
+    public MockBank() {
+        arr = new long[Kind.values().length];
+        Arrays.fill(arr, 1);
     }
 
     @Override
-    public final long load(int reg) {
-        return arr[reg];
-    }
-
-    @Override
-    public final void store(int reg, long val) {
-        arr[reg] = val;
-    }
-
-    @Override
-    public final long addFetch(int reg, long val) {
-        return ++arr[reg];
+    public final long allocIds(Kind kind, long val) {
+        final long nextId = arr[kind.ordinal()]; 
+        arr[kind.ordinal()] += val;
+        return nextId;
     }
 }

@@ -11,12 +11,11 @@ import org.doobry.domain.Action;
 import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
+import org.doobry.domain.Kind;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
-import org.doobry.domain.RecType;
 import org.doobry.engine.Accnt;
-import org.doobry.engine.Reg;
 import org.doobry.engine.Serv;
 import org.doobry.mock.MockBank;
 import org.doobry.mock.MockJourn;
@@ -29,21 +28,21 @@ public final class Rest {
     private final Serv serv;
 
     public Rest() {
-        serv = new Serv(new MockBank(Reg.values().length), new MockJourn());
+        serv = new Serv(new MockBank(), new MockJourn());
         serv.load(new MockModel());
     }
 
     public final synchronized void getRec(StringBuilder sb) {
         sb.append("{\"asset\":");
-        getRec(sb, RecType.ASSET);
+        getRec(sb, Kind.ASSET);
         sb.append(",\"contr\":");
-        getRec(sb, RecType.CONTR);
+        getRec(sb, Kind.CONTR);
         sb.append("}");
     }
 
-    public final synchronized void getRec(StringBuilder sb, RecType type) {
+    public final synchronized void getRec(StringBuilder sb, Kind kind) {
         sb.append('[');
-        SlNode node = serv.getFirstRec(type);
+        SlNode node = serv.getFirstRec(kind);
         for (int i = 0; node != null; node = node.slNext()) {
             final Rec rec = (Rec) node;
             if (i > 0) {
@@ -55,8 +54,8 @@ public final class Rest {
         sb.append(']');
     }
 
-    public final synchronized boolean getRec(StringBuilder sb, RecType type, String mnem) {
-        final Rec rec = serv.findRec(type, mnem);
+    public final synchronized boolean getRec(StringBuilder sb, Kind kind, String mnem) {
+        final Rec rec = serv.findRec(kind, mnem);
         if (rec == null) {
             return false;
         }
@@ -179,7 +178,7 @@ public final class Rest {
     public final synchronized boolean getPosn(StringBuilder sb, String umnem, String cmnem,
             int settlDate) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
-        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        final Contr contr = (Contr) serv.findRec(Kind.CONTR, cmnem);
         if (contr == null) {
             return false;
         }
@@ -225,7 +224,7 @@ public final class Rest {
 
     public final synchronized boolean getBook(StringBuilder sb, String cmnem, int settlDate,
             Integer levels) {
-        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        final Contr contr = (Contr) serv.findRec(Kind.CONTR, cmnem);
         if (contr == null) {
             return false;
         }

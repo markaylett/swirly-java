@@ -10,6 +10,7 @@ import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Direct;
 import org.doobry.domain.Exec;
+import org.doobry.domain.Kind;
 import org.doobry.domain.RefIdx;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
@@ -49,14 +50,13 @@ public final class Broker {
             if (spread(takerOrder, makerOrder, direct) > 0)
                 break;
 
-            final long matchId = bank.addFetch(Reg.MATCH_ID.intValue(), 1L);
-            final long takerId = bank.addFetch(Reg.EXEC_ID.intValue(), 1L);
-            final long makerId = bank.addFetch(Reg.EXEC_ID.intValue(), 1L);
+            final long makerId = bank.allocIds(Kind.EXEC, 2);
+            final long takerId = makerId + 1;
 
             final Accnt makerAccnt = Accnt.getLazyAccnt(makerOrder.getUser(), refIdx);
             final Posn makerPosn = makerAccnt.getLazyPosn(contr, settlDay);
 
-            final Match match = new Match(matchId);
+            final Match match = new Match();
             match.makerOrder = makerOrder;
             match.makerPosn = makerPosn;
             match.ticks = makerOrder.getTicks();
@@ -67,12 +67,12 @@ public final class Broker {
             lastLots = match.lots;
 
             final Exec makerTrade = new Exec(makerId, makerOrder.getId(), makerOrder, now);
-            makerTrade.trade(match.lots, match.ticks, match.lots, match.id, Role.MAKER,
+            makerTrade.trade(match.lots, match.ticks, match.lots, takerId, Role.MAKER,
                     takerOrder.getUser());
             match.makerTrade = makerTrade;
 
             final Exec takerTrade = new Exec(takerId, takerOrder.getId(), takerOrder, now);
-            takerTrade.trade(taken, match.ticks, match.lots, match.id, Role.TAKER,
+            takerTrade.trade(taken, match.ticks, match.lots, makerId, Role.TAKER,
                     makerOrder.getUser());
             match.takerTrade = takerTrade;
 

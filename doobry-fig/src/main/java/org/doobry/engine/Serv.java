@@ -16,7 +16,7 @@ import org.doobry.domain.Order;
 import org.doobry.domain.User;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
-import org.doobry.domain.RecType;
+import org.doobry.domain.Kind;
 import org.doobry.util.Queue;
 import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;
@@ -33,26 +33,26 @@ public final class Serv implements AutoCloseable {
     private final Queue execs = new Queue();
 
     private final void enrichOrder(Order order) {
-        final User user = (User) cache.findRec(RecType.USER, order.getUserId());
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, order.getContrId());
+        final User user = (User) cache.findRec(Kind.USER, order.getUserId());
+        final Contr contr = (Contr) cache.findRec(Kind.CONTR, order.getContrId());
         order.enrich(user, contr);
     }
 
     private final void enrichTrade(Exec trade) {
-        final User user = (User) cache.findRec(RecType.USER, trade.getUserId());
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, trade.getContrId());
-        final User cpty = (User) cache.findRec(RecType.USER, trade.getCptyId());
+        final User user = (User) cache.findRec(Kind.USER, trade.getUserId());
+        final Contr contr = (Contr) cache.findRec(Kind.CONTR, trade.getContrId());
+        final User cpty = (User) cache.findRec(Kind.USER, trade.getCptyId());
         trade.enrich(user, contr, cpty);
     }
 
     private final void enrichPosn(Posn posn) {
-        final User user = (User) cache.findRec(RecType.USER, posn.getUserId());
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, posn.getContrId());
+        final User user = (User) cache.findRec(Kind.USER, posn.getUserId());
+        final Contr contr = (Contr) cache.findRec(Kind.CONTR, posn.getContrId());
         posn.enrich(user, contr);
     }
 
-    private final void insertRecList(Model model, RecType type) {
-        cache.insertList(type, model.readRec(type));
+    private final void insertRecList(Model model, Kind kind) {
+        cache.insertList(kind, model.readRec(kind));
     }
 
     private final void insertOrders(Model model) {
@@ -80,7 +80,7 @@ public final class Serv implements AutoCloseable {
     }
 
     private final Exec newExec(Order order, long now) {
-        final long execId = bank.addFetch(Reg.EXEC_ID.intValue(), 1);
+        final long execId = bank.allocIds(Kind.EXEC, 1);
         return new Exec(execId, order.getId(), order, now);
     }
 
@@ -115,28 +115,28 @@ public final class Serv implements AutoCloseable {
     }
 
     public final void load(Model model) {
-        insertRecList(model, RecType.ASSET);
-        insertRecList(model, RecType.CONTR);
-        insertRecList(model, RecType.USER);
+        insertRecList(model, Kind.ASSET);
+        insertRecList(model, Kind.CONTR);
+        insertRecList(model, Kind.USER);
         insertOrders(model);
         insertTrades(model);
         insertPosns(model);
     }
 
-    public final Rec findRec(RecType type, long id) {
-        return cache.findRec(type, id);
+    public final Rec findRec(Kind kind, long id) {
+        return cache.findRec(kind, id);
     }
 
-    public final Rec findRec(RecType type, String mnem) {
-        return cache.findRec(type, mnem);
+    public final Rec findRec(Kind kind, String mnem) {
+        return cache.findRec(kind, mnem);
     }
 
-    public final SlNode getFirstRec(RecType type) {
-        return cache.getFirstRec(type);
+    public final SlNode getFirstRec(Kind kind) {
+        return cache.getFirstRec(kind);
     }
 
-    public final boolean isEmptyRec(RecType type) {
-        return cache.isEmptyRec(type);
+    public final boolean isEmptyRec(Kind kind) {
+        return cache.isEmptyRec(kind);
     }
 
     public final Accnt getLazyAccnt(User user) {
@@ -144,7 +144,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Accnt getLazyAccnt(String mnem) {
-        final User user = (User) cache.findRec(RecType.USER, mnem);
+        final User user = (User) cache.findRec(Kind.USER, mnem);
         if (user == null) {
             throw new IllegalArgumentException(String.format("invalid user '%s'", mnem));
         }
@@ -157,7 +157,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
         final long now = System.currentTimeMillis();
-        final long orderId = bank.addFetch(Reg.ORDER_ID.intValue(), 1);
+        final long orderId = bank.allocIds(Kind.ORDER, 1);
         final Contr contr = book.getContr();
         final int settlDay = book.getSettlDay();
         final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
@@ -312,7 +312,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Book getLazyBook(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
+        final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }
@@ -324,7 +324,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Book findBook(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
+        final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }

@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.doobry.domain.RecType;
+import org.doobry.domain.Kind;
 
 @SuppressWarnings("serial")
 public final class RecServlet extends HttpServlet {
@@ -30,9 +30,9 @@ public final class RecServlet extends HttpServlet {
             rest.getRec(sb);
         } else if ("asset".equals(parts[0])) {
             if (parts.length == 1) {
-                rest.getRec(sb, RecType.ASSET);
+                rest.getRec(sb, Kind.ASSET);
             } else if (parts.length == 2) {
-                if (!rest.getRec(sb, RecType.ASSET, parts[1])) {
+                if (!rest.getRec(sb, Kind.ASSET, parts[1])) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -42,9 +42,9 @@ public final class RecServlet extends HttpServlet {
             }
         } else if ("contr".equals(parts[0])) {
             if (parts.length == 1) {
-                rest.getRec(sb, RecType.CONTR);
+                rest.getRec(sb, Kind.CONTR);
             } else if (parts.length == 2) {
-                if (!rest.getRec(sb, RecType.CONTR, parts[1])) {
+                if (!rest.getRec(sb, Kind.CONTR, parts[1])) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }

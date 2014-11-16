@@ -10,14 +10,14 @@ import org.doobry.domain.Model;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
-import org.doobry.domain.RecType;
+import org.doobry.domain.Kind;
 
 public final class MockModel implements Model {
 
     @Override
-    public final Rec readRec(RecType type) {
+    public final Rec readRec(Kind kind) {
         Rec first = null;
-        switch (type) {
+        switch (kind) {
         case ASSET:
             first = MockAsset.newAssetList();
             break;
@@ -27,6 +27,8 @@ public final class MockModel implements Model {
         case USER:
             first = MockUser.newUserList();
             break;
+        default:
+            throw new IllegalArgumentException("invalid record-type");
         }
         return first;
     }

@@ -6,7 +6,7 @@
 package org.doobry.engine;
 
 import org.doobry.domain.Rec;
-import org.doobry.domain.RecType;
+import org.doobry.domain.Kind;
 import org.doobry.util.SlNode;
 
 public final class Cache {
@@ -44,14 +44,14 @@ public final class Cache {
     }
 
     private final void insertId(Rec rec) {
-        final int bucket = indexFor(hashCode(rec.getType().intValue(), rec.getId()), nBuckets);
+        final int bucket = indexFor(hashCode(rec.getKind().intValue(), rec.getId()), nBuckets);
         final Rec first = buckets[bucket][ID];
         rec.setIdNext(first);
         buckets[bucket][ID] = rec;
     }
 
     private final void insertMnem(Rec rec) {
-        final int bucket = indexFor(hashCode(rec.getType().intValue(), rec.getMnem()), nBuckets);
+        final int bucket = indexFor(hashCode(rec.getKind().intValue(), rec.getMnem()), nBuckets);
         final Rec first = buckets[bucket][MNEM];
         rec.setMnemNext(first);
         buckets[bucket][MNEM] = rec;
@@ -71,8 +71,8 @@ public final class Cache {
         buckets = new Rec[nBuckets][COLS];
     }
 
-    public final void insertList(RecType type, SlNode first) {
-        switch (type) {
+    public final void insertList(Kind kind, SlNode first) {
+        switch (kind) {
         case ASSET:
             assert firstAsset == null;
             firstAsset = first;
@@ -85,31 +85,33 @@ public final class Cache {
             assert firstUser == null;
             firstUser = first;
             break;
+        default:
+            throw new IllegalArgumentException("invalid record-type");
         }
         updateIndex(first);
     }
 
-    public final Rec findRec(RecType type, long id) {
-        final int bucket = indexFor(hashCode(type.intValue(), id), nBuckets);
+    public final Rec findRec(Kind kind, long id) {
+        final int bucket = indexFor(hashCode(kind.intValue(), id), nBuckets);
         for (Rec rec = buckets[bucket][ID]; rec != null; rec = rec.idNext()) {
-            if (rec.getType() == type && rec.getId() == id)
+            if (rec.getKind() == kind && rec.getId() == id)
                 return rec;
         }
         return null;
     }
 
-    public final Rec findRec(RecType type, String mnem) {
-        final int bucket = indexFor(hashCode(type.intValue(), mnem), nBuckets);
+    public final Rec findRec(Kind kind, String mnem) {
+        final int bucket = indexFor(hashCode(kind.intValue(), mnem), nBuckets);
         for (Rec rec = buckets[bucket][MNEM]; rec != null; rec = rec.mnemNext()) {
-            if (rec.getType() == type && rec.getMnem().equals(mnem))
+            if (rec.getKind() == kind && rec.getMnem().equals(mnem))
                 return rec;
         }
         return null;
     }
 
-    public final SlNode getFirstRec(RecType type) {
+    public final SlNode getFirstRec(Kind kind) {
         SlNode first = null;
-        switch (type) {
+        switch (kind) {
         case ASSET:
             first = firstAsset;
             break;
@@ -119,11 +121,13 @@ public final class Cache {
         case USER:
             first = firstUser;
             break;
+        default:
+            throw new IllegalArgumentException("invalid record-type");
         }
         return first;
     }
 
-    public final boolean isEmptyRec(RecType type) {
-        return getFirstRec(type) == null;
+    public final boolean isEmptyRec(Kind kind) {
+        return getFirstRec(kind) == null;
     }
 }

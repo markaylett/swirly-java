@@ -9,29 +9,18 @@ import org.doobry.domain.Exec;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.util.BasicSlNode;
-import org.doobry.util.Identifiable;
 
 /**
  * A Match represents two orders from opposing sides of the market that may trade.
  */
 
-public final class Match extends BasicSlNode implements Identifiable {
-    final long id;
+public final class Match extends BasicSlNode {
     long ticks;
     long lots;
     Order makerOrder;
     Exec makerTrade;
     Posn makerPosn;
     Exec takerTrade;
-
-    public Match(long id) {
-        this.id = id;
-    }
-
-    @Override
-    public final long getId() {
-        return id;
-    }
 
     public final long getTicks() {
         return ticks;

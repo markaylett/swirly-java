@@ -13,13 +13,13 @@ import org.doobry.util.Printable;
 public abstract class Rec extends BasicSlNode implements Identifiable, Memorable, Printable {
     private transient Rec idNext;
     private transient Rec mnemNext;
-    protected final RecType type;
+    protected final Kind kind;
     protected final long id;
     protected final String mnem;
     protected final String display;
 
-    public Rec(RecType type, long id, String mnem, String display) {
-        this.type = type;
+    public Rec(Kind kind, long id, String mnem, String display) {
+        this.kind = kind;
         this.id = id;
         this.mnem = mnem;
         this.display = display;
@@ -41,8 +41,8 @@ public abstract class Rec extends BasicSlNode implements Identifiable, Memorable
         return mnemNext;
     }
 
-    public final RecType getType() {
-        return type;
+    public final Kind getKind() {
+        return kind;
     }
 
     @Override

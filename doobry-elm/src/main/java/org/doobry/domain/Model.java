@@ -6,7 +6,7 @@
 package org.doobry.domain;
 
 public interface Model {
-    Rec readRec(RecType type);
+    Rec readRec(Kind kind);
 
     Order[] readOrder();
 

@@ -3,24 +3,32 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package org.doobry.engine;
+package org.doobry.domain;
 
-public enum Reg {
+public enum Kind {
     /**
-     * Order identifier register index.
+     * Asset.
      */
-    ORDER_ID(0),
+    ASSET(1),
     /**
-     * Match identifier register index.
+     * Contract.
      */
-    MATCH_ID(1),
+    CONTR(2),
     /**
-     * Execution identifier register index.
+     * User.
      */
-    EXEC_ID(2);
+    USER(3),
+    /**
+     * Order.
+     */
+    ORDER(4),
+    /**
+     * Execution.
+     */
+    EXEC(5);
     private final int value;
 
-    private Reg(int value) {
+    private Kind(int value) {
         this.value = value;
     }
 

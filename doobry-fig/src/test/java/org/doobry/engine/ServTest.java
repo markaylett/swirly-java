@@ -20,7 +20,7 @@ import org.junit.Test;
 public final class ServTest {
     @Test
     public final void test() {
-        try (final Serv s = new Serv(new MockBank(Reg.values().length), new MockJourn())) {
+        try (final Serv s = new Serv(new MockBank(), new MockJourn())) {
             s.load(new MockModel());
             final Accnt accnt = s.getLazyAccnt("WRAMIREZ");
             final int settlDay = ymdToJd(2014, 3, 14);

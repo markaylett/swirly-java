@@ -10,7 +10,7 @@ public final class User extends Rec {
     private transient Object accnt;
 
     public User(long id, String mnem, String display, String email) {
-        super(RecType.USER, id, mnem, display);
+        super(Kind.USER, id, mnem, display);
         this.email = email;
     }
 
