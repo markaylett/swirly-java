@@ -174,8 +174,15 @@ function documentReady() {
                 for (var i = 0; i < rs.length; ++i) {
                     var r = rs[i];
                     var contr = model.contrs[r.contr];
-                    r.bidPrice = dbr.ticksToPrice(r.bidTicks[0], contr);
-                    r.offerPrice = dbr.ticksToPrice(r.offerTicks[0], contr);
+                    r.bidTicks0 = r.bidTicks[0];
+                    r.bidLots0 = r.bidTicks[0];
+                    r.bidCount0 = r.bidTicks[0];
+                    r.offerTicks0 = r.offerTicks[0];
+                    r.offerLots0 = r.offerTicks[0];
+                    r.offerCount0 = r.offerTicks[0];
+
+                    r.bidPrice0 = dbr.ticksToPrice(r.bidTicks0, contr);
+                    r.offerPrice0 = dbr.ticksToPrice(r.offerTicks0, contr);
                 }
                 return rs;
             }
@@ -347,12 +354,12 @@ function documentReady() {
                 { text: 'Id', dataField: 'id', width: 80 },
                 { text: 'Contr', dataField: 'contr', width: 80 },
                 { text: 'Settl Date', dataField: 'settlDate', width: 80 },
-                { text: 'Bid Price', dataField: 'bidPrice', width: 80 },
-                { text: 'Bid Lots', dataField: 'bidLots', width: 80 },
-                { text: 'Bid Count', dataField: 'bidCount', width: 80 },
-                { text: 'Offer Price', dataField: 'offerPrice', width: 80 },
-                { text: 'Offer Lots', dataField: 'offerLots', width: 80 },
-                { text: 'Offer Count', dataField: 'offerCount', width: 80 }
+                { text: 'Bid Price', dataField: 'bidPrice0', width: 80 },
+                { text: 'Bid Lots', dataField: 'bidLots0', width: 80 },
+                { text: 'Bid Count', dataField: 'bidCount0', width: 80 },
+                { text: 'Offer Price', dataField: 'offerPrice0', width: 80 },
+                { text: 'Offer Lots', dataField: 'offerLots0', width: 80 },
+                { text: 'Offer Count', dataField: 'offerCount0', width: 80 }
             ],
             columnsResize: true,
             pageable: true,
