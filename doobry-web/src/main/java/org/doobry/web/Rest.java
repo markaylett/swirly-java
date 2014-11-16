@@ -16,10 +16,8 @@ import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
 import org.doobry.engine.Accnt;
-import org.doobry.engine.Bank;
-import org.doobry.engine.Journ;
+import org.doobry.engine.Model;
 import org.doobry.engine.Serv;
-import org.doobry.mock.MockModel;
 import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;
 
@@ -27,9 +25,8 @@ public final class Rest {
 
     private final Serv serv;
 
-    public Rest(Bank bank, Journ journ) {
-        serv = new Serv(bank, journ);
-        serv.load(new MockModel());
+    public Rest(Model model) {
+        serv = new Serv(model);
     }
 
     public final synchronized void getRec(StringBuilder sb) {

@@ -23,8 +23,7 @@ import org.doobry.util.Tree;
 public final class Serv implements AutoCloseable {
     private static int CACHE_BUCKETS = 257;
     private static int REFIDX_BUCKETS = 257;
-    private final Bank bank;
-    private final Journ journ;
+    private final Model model;
     private final Cache cache = new Cache(CACHE_BUCKETS);
     private final RefIdx refIdx = new RefIdx(REFIDX_BUCKETS);
     private final Tree books = new Tree();
@@ -49,11 +48,11 @@ public final class Serv implements AutoCloseable {
         posn.enrich(user, contr);
     }
 
-    private final void insertRecList(Model model, Kind kind) {
+    private final void insertRecList(Kind kind) {
         cache.insertList(kind, model.readRec(kind));
     }
 
-    private final void insertOrders(Model model) {
+    private final void insertOrders() {
         for (final Order order : model.readOrder()) {
             enrichOrder(order);
             final Accnt accnt = Accnt.getLazyAccnt(order.getUser(), refIdx);
@@ -61,7 +60,7 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    private final void insertTrades(Model model) {
+    private final void insertTrades() {
         for (final Exec trade : model.readTrade()) {
             enrichTrade(trade);
             final Accnt accnt = Accnt.getLazyAccnt(trade.getUser(), refIdx);
@@ -69,7 +68,7 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    private final void insertPosns(Model model) {
+    private final void insertPosns() {
         for (final Posn posn : model.readPosn()) {
             enrichPosn(posn);
             final Accnt accnt = Accnt.getLazyAccnt(posn.getUser(), refIdx);
@@ -78,7 +77,7 @@ public final class Serv implements AutoCloseable {
     }
 
     private final Exec newExec(Order order, long now) {
-        final long execId = bank.allocIds(Kind.EXEC, 1);
+        final long execId = model.allocIds(Kind.EXEC, 1);
         return new Exec(execId, order.getId(), order, now);
     }
 
@@ -103,22 +102,18 @@ public final class Serv implements AutoCloseable {
         execs.join(trans.execs);
     }
 
-    public Serv(Bank bank, Journ journ) {
-        this.bank = bank;
-        this.journ = journ;
+    public Serv(Model model) {
+        this.model = model;
+        insertRecList(Kind.ASSET);
+        insertRecList(Kind.CONTR);
+        insertRecList(Kind.USER);
+        insertOrders();
+        insertTrades();
+        insertPosns();
     }
 
     @Override
     public final void close() {
-    }
-
-    public final void load(Model model) {
-        insertRecList(model, Kind.ASSET);
-        insertRecList(model, Kind.CONTR);
-        insertRecList(model, Kind.USER);
-        insertOrders(model);
-        insertTrades(model);
-        insertPosns(model);
     }
 
     public final Rec findRec(Kind kind, long id) {
@@ -155,7 +150,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
         final long now = System.currentTimeMillis();
-        final long orderId = bank.allocIds(Kind.ORDER, 1);
+        final long orderId = model.allocIds(Kind.ORDER, 1);
         final Contr contr = book.getContr();
         final int settlDay = book.getSettlDay();
         final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
@@ -164,7 +159,7 @@ public final class Serv implements AutoCloseable {
         final Trans trans = new Trans();
         trans.execs.insertBack(newExec);
         // Order fields are updated on match.
-        Broker.matchOrders(book, order, bank, refIdx, trans);
+        Broker.matchOrders(book, order, model, refIdx, trans);
         // Place incomplete order in book.
         if (!order.isDone()) {
             book.insertOrder(order);
@@ -173,7 +168,7 @@ public final class Serv implements AutoCloseable {
         // any unfilled quantity.
         boolean success = false;
         try {
-            journ.insertExecList((Exec) trans.execs.getFirst());
+            model.insertExecList((Exec) trans.execs.getFirst());
             success = true;
         } finally {
             if (!success && !order.isDone()) {
@@ -202,7 +197,7 @@ public final class Serv implements AutoCloseable {
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.revise(lots);
-        journ.insertExec(exec);
+        model.insertExec(exec);
 
         // Final commit phase cannot fail.
         final Book book = findBook(order.getContr(), order.getSettlDay());
@@ -236,7 +231,7 @@ public final class Serv implements AutoCloseable {
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.cancel();
-        journ.insertExec(exec);
+        model.insertExec(exec);
 
         // Final commit phase cannot fail.
         final Book book = findBook(order.getContr(), order.getSettlDay());
@@ -269,7 +264,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
         final long now = System.currentTimeMillis();
-        journ.updateExec(id, now);
+        model.updateExec(id, now);
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);

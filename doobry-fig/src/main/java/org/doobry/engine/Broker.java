@@ -31,7 +31,7 @@ public final class Broker {
     }
 
     private static void matchOrders(Book book, Order takerOrder, Side side, Direct direct,
-            Bank bank, RefIdx refIdx, Trans trans) {
+            Model model, RefIdx refIdx, Trans trans) {
 
         final long now = takerOrder.getCreated();
 
@@ -50,7 +50,7 @@ public final class Broker {
             if (spread(takerOrder, makerOrder, direct) > 0)
                 break;
 
-            final long makerId = bank.allocIds(Kind.EXEC, 2);
+            final long makerId = model.allocIds(Kind.EXEC, 2);
             final long takerId = makerId + 1;
 
             final Accnt makerAccnt = Accnt.getLazyAccnt(makerOrder.getUser(), refIdx);
@@ -92,7 +92,7 @@ public final class Broker {
         }
     }
 
-    public static void matchOrders(Book book, Order taker, Bank bank, RefIdx refIdx, Trans trans) {
+    public static void matchOrders(Book book, Order taker, Model model, RefIdx refIdx, Trans trans) {
         Side side;
         Direct direct;
         if (taker.getAction() == Action.BUY) {
@@ -105,6 +105,6 @@ public final class Broker {
             side = book.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(book, taker, side, direct, bank, refIdx, trans);
+        matchOrders(book, taker, side, direct, model, refIdx, trans);
     }
 }

@@ -12,16 +12,13 @@ import org.doobry.domain.Action;
 import org.doobry.domain.Book;
 import org.doobry.domain.Order;
 import org.doobry.domain.State;
-import org.doobry.mock.MockBank;
-import org.doobry.mock.MockJourn;
 import org.doobry.mock.MockModel;
 import org.junit.Test;
 
 public final class ServTest {
     @Test
     public final void test() {
-        try (final Serv s = new Serv(new MockBank(), new MockJourn())) {
-            s.load(new MockModel());
+        try (final Serv s = new Serv(new MockModel())) {
             final Accnt accnt = s.getLazyAccnt("WRAMIREZ");
             final int settlDay = ymdToJd(2014, 3, 14);
             final Book book = s.getLazyBook("EURUSD", settlDay);

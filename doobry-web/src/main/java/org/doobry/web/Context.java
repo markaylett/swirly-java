@@ -10,7 +10,7 @@ import javax.servlet.ServletContextListener;
 
 public final class Context implements ServletContextListener {
     private static final class Holder {
-        private static final Rest rest = new Rest(new DatastoreBank(), new DatastoreJourn());
+        private static final Rest rest = new Rest(new DatastoreModel());
 
         private static void init() {
             // Force static initialisation.
