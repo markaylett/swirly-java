@@ -44,7 +44,7 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final Rec readRec(Kind kind) {
+    public final Rec selectRec(Kind kind) {
         Rec first = null;
         switch (kind) {
         case ASSET:
@@ -63,17 +63,17 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final Collection<Order> readOrder() {
+    public final Collection<Order> selectOrder() {
         return Collections.emptyList();
     }
 
     @Override
-    public final Collection<Exec> readTrade() {
+    public final Collection<Exec> selectTrade() {
         return Collections.emptyList();
     }
 
     @Override
-    public final Collection<Posn> readPosn() {
+    public final Collection<Posn> selectPosn() {
         return Collections.emptyList();
     }
 }

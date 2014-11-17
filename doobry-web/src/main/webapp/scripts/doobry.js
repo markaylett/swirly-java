@@ -175,11 +175,11 @@ function documentReady() {
                     var r = rs[i];
                     var contr = model.contrs[r.contr];
                     r.bidTicks0 = r.bidTicks[0];
-                    r.bidLots0 = r.bidTicks[0];
-                    r.bidCount0 = r.bidTicks[0];
+                    r.bidLots0 = r.bidLots[0];
+                    r.bidCount0 = r.bidCount[0];
                     r.offerTicks0 = r.offerTicks[0];
-                    r.offerLots0 = r.offerTicks[0];
-                    r.offerCount0 = r.offerTicks[0];
+                    r.offerLots0 = r.offerLots[0];
+                    r.offerCount0 = r.offerCount[0];
 
                     r.bidPrice0 = dbr.ticksToPrice(r.bidTicks0, contr);
                     r.offerPrice0 = dbr.ticksToPrice(r.offerTicks0, contr);

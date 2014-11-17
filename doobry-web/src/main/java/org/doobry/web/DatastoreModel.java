@@ -29,15 +29,22 @@ import org.doobry.util.SlNode;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.KeyRange;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.SortDirection;
 
 public final class DatastoreModel implements Model {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    private final void putOrder(Exec exec) {
+    private final void doInsertOrder(Exec exec) {
         final String kind = Kind.ORDER.camelName();
         final Entity entity = new Entity(kind, exec.getOrderId());
         entity.setProperty("userId", exec.getUserId());
@@ -58,7 +65,25 @@ public final class DatastoreModel implements Model {
         datastore.put(entity);
     }
 
-    private final void putExec(Exec exec) {
+    private final void doUpdateOrder(Exec exec) {
+        final String kind = Kind.ORDER.camelName();
+        final Key key = KeyFactory.createKey(kind, exec.getOrderId());
+        try {
+            final Entity entity = datastore.get(key);
+            entity.setProperty("state", exec.getState().name());
+            entity.setProperty("lots", exec.getLots());
+            entity.setProperty("resd", exec.getResd());
+            entity.setProperty("exec", exec.getExec());
+            entity.setProperty("lastTicks", exec.getLastTicks());
+            entity.setProperty("lastLots", exec.getLastLots());
+            entity.setProperty("modified", exec.getCreated());
+            datastore.put(entity);
+        } catch (final EntityNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private final void doInsertExec(Exec exec) {
         final String kind = Kind.EXEC.camelName();
         final Entity entity = new Entity(kind, exec.getId());
         entity.setProperty("orderId", exec.getOrderId());
@@ -96,15 +121,22 @@ public final class DatastoreModel implements Model {
         for (SlNode node = first; node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
             if (exec.getState() == State.NEW) {
-                putOrder(exec);
+                doInsertOrder(exec);
+            } else {
+                doUpdateOrder(exec);
             }
-            putExec(exec);
+            doInsertExec(exec);
         }
     }
 
     @Override
     public final void insertExec(Exec exec) {
-        putExec(exec);
+        if (exec.getState() == State.NEW) {
+            doInsertOrder(exec);
+        } else {
+            doUpdateOrder(exec);
+        }
+        doInsertExec(exec);
     }
 
     @Override
@@ -113,7 +145,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final Rec readRec(Kind kind) {
+    public final Rec selectRec(Kind kind) {
         Rec first = null;
         switch (kind) {
         case ASSET:
@@ -132,10 +164,11 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final Collection<Order> readOrder() {
+    public final Collection<Order> selectOrder() {
         final Collection<Order> c = new ArrayList<>();
         final String kind = Kind.ORDER.camelName();
-        final Query q = new Query(kind);
+        final Query q = new Query(kind).addSort(Entity.KEY_RESERVED_PROPERTY,
+                SortDirection.ASCENDING);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             final long id = entity.getKey().getId();
@@ -162,10 +195,12 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final Collection<Exec> readTrade() {
+    public final Collection<Exec> selectTrade() {
         final Collection<Exec> c = new ArrayList<>();
         final String kind = Kind.EXEC.camelName();
-        final Query q = new Query(kind);
+        final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
+        final Query q = new Query(kind).setFilter(filter).addSort(Entity.KEY_RESERVED_PROPERTY,
+                SortDirection.ASCENDING);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             final long id = entity.getKey().getId();
@@ -204,7 +239,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final Collection<Posn> readPosn() {
+    public final Collection<Posn> selectPosn() {
         return Collections.emptyList();
     }
 }

@@ -26,11 +26,11 @@ public interface Model {
 
     void updateExec(long id, long modified);
 
-    Rec readRec(Kind kind);
+    Rec selectRec(Kind kind);
 
-    Collection<Order> readOrder();
+    Collection<Order> selectOrder();
 
-    Collection<Exec> readTrade();
+    Collection<Exec> selectTrade();
 
-    Collection<Posn> readPosn();
+    Collection<Posn> selectPosn();
 }

@@ -49,19 +49,29 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void insertRecList(Kind kind) {
-        cache.insertList(kind, model.readRec(kind));
+        cache.insertList(kind, model.selectRec(kind));
     }
 
     private final void insertOrders() {
-        for (final Order order : model.readOrder()) {
+        for (final Order order : model.selectOrder()) {
             enrichOrder(order);
-            final Accnt accnt = Accnt.getLazyAccnt(order.getUser(), refIdx);
-            accnt.insertOrder(order);
+            final Book book = getLazyBook(order.getContr(), order.getSettlDay());
+            book.insertOrder(order);
+            boolean success = false;
+            try {
+                final Accnt accnt = Accnt.getLazyAccnt(order.getUser(), refIdx);
+                accnt.insertOrder(order);
+                success = true;
+            } finally {
+                if (!success) {
+                    book.removeOrder(order);
+                }
+            }
         }
     }
 
     private final void insertTrades() {
-        for (final Exec trade : model.readTrade()) {
+        for (final Exec trade : model.selectTrade()) {
             enrichTrade(trade);
             final Accnt accnt = Accnt.getLazyAccnt(trade.getUser(), refIdx);
             accnt.insertTrade(trade);
@@ -69,7 +79,7 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void insertPosns() {
-        for (final Posn posn : model.readPosn()) {
+        for (final Posn posn : model.selectPosn()) {
             enrichPosn(posn);
             final Accnt accnt = Accnt.getLazyAccnt(posn.getUser(), refIdx);
             accnt.insertPosn(posn);
