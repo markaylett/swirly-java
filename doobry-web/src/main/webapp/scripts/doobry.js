@@ -203,6 +203,7 @@ function documentReady() {
                 { name: 'exec', type: 'int' },
                 { name: 'lastTicks', type: 'int' },
                 { name: 'lastLots', type: 'int' },
+                { name: 'minLots', type: 'int' },
                 { name: 'created', type: 'date', format: 'yyyy-MM-dd' },
                 { name: 'modified', type: 'date', format: 'yyyy-MM-dd' }
             ],
@@ -226,7 +227,7 @@ function documentReady() {
             dataType: 'json',
             dataFields: [
                 { name: 'id', type: 'int' },
-                { name: 'order', type: 'int' },
+                { name: 'orderId', type: 'int' },
                 { name: 'user', type: 'string' },
                 { name: 'contr', type: 'string' },
                 { name: 'settlDate', type: 'int' },
@@ -239,8 +240,9 @@ function documentReady() {
                 { name: 'exec', type: 'int' },
                 { name: 'lastTicks', type: 'int' },
                 { name: 'lastLots', type: 'int' },
+                { name: 'minLots', type: 'int' },
 
-                { name: 'match', type: 'int' },
+                { name: 'matchId', type: 'int' },
                 { name: 'role', type: 'string' },
                 { name: 'cpty', type: 'string' },
 

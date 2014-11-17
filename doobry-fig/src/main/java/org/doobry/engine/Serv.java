@@ -277,7 +277,7 @@ public final class Serv implements AutoCloseable {
                 final User user = exec.getUser();
                 final Accnt accnt = (Accnt) user.getAccnt();
                 assert accnt != null;
-                accnt.releaseOrder(exec.getOrder());
+                accnt.releaseOrder(exec.getOrderId());
             }
         }
     }

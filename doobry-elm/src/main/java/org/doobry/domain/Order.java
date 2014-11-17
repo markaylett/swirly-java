@@ -59,6 +59,30 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
     }
 
     public Order(long id, Identifiable user, Identifiable contr, int settlDay, String ref,
+            State state, Action action, long ticks, long lots, long resd, long exec,
+            long lastTicks, long lastLots, long minLots, long created, long modified) {
+        assert user != null;
+        assert contr != null;
+        assert lots > 0 && lots >= minLots;
+        this.id = id;
+        this.user = user;
+        this.contr = contr;
+        this.settlDay = settlDay;
+        this.ref = ref;
+        this.state = state;
+        this.action = action;
+        this.ticks = ticks;
+        this.lots = lots;
+        this.resd = resd;
+        this.exec = exec;
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.minLots = minLots;
+        this.created = created;
+        this.modified = modified;
+    }
+
+    public Order(long id, Identifiable user, Identifiable contr, int settlDay, String ref,
             Action action, long ticks, long lots, long minLots, long created) {
         assert user != null;
         assert contr != null;
@@ -103,6 +127,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         sb.append(",\"exec\":").append(exec);
         sb.append(",\"lastTicks\":").append(lastTicks);
         sb.append(",\"lastLots\":").append(lastLots);
+        sb.append(",\"minLots\":").append(minLots);
         sb.append(",\"created\":").append(created);
         sb.append(",\"modified\":").append(modified);
         sb.append("}");

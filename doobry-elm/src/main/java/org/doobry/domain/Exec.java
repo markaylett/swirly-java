@@ -55,9 +55,34 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
     }
 
-    public Exec(long id, long order, Instruct instruct, long created) {
+    public Exec(long id, long orderId, Identifiable user, Identifiable contr, int settlDay,
+            String ref, State state, Action action, long ticks, long lots, long resd, long exec,
+            long lastTicks, long lastLots, long minLots, long matchId, Role role,
+            Identifiable cpty, long created) {
         this.id = id;
-        this.orderId = order;
+        this.orderId = orderId;
+        this.user = user;
+        this.contr = contr;
+        this.settlDay = settlDay;
+        this.ref = ref;
+        this.state = state;
+        this.action = action;
+        this.ticks = ticks;
+        this.lots = lots;
+        this.resd = resd;
+        this.exec = exec;
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.minLots = minLots;
+        this.matchId = matchId;
+        this.role = role;
+        this.cpty = cpty;
+        this.created = created;
+    }
+
+    public Exec(long id, long orderId, Instruct instruct, long created) {
+        this.id = id;
+        this.orderId = orderId;
         this.user = instruct.getUser();
         this.contr = instruct.getContr();
         this.settlDay = instruct.getSettlDay();
@@ -84,7 +109,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     @Override
     public final void print(StringBuilder sb, Object arg) {
         sb.append("{\"id\":").append(id);
-        sb.append(",\"order\":").append(orderId);
+        sb.append(",\"orderId\":").append(orderId);
         sb.append(",\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));
         sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
@@ -97,8 +122,9 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         sb.append(",\"exec\":").append(exec);
         sb.append(",\"lastTicks\":").append(lastTicks);
         sb.append(",\"lastLots\":").append(lastLots);
+        sb.append(",\"minLots\":").append(minLots);
         if (state == State.TRADE) {
-            sb.append(",\"match\":").append(matchId);
+            sb.append(",\"matchId\":").append(matchId);
             sb.append(",\"role\":\"").append(role);
             sb.append("\",\"cpty\":\"").append(getRecMnem(cpty));
             sb.append("\"");
@@ -152,7 +178,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         return id;
     }
 
-    public final long getOrder() {
+    public final long getOrderId() {
         return orderId;
     }
 
