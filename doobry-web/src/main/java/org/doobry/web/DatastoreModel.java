@@ -29,8 +29,6 @@ import org.doobry.util.SlNode;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.KeyRange;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
@@ -41,8 +39,7 @@ public final class DatastoreModel implements Model {
 
     private final void putOrder(Exec exec) {
         final String kind = Kind.ORDER.camelName();
-        final Key key = KeyFactory.createKey(kind, exec.getOrderId());
-        final Entity entity = new Entity(kind, key);
+        final Entity entity = new Entity(kind, exec.getOrderId());
         entity.setProperty("userId", exec.getUserId());
         entity.setProperty("contrId", exec.getContrId());
         entity.setProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
@@ -63,8 +60,7 @@ public final class DatastoreModel implements Model {
 
     private final void putExec(Exec exec) {
         final String kind = Kind.EXEC.camelName();
-        final Key key = KeyFactory.createKey(kind, exec.getId());
-        final Entity entity = new Entity(kind, key);
+        final Entity entity = new Entity(kind, exec.getId());
         entity.setProperty("orderId", exec.getOrderId());
         entity.setProperty("userId", exec.getUserId());
         entity.setProperty("contrId", exec.getContrId());

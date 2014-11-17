@@ -405,7 +405,7 @@ function documentReady() {
             theme: theme,
             columns: [
                 { text: 'Id', dataField: 'id', width: 80 },
-                { text: 'Order', dataField: 'order', width: 80 },
+                { text: 'Order', dataField: 'orderId', width: 80 },
                 { text: 'Contr', dataField: 'contr', width: 80 },
                 { text: 'Settl Date', dataField: 'settlDate', width: 80 },
                 { text: 'Action', dataField: 'action', width: 80 },
