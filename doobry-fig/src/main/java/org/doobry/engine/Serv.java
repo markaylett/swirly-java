@@ -163,16 +163,16 @@ public final class Serv implements AutoCloseable {
         final long orderId = model.allocIds(Kind.ORDER, 1);
         final Contr contr = book.getContr();
         final int settlDay = book.getSettlDay();
-        final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
+        final Order newOrder = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
                 ticks, lots, minLots, now);
-        final Exec newExec = newExec(order, now);
-        final Trans trans = new Trans();
-        trans.execs.insertBack(newExec);
+        final Exec newExec = newExec(newOrder, now);
+        final Trans trans = new Trans(newOrder, newExec);
         // Order fields are updated on match.
-        Broker.matchOrders(book, order, model, refIdx, trans);
+        Broker.matchOrders(book, newOrder, model, refIdx, trans);
         // Place incomplete order in book.
-        if (!order.isDone()) {
-            book.insertOrder(order);
+        if (!newOrder.isDone()) {
+            // This may fail if level cannot be allocated.
+            book.insertOrder(newOrder);
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
         // any unfilled quantity.
@@ -181,15 +181,17 @@ public final class Serv implements AutoCloseable {
             model.insertExecList((Exec) trans.execs.getFirst());
             success = true;
         } finally {
-            if (!success && !order.isDone()) {
-                book.removeOrder(order);
+            if (!success && !newOrder.isDone()) {
+                book.removeOrder(newOrder);
             }
         }
         // Final commit phase cannot fail.
-        accnt.insertOrder(order);
+        if (!newOrder.isDone()) {
+            accnt.insertOrder(newOrder);
+        }
         // Commit trans to cycle and free matches.
         commitTrans(accnt, book, trans, now);
-        return order;
+        return newOrder;
     }
 
     public final void reviseOrder(Accnt accnt, Order order, long lots) {

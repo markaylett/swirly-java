@@ -167,8 +167,8 @@ public final class DatastoreModel implements Model {
     public final Collection<Order> selectOrder() {
         final Collection<Order> c = new ArrayList<>();
         final String kind = Kind.ORDER.camelName();
-        final Query q = new Query(kind).addSort(Entity.KEY_RESERVED_PROPERTY,
-                SortDirection.ASCENDING);
+        final Filter filter = new FilterPredicate("resd", FilterOperator.GREATER_THAN, 0);
+        final Query q = new Query(kind).setFilter(filter);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             final long id = entity.getKey().getId();
@@ -199,8 +199,7 @@ public final class DatastoreModel implements Model {
         final Collection<Exec> c = new ArrayList<>();
         final String kind = Kind.EXEC.camelName();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
-        final Query q = new Query(kind).setFilter(filter).addSort(Entity.KEY_RESERVED_PROPERTY,
-                SortDirection.ASCENDING);
+        final Query q = new Query(kind).setFilter(filter);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             final long id = entity.getKey().getId();
@@ -231,7 +230,6 @@ public final class DatastoreModel implements Model {
                 cpty = null;
             }
             final long created = (Long) entity.getProperty("created");
-
             c.add(new Exec(id, orderId, user, contr, settlDay, ref, state, action, ticks, lots,
                     resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty, created));
         }
