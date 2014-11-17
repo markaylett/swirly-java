@@ -8,7 +8,10 @@ package org.doobry.web;
 import static org.doobry.web.WebUtil.splitPathInfo;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +27,14 @@ import com.google.appengine.api.users.UserServiceFactory;
 @SuppressWarnings("serial")
 public final class AccntServlet extends HttpServlet {
 
+    private Map<String, String> userMap = new ConcurrentHashMap<>();
+
+    @Override
+    public final void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        userMap = Context.getRest().newUserMap();
+    }
+
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
@@ -33,6 +44,7 @@ public final class AccntServlet extends HttpServlet {
             resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
             return;
         }
+        final String umnem = userMap.get(user.getEmail());
 
         final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
@@ -40,12 +52,12 @@ public final class AccntServlet extends HttpServlet {
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPathInfo(pathInfo);
         if (parts.length == 0) {
-            rest.getAccnt(sb, user.getEmail());
+            rest.getAccnt(sb, umnem);
         } else if ("order".equals(parts[0])) {
             if (parts.length == 1) {
-                rest.getOrder(sb, user.getEmail());
+                rest.getOrder(sb, umnem);
             } else if (parts.length == 2) {
-                if (!rest.getOrder(sb, user.getEmail(), Integer.parseInt(parts[1]))) {
+                if (!rest.getOrder(sb, umnem, Integer.parseInt(parts[1]))) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -55,9 +67,9 @@ public final class AccntServlet extends HttpServlet {
             }
         } else if ("trade".equals(parts[0])) {
             if (parts.length == 1) {
-                rest.getTrade(sb, user.getEmail());
+                rest.getTrade(sb, umnem);
             } else if (parts.length == 2) {
-                if (!rest.getTrade(sb, user.getEmail(), Integer.parseInt(parts[1]))) {
+                if (!rest.getTrade(sb, umnem, Integer.parseInt(parts[1]))) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -67,11 +79,11 @@ public final class AccntServlet extends HttpServlet {
             }
         } else if ("posn".equals(parts[0])) {
             if (parts.length == 1) {
-                rest.getPosn(sb, user.getEmail());
+                rest.getPosn(sb, umnem);
             } else if (parts.length == 2) {
-                rest.getPosn(sb, user.getEmail(), parts[1]);
+                rest.getPosn(sb, umnem, parts[1]);
             } else if (parts.length == 3) {
-                if (!rest.getPosn(sb, user.getEmail(), parts[1], Integer.parseInt(parts[2]))) {
+                if (!rest.getPosn(sb, umnem, parts[1], Integer.parseInt(parts[2]))) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -98,6 +110,7 @@ public final class AccntServlet extends HttpServlet {
             resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
             return;
         }
+        final String umnem = userMap.get(user.getEmail());
 
         final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
@@ -122,7 +135,7 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
 
-        rest.postOrder(sb, user.getEmail(), r.getContr(), r.getSettlDate(), r.getRef(),
+        rest.postOrder(sb, umnem, r.getContr(), r.getSettlDate(), r.getRef(),
                 r.getAction(), r.getTicks(), r.getLots(), r.getMinLots());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
@@ -142,6 +155,7 @@ public final class AccntServlet extends HttpServlet {
             resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
             return;
         }
+        final String umnem = userMap.get(user.getEmail());
 
         final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
@@ -165,7 +179,7 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        rest.putOrder(sb, user.getEmail(), id, r.getLots());
+        rest.putOrder(sb, umnem, id, r.getLots());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.addHeader("Cache-Control", "no-cache");

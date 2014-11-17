@@ -7,6 +7,9 @@ package org.doobry.web;
 
 import static org.doobry.util.Date.isoToJd;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.doobry.domain.Action;
 import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
@@ -15,6 +18,7 @@ import org.doobry.domain.Kind;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
+import org.doobry.domain.User;
 import org.doobry.engine.Accnt;
 import org.doobry.engine.Model;
 import org.doobry.engine.Serv;
@@ -27,6 +31,15 @@ public final class Rest {
 
     public Rest(Model model) {
         serv = new Serv(model);
+    }
+
+    public final synchronized Map<String, String> newUserMap() {
+        final Map<String, String> m = new ConcurrentHashMap<>();
+        for (SlNode node = serv.getFirstRec(Kind.USER); node != null; node = node.slNext()) {
+            final User user = (User) node;
+            m.put(user.getEmail(), user.getMnem());
+        }
+        return m;
     }
 
     public final synchronized void getRec(StringBuilder sb) {

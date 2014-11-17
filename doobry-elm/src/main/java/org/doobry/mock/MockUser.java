@@ -38,6 +38,7 @@ public final class MockUser {
         put(i++, "TLEE", "Todd Lee", "todd.lee@doobry.org");
         put(i++, "VCAMPBEL", "Virginia Campbell", "virginia.campbell@doobry.org");
         put(i++, "WRAMIREZ", "Wayne Ramirez", "wayne.ramirez@doobry.org");
+        put(i++, "MAYLETT", "Mark Aylett", "mark.aylett@gmail.com");
     }
 
     private MockUser() {

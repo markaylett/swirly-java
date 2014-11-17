@@ -45,7 +45,7 @@ public final class DatastoreModel implements Model {
         final Entity entity = new Entity(kind, key);
         entity.setProperty("userId", exec.getUserId());
         entity.setProperty("contrId", exec.getContrId());
-        entity.setProperty("settlDay", exec.getSettlDay());
+        entity.setProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
         entity.setProperty("ref", exec.getRef());
         entity.setProperty("state", exec.getState().name());
         entity.setProperty("action", exec.getAction().name());
@@ -68,7 +68,7 @@ public final class DatastoreModel implements Model {
         entity.setProperty("orderId", exec.getOrderId());
         entity.setProperty("userId", exec.getUserId());
         entity.setProperty("contrId", exec.getContrId());
-        entity.setProperty("settlDay", exec.getSettlDay());
+        entity.setProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
         entity.setProperty("ref", exec.getRef());
         entity.setProperty("state", exec.getState().name());
         entity.setProperty("action", exec.getAction().name());
@@ -145,7 +145,7 @@ public final class DatastoreModel implements Model {
             final long id = entity.getKey().getId();
             final Identifiable user = newId((Long) entity.getProperty("userId"));
             final Identifiable contr = newId((Long) entity.getProperty("contrId"));
-            final int settlDay = (Integer) entity.getProperty("settlDay");
+            final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
             final String ref = (String) entity.getProperty("ref");
             final State state = State.valueOf((String) entity.getProperty("state"));
             final Action action = Action.valueOf((String) entity.getProperty("action"));
@@ -176,7 +176,7 @@ public final class DatastoreModel implements Model {
             final long orderId = (Long) entity.getProperty("orderId");
             final Identifiable user = newId((Long) entity.getProperty("userId"));
             final Identifiable contr = newId((Long) entity.getProperty("contrId"));
-            final int settlDay = (Integer) entity.getProperty("settlDay");
+            final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
             final String ref = (String) entity.getProperty("ref");
             final State state = State.valueOf((String) entity.getProperty("state"));
             final Action action = Action.valueOf((String) entity.getProperty("action"));
