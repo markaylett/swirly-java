@@ -8,6 +8,10 @@ package org.doobry.util;
 public final class Stack {
     private SlNode first;
 
+    public final void clear() {
+        first = null;
+    }
+
     public final void insertAfter(SlNode node, SlNode newNode) {
         newNode.setSlNext(node.slNext());
         node.setSlNext(newNode);

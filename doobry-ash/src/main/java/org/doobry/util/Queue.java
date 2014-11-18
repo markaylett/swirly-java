@@ -9,6 +9,11 @@ public final class Queue {
     private SlNode first;
     private SlNode last;
 
+    public final void clear() {
+        first = null;
+        last = null;
+    }
+
     public final void insertBack(SlNode node) {
         if (!isEmpty()) {
             last.setSlNext(node);

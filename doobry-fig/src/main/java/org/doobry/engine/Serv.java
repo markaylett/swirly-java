@@ -93,7 +93,7 @@ public final class Serv implements AutoCloseable {
 
     // Assumes that maker lots have not been reduced since matching took place.
 
-    private final void commitTrans(Accnt taker, Book book, Trans trans, long now) {
+    private final void commitMatches(Accnt taker, Book book, long now, Trans trans) {
         for (SlNode node = trans.matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
@@ -107,9 +107,8 @@ public final class Serv implements AutoCloseable {
             match.makerPosn.applyTrade(match.makerTrade);
             // Update taker.
             taker.insertTrade(match.takerTrade);
-            trans.takerPosn.applyTrade(match.takerTrade);
+            trans.posn.applyTrade(match.takerTrade);
         }
-        execs.join(trans.execs);
     }
 
     public Serv(Model model) {
@@ -154,8 +153,8 @@ public final class Serv implements AutoCloseable {
         return getLazyAccnt(user);
     }
 
-    public final Order placeOrder(Accnt accnt, Book book, String ref, Action action, long ticks,
-            long lots, long minLots) {
+    public final Trans placeOrder(Accnt accnt, Book book, String ref, Action action, long ticks,
+            long lots, long minLots, Trans trans) {
         if (lots == 0 || lots < minLots) {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
@@ -163,16 +162,19 @@ public final class Serv implements AutoCloseable {
         final long orderId = model.allocIds(Kind.ORDER, 1);
         final Contr contr = book.getContr();
         final int settlDay = book.getSettlDay();
-        final Order newOrder = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
+        final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
                 ticks, lots, minLots, now);
-        final Exec newExec = newExec(newOrder, now);
-        final Trans trans = new Trans(newOrder, newExec);
+        final Exec exec = newExec(order, now);
+
+        trans.clear();
+        trans.order = order;
+        trans.execs.insertBack(exec);
         // Order fields are updated on match.
-        Broker.matchOrders(book, newOrder, model, refIdx, trans);
+        Broker.matchOrders(book, order, model, refIdx, trans);
         // Place incomplete order in book.
-        if (!newOrder.isDone()) {
+        if (!order.isDone()) {
             // This may fail if level cannot be allocated.
-            book.insertOrder(newOrder);
+            book.insertOrder(order);
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
         // any unfilled quantity.
@@ -181,17 +183,18 @@ public final class Serv implements AutoCloseable {
             model.insertExecList((Exec) trans.execs.getFirst());
             success = true;
         } finally {
-            if (!success && !newOrder.isDone()) {
-                book.removeOrder(newOrder);
+            if (!success && !order.isDone()) {
+                // Undo book insertion.
+                book.removeOrder(order);
             }
         }
         // Final commit phase cannot fail.
-        if (!newOrder.isDone()) {
-            accnt.insertOrder(newOrder);
+        if (!order.isDone()) {
+            accnt.insertOrder(order);
         }
         // Commit trans to cycle and free matches.
-        commitTrans(accnt, book, trans, now);
-        return newOrder;
+        commitMatches(accnt, book, now, trans);
+        return trans;
     }
 
     public final void reviseOrder(Accnt accnt, Order order, long lots) {

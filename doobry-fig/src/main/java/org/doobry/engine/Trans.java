@@ -5,25 +5,40 @@
  *******************************************************************************/
 package org.doobry.engine;
 
-import org.doobry.domain.Exec;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.util.Queue;
+import org.doobry.util.SlNode;
 
 public final class Trans {
-    final Order newOrder;
-    final Queue matches;
+    Order order;
+    final Queue matches = new Queue();
     /**
      * All executions referenced in matches.
      */
-    final Queue execs;
-    Posn takerPosn;
+    final Queue execs = new Queue();
+    Posn posn;
 
-    public Trans(Order newOrder, Exec newExec) {
-        this.newOrder = newOrder;
-        matches = new Queue();
-        execs = new Queue();
-        takerPosn = null;
-        execs.insertBack(newExec);
+    final void clear() {
+        order = null;
+        matches.clear();
+        execs.clear();
+        posn = null;
+    }
+
+    public final Order getOrder() {
+        return order;
+    }
+
+    public final SlNode getFirstExec() {
+        return execs.getFirst();
+    }
+
+    public final boolean isEmptyExec() {
+        return execs.isEmpty();
+    }
+
+    public final Posn getPosn() {
+        return posn;
     }
 }

@@ -22,6 +22,7 @@ import org.doobry.domain.User;
 import org.doobry.engine.Accnt;
 import org.doobry.engine.Model;
 import org.doobry.engine.Serv;
+import org.doobry.engine.Trans;
 import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;
 
@@ -112,7 +113,8 @@ public final class Rest {
             int settlDate, String ref, Action action, long ticks, long lots, long minLots) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
         final Book book = serv.getLazyBook(cmnem, isoToJd(settlDate));
-        final Order order = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots);
+        final Order order = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots,
+                new Trans()).getOrder();
         order.print(sb, null);
     }
 

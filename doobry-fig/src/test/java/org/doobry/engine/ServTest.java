@@ -23,7 +23,8 @@ public final class ServTest {
             final int settlDay = ymdToJd(2014, 3, 14);
             final Book book = s.getLazyBook("EURUSD", settlDay);
 
-            final Order order = s.placeOrder(accnt, book, "", Action.BUY, 12345, 5, 1);
+            final Order order = s.placeOrder(accnt, book, "", Action.BUY, 12345, 5, 1, new Trans())
+                    .getOrder();
             assertEquals(accnt.getUser(), order.getUser());
             assertEquals(book.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());

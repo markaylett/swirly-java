@@ -12,7 +12,7 @@ public final class Tree {
 
     private RbNode root;
 
-    public static int cmp(long lhs, long rhs) {
+    private static int cmp(long lhs, long rhs) {
         int i;
         if (lhs < rhs) {
             i = -1;
@@ -185,7 +185,11 @@ public final class Tree {
     }
 
     public Tree() {
-        this.root = null;
+        clear();
+    }
+
+    public final void clear() {
+        root = null;
     }
 
     /**
