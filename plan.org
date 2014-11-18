@@ -12,3 +12,5 @@
 *** Array-based cancel
 *** Change settldate to string
 ** Blocked
+** Brainstorm
+   Users cannot submit resting orders.

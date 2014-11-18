@@ -107,23 +107,11 @@
           <groupId>com.google.appengine</groupId>
           <artifactId>appengine-maven-plugin</artifactId>
           <version>${appengine.target.version}</version>
-          <configuration>
-            <jvmFlags>
-              <jvmFlag>-Xdebug</jvmFlag>
-              <!--jvmFlag>-Xrunjdwp:transport=dt_socket,address=8000,server=y</jvmFlag-->
-              <jvmFlag>-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y</jvmFlag>
-            </jvmFlags>
-            <disableUpdateCheck>true</disableUpdateCheck>
-          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-ear-plugin</artifactId>
           <version>2.9</version>
-          <configuration>
-            <unpackTypes>war</unpackTypes>
-            <applicationXml>${project.basedir}/src/main/application/META-INF/application.xml</applicationXml>
-          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
