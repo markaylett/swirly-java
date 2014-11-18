@@ -13,25 +13,31 @@ import org.doobry.util.Queue;
 import org.doobry.util.SlNode;
 
 public final class Trans implements Printable {
-    Order order;
+    Order newOrder;
     final Queue matches = new Queue();
     /**
      * All executions referenced in matches.
      */
     final Queue execs = new Queue();
-    Posn posn;
+    Posn takerPosn;
 
     final void clear() {
-        order = null;
+        newOrder = null;
         matches.clear();
         execs.clear();
-        posn = null;
+        takerPosn = null;
     }
 
     @Override
     public void print(StringBuilder sb, Object arg) {
-        sb.append("{\"order\":").append(order);
-        sb.append(",\"exec\":[");
+
+        if (newOrder != null) {
+            sb.append("{\"newOrder\":").append(newOrder);
+            sb.append(',');
+        } else {
+            sb.append('{');
+        }
+        sb.append("\"exec\":[");
         SlNode node = execs.getFirst();
         for (int i = 0; node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
@@ -42,16 +48,16 @@ public final class Trans implements Printable {
             ++i;
         }
         // Position is optional.
-        if (posn != null) {
-            sb.append("],\"posn\":").append(posn);
-            sb.append("}");
+        if (takerPosn != null) {
+            sb.append("],\"takerPosn\":").append(takerPosn);
+            sb.append('}');
         } else {
             sb.append("]}");
         }
     }
 
-    public final Order getOrder() {
-        return order;
+    public final Order getNewOrder() {
+        return newOrder;
     }
 
     public final SlNode getFirstExec() {
@@ -62,7 +68,7 @@ public final class Trans implements Printable {
         return execs.isEmpty();
     }
 
-    public final Posn getPosn() {
-        return posn;
+    public final Posn getTakerPosn() {
+        return takerPosn;
     }
 }

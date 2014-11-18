@@ -87,7 +87,7 @@ public final class Broker {
         if (!trans.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
             final Accnt takerAccnt = Accnt.getLazyAccnt(takerOrder.getUser(), refIdx);
-            trans.posn = takerAccnt.getLazyPosn(contr, settlDay);
+            trans.takerPosn = takerAccnt.getLazyPosn(contr, settlDay);
             takerOrder.trade(taken, lastTicks, lastLots, now);
         }
     }
