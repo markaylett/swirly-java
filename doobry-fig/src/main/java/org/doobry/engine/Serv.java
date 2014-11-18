@@ -9,13 +9,12 @@ import org.doobry.domain.Action;
 import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
-import org.doobry.domain.RefIdx;
+import org.doobry.domain.Kind;
 import org.doobry.domain.Order;
-import org.doobry.domain.User;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
-import org.doobry.domain.Kind;
-import org.doobry.util.Queue;
+import org.doobry.domain.RefIdx;
+import org.doobry.domain.User;
 import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;
 import org.doobry.util.Tree;
@@ -27,7 +26,6 @@ public final class Serv implements AutoCloseable {
     private final Cache cache = new Cache(CACHE_BUCKETS);
     private final RefIdx refIdx = new RefIdx(REFIDX_BUCKETS);
     private final Tree books = new Tree();
-    private final Queue execs = new Queue();
 
     private final void enrichOrder(Order order) {
         final User user = (User) cache.findRec(Kind.USER, order.getUserId());
@@ -197,7 +195,7 @@ public final class Serv implements AutoCloseable {
         return trans;
     }
 
-    public final void reviseOrder(Accnt accnt, Order order, long lots) {
+    public final Trans reviseOrder(Accnt accnt, Order order, long lots, Trans trans) {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
@@ -218,28 +216,30 @@ public final class Serv implements AutoCloseable {
         final Book book = findBook(order.getContr(), order.getSettlDay());
         assert book != null;
         book.reviseOrder(order, lots, now);
-        execs.insertBack(exec);
+
+        trans.clear();
+        trans.order = order;
+        trans.execs.insertBack(exec);
+        return trans;
     }
 
-    public final Order reviseOrder(Accnt accnt, long id, long lots) {
+    public final Trans reviseOrder(Accnt accnt, long id, long lots, Trans trans) {
         final Order order = accnt.findOrder(id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
-        reviseOrder(accnt, order, lots);
-        return order;
+        return reviseOrder(accnt, order, lots, trans);
     }
 
-    public final Order reviseOrder(Accnt accnt, String ref, long lots) {
+    public final Trans reviseOrder(Accnt accnt, String ref, long lots, Trans trans) {
         final Order order = accnt.findOrder(ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
-        reviseOrder(accnt, order, lots);
-        return order;
+        return reviseOrder(accnt, order, lots, trans);
     }
 
-    public final void cancelOrder(Accnt accnt, Order order) {
+    public final Trans cancelOrder(Accnt accnt, Order order, Trans trans) {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
@@ -252,25 +252,27 @@ public final class Serv implements AutoCloseable {
         final Book book = findBook(order.getContr(), order.getSettlDay());
         assert book != null;
         book.cancelOrder(order, now);
-        execs.insertBack(exec);
+
+        trans.clear();
+        trans.order = order;
+        trans.execs.insertBack(exec);
+        return trans;
     }
 
-    public final Order cancelOrder(Accnt accnt, long id) {
+    public final Trans cancelOrder(Accnt accnt, long id, Trans trans) {
         final Order order = accnt.findOrder(id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
-        cancelOrder(accnt, order);
-        return order;
+        return cancelOrder(accnt, order, trans);
     }
 
-    public final Order cancelOrder(Accnt accnt, String ref) {
+    public final Trans cancelOrder(Accnt accnt, String ref, Trans trans) {
         final Order order = accnt.findOrder(ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
-        cancelOrder(accnt, order);
-        return order;
+        return cancelOrder(accnt, order, trans);
     }
 
     public final void ackTrade(Accnt accnt, long id) {
@@ -283,26 +285,6 @@ public final class Serv implements AutoCloseable {
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);
-    }
-
-    public final void clear() {
-        while (!execs.isEmpty()) {
-            final Exec exec = (Exec) execs.removeFirst();
-            if (exec.isDone()) {
-                final User user = exec.getUser();
-                final Accnt accnt = (Accnt) user.getAccnt();
-                assert accnt != null;
-                accnt.releaseOrder(exec.getOrderId());
-            }
-        }
-    }
-
-    public final SlNode getFirstExec() {
-        return execs.getFirst();
-    }
-
-    public final boolean isEmptyExec() {
-        return execs.isEmpty();
     }
 
     public final Book getLazyBook(Contr contr, int settlDay) {

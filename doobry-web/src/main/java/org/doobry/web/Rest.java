@@ -120,8 +120,9 @@ public final class Rest {
 
     public final synchronized void putOrder(StringBuilder sb, String umnem, long id, long lots) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
-        final Order order = lots > 0 ? serv.reviseOrder(accnt, id, lots) //
-                : serv.cancelOrder(accnt, id);
+        final Trans trans = new Trans();
+        final Order order = (lots > 0 ? serv.reviseOrder(accnt, id, lots, trans) //
+                : serv.cancelOrder(accnt, id, trans)).getOrder();
         order.print(sb, null);
     }
 
