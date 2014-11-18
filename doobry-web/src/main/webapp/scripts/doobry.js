@@ -350,6 +350,15 @@ function documentReady() {
                 $('#posnTable').jqxDataTable('updateBoundData');
             }
         });
+        $('#splitter').jqxSplitter({
+            width: 960,
+            height: 500,
+            orientation: 'horizontal',
+            panels: [
+                { size: '40%' },
+                { size: '60%' }
+            ]
+        });
         $('#bookTable').jqxDataTable({
             theme: theme,
             columns: [

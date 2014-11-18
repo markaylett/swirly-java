@@ -27,6 +27,7 @@
     <script type="text/javascript" src="/jqwidgets/jqxlistbox.js"></script>
     <script type="text/javascript" src="/jqwidgets/jqxnumberinput.js"></script>
     <script type="text/javascript" src="/jqwidgets/jqxscrollbar.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxsplitter.js"></script>
     <script type="text/javascript" src="/jqwidgets/jqxswitchbutton.js"></script>
     <script type="text/javascript" src="/jqwidgets/jqxtabs.js"></script>
     <script type="text/javascript" src="/jqwidgets/jqxwindow.js"></script>
@@ -44,19 +45,21 @@
       <button id="cancelOrder">Cancel Order</button>
       <button id="refresh">Refresh</button>
     </div>
-    <div id="bookTable" style="margin-bottom: 5px">
-    </div>
-    <div id="tabs">
-      <ul>
-        <li>Order</li>
-        <li>Trade</li>
-        <li>Posn</li>
-      </ul>
-      <div id="orderTable">
+    <div id="splitter">
+      <div id="bookTable" style="margin-bottom: 5px">
       </div>
-      <div id="tradeTable">
-      </div>
-      <div id="posnTable">
+      <div id="tabs" class="jqx-hideborder jqx-hidescrollbars">
+        <ul>
+          <li style="margin-left: 20px;">Order</li>
+          <li>Trade</li>
+          <li>Posn</li>
+        </ul>
+        <div id="orderTable">
+        </div>
+        <div id="tradeTable">
+        </div>
+        <div id="posnTable">
+        </div>
       </div>
     </div>
     <div id="orderDialog" style="visibility: hidden;">
