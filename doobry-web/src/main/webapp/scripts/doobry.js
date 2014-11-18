@@ -146,6 +146,18 @@ Model.prototype.cancelOrder = function(fn, data) {
     });
 };
 
+Model.prototype.confirmTrade = function(fn, data) {
+    var that = this;
+    $.ajax({
+        type: 'delete',
+        url: '/api/accnt/trade/' + data.id
+    }).done(function(v) {
+        fn(data);
+    }).fail(function(r) {
+        var v = $.parseJSON(r.responseText);
+    });
+};
+
 var model = null;
 
 // Lifecycle phases.
@@ -332,6 +344,22 @@ function documentReady() {
                     var rows = $('#orderTable').jqxDataTable('getRows');
                     var index = rows.indexOf(data);
                     $("#orderTable").jqxDataTable('updateRow', index, v);
+                }, data);
+            }
+        });
+        $('#confirmTrade').jqxButton({
+            theme: theme,
+            height: 27,
+            template: 'primary'
+        });
+        $('#confirmTrade').on('click', function () {
+            var selection = $('#tradeTable').jqxDataTable('getSelection');
+            for (var i = 0; i < selection.length; ++i) {
+                var data = selection[i];
+                model.confirmTrade(function(data) {
+                    var rows = $('#tradeTable').jqxDataTable('getRows');
+                    var index = rows.indexOf(data);
+                    $("#tradeTable").jqxDataTable('deleteRow', index);
                 }, data);
             }
         });

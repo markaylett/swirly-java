@@ -36,6 +36,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.KeyRange;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
@@ -212,7 +213,11 @@ public final class DatastoreModel implements Model {
     public final Collection<Exec> selectTrade() {
         final Collection<Exec> c = new ArrayList<>();
         final String kind = Kind.EXEC.camelName();
-        final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
+        final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
+                State.TRADE.name());
+        final Filter confirmedFilter = new FilterPredicate("confirmed", FilterOperator.EQUAL,
+                Boolean.FALSE);
+        final Filter filter = CompositeFilterOperator.and(stateFilter, confirmedFilter);
         final Query q = new Query(kind).setFilter(filter);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {

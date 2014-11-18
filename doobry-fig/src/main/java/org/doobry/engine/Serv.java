@@ -277,7 +277,7 @@ public final class Serv implements AutoCloseable {
 
     public final void confirmTrade(Accnt accnt, long id) {
         final Exec trade = accnt.findTrade(id);
-        if (trade != null) {
+        if (trade == null) {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
         final long now = System.currentTimeMillis();
