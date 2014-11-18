@@ -25,7 +25,7 @@ public final class ServTest {
 
             final Trans trans = new Trans();
             final Order order = s.placeOrder(accnt, book, "", Action.BUY, 12345, 5, 1, trans)
-                    .getNewOrder();
+                    .getOrder();
             assertEquals(accnt.getUser(), order.getUser());
             assertEquals(book.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());

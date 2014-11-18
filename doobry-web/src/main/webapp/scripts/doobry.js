@@ -116,7 +116,7 @@ Model.prototype.submitOrder = function(contr, settlDate, action, price, lots, fn
             minLots: 0
         })
     }).done(function(v) {
-        var order = v.order;
+        var order = v.order[0];
         var contr = model.contrs[order.contr];
         order.price = dbr.ticksToPrice(order.ticks, contr);
         order.lastPrice = dbr.ticksToPrice(order.lastTicks, contr);

@@ -105,7 +105,7 @@ public final class Serv implements AutoCloseable {
             match.makerPosn.applyTrade(match.makerTrade);
             // Update taker.
             taker.insertTrade(match.takerTrade);
-            trans.takerPosn.applyTrade(match.takerTrade);
+            trans.posn.applyTrade(match.takerTrade);
         }
     }
 
@@ -160,19 +160,19 @@ public final class Serv implements AutoCloseable {
         final long orderId = model.allocIds(Kind.ORDER, 1);
         final Contr contr = book.getContr();
         final int settlDay = book.getSettlDay();
-        final Order newOrder = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
+        final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
                 ticks, lots, minLots, now);
-        final Exec exec = newExec(newOrder, now);
+        final Exec exec = newExec(order, now);
 
         trans.clear();
-        trans.newOrder = newOrder;
+        trans.order = order;
         trans.execs.insertBack(exec);
         // Order fields are updated on match.
-        Broker.matchOrders(book, newOrder, model, refIdx, trans);
+        Broker.matchOrders(book, order, model, refIdx, trans);
         // Place incomplete order in book.
-        if (!newOrder.isDone()) {
+        if (!order.isDone()) {
             // This may fail if level cannot be allocated.
-            book.insertOrder(newOrder);
+            book.insertOrder(order);
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
         // any unfilled quantity.
@@ -181,14 +181,14 @@ public final class Serv implements AutoCloseable {
             model.insertExecList((Exec) trans.execs.getFirst());
             success = true;
         } finally {
-            if (!success && !newOrder.isDone()) {
+            if (!success && !order.isDone()) {
                 // Undo book insertion.
-                book.removeOrder(newOrder);
+                book.removeOrder(order);
             }
         }
         // Final commit phase cannot fail.
-        if (!newOrder.isDone()) {
-            accnt.insertOrder(newOrder);
+        if (!order.isDone()) {
+            accnt.insertOrder(order);
         }
         // Commit trans to cycle and free matches.
         commitMatches(accnt, book, now, trans);
@@ -218,6 +218,7 @@ public final class Serv implements AutoCloseable {
         book.reviseOrder(order, lots, now);
 
         trans.clear();
+        trans.order = order;
         trans.execs.insertBack(exec);
         return trans;
     }
@@ -253,6 +254,7 @@ public final class Serv implements AutoCloseable {
         book.cancelOrder(order, now);
 
         trans.clear();
+        trans.order = order;
         trans.execs.insertBack(exec);
         return trans;
     }

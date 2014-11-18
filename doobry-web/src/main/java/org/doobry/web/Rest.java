@@ -115,7 +115,7 @@ public final class Rest {
         final Book book = serv.getLazyBook(cmnem, isoToJd(settlDate));
         final Trans trans = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots,
                 new Trans());
-        trans.print(sb, null);
+        trans.print(sb, accnt.getUser());
     }
 
     public final synchronized void putOrder(StringBuilder sb, String umnem, long id, long lots) {

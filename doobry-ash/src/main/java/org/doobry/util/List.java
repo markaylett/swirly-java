@@ -31,14 +31,14 @@ public final class List {
     }
 
     public final DlNode removeFirst() {
-        assert (!isEmpty());
+        assert !isEmpty();
         final DlNode node = this.end.dlNext();
         node.remove();
         return node;
     }
 
     public final DlNode removeLast() {
-        assert (!isEmpty());
+        assert !isEmpty();
         final DlNode node = this.end.dlPrev();
         node.remove();
         return node;
