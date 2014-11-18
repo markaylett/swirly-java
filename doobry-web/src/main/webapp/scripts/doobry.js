@@ -116,18 +116,19 @@ Model.prototype.submitOrder = function(contr, settlDate, action, price, lots, fn
             minLots: 0
         })
     }).done(function(v) {
-        var contr = model.contrs[v.contr];
-        v.price = dbr.ticksToPrice(v.ticks, contr);
-        v.lastPrice = dbr.ticksToPrice(v.lastTicks, contr);
-        v.created = new Date(v.created);
-        v.modified = new Date(v.modified);
-        fn(v);
+        var order = v.order;
+        var contr = model.contrs[order.contr];
+        order.price = dbr.ticksToPrice(order.ticks, contr);
+        order.lastPrice = dbr.ticksToPrice(order.lastTicks, contr);
+        order.created = new Date(order.created);
+        order.modified = new Date(order.modified);
+        fn(order);
     }).fail(function(r) {
         var v = $.parseJSON(r.responseText);
     });
 };
 
-Model.prototype.cancelOrder = function(data, fn) {
+Model.prototype.cancelOrder = function(fn, data) {
     var that = this;
     $.ajax({
         type: 'put',
@@ -327,11 +328,11 @@ function documentReady() {
             var selection = $('#orderTable').jqxDataTable('getSelection');
             for (var i = 0; i < selection.length; ++i) {
                 var data = selection[i];
-                model.cancelOrder(data, function(data, v) {
+                model.cancelOrder(function(data, v) {
                     var rows = $('#orderTable').jqxDataTable('getRows');
                     var index = rows.indexOf(data);
                     $("#orderTable").jqxDataTable('updateRow', index, v);
-                });
+                }, data);
             }
         });
         $('#refresh').jqxButton({
@@ -503,7 +504,8 @@ function documentReady() {
             var price = $('#orderPrice').val();
             var lots = $('#orderLots').val();
             model.submitOrder(contr, settlDate, action, price, lots, function(v) {
-                $("#orderTable").jqxDataTable('addRow', v.id, v);
+                if (v.resd > 0)
+                    $("#orderTable").jqxDataTable('addRow', v.id, v);
             });
         });
         $('#closeOrder').jqxButton({

@@ -113,17 +113,20 @@ public final class Rest {
             int settlDate, String ref, Action action, long ticks, long lots, long minLots) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
         final Book book = serv.getLazyBook(cmnem, isoToJd(settlDate));
-        final Order order = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots,
-                new Trans()).getOrder();
-        order.print(sb, null);
+        final Trans trans = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots,
+                new Trans());
+        trans.print(sb, null);
     }
 
     public final synchronized void putOrder(StringBuilder sb, String umnem, long id, long lots) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
         final Trans trans = new Trans();
-        final Order order = (lots > 0 ? serv.reviseOrder(accnt, id, lots, trans) //
-                : serv.cancelOrder(accnt, id, trans)).getOrder();
-        order.print(sb, null);
+        if (lots > 0) {
+            serv.reviseOrder(accnt, id, lots, trans);
+        } else {
+            serv.cancelOrder(accnt, id, trans);
+        }
+        trans.print(sb, null);
     }
 
     public final synchronized void getTrade(StringBuilder sb, String umnem) {
