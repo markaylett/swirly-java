@@ -65,7 +65,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
      * Synthetic position id.
      */
 
-    public static long toId(long aid, long cid, int settlDay) {
+    public static long toId(long userId, long contrId, int settlDay) {
         // 16 million ids.
         final int ID_MASK = (1 << 24) - 1;
         // 16 bits is sufficient for truncated Julian day.
@@ -73,19 +73,24 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
 
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);
-        return ((aid & ID_MASK) << 40) | ((cid & ID_MASK) << 16) | (tjd & JD_MASK);
+        return ((userId & ID_MASK) << 40) | ((contrId & ID_MASK) << 16) | (tjd & JD_MASK);
+    }
+
+
+    public final void applyTrade(Action action, long lastTicks, long lastLots) {
+        final double licks = lastLots * lastTicks;
+        if (action == Action.BUY) {
+            buyLicks += licks;
+            buyLots += lastLots;
+        } else {
+            assert action == Action.SELL;
+            sellLicks += licks;
+            sellLots += lastLots;
+        }
     }
 
     public final void applyTrade(Exec trade) {
-        final double licks = trade.getLastLots() * trade.getLastTicks();
-        if (trade.getAction() == Action.BUY) {
-            buyLicks += licks;
-            buyLots += trade.getLastLots();
-        } else {
-            assert trade.getAction() == Action.SELL;
-            sellLicks += licks;
-            sellLots += trade.getLastLots();
-        }
+        applyTrade(trade.getAction(), trade.getLastTicks(), trade.getLastLots());
     }
 
     public final void setBuyLicks(long buyLicks) {

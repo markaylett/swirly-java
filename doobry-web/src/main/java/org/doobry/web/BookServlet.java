@@ -36,7 +36,7 @@ public final class BookServlet extends HttpServlet {
                 return;
             }
         } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 

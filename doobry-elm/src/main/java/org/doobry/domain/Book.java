@@ -158,7 +158,7 @@ public final class Book extends BasicRbNode implements Identifiable, Printable {
      * Synthetic book id.
      */
 
-    public static long toId(long cid, int settlDay) {
+    public static long toId(long contrId, int settlDay) {
         // 16 million ids.
         final int ID_MASK = (1 << 24) - 1;
         // 16 bits is sufficient for truncated Julian day.
@@ -166,7 +166,7 @@ public final class Book extends BasicRbNode implements Identifiable, Printable {
 
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);
-        return ((cid & ID_MASK) << 16) | (tjd & JD_MASK);
+        return ((contrId & ID_MASK) << 16) | (tjd & JD_MASK);
     }
 
     @Override

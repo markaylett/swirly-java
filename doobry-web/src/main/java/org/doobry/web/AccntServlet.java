@@ -36,6 +36,53 @@ public final class AccntServlet extends HttpServlet {
     }
 
     @Override
+    protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        final UserService userService = UserServiceFactory.getUserService();
+        final User user = userService.getCurrentUser();
+        if (user == null) {
+            resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
+            return;
+        }
+        final String umnem = userMap.get(user.getEmail());
+
+        final Rest rest = Context.getRest();
+        final StringBuilder sb = new StringBuilder();
+
+        final String pathInfo = req.getPathInfo();
+        final String[] parts = splitPathInfo(pathInfo);
+        if ("order".equals(parts[0])) {
+            if (parts.length == 2) {
+                rest.deleteOrder(sb, umnem, Integer.parseInt(parts[1]));
+            } else {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+        } else if ("trade".equals(parts[0])) {
+            if (parts.length == 2) {
+                rest.deleteTrade(sb, umnem, Integer.parseInt(parts[1]));
+            } else {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        if (sb.length() == 0) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            return;
+        }
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json");
+        resp.addHeader("Cache-Control", "no-cache");
+        resp.setStatus(HttpServletResponse.SC_OK);
+        log(sb.toString());
+        resp.getWriter().append(sb);
+    }
+
+    @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         final UserService userService = UserServiceFactory.getUserService();
@@ -62,7 +109,7 @@ public final class AccntServlet extends HttpServlet {
                     return;
                 }
             } else {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
         } else if ("trade".equals(parts[0])) {
@@ -74,7 +121,7 @@ public final class AccntServlet extends HttpServlet {
                     return;
                 }
             } else {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
         } else if ("posn".equals(parts[0])) {
@@ -88,13 +135,17 @@ public final class AccntServlet extends HttpServlet {
                     return;
                 }
             } else {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
 
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
+        resp.addHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
         log(sb.toString());
         resp.getWriter().append(sb);
@@ -135,8 +186,8 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
 
-        rest.postOrder(sb, umnem, r.getContr(), r.getSettlDate(), r.getRef(),
-                r.getAction(), r.getTicks(), r.getLots(), r.getMinLots());
+        rest.postOrder(sb, umnem, r.getContr(), r.getSettlDate(), r.getRef(), r.getAction(),
+                r.getTicks(), r.getLots(), r.getMinLots());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.addHeader("Cache-Control", "no-cache");

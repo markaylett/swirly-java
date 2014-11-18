@@ -9,7 +9,8 @@ import static org.doobry.util.AshFactory.newId;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.doobry.domain.Action;
 import org.doobry.domain.Exec;
@@ -104,9 +105,23 @@ public final class DatastoreModel implements Model {
             entity.setProperty("role", exec.getRole().name());
             entity.setProperty("cptyId", exec.getCptyId());
         }
+        entity.setProperty("confirmed", Boolean.FALSE);
         entity.setProperty("created", exec.getCreated());
         entity.setProperty("modified", exec.getCreated());
         datastore.put(entity);
+    }
+
+    private final void doUpdateExec(long id, long modified) {
+        final String kind = Kind.EXEC.camelName();
+        final Key key = KeyFactory.createKey(kind, id);
+        try {
+            final Entity entity = datastore.get(key);
+            entity.setProperty("confirmed", Boolean.TRUE);
+            entity.setProperty("modified", modified);
+            datastore.put(entity);
+        } catch (final EntityNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Override
@@ -140,7 +155,7 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void updateExec(long id, long modified) {
-        // TODO Auto-generated method stub
+        doUpdateExec(id, modified);
     }
 
     @Override
@@ -237,6 +252,27 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final Collection<Posn> selectPosn() {
-        return Collections.emptyList();
+        final Map<Long, Posn> m = new HashMap<>();
+        final String kind = Kind.EXEC.camelName();
+        final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
+        final Query q = new Query(kind).setFilter(filter);
+        final PreparedQuery pq = datastore.prepare(q);
+        for (final Entity entity : pq.asIterable()) {
+            final long userId = (Long) entity.getProperty("userId");
+            final long contrId = (Long) entity.getProperty("contrId");
+            final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
+            final Long posnId = Long.valueOf(Posn.toId(userId, contrId, settlDay));
+            // Lazy position.
+            Posn posn = m.get(posnId);
+            if (posn == null) {
+                posn = new Posn(newId(userId), newId(contrId), settlDay);
+                m.put(posnId, posn);
+            }
+            final Action action = Action.valueOf((String) entity.getProperty("action"));
+            final long lastTicks = (Long) entity.getProperty("lastTicks");
+            final long lastLots = (Long) entity.getProperty("lastLots");
+            posn.applyTrade(action, lastTicks, lastLots);
+        }
+        return m.values();
     }
 }

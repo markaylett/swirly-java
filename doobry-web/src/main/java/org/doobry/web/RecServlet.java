@@ -37,7 +37,7 @@ public final class RecServlet extends HttpServlet {
                     return;
                 }
             } else {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
         } else if ("contr".equals(parts[0])) {
@@ -49,9 +49,12 @@ public final class RecServlet extends HttpServlet {
                     return;
                 }
             } else {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
 
         resp.setCharacterEncoding("UTF-8");

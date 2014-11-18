@@ -84,6 +84,12 @@ public final class Rest {
         sb.append("}");
     }
 
+    public final synchronized void deleteOrder(StringBuilder sb, String umnem, long id) {
+        final Accnt accnt = serv.getLazyAccnt(umnem);
+        final Trans trans = serv.cancelOrder(accnt, id, new Trans());
+        trans.print(sb, null);
+    }
+
     public final synchronized void getOrder(StringBuilder sb, String umnem) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
         sb.append('[');
@@ -155,7 +161,7 @@ public final class Rest {
 
     public final synchronized void deleteTrade(StringBuilder sb, String umnem, long id) {
         final Accnt accnt = serv.getLazyAccnt(umnem);
-        serv.ackTrade(accnt, id);
+        serv.confirmTrade(accnt, id);
     }
 
     public final synchronized void getPosn(StringBuilder sb, String umnem) {
