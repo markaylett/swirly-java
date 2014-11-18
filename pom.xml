@@ -29,7 +29,8 @@
     <module>doobry-elm</module>
     <module>doobry-fig</module>
     <module>doobry-web</module>
-    <module>doobry-ear</module>
+    <module>doobry-dev</module>
+    <module>doobry-uat</module>
   </modules>
 
   <dependencyManagement>
