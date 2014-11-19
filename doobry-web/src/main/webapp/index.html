@@ -1,108 +1,146 @@
-<!--
-   Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
- 
-   All rights reserved.
--->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8"/>
-    <title>Getting Started</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Aylett">
+    <link rel="icon" href="/favicon.ico">
 
-    <link rel="stylesheet" href="/jqwidgets/styles/jqx.base.css" type="text/css"/>
-    <link rel="stylesheet" href="/jqwidgets/styles/jqx.energyblue.css" type="text/css"/>
+    <title>Doobry</title>
 
-    <script type="text/javascript" src="/scripts/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxcore.js"></script>
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <link href="/css/theme.css" rel="stylesheet">
 
-    <script type="text/javascript" src="/jqwidgets/jqxbuttongroup.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxbuttons.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxcalendar.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxdata.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxdatatable.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxdatetimeinput.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxdropdownlist.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxinput.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxlistbox.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxnumberinput.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxscrollbar.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxswitchbutton.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxtabs.js"></script>
-    <script type="text/javascript" src="/jqwidgets/jqxwindow.js"></script>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
 
-    <script type="text/javascript" src="/scripts/doobry.js"></script>
+  <body role="document">
 
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Doobry</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Contr</th>
+            <th>Settl Date</th>
+            <th>State</th>
+            <th>Action</th>
+            <th>Price</th>
+            <th>Lots</th>
+            <th>Resd</th>
+            <th>Exec</th>
+            <th>Last Price</th>
+            <th>Last Lots</th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: orders">
+          <tr>
+            <td data-bind="text: id"></td>
+            <td data-bind="text: contr"></td>
+            <td data-bind="text: settlDate"></td>
+            <td data-bind="text: state"></td>
+            <td data-bind="text: action"></td>
+            <td data-bind="text: price"></td>
+            <td data-bind="text: lots"></td>
+            <td data-bind="text: resd"></td>
+            <td data-bind="text: exec"></td>
+            <td data-bind="text: lastPrice"></td>
+            <td data-bind="text: lastLots"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active"><a href="#orders" data-toggle="tab">Orders</a></li>
+        <li><a href="#trades" data-toggle="tab">Trades</a></li>
+        <li><a href="#posns" data-toggle="tab">Positions</a></li>
+    </ul>
+      <div id="tab-content" class="tab-content">
+        <div id="orders" class="tab-pane active">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Contr</th>
+                <th>Settl Date</th>
+                <th>State</th>
+                <th>Action</th>
+                <th>Price</th>
+                <th>Lots</th>
+                <th>Resd</th>
+                <th>Exec</th>
+                <th>Last Price</th>
+                <th>Last Lots</th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: orders">
+              <tr>
+                <td data-bind="text: id"></td>
+                <td data-bind="text: contr"></td>
+                <td data-bind="text: settlDate"></td>
+                <td data-bind="text: state"></td>
+                <td data-bind="text: action"></td>
+                <td data-bind="text: price"></td>
+                <td data-bind="text: lots"></td>
+                <td data-bind="text: resd"></td>
+                <td data-bind="text: exec"></td>
+                <td data-bind="text: lastPrice"></td>
+                <td data-bind="text: lastLots"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="trades" class="tab-pane">
+          <p>Trades</p>
+        </div>
+        <div id="posns" class="tab-pane">
+          <p>Positions</p>
+        </div>
+    </div>
+
+    </div> <!-- /container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/knockout.js"></script>
+    <script type="text/javascript" src="/js/doobry.js"></script>
     <script type="text/javascript">
       $(documentReady);
     </script>
-  </head>
-  <body class="default">
-    <div id="toolbar" style="margin-bottom: 5px">
-      <button id="refresh">Refresh</button>
-      <button id="newOrder">New Order</button>
-      <button id="reviseOrder">Revise Order</button>
-      <button id="cancelOrder">Cancel Order</button>
-      <button id="confirmTrade">Confirm Trade</button>
-    </div>
-    <div id="bookTable" style="margin-bottom: 5px">
-    </div>
-    <div id="tabs">
-      <ul>
-        <li>Order</li>
-        <li>Trade</li>
-        <li>Posn</li>
-      </ul>
-      <div id="orderTable">
-      </div>
-      <div id="tradeTable">
-      </div>
-      <div id="posnTable">
-      </div>
-    </div>
-  </div>
-  <div id="orderDialog" style="visibility: hidden;">
-    <div>Order</div>
-    <div style="overflow: hidden;">
-      <table style="table-layout: fixed; border-style: none;">
-        <tr>
-          <td align="right">Contract:</td>
-          <td align="left">
-            <input id="orderContr"></input>
-          </td>
-        </tr>
-        <tr>
-          <td align="right">Settl Date:</td>
-          <td align="left">
-            <div id="orderSettlDate"></div>
-          </td>
-        </tr>
-        <tr>
-          <td align="right">Action:</td>
-          <td align="left">
-            <div id="orderAction"></div>
-          </td>
-        </tr>
-        <tr>
-          <td align="right">Price:</td>
-          <td align="left">
-            <div id="orderPrice"></div>
-          </td>
-        </tr>
-        <tr>
-          <td align="right">Lots:</td>
-          <td align="left">
-            <div id="orderLots"></div>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="right">
-            <br/>
-            <button id="submitOrder">Submit</button>
-            <button style="margin-left: 5px;" id="closeOrder">Cancel</button>
-          </td>
-        </tr>
-      </table>
-    </div>
   </body>
 </html>

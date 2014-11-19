@@ -1,0 +1,109 @@
+<!--
+   Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
+ 
+   All rights reserved.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Doobry</title>
+
+    <link rel="stylesheet" href="/jqwidgets/styles/jqx.base.css" type="text/css"/>
+    <link rel="stylesheet" href="/jqwidgets/styles/jqx.energyblue.css" type="text/css"/>
+
+    <script type="text/javascript" src="/scripts/jquery-1.11.1.min.js"></script>
+
+    <script type="text/javascript" src="/jqwidgets/jqxcore.js"></script>
+
+    <script type="text/javascript" src="/jqwidgets/jqxbuttongroup.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxbuttons.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxcalendar.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxdata.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxdatatable.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxdatetimeinput.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxdropdownlist.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxinput.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxlistbox.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxnumberinput.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxscrollbar.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxswitchbutton.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxtabs.js"></script>
+    <script type="text/javascript" src="/jqwidgets/jqxwindow.js"></script>
+
+    <script type="text/javascript" src="/scripts/doobry.js"></script>
+
+    <script type="text/javascript">
+      $(documentReady);
+    </script>
+  </head>
+  <body class="default">
+    <div id="toolbar" style="margin-bottom: 5px">
+      <button id="refresh">Refresh</button>
+      <button id="newOrder">New Order</button>
+      <button id="reviseOrder">Revise Order</button>
+      <button id="cancelOrder">Cancel Order</button>
+      <button id="confirmTrade">Confirm Trade</button>
+    </div>
+    <div id="bookTable" style="margin-bottom: 5px">
+    </div>
+    <div id="tabs">
+      <ul>
+        <li>Order</li>
+        <li>Trade</li>
+        <li>Posn</li>
+      </ul>
+      <div id="orderTable">
+      </div>
+      <div id="tradeTable">
+      </div>
+      <div id="posnTable">
+      </div>
+    </div>
+  </div>
+  <div id="orderDialog" style="visibility: hidden;">
+    <div>Order</div>
+    <div style="overflow: hidden;">
+      <table style="table-layout: fixed; border-style: none;">
+        <tr>
+          <td align="right">Contract:</td>
+          <td align="left">
+            <input id="orderContr"></input>
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Settl Date:</td>
+          <td align="left">
+            <div id="orderSettlDate"></div>
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Action:</td>
+          <td align="left">
+            <div id="orderAction"></div>
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Price:</td>
+          <td align="left">
+            <div id="orderPrice"></div>
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Lots:</td>
+          <td align="left">
+            <div id="orderLots"></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="right">
+            <br/>
+            <button id="submitOrder">Submit</button>
+            <button style="margin-left: 5px;" id="closeOrder">Cancel</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>
