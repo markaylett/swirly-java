@@ -52,32 +52,26 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th>Id</th>
             <th>Contr</th>
             <th>Settl Date</th>
-            <th>State</th>
-            <th>Action</th>
-            <th>Price</th>
-            <th>Lots</th>
-            <th>Resd</th>
-            <th>Exec</th>
-            <th>Last Price</th>
-            <th>Last Lots</th>
+            <th>Bid Price</th>
+            <th>Bid Lots</th>
+            <th>Bid Count</th>
+            <th>Offer Price</th>
+            <th>Offer Lots</th>
+            <th>Offer Count</th>
           </tr>
         </thead>
-        <tbody data-bind="foreach: orders">
+        <tbody data-bind="foreach: books">
           <tr>
-            <td data-bind="text: id"></td>
             <td data-bind="mnem: contr"></td>
             <td data-bind="text: settlDate"></td>
-            <td data-bind="text: state"></td>
-            <td data-bind="text: action"></td>
-            <td data-bind="text: price"></td>
-            <td data-bind="text: lots"></td>
-            <td data-bind="text: resd"></td>
-            <td data-bind="text: exec"></td>
-            <td data-bind="text: lastPrice"></td>
-            <td data-bind="text: lastLots"></td>
+            <td data-bind="text: bidPrice"></td>
+            <td data-bind="text: bidLots"></td>
+            <td data-bind="text: bidCount"></td>
+            <td data-bind="text: offerPrice"></td>
+            <td data-bind="text: offerLots"></td>
+            <td data-bind="text: offerCount"></td>
           </tr>
         </tbody>
       </table>
@@ -86,7 +80,7 @@
         <li class="active"><a href="#orders" data-toggle="tab">Orders</a></li>
         <li><a href="#trades" data-toggle="tab">Trades</a></li>
         <li><a href="#posns" data-toggle="tab">Positions</a></li>
-    </ul>
+      </ul>
       <div id="tab-content" class="tab-content">
         <div id="orders" class="tab-pane active">
           <table class="table table-striped">
@@ -123,7 +117,39 @@
           </table>
         </div>
         <div id="trades" class="tab-pane">
-          <p>Trades</p>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Order Id</th>
+                <th>Contr</th>
+                <th>Settl Date</th>
+                <th>State</th>
+                <th>Action</th>
+                <th>Price</th>
+                <th>Lots</th>
+                <th>Resd</th>
+                <th>Exec</th>
+                <th>Last Price</th>
+                <th>Last Lots</th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: trades">
+              <tr>
+                <td data-bind="text: id"></td>
+                <td data-bind="text: orderId"></td>
+                <td data-bind="mnem: contr"></td>
+                <td data-bind="text: settlDate"></td>
+                <td data-bind="text: action"></td>
+                <td data-bind="text: price"></td>
+                <td data-bind="text: lots"></td>
+                <td data-bind="text: resd"></td>
+                <td data-bind="text: exec"></td>
+                <td data-bind="text: lastPrice"></td>
+                <td data-bind="text: lastLots"></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <div id="posns" class="tab-pane">
           <p>Positions</p>
