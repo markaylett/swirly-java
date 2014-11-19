@@ -6,15 +6,18 @@
 package org.doobry.engine;
 
 import org.doobry.domain.Action;
-import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
+import org.doobry.domain.Direct;
 import org.doobry.domain.Exec;
 import org.doobry.domain.Kind;
 import org.doobry.domain.Order;
 import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
 import org.doobry.domain.RefIdx;
+import org.doobry.domain.Role;
+import org.doobry.domain.Side;
 import org.doobry.domain.User;
+import org.doobry.util.DlNode;
 import org.doobry.util.RbNode;
 import org.doobry.util.SlNode;
 import org.doobry.util.Tree;
@@ -26,6 +29,7 @@ public final class Serv implements AutoCloseable {
     private final Cache cache = new Cache(CACHE_BUCKETS);
     private final RefIdx refIdx = new RefIdx(REFIDX_BUCKETS);
     private final Tree books = new Tree();
+    private final Tree accnts = new Tree();
 
     private final void enrichOrder(Order order) {
         final User user = (User) cache.findRec(Kind.USER, order.getUserId());
@@ -57,7 +61,7 @@ public final class Serv implements AutoCloseable {
             book.insertOrder(order);
             boolean success = false;
             try {
-                final Accnt accnt = Accnt.getLazyAccnt(order.getUser(), refIdx);
+                final Accnt accnt = getLazyAccnt(order.getUser());
                 accnt.insertOrder(order);
                 success = true;
             } finally {
@@ -71,7 +75,7 @@ public final class Serv implements AutoCloseable {
     private final void insertTrades() {
         for (final Exec trade : model.selectTrade()) {
             enrichTrade(trade);
-            final Accnt accnt = Accnt.getLazyAccnt(trade.getUser(), refIdx);
+            final Accnt accnt = getLazyAccnt(trade.getUser());
             accnt.insertTrade(trade);
         }
     }
@@ -79,7 +83,7 @@ public final class Serv implements AutoCloseable {
     private final void insertPosns() {
         for (final Posn posn : model.selectPosn()) {
             enrichPosn(posn);
-            final Accnt accnt = Accnt.getLazyAccnt(posn.getUser(), refIdx);
+            final Accnt accnt = getLazyAccnt(posn.getUser());
             accnt.insertPosn(posn);
         }
     }
@@ -87,6 +91,92 @@ public final class Serv implements AutoCloseable {
     private final Exec newExec(Order order, long now) {
         final long execId = model.allocIds(Kind.EXEC, 1);
         return new Exec(execId, order.getId(), order, now);
+    }
+
+    private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
+        return direct == Direct.PAID
+        // Paid when the taker lifts the offer.
+        ? makerOrder.getTicks() - takerOrder.getTicks()
+                // Given when the taker hits the bid.
+                : takerOrder.getTicks() - makerOrder.getTicks();
+    }
+
+    private final void matchOrders(Book book, Order takerOrder, Side side, Direct direct,
+            Trans trans) {
+
+        final long now = takerOrder.getCreated();
+
+        long taken = 0;
+        long lastTicks = 0;
+        long lastLots = 0;
+
+        final Contr contr = book.getContr();
+        final int settlDay = book.getSettlDay();
+
+        DlNode node = side.getFirstOrder();
+        for (; taken < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
+            final Order makerOrder = (Order) node;
+
+            // Only consider orders while prices cross.
+            if (spread(takerOrder, makerOrder, direct) > 0)
+                break;
+
+            final long makerId = model.allocIds(Kind.EXEC, 2);
+            final long takerId = makerId + 1;
+
+            final Accnt makerAccnt = getLazyAccnt(makerOrder.getUser());
+            final Posn makerPosn = makerAccnt.getLazyPosn(contr, settlDay);
+
+            final Match match = new Match();
+            match.makerOrder = makerOrder;
+            match.makerPosn = makerPosn;
+            match.ticks = makerOrder.getTicks();
+            match.lots = Math.min(takerOrder.getResd() - taken, makerOrder.getResd());
+
+            taken += match.lots;
+            lastTicks = match.ticks;
+            lastLots = match.lots;
+
+            final Exec makerTrade = new Exec(makerId, makerOrder.getId(), makerOrder, now);
+            makerTrade.trade(match.lots, match.ticks, match.lots, takerId, Role.MAKER,
+                    takerOrder.getUser());
+            match.makerTrade = makerTrade;
+
+            final Exec takerTrade = new Exec(takerId, takerOrder.getId(), takerOrder, now);
+            takerTrade.trade(taken, match.ticks, match.lots, makerId, Role.TAKER,
+                    makerOrder.getUser());
+            match.takerTrade = takerTrade;
+
+            trans.matches.insertBack(match);
+
+            // Maker updated first because this is consistent with last-look semantics.
+            // N.B. the reference count is not incremented here.
+            trans.execs.insertBack(makerTrade);
+            trans.execs.insertBack(takerTrade);
+        }
+
+        if (!trans.matches.isEmpty()) {
+            // Avoid allocating position when there are no matches.
+            final Accnt takerAccnt = getLazyAccnt(takerOrder.getUser());
+            trans.posn = takerAccnt.getLazyPosn(contr, settlDay);
+            takerOrder.trade(taken, lastTicks, lastLots, now);
+        }
+    }
+
+    public final void matchOrders(Book book, Order taker, Trans trans) {
+        Side side;
+        Direct direct;
+        if (taker.getAction() == Action.BUY) {
+            // Paid when the taker lifts the offer.
+            side = book.getOfferSide();
+            direct = Direct.PAID;
+        } else {
+            assert taker.getAction() == Action.SELL;
+            // Given when the taker hits the bid.
+            side = book.getBidSide();
+            direct = Direct.GIVEN;
+        }
+        matchOrders(book, taker, side, direct, trans);
     }
 
     // Assumes that maker lots have not been reduced since matching took place.
@@ -98,7 +188,10 @@ public final class Serv implements AutoCloseable {
             // Reduce maker.
             book.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
-            final Accnt maker = Accnt.getLazyAccnt(makerOrder.getUser(), refIdx);
+            final Accnt maker = getLazyAccnt(makerOrder.getUser());
+            if (makerOrder.isDone()) {
+                maker.removeOrder(makerOrder);
+            }
             // Maker updated first because this is consistent with last-look semantics.
             // Update maker.
             maker.insertTrade(match.makerTrade);
@@ -139,8 +232,64 @@ public final class Serv implements AutoCloseable {
         return cache.isEmptyRec(kind);
     }
 
+    public final Book getLazyBook(Contr contr, int settlDay) {
+        Book book;
+        final long id = Book.toId(contr.getId(), settlDay);
+        final RbNode node = books.pfind(id);
+        if (node == null || node.getId() != id) {
+            book = new Book(contr, settlDay);
+            final RbNode parent = node;
+            books.pinsert(book, parent);
+        } else {
+            book = (Book) node;
+        }
+        return book;
+    }
+
+    public final Book getLazyBook(String mnem, int settlDay) {
+        final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
+        if (contr == null) {
+            throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
+        }
+        return getLazyBook(contr, settlDay);
+    }
+
+    public final Book findBook(Contr contr, int settlDay) {
+        return (Book) books.find(Book.toId(contr.getId(), settlDay));
+    }
+
+    public final Book findBook(String mnem, int settlDay) {
+        final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
+        if (contr == null) {
+            throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
+        }
+        return findBook(contr, settlDay);
+    }
+
+    public final RbNode getFirstBook() {
+        return books.getFirst();
+    }
+
+    public final RbNode getLastBook() {
+        return books.getLast();
+    }
+
+    public final boolean isEmptyBook() {
+        return books.isEmpty();
+    }
+
     public final Accnt getLazyAccnt(User user) {
-        return Accnt.getLazyAccnt(user, refIdx);
+        Accnt accnt;
+        final long id = user.getId();
+        final RbNode node = accnts.pfind(id);
+        if (node == null || node.getId() != id) {
+            accnt = new Accnt(user, refIdx);
+            final RbNode parent = node;
+            accnts.pinsert(accnt, parent);
+        } else {
+            accnt = (Accnt) node;
+        }
+        return accnt;
     }
 
     public final Accnt getLazyAccnt(String mnem) {
@@ -150,7 +299,7 @@ public final class Serv implements AutoCloseable {
         }
         return getLazyAccnt(user);
     }
-
+    
     public final Trans placeOrder(Accnt accnt, Book book, String ref, Action action, long ticks,
             long lots, long minLots, Trans trans) {
         if (lots == 0 || lots < minLots) {
@@ -168,7 +317,7 @@ public final class Serv implements AutoCloseable {
         trans.order = order;
         trans.execs.insertBack(exec);
         // Order fields are updated on match.
-        Broker.matchOrders(book, order, model, refIdx, trans);
+        matchOrders(book, order, trans);
         // Place incomplete order in book.
         if (!order.isDone()) {
             // This may fail if level cannot be allocated.
@@ -252,6 +401,7 @@ public final class Serv implements AutoCloseable {
         final Book book = findBook(order.getContr(), order.getSettlDay());
         assert book != null;
         book.cancelOrder(order, now);
+        accnt.removeOrder(order);
 
         trans.clear();
         trans.order = order;
@@ -285,51 +435,5 @@ public final class Serv implements AutoCloseable {
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);
-    }
-
-    public final Book getLazyBook(Contr contr, int settlDay) {
-        Book book;
-        final long id = Book.toId(contr.getId(), settlDay);
-        final RbNode node = books.pfind(id);
-        if (node == null || node.getId() != id) {
-            book = new Book(contr, settlDay);
-            final RbNode parent = node;
-            books.pinsert(book, parent);
-        } else {
-            book = (Book) node;
-        }
-        return book;
-    }
-
-    public final Book getLazyBook(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
-        if (contr == null) {
-            throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
-        }
-        return getLazyBook(contr, settlDay);
-    }
-
-    public final Book findBook(Contr contr, int settlDay) {
-        return (Book) books.find(Book.toId(contr.getId(), settlDay));
-    }
-
-    public final Book findBook(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
-        if (contr == null) {
-            throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
-        }
-        return findBook(contr, settlDay);
-    }
-
-    public final RbNode getFirstBook() {
-        return books.getFirst();
-    }
-
-    public final RbNode getLastBook() {
-        return books.getLast();
-    }
-
-    public final boolean isEmptyBook() {
-        return books.isEmpty();
     }
 }

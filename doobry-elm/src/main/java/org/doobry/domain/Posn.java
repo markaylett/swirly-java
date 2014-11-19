@@ -76,7 +76,6 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
         return ((userId & ID_MASK) << 40) | ((contrId & ID_MASK) << 16) | (tjd & JD_MASK);
     }
 
-
     public final void applyTrade(Action action, long lastTicks, long lastLots) {
         final double licks = lastLots * lastTicks;
         if (action == Action.BUY) {

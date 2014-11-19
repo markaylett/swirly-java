@@ -7,41 +7,35 @@ package org.doobry.engine;
 
 import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
-import org.doobry.domain.RefIdx;
 import org.doobry.domain.Order;
-import org.doobry.domain.User;
 import org.doobry.domain.Posn;
+import org.doobry.domain.RefIdx;
+import org.doobry.domain.User;
+import org.doobry.util.BasicRbNode;
+import org.doobry.util.Identifiable;
 import org.doobry.util.RbNode;
 import org.doobry.util.Tree;
 
-public final class Accnt {
+public final class Accnt extends BasicRbNode implements Identifiable {
     private final User user;
     private final RefIdx refIdx;
     private final Tree orders = new Tree();
     private final Tree trades = new Tree();
     private final Tree posns = new Tree();
 
-    private Accnt(User user, RefIdx refIdx) {
+    public Accnt(User user, RefIdx refIdx) {
         this.user = user;
         this.refIdx = refIdx;
     }
 
-    public static Accnt getLazyAccnt(User user, RefIdx refIdx) {
-        Accnt accnt = (Accnt) user.getAccnt();
-        if (accnt == null) {
-            accnt = new Accnt(user, refIdx);
-            user.setAccnt(accnt);
-        }
-        return accnt;
+    @Override
+    public final long getId() {
+        return user.getId();
     }
 
     public final User getUser() {
         return user;
     }
-
-    /**
-     * Transfer ownership to accnt.
-     */
 
     public final void insertOrder(Order order) {
         final RbNode node = orders.insert(order);
@@ -50,35 +44,23 @@ public final class Accnt {
             refIdx.insert(order);
     }
 
-    /**
-     * Release ownership from accnt.
-     */
-
-    public final void releaseOrder(Order order) {
+    public final void removeOrder(Order order) {
         assert user.getId() == order.getUser().getId();
         orders.remove(order);
         if (!order.getRef().isEmpty())
             refIdx.remove(user.getId(), order.getRef());
     }
 
-    /**
-     * Release ownership from accnt.
-     */
-
-    public final Order releaseOrder(long id) {
+    public final Order removeOrder(long id) {
         final RbNode node = orders.find(id);
         if (node == null)
             return null;
         final Order order = (Order) node;
-        releaseOrder(order);
+        removeOrder(order);
         return order;
     }
 
-    /**
-     * Release ownership from accnt.
-     */
-
-    public final Order releaseOrder(String ref) {
+    public final Order removeOrder(String ref) {
         final Order order = refIdx.remove(user.getId(), ref);
         if (order != null) {
             orders.remove(order);

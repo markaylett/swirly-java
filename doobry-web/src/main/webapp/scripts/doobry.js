@@ -61,46 +61,166 @@
         }
         return out;
     }
+    dbr.Model = function (fn) {
+
+        var that = this;
+
+        this.fn = fn;
+        this.asset = undefined;
+        this.contr = undefined;
+        this.book = undefined;
+        this.order = undefined;
+        this.trade = undefined;
+        this.posn = undefined;
+
+        var maybeReady = function() {
+
+            if (that.asset === undefined
+                || that.contr === undefined
+                || that.book === undefined
+                || that.order === undefined
+                || that.trade === undefined
+                || that.posn === undefined)
+                return;
+
+            dbr.eachValue(that.asset, that.enrichAsset.bind(that));
+            dbr.eachValue(that.contr, that.enrichContr.bind(that));
+            dbr.eachValue(that.book, that.enrichBook.bind(that));
+            dbr.eachValue(that.order, that.enrichOrder.bind(that));
+            dbr.eachValue(that.trade, that.enrichTrade.bind(that));
+            dbr.eachValue(that.posn, that.enrichPosn.bind(that));
+
+            console.log('ready');
+            fn.ready(that);
+
+            // setInterval(function() {
+            // that.refresh();
+            // }, 10000);
+        };
+
+        $.ajax({
+            type: 'get',
+            url: '/api/rec'
+        }).done(function(arr) {
+            var dict = [];
+            $.each(arr.asset, function(k, v) {
+                dict[v.mnem] = v;
+            });
+            that.asset = dict;
+            dict = [];
+            $.each(arr.contr, function(k, v) {
+                dict[v.mnem] = v;
+            });
+            that.contr = dict;
+            maybeReady();
+        });
+
+        $.ajax({
+            type: 'get',
+            url: '/api/book'
+        }).done(function(arr) {
+            that.book = arr;
+            maybeReady();
+        });
+
+        $.ajax({
+            type: 'get',
+            url: '/api/accnt'
+        }).done(function(arr) {
+            that.order = arr.order;
+            that.trade = arr.trade;
+            that.posn = arr.posn;
+            maybeReady();
+        });
+    };
     root.dbr = dbr;
 }).call(this);
 
-function Model(ready) {
+dbr.Model.prototype.enrichAsset = function(v) {
+};
 
+dbr.Model.prototype.enrichContr = function(v) {
+    v.priceInc = dbr.priceInc(v);
+    v.qtyInc = dbr.qtyInc(v);
+};
+
+dbr.Model.prototype.enrichBook = function(v) {
+    var contr = this.contr[v.contr];
+    v.bidPrice = dbr.mapValue(v.bidTicks, function(w) {
+        return dbr.ticksToPrice(w, contr);
+    });
+    v.offerPrice = dbr.mapValue(v.offerTicks, function(w) {
+        return dbr.ticksToPrice(w, contr);
+    });
+    v.bidPrice0 = v.bidPrice[0];
+    v.bidTicks0 = v.bidTicks[0];
+    v.bidLots0 = v.bidLots[0];
+    v.bidCount0 = v.bidCount[0];
+    v.offerPrice0 = v.offerPrice[0];
+    v.offerTicks0 = v.offerTicks[0];
+    v.offerLots0 = v.offerLots[0];
+    v.offerCount0 = v.offerCount[0];
+};
+
+dbr.Model.prototype.enrichOrder = function(v) {
+    var contr = this.contr[v.contr];
+    v.price = dbr.ticksToPrice(v.ticks, contr);
+    v.lastPrice = dbr.ticksToPrice(v.lastTicks, contr);
+    v.created = new Date(v.created);
+    v.modified = new Date(v.modified);
+};
+
+dbr.Model.prototype.enrichTrade = function(v) {
+    var contr = this.contr[v.contr];
+    v.price = dbr.ticksToPrice(v.ticks, contr);
+    v.lastPrice = dbr.ticksToPrice(v.lastTicks, contr);
+    v.created = new Date(v.created);
+    v.modified = new Date(v.modified);
+};
+
+dbr.Model.prototype.enrichPosn = function(v) {
+    var contr = this.contr[v.contr];
+    if (v.buyLots > 0) {
+        v.buyTicks = dbr.fractToReal(v.buyLicks, v.buyLots);
+    } else {
+        v.buyTicks = 0;
+    }
+    if (v.sellLots > 0) {
+        v.sellTicks = dbr.fractToReal(v.sellLicks, v.sellLots);
+    } else {
+        v.sellTicks = 0;
+    }
+    v.buyPrice = dbr.ticksToPrice(v.buyTicks, contr);
+    v.sellPrice = dbr.ticksToPrice(v.sellTicks, contr);
+};
+
+dbr.Model.prototype.refresh = function() {
     var that = this;
-
-    this.contrs = undefined;
-
-    var maybeReady = function() {
-
-        if (that.contrs === undefined)
-            return;
-
-        console.log('ready');
-        ready(that);
-
-        // setInterval(function() {
-        // that.refresh();
-        // }, 10000);
-    };
-
     $.ajax({
         type: 'get',
-        url: '/api/rec/contr'
+        url: '/api/book'
     }).done(function(arr) {
-        var dict = [];
-        $.each(arr, function(k, v) {
-            v.priceInc = dbr.priceInc(v);
-            v.qtyInc = dbr.qtyInc(v);
-            dict[v.mnem] = v;
-        });
-        that.contrs = dict;
-        maybeReady();
+        dbr.eachValue(arr, that.enrichBook.bind(that));
+        that.book = arr;
+        that.fn.refreshBook();
+    });
+    $.ajax({
+        type: 'get',
+        url: '/api/accnt'
+    }).done(function(arr) {
+        dbr.eachValue(arr.order, that.enrichOrder.bind(that));
+        dbr.eachValue(arr.trade, that.enrichTrade.bind(that));
+        dbr.eachValue(arr.posn, that.enrichPosn.bind(that));
+        that.order = arr.order;
+        that.trade = arr.trade;
+        that.posn = arr.posn;
+        that.fn.refreshAccnt();
     });
 }
 
-Model.prototype.submitOrder = function(contr, settlDate, action, price, lots, fn) {
+dbr.Model.prototype.submitOrder = function(contr, settlDate, action, price, lots, fn) {
     var that = this;
-    contr = this.contrs[contr];
+    contr = this.contr[contr];
     settlDate = parseInt(settlDate);
     var ticks = dbr.priceToTicks(price, contr);
     $.ajax({
@@ -117,7 +237,7 @@ Model.prototype.submitOrder = function(contr, settlDate, action, price, lots, fn
         })
     }).done(function(v) {
         var order = v.order[0];
-        var contr = model.contrs[order.contr];
+        var contr = model.contr[order.contr];
         order.price = dbr.ticksToPrice(order.ticks, contr);
         order.lastPrice = dbr.ticksToPrice(order.lastTicks, contr);
         order.created = new Date(order.created);
@@ -128,25 +248,26 @@ Model.prototype.submitOrder = function(contr, settlDate, action, price, lots, fn
     });
 };
 
-Model.prototype.cancelOrder = function(fn, data) {
+dbr.Model.prototype.cancelOrder = function(fn, data) {
     var that = this;
     $.ajax({
         type: 'put',
         url: '/api/accnt/order/' + data.id,
         data: '{"lots":0}'
     }).done(function(v) {
-        var contr = model.contrs[v.contr];
-        v.price = dbr.ticksToPrice(v.ticks, contr);
-        v.lastPrice = dbr.ticksToPrice(v.lastTicks, contr);
-        v.created = new Date(v.created);
-        v.modified = new Date(v.modified);
-        fn(data, v);
+        var order = v.order[0];
+        var contr = model.contr[order.contr];
+        order.price = dbr.ticksToPrice(order.ticks, contr);
+        order.lastPrice = dbr.ticksToPrice(order.lastTicks, contr);
+        order.created = new Date(order.created);
+        order.modified = new Date(order.modified);
+        fn(data, order);
     }).fail(function(r) {
         var v = $.parseJSON(r.responseText);
     });
 };
 
-Model.prototype.confirmTrade = function(fn, data) {
+dbr.Model.prototype.confirmTrade = function(fn, data) {
     var that = this;
     $.ajax({
         type: 'delete',
@@ -158,170 +279,119 @@ Model.prototype.confirmTrade = function(fn, data) {
     });
 };
 
-var model = null;
-
 // Lifecycle phases.
 
 function documentReady() {
 
-    model = new Model(function(model) {
+    var bookSource = {
+        dataType: 'array',
+        dataFields: [
+            { name: 'id', type: 'int' },
+            { name: 'contr', type: 'string' },
+            { name: 'settlDate', type: 'int' },
+            { name: 'bidPrice0', type: 'string' },
+            { name: 'bidLots0', type: 'int' },
+            { name: 'bidCount0', type: 'int' },
+            { name: 'offerPrice0', type: 'string' },
+            { name: 'offerLots0', type: 'int' },
+            { name: 'offerCount0', type: 'int' }
+        ],
+        id: 'id',
+        localData: []
+    };
+    var bookAdapter = new $.jqx.dataAdapter(bookSource);
+    var orderSource = {
+        dataType: 'array',
+        dataFields: [
+            { name: 'id', type: 'int' },
+            { name: 'user', type: 'string' },
+            { name: 'contr', type: 'string' },
+            { name: 'settlDate', type: 'int' },
+            { name: 'ref', type: 'string' },
+            { name: 'state', type: 'string' },
+            { name: 'action', type: 'string' },
+            { name: 'price', type: 'string' },
+            { name: 'lots', type: 'int' },
+            { name: 'resd', type: 'int' },
+            { name: 'exec', type: 'int' },
+            { name: 'lastPrice', type: 'string' },
+            { name: 'lastLots', type: 'int' },
+            { name: 'minLots', type: 'int' },
+            { name: 'created', type: 'date', format: 'yyyy-MM-dd' },
+            { name: 'modified', type: 'date', format: 'yyyy-MM-dd' }
+        ],
+        id: 'id',
+        localData: []
+    };
+    var orderAdapter = new $.jqx.dataAdapter(orderSource);
+    var tradeSource = {
+        dataType: 'array',
+        dataFields: [
+            { name: 'id', type: 'int' },
+            { name: 'orderId', type: 'int' },
+            { name: 'user', type: 'string' },
+            { name: 'contr', type: 'string' },
+            { name: 'settlDate', type: 'int' },
+            { name: 'ref', type: 'string' },
+            { name: 'state', type: 'string' },
+            { name: 'action', type: 'string' },
+            { name: 'price', type: 'string' },
+            { name: 'lots', type: 'int' },
+            { name: 'resd', type: 'int' },
+            { name: 'exec', type: 'int' },
+            { name: 'lastPrice', type: 'string' },
+            { name: 'lastLots', type: 'int' },
+            { name: 'minLots', type: 'int' },
 
-        var bookSource = {
-            dataType: 'json',
-            dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'contr', type: 'string' },
-                { name: 'settlDate', type: 'int' },
-                { name: 'bidTicks', type: 'int' },
-                { name: 'bidLots', type: 'int' },
-                { name: 'bidCount', type: 'int' },
-                { name: 'offerTicks', type: 'int' },
-                { name: 'offerLots', type: 'int' },
-                { name: 'offerCount', type: 'int' }
-            ],
-            id: 'id',
-            url: '/api/book'
-        };
-        var bookAdapter = new $.jqx.dataAdapter(bookSource, {
-            beforeLoadComplete: function (rs) {
-                for (var i = 0; i < rs.length; ++i) {
-                    var r = rs[i];
-                    var contr = model.contrs[r.contr];
-                    r.bidTicks0 = r.bidTicks[0];
-                    r.bidLots0 = r.bidLots[0];
-                    r.bidCount0 = r.bidCount[0];
-                    r.offerTicks0 = r.offerTicks[0];
-                    r.offerLots0 = r.offerLots[0];
-                    r.offerCount0 = r.offerCount[0];
+            { name: 'matchId', type: 'int' },
+            { name: 'role', type: 'string' },
+            { name: 'cpty', type: 'string' },
 
-                    r.bidPrice0 = dbr.ticksToPrice(r.bidTicks0, contr);
-                    r.offerPrice0 = dbr.ticksToPrice(r.offerTicks0, contr);
-                }
-                return rs;
-            }
-        });
-        var orderSource = {
-            dataType: 'json',
-            dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'user', type: 'string' },
-                { name: 'contr', type: 'string' },
-                { name: 'settlDate', type: 'int' },
-                { name: 'ref', type: 'string' },
-                { name: 'state', type: 'string' },
-                { name: 'action', type: 'string' },
-                { name: 'ticks', type: 'int' },
-                { name: 'lots', type: 'int' },
-                { name: 'resd', type: 'int' },
-                { name: 'exec', type: 'int' },
-                { name: 'lastTicks', type: 'int' },
-                { name: 'lastLots', type: 'int' },
-                { name: 'minLots', type: 'int' },
-                { name: 'created', type: 'date', format: 'yyyy-MM-dd' },
-                { name: 'modified', type: 'date', format: 'yyyy-MM-dd' }
-            ],
-            id: 'id',
-            url: '/api/accnt/order'
-        };
-        var orderAdapter = new $.jqx.dataAdapter(orderSource, {
-            beforeLoadComplete: function (rs) {
-                for (var i = 0; i < rs.length; ++i) {
-                    var r = rs[i];
-                    var contr = model.contrs[r.contr];
-                    r.price = dbr.ticksToPrice(r.ticks, contr);
-                    r.lastPrice = dbr.ticksToPrice(r.lastTicks, contr);
-                    r.created = new Date(r.created);
-                    r.modified = new Date(r.modified);
-                }
-                return rs;
-            }
-        });
-        var tradeSource = {
-            dataType: 'json',
-            dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'orderId', type: 'int' },
-                { name: 'user', type: 'string' },
-                { name: 'contr', type: 'string' },
-                { name: 'settlDate', type: 'int' },
-                { name: 'ref', type: 'string' },
-                { name: 'state', type: 'string' },
-                { name: 'action', type: 'string' },
-                { name: 'ticks', type: 'int' },
-                { name: 'lots', type: 'int' },
-                { name: 'resd', type: 'int' },
-                { name: 'exec', type: 'int' },
-                { name: 'lastTicks', type: 'int' },
-                { name: 'lastLots', type: 'int' },
-                { name: 'minLots', type: 'int' },
+            { name: 'created', type: 'date', format: 'yyyy-MM-dd' }
+        ],
+        id: 'id',
+        localData: []
+    };
+    var tradeAdapter = new $.jqx.dataAdapter(tradeSource);
+    var posnSource = {
+        dataType: 'array',
+        dataFields: [
+            { name: 'id', type: 'int' },
+            { name: 'user', type: 'string' },
+            { name: 'contr', type: 'string' },
+            { name: 'settlDate', type: 'int' },
+            { name: 'buyPrice', type: 'string' },
+            { name: 'buyLots', type: 'int' },
+            { name: 'sellPrice', type: 'string' },
+            { name: 'sellLots', type: 'int' }
+        ],
+        id: 'id',
+        localData: []
+    };
+    var posnAdapter = new $.jqx.dataAdapter(posnSource);
 
-                { name: 'matchId', type: 'int' },
-                { name: 'role', type: 'string' },
-                { name: 'cpty', type: 'string' },
-
-                { name: 'created', type: 'date', format: 'yyyy-MM-dd' }
-            ],
-            id: 'id',
-            url: '/api/accnt/trade'
-        };
-        var tradeAdapter = new $.jqx.dataAdapter(tradeSource, {
-            beforeLoadComplete: function (rs) {
-                for (var i = 0; i < rs.length; ++i) {
-                    var r = rs[i];
-                    var contr = model.contrs[r.contr];
-                    r.price = dbr.ticksToPrice(r.ticks, contr);
-                    r.lastPrice = dbr.ticksToPrice(r.lastTicks, contr);
-                    r.created = new Date(r.created);
-                    r.modified = new Date(r.modified);
-                }
-                return rs;
-            }
-        });
-        var posnSource = {
-            dataType: 'json',
-            dataFields: [
-                { name: 'id', type: 'int' },
-                { name: 'user', type: 'string' },
-                { name: 'contr', type: 'string' },
-                { name: 'settlDate', type: 'int' },
-                { name: 'buyLicks', type: 'int' },
-                { name: 'buyLots', type: 'int' },
-                { name: 'sellLicks', type: 'int' },
-                { name: 'sellLots', type: 'int' }
-            ],
-            id: 'id',
-            url: '/api/accnt/posn'
-        };
-        var posnAdapter = new $.jqx.dataAdapter(posnSource, {
-            beforeLoadComplete: function (rs) {
-                for (var i = 0; i < rs.length; ++i) {
-                    var r = rs[i];
-                    var contr = model.contrs[r.contr];
-                    if (r.buyLots > 0) {
-                        r.buyTicks = dbr.fractToReal(r.buyLicks, r.buyLots);
-                    } else {
-                        r.buyTicks = 0;
-                    }
-                    if (r.sellLots > 0) {
-                        r.sellTicks = dbr.fractToReal(r.sellLicks, r.sellLots);
-                    } else {
-                        r.sellTicks = 0;
-                    }
-                    r.buyPrice = dbr.ticksToPrice(r.buyTicks, contr);
-                    r.sellPrice = dbr.ticksToPrice(r.sellTicks, contr);
-                }
-                return rs;
-            }
-        });
+    var modelReady = function(model) {
 
         var theme = 'energyblue';
 
+        $('#refresh').jqxButton({
+            theme: theme,
+            height: 27,
+            template: 'primary'
+        });
+        $('#refresh').on('click', function () {
+            model.refresh();
+        });
         $('#newOrder').jqxButton({
             theme: theme,
             height: 27,
             template: 'primary'
         });
         $('#newOrder').on('click', function () {
+            $('#orderContr').val('EURUSD');
+            $('#orderPrice').val(1.2345);
+            $('#orderLots').val(10);
+
             $('#orderDialog').jqxWindow('open');
         });
         $('#reviseOrder').jqxButton({
@@ -363,31 +433,6 @@ function documentReady() {
                 }, data);
             }
         });
-        $('#refresh').jqxButton({
-            theme: theme,
-            height: 27,
-            template: 'primary'
-        });
-        $('#refresh').on('click', function () {
-            $('#bookTable').jqxDataTable('updateBoundData');
-            var item = $('#tabs').jqxTabs('selectedItem');
-            if (item === 0) {
-                $('#orderTable').jqxDataTable('updateBoundData');
-            } else if (item === 1) {
-                $('#tradeTable').jqxDataTable('updateBoundData');
-            } else if (item === 2) {
-                $('#posnTable').jqxDataTable('updateBoundData');
-            }
-        });
-        $('#splitter').jqxSplitter({
-            width: 960,
-            height: 500,
-            orientation: 'horizontal',
-            panels: [
-                { size: '40%' },
-                { size: '60%' }
-            ]
-        });
         $('#bookTable').jqxDataTable({
             theme: theme,
             columns: [
@@ -405,6 +450,8 @@ function documentReady() {
             pagerButtonsCount: 10,
             source: bookAdapter
         });
+        bookSource.localdata = model.book;
+        bookAdapter.dataBind();
         $('#tabs').jqxTabs({
             theme: theme,
             position: 'top'
@@ -412,11 +459,14 @@ function documentReady() {
         $('#tabs').on('selected', function (event) {
             var item = event.args.item;
             if (item === 0) {
-                $('#orderTable').jqxDataTable('updateBoundData');
+                orderSource.localdata = model.order;
+                orderAdapter.dataBind();
             } else if (item === 1) {
-                $('#tradeTable').jqxDataTable('updateBoundData');
+                tradeSource.localdata = model.trade;
+                tradeAdapter.dataBind();
             } else if (item === 2) {
-                $('#posnTable').jqxDataTable('updateBoundData');
+                posnSource.localdata = model.posn;
+                posnAdapter.dataBind();
             }
         });
         $('#orderTable').jqxDataTable({
@@ -439,6 +489,8 @@ function documentReady() {
             pagerButtonsCount: 10,
             source: orderAdapter
         });
+        orderSource.localdata = model.order;
+        orderAdapter.dataBind();
         $('#tradeTable').jqxDataTable({
             theme: theme,
             columns: [
@@ -459,6 +511,8 @@ function documentReady() {
             pagerButtonsCount: 10,
             source: tradeAdapter
         });
+        tradeSource.localdata = model.trade;
+        tradeAdapter.dataBind();
         $('#posnTable').jqxDataTable({
             theme: theme,
             columns: [
@@ -474,14 +528,16 @@ function documentReady() {
             pagerButtonsCount: 10,
             source: posnAdapter
         });
+        posnSource.localdata = model.posn;
+        posnAdapter.dataBind();
         $('#orderContr').jqxInput({
             theme: theme,
             width: 160,
             height: 27,
-            source: Object.keys(model.contrs)
+            source: Object.keys(model.contr)
         });
         $('#orderContr').on('select', function () {
-            var contr = model.contrs[$('#orderContr').val()];
+            var contr = model.contr[$('#orderContr').val()];
             $('#orderPrice').jqxNumberInput({
                 'decimalDigits': contr.priceDp
             });
@@ -551,5 +607,26 @@ function documentReady() {
             resizable: false
         });
         $('#orderDialog').css('visibility', 'visible');
+    };
+
+    model = new dbr.Model({
+        ready: modelReady,
+        refreshBook: function() {
+            bookSource.localdata = model.book;
+            bookAdapter.dataBind();
+        },
+        refreshAccnt: function() {
+            var item = $('#tabs').jqxTabs('selectedItem');
+            if (item === 0) {
+                orderSource.localdata = model.order;
+                orderAdapter.dataBind();
+            } else if (item === 1) {
+                tradeSource.localdata = model.trade;
+                tradeAdapter.dataBind();
+            } else if (item === 2) {
+                posnSource.localdata = model.posn;
+                posnAdapter.dataBind();
+            }
+        }
     });
 }

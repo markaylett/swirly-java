@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.doobry.domain.Action;
-import org.doobry.domain.Book;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Exec;
 import org.doobry.domain.Kind;
@@ -20,6 +19,7 @@ import org.doobry.domain.Posn;
 import org.doobry.domain.Rec;
 import org.doobry.domain.User;
 import org.doobry.engine.Accnt;
+import org.doobry.engine.Book;
 import org.doobry.engine.Model;
 import org.doobry.engine.Serv;
 import org.doobry.engine.Trans;

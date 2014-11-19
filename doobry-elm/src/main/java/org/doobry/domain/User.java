@@ -7,7 +7,6 @@ package org.doobry.domain;
 
 public final class User extends Rec {
     private final String email;
-    private transient Object accnt;
 
     public User(long id, String mnem, String display, String email) {
         super(Kind.USER, id, mnem, display);
@@ -29,15 +28,7 @@ public final class User extends Rec {
         sb.append("\"}");
     }
 
-    public final void setAccnt(Object accnt) {
-        this.accnt = accnt;
-    }
-
     public final String getEmail() {
         return email;
-    }
-
-    public final Object getAccnt() {
-        return accnt;
     }
 }
