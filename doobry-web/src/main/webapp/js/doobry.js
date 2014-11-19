@@ -136,6 +136,35 @@ function Trade(val, contrs) {
 }
 
 function Posn(val, contrs) {
+
+    var contr = contrs[val.contr];
+
+    this.id = ko.observable(val.id);
+    this.user = ko.observable(val.user);
+    this.contr = ko.observable(contr);
+    this.settlDate = ko.observable(val.settlDate);
+    this.buyLicks = ko.observable(val.buyLicks);
+    this.buyLots = ko.observable(val.buyLots);
+    this.sellLicks = ko.observable(val.sellLicks);
+    this.sellLots = ko.observable(val.sellLots);
+
+    this.buyPrice = ko.computed(function() {
+        var ticks = 0;
+        var lots = this.buyLots();
+        if (lots > 0) {
+            ticks = fractToReal(this.buyLicks(), lots);
+        }
+        return ticksToPrice(ticks, this.contr());
+    }, this);
+
+    this.sellPrice = ko.computed(function() {
+        var ticks = 0;
+        var lots = this.sellLots();
+        if (lots > 0) {
+            ticks = fractToReal(this.sellLicks(), lots);
+        }
+        return ticksToPrice(ticks, this.contr());
+    }, this);
 }
 
 function ViewModel(contrs) {
@@ -145,37 +174,36 @@ function ViewModel(contrs) {
     self.orders = ko.observableArray([]);
     self.trades = ko.observableArray([]);
     self.posns = ko.observableArray([]);
+
+    self.refresh = function() {
+
+        $.getJSON('/api/book', function(raw) {
+
+            var cooked = $.map(raw, function(val) {
+                return new Book(val, self.contrs);
+            });
+            self.books(cooked);
+        });
+
+        $.getJSON('/api/accnt', function(raw) {
+
+            var cooked = $.map(raw.orders, function(val) {
+                return new Order(val, self.contrs);
+            });
+            self.orders(cooked);
+
+            cooked = $.map(raw.trades, function(val) {
+                return new Trade(val, self.contrs);
+            });
+            self.trades(cooked);
+
+            cooked = $.map(raw.posns, function(val) {
+                return new Posn(val, self.contrs);
+            });
+            self.posns(cooked);
+        });
+    };
 }
-
-ViewModel.prototype.refresh = function() {
-    var self = this;
-
-    $.getJSON('/api/book', function(raw) {
-
-        var cooked = $.map(raw, function(val) {
-            return new Book(val, self.contrs);
-        });
-        self.books(cooked);
-    });
-
-    $.getJSON('/api/accnt', function(raw) {
-
-        var cooked = $.map(raw.orders, function(val) {
-            return new Order(val, self.contrs);
-        });
-        self.orders(cooked);
-
-        cooked = $.map(raw.trades, function(val) {
-            return new Trade(val, self.contrs);
-        });
-        self.trades(cooked);
-
-        cooked = $.map(raw.posns, function(val) {
-            return new Posn(val, self.contrs);
-        });
-        self.posns(cooked);
-    });
-};
 
 function documentReady() {
 
