@@ -44,9 +44,9 @@ public final class Rest {
     }
 
     public final synchronized void getRec(StringBuilder sb) {
-        sb.append("{\"asset\":");
+        sb.append("{\"assets\":");
         getRec(sb, Kind.ASSET);
-        sb.append(",\"contr\":");
+        sb.append(",\"contrs\":");
         getRec(sb, Kind.CONTR);
         sb.append("}");
     }
@@ -75,11 +75,11 @@ public final class Rest {
     }
 
     public final synchronized void getAccnt(StringBuilder sb, String umnem) {
-        sb.append("{\"order\":");
+        sb.append("{\"orders\":");
         getOrder(sb, umnem);
-        sb.append(",\"trade\":");
+        sb.append(",\"trades\":");
         getTrade(sb, umnem);
-        sb.append(",\"posn\":");
+        sb.append(",\"posns\":");
         getPosn(sb, umnem);
         sb.append("}");
     }
