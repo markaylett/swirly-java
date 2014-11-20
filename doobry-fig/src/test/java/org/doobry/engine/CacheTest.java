@@ -53,9 +53,9 @@ public final class CacheTest {
         final Cache c = new Cache(257);
         c.insertList(Kind.USER, model.selectRec(Kind.USER));
         assertFalse(c.isEmptyRec(Kind.USER));
-        assertEquals("BJONES", ((Rec) c.getFirstRec(Kind.USER)).getMnem());
-        assertEquals("EEDWARDS", ((Rec) c.getFirstRec(Kind.USER).slNext()).getMnem());
-        assertEquals("GWILSON", c.findRec(Kind.USER, "GWILSON").getMnem());
-        assertEquals("JTHOMAS", c.findRec(Kind.USER, 4).getMnem());
+        assertEquals("EMIAYL", ((Rec) c.getFirstRec(Kind.USER)).getMnem());
+        assertEquals("GOSAYL", ((Rec) c.getFirstRec(Kind.USER).slNext()).getMnem());
+        assertEquals("MARAYL", c.findRec(Kind.USER, "MARAYL").getMnem());
+        assertEquals("TOBAYL", c.findRec(Kind.USER, 3).getMnem());
     }
 }

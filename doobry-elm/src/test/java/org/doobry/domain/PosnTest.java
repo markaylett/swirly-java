@@ -15,14 +15,14 @@ import org.junit.Test;
 public final class PosnTest {
     @Test
     public final void test() {
-        final Posn posn = new Posn(MockUser.newUser("WRAMIREZ"), MockContr.newContr("EURUSD"),
+        final Posn posn = new Posn(MockUser.newUser("MARAYL"), MockContr.newContr("EURUSD"),
                 ymdToJd(2014, 3, 14));
         posn.setBuyLicks(1);
         posn.setBuyLots(2);
         posn.setSellLicks(3);
         posn.setSellLots(4);
         assertEquals(
-                "{\"id\":10995117080923,\"user\":\"WRAMIREZ\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyLicks\":1,\"buyLots\":2,\"sellLicks\":3,\"sellLots\":4}",
+                "{\"id\":1099512430939,\"user\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyLicks\":1,\"buyLots\":2,\"sellLicks\":3,\"sellLots\":4}",
                 posn.toString());
     }
 }

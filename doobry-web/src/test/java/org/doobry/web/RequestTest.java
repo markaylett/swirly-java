@@ -55,7 +55,7 @@ public final class RequestTest {
 
     @Test
     public final void testDuplicate() throws ParseException {
-        final Request r = parse("{\"user\":\"WRAMIREZ\",\"user\":\"WRAMIREZ\"}");
+        final Request r = parse("{\"user\":\"MARAYL\",\"user\":\"MARAYL\"}");
         assertTrue(!r.isValid());
     }
 

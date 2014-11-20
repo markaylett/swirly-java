@@ -33,7 +33,7 @@ public final class SideTest {
     public final void testOrders() {
         long now = System.currentTimeMillis();
         final Contr contr = MockContr.newContr("EURUSD");
-        final User user = MockUser.newUser("WRAMIREZ");
+        final User user = MockUser.newUser("MARAYL");
         // Two orders at the same price level.
         final Order apple = new Order(1, user, contr, ymdToJd(2014, 3, 14), "apple", Action.BUY,
                 12345, 10, 0, now);
@@ -132,7 +132,7 @@ public final class SideTest {
     public final void testLevels() {
         long now = System.currentTimeMillis();
         final Contr contr = MockContr.newContr("EURUSD");
-        final User user = MockUser.newUser("WRAMIREZ");
+        final User user = MockUser.newUser("MARAYL");
         // Two orders at the same price level.
         final Order apple = new Order(1, user, contr, ymdToJd(2014, 3, 14), "apple", Action.BUY,
                 12345, 10, 0, now);

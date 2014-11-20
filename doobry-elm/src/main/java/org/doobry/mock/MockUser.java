@@ -28,17 +28,10 @@ public final class MockUser {
 
     static {
         int i = 1;
-        put(i++, "BJONES", "Bobby Jones", "bobby.jones@doobry.org");
-        put(i++, "EEDWARDS", "Emily Edwards", "emily.edwards@doobry.org");
-        put(i++, "GWILSON", "George Wilson", "george.wilson@doobry.org");
-        put(i++, "JTHOMAS", "Joseph Thomas", "joseph.thomas@doobry.org");
-        put(i++, "JWRIGHT", "Juan Wright", "juan.wright@doobry.org");
-        put(i++, "RALEXAND", "Raymond Alexander", "raymond.alexander@doobry.org");
-        put(i++, "SFLORES", "Steven Flores", "steven.flores@doobry.org");
-        put(i++, "TLEE", "Todd Lee", "todd.lee@doobry.org");
-        put(i++, "VCAMPBEL", "Virginia Campbell", "virginia.campbell@doobry.org");
-        put(i++, "WRAMIREZ", "Wayne Ramirez", "wayne.ramirez@doobry.org");
-        put(i++, "MAYLETT", "Mark Aylett", "mark.aylett@gmail.com");
+        put(i++, "MARAYL", "Mark Aylett", "mark.aylett@gmail.com");
+        put(i++, "GOSAYL", "Goska Aylett", "goska.aylett@gmail.com");
+        put(i++, "TOBAYL", "Toby Aylett", "toby.aylett@gmail.com");
+        put(i++, "EMIAYL", "Emily Aylett", "emily.aylett@gmail.com");
     }
 
     private MockUser() {

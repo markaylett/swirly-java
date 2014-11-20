@@ -18,7 +18,7 @@ public final class ServTest {
     @Test
     public final void test() {
         try (final Serv s = new Serv(new MockModel())) {
-            final Accnt accnt = s.getLazyAccnt("WRAMIREZ");
+            final Accnt accnt = s.getLazyAccnt("MARAYL");
             final int settlDay = ymdToJd(2014, 3, 14);
             final Book book = s.getLazyBook("EURUSD", settlDay);
 

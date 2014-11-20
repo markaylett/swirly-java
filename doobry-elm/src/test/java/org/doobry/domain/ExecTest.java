@@ -15,16 +15,16 @@ import org.junit.Test;
 public final class ExecTest {
     @Test
     public final void test() {
-        final Order order = new Order(1, MockUser.newUser("WRAMIREZ"),
+        final Order order = new Order(1, MockUser.newUser("MARAYL"),
                 MockContr.newContr("EURUSD"), ymdToJd(2014, 3, 14), "test", Action.BUY, 12345, 3,
                 1, 1414692516006L);
         final Exec exec = new Exec(2, 1, order, 1414692516007L);
         assertEquals(
-                "{\"id\":2,\"orderId\":1,\"user\":\"WRAMIREZ\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":3,\"exec\":0,\"lastTicks\":0,\"lastLots\":0,\"minLots\":1,\"created\":1414692516007}",
+                "{\"id\":2,\"orderId\":1,\"user\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":3,\"exec\":0,\"lastTicks\":0,\"lastLots\":0,\"minLots\":1,\"created\":1414692516007}",
                 exec.toString());
-        exec.trade(12345, 1, 3, Role.MAKER, MockUser.newUser("BJONES"));
+        exec.trade(12345, 1, 3, Role.MAKER, MockUser.newUser("GOSAYL"));
         assertEquals(
-                "{\"id\":2,\"orderId\":1,\"user\":\"WRAMIREZ\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"TRADE\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":2,\"exec\":1,\"lastTicks\":12345,\"lastLots\":1,\"minLots\":1,\"matchId\":3,\"role\":\"MAKER\",\"cpty\":\"BJONES\",\"created\":1414692516007}",
+                "{\"id\":2,\"orderId\":1,\"user\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"TRADE\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":2,\"exec\":1,\"lastTicks\":12345,\"lastLots\":1,\"minLots\":1,\"matchId\":3,\"role\":\"MAKER\",\"cpty\":\"GOSAYL\",\"created\":1414692516007}",
                 exec.toString());
     }
 }

@@ -14,7 +14,7 @@ public final class UserTest {
     @Test
     public final void test() {
         assertEquals(
-                "{\"mnem\":\"WRAMIREZ\",\"display\":\"Wayne Ramirez\",\"email\":\"wayne.ramirez@doobry.org\"}",
-                MockUser.newUser("WRAMIREZ").toString());
+                "{\"mnem\":\"MARAYL\",\"display\":\"Mark Aylett\",\"email\":\"mark.aylett@gmail.com\"}",
+                MockUser.newUser("MARAYL").toString());
     }
 }

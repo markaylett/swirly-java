@@ -23,7 +23,7 @@ public final class BookTest {
         final int settlDay = ymdToJd(2014, 3, 14);
         final Book book = new Book(contr, settlDay);
 
-        final User user = MockUser.newUser("WRAMIREZ");
+        final User user = MockUser.newUser("MARAYL");
         final long now = 1414932078620L;
 
         book.placeOrder(
