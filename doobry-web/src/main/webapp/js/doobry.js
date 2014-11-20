@@ -40,6 +40,17 @@ function priceInc(contr) {
     return fractToReal(contr.tickNumer, contr.tickDenom).toFixed(contr.priceDp);
 }
 
+function toDateInt(s) {
+    return parseInt(s.substr(0, 4) + s.substr(5, 2) + s.substr(8, 2));
+}
+
+function toDateStr(i) {
+    var year = Math.floor(i / 10000);
+    var mon = Math.floor(i / 100) % 100;
+    var mday = i % 100;
+    return '' + year + '-' + mon + '-' + mday;
+}
+
 ko.bindingHandlers.mnem = {
     update: function(elem, valAccessor) {
         var val = valAccessor();
@@ -48,139 +59,147 @@ ko.bindingHandlers.mnem = {
 };
 
 function Book(val, contrs) {
+    var self = this;
 
     var contr = contrs[val.contr];
 
-    this.id = ko.observable(val.id);
-    this.contr = ko.observable(contr);
-    this.settlDate = ko.observable(val.settlDate);
-    this.bidTicks = ko.observable(val.bidTicks[0]);
-    this.bidLots = ko.observable(val.bidLots[0]);
-    this.bidCount = ko.observable(val.bidCount[0]);
-    this.offerTicks = ko.observable(val.offerTicks[0]);
-    this.offerLots = ko.observable(val.offerLots[0]);
-    this.offerCount = ko.observable(val.offerCount[0]);
+    self.id = ko.observable(val.id);
+    self.contr = ko.observable(contr);
+    self.settlDate = ko.observable(toDateStr(val.settlDate));
+    self.bidTicks = ko.observable(val.bidTicks[0]);
+    self.bidLots = ko.observable(val.bidLots[0]);
+    self.bidCount = ko.observable(val.bidCount[0]);
+    self.offerTicks = ko.observable(val.offerTicks[0]);
+    self.offerLots = ko.observable(val.offerLots[0]);
+    self.offerCount = ko.observable(val.offerCount[0]);
 
-    this.bidPrice = ko.computed(function() {
-        return ticksToPrice(this.bidTicks(), this.contr());
+    self.bidPrice = ko.computed(function() {
+        return ticksToPrice(self.bidTicks(), self.contr());
     }, this);
 
-    this.offerPrice = ko.computed(function() {
-        return ticksToPrice(this.offerTicks(), this.contr());
+    self.offerPrice = ko.computed(function() {
+        return ticksToPrice(self.offerTicks(), self.contr());
     }, this);
 }
 
 function Order(val, contrs) {
+    var self = this;
 
     var contr = contrs[val.contr];
 
-    this.isSelected = ko.observable(val.isSelected);
-    this.id = ko.observable(val.id);
-    this.user = ko.observable(val.user);
-    this.contr = ko.observable(contr);
-    this.settlDate = ko.observable(val.settlDate);
-    this.ref = ko.observable(val.ref);
-    this.state = ko.observable(val.state);
-    this.action = ko.observable(val.action);
-    this.ticks = ko.observable(val.ticks);
-    this.lots = ko.observable(val.lots);
-    this.resd = ko.observable(val.resd);
-    this.exec = ko.observable(val.exec);
-    this.lastTicks = ko.observable(val.lastTicks);
-    this.lastLots = ko.observable(val.lastLots);
-    this.minLots = ko.observable(val.minLots);
-    this.created = ko.observable(val.created);
-    this.modified = ko.observable(val.modified);
+    self.isSelected = ko.observable(val.isSelected);
+    self.id = ko.observable(val.id);
+    self.user = ko.observable(val.user);
+    self.contr = ko.observable(contr);
+    self.settlDate = ko.observable(toDateStr(val.settlDate));
+    self.ref = ko.observable(val.ref);
+    self.state = ko.observable(val.state);
+    self.action = ko.observable(val.action);
+    self.ticks = ko.observable(val.ticks);
+    self.lots = ko.observable(val.lots);
+    self.resd = ko.observable(val.resd);
+    self.exec = ko.observable(val.exec);
+    self.lastTicks = ko.observable(val.lastTicks);
+    self.lastLots = ko.observable(val.lastLots);
+    self.minLots = ko.observable(val.minLots);
+    self.created = ko.observable(val.created);
+    self.modified = ko.observable(val.modified);
 
-    this.price = ko.computed(function() {
-        return ticksToPrice(this.ticks(), this.contr());
+    self.price = ko.computed(function() {
+        return ticksToPrice(self.ticks(), self.contr());
     }, this);
 
-    this.lastPrice = ko.computed(function() {
-        return ticksToPrice(this.lastTicks(), this.contr());
+    self.lastPrice = ko.computed(function() {
+        return ticksToPrice(self.lastTicks(), self.contr());
     }, this);
 }
 
 function Trade(val, contrs) {
+    var self = this;
 
     var contr = contrs[val.contr];
 
-    this.isSelected = ko.observable(val.isSelected);
-    this.id = ko.observable(val.id);
-    this.orderId = ko.observable(val.orderId);
-    this.user = ko.observable(val.user);
-    this.contr = ko.observable(contr);
-    this.settlDate = ko.observable(val.settlDate);
-    this.ref = ko.observable(val.ref);
-    this.state = ko.observable(val.state);
-    this.action = ko.observable(val.action);
-    this.ticks = ko.observable(val.ticks);
-    this.lots = ko.observable(val.lots);
-    this.resd = ko.observable(val.resd);
-    this.exec = ko.observable(val.exec);
-    this.lastTicks = ko.observable(val.lastTicks);
-    this.lastLots = ko.observable(val.lastLots);
-    this.minLots = ko.observable(val.minLots);
+    self.isSelected = ko.observable(val.isSelected);
+    self.id = ko.observable(val.id);
+    self.orderId = ko.observable(val.orderId);
+    self.user = ko.observable(val.user);
+    self.contr = ko.observable(contr);
+    self.settlDate = ko.observable(toDateStr(val.settlDate));
+    self.ref = ko.observable(val.ref);
+    self.state = ko.observable(val.state);
+    self.action = ko.observable(val.action);
+    self.ticks = ko.observable(val.ticks);
+    self.lots = ko.observable(val.lots);
+    self.resd = ko.observable(val.resd);
+    self.exec = ko.observable(val.exec);
+    self.lastTicks = ko.observable(val.lastTicks);
+    self.lastLots = ko.observable(val.lastLots);
+    self.minLots = ko.observable(val.minLots);
 
-    this.matchId = ko.observable(val.matchId);
-    this.role = ko.observable(val.role);
-    this.cpty = ko.observable(val.cpty);
+    self.matchId = ko.observable(val.matchId);
+    self.role = ko.observable(val.role);
+    self.cpty = ko.observable(val.cpty);
 
-    this.created = ko.observable(val.created);
+    self.created = ko.observable(val.created);
 
-    this.price = ko.computed(function() {
-        return ticksToPrice(this.ticks(), this.contr());
+    self.price = ko.computed(function() {
+        return ticksToPrice(self.ticks(), self.contr());
     }, this);
 
-    this.lastPrice = ko.computed(function() {
-        return ticksToPrice(this.lastTicks(), this.contr());
+    self.lastPrice = ko.computed(function() {
+        return ticksToPrice(self.lastTicks(), self.contr());
     }, this);
 }
 
 function Posn(val, contrs) {
+    var self = this;
 
     var contr = contrs[val.contr];
 
-    this.id = ko.observable(val.id);
-    this.user = ko.observable(val.user);
-    this.contr = ko.observable(contr);
-    this.settlDate = ko.observable(val.settlDate);
-    this.buyLicks = ko.observable(val.buyLicks);
-    this.buyLots = ko.observable(val.buyLots);
-    this.sellLicks = ko.observable(val.sellLicks);
-    this.sellLots = ko.observable(val.sellLots);
+    self.id = ko.observable(val.id);
+    self.user = ko.observable(val.user);
+    self.contr = ko.observable(contr);
+    self.settlDate = ko.observable(toDateStr(val.settlDate));
+    self.buyLicks = ko.observable(val.buyLicks);
+    self.buyLots = ko.observable(val.buyLots);
+    self.sellLicks = ko.observable(val.sellLicks);
+    self.sellLots = ko.observable(val.sellLots);
 
-    this.buyPrice = ko.computed(function() {
+    self.buyPrice = ko.computed(function() {
         var ticks = 0;
-        var lots = this.buyLots();
+        var lots = self.buyLots();
         if (lots > 0) {
-            ticks = fractToReal(this.buyLicks(), lots);
+            ticks = fractToReal(self.buyLicks(), lots);
         }
-        return ticksToPrice(ticks, this.contr());
+        return ticksToPrice(ticks, self.contr());
     }, this);
 
-    this.sellPrice = ko.computed(function() {
+    self.sellPrice = ko.computed(function() {
         var ticks = 0;
-        var lots = this.sellLots();
+        var lots = self.sellLots();
         if (lots > 0) {
-            ticks = fractToReal(this.sellLicks(), lots);
+            ticks = fractToReal(self.sellLicks(), lots);
         }
-        return ticksToPrice(ticks, this.contr());
+        return ticksToPrice(ticks, self.contr());
     }, this);
 }
 
 function ViewModel(contrs) {
     var self = this;
-    this.contrs = contrs;
 
-    this.books = ko.observableArray([]);
-    this.orders = ko.observableArray([]);
-    this.trades = ko.observableArray([]);
-    this.posns = ko.observableArray([]);
+    self.contrs = contrs;
 
-    this.selectedOrders = [];
+    self.books = ko.observableArray([]);
+    self.orders = ko.observableArray([]);
+    self.trades = ko.observableArray([]);
+    self.posns = ko.observableArray([]);
 
-    this.refresh = function() {
+    self.contrMnem = ko.observable();
+    self.settlDate = ko.observable();
+    self.price = ko.observable();
+    self.lots = ko.observable();
+
+    self.refresh = function() {
 
         $.getJSON('/api/book', function(raw) {
 
@@ -216,30 +235,59 @@ function ViewModel(contrs) {
             self.posns(cooked);
         });
     };
-}
 
-function substrMatcher(strs) {
-    return function(q, cb) {
-        var matches, substrRegex;
- 
-        // An array that will be populated with substring matches.
-        matches = [];
- 
-        // Eegex used to determine if a string contains the substring `q`.
-        substrRegex = new RegExp(q, 'i');
- 
-        // Iterate through the pool of strings and for any string that
-        // contains the substring `q`, add it to the `matches` array.
-        $.each(strs, function(i, str) {
-            if (substrRegex.test(str)) {
-                // The typeahead jQuery plugin expects suggestions to
-                // a JavaScript object, refer to typeahead docs for
-                // more info.
-                matches.push({ value: str });
-            }
+    self.selectOrder = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        self.price(val.price());
+        self.lots(val.lots());
+        return true;
+    };
+
+    self.submitOrder = function(action) {
+        var contr = self.contrs[self.contrMnem()];
+        var settlDate = toDateInt(self.settlDate());
+        var ticks = priceToTicks(self.price(), contr);
+        var lots = parseInt(self.lots());
+        $.ajax({
+            type: 'post',
+            url: '/api/accnt/order/',
+            data: JSON.stringify({
+                contr: contr.mnem,
+                settlDate: settlDate,
+                ref: '',
+                action: action,
+                ticks: ticks,
+                lots: lots,
+                minLots: 0
+            })
+        }).done(function(raw) {
         });
- 
-        cb(matches);
+    };
+
+    self.submitBuy = function() {
+        self.submitOrder('BUY');
+    };
+
+    self.submitSell = function() {
+        self.submitOrder('SELL');
+    };
+
+    self.cancelOrder = function(id) {
+        $.ajax({
+            type: 'put',
+            url: '/api/accnt/order/' + id,
+            data: '{"lots":0}'
+        }).done(function(raw) {
+        });
+    };
+
+    self.confirmTrade = function(id) {
+        $.ajax({
+            type: 'delete',
+            url: '/api/accnt/trade/' + data.id
+        }).done(function(raw) {
+        });
     };
 }
 
@@ -254,16 +302,10 @@ function documentReady() {
             val.qtyInc = qtyInc(val);
             contrs[val.mnem] = val;
         });
-        $('#contr').typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 1
-        }, {
-            name: 'contrs',
-            displayKey: 'value',
-            source: substrMatcher(Object.keys(contrs))
+        $("#contr").typeahead({
+            items: 4,
+            source: Object.keys(contrs)
         });
-
         var model = new ViewModel(contrs);
         ko.applyBindings(model);
         model.refresh();

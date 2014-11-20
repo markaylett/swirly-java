@@ -29,7 +29,8 @@
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                  data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -121,9 +122,12 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: orders">
-              <tr>
+              <tr style="cursor: pointer; cursor: hand;"
+                  data-bind="click: $root.selectOrder">
                 <td>
-                  <input type="checkbox" data-bind="checked: isSelected"/>
+                  <input type="checkbox"
+                         data-bind="checked: isSelected, click: $root.selectOrder,
+                                    clickBubble: false"/>
                 </td>
                 <td data-bind="text: id"></td>
                 <td data-bind="mnem: contr"></td>
@@ -208,25 +212,33 @@
       <form class="form-inline" role="form">
         <div class="form-group">
           <label for="contr" class="sr-only">Contr</label>
-          <input id="contr" type="text" class="form-control typeahead" placeholder="Enter contract"/>
+          <div id="the-basics">
+            <input id="contr" type="text" class="form-control" placeholder="Enter contract"
+                   data-bind="value: contrMnem"/>
+          </div>
         </div>
         <div class="form-group">
           <label for="settlDate" class="sr-only">Settl Date</label>
-          <input id="settlDate" type="date" class="form-control" placeholder="Enter settl date"/>
+          <input id="settlDate" type="date" class="form-control" placeholder="Enter settl date"
+                 data-bind="value: settlDate"/>
         </div>
         <div class="form-group">
           <label for="price" class="sr-only">Price</label>
-          <input id="price" type="number" class="form-control" placeholder="Enter price"/>
+          <input id="price" type="number" class="form-control" placeholder="Enter price"
+                 data-bind="value: price"/>
         </div>
         <div class="form-group">
           <label for="lots" class="sr-only">Lots</label>
-            <input id="lots" type="number" class="form-control" placeholder="Enter lots"/>
+            <input id="lots" type="number" class="form-control" placeholder="Enter lots"
+                 data-bind="value: lots"/>
         </div>
-        <button type="button" class="btn btn-default" aria-label="Buy">
+        <button type="button" class="btn btn-default" aria-label="Buy"
+                data-bind="click: submitBuy">
           <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
           Buy
         </button>
-        <button type="button" class="btn btn-default" aria-label="Sell">
+        <button type="button" class="btn btn-default" aria-label="Sell"
+                data-bind="click: submitSell">
           <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
           Sell
         </button>
@@ -239,8 +251,8 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script type="text/javascript" src="/js/jquery.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap3-typeahead.min.js"></script>
     <script type="text/javascript" src="/js/knockout.js"></script>
-    <script type="text/javascript" src="/js/typeahead.js"></script>
     <script type="text/javascript" src="/js/doobry.js"></script>
     <script type="text/javascript">
       $(documentReady);
