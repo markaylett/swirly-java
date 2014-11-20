@@ -60,18 +60,18 @@
           <label for="contr" class="sr-only">Contr</label>
           <div id="the-basics">
             <input id="contr" type="text" class="form-control" placeholder="Enter contract"
-                   data-bind="value: contrMnem"/>
+                   data-bind="value: contrMnem, disable: isOrderSelected"/>
           </div>
         </div>
         <div class="form-group">
           <label for="settlDate" class="sr-only">Settl Date</label>
           <input id="settlDate" type="date" class="form-control" placeholder="Enter settl date"
-                 data-bind="value: settlDate"/>
+                 data-bind="value: settlDate, disable: isOrderSelected"/>
         </div>
         <div class="form-group">
           <label for="price" class="sr-only">Price</label>
           <input id="price" type="number" class="form-control" placeholder="Enter price"
-                 data-bind="value: price" min="0"/>
+                 data-bind="value: price, disable: isOrderSelected" min="0"/>
         </div>
         <div class="form-group">
           <label for="lots" class="sr-only">Lots</label>
@@ -79,12 +79,12 @@
                  data-bind="value: lots"/>
         </div>
         <button type="button" class="btn btn-default" aria-label="Buy"
-                data-bind="click: submitBuy">
+                data-bind="click: submitBuy, disable: isOrderSelected">
           <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
           Buy
         </button>
         <button type="button" class="btn btn-default" aria-label="Sell"
-                data-bind="click: submitSell">
+                data-bind="click: submitSell, disable: isOrderSelected">
           <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
           Sell
         </button>
@@ -147,9 +147,18 @@
       </div>
 
       <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-        <li class="active"><a href="#orders" data-toggle="tab">Orders</a></li>
-        <li><a href="#trades" data-toggle="tab">Trades</a></li>
-        <li><a href="#posns" data-toggle="tab">Positions</a></li>
+        <li>
+          <a id="orderTab" href="#orders" data-toggle="tab"
+             data-bind="click: selectTab;">Orders</a>
+        </li>
+        <li>
+          <a id="tradeTab" href="#trades" data-toggle="tab"
+             data-bind="click: selectTab;">Trades</a>
+        </li>
+        <li>
+          <a id="posnTab" href="#posns" data-toggle="tab"
+             data-bind="click: selectTab;">Posns</a>
+        </li>
       </ul>
       <div id="tab-content" class="tab-content">
         <div id="orders" class="tab-pane active">

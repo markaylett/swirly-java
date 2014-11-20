@@ -82,11 +82,11 @@ function Book(val, contrs) {
 
     self.bidPrice = ko.computed(function() {
         return ticksToPrice(self.bidTicks(), self.contr());
-    }, self);
+    });
 
     self.offerPrice = ko.computed(function() {
         return ticksToPrice(self.offerTicks(), self.contr());
-    }, self);
+    });
 }
 
 function Order(val, contrs) {
@@ -114,11 +114,21 @@ function Order(val, contrs) {
 
     self.price = ko.computed(function() {
         return ticksToPrice(self.ticks(), self.contr());
-    }, self);
+    });
 
     self.lastPrice = ko.computed(function() {
         return ticksToPrice(self.lastTicks(), self.contr());
-    }, self);
+    });
+
+    self.update = function(val) {
+        self.state(val.state);
+        self.lots(val.lots);
+        self.resd(val.resd);
+        self.exec(val.exec);
+        self.lastTicks(val.lastTicks);
+        self.lastLots(val.lastLots);
+        self.modified(val.modified);
+    };
 }
 
 function Trade(val, contrs) {
@@ -151,11 +161,11 @@ function Trade(val, contrs) {
 
     self.price = ko.computed(function() {
         return ticksToPrice(self.ticks(), self.contr());
-    }, self);
+    });
 
     self.lastPrice = ko.computed(function() {
         return ticksToPrice(self.lastTicks(), self.contr());
-    }, self);
+    });
 }
 
 function Posn(val, contrs) {
@@ -179,7 +189,7 @@ function Posn(val, contrs) {
             ticks = fractToReal(self.buyLicks(), lots);
         }
         return ticksToPrice(ticks, self.contr());
-    }, self);
+    });
 
     self.sellPrice = ko.computed(function() {
         var ticks = 0;
@@ -188,7 +198,14 @@ function Posn(val, contrs) {
             ticks = fractToReal(self.sellLicks(), lots);
         }
         return ticksToPrice(ticks, self.contr());
-    }, self);
+    });
+
+    self.update = function(val) {
+        self.buyLicks(val.buyLicks);
+        self.buyLots(val.buyLots);
+        self.sellLicks(val.sellLicks);
+        self.sellLots(val.sellLots);
+    };
 }
 
 function ViewModel(contrs) {
@@ -201,6 +218,7 @@ function ViewModel(contrs) {
     self.trades = ko.observableArray([]);
     self.posns = ko.observableArray([]);
 
+    self.selectedTab = ko.observable();
     self.allOrders = ko.observable(false);
     self.allTrades = ko.observable(false);
 
@@ -209,37 +227,48 @@ function ViewModel(contrs) {
     self.price = ko.observable();
     self.lots = ko.observable();
 
+    self.books.extend({ rateLimit: 25 });
+    self.orders.extend({ rateLimit: 25 });
+    self.trades.extend({ rateLimit: 25 });
+    self.posns.extend({ rateLimit: 25 });
+
     self.isOrderSelected = ko.computed(function() {
+        if (self.selectedTab() != 'orderTab') {
+            return false;
+        }
         var orders = self.orders();
         for (var i = 0; i < orders.length; ++i) {
             if (orders[i].isSelected())
                 return true;
         }
         return false;
-    }, self);
+    });
 
     self.isTradeSelected = ko.computed(function() {
+        if (self.selectedTab() != 'tradeTab') {
+            return false;
+        }
         var trades = self.trades();
         for (var i = 0; i < trades.length; ++i) {
             if (trades[i].isSelected())
                 return true;
         }
         return false;
-    }, self);
+    });
 
     self.allOrders.subscribe(function(val) {
         var orders = self.orders();
         for (var i = 0; i < orders.length; ++i) {
             orders[i].isSelected(val);
         }
-    }, self);
+    });
 
     self.allTrades.subscribe(function(val) {
         var trades = self.trades();
         for (var i = 0; i < trades.length; ++i) {
             trades[i].isSelected(val);
         }
-    }, self);
+    });
 
     self.contrMnem.subscribe(function(val) {
         if (val in self.contrs) {
@@ -247,21 +276,23 @@ function ViewModel(contrs) {
             $('#price').attr('step', contr.priceInc);
             $('#lots').attr('min', contr.minLots);
         }
-    }, self);
+    });
 
     self.selectBid = function(val) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
         self.price(val.bidPrice());
-        self.lots(val.bidLots());
         return true;
+    };
+
+    self.selectTab = function(val, event) {
+        self.selectedTab(event.target.id);
     };
 
     self.selectOffer = function(val) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
         self.price(val.offerPrice());
-        self.lots(val.offerLots());
         return true;
     };
 
@@ -269,7 +300,7 @@ function ViewModel(contrs) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
         self.price(val.price());
-        self.lots(val.lots());
+        self.lots(val.resd());
         return true;
     };
 
@@ -277,7 +308,7 @@ function ViewModel(contrs) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
         self.price(val.price());
-        self.lots(val.lots());
+        self.lots(val.resd());
         return true;
     };
 
@@ -285,7 +316,6 @@ function ViewModel(contrs) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
         self.price(val.buyPrice());
-        self.lots(val.buyLots());
         return true;
     };
 
@@ -293,7 +323,6 @@ function ViewModel(contrs) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
         self.price(val.sellPrice());
-        self.lots(val.sellLots());
         return true;
     };
 
@@ -309,8 +338,20 @@ function ViewModel(contrs) {
         });
     };
 
+    self.removeOrder = function(id) {
+        self.orders.remove(function(val) {
+            return val.id() === id;
+        });
+    };
+
     self.findTrade = function(id) {
         return ko.utils.arrayFirst(self.trades(), function(val) {
+            return val.id() === id;
+        });
+    };
+
+    self.removeTrade = function(id) {
+        self.trades.remove(function(val) {
             return val.id() === id;
         });
     };
@@ -319,6 +360,36 @@ function ViewModel(contrs) {
         return ko.utils.arrayFirst(self.posns(), function(val) {
             return val.id() === id;
         });
+    };
+
+    self.applyTrans = function(raw) {
+        $.each(raw.orders, function(key, val) {
+            if (val.resd > 0) {
+                order = self.findOrder(val.id);
+                if (order !== null) {
+                    order.update(val);
+                } else {
+                    val.isSelected = false;
+                    self.orders.push(new Order(val, self.contrs));
+                }
+            } else {
+                self.removeOrder(val.id);
+            }
+        });
+        $.each(raw.execs, function(key, val) {
+            if (val.state == 'TRADE') {
+                val.isSelected = false;
+                self.trades.push(new Trade(val, self.contrs));
+            }
+        });
+        if ('posn' in raw) {
+            posn = self.findPosn(raw.posn.id);
+            if (posn !== null) {
+                posn.update(raw.posn);
+            } else {
+                self.posns.push(new Posn(raw.posn, self.contrs));
+            }
+        }
     };
 
     self.refreshAll = function() {
@@ -334,15 +405,15 @@ function ViewModel(contrs) {
         $.getJSON('/api/accnt', function(raw) {
 
             var cooked = $.map(raw.orders, function(val) {
-                match = self.findOrder(val.id);
-                val.isSelected = (match !== null && match.isSelected());
+                order = self.findOrder(val.id);
+                val.isSelected = (order !== null && order.isSelected());
                 return new Order(val, self.contrs);
             });
             self.orders(cooked);
 
             cooked = $.map(raw.trades, function(val) {
-                match = self.findTrade(val.id);
-                val.isSelected = (match !== null && match.isSelected());
+                order = self.findTrade(val.id);
+                val.isSelected = (order !== null && order.isSelected());
                 return new Trade(val, self.contrs);
             });
             self.trades(cooked);
@@ -372,7 +443,7 @@ function ViewModel(contrs) {
                 minLots: 0
             })
         }).done(function(raw) {
-            console.log(raw);
+            self.applyTrans(raw);
         });
     };
 
@@ -385,16 +456,25 @@ function ViewModel(contrs) {
     };
 
     self.reviseOrder = function(id) {
+        var lots = parseInt(self.lots());
         $.ajax({
             type: 'put',
             url: '/api/accnt/order/' + id,
-            data: '{"lots":0}'
+            data: JSON.stringify({
+                lots: lots
+            })
         }).done(function(raw) {
-            console.log(raw);
+            self.applyTrans(raw);
         });
     };
 
     self.reviseAll = function() {
+        var orders = self.orders();
+        for (var i = 0; i < orders.length; ++i) {
+            if (orders[i].isSelected()) {
+                self.reviseOrder(orders[i].id());
+            }
+        }
     };
 
     self.cancelOrder = function(id) {
@@ -403,7 +483,7 @@ function ViewModel(contrs) {
             url: '/api/accnt/order/' + id,
             data: '{"lots":0}'
         }).done(function(raw) {
-            console.log(raw);
+            self.applyTrans(raw);
         });
     };
 
@@ -421,7 +501,7 @@ function ViewModel(contrs) {
             type: 'delete',
             url: '/api/accnt/trade/' + id
         }).done(function(raw) {
-            console.log(raw);
+            self.removeTrade(id);
         });
     };
 
@@ -446,16 +526,16 @@ function documentReady() {
             val.qtyInc = qtyInc(val);
             contrs[val.mnem] = val;
         });
-        $("#contr").typeahead({
+        $('#contr').typeahead({
             items: 4,
             source: Object.keys(contrs)
         });
         var model = new ViewModel(contrs);
         ko.applyBindings(model);
+        $('#orderTab').click();
         model.refreshAll();
         setInterval(function() {
             //model.refreshAll();
         }, 10000);
-
     });
 }
