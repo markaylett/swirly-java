@@ -74,6 +74,7 @@ function Order(val, contrs) {
 
     var contr = contrs[val.contr];
 
+    this.isSelected = ko.observable(val.isSelected);
     this.id = ko.observable(val.id);
     this.user = ko.observable(val.user);
     this.contr = ko.observable(contr);
@@ -104,6 +105,7 @@ function Trade(val, contrs) {
 
     var contr = contrs[val.contr];
 
+    this.isSelected = ko.observable(val.isSelected);
     this.id = ko.observable(val.id);
     this.orderId = ko.observable(val.orderId);
     this.user = ko.observable(val.user);
@@ -169,13 +171,16 @@ function Posn(val, contrs) {
 
 function ViewModel(contrs) {
     var self = this;
-    self.contrs = contrs;
-    self.books = ko.observableArray([]);
-    self.orders = ko.observableArray([]);
-    self.trades = ko.observableArray([]);
-    self.posns = ko.observableArray([]);
+    this.contrs = contrs;
 
-    self.refresh = function() {
+    this.books = ko.observableArray([]);
+    this.orders = ko.observableArray([]);
+    this.trades = ko.observableArray([]);
+    this.posns = ko.observableArray([]);
+
+    this.selectedOrders = [];
+
+    this.refresh = function() {
 
         $.getJSON('/api/book', function(raw) {
 
@@ -188,11 +193,19 @@ function ViewModel(contrs) {
         $.getJSON('/api/accnt', function(raw) {
 
             var cooked = $.map(raw.orders, function(val) {
+                match = ko.utils.arrayFirst(self.orders(), function(item) {
+                    return item.id() === val.id;
+                });
+                val.isSelected = (match !== null && match.isSelected());
                 return new Order(val, self.contrs);
             });
             self.orders(cooked);
 
             cooked = $.map(raw.trades, function(val) {
+                match = ko.utils.arrayFirst(self.trades(), function(item) {
+                    return item.id() === val.id;
+                });
+                val.isSelected = (match !== null && match.isSelected());
                 return new Trade(val, self.contrs);
             });
             self.trades(cooked);
@@ -202,6 +215,31 @@ function ViewModel(contrs) {
             });
             self.posns(cooked);
         });
+    };
+}
+
+function substrMatcher(strs) {
+    return function(q, cb) {
+        var matches, substrRegex;
+ 
+        // An array that will be populated with substring matches.
+        matches = [];
+ 
+        // Eegex used to determine if a string contains the substring `q`.
+        substrRegex = new RegExp(q, 'i');
+ 
+        // Iterate through the pool of strings and for any string that
+        // contains the substring `q`, add it to the `matches` array.
+        $.each(strs, function(i, str) {
+            if (substrRegex.test(str)) {
+                // The typeahead jQuery plugin expects suggestions to
+                // a JavaScript object, refer to typeahead docs for
+                // more info.
+                matches.push({ value: str });
+            }
+        });
+ 
+        cb(matches);
     };
 }
 
@@ -216,6 +254,16 @@ function documentReady() {
             val.qtyInc = qtyInc(val);
             contrs[val.mnem] = val;
         });
+        $('#contr').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 1
+        }, {
+            name: 'contrs',
+            displayKey: 'value',
+            source: substrMatcher(Object.keys(contrs))
+        });
+
         var model = new ViewModel(contrs);
         ko.applyBindings(model);
         model.refresh();
