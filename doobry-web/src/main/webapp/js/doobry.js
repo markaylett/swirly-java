@@ -58,6 +58,13 @@ ko.bindingHandlers.mnem = {
     }
 };
 
+ko.bindingHandlers.optnum = {
+    update: function(elem, valAccessor) {
+        var val = valAccessor();
+        $(elem).text(parseFloat(val()) === 0 ? '-' : val());
+    }
+};
+
 function Book(val, contrs) {
     var self = this;
 
@@ -75,11 +82,11 @@ function Book(val, contrs) {
 
     self.bidPrice = ko.computed(function() {
         return ticksToPrice(self.bidTicks(), self.contr());
-    }, this);
+    }, self);
 
     self.offerPrice = ko.computed(function() {
         return ticksToPrice(self.offerTicks(), self.contr());
-    }, this);
+    }, self);
 }
 
 function Order(val, contrs) {
@@ -107,11 +114,11 @@ function Order(val, contrs) {
 
     self.price = ko.computed(function() {
         return ticksToPrice(self.ticks(), self.contr());
-    }, this);
+    }, self);
 
     self.lastPrice = ko.computed(function() {
         return ticksToPrice(self.lastTicks(), self.contr());
-    }, this);
+    }, self);
 }
 
 function Trade(val, contrs) {
@@ -144,11 +151,11 @@ function Trade(val, contrs) {
 
     self.price = ko.computed(function() {
         return ticksToPrice(self.ticks(), self.contr());
-    }, this);
+    }, self);
 
     self.lastPrice = ko.computed(function() {
         return ticksToPrice(self.lastTicks(), self.contr());
-    }, this);
+    }, self);
 }
 
 function Posn(val, contrs) {
@@ -172,7 +179,7 @@ function Posn(val, contrs) {
             ticks = fractToReal(self.buyLicks(), lots);
         }
         return ticksToPrice(ticks, self.contr());
-    }, this);
+    }, self);
 
     self.sellPrice = ko.computed(function() {
         var ticks = 0;
@@ -181,7 +188,7 @@ function Posn(val, contrs) {
             ticks = fractToReal(self.sellLicks(), lots);
         }
         return ticksToPrice(ticks, self.contr());
-    }, this);
+    }, self);
 }
 
 function ViewModel(contrs) {
@@ -194,12 +201,85 @@ function ViewModel(contrs) {
     self.trades = ko.observableArray([]);
     self.posns = ko.observableArray([]);
 
+    self.allOrders = ko.observable(false);
+    self.allTrades = ko.observable(false);
+
     self.contrMnem = ko.observable();
     self.settlDate = ko.observable();
     self.price = ko.observable();
     self.lots = ko.observable();
 
-    self.refresh = function() {
+    self.allOrders.subscribe(function(val) {
+        var orders = self.orders();
+        for (var i = 0; i < orders.length; ++i) {
+            orders[i].isSelected(val);
+        }
+    }, self);
+
+    self.allTrades.subscribe(function(val) {
+        var trades = self.trades();
+        for (var i = 0; i < trades.length; ++i) {
+            trades[i].isSelected(val);
+        }
+    }, self);
+
+    self.contrMnem.subscribe(function(val) {
+        if (val in self.contrs) {
+            var contr = self.contrs[val];
+            $('#price').attr('step', contr.priceInc);
+            $('#lots').attr('min', contr.minLots);
+        }
+    }, self);
+
+    self.selectBid = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        self.price(val.bidPrice());
+        self.lots(val.bidLots());
+        return true;
+    };
+
+    self.selectOffer = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        self.price(val.offerPrice());
+        self.lots(val.offerLots());
+        return true;
+    };
+
+    self.selectOrder = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        self.price(val.price());
+        self.lots(val.lots());
+        return true;
+    };
+
+    self.selectTrade = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        self.price(val.price());
+        self.lots(val.lots());
+        return true;
+    };
+
+    self.selectBuy = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        self.price(val.buyPrice());
+        self.lots(val.buyLots());
+        return true;
+    };
+
+    self.selectSell = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        self.price(val.sellPrice());
+        self.lots(val.sellLots());
+        return true;
+    };
+
+    self.refreshAll = function() {
 
         $.getJSON('/api/book', function(raw) {
 
@@ -236,14 +316,6 @@ function ViewModel(contrs) {
         });
     };
 
-    self.selectOrder = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
-        self.price(val.price());
-        self.lots(val.lots());
-        return true;
-    };
-
     self.submitOrder = function(action) {
         var contr = self.contrs[self.contrMnem()];
         var settlDate = toDateInt(self.settlDate());
@@ -273,6 +345,18 @@ function ViewModel(contrs) {
         self.submitOrder('SELL');
     };
 
+    self.reviseOrder = function(id) {
+        $.ajax({
+            type: 'put',
+            url: '/api/accnt/order/' + id,
+            data: '{"lots":0}'
+        }).done(function(raw) {
+        });
+    };
+
+    self.reviseAll = function() {
+    };
+
     self.cancelOrder = function(id) {
         $.ajax({
             type: 'put',
@@ -282,12 +366,30 @@ function ViewModel(contrs) {
         });
     };
 
+    self.cancelAll = function() {
+        var orders = self.orders();
+        for (var i = 0; i < orders.length; ++i) {
+            if (orders[i].isSelected()) {
+                self.cancelOrder(orders[i].id());
+            }
+        }
+    };
+
     self.confirmTrade = function(id) {
         $.ajax({
             type: 'delete',
-            url: '/api/accnt/trade/' + data.id
+            url: '/api/accnt/trade/' + id
         }).done(function(raw) {
         });
+    };
+
+    self.confirmAll = function() {
+        var trades = self.trades();
+        for (var i = 0; i < trades.length; ++i) {
+            if (trades[i].isSelected()) {
+                self.confirmTrade(trades[i].id());
+            }
+        }
     };
 }
 
@@ -308,6 +410,10 @@ function documentReady() {
         });
         var model = new ViewModel(contrs);
         ko.applyBindings(model);
-        model.refresh();
+        model.refreshAll();
+        setInterval(function() {
+            //model.refreshAll();
+        }, 10000);
+
     });
 }
