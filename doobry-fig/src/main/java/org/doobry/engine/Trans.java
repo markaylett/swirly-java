@@ -14,6 +14,7 @@ import org.doobry.util.Queue;
 import org.doobry.util.SlNode;
 
 public final class Trans implements Printable {
+    Book book;
     Order order;
     final Queue matches = new Queue();
     /**
@@ -26,6 +27,7 @@ public final class Trans implements Printable {
     Posn posn;
 
     final void clear() {
+        book = null;
         order = null;
         matches.clear();
         execs.clear();
@@ -35,7 +37,15 @@ public final class Trans implements Printable {
     @Override
     public final void print(StringBuilder sb, Object arg) {
         final User user = (User) arg;
-        sb.append("{\"orders\":[");
+        if (book != null) {
+            sb.append("{\"book\":");
+            // FIXME: number of levels.
+            book.print(sb, Integer.valueOf(5));
+            sb.append(',');
+        } else {
+            sb.append('{');            
+        }
+        sb.append("\"orders\":[");
         int i = 0;
         if (order != null) {
             assert user != null && order.getUserId() == user.getId();
@@ -68,7 +78,8 @@ public final class Trans implements Printable {
         }
         // Position is optional.
         if (posn != null) {
-            sb.append("],\"posn\":").append(posn);
+            sb.append("],\"posn\":");
+            posn.print(sb, null);
             sb.append('}');
         } else {
             sb.append("]}");

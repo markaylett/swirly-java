@@ -163,20 +163,20 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    public final void matchOrders(Book book, Order taker, Trans trans) {
+    public final void matchOrders(Book book, Order order, Trans trans) {
         Side side;
         Direct direct;
-        if (taker.getAction() == Action.BUY) {
+        if (order.getAction() == Action.BUY) {
             // Paid when the taker lifts the offer.
             side = book.getOfferSide();
             direct = Direct.PAID;
         } else {
-            assert taker.getAction() == Action.SELL;
+            assert order.getAction() == Action.SELL;
             // Given when the taker hits the bid.
             side = book.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(book, taker, side, direct, trans);
+        matchOrders(book, order, side, direct, trans);
     }
 
     // Assumes that maker lots have not been reduced since matching took place.
@@ -314,6 +314,7 @@ public final class Serv implements AutoCloseable {
         final Exec exec = newExec(order, now);
 
         trans.clear();
+        trans.book = book;
         trans.order = order;
         trans.execs.insertBack(exec);
         // Order fields are updated on match.
@@ -367,6 +368,7 @@ public final class Serv implements AutoCloseable {
         book.reviseOrder(order, lots, now);
 
         trans.clear();
+        trans.book = book;
         trans.order = order;
         trans.execs.insertBack(exec);
         return trans;
@@ -404,6 +406,7 @@ public final class Serv implements AutoCloseable {
         accnt.removeOrder(order);
 
         trans.clear();
+        trans.book = book;
         trans.order = order;
         trans.execs.insertBack(exec);
         return trans;

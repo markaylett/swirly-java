@@ -87,6 +87,15 @@ function Book(val, contrs) {
     self.offerPrice = ko.computed(function() {
         return ticksToPrice(self.offerTicks(), self.contr());
     });
+
+    self.update = function(val) {
+        self.bidTicks(val.bidTicks[0]);
+        self.bidLots(val.bidLots[0]);
+        self.bidCount(val.bidCount[0]);
+        self.offerTicks(val.offerTicks[0]);
+        self.offerLots(val.offerLots[0]);
+        self.offerCount(val.offerCount[0]);
+    };
 }
 
 function Order(val, contrs) {
@@ -363,6 +372,14 @@ function ViewModel(contrs) {
     };
 
     self.applyTrans = function(raw) {
+        if ('book' in raw) {
+            book = self.findBook(raw.book.id);
+            if (book !== null) {
+                book.update(raw.book);
+            } else {
+                self.books.push(new Book(raw.book, self.contrs));
+            }
+        }
         $.each(raw.orders, function(key, val) {
             if (val.resd > 0) {
                 order = self.findOrder(val.id);
@@ -535,7 +552,7 @@ function documentReady() {
         $('#orderTab').click();
         model.refreshAll();
         setInterval(function() {
-            //model.refreshAll();
+            model.refreshAll();
         }, 10000);
     });
 }
