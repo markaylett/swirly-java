@@ -6,8 +6,8 @@
 module('conversion');
 
 test('fraction to real', function() {
-    equal(dbr.fractToReal(100, 1).toFixed(2), "100.00", 'one hundred');
-    equal(dbr.fractToReal(1, 100).toFixed(2), "0.01", 'one hundredth');
+    equal(fractToReal(100, 1).toFixed(2), "100.00", 'one hundred');
+    equal(fractToReal(1, 100).toFixed(2), "0.01", 'one hundredth');
 })
 
 test('price increment', function() {
@@ -16,7 +16,7 @@ test('price increment', function() {
         tickDenom: 10000,
         priceDp: 4
     };
-    equal(dbr.priceInc(contr), "0.0001", 'one ten thousandth');
+    equal(priceInc(contr), "0.0001", 'one ten thousandth');
 });
 
 test('quantity increment', function() {
@@ -25,7 +25,7 @@ test('quantity increment', function() {
         lotDenom: 1,
         lotDp: 1
     };
-    equal(dbr.qtyInc(contr), 1000000, 'one million');
+    equal(qtyInc(contr), 1000000, 'one million');
 });
 
 module('reference data');
