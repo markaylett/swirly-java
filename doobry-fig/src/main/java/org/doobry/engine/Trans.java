@@ -35,7 +35,7 @@ public final class Trans implements Printable {
     @Override
     public final void print(StringBuilder sb, Object arg) {
         final User user = (User) arg;
-        sb.append("{\"order\":[");
+        sb.append("{\"orders\":[");
         int i = 0;
         if (order != null) {
             assert user != null && order.getUserId() == user.getId();
@@ -53,7 +53,7 @@ public final class Trans implements Printable {
             match.makerOrder.print(sb, null);
             ++i;
         }
-        sb.append("],\"exec\":[");
+        sb.append("],\"execs\":[");
         i = 0;
         for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;

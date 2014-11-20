@@ -209,6 +209,24 @@ function ViewModel(contrs) {
     self.price = ko.observable();
     self.lots = ko.observable();
 
+    self.isOrderSelected = ko.computed(function() {
+        var orders = self.orders();
+        for (var i = 0; i < orders.length; ++i) {
+            if (orders[i].isSelected())
+                return true;
+        }
+        return false;
+    }, self);
+
+    self.isTradeSelected = ko.computed(function() {
+        var trades = self.trades();
+        for (var i = 0; i < trades.length; ++i) {
+            if (trades[i].isSelected())
+                return true;
+        }
+        return false;
+    }, self);
+
     self.allOrders.subscribe(function(val) {
         var orders = self.orders();
         for (var i = 0; i < orders.length; ++i) {
@@ -279,6 +297,30 @@ function ViewModel(contrs) {
         return true;
     };
 
+    self.findBook = function(id) {
+        return ko.utils.arrayFirst(self.books(), function(val) {
+            return val.id() === id;
+        });
+    };
+
+    self.findOrder = function(id) {
+        return ko.utils.arrayFirst(self.orders(), function(val) {
+            return val.id() === id;
+        });
+    };
+
+    self.findTrade = function(id) {
+        return ko.utils.arrayFirst(self.trades(), function(val) {
+            return val.id() === id;
+        });
+    };
+
+    self.findPosn = function(id) {
+        return ko.utils.arrayFirst(self.posns(), function(val) {
+            return val.id() === id;
+        });
+    };
+
     self.refreshAll = function() {
 
         $.getJSON('/api/book', function(raw) {
@@ -292,18 +334,14 @@ function ViewModel(contrs) {
         $.getJSON('/api/accnt', function(raw) {
 
             var cooked = $.map(raw.orders, function(val) {
-                match = ko.utils.arrayFirst(self.orders(), function(item) {
-                    return item.id() === val.id;
-                });
+                match = self.findOrder(val.id);
                 val.isSelected = (match !== null && match.isSelected());
                 return new Order(val, self.contrs);
             });
             self.orders(cooked);
 
             cooked = $.map(raw.trades, function(val) {
-                match = ko.utils.arrayFirst(self.trades(), function(item) {
-                    return item.id() === val.id;
-                });
+                match = self.findTrade(val.id);
                 val.isSelected = (match !== null && match.isSelected());
                 return new Trade(val, self.contrs);
             });
@@ -334,6 +372,7 @@ function ViewModel(contrs) {
                 minLots: 0
             })
         }).done(function(raw) {
+            console.log(raw);
         });
     };
 
@@ -351,6 +390,7 @@ function ViewModel(contrs) {
             url: '/api/accnt/order/' + id,
             data: '{"lots":0}'
         }).done(function(raw) {
+            console.log(raw);
         });
     };
 
@@ -363,6 +403,7 @@ function ViewModel(contrs) {
             url: '/api/accnt/order/' + id,
             data: '{"lots":0}'
         }).done(function(raw) {
+            console.log(raw);
         });
     };
 
@@ -380,6 +421,7 @@ function ViewModel(contrs) {
             type: 'delete',
             url: '/api/accnt/trade/' + id
         }).done(function(raw) {
+            console.log(raw);
         });
     };
 
