@@ -29,7 +29,7 @@ public final class CacheTest {
     @Test
     public final void testAsset() {
         final Cache c = new Cache(257);
-        c.insertList(Kind.ASSET, model.selectRec(Kind.ASSET));
+        c.insertRecList(Kind.ASSET, model.getRecList(Kind.ASSET));
         assertFalse(c.isEmptyRec(Kind.ASSET));
         assertEquals("AUD", ((Rec) c.getFirstRec(Kind.ASSET)).getMnem());
         assertEquals("CAD", ((Rec) c.getFirstRec(Kind.ASSET).slNext()).getMnem());
@@ -40,7 +40,7 @@ public final class CacheTest {
     @Test
     public final void testContr() {
         final Cache c = new Cache(257);
-        c.insertList(Kind.CONTR, model.selectRec(Kind.CONTR));
+        c.insertRecList(Kind.CONTR, model.getRecList(Kind.CONTR));
         assertFalse(c.isEmptyRec(Kind.CONTR));
         assertEquals("AUDUSD", ((Rec) c.getFirstRec(Kind.CONTR)).getMnem());
         assertEquals("EURCHF", ((Rec) c.getFirstRec(Kind.CONTR).slNext()).getMnem());
@@ -51,7 +51,7 @@ public final class CacheTest {
     @Test
     public final void testUser() {
         final Cache c = new Cache(257);
-        c.insertList(Kind.USER, model.selectRec(Kind.USER));
+        c.insertRecList(Kind.USER, model.getRecList(Kind.USER));
         assertFalse(c.isEmptyRec(Kind.USER));
         assertEquals("EMIAYL", ((Rec) c.getFirstRec(Kind.USER)).getMnem());
         assertEquals("GOSAYL", ((Rec) c.getFirstRec(Kind.USER).slNext()).getMnem());

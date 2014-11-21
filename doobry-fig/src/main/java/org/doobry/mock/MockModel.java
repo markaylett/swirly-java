@@ -6,8 +6,8 @@
 package org.doobry.mock;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.doobry.domain.Exec;
 import org.doobry.domain.Order;
@@ -44,7 +44,7 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final Rec selectRec(Kind kind) {
+    public final Rec getRecList(Kind kind) {
         Rec first = null;
         switch (kind) {
         case ASSET:
@@ -63,17 +63,17 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final Collection<Order> selectOrder() {
+    public final List<Order> getOrders() {
         return Collections.emptyList();
     }
 
     @Override
-    public final Collection<Exec> selectTrade() {
+    public final List<Exec> getTrades() {
         return Collections.emptyList();
     }
 
     @Override
-    public final Collection<Posn> selectPosn() {
+    public final List<Posn> getPosns() {
         return Collections.emptyList();
     }
 }

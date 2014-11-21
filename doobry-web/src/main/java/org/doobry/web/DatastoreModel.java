@@ -8,8 +8,8 @@ package org.doobry.web;
 import static org.doobry.util.AshFactory.newId;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.doobry.domain.Action;
@@ -160,7 +160,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final Rec selectRec(Kind kind) {
+    public final Rec getRecList(Kind kind) {
         Rec first = null;
         switch (kind) {
         case ASSET:
@@ -179,8 +179,8 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final Collection<Order> selectOrder() {
-        final Collection<Order> c = new ArrayList<>();
+    public final List<Order> getOrders() {
+        final List<Order> l = new ArrayList<>();
         final String kind = Kind.ORDER.camelName();
         final Filter filter = new FilterPredicate("resd", FilterOperator.GREATER_THAN, 0);
         final Query q = new Query(kind).setFilter(filter);
@@ -204,14 +204,14 @@ public final class DatastoreModel implements Model {
             final long modified = (Long) entity.getProperty("modified");
             final Order order = new Order(id, user, contr, settlDay, ref, state, action, ticks,
                     lots, resd, exec, lastTicks, lastLots, minLots, created, modified);
-            c.add(order);
+            l.add(order);
         }
-        return c;
+        return l;
     }
 
     @Override
-    public final Collection<Exec> selectTrade() {
-        final Collection<Exec> c = new ArrayList<>();
+    public final List<Exec> getTrades() {
+        final List<Exec> l = new ArrayList<>();
         final String kind = Kind.EXEC.camelName();
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
@@ -249,14 +249,14 @@ public final class DatastoreModel implements Model {
                 cpty = null;
             }
             final long created = (Long) entity.getProperty("created");
-            c.add(new Exec(id, orderId, user, contr, settlDay, ref, state, action, ticks, lots,
+            l.add(new Exec(id, orderId, user, contr, settlDay, ref, state, action, ticks, lots,
                     resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty, created));
         }
-        return c;
+        return l;
     }
 
     @Override
-    public final Collection<Posn> selectPosn() {
+    public final List<Posn> getPosns() {
         final Map<Long, Posn> m = new HashMap<>();
         final String kind = Kind.EXEC.camelName();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
@@ -278,6 +278,6 @@ public final class DatastoreModel implements Model {
             final long lastLots = (Long) entity.getProperty("lastLots");
             posn.applyTrade(action, lastTicks, lastLots);
         }
-        return m.values();
+        return new ArrayList<>(m.values());
     }
 }

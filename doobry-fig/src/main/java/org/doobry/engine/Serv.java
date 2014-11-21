@@ -5,6 +5,8 @@
  *******************************************************************************/
 package org.doobry.engine;
 
+import java.util.List;
+
 import org.doobry.domain.Action;
 import org.doobry.domain.Contr;
 import org.doobry.domain.Direct;
@@ -51,11 +53,13 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void insertRecList(Kind kind) {
-        cache.insertList(kind, model.selectRec(kind));
+        cache.insertRecList(kind, model.getRecList(kind));
     }
 
     private final void insertOrders() {
-        for (final Order order : model.selectOrder()) {
+        final List<Order> orders = model.getOrders();
+        for (int i = 0; i < orders.size(); ++i) {
+            final Order order = orders.get(i);
             enrichOrder(order);
             final Book book = getLazyBook(order.getContr(), order.getSettlDay());
             book.insertOrder(order);
@@ -73,7 +77,9 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void insertTrades() {
-        for (final Exec trade : model.selectTrade()) {
+        final List<Exec> trades = model.getTrades();
+        for (int i = 0; i < trades.size(); ++i) {
+            final Exec trade = trades.get(i);
             enrichTrade(trade);
             final Accnt accnt = getLazyAccnt(trade.getUser());
             accnt.insertTrade(trade);
@@ -81,7 +87,9 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void insertPosns() {
-        for (final Posn posn : model.selectPosn()) {
+        final List<Posn> posns = model.getPosns();
+        for (int i = 0; i < posns.size(); ++i) {
+            final Posn posn = posns.get(i);
             enrichPosn(posn);
             final Accnt accnt = getLazyAccnt(posn.getUser());
             accnt.insertPosn(posn);

@@ -71,7 +71,7 @@ public final class Cache {
         buckets = new Rec[nBuckets][COLS];
     }
 
-    public final void insertList(Kind kind, SlNode first) {
+    public final void insertRecList(Kind kind, SlNode first) {
         switch (kind) {
         case ASSET:
             assert firstAsset == null;

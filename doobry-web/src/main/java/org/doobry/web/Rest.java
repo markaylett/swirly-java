@@ -39,7 +39,7 @@ public final class Rest {
         final Map<String, String> m = new ConcurrentHashMap<>();
         for (SlNode node = serv.getFirstRec(Kind.USER); node != null; node = node.slNext()) {
             final User user = (User) node;
-            final String email = user.getEmail(); 
+            final String email = user.getEmail();
             m.put(email, user.getMnem());
             // FIXME: handle secondary email addresses.
             final String email2 = alternateEmail(email);

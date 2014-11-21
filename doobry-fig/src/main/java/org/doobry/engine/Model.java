@@ -5,7 +5,7 @@
  *******************************************************************************/
 package org.doobry.engine;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.doobry.domain.Exec;
 import org.doobry.domain.Kind;
@@ -26,11 +26,11 @@ public interface Model {
 
     void updateExec(long id, long modified);
 
-    Rec selectRec(Kind kind);
+    Rec getRecList(Kind kind);
 
-    Collection<Order> selectOrder();
+    List<Order> getOrders();
 
-    Collection<Exec> selectTrade();
+    List<Exec> getTrades();
 
-    Collection<Posn> selectPosn();
+    List<Posn> getPosns();
 }
