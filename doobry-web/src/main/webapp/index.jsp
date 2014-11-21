@@ -3,6 +3,11 @@
  
    All rights reserved.
 -->
+<%@ page contentType="text/html;charset=utf-8" language="java"%>
+<%@ page import="com.google.appengine.api.users.User"%>
+<%@ page import="com.google.appengine.api.users.UserService"%>
+<%@ page import="com.google.appengine.api.users.UserServiceFactory"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -49,12 +54,33 @@
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
-        </div><!--/.nav-collapse -->
+          <ul class="nav navbar-nav navbar-right">
+<%
+  final UserService userService = UserServiceFactory.getUserService();
+  final User user = userService.getCurrentUser();
+  if (user != null) {
+    pageContext.setAttribute("user", user);
+%>
+            <li><a href="#">Hello, ${fn:escapeXml(user.nickname)}</a></li>
+            <li>
+              <a href="<%=userService.createLogoutURL(request.getRequestURI())%>">Sign Out</a>
+            </li>
+<%
+  } else {
+%>
+            <li><a href="#">Welcome</a></li>
+            <li>
+              <a href="<%=userService.createLoginURL(request.getRequestURI())%>">Sign In</a>
+            </li>
+<%
+  }
+%>
+          </ul>
+        </div>
       </div>
     </nav>
 
     <div class="container theme-showcase" role="main">
-
       <form class="form-inline" role="form" style="margin-bottom: 20px;">
         <div class="form-group">
           <label for="contr" class="sr-only">Contr</label>
@@ -257,6 +283,8 @@
                 <th>Buy Lots</th>
                 <th>Sell Price</th>
                 <th>Sell Lots</th>
+                <th>Net Price</th>
+                <th>Net Lots</th>
               </tr>
             </thead>
             <tbody data-bind="foreach: posns">
@@ -271,6 +299,10 @@
                     data-bind="optnum: sellPrice, click: $root.selectSell"></td>
                 <td style="cursor: pointer; cursor: hand;"
                     data-bind="optnum: sellLots, click: $root.selectSell"></td>
+                <td style="cursor: pointer; cursor: hand;"
+                    data-bind="text: netPrice, click: $root.selectNet"></td>
+                <td style="cursor: pointer; cursor: hand;"
+                    data-bind="text: netLots, click: $root.selectNet"></td>
               </tr>
             </tbody>
           </table>

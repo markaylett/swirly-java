@@ -194,7 +194,7 @@ function Posn(val, contrs) {
     self.buyPrice = ko.computed(function() {
         var ticks = 0;
         var lots = self.buyLots();
-        if (lots > 0) {
+        if (lots !== 0) {
             ticks = fractToReal(self.buyLicks(), lots);
         }
         return ticksToPrice(ticks, self.contr());
@@ -203,10 +203,24 @@ function Posn(val, contrs) {
     self.sellPrice = ko.computed(function() {
         var ticks = 0;
         var lots = self.sellLots();
-        if (lots > 0) {
+        if (lots !== 0) {
             ticks = fractToReal(self.sellLicks(), lots);
         }
         return ticksToPrice(ticks, self.contr());
+    });
+
+    self.netPrice = ko.computed(function() {
+        var ticks = 0;
+        var licks = self.buyLicks() - self.sellLicks();
+        var lots = self.buyLots() - self.sellLots();
+        if (lots !== 0) {
+            ticks = fractToReal(licks, lots);
+        }
+        return ticksToPrice(ticks, self.contr());
+    });
+
+    self.netLots = ko.computed(function() {
+        return self.buyLots() - self.sellLots();
     });
 
     self.update = function(val) {
@@ -332,6 +346,13 @@ function ViewModel(contrs) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
         self.price(val.sellPrice());
+        return true;
+    };
+
+    self.selectNet = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        self.price(val.netPrice());
         return true;
     };
 
