@@ -5,6 +5,7 @@
  *******************************************************************************/
 package org.doobry.web;
 
+import static org.doobry.web.WebUtil.alternateEmail;
 import static org.doobry.web.WebUtil.splitPathInfo;
 import static org.junit.Assert.assertEquals;
 
@@ -47,5 +48,10 @@ public final class WebUtilTest {
         assertEquals(2, parts.length);
         assertEquals("foo", parts[0]);
         assertEquals("bar", parts[1]);
+    }
+
+    @Test
+    public final void testEmail() {
+        assertEquals("emily.aylett@gmail.com", alternateEmail("emily.aylett@googlemail.com"));
     }
 }

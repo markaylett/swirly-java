@@ -46,6 +46,10 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
         final String umnem = userMap.get(user.getEmail());
+        if (umnem == null) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
@@ -92,6 +96,10 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
         final String umnem = userMap.get(user.getEmail());
+        if (umnem == null) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
@@ -162,6 +170,10 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
         final String umnem = userMap.get(user.getEmail());
+        if (umnem == null) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();
@@ -207,6 +219,10 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
         final String umnem = userMap.get(user.getEmail());
+        if (umnem == null) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         final Rest rest = Context.getRest();
         final StringBuilder sb = new StringBuilder();

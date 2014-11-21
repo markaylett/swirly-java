@@ -6,6 +6,7 @@
 package org.doobry.web;
 
 import static org.doobry.util.Date.isoToJd;
+import static org.doobry.web.WebUtil.alternateEmail;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,7 +39,13 @@ public final class Rest {
         final Map<String, String> m = new ConcurrentHashMap<>();
         for (SlNode node = serv.getFirstRec(Kind.USER); node != null; node = node.slNext()) {
             final User user = (User) node;
-            m.put(user.getEmail(), user.getMnem());
+            final String email = user.getEmail(); 
+            m.put(email, user.getMnem());
+            // FIXME: handle secondary email addresses.
+            final String email2 = alternateEmail(email);
+            if (email2 != null) {
+                m.put(email2, user.getMnem());
+            }
         }
         return m;
     }

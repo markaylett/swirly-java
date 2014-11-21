@@ -42,4 +42,13 @@ public final class WebUtil {
         pw.write(msg);
         pw.write("\"}");
     }
+
+    // FIXME: this is a temporary hack.
+    public static String alternateEmail(String email) {
+        if (!email.endsWith("@googlemail.com")) {
+            return null;
+        }
+        final String name = email.substring(0, email.length() - 15);
+        return name + "@gmail.com";
+    }
 }
