@@ -5,17 +5,17 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.doobry</groupId>
-  <artifactId>doobry</artifactId>
+  <groupId>com.swirlycloud</groupId>
+  <artifactId>swirly</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>doobry</name>
+  <name>swirly</name>
   
   <scm>
-    <url>https://github.com/doobry-org/doobryj</url>
-    <connection>scm:git:git://github.com/doobry-org/doobryj.git</connection>
-    <developerConnection>scm:git:git@github.com:doobry-org/doobryj.git</developerConnection>
+    <url>https://github.com/swirly-cloud/swirly</url>
+    <connection>scm:git:git://github.com/swirly-cloud/swirly.git</connection>
+    <developerConnection>scm:git:git@github.com:swirly-cloud/swirly.git</developerConnection>
   </scm>
 
   <properties>
@@ -25,12 +25,12 @@
   </properties>
 
   <modules>
-    <module>doobry-ash</module>
-    <module>doobry-elm</module>
-    <module>doobry-fig</module>
-    <module>doobry-web</module>
-    <module>doobry-dev</module>
-    <module>doobry-uat</module>
+    <module>swirly-ash</module>
+    <module>swirly-elm</module>
+    <module>swirly-fig</module>
+    <module>swirly-web</module>
+    <module>swirly-dev</module>
+    <module>swirly-prod</module>
   </modules>
 
   <dependencyManagement>
