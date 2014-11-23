@@ -13,7 +13,7 @@
 
 <%@ include file="/include/head.jsp" %> 
 
-  <body>
+  <body role="document">
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
       <div class="container">
@@ -38,7 +38,7 @@
       </div>
     </nav>
 
-    <div class="container">
+    <div class="container" role="main">
 
       <div class="starter-template">
         <h1>Bootstrap starter template</h1>
