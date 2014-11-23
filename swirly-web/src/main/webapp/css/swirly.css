@@ -26,13 +26,17 @@ body > .container {
   padding: 60px 15px 0;
 }
 
-.container .text-muted {
-  margin: 14px 0;
+.container .footer-links {
+  margin: 20px 0;
 }
 
 .footer > .container {
   padding-right: 15px;
   padding-left: 15px;
+}
+
+.footer a {
+  padding-right: 15px;
 }
 
 code {

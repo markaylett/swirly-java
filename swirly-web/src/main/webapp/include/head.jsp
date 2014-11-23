@@ -12,7 +12,6 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
   <link href="/css/font-awesome.min.css" rel="stylesheet">
-  <link href="/css/bootstrap-social.css" rel="stylesheet">
   <!-- Custom styles -->
   <link href="/css/swirly.css" rel="stylesheet">
 

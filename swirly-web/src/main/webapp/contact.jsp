@@ -3,11 +3,15 @@
  
    All rights reserved.
 -->
-<%@ page contentType="text/html;charset=utf-8" language="java" %>
+<%@ page contentType="text/html;charset=utf-8" language="java"%>
+<%@ page import="com.google.appengine.api.users.User"%>
+<%@ page import="com.google.appengine.api.users.UserService"%>
+<%@ page import="com.google.appengine.api.users.UserServiceFactory"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
 <html lang="en">
 
-<%@ include file="include/head.jsp" %> 
+<%@ include file="/include/head.jsp" %> 
 
   <body>
 
@@ -24,10 +28,12 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="/home.jsp">Home</a></li>
-            <li><a href="/about.jsp">About</a></li>
-            <li class="active"><a href="/contact.jsp">Contact</a></li>
+            <li><a href="home.jsp">Home</a></li>
+            <li><a href="about.jsp">About</a></li>
+            <li class="active"><a href="contact.jsp">Contact</a></li>
+            <li><a href="trader.jsp">Trader</a></li>
           </ul>
+<%@ include file="/include/navright.jsp" %> 
         </div>
       </div>
     </nav>
@@ -41,7 +47,7 @@
 
     </div>
 
-<%@ include file="include/footer.jsp" %> 
+<%@ include file="/include/footer.jsp" %> 
 
     <!-- Bootstrap core JavaScript
          ================================================== -->

@@ -81,6 +81,53 @@ public final class Rest {
         return true;
     }
 
+
+    public final synchronized void getBook(StringBuilder sb, Integer levels) {
+        sb.append('[');
+        RbNode node = serv.getFirstBook();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Book book = (Book) node;
+            if (i > 0) {
+                sb.append(',');
+            }
+            book.print(sb, levels);
+            ++i;
+        }
+        sb.append(']');
+    }
+
+    public final synchronized void getBook(StringBuilder sb, String cmnem, Integer levels) {
+        sb.append('[');
+        RbNode node = serv.getFirstBook();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Book book = (Book) node;
+            if (!book.getContr().getMnem().equals(cmnem)) {
+                continue;
+            }
+            if (i > 0) {
+                sb.append(',');
+            }
+            book.print(sb, levels);
+            ++i;
+        }
+        sb.append(']');
+    }
+
+    public final synchronized boolean getBook(StringBuilder sb, String cmnem, int settlDate,
+            Integer levels) {
+        final Contr contr = (Contr) serv.findRec(Kind.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final Book book = serv.findBook(contr, settlDay);
+        if (book == null) {
+            return false;
+        }
+        book.print(sb, levels);
+        return true;
+    }
+
     public final synchronized void getAccnt(StringBuilder sb, String umnem) {
         sb.append("{\"orders\":");
         getOrder(sb, umnem);
@@ -217,52 +264,6 @@ public final class Rest {
             return false;
         }
         posn.print(sb, null);
-        return true;
-    }
-
-    public final synchronized void getBook(StringBuilder sb, Integer levels) {
-        sb.append('[');
-        RbNode node = serv.getFirstBook();
-        for (int i = 0; node != null; node = node.rbNext()) {
-            final Book book = (Book) node;
-            if (i > 0) {
-                sb.append(',');
-            }
-            book.print(sb, levels);
-            ++i;
-        }
-        sb.append(']');
-    }
-
-    public final synchronized void getBook(StringBuilder sb, String cmnem, Integer levels) {
-        sb.append('[');
-        RbNode node = serv.getFirstBook();
-        for (int i = 0; node != null; node = node.rbNext()) {
-            final Book book = (Book) node;
-            if (!book.getContr().getMnem().equals(cmnem)) {
-                continue;
-            }
-            if (i > 0) {
-                sb.append(',');
-            }
-            book.print(sb, levels);
-            ++i;
-        }
-        sb.append(']');
-    }
-
-    public final synchronized boolean getBook(StringBuilder sb, String cmnem, int settlDate,
-            Integer levels) {
-        final Contr contr = (Contr) serv.findRec(Kind.CONTR, cmnem);
-        if (contr == null) {
-            return false;
-        }
-        final int settlDay = isoToJd(settlDate);
-        final Book book = serv.findBook(contr, settlDay);
-        if (book == null) {
-            return false;
-        }
-        book.print(sb, levels);
         return true;
     }
 }
