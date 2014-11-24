@@ -37,7 +37,7 @@
   </servlet-mapping>
 
   <welcome-file-list>
-    <welcome-file>public/home.jsp</welcome-file>
+    <welcome-file>home.jsp</welcome-file>
   </welcome-file-list>
 
   <error-page>
