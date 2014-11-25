@@ -4,16 +4,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
   <meta name="author" content="Mark Aylett">
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" href="favicon.ico">
 
   <title>Swirly</title>
 
   <!-- Bootstrap -->
-  <link href="/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
-  <link href="/css/font-awesome.min.css" rel="stylesheet">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+  <link href="css/font-awesome.min.css" rel="stylesheet">
   <!-- Custom styles -->
-  <link href="/css/swirly.css" rel="stylesheet">
+  <link href="css/swirly.css" rel="stylesheet">
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
   <!--[if lt IE 9]>

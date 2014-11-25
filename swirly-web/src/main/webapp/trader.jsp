@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%@ include file="/include/head.jsp" %> 
+<%@ include file="include/head.jsp" %> 
 
   <body role="document">
 
@@ -29,7 +29,7 @@
             <li><a href="contact.jsp">Contact</a></li>
             <li class="active"><a href="trader.jsp">Trader</a></li>
           </ul>
-<%@ include file="/include/navright.jsp" %> 
+<%@ include file="include/navright.jsp" %> 
         </div>
       </div>
     </nav>
@@ -266,16 +266,16 @@
 
     </div>
 
-<%@ include file="/include/footer.jsp" %> 
+<%@ include file="include/footer.jsp" %> 
 
     <!-- Bootstrap core JavaScript
          ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/js/bootstrap3-typeahead.min.js"></script>
-    <script type="text/javascript" src="/js/knockout.js"></script>
-    <script type="text/javascript" src="/js/swirly.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap3-typeahead.min.js"></script>
+    <script type="text/javascript" src="js/knockout.js"></script>
+    <script type="text/javascript" src="js/swirly.js"></script>
     <script type="text/javascript">
       $(documentReady);
     </script>
