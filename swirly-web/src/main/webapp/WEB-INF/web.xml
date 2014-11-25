@@ -46,6 +46,11 @@
   </error-page>
 
   <error-page>
+    <error-code>403</error-code>
+    <location>/error/403.json</location>
+  </error-page>
+
+  <error-page>
     <error-code>404</error-code>
     <location>/error/404.json</location>
   </error-page>
@@ -68,6 +73,17 @@
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>admin</web-resource-name>
+      <url-pattern>/api/rec/user</url-pattern>
+      <url-pattern>/admin.jsp</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
 </web-app>

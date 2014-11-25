@@ -52,6 +52,18 @@ public final class RecServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
+        } else if ("user".equals(parts[0])) {
+            if (parts.length == 1) {
+                rest.getRec(sb, Kind.USER);
+            } else if (parts.length == 2) {
+                if (!rest.getRec(sb, Kind.USER, parts[1])) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
+            } else {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
