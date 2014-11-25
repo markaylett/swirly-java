@@ -1,13 +1,14 @@
+<!-- -*- html -*- -->
 <!--
    Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
- 
+
    All rights reserved.
 -->
 <%@ page contentType="text/html;charset=utf-8" language="java"%>
 <!DOCTYPE html>
 <html lang="en">
 
-<%@ include file="include/head.jsp" %> 
+<%@ include file="include/head.jsp" %>
 
   <body role="document">
 
@@ -28,8 +29,9 @@
             <li><a href="about.jsp">About</a></li>
             <li class="active"><a href="contact.jsp">Contact</a></li>
             <li><a href="trader.jsp">Trader</a></li>
+            <li><a href="admin.jsp">Admin</a></li>
           </ul>
-<%@ include file="include/navright.jsp" %> 
+<%@ include file="include/navright.jsp" %>
         </div>
       </div>
     </nav>
@@ -43,7 +45,7 @@
 
     </div>
 
-<%@ include file="include/footer.jsp" %> 
+<%@ include file="include/footer.jsp" %>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->

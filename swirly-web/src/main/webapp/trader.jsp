@@ -1,13 +1,14 @@
+<!-- -*- html -*- -->
 <!--
    Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
- 
+
    All rights reserved.
 -->
 <%@ page contentType="text/html;charset=utf-8" language="java"%>
 <!DOCTYPE html>
 <html lang="en">
 
-<%@ include file="include/head.jsp" %> 
+<%@ include file="include/head.jsp" %>
 
   <body role="document">
 
@@ -28,8 +29,9 @@
             <li><a href="about.jsp">About</a></li>
             <li><a href="contact.jsp">Contact</a></li>
             <li class="active"><a href="trader.jsp">Trader</a></li>
+            <li><a href="admin.jsp">Admin</a></li>
           </ul>
-<%@ include file="include/navright.jsp" %> 
+<%@ include file="include/navright.jsp" %>
         </div>
       </div>
     </nav>
@@ -76,29 +78,29 @@
           <tr>
             <th>Contr</th>
             <th>Settl Date</th>
-            <th>Bid Price</th>
-            <th>Bid Lots</th>
-            <th>Bid Count</th>
-            <th>Offer Price</th>
-            <th>Offer Lots</th>
-            <th>Offer Count</th>
+            <th style="text-align: right;">Bid Price</th>
+            <th style="text-align: right;">Bid Lots</th>
+            <th style="text-align: right;">Bid Count</th>
+            <th style="text-align: right;">Offer Price</th>
+            <th style="text-align: right;">Offer Lots</th>
+            <th style="text-align: right;">Offer Count</th>
           </tr>
         </thead>
         <tbody data-bind="foreach: books">
           <tr>
             <td data-bind="mnem: contr"></td>
             <td data-bind="text: settlDate"></td>
-            <td style="cursor: pointer; cursor: hand;"
+            <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="optnum: bidPrice, click: $root.selectBid"></td>
-            <td style="cursor: pointer; cursor: hand;"
+            <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="optnum: bidLots, click: $root.selectBid"></td>
-            <td style="cursor: pointer; cursor: hand;"
+            <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="optnum: bidCount, click: $root.selectBid"></td>
-            <td style="cursor: pointer; cursor: hand;"
+            <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="optnum: offerPrice, click: $root.selectOffer"></td>
-            <td style="cursor: pointer; cursor: hand;"
+            <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="optnum: offerLots, click: $root.selectOffer"></td>
-            <td style="cursor: pointer; cursor: hand;"
+            <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="optnum: offerCount, click: $root.selectOffer"></td>
           </tr>
         </tbody>
@@ -154,12 +156,12 @@
                 <th>Settl Date</th>
                 <th>State</th>
                 <th>Action</th>
-                <th>Price</th>
-                <th>Lots</th>
-                <th>Resd</th>
-                <th>Exec</th>
-                <th>Last Price</th>
-                <th>Last Lots</th>
+                <th style="text-align: right;">Price</th>
+                <th style="text-align: right;">Lots</th>
+                <th style="text-align: right;">Resd</th>
+                <th style="text-align: right;">Exec</th>
+                <th style="text-align: right;">Last Price</th>
+                <th style="text-align: right;">Last Lots</th>
               </tr>
             </thead>
             <tbody data-bind="foreach: orders">
@@ -175,12 +177,12 @@
                 <td data-bind="text: settlDate"></td>
                 <td data-bind="text: state"></td>
                 <td data-bind="text: action"></td>
-                <td data-bind="text: price"></td>
-                <td data-bind="text: lots"></td>
-                <td data-bind="text: resd"></td>
-                <td data-bind="text: exec"></td>
-                <td data-bind="optnum: lastPrice"></td>
-                <td data-bind="optnum: lastLots"></td>
+                <td style="text-align: right;" data-bind="text: price"></td>
+                <td style="text-align: right;" data-bind="text: lots"></td>
+                <td style="text-align: right;" data-bind="text: resd"></td>
+                <td style="text-align: right;" data-bind="text: exec"></td>
+                <td style="text-align: right;" data-bind="optnum: lastPrice"></td>
+                <td style="text-align: right;" data-bind="optnum: lastLots"></td>
               </tr>
             </tbody>
           </table>
@@ -197,12 +199,12 @@
                 <th>Contr</th>
                 <th>Settl Date</th>
                 <th>Action</th>
-                <th>Price</th>
-                <th>Lots</th>
-                <th>Resd</th>
-                <th>Exec</th>
-                <th>Last Price</th>
-                <th>Last Lots</th>
+                <th style="text-align: right;">Price</th>
+                <th style="text-align: right;">Lots</th>
+                <th style="text-align: right;">Resd</th>
+                <th style="text-align: right;">Exec</th>
+                <th style="text-align: right;">Last Price</th>
+                <th style="text-align: right;">Last Lots</th>
               </tr>
             </thead>
             <tbody data-bind="foreach: trades">
@@ -218,12 +220,12 @@
                 <td data-bind="mnem: contr"></td>
                 <td data-bind="text: settlDate"></td>
                 <td data-bind="text: action"></td>
-                <td data-bind="text: price"></td>
-                <td data-bind="text: lots"></td>
-                <td data-bind="text: resd"></td>
-                <td data-bind="text: exec"></td>
-                <td data-bind="text: lastPrice"></td>
-                <td data-bind="text: lastLots"></td>
+                <td style="text-align: right;" data-bind="text: price"></td>
+                <td style="text-align: right;" data-bind="text: lots"></td>
+                <td style="text-align: right;" data-bind="text: resd"></td>
+                <td style="text-align: right;" data-bind="text: exec"></td>
+                <td style="text-align: right;" data-bind="text: lastPrice"></td>
+                <td style="text-align: right;" data-bind="text: lastLots"></td>
               </tr>
             </tbody>
           </table>
@@ -234,29 +236,29 @@
               <tr>
                 <th>Contr</th>
                 <th>Settl Date</th>
-                <th>Buy Price</th>
-                <th>Buy Lots</th>
-                <th>Sell Price</th>
-                <th>Sell Lots</th>
-                <th>Net Price</th>
-                <th>Net Lots</th>
+                <th style="text-align: right;">Buy Price</th>
+                <th style="text-align: right;">Buy Lots</th>
+                <th style="text-align: right;">Sell Price</th>
+                <th style="text-align: right;">Sell Lots</th>
+                <th style="text-align: right;">Net Price</th>
+                <th style="text-align: right;">Net Lots</th>
               </tr>
             </thead>
             <tbody data-bind="foreach: posns">
               <tr>
                 <td data-bind="mnem: contr"></td>
                 <td data-bind="text: settlDate"></td>
-                <td style="cursor: pointer; cursor: hand;"
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="optnum: buyPrice, click: $root.selectBuy"></td>
-                <td style="cursor: pointer; cursor: hand;"
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="optnum: buyLots, click: $root.selectBuy"></td>
-                <td style="cursor: pointer; cursor: hand;"
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="optnum: sellPrice, click: $root.selectSell"></td>
-                <td style="cursor: pointer; cursor: hand;"
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="optnum: sellLots, click: $root.selectSell"></td>
-                <td style="cursor: pointer; cursor: hand;"
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="text: netPrice, click: $root.selectNet"></td>
-                <td style="cursor: pointer; cursor: hand;"
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="text: netLots, click: $root.selectNet"></td>
               </tr>
             </tbody>
@@ -266,7 +268,7 @@
 
     </div>
 
-<%@ include file="include/footer.jsp" %> 
+<%@ include file="include/footer.jsp" %>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->
@@ -274,8 +276,10 @@
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/bootstrap3-typeahead.min.js"></script>
-    <script type="text/javascript" src="js/knockout.js"></script>
+    <script type="text/javascript" src="js/knockout.min.js"></script>
+
     <script type="text/javascript" src="js/swirly.js"></script>
+    <script type="text/javascript" src="js/trader.js"></script>
     <script type="text/javascript">
       $(documentReady);
     </script>
