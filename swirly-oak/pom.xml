@@ -11,12 +11,17 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>swirly-web</artifactId>
+  <artifactId>swirly-oak</artifactId>
   <packaging>war</packaging>
 
-  <name>swirly-web</name>
+  <name>swirly-oak</name>
 
   <dependencies>
+    <dependency>
+      <groupId>com.swirlycloud</groupId>
+      <artifactId>swirly-fig</artifactId>
+	  <version>${project.version}</version>
+    </dependency>
     <!-- Compile/runtime dependencies -->
     <dependency>
       <groupId>com.google.appengine</groupId>

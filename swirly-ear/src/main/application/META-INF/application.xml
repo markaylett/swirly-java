@@ -10,5 +10,9 @@
       <web-uri>swirly-web-0.1.0-SNAPSHOT.war</web-uri>
       <context-root>default</context-root>
     </web>
+    <web>
+      <web-uri>swirly-oak-0.1.0-SNAPSHOT.war</web-uri>
+      <context-root>backend</context-root>
+    </web>
   </module>
 </application>

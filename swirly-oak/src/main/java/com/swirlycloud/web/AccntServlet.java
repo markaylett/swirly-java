@@ -36,8 +36,18 @@ public final class AccntServlet extends HttpServlet {
     }
 
     @Override
+    public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setHeader("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, POST, PUT");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        resp.setHeader("Access-Control-Max-Age", "86400");
+    }
+
+    @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
         final User user = userService.getCurrentUser();
@@ -80,7 +90,7 @@ public final class AccntServlet extends HttpServlet {
         }
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
-        resp.addHeader("Cache-Control", "no-cache");
+        resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
         log(sb.toString());
         resp.getWriter().append(sb);
@@ -88,6 +98,7 @@ public final class AccntServlet extends HttpServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
         final User user = userService.getCurrentUser();
@@ -153,7 +164,7 @@ public final class AccntServlet extends HttpServlet {
 
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
-        resp.addHeader("Cache-Control", "no-cache");
+        resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
         log(sb.toString());
         resp.getWriter().append(sb);
@@ -162,6 +173,7 @@ public final class AccntServlet extends HttpServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
         final User user = userService.getCurrentUser();
@@ -202,7 +214,7 @@ public final class AccntServlet extends HttpServlet {
                 r.getTicks(), r.getLots(), r.getMinLots());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
-        resp.addHeader("Cache-Control", "no-cache");
+        resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
         log(sb.toString());
         resp.getWriter().append(sb);
@@ -211,6 +223,7 @@ public final class AccntServlet extends HttpServlet {
     @Override
     protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
         final User user = userService.getCurrentUser();
@@ -249,7 +262,7 @@ public final class AccntServlet extends HttpServlet {
         rest.putOrder(sb, umnem, id, r.getLots());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
-        resp.addHeader("Cache-Control", "no-cache");
+        resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
         log(sb.toString());
         resp.getWriter().append(sb);

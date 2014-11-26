@@ -19,7 +19,17 @@ public final class BookServlet extends HttpServlet {
     private static final Integer LEVELS = Integer.valueOf(5);
 
     @Override
+    public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        resp.setHeader("Access-Control-Max-Age", "86400");
+    }
+
+    @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final Rest ctx = Context.getRest();
         final StringBuilder sb = new StringBuilder();
@@ -42,7 +52,7 @@ public final class BookServlet extends HttpServlet {
 
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
-        resp.addHeader("Cache-Control", "no-cache");
+        resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.getWriter().append(sb);
     }
