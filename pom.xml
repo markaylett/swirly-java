@@ -29,8 +29,7 @@
     <module>swirly-elm</module>
     <module>swirly-fig</module>
     <module>swirly-web</module>
-    <module>swirly-dev</module>
-    <module>swirly-prod</module>
+    <module>swirly-ear</module>
   </modules>
 
   <dependencyManagement>
