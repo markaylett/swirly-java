@@ -3,10 +3,10 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.web;
+package com.swirlycloud.oak;
 
-import static com.swirlycloud.web.WebUtil.alternateEmail;
-import static com.swirlycloud.web.WebUtil.splitPathInfo;
+import static com.swirlycloud.oak.WebUtil.alternateEmail;
+import static com.swirlycloud.oak.WebUtil.splitPathInfo;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

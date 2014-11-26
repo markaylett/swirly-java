@@ -6,5 +6,6 @@
 package com.swirlycloud.util;
 
 public interface Printable {
+    // TODO: consider using Appendable.
     void print(StringBuilder sb, Object arg);
 }

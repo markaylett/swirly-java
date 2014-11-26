@@ -3,10 +3,10 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.web;
+package com.swirlycloud.oak;
 
+import static com.swirlycloud.oak.WebUtil.alternateEmail;
 import static com.swirlycloud.util.Date.isoToJd;
-import static com.swirlycloud.web.WebUtil.alternateEmail;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

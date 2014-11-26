@@ -3,7 +3,7 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.web;
+package com.swirlycloud.oak;
 
 import static org.junit.Assert.*;
 
@@ -12,7 +12,7 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.swirlycloud.domain.Action;
-import com.swirlycloud.web.Request;
+import com.swirlycloud.oak.Request;
 
 public final class RequestTest {
     private static final Request parse(String s) throws ParseException {

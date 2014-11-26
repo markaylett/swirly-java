@@ -3,9 +3,9 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.web;
+package com.swirlycloud.oak;
 
-import static com.swirlycloud.web.WebUtil.splitPathInfo;
+import static com.swirlycloud.oak.WebUtil.splitPathInfo;
 
 import java.io.IOException;
 
