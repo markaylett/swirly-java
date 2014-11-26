@@ -8,35 +8,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%@ include file="include/head.jsp" %>
+<jsp:include page="include/head.jsp"/>
 
-  <body role="document">
+  <body>
 
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Swirly</a>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="home.jsp">Home</a></li>
-            <li><a href="about.jsp">About</a></li>
-            <li class="active"><a href="contact.jsp">Contact</a></li>
-            <li><a href="trader.jsp">Trader</a></li>
-            <li><a href="admin.jsp">Admin</a></li>
-          </ul>
-<%@ include file="include/navright.jsp" %>
-        </div>
-      </div>
-    </nav>
+<jsp:include page="include/navbar.jsp">
+  <jsp:param name="active" value="contact"/>
+</jsp:include>
 
-    <div class="container" role="main">
+    <div class="container">
 
       <div>
         <h1>Contact</h1>
@@ -45,7 +25,7 @@
 
     </div>
 
-<%@ include file="include/footer.jsp" %>
+<jsp:include page="include/footer.jsp"/>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->

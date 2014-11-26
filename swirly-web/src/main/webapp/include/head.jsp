@@ -1,4 +1,9 @@
 <!-- -*- html -*- -->
+<!--
+   Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
+
+   All rights reserved.
+-->
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">

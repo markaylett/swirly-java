@@ -4,24 +4,24 @@
  * All rights reserved.
  **************************************************************************************************/
 
-function ViewModel(contrs) {
+function ViewModel() {
     var self = this;
 
-    self.contrs = ko.observableArray([]);
+    self.users = ko.observableArray([]);
 
     self.refreshAll = function() {
 
-        $.getJSON('/api/rec/contr', function(raw) {
+        $.getJSON('/api/rec/user', function(raw) {
 
             var cooked = $.map(raw, function(val) {
-                return new Contr(val);
+                return new User(val);
             });
-            self.contrs(cooked);
+            self.users(cooked);
         });
     };
 }
 
-function documentReady() {
+function initApp() {
 
     var model = new ViewModel();
     ko.applyBindings(model);

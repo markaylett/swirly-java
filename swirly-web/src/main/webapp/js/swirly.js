@@ -84,6 +84,14 @@ function Contr(val) {
     self.maxLots = ko.observable(val.maxLots);
 }
 
+function User(val) {
+    var self = this;
+
+    self.mnem = ko.observable(val.mnem);
+    self.display = ko.observable(val.display);
+    self.email = ko.observable(val.email);
+}
+
 function Book(val, contrs) {
     var self = this;
 

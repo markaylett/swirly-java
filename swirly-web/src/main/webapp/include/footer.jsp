@@ -1,4 +1,9 @@
 <!-- -*- html -*- -->
+<!--
+   Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
+
+   All rights reserved.
+-->
 <footer class="footer">
   <div class="container">
     <div class="footer-links">

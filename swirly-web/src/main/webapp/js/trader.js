@@ -326,7 +326,7 @@ function ViewModel(contrs) {
     };
 }
 
-function documentReady() {
+function initApp() {
 
     $('#tabs').tab();
 
