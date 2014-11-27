@@ -28,8 +28,8 @@
     <module>swirly-ash</module>
     <module>swirly-elm</module>
     <module>swirly-fig</module>
-    <module>swirly-oak</module>
-    <module>swirly-web</module>
+    <module>swirly-back</module>
+    <module>swirly-front</module>
     <module>swirly-ear</module>
   </modules>
 

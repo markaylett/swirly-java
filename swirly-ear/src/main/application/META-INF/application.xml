@@ -4,18 +4,17 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd" version="5">
   <!-- Modules -->
 
-  <!-- The default module should be listed first -->
-
   <!-- App Engine will ignore the <context-root> elements, so HTTP clients need not prepend it to
        the URL path when addressing a module. -->
   <display-name>swirly-prod</display-name>
   <module>
+    <!-- The default module must be listed first. -->
     <web>
-      <web-uri>swirly-web-0.1.0-SNAPSHOT.war</web-uri>
+      <web-uri>swirly-front-0.1.0-SNAPSHOT.war</web-uri>
       <context-root>default</context-root>
     </web>
     <web>
-      <web-uri>swirly-oak-0.1.0-SNAPSHOT.war</web-uri>
+      <web-uri>swirly-back-0.1.0-SNAPSHOT.war</web-uri>
       <context-root>backend</context-root>
     </web>
   </module>

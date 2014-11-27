@@ -1,0 +1,59 @@
+/*******************************************************************************
+ * Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
+ *
+ * All rights reserved.
+ *******************************************************************************/
+package com.swirlycloud.back;
+
+import static com.swirlycloud.back.WebUtil.splitPathInfo;
+
+import java.io.IOException;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@SuppressWarnings("serial")
+public final class BookServlet extends HttpServlet {
+
+    private static final Integer LEVELS = Integer.valueOf(5);
+
+    @Override
+    public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        resp.setHeader("Access-Control-Max-Age", "86400");
+    }
+
+    @Override
+    public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+
+        final Rest ctx = Context.getRest();
+        final StringBuilder sb = new StringBuilder();
+
+        final String pathInfo = req.getPathInfo();
+        final String[] parts = splitPathInfo(pathInfo);
+        if (parts.length == 0) {
+            ctx.getBook(sb, LEVELS);
+        } else if (parts.length == 1) {
+            ctx.getBook(sb, parts[0], LEVELS);
+        } else if (parts.length == 2) {
+            if (!ctx.getBook(sb, parts[0], Integer.parseInt(parts[1]), LEVELS)) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json");
+        resp.setHeader("Cache-Control", "no-cache");
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.getWriter().append(sb);
+    }
+}

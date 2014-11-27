@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+  <listener>
+    <listener-class>com.swirlycloud.back.Context</listener-class>
+  </listener>
+
+  <servlet>
+    <servlet-name>rec</servlet-name>
+    <servlet-class>com.swirlycloud.back.RecServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>book</servlet-name>
+    <servlet-class>com.swirlycloud.back.BookServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>accnt</servlet-name>
+    <servlet-class>com.swirlycloud.back.AccntServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>rec</servlet-name>
+    <url-pattern>/api/rec/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>book</servlet-name>
+    <url-pattern>/api/book/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>accnt</servlet-name>
+    <url-pattern>/api/accnt/*</url-pattern>
+  </servlet-mapping>
+
+  <error-page>
+    <error-code>400</error-code>
+    <location>/error/400.json</location>
+  </error-page>
+
+  <error-page>
+    <error-code>403</error-code>
+    <location>/error/403.json</location>
+  </error-page>
+
+  <error-page>
+    <error-code>404</error-code>
+    <location>/error/404.json</location>
+  </error-page>
+
+  <error-page>
+    <error-code>405</error-code>
+    <location>/error/405.json</location>
+  </error-page>
+
+  <error-page>
+    <error-code>500</error-code>
+    <location>/error/500.json</location>
+  </error-page>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>trader</web-resource-name>
+      <url-pattern>/api/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>admin</web-resource-name>
+      <url-pattern>/api/rec/user</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
+</web-app>
