@@ -18,8 +18,21 @@
 
     <div class="container" style="padding: 90px 15px 0;">
 
-      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#userDialog">
-        Add User
+      <div class="alert alert-warning alert-dismissible" role="alert"
+           data-bind="visible: haveErrors">
+        <button type="button" class="close" data-bind="click: clearErrors">
+          &times;
+        </button>
+        <ul data-bind="foreach: errors">
+          <li>
+            <strong data-bind="text: num"></strong>:&nbsp;<span data-bind="text: msg"></span>
+          </li>
+        </ul>
+      </div>
+
+      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#userDialog"
+              data-bind="click: clearUser">
+        New User
       </button>
 
       <table class="table table-hover table-striped">
@@ -46,27 +59,28 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            <h4 class="modal-title">Add User</h4>
+            <h4 class="modal-title">New User</h4>
           </div>
           <div class="modal-body">
             <form role="form">
               <div class="form-group">
                 <label for="mnem">Mnem:</label>
-                <input id="mnem" type="text" class="form-control">
+                <input id="mnem" type="text" class="form-control" data-bind="value: mnem"/>
               </div>
               <div class="form-group">
                 <label for="display">Display:</label>
-                <input id="display" type="email" class="form-control">
+                <input id="display" type="email" class="form-control" data-bind="value: display"/>
               </div>
               <div class="form-group">
                 <label for="email">Email:</label>
-                <input id="email" type="text" class="form-control">
+                <input id="email" type="text" class="form-control" data-bind="value: email"/>
               </div>
             </form>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal"
+                    data-bind="click: submitUser">Save</button>
           </div>
         </div>
       </div>

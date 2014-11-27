@@ -65,6 +65,13 @@ ko.bindingHandlers.optnum = {
     }
 };
 
+function Error(val) {
+    var self = this;
+
+    self.num = ko.observable(val.num);
+    self.msg = ko.observable(val.msg);
+}
+
 function Contr(val) {
     var self = this;
 
