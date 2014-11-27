@@ -4,5 +4,5 @@
 
    All rights reserved.
 --%>
-<%@ page contentType="application/json;charset=utf-8" isErrorPage="true" language="java" %>
+<%@ page contentType="application/json;charset=utf-8" isErrorPage="true" language="java"%>
 {"num":500,"msg":"<%=exception.getMessage()%>"}
