@@ -3,13 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
+  <!-- The proxy servlet is only used by the development server. -->
   <servlet>
-    <servlet-name>dev</servlet-name>
-    <servlet-class>com.swirlycloud.web.DevServlet</servlet-class>
+    <servlet-name>proxy</servlet-name>
+    <servlet-class>com.swirlycloud.web.ProxyServlet</servlet-class>
+    <init-param>
+	  <param-name>module</param-name>
+	  <param-value>backend</param-value>
+	</init-param>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>dev</servlet-name>
+    <servlet-name>proxy</servlet-name>
     <url-pattern>/api/*</url-pattern>
   </servlet-mapping>
 
