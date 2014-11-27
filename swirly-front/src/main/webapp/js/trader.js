@@ -7,6 +7,25 @@
 function ViewModel(contrs) {
     var self = this;
 
+    self.errors = ko.observableArray([]);
+
+    self.clearErrors = function() {
+        self.errors.removeAll();
+    };
+
+    self.hasErrors = ko.computed(function() {
+        return self.errors().length > 0;
+    });
+
+    self.showError = function(error) {
+        // Add to top of list.
+        self.errors.unshift(error);
+        // Limit to last 10 errors.
+        if (self.errors().length > 10) {
+            self.errors.pop();
+        }
+    };
+
     self.contrs = contrs;
 
     self.books = ko.observableArray([]);
@@ -211,6 +230,8 @@ function ViewModel(contrs) {
                 return new Book(val, self.contrs);
             });
             self.books(cooked);
+        }).fail(function(xhr) {
+            self.showError(new Error(xhr));
         });
 
         $.getJSON('/api/accnt', function(raw) {
@@ -233,6 +254,8 @@ function ViewModel(contrs) {
                 return new Posn(val, self.contrs);
             });
             self.posns(cooked);
+        }).fail(function(xhr) {
+            self.showError(new Error(xhr));
         });
     };
 
@@ -255,6 +278,8 @@ function ViewModel(contrs) {
             })
         }).done(function(raw) {
             self.applyTrans(raw);
+        }).fail(function(xhr) {
+            self.showError(new Error(xhr));
         });
     };
 
@@ -276,6 +301,8 @@ function ViewModel(contrs) {
             })
         }).done(function(raw) {
             self.applyTrans(raw);
+        }).fail(function(xhr) {
+            self.showError(new Error(xhr));
         });
     };
 
@@ -295,6 +322,8 @@ function ViewModel(contrs) {
             data: '{"lots":0}'
         }).done(function(raw) {
             self.applyTrans(raw);
+        }).fail(function(xhr) {
+            self.showError(new Error(xhr));
         });
     };
 
@@ -313,6 +342,8 @@ function ViewModel(contrs) {
             url: '/api/accnt/trade/' + id
         }).done(function(raw) {
             self.removeTrade(id);
+        }).fail(function(xhr) {
+            self.showError(new Error(xhr));
         });
     };
 
@@ -348,5 +379,7 @@ function initApp() {
         setInterval(function() {
             model.refreshAll();
         }, 10000);
+    }).fail(function(xhr) {
+        self.showError(new Error(xhr));
     });
 }

@@ -18,17 +18,7 @@
 
     <div class="container" style="padding: 90px 15px 0;">
 
-      <div class="alert alert-warning alert-dismissible" role="alert"
-           data-bind="visible: haveErrors">
-        <button type="button" class="close" data-bind="click: clearErrors">
-          &times;
-        </button>
-        <ul data-bind="foreach: errors">
-          <li>
-            <strong data-bind="text: num"></strong>:&nbsp;<span data-bind="text: msg"></span>
-          </li>
-        </ul>
-      </div>
+<jsp:include page="include/alert.jsp"/>
 
       <button type="button" class="btn btn-default" data-toggle="modal" data-target="#userDialog"
               data-bind="click: clearUser">

@@ -18,6 +18,8 @@
 
     <div class="container" style="padding: 90px 15px 0;">
 
+<jsp:include page="include/alert.jsp"/>
+
       <table class="table table-hover table-striped">
         <thead>
           <tr>

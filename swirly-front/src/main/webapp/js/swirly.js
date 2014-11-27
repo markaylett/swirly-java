@@ -68,6 +68,16 @@ ko.bindingHandlers.optnum = {
 function Error(val) {
     var self = this;
 
+    if ('responseText' in val) {
+        if (val.responseText.length > 0) {
+            val = $.parseJSON(val.responseText);
+        } else {
+            val = {
+                num: val.status,
+                msg: val.statusText
+            };
+        }
+    }
     self.num = ko.observable(val.num);
     self.msg = ko.observable(val.msg);
 }

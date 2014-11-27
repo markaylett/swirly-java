@@ -7,6 +7,25 @@
 function ViewModel() {
     var self = this;
 
+    self.errors = ko.observableArray([]);
+
+    self.clearErrors = function() {
+        self.errors.removeAll();
+    };
+
+    self.hasErrors = ko.computed(function() {
+        return self.errors().length > 0;
+    });
+
+    self.showError = function(error) {
+        // Add to top of list.
+        self.errors.unshift(error);
+        // Limit to last 10 errors.
+        if (self.errors().length > 10) {
+            self.errors.pop();
+        }
+    };
+
     self.contrs = ko.observableArray([]);
 
     self.refreshAll = function() {
@@ -17,6 +36,8 @@ function ViewModel() {
                 return new Contr(val);
             });
             self.contrs(cooked);
+        }).fail(function(xhr) {
+            self.showError(new Error($.parseJSON(xhr.responseText)));
         });
     };
 }

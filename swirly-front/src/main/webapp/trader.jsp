@@ -18,6 +18,8 @@
 
     <div class="container" style="padding: 90px 15px 0;">
 
+<jsp:include page="include/alert.jsp"/>
+
       <form class="form-inline" style="margin-bottom: 20px;">
         <div class="form-group">
           <div id="the-basics">
