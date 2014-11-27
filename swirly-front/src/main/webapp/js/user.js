@@ -22,6 +22,13 @@ function ViewModel() {
         self.errors.removeAll();
     };
 
+    self.showError = function(error) {
+        self.errors.unshift(error);
+        if (self.errors().length > 10) {
+            self.errors.pop();
+        }
+    };
+
     self.clearUser = function() {
         self.mnem('MARAYL');
         self.display('Mark Aylett');
@@ -39,6 +46,8 @@ function ViewModel() {
                 return new User(val);
             });
             self.users(cooked);
+        }).fail(function(xhr) {
+            self.showError(new Error($.parseJSON(xhr.responseText)));
         });
     };
 
@@ -55,7 +64,7 @@ function ViewModel() {
         }).done(function(raw) {
             self.applyTrans(raw);
         }).fail(function(xhr) {
-            self.errors.push(new Error($.parseJSON(xhr.responseText)));
+            self.showError(new Error($.parseJSON(xhr.responseText)));
         });
     };
 }
