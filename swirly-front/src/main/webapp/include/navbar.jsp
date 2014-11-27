@@ -12,25 +12,25 @@
    final UserService userService = UserServiceFactory.getUserService();
 
    String homeTag = "<li>";
-   String aboutTag = "<li>";
-   String contactTag = "<li>";
    String traderTag = "<li>";
    String contrTag = "<li>";
    String userTag = "<li>";
+   String aboutTag = "<li>";
+   String contactTag = "<li>";
 
    final String active = request.getParameter("active");
    if ("home".equals(active)) {
      homeTag = "<li class=\"active\">";
-   } else if ("about".equals(active)) {
-     aboutTag = "<li class=\"active\">";
-   } else if ("contact".equals(active)) {
-     contactTag = "<li class=\"active\">";
    } else if ("trader".equals(active)) {
      traderTag = "<li class=\"active\">";
    } else if ("contr".equals(active)) {
      contrTag = "<li class=\"active\">";
    } else if ("user".equals(active)) {
      userTag = "<li class=\"active\">";
+   } else if ("about".equals(active)) {
+     aboutTag = "<li class=\"active\">";
+   } else if ("contact".equals(active)) {
+     contactTag = "<li class=\"active\">";
    }
 %>
 <nav class="navbar navbar-default navbar-fixed-top">
@@ -46,8 +46,6 @@
     <div id="navbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
         <%=homeTag%><a href="home.jsp">Home</a></li>
-        <%=aboutTag%><a href="about.jsp">About</a></li>
-        <%=contactTag%><a href="contact.jsp">Contact</a></li>
 <%
    if (userService.isUserLoggedIn()) {
 %>
@@ -61,6 +59,8 @@
      }
    }
 %>
+        <%=aboutTag%><a href="about.jsp">About</a></li>
+        <%=contactTag%><a href="contact.jsp">Contact</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
 <%
@@ -70,7 +70,7 @@
 %>
         <li><a href="#">Hello, ${fn:escapeXml(user.nickname)}</a></li>
         <li>
-          <a href="<%=userService.createLogoutURL(request.getRequestURI())%>">Sign Out</a>
+          <a href="<%=userService.createLogoutURL("/home.jsp")%>">Sign Out</a>
         </li>
 <% } else {%>
         <li><a href="#">Welcome</a></li>
