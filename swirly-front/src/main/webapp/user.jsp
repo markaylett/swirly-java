@@ -1,10 +1,10 @@
-<!-- -*- html -*- -->
-<!--
+<%-- -*- html -*- --%>
+<%--
    Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
 
    All rights reserved.
--->
-<%@ page contentType="text/html;charset=utf-8" language="java"%>
+--%>
+<%@ page contentType="text/html;charset=utf-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
 
