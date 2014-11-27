@@ -22,31 +22,6 @@
     <welcome-file>home.jsp</welcome-file>
   </welcome-file-list>
 
-  <error-page>
-    <error-code>400</error-code>
-    <location>/error/400.json</location>
-  </error-page>
-
-  <error-page>
-    <error-code>403</error-code>
-    <location>/error/403.json</location>
-  </error-page>
-
-  <error-page>
-    <error-code>404</error-code>
-    <location>/error/404.json</location>
-  </error-page>
-
-  <error-page>
-    <error-code>405</error-code>
-    <location>/error/405.json</location>
-  </error-page>
-
-  <error-page>
-    <error-code>500</error-code>
-    <location>/error/500.json</location>
-  </error-page>
-
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>trader</web-resource-name>
