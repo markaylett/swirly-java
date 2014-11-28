@@ -20,8 +20,8 @@ function ViewModel() {
     self.showError = function(error) {
         // Add to top of list.
         self.errors.unshift(error);
-        // Limit to last 10 errors.
-        if (self.errors().length > 10) {
+        // Limit to last 5 errors.
+        if (self.errors().length > 5) {
             self.errors.pop();
         }
     };

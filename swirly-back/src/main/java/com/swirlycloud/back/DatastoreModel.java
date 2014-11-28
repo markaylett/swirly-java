@@ -33,6 +33,7 @@ import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.State;
+import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.mock.MockAsset;
 import com.swirlycloud.mock.MockContr;
@@ -43,6 +44,19 @@ import com.swirlycloud.util.SlNode;
 public final class DatastoreModel implements Model {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+    private final void doInsertUser(User user) {
+        final String kind = Kind.USER.camelName();
+        final Entity entity = new Entity(kind, user.getId());
+        entity.setProperty("mnem", user.getMnem());
+        entity.setProperty("display", user.getDisplay());
+        entity.setProperty("email", user.getEmail());
+        final Entity mnemIdx = new Entity("UserMnem", user.getMnem());
+        final Entity emailIdx = new Entity("UserEmail", user.getEmail());
+        datastore.put(entity);
+        datastore.put(mnemIdx);
+        datastore.put(emailIdx);
+    }
 
     private final void doInsertOrder(Exec exec) {
         final String kind = Kind.ORDER.camelName();
@@ -128,6 +142,11 @@ public final class DatastoreModel implements Model {
     public final long allocIds(Kind kind, long num) {
         final KeyRange range = datastore.allocateIds(kind.camelName(), num);
         return range.getStart().getId();
+    }
+
+    @Override
+    public final void insertUser(User user) {
+        doInsertUser(user);
     }
 
     @Override

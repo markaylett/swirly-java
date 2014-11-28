@@ -14,6 +14,7 @@ import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.mock.MockAsset;
 import com.swirlycloud.mock.MockContr;
@@ -32,6 +33,10 @@ public final class MockModel implements Model {
         final long nextId = arr[kind.ordinal()];
         arr[kind.ordinal()] += num;
         return nextId;
+    }
+
+    @Override
+    public final void insertUser(User user) {
     }
 
     @Override

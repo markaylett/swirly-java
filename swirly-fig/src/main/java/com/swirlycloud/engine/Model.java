@@ -12,6 +12,7 @@ import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.domain.User;
 
 public interface Model {
 
@@ -19,6 +20,8 @@ public interface Model {
      * Allocate contiguous sequence of identifiers and return the first.
      */
     long allocIds(Kind kind, long num);
+
+    void insertUser(User user);
 
     void insertExecList(Exec first);
 

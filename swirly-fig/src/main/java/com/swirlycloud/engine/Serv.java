@@ -97,6 +97,11 @@ public final class Serv implements AutoCloseable {
         }
     }
 
+    private final User newUser(String mnem, String display, String email) {
+        final long userId = model.allocIds(Kind.USER, 1);
+        return new User(userId, mnem, display, email);
+    }
+
     private final Exec newExec(Order order, long now) {
         final long execId = model.allocIds(Kind.EXEC, 1);
         return new Exec(execId, order.getId(), order, now);
@@ -228,6 +233,14 @@ public final class Serv implements AutoCloseable {
 
     @Override
     public final void close() {
+    }
+
+    public final User registerUser(String mnem, String display, String email) {
+        final User user = newUser(mnem, display, email);
+        model.insertUser(user);
+        cache.insertRec(user);
+        emailIdx.insert(user);
+        return user;
     }
 
     public final Rec findRec(Kind kind, long id) {

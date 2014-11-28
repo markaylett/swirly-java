@@ -71,6 +71,27 @@ public final class Cache {
         buckets = new Rec[nBuckets][COLS];
     }
 
+    public final void insertRec(Rec rec) {
+        switch (rec.getKind()) {
+        case ASSET:
+            rec.setSlNext(firstAsset);
+            firstAsset = rec;
+            break;
+        case CONTR:
+            rec.setSlNext(firstContr);
+            firstContr = rec;
+            break;
+        case USER:
+            rec.setSlNext(firstUser);
+            firstUser = rec;
+            break;
+        default:
+            throw new IllegalArgumentException("invalid record-type");
+        }
+        insertId(rec);
+        insertMnem(rec);
+    }
+
     public final void insertRecList(Kind kind, SlNode first) {
         switch (kind) {
         case ASSET:
