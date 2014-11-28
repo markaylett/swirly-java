@@ -81,7 +81,6 @@ public final class Rest {
         return true;
     }
 
-
     public final synchronized void getBook(StringBuilder sb, Integer levels) {
         sb.append('[');
         RbNode node = serv.getFirstBook();

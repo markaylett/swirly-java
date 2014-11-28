@@ -14,18 +14,23 @@ import com.swirlycloud.domain.Action;
 
 public final class Request implements ContentHandler {
 
-    public static final int ID = 1 << 0;
-    public static final int CONTR = 1 << 1;
-    public static final int SETTL_DATE = 1 << 2;
-    public static final int REF = 1 << 3;
-    public static final int ACTION = 1 << 4;
-    public static final int TICKS = 1 << 5;
-    public static final int LOTS = 1 << 6;
-    public static final int MIN_LOTS = 1 << 7;
+    public static final int MNEM = 1 << 0;
+    public static final int DISPLAY = 1 << 1;
+    public static final int ID = 1 << 2;
+    public static final int CONTR = 1 << 3;
+    public static final int SETTL_DATE = 1 << 4;
+    public static final int REF = 1 << 5;
+    public static final int ACTION = 1 << 6;
+    public static final int TICKS = 1 << 7;
+    public static final int LOTS = 1 << 8;
+    public static final int MIN_LOTS = 1 << 9;
 
     private transient String key;
     private boolean valid;
     private int fields;
+
+    private String mnem;
+    private String display;
     private long id;
     private String contr;
     private int settlDate;
@@ -58,7 +63,17 @@ public final class Request implements ContentHandler {
 
     @Override
     public final boolean primitive(Object value) throws ParseException, IOException {
-        if ("id".equals(key)) {
+        if ("mnem".equals(key)) {
+            if (!(value instanceof String) || (fields & MNEM) != 0)
+                return false;
+            fields |= MNEM;
+            ref = (String) value;
+        } else if ("display".equals(key)) {
+            if (!(value instanceof String) || (fields & DISPLAY) != 0)
+                return false;
+            fields |= DISPLAY;
+            ref = (String) value;
+        } else if ("id".equals(key)) {
             if (!(value instanceof Long) || (fields & ID) != 0)
                 return false;
             fields |= ID;
@@ -130,6 +145,14 @@ public final class Request implements ContentHandler {
 
     public final int getFields() {
         return fields;
+    }
+
+    public final String getMnem() {
+        return mnem;
+    }
+
+    public final String getDisplay() {
+        return display;
     }
 
     public final long getId() {
