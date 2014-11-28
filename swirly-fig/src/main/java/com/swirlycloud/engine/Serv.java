@@ -29,7 +29,6 @@ public final class Serv implements AutoCloseable {
     private static int BUCKETS = 257;
     private final Model model;
     private final Cache cache = new Cache(BUCKETS);
-    @SuppressWarnings("unused")
     private final EmailIdx emailIdx = new EmailIdx(BUCKETS);
     private final RefIdx refIdx = new RefIdx(BUCKETS);
     private final Tree books = new Tree();
@@ -220,6 +219,11 @@ public final class Serv implements AutoCloseable {
         insertOrders();
         insertTrades();
         insertPosns();
+        // Build email index.
+        for (SlNode node = cache.getFirstRec(Kind.USER); node != null; node = node.slNext()) {
+            final User user = (User) node;
+            emailIdx.insert(user);
+        }
     }
 
     @Override
@@ -240,6 +244,10 @@ public final class Serv implements AutoCloseable {
 
     public final boolean isEmptyRec(Kind kind) {
         return cache.isEmptyRec(kind);
+    }
+
+    public final User findUserByEmail(String email) {
+        return emailIdx.find(email);
     }
 
     public final Book getLazyBook(Contr contr, int settlDay) {
@@ -309,7 +317,15 @@ public final class Serv implements AutoCloseable {
         }
         return getLazyAccnt(user);
     }
-    
+
+    public final Accnt getLazyAccntByEmail(String email) {
+        final User user = emailIdx.find(email);
+        if (user == null) {
+            throw new IllegalArgumentException(String.format("invalid user '%s'", email));
+        }
+        return getLazyAccnt(user);
+    }
+
     public final Trans placeOrder(Accnt accnt, Book book, String ref, Action action, long ticks,
             long lots, long minLots, Trans trans) {
         if (lots == 0 || lots < minLots) {
