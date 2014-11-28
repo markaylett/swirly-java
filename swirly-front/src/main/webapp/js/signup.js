@@ -40,6 +40,7 @@ function ViewModel() {
                 display: display
             })
         }).done(function(raw) {
+            window.location.reload();
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });

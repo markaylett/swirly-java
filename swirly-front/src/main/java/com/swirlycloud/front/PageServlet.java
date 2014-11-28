@@ -41,8 +41,6 @@ public final class PageServlet extends HttpServlet {
             page = Page.ABOUT;
         } else if ("contact".equals(parts[0])) {
             page = Page.CONTACT;
-        } else if ("signup".equals(parts[0])) {
-            page = Page.SIGNUP;
         } else {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -57,9 +55,6 @@ public final class PageServlet extends HttpServlet {
             if (!state.isUserRegistered()) {
                 page = Page.SIGNUP;
             }
-        } else if (page == Page.SIGNUP && !state.isUserLoggedIn()) {
-            resp.sendRedirect(state.getLoginURL());
-            return;
         }
         req.setAttribute("state", state);
         final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(

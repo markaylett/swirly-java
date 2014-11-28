@@ -14,6 +14,7 @@ import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Accnt;
 import com.swirlycloud.engine.Book;
 import com.swirlycloud.engine.Model;
@@ -59,6 +60,12 @@ public final class Rest {
         }
         rec.print(sb, null);
         return true;
+    }
+
+    public final synchronized void registerUser(StringBuilder sb, String mnem, String display,
+            String email) {
+        final User user = serv.registerUser(mnem, display, email);
+        user.print(sb, null);
     }
 
     public final synchronized void getBook(StringBuilder sb, Integer levels) {

@@ -67,12 +67,12 @@ public final class Request implements ContentHandler {
             if (!(value instanceof String) || (fields & MNEM) != 0)
                 return false;
             fields |= MNEM;
-            ref = (String) value;
+            mnem = (String) value;
         } else if ("display".equals(key)) {
             if (!(value instanceof String) || (fields & DISPLAY) != 0)
                 return false;
             fields |= DISPLAY;
-            ref = (String) value;
+            display = (String) value;
         } else if ("id".equals(key)) {
             if (!(value instanceof Long) || (fields & ID) != 0)
                 return false;
