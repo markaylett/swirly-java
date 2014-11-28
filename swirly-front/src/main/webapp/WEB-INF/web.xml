@@ -36,6 +36,7 @@
     <web-resource-collection>
       <web-resource-name>trader</web-resource-name>
       <url-pattern>/page/trader</url-pattern>
+      <url-pattern>/page/contr</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
@@ -45,7 +46,6 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>admin</web-resource-name>
-      <url-pattern>/page/contr</url-pattern>
       <url-pattern>/page/user</url-pattern>
     </web-resource-collection>
     <auth-constraint>
