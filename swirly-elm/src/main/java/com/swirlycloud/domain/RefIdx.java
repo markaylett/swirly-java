@@ -41,7 +41,7 @@ public final class RefIdx {
         if (order.getRef() != null) {
             final int bucket = indexFor(hashCode(order.getUser().getId(), order.getRef()),
                     buckets.length);
-            order.nextRef = buckets[bucket];
+            order.refNext = buckets[bucket];
             buckets[bucket] = order;
         }
     }
@@ -54,13 +54,13 @@ public final class RefIdx {
             return null;
         }
         if (equals(it, trid, ref)) {
-            buckets[bucket] = it.nextRef;
+            buckets[bucket] = it.refNext;
             return it;
         }
-        for (; it.nextRef != null; it = it.nextRef) {
-            final Order next = it.nextRef;
+        for (; it.refNext != null; it = it.refNext) {
+            final Order next = it.refNext;
             if (equals(next, trid, ref)) {
-                it.nextRef = next.nextRef;
+                it.refNext = next.refNext;
                 return next;
             }
         }
@@ -70,7 +70,7 @@ public final class RefIdx {
     public final Order find(long trid, String ref) {
         assert ref != null;
         final int bucket = indexFor(hashCode(trid, ref), buckets.length);
-        for (Order it = buckets[bucket]; it != null; it = it.nextRef) {
+        for (Order it = buckets[bucket]; it != null; it = it.refNext) {
             if (equals(it, trid, ref)) {
                 return it;
             }

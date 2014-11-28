@@ -16,7 +16,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
 
     // Internals.
     // Singly-linked buckets.
-    transient Order nextRef;
+    transient Order refNext;
     transient RbNode level;
 
     private final long id;

@@ -10,6 +10,7 @@ import java.util.List;
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Direct;
+import com.swirlycloud.domain.EmailIdx;
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
@@ -25,11 +26,12 @@ import com.swirlycloud.util.SlNode;
 import com.swirlycloud.util.Tree;
 
 public final class Serv implements AutoCloseable {
-    private static int CACHE_BUCKETS = 257;
-    private static int REFIDX_BUCKETS = 257;
+    private static int BUCKETS = 257;
     private final Model model;
-    private final Cache cache = new Cache(CACHE_BUCKETS);
-    private final RefIdx refIdx = new RefIdx(REFIDX_BUCKETS);
+    private final Cache cache = new Cache(BUCKETS);
+    @SuppressWarnings("unused")
+    private final EmailIdx emailIdx = new EmailIdx(BUCKETS);
+    private final RefIdx refIdx = new RefIdx(BUCKETS);
     private final Tree books = new Tree();
     private final Tree accnts = new Tree();
 
@@ -171,7 +173,7 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    public final void matchOrders(Book book, Order order, Trans trans) {
+    private final void matchOrders(Book book, Order order, Trans trans) {
         Side side;
         Direct direct;
         if (order.getAction() == Action.BUY) {

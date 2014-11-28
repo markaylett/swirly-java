@@ -6,6 +6,10 @@
 package com.swirlycloud.domain;
 
 public final class User extends Rec {
+    // Internals.
+    // Singly-linked buckets.
+    transient User emailNext;
+
     private final String email;
 
     public User(long id, String mnem, String display, String email) {
