@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
-import static com.swirlycloud.back.WebUtil.splitPathInfo;
+import static com.swirlycloud.util.PathUtil.splitPath;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public final class BookServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPathInfo(pathInfo);
+        final String[] parts = splitPath(pathInfo);
         if (parts.length == 0) {
             ctx.getBook(sb, LEVELS);
         } else if (parts.length == 1) {

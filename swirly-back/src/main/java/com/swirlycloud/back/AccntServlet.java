@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
-import static com.swirlycloud.back.WebUtil.splitPathInfo;
+import static com.swirlycloud.util.PathUtil.splitPath;
 
 import java.io.IOException;
 import java.util.Map;
@@ -65,7 +65,7 @@ public final class AccntServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPathInfo(pathInfo);
+        final String[] parts = splitPath(pathInfo);
         if ("order".equals(parts[0])) {
             if (parts.length == 2) {
                 rest.deleteOrder(sb, umnem, Integer.parseInt(parts[1]));
@@ -116,7 +116,7 @@ public final class AccntServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPathInfo(pathInfo);
+        final String[] parts = splitPath(pathInfo);
         if (parts.length == 0) {
             rest.getAccnt(sb, umnem);
         } else if ("order".equals(parts[0])) {
@@ -191,7 +191,7 @@ public final class AccntServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPathInfo(pathInfo);
+        final String[] parts = splitPath(pathInfo);
         if (parts.length != 1 || !"order".equals(parts[0])) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -241,7 +241,7 @@ public final class AccntServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPathInfo(pathInfo);
+        final String[] parts = splitPath(pathInfo);
         if (parts.length != 2 || !"order".equals(parts[0])) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;

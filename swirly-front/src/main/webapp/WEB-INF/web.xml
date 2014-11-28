@@ -13,19 +13,29 @@
 	</init-param>
   </servlet>
 
+  <servlet>
+    <servlet-name>page</servlet-name>
+    <servlet-class>com.swirlycloud.front.PageServlet</servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>proxy</servlet-name>
     <url-pattern>/api/*</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+    <servlet-name>page</servlet-name>
+    <url-pattern>/page/*</url-pattern>
+  </servlet-mapping>
+
   <welcome-file-list>
-    <welcome-file>home.jsp</welcome-file>
+    <welcome-file>page/home</welcome-file>
   </welcome-file-list>
 
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>trader</web-resource-name>
-      <url-pattern>/trader.jsp</url-pattern>
+      <url-pattern>/page/trader</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
@@ -35,8 +45,8 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>admin</web-resource-name>
-      <url-pattern>/contr.jsp</url-pattern>
-      <url-pattern>/user.jsp</url-pattern>
+      <url-pattern>/page/contr</url-pattern>
+      <url-pattern>/page/user</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>

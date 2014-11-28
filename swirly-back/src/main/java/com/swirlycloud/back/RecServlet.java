@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
-import static com.swirlycloud.back.WebUtil.splitPathInfo;
+import static com.swirlycloud.util.PathUtil.splitPath;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public final class RecServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPathInfo(pathInfo);
+        final String[] parts = splitPath(pathInfo);
         if (parts.length == 0) {
             rest.getRec(sb);
         } else if ("asset".equals(parts[0])) {

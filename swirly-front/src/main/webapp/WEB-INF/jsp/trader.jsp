@@ -8,17 +8,17 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<jsp:include page="include/head.jsp"/>
+<jsp:include page="head.jsp"/>
 
   <body>
 
-<jsp:include page="include/navbar.jsp">
+<jsp:include page="navbar.jsp">
   <jsp:param name="active" value="trader"/>
 </jsp:include>
 
     <div class="container" style="padding: 90px 15px 0;">
 
-<jsp:include page="include/alert.jsp"/>
+<jsp:include page="alert.jsp"/>
 
       <form class="form-inline" style="margin-bottom: 20px;">
         <div class="form-group">
@@ -246,18 +246,18 @@
 
     </div>
 
-<jsp:include page="include/footer.jsp"/>
+<jsp:include page="footer.jsp"/>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/javascript" src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap3-typeahead.min.js"></script>
-    <script type="text/javascript" src="js/knockout.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap3-typeahead.min.js"></script>
+    <script type="text/javascript" src="/js/knockout.min.js"></script>
 
-    <script type="text/javascript" src="js/swirly.js"></script>
-    <script type="text/javascript" src="js/trader.js"></script>
+    <script type="text/javascript" src="/js/swirly.js"></script>
+    <script type="text/javascript" src="/js/trader.js"></script>
     <script type="text/javascript">
       $(initApp);
     </script>

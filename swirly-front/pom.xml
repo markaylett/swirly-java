@@ -17,6 +17,11 @@
   <name>swirly-front</name>
 
   <dependencies>
+    <dependency>
+      <groupId>com.swirlycloud</groupId>
+      <artifactId>swirly-ash</artifactId>
+	  <version>${project.version}</version>
+    </dependency>
     <!-- Compile/runtime dependencies -->
     <dependency>
       <groupId>com.google.appengine</groupId>
