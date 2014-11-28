@@ -42,3 +42,10 @@ body > .container {
 code {
   font-size: 80%;
 }
+
+/* Sign-up form. */
+
+.form-signup {
+  max-width: 350px;
+  margin: 0 auto;
+}

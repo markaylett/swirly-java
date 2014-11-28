@@ -48,7 +48,20 @@ public final class PageServlet extends HttpServlet {
             return;
         }
         // Expose state to JSP page.
-        req.setAttribute("state", new PageState(page));
+        final PageState state = new PageState(page);
+        if (page.isRestricted()) {
+            if (!state.isUserLoggedIn()) {
+                resp.sendRedirect(state.getLoginURL());
+                return;
+            }
+            if (!state.isUserRegistered()) {
+                page = Page.SIGNUP;
+            }
+        } else if (page == Page.SIGNUP && !state.isUserLoggedIn()) {
+            resp.sendRedirect(state.getLoginURL());
+            return;
+        }
+        req.setAttribute("state", state);
         final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(
                 page.getJspPage());
         dispatcher.forward(req, resp);

@@ -16,10 +16,20 @@
 
     <div class="container">
 
-      <div>
-        <h1>Signup</h1>
-        <p class="lead">The gmail of finance.</p>
-      </div>
+      <jsp:include page="alert.jsp"/>
+
+      <form class="form-signup">
+        <h2>Trader sign-up</h2>
+        <div class="form-group">
+          <label for="mnem">Username:</label>
+          <input id="mnem" type="text" class="form-control" data-bind="value: mnem"/>
+        </div>
+        <div class="form-group">
+          <label for="display">Full name:</label>
+          <input id="display" type="text" class="form-control" data-bind="value: display"/>
+        </div>
+        <button type="button" class="btn btn-lg btn-primary btn-block" data-bind="click: signup">Sign up</button>
+      </form>
 
     </div>
 
@@ -30,5 +40,13 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script type="text/javascript" src="/js/jquery.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap3-typeahead.min.js"></script>
+    <script type="text/javascript" src="/js/knockout.min.js"></script>
+
+    <script type="text/javascript" src="/js/swirly.js"></script>
+    <script type="text/javascript" src="/js/signup.js"></script>
+    <script type="text/javascript">
+      $(initApp);
+    </script>
   </body>
 </html>

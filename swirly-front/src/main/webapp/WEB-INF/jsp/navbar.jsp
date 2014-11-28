@@ -22,7 +22,7 @@
         <c:if test="${state.userLoggedIn}">
           <li ${state.traderPage ? 'class="active"' : ""}><a href="/page/trader">Trader</a></li>
           <c:if test="${state.userAdmin}">
-            <li ${state.contractPage ? 'class="active"' : ""}><a href="/page/contr">Contract</a></li>
+            <li ${state.contrPage ? 'class="active"' : ""}><a href="/page/contr">Contract</a></li>
             <li ${state.userPage ? 'class="active"' : ""}><a href="/page/user">User</a></li>
           </c:if>
         </c:if>

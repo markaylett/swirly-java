@@ -17,7 +17,7 @@
     <div class="container">
 
       <div>
-        <h1>About</h1>
+        <h2>About</h2>
         <p class="lead">The gmail of finance.</p>
       </div>
 
