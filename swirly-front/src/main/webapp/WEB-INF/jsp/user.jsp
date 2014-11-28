@@ -8,17 +8,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<jsp:include page="head.jsp"/>
+  <jsp:include page="head.jsp"/>
 
   <body>
 
-<jsp:include page="navbar.jsp">
-  <jsp:param name="active" value="user"/>
-</jsp:include>
+    <jsp:include page="navbar.jsp"/>
 
     <div class="container" style="padding: 90px 15px 0;">
 
-<jsp:include page="alert.jsp"/>
+      <jsp:include page="alert.jsp"/>
 
       <button type="button" class="btn btn-default" data-toggle="modal" data-target="#userDialog"
               data-bind="click: clearUser">
@@ -76,7 +74,7 @@
       </div>
     </div>
 
-<jsp:include page="footer.jsp"/>
+    <jsp:include page="footer.jsp"/>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->

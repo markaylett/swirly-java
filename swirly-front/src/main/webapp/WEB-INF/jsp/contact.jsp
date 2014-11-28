@@ -8,13 +8,11 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<jsp:include page="head.jsp"/>
+  <jsp:include page="head.jsp"/>
 
   <body>
 
-<jsp:include page="navbar.jsp">
-  <jsp:param name="active" value="contact"/>
-</jsp:include>
+    <jsp:include page="navbar.jsp"/>
 
     <div class="container">
 
@@ -25,7 +23,7 @@
 
     </div>
 
-<jsp:include page="footer.jsp"/>
+    <jsp:include page="footer.jsp"/>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->

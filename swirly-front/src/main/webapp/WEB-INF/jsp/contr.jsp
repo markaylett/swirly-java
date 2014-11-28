@@ -8,17 +8,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<jsp:include page="head.jsp"/>
+  <jsp:include page="head.jsp"/>
 
   <body>
 
-<jsp:include page="navbar.jsp">
-  <jsp:param name="active" value="contr"/>
-</jsp:include>
+    <jsp:include page="navbar.jsp"/>
 
     <div class="container" style="padding: 90px 15px 0;">
 
-<jsp:include page="alert.jsp"/>
+      <jsp:include page="alert.jsp"/>
 
       <table class="table table-hover table-striped">
         <thead>
@@ -61,7 +59,7 @@
 
     </div>
 
-<jsp:include page="footer.jsp"/>
+    <jsp:include page="footer.jsp"/>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->

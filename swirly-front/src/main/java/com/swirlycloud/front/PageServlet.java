@@ -47,6 +47,7 @@ public final class PageServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+        // Expose state to JSP page.
         req.setAttribute("state", new PageState(page));
         final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(
                 page.getJspPage());
