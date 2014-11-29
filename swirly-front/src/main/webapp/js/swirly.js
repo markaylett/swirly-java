@@ -48,7 +48,9 @@ function toDateStr(i) {
     var year = Math.floor(i / 10000);
     var mon = Math.floor(i / 100) % 100;
     var mday = i % 100;
-    return '' + year + '-' + mon + '-' + mday;
+    return ('000' + year).slice(-4)
+        + '-' + ('0' + mon).slice(-2)
+        + '-' + ('0' + mday).slice(-2);
 }
 
 ko.bindingHandlers.mnem = {
