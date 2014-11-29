@@ -21,10 +21,12 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.KeyRange;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.TransactionOptions;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Transaction;
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Kind;
@@ -37,11 +39,14 @@ import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.mock.MockAsset;
 import com.swirlycloud.mock.MockContr;
-import com.swirlycloud.mock.MockUser;
 import com.swirlycloud.util.Identifiable;
+import com.swirlycloud.util.Queue;
 import com.swirlycloud.util.SlNode;
 
 public final class DatastoreModel implements Model {
+
+    // Cross-group transactions need to be explicitly specified.
+    private static final TransactionOptions TXN_OPTIONS = TransactionOptions.Builder.withXG(true);
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -138,6 +143,22 @@ public final class DatastoreModel implements Model {
         }
     }
 
+    private final Rec getUserList() {
+        final Queue l = new Queue(); 
+        final String kind = Kind.USER.camelName();
+        final Query q = new Query(kind);
+        final PreparedQuery pq = datastore.prepare(q);
+        for (final Entity entity : pq.asIterable()) {
+            final long id = entity.getKey().getId();
+            final String mnem = (String) entity.getProperty("mnem");
+            final String display = (String) entity.getProperty("display");
+            final String email = (String) entity.getProperty("email");
+            final User user = new User(id, mnem, display, email);
+            l.insertBack(user);
+        }
+        return (Rec) l.getFirst();
+    }
+
     @Override
     public final long allocIds(Kind kind, long num) {
         final KeyRange range = datastore.allocateIds(kind.camelName(), num);
@@ -146,35 +167,67 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertUser(User user) {
-        doInsertUser(user);
+        final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
+        try {
+            doInsertUser(user);
+            txn.commit();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
     }
 
     @Override
     public final void insertExecList(Exec first) {
-        for (SlNode node = first; node != null; node = node.slNext()) {
-            final Exec exec = (Exec) node;
+        final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
+        try {
+            for (SlNode node = first; node != null; node = node.slNext()) {
+                final Exec exec = (Exec) node;
+                if (exec.getState() == State.NEW) {
+                    doInsertOrder(exec);
+                } else {
+                    doUpdateOrder(exec);
+                }
+                doInsertExec(exec);
+            }
+            txn.commit();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void insertExec(Exec exec) {
+        final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
+        try {
             if (exec.getState() == State.NEW) {
                 doInsertOrder(exec);
             } else {
                 doUpdateOrder(exec);
             }
             doInsertExec(exec);
+            txn.commit();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
         }
-    }
-
-    @Override
-    public final void insertExec(Exec exec) {
-        if (exec.getState() == State.NEW) {
-            doInsertOrder(exec);
-        } else {
-            doUpdateOrder(exec);
-        }
-        doInsertExec(exec);
     }
 
     @Override
     public final void updateExec(long id, long modified) {
-        doUpdateExec(id, modified);
+        final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
+        try {
+            doUpdateExec(id, modified);
+            txn.commit();
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
     }
 
     @Override
@@ -182,13 +235,15 @@ public final class DatastoreModel implements Model {
         Rec first = null;
         switch (kind) {
         case ASSET:
+            // TODO: migrate to datastore.
             first = MockAsset.newAssetList();
             break;
         case CONTR:
+            // TODO: migrate to datastore.
             first = MockContr.newContrList();
             break;
         case USER:
-            first = MockUser.newUserList();
+            first = getUserList();
             break;
         default:
             throw new IllegalArgumentException("invalid record-type");
