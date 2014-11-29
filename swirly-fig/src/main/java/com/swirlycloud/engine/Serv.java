@@ -20,6 +20,7 @@ import com.swirlycloud.domain.RefIdx;
 import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.Side;
 import com.swirlycloud.domain.User;
+import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.util.DlNode;
 import com.swirlycloud.util.RbNode;
 import com.swirlycloud.util.SlNode;
@@ -54,7 +55,12 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void insertRecList(Kind kind) {
-        cache.insertRecList(kind, model.getRecList(kind));
+        model.getRecList(kind, new UnaryCallback<Rec>() {
+            @Override
+            public final void call(Rec arg) {
+                cache.insertRec(arg);
+            }
+        });
     }
 
     private final void insertOrders() {

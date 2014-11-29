@@ -21,12 +21,12 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.KeyRange;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.TransactionOptions;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Kind;
@@ -37,10 +37,10 @@ import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.State;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Model;
+import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.mock.MockAsset;
 import com.swirlycloud.mock.MockContr;
 import com.swirlycloud.util.Identifiable;
-import com.swirlycloud.util.Queue;
 import com.swirlycloud.util.SlNode;
 
 public final class DatastoreModel implements Model {
@@ -143,8 +143,7 @@ public final class DatastoreModel implements Model {
         }
     }
 
-    private final Rec getUserList() {
-        final Queue l = new Queue(); 
+    private final void getUserList(UnaryCallback<Rec> cb) {
         final String kind = Kind.USER.camelName();
         final Query q = new Query(kind);
         final PreparedQuery pq = datastore.prepare(q);
@@ -154,9 +153,8 @@ public final class DatastoreModel implements Model {
             final String display = (String) entity.getProperty("display");
             final String email = (String) entity.getProperty("email");
             final User user = new User(id, mnem, display, email);
-            l.insertBack(user);
+            cb.call(user);
         }
-        return (Rec) l.getFirst();
     }
 
     @Override
@@ -231,24 +229,22 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final Rec getRecList(Kind kind) {
-        Rec first = null;
+    public final void getRecList(Kind kind, UnaryCallback<Rec> cb) {
         switch (kind) {
         case ASSET:
             // TODO: migrate to datastore.
-            first = MockAsset.newAssetList();
+            MockAsset.getAssetList(cb);
             break;
         case CONTR:
             // TODO: migrate to datastore.
-            first = MockContr.newContrList();
+            MockContr.getContrList(cb);
             break;
         case USER:
-            first = getUserList();
+            getUserList(cb);
             break;
         default:
             throw new IllegalArgumentException("invalid record-type");
         }
-        return first;
     }
 
     @Override

@@ -11,8 +11,9 @@ import java.util.TreeMap;
 
 import com.swirlycloud.domain.AssetType;
 import com.swirlycloud.domain.Contr;
+import com.swirlycloud.domain.Rec;
 import com.swirlycloud.function.NullaryFunction;
-import com.swirlycloud.util.Queue;
+import com.swirlycloud.function.UnaryCallback;
 
 public final class MockContr {
 
@@ -88,11 +89,9 @@ public final class MockContr {
         return FACTORIES.get(mnem).call();
     }
 
-    public static Contr newContrList() {
-        final Queue q = new Queue();
+    public static void getContrList(UnaryCallback<Rec> cb) {
         for (final Entry<String, NullaryFunction<Contr>> entry : FACTORIES.entrySet()) {
-            q.insertBack(entry.getValue().call());
+            cb.call(entry.getValue().call());
         }
-        return (Contr) q.getFirst();
     }
 }

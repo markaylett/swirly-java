@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.function.NullaryFunction;
-import com.swirlycloud.util.Queue;
+import com.swirlycloud.function.UnaryCallback;
 
 public final class MockUser {
     private static final Map<String, NullaryFunction<User>> FACTORIES = new TreeMap<>();
@@ -42,11 +43,9 @@ public final class MockUser {
         return FACTORIES.get(mnem).call();
     }
 
-    public static User newUserList() {
-        final Queue q = new Queue();
+    public static void getUserList(UnaryCallback<Rec> cb) {
         for (final Entry<String, NullaryFunction<User>> entry : FACTORIES.entrySet()) {
-            q.insertBack(entry.getValue().call());
+            cb.call(entry.getValue().call());
         }
-        return (User) q.getFirst();
     }
 }

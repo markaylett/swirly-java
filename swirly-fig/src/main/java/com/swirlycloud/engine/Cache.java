@@ -7,6 +7,7 @@ package com.swirlycloud.engine;
 
 import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.util.Queue;
 import com.swirlycloud.util.SlNode;
 
 public final class Cache {
@@ -14,9 +15,9 @@ public final class Cache {
     private static int MNEM = 1;
     private static int COLS = 2;
     private final int nBuckets;
-    private SlNode firstAsset;
-    private SlNode firstContr;
-    private SlNode firstUser;
+    private Queue assets;
+    private Queue contrs;
+    private Queue users;
     private final Rec[][] buckets;
 
     private static int hashCode(long id) {
@@ -57,59 +58,31 @@ public final class Cache {
         buckets[bucket][MNEM] = rec;
     }
 
-    private final void updateIndex(SlNode first) {
-        for (SlNode node = first; node != null; node = node.slNext()) {
-            final Rec rec = (Rec) node;
-            insertId(rec);
-            insertMnem(rec);
-        }
-    }
-
     public Cache(int nBuckets) {
         assert nBuckets > 0;
         this.nBuckets = nBuckets;
+        assets = new Queue();
+        contrs = new Queue();
+        users = new Queue();
         buckets = new Rec[nBuckets][COLS];
     }
 
     public final void insertRec(Rec rec) {
         switch (rec.getKind()) {
         case ASSET:
-            rec.setSlNext(firstAsset);
-            firstAsset = rec;
+            assets.insertBack(rec);
             break;
         case CONTR:
-            rec.setSlNext(firstContr);
-            firstContr = rec;
+            contrs.insertBack(rec);
             break;
         case USER:
-            rec.setSlNext(firstUser);
-            firstUser = rec;
+            users.insertBack(rec);
             break;
         default:
             throw new IllegalArgumentException("invalid record-type");
         }
         insertId(rec);
         insertMnem(rec);
-    }
-
-    public final void insertRecList(Kind kind, SlNode first) {
-        switch (kind) {
-        case ASSET:
-            assert firstAsset == null;
-            firstAsset = first;
-            break;
-        case CONTR:
-            assert firstContr == null;
-            firstContr = first;
-            break;
-        case USER:
-            assert firstUser == null;
-            firstUser = first;
-            break;
-        default:
-            throw new IllegalArgumentException("invalid record-type");
-        }
-        updateIndex(first);
     }
 
     public final Rec findRec(Kind kind, long id) {
@@ -134,13 +107,13 @@ public final class Cache {
         SlNode first = null;
         switch (kind) {
         case ASSET:
-            first = firstAsset;
+            first = assets.getFirst();
             break;
         case CONTR:
-            first = firstContr;
+            first = contrs.getFirst();
             break;
         case USER:
-            first = firstUser;
+            first = users.getFirst();
             break;
         default:
             throw new IllegalArgumentException("invalid record-type");

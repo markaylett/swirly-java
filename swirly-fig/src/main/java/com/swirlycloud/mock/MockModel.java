@@ -16,6 +16,7 @@ import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Model;
+import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.mock.MockAsset;
 import com.swirlycloud.mock.MockContr;
 import com.swirlycloud.mock.MockUser;
@@ -52,22 +53,20 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final Rec getRecList(Kind kind) {
-        Rec first = null;
+    public final void getRecList(Kind kind, UnaryCallback<Rec> cb) {
         switch (kind) {
         case ASSET:
-            first = MockAsset.newAssetList();
+            MockAsset.getAssetList(cb);
             break;
         case CONTR:
-            first = MockContr.newContrList();
+            MockContr.getContrList(cb);
             break;
         case USER:
-            first = MockUser.newUserList();
+            MockUser.getUserList(cb);
             break;
         default:
             throw new IllegalArgumentException("invalid record-type");
         }
-        return first;
     }
 
     @Override

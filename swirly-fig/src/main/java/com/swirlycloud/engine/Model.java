@@ -13,6 +13,7 @@ import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.User;
+import com.swirlycloud.function.UnaryCallback;
 
 public interface Model {
 
@@ -29,7 +30,7 @@ public interface Model {
 
     void updateExec(long id, long modified);
 
-    Rec getRecList(Kind kind);
+    void getRecList(Kind kind, UnaryCallback<Rec> cb);
 
     List<Order> getOrders();
 

@@ -11,8 +11,9 @@ import java.util.TreeMap;
 
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.AssetType;
+import com.swirlycloud.domain.Rec;
 import com.swirlycloud.function.NullaryFunction;
-import com.swirlycloud.util.Queue;
+import com.swirlycloud.function.UnaryCallback;
 
 public final class MockAsset {
     private static final Map<String, NullaryFunction<Asset>> FACTORIES = new TreeMap<>();
@@ -63,11 +64,9 @@ public final class MockAsset {
         return FACTORIES.get(mnem).call();
     }
 
-    public static Asset newAssetList() {
-        final Queue q = new Queue();
+    public static void getAssetList(UnaryCallback<Rec> cb) {
         for (final Entry<String, NullaryFunction<Asset>> entry : FACTORIES.entrySet()) {
-            q.insertBack(entry.getValue().call());
+            cb.call(entry.getValue().call());
         }
-        return (Asset) q.getFirst();
     }
 }
