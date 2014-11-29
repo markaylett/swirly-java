@@ -11,7 +11,6 @@ import java.util.TreeMap;
 
 import com.swirlycloud.domain.AssetType;
 import com.swirlycloud.domain.Contr;
-import com.swirlycloud.domain.Rec;
 import com.swirlycloud.function.NullaryFunction;
 import com.swirlycloud.function.UnaryCallback;
 
@@ -89,7 +88,7 @@ public final class MockContr {
         return FACTORIES.get(mnem).call();
     }
 
-    public static void selectContr(UnaryCallback<Rec> cb) {
+    public static void selectContr(UnaryCallback<Contr> cb) {
         for (final Entry<String, NullaryFunction<Contr>> entry : FACTORIES.entrySet()) {
             cb.call(entry.getValue().call());
         }

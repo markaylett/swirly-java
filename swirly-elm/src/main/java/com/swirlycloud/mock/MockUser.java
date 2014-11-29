@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.function.NullaryFunction;
 import com.swirlycloud.function.UnaryCallback;
@@ -43,7 +42,7 @@ public final class MockUser {
         return FACTORIES.get(mnem).call();
     }
 
-    public static void selectUser(UnaryCallback<Rec> cb) {
+    public static void selectUser(UnaryCallback<User> cb) {
         for (final Entry<String, NullaryFunction<User>> entry : FACTORIES.entrySet()) {
             cb.call(entry.getValue().call());
         }

@@ -11,7 +11,6 @@ import java.util.TreeMap;
 
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.AssetType;
-import com.swirlycloud.domain.Rec;
 import com.swirlycloud.function.NullaryFunction;
 import com.swirlycloud.function.UnaryCallback;
 
@@ -64,7 +63,7 @@ public final class MockAsset {
         return FACTORIES.get(mnem).call();
     }
 
-    public static void selectAsset(UnaryCallback<Rec> cb) {
+    public static void selectAsset(UnaryCallback<Asset> cb) {
         for (final Entry<String, NullaryFunction<Asset>> entry : FACTORIES.entrySet()) {
             cb.call(entry.getValue().call());
         }

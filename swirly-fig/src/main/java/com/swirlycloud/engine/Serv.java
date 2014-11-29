@@ -6,6 +6,7 @@
 package com.swirlycloud.engine;
 
 import com.swirlycloud.domain.Action;
+import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Direct;
 import com.swirlycloud.domain.EmailIdx;
@@ -68,11 +69,30 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    private final void insertRecs(Kind kind) {
-        model.selectRec(kind, new UnaryCallback<Rec>() {
+    private final void insertAssets() {
+        model.selectAsset(new UnaryCallback<Asset>() {
             @Override
-            public final void call(Rec arg) {
+            public final void call(Asset arg) {
                 cache.insertRec(arg);
+            }
+        });
+    }
+
+    private final void insertContrs() {
+        model.selectContr(new UnaryCallback<Contr>() {
+            @Override
+            public final void call(Contr arg) {
+                cache.insertRec(arg);
+            }
+        });
+    }
+
+    private final void insertUsers() {
+        model.selectUser(new UnaryCallback<User>() {
+            @Override
+            public final void call(User arg) {
+                cache.insertRec(arg);
+                emailIdx.insert(arg);
             }
         });
     }
@@ -229,9 +249,9 @@ public final class Serv implements AutoCloseable {
 
     public Serv(Model model) {
         this.model = model;
-        insertRecs(Kind.ASSET);
-        insertRecs(Kind.CONTR);
-        insertRecs(Kind.USER);
+        insertAssets();
+        insertContrs();
+        insertUsers();
         insertOrders();
         insertTrades();
         insertPosns();

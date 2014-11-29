@@ -7,11 +7,12 @@ package com.swirlycloud.mock;
 
 import java.util.Arrays;
 
+import com.swirlycloud.domain.Asset;
+import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
-import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
@@ -48,20 +49,18 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void selectRec(Kind kind, UnaryCallback<Rec> cb) {
-        switch (kind) {
-        case ASSET:
-            MockAsset.selectAsset(cb);
-            break;
-        case CONTR:
-            MockContr.selectContr(cb);
-            break;
-        case USER:
-            MockUser.selectUser(cb);
-            break;
-        default:
-            throw new IllegalArgumentException("invalid record-type");
-        }
+    public final void selectAsset(UnaryCallback<Asset> cb) {
+        MockAsset.selectAsset(cb);
+    }
+
+    @Override
+    public final void selectContr(UnaryCallback<Contr> cb) {
+        MockContr.selectContr(cb);
+    }
+
+    @Override
+    public final void selectUser(UnaryCallback<User> cb) {
+        MockUser.selectUser(cb);
     }
 
     @Override

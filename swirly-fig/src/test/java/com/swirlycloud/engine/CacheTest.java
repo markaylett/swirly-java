@@ -9,8 +9,11 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.swirlycloud.domain.Asset;
+import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Cache;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
@@ -33,9 +36,9 @@ public final class CacheTest {
     @Test
     public final void testAsset() {
         final Cache c = new Cache(257);
-        model.selectRec(Kind.ASSET, new UnaryCallback<Rec>() {
+        model.selectAsset(new UnaryCallback<Asset>() {
             @Override
-            public final void call(Rec arg) {
+            public final void call(Asset arg) {
                 c.insertRec(arg);
             }
         });
@@ -49,9 +52,9 @@ public final class CacheTest {
     @Test
     public final void testContr() {
         final Cache c = new Cache(257);
-        model.selectRec(Kind.CONTR, new UnaryCallback<Rec>() {
+        model.selectContr(new UnaryCallback<Contr>() {
             @Override
-            public final void call(Rec arg) {
+            public final void call(Contr arg) {
                 c.insertRec(arg);
             }
         });
@@ -65,9 +68,9 @@ public final class CacheTest {
     @Test
     public final void testUser() {
         final Cache c = new Cache(257);
-        model.selectRec(Kind.USER, new UnaryCallback<Rec>() {
+        model.selectUser(new UnaryCallback<User>() {
             @Override
-            public final void call(Rec arg) {
+            public final void call(User arg) {
                 c.insertRec(arg);
             }
         });
