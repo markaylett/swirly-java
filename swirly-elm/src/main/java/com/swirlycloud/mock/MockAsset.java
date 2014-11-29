@@ -64,7 +64,7 @@ public final class MockAsset {
         return FACTORIES.get(mnem).call();
     }
 
-    public static void getAssetList(UnaryCallback<Rec> cb) {
+    public static void selectAsset(UnaryCallback<Rec> cb) {
         for (final Entry<String, NullaryFunction<Asset>> entry : FACTORIES.entrySet()) {
             cb.call(entry.getValue().call());
         }

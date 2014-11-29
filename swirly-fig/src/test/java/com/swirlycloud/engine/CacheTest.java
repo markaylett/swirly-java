@@ -33,7 +33,7 @@ public final class CacheTest {
     @Test
     public final void testAsset() {
         final Cache c = new Cache(257);
-        model.getRecList(Kind.ASSET, new UnaryCallback<Rec>() {
+        model.selectRec(Kind.ASSET, new UnaryCallback<Rec>() {
             @Override
             public final void call(Rec arg) {
                 c.insertRec(arg);
@@ -49,7 +49,7 @@ public final class CacheTest {
     @Test
     public final void testContr() {
         final Cache c = new Cache(257);
-        model.getRecList(Kind.CONTR, new UnaryCallback<Rec>() {
+        model.selectRec(Kind.CONTR, new UnaryCallback<Rec>() {
             @Override
             public final void call(Rec arg) {
                 c.insertRec(arg);
@@ -65,7 +65,7 @@ public final class CacheTest {
     @Test
     public final void testUser() {
         final Cache c = new Cache(257);
-        model.getRecList(Kind.USER, new UnaryCallback<Rec>() {
+        model.selectRec(Kind.USER, new UnaryCallback<Rec>() {
             @Override
             public final void call(Rec arg) {
                 c.insertRec(arg);

@@ -89,7 +89,7 @@ public final class MockContr {
         return FACTORIES.get(mnem).call();
     }
 
-    public static void getContrList(UnaryCallback<Rec> cb) {
+    public static void selectContr(UnaryCallback<Rec> cb) {
         for (final Entry<String, NullaryFunction<Contr>> entry : FACTORIES.entrySet()) {
             cb.call(entry.getValue().call());
         }

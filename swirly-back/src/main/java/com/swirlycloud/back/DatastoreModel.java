@@ -5,11 +5,9 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
-import static com.swirlycloud.util.AshFactory.newId;
+import static com.swirlycloud.util.AshUtil.newId;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -229,15 +227,15 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void getRecList(Kind kind, UnaryCallback<Rec> cb) {
+    public final void selectRec(Kind kind, UnaryCallback<Rec> cb) {
         switch (kind) {
         case ASSET:
             // TODO: migrate to datastore.
-            MockAsset.getAssetList(cb);
+            MockAsset.selectAsset(cb);
             break;
         case CONTR:
             // TODO: migrate to datastore.
-            MockContr.getContrList(cb);
+            MockContr.selectContr(cb);
             break;
         case USER:
             getUserList(cb);
@@ -248,8 +246,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final List<Order> getOrders() {
-        final List<Order> l = new ArrayList<>();
+    public final void selectOrder(UnaryCallback<Order> cb) {
         final String kind = Kind.ORDER.camelName();
         final Filter filter = new FilterPredicate("resd", FilterOperator.GREATER_THAN, 0);
         final Query q = new Query(kind).setFilter(filter);
@@ -273,14 +270,12 @@ public final class DatastoreModel implements Model {
             final long modified = (Long) entity.getProperty("modified");
             final Order order = new Order(id, user, contr, settlDay, ref, state, action, ticks,
                     lots, resd, exec, lastTicks, lastLots, minLots, created, modified);
-            l.add(order);
+            cb.call(order);
         }
-        return l;
     }
 
     @Override
-    public final List<Exec> getTrades() {
-        final List<Exec> l = new ArrayList<>();
+    public final void selectTrade(UnaryCallback<Exec> cb) {
         final String kind = Kind.EXEC.camelName();
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
@@ -318,14 +313,14 @@ public final class DatastoreModel implements Model {
                 cpty = null;
             }
             final long created = (Long) entity.getProperty("created");
-            l.add(new Exec(id, orderId, user, contr, settlDay, ref, state, action, ticks, lots,
-                    resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty, created));
+            final Exec trade = new Exec(id, orderId, user, contr, settlDay, ref, state, action, ticks, lots,
+                    resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty, created);
+            cb.call(trade);
         }
-        return l;
     }
 
     @Override
-    public final List<Posn> getPosns() {
+    public final void selectPosn(UnaryCallback<Posn> cb) {
         final Map<Long, Posn> m = new HashMap<>();
         final String kind = Kind.EXEC.camelName();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
@@ -347,6 +342,8 @@ public final class DatastoreModel implements Model {
             final long lastLots = (Long) entity.getProperty("lastLots");
             posn.applyTrade(action, lastTicks, lastLots);
         }
-        return new ArrayList<>(m.values());
+        for (final Posn posn : m.values()) {
+            cb.call(posn);
+        }
     }
 }

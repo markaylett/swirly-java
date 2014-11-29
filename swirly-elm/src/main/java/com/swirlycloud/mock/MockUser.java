@@ -43,7 +43,7 @@ public final class MockUser {
         return FACTORIES.get(mnem).call();
     }
 
-    public static void getUserList(UnaryCallback<Rec> cb) {
+    public static void selectUser(UnaryCallback<Rec> cb) {
         for (final Entry<String, NullaryFunction<User>> entry : FACTORIES.entrySet()) {
             cb.call(entry.getValue().call());
         }

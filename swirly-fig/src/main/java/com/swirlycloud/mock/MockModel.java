@@ -6,8 +6,6 @@
 package com.swirlycloud.mock;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Kind;
@@ -17,9 +15,6 @@ import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
-import com.swirlycloud.mock.MockAsset;
-import com.swirlycloud.mock.MockContr;
-import com.swirlycloud.mock.MockUser;
 
 public final class MockModel implements Model {
     private final long[] arr;
@@ -53,16 +48,16 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void getRecList(Kind kind, UnaryCallback<Rec> cb) {
+    public final void selectRec(Kind kind, UnaryCallback<Rec> cb) {
         switch (kind) {
         case ASSET:
-            MockAsset.getAssetList(cb);
+            MockAsset.selectAsset(cb);
             break;
         case CONTR:
-            MockContr.getContrList(cb);
+            MockContr.selectContr(cb);
             break;
         case USER:
-            MockUser.getUserList(cb);
+            MockUser.selectUser(cb);
             break;
         default:
             throw new IllegalArgumentException("invalid record-type");
@@ -70,17 +65,14 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final List<Order> getOrders() {
-        return Collections.emptyList();
+    public final void selectOrder(UnaryCallback<Order> cb) {
     }
 
     @Override
-    public final List<Exec> getTrades() {
-        return Collections.emptyList();
+    public final void selectTrade(UnaryCallback<Exec> cb) {
     }
 
     @Override
-    public final List<Posn> getPosns() {
-        return Collections.emptyList();
+    public final void selectPosn(UnaryCallback<Posn> cb) {
     }
 }

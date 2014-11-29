@@ -5,8 +5,6 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
-import java.util.List;
-
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
@@ -30,11 +28,11 @@ public interface Model {
 
     void updateExec(long id, long modified);
 
-    void getRecList(Kind kind, UnaryCallback<Rec> cb);
+    void selectRec(Kind kind, UnaryCallback<Rec> cb);
 
-    List<Order> getOrders();
+    void selectOrder(UnaryCallback<Order> cb);
 
-    List<Exec> getTrades();
+    void selectTrade(UnaryCallback<Exec> cb);
 
-    List<Posn> getPosns();
+    void selectPosn(UnaryCallback<Posn> cb);
 }

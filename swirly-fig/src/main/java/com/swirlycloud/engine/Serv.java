@@ -5,8 +5,6 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
-import java.util.List;
-
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Direct;
@@ -54,8 +52,24 @@ public final class Serv implements AutoCloseable {
         posn.enrich(user, contr);
     }
 
-    private final void insertRecList(Kind kind) {
-        model.getRecList(kind, new UnaryCallback<Rec>() {
+    private final void insertOrder(Order order) {
+        enrichOrder(order);
+        final Book book = getLazyBook(order.getContr(), order.getSettlDay());
+        book.insertOrder(order);
+        boolean success = false;
+        try {
+            final Accnt accnt = getLazyAccnt(order.getUser());
+            accnt.insertOrder(order);
+            success = true;
+        } finally {
+            if (!success) {
+                book.removeOrder(order);
+            }
+        }
+    }
+
+    private final void insertRecs(Kind kind) {
+        model.selectRec(kind, new UnaryCallback<Rec>() {
             @Override
             public final void call(Rec arg) {
                 cache.insertRec(arg);
@@ -64,43 +78,34 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void insertOrders() {
-        final List<Order> orders = model.getOrders();
-        for (int i = 0; i < orders.size(); ++i) {
-            final Order order = orders.get(i);
-            enrichOrder(order);
-            final Book book = getLazyBook(order.getContr(), order.getSettlDay());
-            book.insertOrder(order);
-            boolean success = false;
-            try {
-                final Accnt accnt = getLazyAccnt(order.getUser());
-                accnt.insertOrder(order);
-                success = true;
-            } finally {
-                if (!success) {
-                    book.removeOrder(order);
-                }
+        model.selectOrder(new UnaryCallback<Order>() {
+            @Override
+            public final void call(Order arg) {
+                insertOrder(arg);
             }
-        }
+        });
     }
 
     private final void insertTrades() {
-        final List<Exec> trades = model.getTrades();
-        for (int i = 0; i < trades.size(); ++i) {
-            final Exec trade = trades.get(i);
-            enrichTrade(trade);
-            final Accnt accnt = getLazyAccnt(trade.getUser());
-            accnt.insertTrade(trade);
-        }
+        model.selectTrade(new UnaryCallback<Exec>() {
+            @Override
+            public final void call(Exec arg) {
+                enrichTrade(arg);
+                final Accnt accnt = getLazyAccnt(arg.getUser());
+                accnt.insertTrade(arg);
+            }
+        });
     }
 
     private final void insertPosns() {
-        final List<Posn> posns = model.getPosns();
-        for (int i = 0; i < posns.size(); ++i) {
-            final Posn posn = posns.get(i);
-            enrichPosn(posn);
-            final Accnt accnt = getLazyAccnt(posn.getUser());
-            accnt.insertPosn(posn);
-        }
+        model.selectPosn(new UnaryCallback<Posn>() {
+            @Override
+            public final void call(Posn arg) {
+                enrichPosn(arg);
+                final Accnt accnt = getLazyAccnt(arg.getUser());
+                accnt.insertPosn(arg);
+            }
+        });
     }
 
     private final User newUser(String mnem, String display, String email) {
@@ -224,9 +229,9 @@ public final class Serv implements AutoCloseable {
 
     public Serv(Model model) {
         this.model = model;
-        insertRecList(Kind.ASSET);
-        insertRecList(Kind.CONTR);
-        insertRecList(Kind.USER);
+        insertRecs(Kind.ASSET);
+        insertRecs(Kind.CONTR);
+        insertRecs(Kind.USER);
         insertOrders();
         insertTrades();
         insertPosns();

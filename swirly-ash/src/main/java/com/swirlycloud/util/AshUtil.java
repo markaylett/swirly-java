@@ -5,8 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
-public final class AshFactory {
-    private AshFactory() {
+public final class AshUtil {
+    private AshUtil() {
     }
 
     public static Identifiable newId(final long id) {
