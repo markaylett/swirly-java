@@ -45,7 +45,7 @@ import com.swirlycloud.util.SlNode;
 public final class DatastoreModel implements Model {
 
     // Cross-group transactions need to be explicitly specified.
-    private static final TransactionOptions TXN_OPTIONS = TransactionOptions.Builder.withXG(true);
+    private static final TransactionOptions XG_OPTION = TransactionOptions.Builder.withXG(true);
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -107,7 +107,7 @@ public final class DatastoreModel implements Model {
         return entity;
     }
 
-    private final void applyExec(Entity order, Exec exec) {
+    private final Entity applyExec(Entity order, Exec exec) {
         order.setProperty("state", exec.getState().name());
         order.setProperty("lots", exec.getLots());
         order.setProperty("resd", exec.getResd());
@@ -115,6 +115,7 @@ public final class DatastoreModel implements Model {
         order.setProperty("lastTicks", exec.getLastTicks());
         order.setProperty("lastLots", exec.getLastLots());
         order.setProperty("modified", exec.getCreated());
+        return order;
     }
 
     private final Entity getOrder(long id) {
@@ -122,7 +123,7 @@ public final class DatastoreModel implements Model {
         final Key key = KeyFactory.createKey(kind, id);
         try {
             return datastore.get(key);
-         } catch (final EntityNotFoundException e) {
+        } catch (final EntityNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
     }
@@ -132,41 +133,9 @@ public final class DatastoreModel implements Model {
         final Key key = KeyFactory.createKey(kind, id);
         try {
             return datastore.get(key);
-         } catch (final EntityNotFoundException e) {
+        } catch (final EntityNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
-    }
-
-    private final void doInsertUser(User user) {
-        final Entity entity = newUser(user);
-        final Entity mnemIdx = new Entity("UserMnem", user.getMnem());
-        final Entity emailIdx = new Entity("UserEmail", user.getEmail());
-        datastore.put(entity);
-        datastore.put(mnemIdx);
-        datastore.put(emailIdx);
-    }
-
-    private final void doInsertOrder(Exec exec) {
-        final Entity entity = newOrder(exec);
-        datastore.put(entity);
-    }
-
-    private final void doUpdateOrder(Exec exec) {
-        final Entity entity = getOrder(exec.getOrderId());
-        applyExec(entity, exec);
-        datastore.put(entity);
-    }
-
-    private final void doInsertExec(Exec exec) {
-        final Entity entity = newExec(exec);
-        datastore.put(entity);
-    }
-
-    private final void doUpdateExec(long id, long modified) {
-        final Entity entity = getExec(id);
-        entity.setProperty("confirmed", Boolean.TRUE);
-        entity.setProperty("modified", modified);
-        datastore.put(entity);
     }
 
     @Override
@@ -177,9 +146,14 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertUser(User user) {
-        final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
+        final Transaction txn = datastore.beginTransaction(XG_OPTION);
         try {
-            doInsertUser(user);
+            final Entity entity = newUser(user);
+            final Entity mnemIdx = new Entity("UserMnem", user.getMnem());
+            final Entity emailIdx = new Entity("UserEmail", user.getEmail());
+            datastore.put(entity);
+            datastore.put(mnemIdx);
+            datastore.put(emailIdx);
             txn.commit();
         } finally {
             if (txn.isActive()) {
@@ -190,23 +164,28 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertExecList(Exec first) {
+        // N.B. the approach I used previously on a traditional RDMS was quite different, in that
+        // order revisions were managed as triggers on the exec table.
         final Map<Long, Entity> orders = new HashMap<>();
-        final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
+        final Transaction txn = datastore.beginTransaction(XG_OPTION);
         try {
             for (SlNode node = first; node != null; node = node.slNext()) {
                 final Exec exec = (Exec) node;
                 if (exec.getState() == State.NEW) {
+                    // Defer actual datastore put.
                     orders.put(first.getOrderId(), newOrder(exec));
                 } else {
                     final long id = exec.getOrderId();
+                    // This exec may apply to a cached order.
                     Entity order = orders.get(id);
                     if (order == null) {
+                        // Otherwise fetch the order from the datastore.
                         order = getOrder(id);
                         orders.put(id, order);
                     }
                     applyExec(order, exec);
                 }
-                doInsertExec(exec);
+                datastore.put(newExec(exec));
             }
             datastore.put(orders.values());
             txn.commit();
@@ -219,14 +198,14 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertExec(Exec exec) {
-        final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
+        final Transaction txn = datastore.beginTransaction(XG_OPTION);
         try {
             if (exec.getState() == State.NEW) {
-                doInsertOrder(exec);
+                datastore.put(newOrder(exec));
             } else {
-                doUpdateOrder(exec);
+                datastore.put(applyExec(getOrder(exec.getOrderId()), exec));
             }
-            doInsertExec(exec);
+            datastore.put(newExec(exec));
             txn.commit();
         } finally {
             if (txn.isActive()) {
@@ -237,9 +216,12 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void updateExec(long id, long modified) {
-        final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
+        final Transaction txn = datastore.beginTransaction(XG_OPTION);
         try {
-            doUpdateExec(id, modified);
+            final Entity entity = getExec(id);
+            entity.setProperty("confirmed", Boolean.TRUE);
+            entity.setProperty("modified", modified);
+            datastore.put(entity);
             txn.commit();
         } finally {
             if (txn.isActive()) {
@@ -343,8 +325,9 @@ public final class DatastoreModel implements Model {
                 cpty = null;
             }
             final long created = (Long) entity.getProperty("created");
-            final Exec trade = new Exec(id, orderId, user, contr, settlDay, ref, state, action, ticks, lots,
-                    resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty, created);
+            final Exec trade = new Exec(id, orderId, user, contr, settlDay, ref, state, action,
+                    ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty,
+                    created);
             cb.call(trade);
         }
     }
