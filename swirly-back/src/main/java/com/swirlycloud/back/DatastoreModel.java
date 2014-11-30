@@ -52,69 +52,69 @@ public final class DatastoreModel implements Model {
     private final Entity newUser(User user) {
         final String kind = Kind.USER.camelName();
         final Entity entity = new Entity(kind, user.getId());
-        entity.setProperty("mnem", user.getMnem());
-        entity.setProperty("display", user.getDisplay());
-        entity.setProperty("email", user.getEmail());
+        entity.setUnindexedProperty("mnem", user.getMnem());
+        entity.setUnindexedProperty("display", user.getDisplay());
+        entity.setUnindexedProperty("email", user.getEmail());
         return entity;
     }
 
     private final Entity newOrder(Exec exec) {
         final String kind = Kind.ORDER.camelName();
         final Entity entity = new Entity(kind, exec.getOrderId());
-        entity.setProperty("userId", exec.getUserId());
-        entity.setProperty("contrId", exec.getContrId());
-        entity.setProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
-        entity.setProperty("ref", exec.getRef());
-        entity.setProperty("state", exec.getState().name());
-        entity.setProperty("action", exec.getAction().name());
-        entity.setProperty("ticks", exec.getTicks());
-        entity.setProperty("lots", exec.getLots());
+        entity.setUnindexedProperty("userId", exec.getUserId());
+        entity.setUnindexedProperty("contrId", exec.getContrId());
+        entity.setUnindexedProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
+        entity.setUnindexedProperty("ref", exec.getRef());
+        entity.setUnindexedProperty("state", exec.getState().name());
+        entity.setUnindexedProperty("action", exec.getAction().name());
+        entity.setUnindexedProperty("ticks", exec.getTicks());
+        entity.setUnindexedProperty("lots", exec.getLots());
         entity.setProperty("resd", exec.getResd());
-        entity.setProperty("exec", exec.getExec());
-        entity.setProperty("lastTicks", exec.getLastTicks());
-        entity.setProperty("lastLots", exec.getLastLots());
-        entity.setProperty("minLots", exec.getMinLots());
-        entity.setProperty("created", exec.getCreated());
-        entity.setProperty("modified", exec.getCreated());
+        entity.setUnindexedProperty("exec", exec.getExec());
+        entity.setUnindexedProperty("lastTicks", exec.getLastTicks());
+        entity.setUnindexedProperty("lastLots", exec.getLastLots());
+        entity.setUnindexedProperty("minLots", exec.getMinLots());
+        entity.setUnindexedProperty("created", exec.getCreated());
+        entity.setUnindexedProperty("modified", exec.getCreated());
         return entity;
     }
 
     private final Entity newExec(Exec exec) {
         final String kind = Kind.EXEC.camelName();
         final Entity entity = new Entity(kind, exec.getId());
-        entity.setProperty("orderId", exec.getOrderId());
-        entity.setProperty("userId", exec.getUserId());
-        entity.setProperty("contrId", exec.getContrId());
-        entity.setProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
-        entity.setProperty("ref", exec.getRef());
+        entity.setUnindexedProperty("orderId", exec.getOrderId());
+        entity.setUnindexedProperty("userId", exec.getUserId());
+        entity.setUnindexedProperty("contrId", exec.getContrId());
+        entity.setUnindexedProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
+        entity.setUnindexedProperty("ref", exec.getRef());
         entity.setProperty("state", exec.getState().name());
-        entity.setProperty("action", exec.getAction().name());
-        entity.setProperty("ticks", exec.getTicks());
-        entity.setProperty("lots", exec.getLots());
-        entity.setProperty("resd", exec.getResd());
-        entity.setProperty("exec", exec.getExec());
-        entity.setProperty("lastTicks", exec.getLastTicks());
-        entity.setProperty("lastLots", exec.getLastLots());
-        entity.setProperty("minLots", exec.getMinLots());
+        entity.setUnindexedProperty("action", exec.getAction().name());
+        entity.setUnindexedProperty("ticks", exec.getTicks());
+        entity.setUnindexedProperty("lots", exec.getLots());
+        entity.setUnindexedProperty("resd", exec.getResd());
+        entity.setUnindexedProperty("exec", exec.getExec());
+        entity.setUnindexedProperty("lastTicks", exec.getLastTicks());
+        entity.setUnindexedProperty("lastLots", exec.getLastLots());
+        entity.setUnindexedProperty("minLots", exec.getMinLots());
         if (exec.getState() == State.TRADE) {
-            entity.setProperty("matchId", exec.getMatchId());
-            entity.setProperty("role", exec.getRole().name());
-            entity.setProperty("cptyId", exec.getCptyId());
+            entity.setUnindexedProperty("matchId", exec.getMatchId());
+            entity.setUnindexedProperty("role", exec.getRole().name());
+            entity.setUnindexedProperty("cptyId", exec.getCptyId());
         }
         entity.setProperty("confirmed", Boolean.FALSE);
-        entity.setProperty("created", exec.getCreated());
-        entity.setProperty("modified", exec.getCreated());
+        entity.setUnindexedProperty("created", exec.getCreated());
+        entity.setUnindexedProperty("modified", exec.getCreated());
         return entity;
     }
 
     private final Entity applyExec(Entity order, Exec exec) {
         order.setProperty("state", exec.getState().name());
-        order.setProperty("lots", exec.getLots());
-        order.setProperty("resd", exec.getResd());
-        order.setProperty("exec", exec.getExec());
-        order.setProperty("lastTicks", exec.getLastTicks());
-        order.setProperty("lastLots", exec.getLastLots());
-        order.setProperty("modified", exec.getCreated());
+        order.setUnindexedProperty("lots", exec.getLots());
+        order.setUnindexedProperty("resd", exec.getResd());
+        order.setUnindexedProperty("exec", exec.getExec());
+        order.setUnindexedProperty("lastTicks", exec.getLastTicks());
+        order.setUnindexedProperty("lastLots", exec.getLastLots());
+        order.setUnindexedProperty("modified", exec.getCreated());
         return order;
     }
 
@@ -220,7 +220,7 @@ public final class DatastoreModel implements Model {
         try {
             final Entity entity = getExec(id);
             entity.setProperty("confirmed", Boolean.TRUE);
-            entity.setProperty("modified", modified);
+            entity.setUnindexedProperty("modified", modified);
             datastore.put(entity);
             txn.commit();
         } finally {
