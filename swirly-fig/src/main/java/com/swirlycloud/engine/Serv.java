@@ -5,6 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
+import java.util.regex.Pattern;
+
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
@@ -26,7 +28,9 @@ import com.swirlycloud.util.SlNode;
 import com.swirlycloud.util.Tree;
 
 public final class Serv implements AutoCloseable {
-    private static int BUCKETS = 257;
+    private static final int BUCKETS = 257;
+    private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z_]{3,16}$");
+
     private final Model model;
     private final Cache cache = new Cache(BUCKETS);
     private final EmailIdx emailIdx = new EmailIdx(BUCKETS);
@@ -129,6 +133,9 @@ public final class Serv implements AutoCloseable {
     }
 
     private final User newUser(String mnem, String display, String email) {
+        if (!MNEM_PATTERN.matcher(mnem).matches()) {
+            throw new IllegalArgumentException(String.format("invalid mnem '%s'", mnem));
+        }
         final long userId = model.allocIds(Kind.USER, 1);
         return new User(userId, mnem, display, email);
     }
