@@ -49,20 +49,16 @@ public final class DatastoreModel implements Model {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    private final void doInsertUser(User user) {
+    private final Entity newUser(User user) {
         final String kind = Kind.USER.camelName();
         final Entity entity = new Entity(kind, user.getId());
         entity.setProperty("mnem", user.getMnem());
         entity.setProperty("display", user.getDisplay());
         entity.setProperty("email", user.getEmail());
-        final Entity mnemIdx = new Entity("UserMnem", user.getMnem());
-        final Entity emailIdx = new Entity("UserEmail", user.getEmail());
-        datastore.put(entity);
-        datastore.put(mnemIdx);
-        datastore.put(emailIdx);
+        return entity;
     }
 
-    private final void doInsertOrder(Exec exec) {
+    private final Entity newOrder(Exec exec) {
         final String kind = Kind.ORDER.camelName();
         final Entity entity = new Entity(kind, exec.getOrderId());
         entity.setProperty("userId", exec.getUserId());
@@ -80,28 +76,10 @@ public final class DatastoreModel implements Model {
         entity.setProperty("minLots", exec.getMinLots());
         entity.setProperty("created", exec.getCreated());
         entity.setProperty("modified", exec.getCreated());
-        datastore.put(entity);
+        return entity;
     }
 
-    private final void doUpdateOrder(Exec exec) {
-        final String kind = Kind.ORDER.camelName();
-        final Key key = KeyFactory.createKey(kind, exec.getOrderId());
-        try {
-            final Entity entity = datastore.get(key);
-            entity.setProperty("state", exec.getState().name());
-            entity.setProperty("lots", exec.getLots());
-            entity.setProperty("resd", exec.getResd());
-            entity.setProperty("exec", exec.getExec());
-            entity.setProperty("lastTicks", exec.getLastTicks());
-            entity.setProperty("lastLots", exec.getLastLots());
-            entity.setProperty("modified", exec.getCreated());
-            datastore.put(entity);
-        } catch (final EntityNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    private final void doInsertExec(Exec exec) {
+    private final Entity newExec(Exec exec) {
         final String kind = Kind.EXEC.camelName();
         final Entity entity = new Entity(kind, exec.getId());
         entity.setProperty("orderId", exec.getOrderId());
@@ -126,20 +104,69 @@ public final class DatastoreModel implements Model {
         entity.setProperty("confirmed", Boolean.FALSE);
         entity.setProperty("created", exec.getCreated());
         entity.setProperty("modified", exec.getCreated());
+        return entity;
+    }
+
+    private final void applyExec(Entity order, Exec exec) {
+        order.setProperty("state", exec.getState().name());
+        order.setProperty("lots", exec.getLots());
+        order.setProperty("resd", exec.getResd());
+        order.setProperty("exec", exec.getExec());
+        order.setProperty("lastTicks", exec.getLastTicks());
+        order.setProperty("lastLots", exec.getLastLots());
+        order.setProperty("modified", exec.getCreated());
+    }
+
+    private final Entity getOrder(long id) {
+        final String kind = Kind.ORDER.camelName();
+        final Key key = KeyFactory.createKey(kind, id);
+        try {
+            return datastore.get(key);
+         } catch (final EntityNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private final Entity getExec(long id) {
+        final String kind = Kind.EXEC.camelName();
+        final Key key = KeyFactory.createKey(kind, id);
+        try {
+            return datastore.get(key);
+         } catch (final EntityNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private final void doInsertUser(User user) {
+        final Entity entity = newUser(user);
+        final Entity mnemIdx = new Entity("UserMnem", user.getMnem());
+        final Entity emailIdx = new Entity("UserEmail", user.getEmail());
+        datastore.put(entity);
+        datastore.put(mnemIdx);
+        datastore.put(emailIdx);
+    }
+
+    private final void doInsertOrder(Exec exec) {
+        final Entity entity = newOrder(exec);
+        datastore.put(entity);
+    }
+
+    private final void doUpdateOrder(Exec exec) {
+        final Entity entity = getOrder(exec.getOrderId());
+        applyExec(entity, exec);
+        datastore.put(entity);
+    }
+
+    private final void doInsertExec(Exec exec) {
+        final Entity entity = newExec(exec);
         datastore.put(entity);
     }
 
     private final void doUpdateExec(long id, long modified) {
-        final String kind = Kind.EXEC.camelName();
-        final Key key = KeyFactory.createKey(kind, id);
-        try {
-            final Entity entity = datastore.get(key);
-            entity.setProperty("confirmed", Boolean.TRUE);
-            entity.setProperty("modified", modified);
-            datastore.put(entity);
-        } catch (final EntityNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
+        final Entity entity = getExec(id);
+        entity.setProperty("confirmed", Boolean.TRUE);
+        entity.setProperty("modified", modified);
+        datastore.put(entity);
     }
 
     @Override
@@ -163,17 +190,25 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertExecList(Exec first) {
+        final Map<Long, Entity> orders = new HashMap<>();
         final Transaction txn = datastore.beginTransaction(TXN_OPTIONS);
         try {
             for (SlNode node = first; node != null; node = node.slNext()) {
                 final Exec exec = (Exec) node;
                 if (exec.getState() == State.NEW) {
-                    doInsertOrder(exec);
+                    orders.put(first.getOrderId(), newOrder(exec));
                 } else {
-                    doUpdateOrder(exec);
+                    final long id = exec.getOrderId();
+                    Entity order = orders.get(id);
+                    if (order == null) {
+                        order = getOrder(id);
+                        orders.put(id, order);
+                    }
+                    applyExec(order, exec);
                 }
                 doInsertExec(exec);
             }
+            datastore.put(orders.values());
             txn.commit();
         } finally {
             if (txn.isActive()) {

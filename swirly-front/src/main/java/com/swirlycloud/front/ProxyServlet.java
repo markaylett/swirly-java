@@ -115,7 +115,9 @@ public final class ProxyServlet extends HttpServlet {
             resp.setHeader(h.getName(), h.getValue());
         }
         resp.setStatus(modResp.getResponseCode());
-        resp.getOutputStream().write(modResp.getContent());
+        if (modResp.getContent() != null) {
+            resp.getOutputStream().write(modResp.getContent());
+        }
     }
 
     @Override
