@@ -31,15 +31,16 @@ public final class Rest {
         serv = new Serv(model);
     }
 
-    public final synchronized void getRec(StringBuilder sb) {
+    public final synchronized boolean getRec(StringBuilder sb) {
         sb.append("{\"assets\":");
         getRec(sb, RecType.ASSET);
         sb.append(",\"contrs\":");
         getRec(sb, RecType.CONTR);
         sb.append("}");
+        return true;
     }
 
-    public final synchronized void getRec(StringBuilder sb, RecType recType) {
+    public final synchronized boolean getRec(StringBuilder sb, RecType recType) {
         sb.append('[');
         SlNode node = serv.getFirstRec(recType);
         for (int i = 0; node != null; node = node.slNext()) {
@@ -51,6 +52,7 @@ public final class Rest {
             ++i;
         }
         sb.append(']');
+        return true;
     }
 
     public final synchronized boolean getRec(StringBuilder sb, RecType recType, String mnem) {
@@ -68,7 +70,7 @@ public final class Rest {
         user.print(sb, null);
     }
 
-    public final synchronized void getMarket(StringBuilder sb, Integer levels) {
+    public final synchronized boolean getMarket(StringBuilder sb, Integer levels) {
         sb.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -80,9 +82,14 @@ public final class Rest {
             ++i;
         }
         sb.append(']');
+        return true;
     }
 
-    public final synchronized void getMarket(StringBuilder sb, String cmnem, Integer levels) {
+    public final synchronized boolean getMarket(StringBuilder sb, String cmnem, Integer levels) {
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
         sb.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -97,6 +104,7 @@ public final class Rest {
             ++i;
         }
         sb.append(']');
+        return true;
     }
 
     public final synchronized boolean getMarket(StringBuilder sb, String cmnem, int settlDate,
@@ -114,7 +122,7 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized void getAccnt(StringBuilder sb, String email) {
+    public final synchronized boolean getAccnt(StringBuilder sb, String email) {
         sb.append("{\"orders\":");
         getOrder(sb, email);
         sb.append(",\"trades\":");
@@ -122,16 +130,30 @@ public final class Rest {
         sb.append(",\"posns\":");
         getPosn(sb, email);
         sb.append("}");
+        return true;
     }
 
-    public final synchronized void deleteOrder(StringBuilder sb, String email, long id) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
-        final Trans trans = serv.cancelOrder(accnt, id, new Trans());
+    public final synchronized boolean deleteOrder(StringBuilder sb, String email, String cmnem,
+            int settlDate, long id) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final Market market = serv.findMarket(cmnem, settlDay);
+        if (market == null) {
+            return false;
+        }
+        final Trans trans = serv.cancelOrder(accnt, market, id, new Trans());
         trans.print(sb, null);
+        return true;
     }
 
-    public final synchronized void getOrder(StringBuilder sb, String email) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
+    public final synchronized boolean getOrder(StringBuilder sb, String email) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
         sb.append('[');
         RbNode node = accnt.getFirstOrder();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -143,11 +165,21 @@ public final class Rest {
             ++i;
         }
         sb.append(']');
+        return true;
     }
 
-    public final synchronized boolean getOrder(StringBuilder sb, String email, long id) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
-        final Order order = accnt.findOrder(id);
+    public final synchronized boolean getOrder(StringBuilder sb, String email, String cmnem,
+            int settlDate, long id) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final Order order = accnt.findOrder(contr.getId(), settlDay, id);
         if (order == null) {
             return false;
         }
@@ -155,28 +187,47 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized void postOrder(StringBuilder sb, String email, String cmnem,
+    public final synchronized boolean postOrder(StringBuilder sb, String email, String cmnem,
             int settlDate, String ref, Action action, long ticks, long lots, long minLots) {
         final Accnt accnt = serv.getLazyAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
         final Market market = serv.getLazyMarket(cmnem, isoToJd(settlDate));
+        if (market == null) {
+            return false;
+        }
         final Trans trans = serv.placeOrder(accnt, market, ref, action, ticks, lots, minLots,
                 new Trans());
         trans.print(sb, accnt.getUser());
+        return true;
     }
 
-    public final synchronized void putOrder(StringBuilder sb, String email, long id, long lots) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
+    public final synchronized boolean putOrder(StringBuilder sb, String email, String cmnem,
+            int settlDate, long id, long lots) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
+        final Market market = serv.findMarket(cmnem, isoToJd(settlDate));
+        if (market == null) {
+            return false;
+        }
         final Trans trans = new Trans();
         if (lots > 0) {
-            serv.reviseOrder(accnt, id, lots, trans);
+            serv.reviseOrder(accnt, market, id, lots, trans);
         } else {
-            serv.cancelOrder(accnt, id, trans);
+            serv.cancelOrder(accnt, market, id, trans);
         }
         trans.print(sb, null);
+        return true;
     }
 
-    public final synchronized void getTrade(StringBuilder sb, String email) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
+    public final synchronized boolean getTrade(StringBuilder sb, String email) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
         sb.append('[');
         RbNode node = accnt.getFirstTrade();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -187,11 +238,21 @@ public final class Rest {
             trade.print(sb, null);
         }
         sb.append(']');
+        return true;
     }
 
-    public final synchronized boolean getTrade(StringBuilder sb, String email, long id) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
-        final Exec trade = accnt.findTrade(id);
+    public final synchronized boolean getTrade(StringBuilder sb, String email, String cmnem,
+            int settlDate, long id) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final Exec trade = accnt.findTrade(contr.getId(), settlDay, id);
         if (trade == null) {
             return false;
         }
@@ -199,13 +260,26 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized void deleteTrade(StringBuilder sb, String email, long id) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
-        serv.confirmTrade(accnt, id);
+    public final synchronized boolean deleteTrade(StringBuilder sb, String email, String cmnem,
+            int settlDate, long id) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        serv.confirmTrade(accnt, contr.getId(), settlDay, id);
+        return true;
     }
 
-    public final synchronized void getPosn(StringBuilder sb, String email) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
+    public final synchronized boolean getPosn(StringBuilder sb, String email) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
         sb.append('[');
         RbNode node = accnt.getFirstPosn();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -217,10 +291,14 @@ public final class Rest {
             ++i;
         }
         sb.append(']');
+        return true;
     }
 
-    public final synchronized void getPosn(StringBuilder sb, String email, String cmnem) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
+    public final synchronized boolean getPosn(StringBuilder sb, String email, String cmnem) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
         sb.append('[');
         RbNode node = accnt.getFirstPosn();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -235,11 +313,15 @@ public final class Rest {
             ++i;
         }
         sb.append(']');
+        return true;
     }
 
     public final synchronized boolean getPosn(StringBuilder sb, String email, String cmnem,
             int settlDate) {
-        final Accnt accnt = serv.getLazyAccntByEmail(email);
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;

@@ -147,10 +147,10 @@ public final class Serv implements AutoCloseable {
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
         return direct == Direct.PAID
-                // Paid when the taker lifts the offer.
-                ? makerOrder.getTicks() - takerOrder.getTicks()
-                        // Given when the taker hits the bid.
-                        : takerOrder.getTicks() - makerOrder.getTicks();
+        // Paid when the taker lifts the offer.
+        ? makerOrder.getTicks() - takerOrder.getTicks()
+                // Given when the taker hits the bid.
+                : takerOrder.getTicks() - makerOrder.getTicks();
     }
 
     private final void matchOrders(Market market, Order takerOrder, Side side, Direct direct,
@@ -177,7 +177,8 @@ public final class Serv implements AutoCloseable {
             final long makerId = model.allocExecIds(2);
             final long takerId = makerId + 1;
 
-            final Accnt makerAccnt = getLazyAccnt(makerOrder.getUser());
+            final Accnt makerAccnt = findAccnt(makerOrder.getUser());
+            assert makerAccnt != null;
             final Posn makerPosn = makerAccnt.getLazyPosn(contr, settlDay);
 
             final Match match = new Match();
@@ -241,7 +242,8 @@ public final class Serv implements AutoCloseable {
             // Reduce maker.
             market.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
-            final Accnt maker = getLazyAccnt(makerOrder.getUser());
+            final Accnt maker = findAccnt(makerOrder.getUser());
+            assert maker != null; 
             if (makerOrder.isDone()) {
                 maker.removeOrder(makerOrder);
             }
@@ -319,7 +321,7 @@ public final class Serv implements AutoCloseable {
     public final Market getLazyMarket(String mnem, int settlDay) {
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
-            throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
+            return null;
         }
         return getLazyMarket(contr, settlDay);
     }
@@ -331,7 +333,7 @@ public final class Serv implements AutoCloseable {
     public final Market findMarket(String mnem, int settlDay) {
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
-            throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
+            return null;
         }
         return findMarket(contr, settlDay);
     }
@@ -365,7 +367,7 @@ public final class Serv implements AutoCloseable {
     public final Accnt getLazyAccnt(String mnem) {
         final User user = (User) cache.findRec(RecType.USER, mnem);
         if (user == null) {
-            throw new IllegalArgumentException(String.format("invalid user '%s'", mnem));
+            return null;
         }
         return getLazyAccnt(user);
     }
@@ -373,9 +375,29 @@ public final class Serv implements AutoCloseable {
     public final Accnt getLazyAccntByEmail(String email) {
         final User user = emailIdx.find(email);
         if (user == null) {
-            throw new IllegalArgumentException(String.format("invalid user '%s'", email));
+            return null;
         }
         return getLazyAccnt(user);
+    }
+
+    public final Accnt findAccnt(User user) {
+        return (Accnt) accnts.find(user.getId());
+    }
+
+    public final Accnt findAccnt(String mnem) {
+        final User user = (User) cache.findRec(RecType.USER, mnem);
+        if (user == null) {
+            return null;
+        }
+        return findAccnt(user);
+    }
+
+    public final Accnt findAccntByEmail(String email) {
+        final User user = emailIdx.find(email);
+        if (user == null) {
+            return null;
+        }
+        return findAccnt(user);
     }
 
     public final Trans placeOrder(Accnt accnt, Market market, String ref, Action action,
@@ -423,7 +445,7 @@ public final class Serv implements AutoCloseable {
         return trans;
     }
 
-    public final Trans reviseOrder(Accnt accnt, Order order, long lots, Trans trans) {
+    public final Trans reviseOrder(Accnt accnt, Market market, Order order, long lots, Trans trans) {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
@@ -435,8 +457,6 @@ public final class Serv implements AutoCloseable {
                 || lots > order.getLots()) {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
-        final Market market = findMarket(order.getContr(), order.getSettlDay());
-        assert market != null;
 
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
@@ -453,29 +473,30 @@ public final class Serv implements AutoCloseable {
         return trans;
     }
 
-    public final Trans reviseOrder(Accnt accnt, long id, long lots, Trans trans) {
-        final Order order = accnt.findOrder(id);
+    public final Trans reviseOrder(Accnt accnt, Market market, long id, long lots, Trans trans) {
+        final Contr contr = market.getContr();
+        final int settlDay = market.getSettlDay();
+        final Order order = accnt.findOrder(contr.getId(), settlDay, id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
-        return reviseOrder(accnt, order, lots, trans);
+        return reviseOrder(accnt, market, order, lots, trans);
     }
 
-    public final Trans reviseOrder(Accnt accnt, String ref, long lots, Trans trans) {
-        final Order order = accnt.findOrder(ref);
+    public final Trans reviseOrder(Accnt accnt, Market market, String ref, long lots, Trans trans) {
+        final Contr contr = market.getContr();
+        final int settlDay = market.getSettlDay();
+        final Order order = accnt.findOrder(contr.getId(), settlDay, ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
-        return reviseOrder(accnt, order, lots, trans);
+        return reviseOrder(accnt, market, order, lots, trans);
     }
 
-    public final Trans cancelOrder(Accnt accnt, Order order, Trans trans) {
+    public final Trans cancelOrder(Accnt accnt, Market market, Order order, Trans trans) {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
-        final Market market = findMarket(order.getContr(), order.getSettlDay());
-        assert market != null;
-
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.cancel();
@@ -492,24 +513,28 @@ public final class Serv implements AutoCloseable {
         return trans;
     }
 
-    public final Trans cancelOrder(Accnt accnt, long id, Trans trans) {
-        final Order order = accnt.findOrder(id);
+    public final Trans cancelOrder(Accnt accnt, Market market, long id, Trans trans) {
+        final Contr contr = market.getContr();
+        final int settlDay = market.getSettlDay();
+        final Order order = accnt.findOrder(contr.getId(), settlDay, id);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%d'", id));
         }
-        return cancelOrder(accnt, order, trans);
+        return cancelOrder(accnt, market, order, trans);
     }
 
-    public final Trans cancelOrder(Accnt accnt, String ref, Trans trans) {
-        final Order order = accnt.findOrder(ref);
+    public final Trans cancelOrder(Accnt accnt, Market market, String ref, Trans trans) {
+        final Contr contr = market.getContr();
+        final int settlDay = market.getSettlDay();
+        final Order order = accnt.findOrder(contr.getId(), settlDay, ref);
         if (order == null) {
             throw new IllegalArgumentException(String.format("no such order '%s'", ref));
         }
-        return cancelOrder(accnt, order, trans);
+        return cancelOrder(accnt, market, order, trans);
     }
 
-    public final void confirmTrade(Accnt accnt, long id) {
-        final Exec trade = accnt.findTrade(id);
+    public final void confirmTrade(Accnt accnt, long contrId, int settlDay, long id) {
+        final Exec trade = accnt.findTrade(contrId, settlDay, id);
         if (trade == null) {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }

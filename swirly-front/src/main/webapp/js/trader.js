@@ -266,10 +266,8 @@ function ViewModel(contrs) {
         var lots = parseInt(self.lots());
         $.ajax({
             type: 'post',
-            url: '/api/accnt/order/',
+            url: '/api/accnt/order/' + contr.mnem + '/' + settlDate,
             data: JSON.stringify({
-                contr: contr.mnem,
-                settlDate: settlDate,
                 ref: '',
                 action: action,
                 ticks: ticks,
@@ -291,11 +289,14 @@ function ViewModel(contrs) {
         self.submitOrder('SELL');
     };
 
-    self.reviseOrder = function(id) {
+    self.reviseOrder = function(order) {
+        var contr = order.contr().mnem;
+        var settlDate = toDateInt(order.settlDate());
+        var id = order.id();
         var lots = parseInt(self.lots());
         $.ajax({
             type: 'put',
-            url: '/api/accnt/order/' + id,
+            url: '/api/accnt/order/' + contr + '/' + settlDate + '/' + id,
             data: JSON.stringify({
                 lots: lots
             })
@@ -309,16 +310,20 @@ function ViewModel(contrs) {
     self.reviseAll = function() {
         var orders = self.orders();
         for (var i = 0; i < orders.length; ++i) {
-            if (orders[i].isSelected()) {
-                self.reviseOrder(orders[i].id());
+            var order = orders[i];
+            if (order.isSelected()) {
+                self.reviseOrder(order);
             }
         }
     };
 
-    self.cancelOrder = function(id) {
+    self.cancelOrder = function(order) {
+        var contr = order.contr().mnem;
+        var settlDate = toDateInt(order.settlDate());
+        var id = order.id();
         $.ajax({
             type: 'put',
-            url: '/api/accnt/order/' + id,
+            url: '/api/accnt/order/' + contr + '/' + settlDate + '/' + id,
             data: '{"lots":0}'
         }).done(function(raw) {
             self.applyTrans(raw);
@@ -330,16 +335,20 @@ function ViewModel(contrs) {
     self.cancelAll = function() {
         var orders = self.orders();
         for (var i = 0; i < orders.length; ++i) {
-            if (orders[i].isSelected()) {
-                self.cancelOrder(orders[i].id());
+            var order = orders[i];
+            if (order.isSelected()) {
+                self.cancelOrder(order);
             }
         }
     };
 
-    self.confirmTrade = function(id) {
+    self.confirmTrade = function(trade) {
+        var contr = trade.contr().mnem;
+        var settlDate = toDateInt(trade.settlDate());
+        var id = trade.id();
         $.ajax({
             type: 'delete',
-            url: '/api/accnt/trade/' + id
+            url: '/api/accnt/trade/' + contr + '/' + settlDate + '/' + id
         }).done(function(raw) {
             self.removeTrade(id);
         }).fail(function(xhr) {
@@ -350,8 +359,9 @@ function ViewModel(contrs) {
     self.confirmAll = function() {
         var trades = self.trades();
         for (var i = 0; i < trades.length; ++i) {
-            if (trades[i].isSelected()) {
-                self.confirmTrade(trades[i].id());
+            var trade = trades[i];
+            if (trade.isSelected()) {
+                self.confirmTrade(trade);
             }
         }
     };

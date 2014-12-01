@@ -58,8 +58,8 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         }
     }
 
-    public final Order removeOrder(long id) {
-        final RbNode node = orders.find(id);
+    public final Order removeOrder(long contrId, int settlDay, long id) {
+        final RbNode node = orders.find(Order.composeId(contrId, settlDay, id));
         if (node == null) {
             return null;
         }
@@ -76,15 +76,15 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return order;
     }
 
-    public final Order findOrder(long id) {
-        return (Order) orders.find(id);
+    public final Order findOrder(long contrId, int settlDay, long id) {
+        return (Order) orders.find(Order.composeId(contrId, settlDay, id));
     }
 
     /**
      * Returns order directly because hash lookup is not a node-based container.
      */
 
-    public final Order findOrder(String ref) {
+    public final Order findOrder(long contrId, int settlDay, String ref) {
         assert ref != null && !ref.isEmpty();
         return refIdx.find(user.getId(), ref);
     }
@@ -110,8 +110,8 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         trades.remove(trade);
     }
 
-    public final boolean removeTrade(long id) {
-        final RbNode node = trades.find(id);
+    public final boolean removeTrade(long contrId, int settlDay, long id) {
+        final RbNode node = trades.find(Exec.composeId(contrId, settlDay, id));
         if (node == null) {
             return false;
         }
@@ -120,8 +120,8 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return true;
     }
 
-    public final Exec findTrade(long id) {
-        return (Exec) trades.find(id);
+    public final Exec findTrade(long contrId, int settlDay, long id) {
+        return (Exec) trades.find(Exec.composeId(contrId, settlDay, id));
     }
 
     public final RbNode getFirstTrade() {
@@ -163,7 +163,6 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     public final Posn getLazyPosn(Contr contr, int settlDay) {
-
         Posn posn;
         final long key = Posn.composeId(contr.getId(), settlDay, user.getId());
         final RbNode node = posns.pfind(key);

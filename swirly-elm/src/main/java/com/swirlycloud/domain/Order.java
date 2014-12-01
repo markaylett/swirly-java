@@ -20,7 +20,6 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
     transient Order refNext;
     transient RbNode level;
 
-    @SuppressWarnings("unused")
     private final long key;
     private final long id;
     /**
@@ -67,7 +66,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         assert user != null;
         assert contr != null;
         assert lots > 0 && lots >= minLots;
-        if (id >= (1 << 32)) {
+        if (id >= (1L << 32)) {
             throw new IllegalArgumentException("order-id exceeds max-value");
         }
         this.key = composeId(contr.getId(), settlDay, id);
@@ -94,7 +93,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         assert user != null;
         assert contr != null;
         assert lots > 0 && lots >= minLots;
-        if (id >= (1 << 32)) {
+        if (id >= (1L << 32)) {
             throw new IllegalArgumentException("order-id exceeds max-value");
         }
         this.key = composeId(contr.getId(), settlDay, id);
@@ -157,11 +156,11 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
 
     public static long composeId(long contrId, int settlDay, long orderId) {
         // 16 bit contr-id.
-        final int CONTR_MASK = (1 << 16) - 1;
+        final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.
-        final int TJD_MASK = (1 << 16) - 1;
+        final long TJD_MASK = (1L << 16) - 1;
         // 32 bit order-id.
-        final int ORDER_MASK = (1 << 32) - 1;
+        final long ORDER_MASK = (1L << 32) - 1;
 
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);
@@ -205,7 +204,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
 
     @Override
     public final long getKey() {
-        return id;
+        return key;
     }
 
     @Override

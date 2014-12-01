@@ -18,6 +18,9 @@ public final class MarketServlet extends HttpServlet {
 
     private static final Integer DEPTH = Integer.valueOf(5);
 
+    private static final int CMNEM_PART = 0;
+    private static final int SETTL_DATE_PART = 1;
+
     @Override
     public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -36,20 +39,21 @@ public final class MarketServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
+
+        boolean found = false;
         if (parts.length == 0) {
-            ctx.getMarket(sb, DEPTH);
+            found = ctx.getMarket(sb, DEPTH);
         } else if (parts.length == 1) {
-            ctx.getMarket(sb, parts[0], DEPTH);
+            found = ctx.getMarket(sb, parts[CMNEM_PART], DEPTH);
         } else if (parts.length == 2) {
-            if (!ctx.getMarket(sb, parts[0], Integer.parseInt(parts[1]), DEPTH)) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-        } else {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            found = ctx.getMarket(sb, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                    DEPTH);
         }
 
+        if (!found) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");

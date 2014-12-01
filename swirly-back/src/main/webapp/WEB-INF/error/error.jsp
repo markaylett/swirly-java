@@ -5,4 +5,5 @@
    All rights reserved.
 --%>
 <%@ page contentType="application/json;charset=utf-8" isErrorPage="true" language="java"%>
-{"num":500,"msg":"<%=exception.getMessage()%>"}
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+{"num":500,"msg":"${fn:escapeXml(exception.message)}"}

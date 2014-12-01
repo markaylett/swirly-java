@@ -24,6 +24,9 @@ import com.swirlycloud.domain.RecType;
 @SuppressWarnings("serial")
 public final class RecServlet extends HttpServlet {
 
+    private static final int TYPE_PART = 0;
+    private static final int CMNEM_PART = 1;
+
     @Override
     public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -42,49 +45,34 @@ public final class RecServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
+
+        boolean found = false;
         if (parts.length == 0) {
-            rest.getRec(sb);
-        } else if ("asset".equals(parts[0])) {
+            found = rest.getRec(sb);
+        } else if ("asset".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                rest.getRec(sb, RecType.ASSET);
+                found = rest.getRec(sb, RecType.ASSET);
             } else if (parts.length == 2) {
-                if (!rest.getRec(sb, RecType.ASSET, parts[1])) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+                found = rest.getRec(sb, RecType.ASSET, parts[CMNEM_PART]);
             }
-        } else if ("contr".equals(parts[0])) {
+        } else if ("contr".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                rest.getRec(sb, RecType.CONTR);
+                found = rest.getRec(sb, RecType.CONTR);
             } else if (parts.length == 2) {
-                if (!rest.getRec(sb, RecType.CONTR, parts[1])) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+                found = rest.getRec(sb, RecType.CONTR, parts[CMNEM_PART]);
             }
-        } else if ("user".equals(parts[0])) {
+        } else if ("user".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                rest.getRec(sb, RecType.USER);
+                found = rest.getRec(sb, RecType.USER);
             } else if (parts.length == 2) {
-                if (!rest.getRec(sb, RecType.USER, parts[1])) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+                found = rest.getRec(sb, RecType.USER, parts[CMNEM_PART]);
             }
-        } else {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
         }
 
+        if (!found) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
@@ -110,8 +98,9 @@ public final class RecServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
-        if (parts.length != 1 || !"user".equals(parts[0])) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+
+        if (parts.length != 1 || !"user".equals(parts[TYPE_PART])) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 

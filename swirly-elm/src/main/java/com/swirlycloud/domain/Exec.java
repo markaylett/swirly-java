@@ -14,7 +14,6 @@ import com.swirlycloud.util.Printable;
 
 public final class Exec extends BasicRbSlNode implements Identifiable, Printable, Instruct {
 
-    @SuppressWarnings("unused")
     private final long key;
     private final long id;
     private final long orderId;
@@ -62,7 +61,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
             String ref, State state, Action action, long ticks, long lots, long resd, long exec,
             long lastTicks, long lastLots, long minLots, long matchId, Role role,
             Identifiable cpty, long created) {
-        if (id >= (1 << 32)) {
+        if (id >= (1L << 32)) {
             throw new IllegalArgumentException("exec-id exceeds max-value");
         }
         this.key = composeId(contr.getId(), settlDay, id);
@@ -88,10 +87,10 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     }
 
     public Exec(long id, long orderId, Instruct instruct, long created) {
-        if (id >= (1 << 32)) {
+        if (id >= (1L << 32)) {
             throw new IllegalArgumentException("exec-id exceeds max-value");
         }
-        this.key = composeId(contr.getId(), instruct.getSettlDay(), id);
+        this.key = composeId(instruct.getContrId(), instruct.getSettlDay(), id);
         this.id = id;
         this.orderId = orderId;
         this.user = instruct.getUser();
@@ -161,11 +160,11 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
 
     public static long composeId(long contrId, int settlDay, long execId) {
         // 16 bit contr-id.
-        final int CONTR_MASK = (1 << 16) - 1;
+        final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.
-        final int TJD_MASK = (1 << 16) - 1;
+        final long TJD_MASK = (1L << 16) - 1;
         // 32 bit exec-id.
-        final int EXEC_MASK = (1 << 32) - 1;
+        final long EXEC_MASK = (1L << 32) - 1;
 
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);
@@ -203,7 +202,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
 
     @Override
     public final long getKey() {
-        return id;
+        return key;
     }
 
     @Override

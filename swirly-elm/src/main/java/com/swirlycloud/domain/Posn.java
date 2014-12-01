@@ -67,11 +67,11 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
 
     public static long composeId(long contrId, int settlDay, long userId) {
         // 16 bit contr-id.
-        final int CONTR_MASK = (1 << 16) - 1;
+        final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.
-        final int TJD_MASK = (1 << 16) - 1;
+        final long TJD_MASK = (1L << 16) - 1;
         // 32 bit user-id.
-        final int USER_MASK = (1 << 32) - 1;
+        final long USER_MASK = (1L << 32) - 1;
 
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);

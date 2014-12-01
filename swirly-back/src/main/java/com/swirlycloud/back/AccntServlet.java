@@ -24,6 +24,10 @@ import com.google.appengine.api.users.UserServiceFactory;
 
 @SuppressWarnings("serial")
 public final class AccntServlet extends HttpServlet {
+    private static final int TYPE_PART = 0;
+    private static final int CMNEM_PART = 1;
+    private static final int SETTL_DATE_PART = 2;
+    private static final int ID_PART = 3;
 
     @Override
     public final void init(ServletConfig config) throws ServletException {
@@ -57,22 +61,22 @@ public final class AccntServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
-        if ("order".equals(parts[0])) {
-            if (parts.length == 2) {
-                rest.deleteOrder(sb, email, Integer.parseInt(parts[1]));
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+
+        boolean found = false;
+        if ("order".equals(parts[TYPE_PART])) {
+            if (parts.length == 4) {
+                found = rest.deleteOrder(sb, email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
             }
-        } else if ("trade".equals(parts[0])) {
-            if (parts.length == 2) {
-                rest.deleteTrade(sb, email, Integer.parseInt(parts[1]));
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+        } else if ("trade".equals(parts[TYPE_PART])) {
+            if (parts.length == 4) {
+                found = rest.deleteTrade(sb, email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
             }
-        } else {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        }
+
+        if (!found) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         if (sb.length() == 0) {
@@ -104,51 +108,39 @@ public final class AccntServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
+
+        boolean found = false;
         if (parts.length == 0) {
-            rest.getAccnt(sb, email);
-        } else if ("order".equals(parts[0])) {
+            found = rest.getAccnt(sb, email);
+        } else if ("order".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                rest.getOrder(sb, email);
-            } else if (parts.length == 2) {
-                if (!rest.getOrder(sb, email, Integer.parseInt(parts[1]))) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+                found = rest.getOrder(sb, email);
+            } else if (parts.length == 4) {
+                found = rest.getOrder(sb, email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
             }
-        } else if ("trade".equals(parts[0])) {
+        } else if ("trade".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                rest.getTrade(sb, email);
-            } else if (parts.length == 2) {
-                if (!rest.getTrade(sb, email, Integer.parseInt(parts[1]))) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+                found = rest.getTrade(sb, email);
+            } else if (parts.length == 4) {
+                found = rest.getTrade(sb, email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
             }
-        } else if ("posn".equals(parts[0])) {
+        } else if ("posn".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                rest.getPosn(sb, email);
+                found = rest.getPosn(sb, email);
             } else if (parts.length == 2) {
-                rest.getPosn(sb, email, parts[1]);
+                found = rest.getPosn(sb, email, parts[CMNEM_PART]);
             } else if (parts.length == 3) {
-                if (!rest.getPosn(sb, email, parts[1], Integer.parseInt(parts[2]))) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
+                found = rest.getPosn(sb, email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]));
             }
-        } else {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
         }
 
+        if (!found) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
@@ -175,10 +167,12 @@ public final class AccntServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
-        if (parts.length != 1 || !"order".equals(parts[0])) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        if (parts.length != 3 || !"order".equals(parts[TYPE_PART])) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+        final String cmnem = parts[CMNEM_PART];
+        final int settlDate = Integer.parseInt(parts[SETTL_DATE_PART]);
 
         final JSONParser p = new JSONParser();
         final Request r = new Request();
@@ -187,14 +181,15 @@ public final class AccntServlet extends HttpServlet {
         } catch (final ParseException e) {
             throw new IOException(e);
         }
-        if (r.getFields() != (Request.CONTR | Request.SETTL_DATE | Request.REF | Request.ACTION
-                | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
+        if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-
-        rest.postOrder(sb, email, r.getContr(), r.getSettlDate(), r.getRef(), r.getAction(),
-                r.getTicks(), r.getLots(), r.getMinLots());
+        if (!rest.postOrder(sb, email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
+                r.getLots(), r.getMinLots())) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
@@ -221,11 +216,13 @@ public final class AccntServlet extends HttpServlet {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
-        if (parts.length != 2 || !"order".equals(parts[0])) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        if (parts.length != 4 || !"order".equals(parts[TYPE_PART])) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        final long id = Integer.parseInt(parts[1]);
+        final String cmnem = parts[CMNEM_PART];
+        final int settlDate = Integer.parseInt(parts[SETTL_DATE_PART]);
+        final long id = Long.parseLong(parts[ID_PART]);
 
         final JSONParser p = new JSONParser();
         final Request r = new Request();
@@ -238,7 +235,10 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        rest.putOrder(sb, email, id, r.getLots());
+        if (!rest.putOrder(sb, email, cmnem, settlDate, id, r.getLots())) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");

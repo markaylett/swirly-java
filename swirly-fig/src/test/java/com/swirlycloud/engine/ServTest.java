@@ -7,6 +7,7 @@ package com.swirlycloud.engine;
 
 import static com.swirlycloud.util.Date.ymdToJd;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
@@ -20,8 +21,11 @@ public final class ServTest {
     public final void test() {
         try (final Serv s = new Serv(new MockModel())) {
             final Accnt accnt = s.getLazyAccnt("MARAYL");
+            assertNotNull(accnt);
+
             final int settlDay = ymdToJd(2014, 3, 14);
             final Market market = s.getLazyMarket("EURUSD", settlDay);
+            assertNotNull(market);
 
             final Trans trans = new Trans();
             final Order order = s.placeOrder(accnt, market, "", Action.BUY, 12345, 5, 1, trans)
@@ -41,7 +45,7 @@ public final class ServTest {
             assertEquals(1, order.getMinLots());
             assertEquals(order.getCreated(), order.getModified());
 
-            s.reviseOrder(accnt, order, 4, trans);
+            s.reviseOrder(accnt, market, order, 4, trans);
             assertEquals(accnt.getUser(), order.getUser());
             assertEquals(market.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());

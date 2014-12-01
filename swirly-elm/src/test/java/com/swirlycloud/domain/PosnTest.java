@@ -23,7 +23,7 @@ public final class PosnTest {
         posn.setSellLicks(3);
         posn.setSellLots(4);
         assertEquals(
-                "{\"id\":1099512430939,\"user\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyLicks\":1,\"buyLots\":2,\"sellLicks\":3,\"sellLots\":4}",
+                "{\"id\":3449558818357249,\"user\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyLicks\":1,\"buyLots\":2,\"sellLicks\":3,\"sellLots\":4}",
                 posn.toString());
     }
 }
