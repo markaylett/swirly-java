@@ -5,11 +5,9 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-
-import com.swirlycloud.util.List;
 
 public final class ListTest {
     @Test

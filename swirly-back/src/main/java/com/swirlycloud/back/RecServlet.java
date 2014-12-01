@@ -19,7 +19,7 @@ import org.json.simple.parser.ParseException;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.swirlycloud.domain.Kind;
+import com.swirlycloud.domain.RecType;
 
 @SuppressWarnings("serial")
 public final class RecServlet extends HttpServlet {
@@ -46,9 +46,9 @@ public final class RecServlet extends HttpServlet {
             rest.getRec(sb);
         } else if ("asset".equals(parts[0])) {
             if (parts.length == 1) {
-                rest.getRec(sb, Kind.ASSET);
+                rest.getRec(sb, RecType.ASSET);
             } else if (parts.length == 2) {
-                if (!rest.getRec(sb, Kind.ASSET, parts[1])) {
+                if (!rest.getRec(sb, RecType.ASSET, parts[1])) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -58,9 +58,9 @@ public final class RecServlet extends HttpServlet {
             }
         } else if ("contr".equals(parts[0])) {
             if (parts.length == 1) {
-                rest.getRec(sb, Kind.CONTR);
+                rest.getRec(sb, RecType.CONTR);
             } else if (parts.length == 2) {
-                if (!rest.getRec(sb, Kind.CONTR, parts[1])) {
+                if (!rest.getRec(sb, RecType.CONTR, parts[1])) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -70,9 +70,9 @@ public final class RecServlet extends HttpServlet {
             }
         } else if ("user".equals(parts[0])) {
             if (parts.length == 1) {
-                rest.getRec(sb, Kind.USER);
+                rest.getRec(sb, RecType.USER);
             } else if (parts.length == 2) {
-                if (!rest.getRec(sb, Kind.USER, parts[1])) {
+                if (!rest.getRec(sb, RecType.USER, parts[1])) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
                 }
@@ -119,7 +119,7 @@ public final class RecServlet extends HttpServlet {
         final Request r = new Request();
         try {
             p.parse(req.getReader(), r);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new IOException(e);
         }
         if (r.getFields() != (Request.MNEM | Request.DISPLAY)) {

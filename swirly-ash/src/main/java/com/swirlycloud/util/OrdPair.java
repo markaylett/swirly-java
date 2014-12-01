@@ -9,7 +9,7 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable
 public final class OrdPair<T extends Comparable<? super T>, U extends Comparable<? super U>>
-        extends EqPair<T, U> implements Comparable<OrdPair<T, U>> {
+extends EqPair<T, U> implements Comparable<OrdPair<T, U>> {
 
     public OrdPair(T first, U second) {
         super(first, second);

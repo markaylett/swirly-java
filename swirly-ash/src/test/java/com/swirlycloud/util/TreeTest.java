@@ -5,12 +5,14 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-
-import com.swirlycloud.util.BasicRbNode;
-import com.swirlycloud.util.Tree;
 
 public final class TreeTest {
     private static final class Node extends BasicRbNode {

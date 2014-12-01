@@ -5,11 +5,10 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-
-import com.swirlycloud.util.Queue;
 
 public final class QueueTest {
     @Test

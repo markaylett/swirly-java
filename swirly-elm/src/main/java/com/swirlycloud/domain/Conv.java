@@ -61,8 +61,9 @@ public final class Conv {
         int dp;
         for (dp = 0; dp < 9; ++dp) {
             final double fp = d % 1.0;
-            if (fp < 0.000000001)
+            if (fp < 0.000000001) {
                 break;
+            }
             d *= 10;
         }
         return dp;

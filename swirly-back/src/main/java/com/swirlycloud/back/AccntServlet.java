@@ -184,7 +184,7 @@ public final class AccntServlet extends HttpServlet {
         final Request r = new Request();
         try {
             p.parse(req.getReader(), r);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new IOException(e);
         }
         if (r.getFields() != (Request.CONTR | Request.SETTL_DATE | Request.REF | Request.ACTION
@@ -231,7 +231,7 @@ public final class AccntServlet extends HttpServlet {
         final Request r = new Request();
         try {
             p.parse(req.getReader(), r);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new IOException(e);
         }
         if (r.getFields() != Request.LOTS) {

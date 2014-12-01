@@ -52,7 +52,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     private long matchId;
     private Role role;
     private Identifiable cpty;
-    private long created;
+    private final long created;
 
     private static String getRecMnem(Identifiable iden) {
         return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());

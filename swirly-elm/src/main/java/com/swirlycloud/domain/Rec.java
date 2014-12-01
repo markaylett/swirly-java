@@ -13,13 +13,13 @@ import com.swirlycloud.util.Printable;
 public abstract class Rec extends BasicSlNode implements Identifiable, Memorable, Printable {
     private transient Rec idNext;
     private transient Rec mnemNext;
-    protected final Kind kind;
+    protected final RecType recType;
     protected final long id;
     protected final String mnem;
     protected final String display;
 
-    public Rec(Kind kind, long id, String mnem, String display) {
-        this.kind = kind;
+    public Rec(RecType recType, long id, String mnem, String display) {
+        this.recType = recType;
         this.id = id;
         this.mnem = mnem;
         this.display = display;
@@ -41,8 +41,8 @@ public abstract class Rec extends BasicSlNode implements Identifiable, Memorable
         return mnemNext;
     }
 
-    public final Kind getKind() {
-        return kind;
+    public final RecType getRecType() {
+        return recType;
     }
 
     @Override

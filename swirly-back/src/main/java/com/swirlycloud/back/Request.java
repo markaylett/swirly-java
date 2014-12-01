@@ -64,53 +64,63 @@ public final class Request implements ContentHandler {
     @Override
     public final boolean primitive(Object value) throws ParseException, IOException {
         if ("mnem".equals(key)) {
-            if (!(value instanceof String) || (fields & MNEM) != 0)
+            if (!(value instanceof String) || (fields & MNEM) != 0) {
                 return false;
+            }
             fields |= MNEM;
             mnem = (String) value;
         } else if ("display".equals(key)) {
-            if (!(value instanceof String) || (fields & DISPLAY) != 0)
+            if (!(value instanceof String) || (fields & DISPLAY) != 0) {
                 return false;
+            }
             fields |= DISPLAY;
             display = (String) value;
         } else if ("id".equals(key)) {
-            if (!(value instanceof Long) || (fields & ID) != 0)
+            if (!(value instanceof Long) || (fields & ID) != 0) {
                 return false;
+            }
             fields |= ID;
             id = (Long) value;
         } else if ("contr".equals(key)) {
-            if (!(value instanceof String) || (fields & CONTR) != 0)
+            if (!(value instanceof String) || (fields & CONTR) != 0) {
                 return false;
+            }
             fields |= CONTR;
             contr = (String) value;
         } else if ("settlDate".equals(key)) {
-            if (!(value instanceof Long) || (fields & SETTL_DATE) != 0)
+            if (!(value instanceof Long) || (fields & SETTL_DATE) != 0) {
                 return false;
+            }
             fields |= SETTL_DATE;
             settlDate = ((Long) value).intValue();
         } else if ("ref".equals(key)) {
-            if (!(value instanceof String) || (fields & REF) != 0)
+            if (!(value instanceof String) || (fields & REF) != 0) {
                 return false;
+            }
             fields |= REF;
             ref = (String) value;
         } else if ("action".equals(key)) {
-            if (!(value instanceof String) || (fields & ACTION) != 0)
+            if (!(value instanceof String) || (fields & ACTION) != 0) {
                 return false;
+            }
             fields |= ACTION;
             action = Action.valueOf((String) value);
         } else if ("ticks".equals(key)) {
-            if (!(value instanceof Long) || (fields & TICKS) != 0)
+            if (!(value instanceof Long) || (fields & TICKS) != 0) {
                 return false;
+            }
             fields |= TICKS;
             ticks = (Long) value;
         } else if ("lots".equals(key)) {
-            if (!(value instanceof Long) || (fields & LOTS) != 0)
+            if (!(value instanceof Long) || (fields & LOTS) != 0) {
                 return false;
+            }
             fields |= LOTS;
             lots = (Long) value;
         } else if ("minLots".equals(key)) {
-            if (!(value instanceof Long) || (fields & MIN_LOTS) != 0)
+            if (!(value instanceof Long) || (fields & MIN_LOTS) != 0) {
                 return false;
+            }
             fields |= MIN_LOTS;
             minLots = (Long) value;
         } else {

@@ -13,10 +13,10 @@ import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Direct;
 import com.swirlycloud.domain.EmailIdx;
 import com.swirlycloud.domain.Exec;
-import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.domain.RecType;
 import com.swirlycloud.domain.RefIdx;
 import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.Side;
@@ -39,21 +39,21 @@ public final class Serv implements AutoCloseable {
     private final Tree accnts = new Tree();
 
     private final void enrichOrder(Order order) {
-        final User user = (User) cache.findRec(Kind.USER, order.getUserId());
-        final Contr contr = (Contr) cache.findRec(Kind.CONTR, order.getContrId());
+        final User user = (User) cache.findRec(RecType.USER, order.getUserId());
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, order.getContrId());
         order.enrich(user, contr);
     }
 
     private final void enrichTrade(Exec trade) {
-        final User user = (User) cache.findRec(Kind.USER, trade.getUserId());
-        final Contr contr = (Contr) cache.findRec(Kind.CONTR, trade.getContrId());
-        final User cpty = (User) cache.findRec(Kind.USER, trade.getCptyId());
+        final User user = (User) cache.findRec(RecType.USER, trade.getUserId());
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, trade.getContrId());
+        final User cpty = (User) cache.findRec(RecType.USER, trade.getCptyId());
         trade.enrich(user, contr, cpty);
     }
 
     private final void enrichPosn(Posn posn) {
-        final User user = (User) cache.findRec(Kind.USER, posn.getUserId());
-        final Contr contr = (Contr) cache.findRec(Kind.CONTR, posn.getContrId());
+        final User user = (User) cache.findRec(RecType.USER, posn.getUserId());
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, posn.getContrId());
         posn.enrich(user, contr);
     }
 
@@ -136,21 +136,21 @@ public final class Serv implements AutoCloseable {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new IllegalArgumentException(String.format("invalid mnem '%s'", mnem));
         }
-        final long userId = model.allocIds(Kind.USER, 1);
+        final long userId = model.allocUserIds(1);
         return new User(userId, mnem, display, email);
     }
 
     private final Exec newExec(Order order, long now) {
-        final long execId = model.allocIds(Kind.EXEC, 1);
+        final long execId = model.allocExecIds(1);
         return new Exec(execId, order.getId(), order, now);
     }
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
         return direct == Direct.PAID
-        // Paid when the taker lifts the offer.
-        ? makerOrder.getTicks() - takerOrder.getTicks()
-                // Given when the taker hits the bid.
-                : takerOrder.getTicks() - makerOrder.getTicks();
+                // Paid when the taker lifts the offer.
+                ? makerOrder.getTicks() - takerOrder.getTicks()
+                        // Given when the taker hits the bid.
+                        : takerOrder.getTicks() - makerOrder.getTicks();
     }
 
     private final void matchOrders(Market market, Order takerOrder, Side side, Direct direct,
@@ -170,10 +170,11 @@ public final class Serv implements AutoCloseable {
             final Order makerOrder = (Order) node;
 
             // Only consider orders while prices cross.
-            if (spread(takerOrder, makerOrder, direct) > 0)
+            if (spread(takerOrder, makerOrder, direct) > 0) {
                 break;
+            }
 
-            final long makerId = model.allocIds(Kind.EXEC, 2);
+            final long makerId = model.allocExecIds(2);
             final long takerId = makerId + 1;
 
             final Accnt makerAccnt = getLazyAccnt(makerOrder.getUser());
@@ -263,7 +264,7 @@ public final class Serv implements AutoCloseable {
         insertTrades();
         insertPosns();
         // Build email index.
-        for (SlNode node = cache.getFirstRec(Kind.USER); node != null; node = node.slNext()) {
+        for (SlNode node = cache.getFirstRec(RecType.USER); node != null; node = node.slNext()) {
             final User user = (User) node;
             emailIdx.insert(user);
         }
@@ -281,20 +282,20 @@ public final class Serv implements AutoCloseable {
         return user;
     }
 
-    public final Rec findRec(Kind kind, long id) {
-        return cache.findRec(kind, id);
+    public final Rec findRec(RecType recType, long id) {
+        return cache.findRec(recType, id);
     }
 
-    public final Rec findRec(Kind kind, String mnem) {
-        return cache.findRec(kind, mnem);
+    public final Rec findRec(RecType recType, String mnem) {
+        return cache.findRec(recType, mnem);
     }
 
-    public final SlNode getFirstRec(Kind kind) {
-        return cache.getFirstRec(kind);
+    public final SlNode getFirstRec(RecType recType) {
+        return cache.getFirstRec(recType);
     }
 
-    public final boolean isEmptyRec(Kind kind) {
-        return cache.isEmptyRec(kind);
+    public final boolean isEmptyRec(RecType recType) {
+        return cache.isEmptyRec(recType);
     }
 
     public final User findUserByEmail(String email) {
@@ -316,7 +317,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Market getLazyMarket(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }
@@ -328,7 +329,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Market findMarket(String mnem, int settlDay) {
-        final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }
@@ -362,7 +363,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Accnt getLazyAccnt(String mnem) {
-        final User user = (User) cache.findRec(Kind.USER, mnem);
+        final User user = (User) cache.findRec(RecType.USER, mnem);
         if (user == null) {
             throw new IllegalArgumentException(String.format("invalid user '%s'", mnem));
         }
@@ -383,7 +384,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
         final long now = System.currentTimeMillis();
-        final long orderId = model.allocIds(Kind.ORDER, 1);
+        final long orderId = model.allocOrderIds(1);
         final Contr contr = market.getContr();
         final int settlDay = market.getSettlDay();
         final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,

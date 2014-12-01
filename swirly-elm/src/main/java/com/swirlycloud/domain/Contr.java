@@ -27,7 +27,7 @@ public final class Contr extends Rec {
     public Contr(long id, String mnem, String display, AssetType assetType, String asset,
             String ccy, int tickNumer, int tickDenom, int lotNumer, int lotDenom, int pipDp,
             long minLots, long maxLots) {
-        super(Kind.CONTR, id, mnem, display);
+        super(RecType.CONTR, id, mnem, display);
         if (id >= (1 << 16)) {
             throw new IllegalArgumentException("contr-id exceeds max-value");
         }

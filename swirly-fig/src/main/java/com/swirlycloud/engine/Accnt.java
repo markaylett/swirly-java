@@ -45,21 +45,24 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     public final void insertOrder(Order order) {
         final RbNode node = orders.insert(order);
         assert node == order;
-        if (!order.getRef().isEmpty())
+        if (!order.getRef().isEmpty()) {
             refIdx.insert(order);
+        }
     }
 
     public final void removeOrder(Order order) {
         assert user.getId() == order.getUserId();
         orders.remove(order);
-        if (!order.getRef().isEmpty())
+        if (!order.getRef().isEmpty()) {
             refIdx.remove(user.getId(), order.getRef());
+        }
     }
 
     public final Order removeOrder(long id) {
         final RbNode node = orders.find(id);
-        if (node == null)
+        if (node == null) {
             return null;
+        }
         final Order order = (Order) node;
         removeOrder(order);
         return order;
@@ -109,8 +112,9 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
     public final boolean removeTrade(long id) {
         final RbNode node = trades.find(id);
-        if (node == null)
+        if (node == null) {
             return false;
+        }
 
         trades.remove(node);
         return true;

@@ -9,7 +9,7 @@ public final class Asset extends Rec {
     private final AssetType type;
 
     public Asset(long id, String mnem, String display, AssetType type) {
-        super(Kind.ASSET, id, mnem, display);
+        super(RecType.ASSET, id, mnem, display);
         this.type = type;
     }
 

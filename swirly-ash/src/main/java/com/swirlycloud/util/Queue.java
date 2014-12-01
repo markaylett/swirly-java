@@ -30,17 +30,19 @@ public final class Queue {
         }
         final SlNode node = first;
         first = first.slNext();
-        if (isEmpty())
+        if (isEmpty()) {
             last = null;
+        }
         return node;
     }
 
     public final void join(Queue rhs) {
         if (!rhs.isEmpty()) {
-            if (!isEmpty())
+            if (!isEmpty()) {
                 last.setSlNext(rhs.first);
-            else
+            } else {
                 first = rhs.first;
+            }
             last = rhs.last;
         }
     }

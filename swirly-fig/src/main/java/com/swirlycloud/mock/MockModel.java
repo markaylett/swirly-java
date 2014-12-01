@@ -5,12 +5,9 @@
  *******************************************************************************/
 package com.swirlycloud.mock;
 
-import java.util.Arrays;
-
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Exec;
-import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.User;
@@ -18,17 +15,28 @@ import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
 
 public final class MockModel implements Model {
-    private final long[] arr;
+    private long maxUserId = 0;
+    private long maxOrderId = 0;
+    private long maxExecId = 0;
 
-    public MockModel() {
-        arr = new long[Kind.values().length];
-        Arrays.fill(arr, 1);
+    @Override
+    public final long allocUserIds(long num) {
+        final long nextId = maxUserId + 1;
+        maxUserId += num;
+        return nextId;
     }
 
     @Override
-    public final long allocIds(Kind kind, long num) {
-        final long nextId = arr[kind.ordinal()];
-        arr[kind.ordinal()] += num;
+    public final long allocOrderIds(long num) {
+        final long nextId = maxOrderId + 1;
+        maxOrderId += num;
+        return nextId;
+    }
+
+    @Override
+    public final long allocExecIds(long num) {
+        final long nextId = maxExecId + 1;
+        maxExecId += num;
         return nextId;
     }
 

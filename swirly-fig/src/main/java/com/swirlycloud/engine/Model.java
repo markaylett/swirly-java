@@ -8,7 +8,6 @@ package com.swirlycloud.engine;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Exec;
-import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.User;
@@ -19,7 +18,17 @@ public interface Model {
     /**
      * Allocate contiguous sequence of identifiers and return the first.
      */
-    long allocIds(Kind kind, long num);
+    long allocUserIds(long num);
+
+    /**
+     * Allocate contiguous sequence of identifiers and return the first.
+     */
+    long allocOrderIds(long num);
+
+    /**
+     * Allocate contiguous sequence of identifiers and return the first.
+     */
+    long allocExecIds(long num);
 
     void insertUser(User user);
 

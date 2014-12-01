@@ -10,8 +10,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.domain.Action;
-import com.swirlycloud.domain.Order;
 import com.swirlycloud.mock.MockContr;
 import com.swirlycloud.mock.MockUser;
 

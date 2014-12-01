@@ -10,7 +10,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.domain.Posn;
 import com.swirlycloud.mock.MockContr;
 import com.swirlycloud.mock.MockUser;
 

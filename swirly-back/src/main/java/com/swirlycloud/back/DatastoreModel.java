@@ -28,7 +28,6 @@ import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Exec;
-import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Role;
@@ -45,14 +44,14 @@ public final class DatastoreModel implements Model {
 
     private static final String GROUP_KIND = "Group";
     @SuppressWarnings("unused")
-    private static final String ASSET_KIND = Kind.ASSET.camelName();
+    private static final String ASSET_KIND = "Asset";
     @SuppressWarnings("unused")
-    private static final String CONTR_KIND = Kind.CONTR.camelName();
-    private static final String USER_KIND = Kind.USER.camelName();
+    private static final String CONTR_KIND = "Contr";
+    private static final String USER_KIND = "User";
     private static final String USER_MNEM_KIND = "UserMnem";
     private static final String USER_EMAIL_KIND = "UserEmail";
-    private static final String ORDER_KIND = Kind.ORDER.camelName();
-    private static final String EXEC_KIND = Kind.EXEC.camelName();
+    private static final String ORDER_KIND = "Order";
+    private static final String EXEC_KIND = "Exec";
     private static final String MARKET_KIND = "Market";
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -176,8 +175,20 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final long allocIds(Kind kind, long num) {
-        final KeyRange range = datastore.allocateIds(kind.camelName(), num);
+    public final long allocUserIds(long num) {
+        final KeyRange range = datastore.allocateIds(USER_KIND, num);
+        return range.getStart().getId();
+    }
+
+    @Override
+    public final long allocOrderIds(long num) {
+        final KeyRange range = datastore.allocateIds(ORDER_KIND, num);
+        return range.getStart().getId();
+    }
+
+    @Override
+    public final long allocExecIds(long num) {
+        final KeyRange range = datastore.allocateIds(EXEC_KIND, num);
         return range.getStart().getId();
     }
 

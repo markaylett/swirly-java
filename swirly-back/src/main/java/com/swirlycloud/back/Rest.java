@@ -10,10 +10,10 @@ import static com.swirlycloud.util.Date.isoToJd;
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Exec;
-import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.domain.RecType;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Accnt;
 import com.swirlycloud.engine.Market;
@@ -33,15 +33,15 @@ public final class Rest {
 
     public final synchronized void getRec(StringBuilder sb) {
         sb.append("{\"assets\":");
-        getRec(sb, Kind.ASSET);
+        getRec(sb, RecType.ASSET);
         sb.append(",\"contrs\":");
-        getRec(sb, Kind.CONTR);
+        getRec(sb, RecType.CONTR);
         sb.append("}");
     }
 
-    public final synchronized void getRec(StringBuilder sb, Kind kind) {
+    public final synchronized void getRec(StringBuilder sb, RecType recType) {
         sb.append('[');
-        SlNode node = serv.getFirstRec(kind);
+        SlNode node = serv.getFirstRec(recType);
         for (int i = 0; node != null; node = node.slNext()) {
             final Rec rec = (Rec) node;
             if (i > 0) {
@@ -53,8 +53,8 @@ public final class Rest {
         sb.append(']');
     }
 
-    public final synchronized boolean getRec(StringBuilder sb, Kind kind, String mnem) {
-        final Rec rec = serv.findRec(kind, mnem);
+    public final synchronized boolean getRec(StringBuilder sb, RecType recType, String mnem) {
+        final Rec rec = serv.findRec(recType, mnem);
         if (rec == null) {
             return false;
         }
@@ -101,7 +101,7 @@ public final class Rest {
 
     public final synchronized boolean getMarket(StringBuilder sb, String cmnem, int settlDate,
             Integer levels) {
-        final Contr contr = (Contr) serv.findRec(Kind.CONTR, cmnem);
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
         }
@@ -240,7 +240,7 @@ public final class Rest {
     public final synchronized boolean getPosn(StringBuilder sb, String email, String cmnem,
             int settlDate) {
         final Accnt accnt = serv.getLazyAccntByEmail(email);
-        final Contr contr = (Contr) serv.findRec(Kind.CONTR, cmnem);
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
         }

@@ -5,13 +5,13 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
-import com.swirlycloud.back.Request;
 import com.swirlycloud.domain.Action;
 
 public final class RequestTest {

@@ -5,8 +5,9 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
-import java.util.Collection;
 import static java.util.Collections.binarySearch;
+
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,7 +15,7 @@ import java.util.LinkedList;
 /**
  * A sorted and unique set of elements. Although this collection could be considered a
  * {@link java.util.List} or {@link java.util.Set}, neither interface is currently implemented.
- * 
+ *
  * @author Mark Aylett
  * @param <T>
  *            element type.

@@ -40,7 +40,7 @@ public final class ProxyServlet extends HttpServlet {
 
     /**
      * Generate equivalent URL for target module.
-     * 
+     *
      * @param req
      *            The original request.
      * @param module
@@ -63,7 +63,7 @@ public final class ProxyServlet extends HttpServlet {
         }
         try {
             return new URL(sb.toString());
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw new IOException(e);
         }
     }
@@ -84,7 +84,7 @@ public final class ProxyServlet extends HttpServlet {
         if (len <= 0) {
             return;
         }
-        byte[] arr = new byte[len];
+        final byte[] arr = new byte[len];
         try (final InputStream is = req.getInputStream()) {
             int off = 0;
             do {
@@ -111,7 +111,7 @@ public final class ProxyServlet extends HttpServlet {
         final HTTPResponse modResp = URLFetchServiceFactory.getURLFetchService().fetch(modReq);
 
         // Send module response to client.
-        for (HTTPHeader h : modResp.getHeaders()) {
+        for (final HTTPHeader h : modResp.getHeaders()) {
             resp.setHeader(h.getName(), h.getValue());
         }
         resp.setStatus(modResp.getResponseCode());

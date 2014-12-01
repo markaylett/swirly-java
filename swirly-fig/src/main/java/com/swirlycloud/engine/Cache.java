@@ -5,8 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
-import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.domain.RecType;
 import com.swirlycloud.util.Queue;
 import com.swirlycloud.util.SlNode;
 
@@ -15,9 +15,9 @@ public final class Cache {
     private static int MNEM = 1;
     private static int COLS = 2;
     private final int nBuckets;
-    private Queue assets;
-    private Queue contrs;
-    private Queue users;
+    private final Queue assets;
+    private final Queue contrs;
+    private final Queue users;
     private final Rec[][] buckets;
 
     private static int hashCode(long id) {
@@ -45,14 +45,14 @@ public final class Cache {
     }
 
     private final void insertId(Rec rec) {
-        final int bucket = indexFor(hashCode(rec.getKind().intValue(), rec.getId()), nBuckets);
+        final int bucket = indexFor(hashCode(rec.getRecType().intValue(), rec.getId()), nBuckets);
         final Rec first = buckets[bucket][ID];
         rec.setIdNext(first);
         buckets[bucket][ID] = rec;
     }
 
     private final void insertMnem(Rec rec) {
-        final int bucket = indexFor(hashCode(rec.getKind().intValue(), rec.getMnem()), nBuckets);
+        final int bucket = indexFor(hashCode(rec.getRecType().intValue(), rec.getMnem()), nBuckets);
         final Rec first = buckets[bucket][MNEM];
         rec.setMnemNext(first);
         buckets[bucket][MNEM] = rec;
@@ -68,7 +68,7 @@ public final class Cache {
     }
 
     public final void insertRec(Rec rec) {
-        switch (rec.getKind()) {
+        switch (rec.getRecType()) {
         case ASSET:
             assets.insertBack(rec);
             break;
@@ -85,27 +85,29 @@ public final class Cache {
         insertMnem(rec);
     }
 
-    public final Rec findRec(Kind kind, long id) {
-        final int bucket = indexFor(hashCode(kind.intValue(), id), nBuckets);
+    public final Rec findRec(RecType recType, long id) {
+        final int bucket = indexFor(hashCode(recType.intValue(), id), nBuckets);
         for (Rec rec = buckets[bucket][ID]; rec != null; rec = rec.idNext()) {
-            if (rec.getKind() == kind && rec.getId() == id)
+            if (rec.getRecType() == recType && rec.getId() == id) {
                 return rec;
+            }
         }
         return null;
     }
 
-    public final Rec findRec(Kind kind, String mnem) {
-        final int bucket = indexFor(hashCode(kind.intValue(), mnem), nBuckets);
+    public final Rec findRec(RecType recType, String mnem) {
+        final int bucket = indexFor(hashCode(recType.intValue(), mnem), nBuckets);
         for (Rec rec = buckets[bucket][MNEM]; rec != null; rec = rec.mnemNext()) {
-            if (rec.getKind() == kind && rec.getMnem().equals(mnem))
+            if (rec.getRecType() == recType && rec.getMnem().equals(mnem)) {
                 return rec;
+            }
         }
         return null;
     }
 
-    public final SlNode getFirstRec(Kind kind) {
+    public final SlNode getFirstRec(RecType recType) {
         SlNode first = null;
-        switch (kind) {
+        switch (recType) {
         case ASSET:
             first = assets.getFirst();
             break;
@@ -121,7 +123,7 @@ public final class Cache {
         return first;
     }
 
-    public final boolean isEmptyRec(Kind kind) {
-        return getFirstRec(kind) == null;
+    public final boolean isEmptyRec(RecType recType) {
+        return getFirstRec(recType) == null;
     }
 }

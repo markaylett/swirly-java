@@ -10,13 +10,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.domain.Action;
-import com.swirlycloud.domain.Contr;
-import com.swirlycloud.domain.Level;
-import com.swirlycloud.domain.Order;
-import com.swirlycloud.domain.Side;
-import com.swirlycloud.domain.State;
-import com.swirlycloud.domain.User;
 import com.swirlycloud.mock.MockContr;
 import com.swirlycloud.mock.MockUser;
 import com.swirlycloud.util.DlNode;
@@ -25,15 +18,17 @@ import com.swirlycloud.util.RbNode;
 public final class SideTest {
     private static final int size(RbNode node) {
         int n = 0;
-        for (; node != null; node = node.rbNext())
+        for (; node != null; node = node.rbNext()) {
             ++n;
+        }
         return n;
     }
 
     private static final int size(DlNode node) {
         int n = 0;
-        for (; !node.isEnd(); node = node.dlNext())
+        for (; !node.isEnd(); node = node.dlNext()) {
             ++n;
+        }
         return n;
     }
 
@@ -138,7 +133,7 @@ public final class SideTest {
 
     @Test
     public final void testLevels() {
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         final Contr contr = MockContr.newContr("EURUSD");
         final User user = MockUser.newUser("MARAYL");
         // Two orders at the same price level.

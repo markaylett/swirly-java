@@ -13,7 +13,7 @@ public final class User extends Rec {
     private final String email;
 
     public User(long id, String mnem, String display, String email) {
-        super(Kind.USER, id, mnem, display);
+        super(RecType.USER, id, mnem, display);
         this.email = email;
     }
 

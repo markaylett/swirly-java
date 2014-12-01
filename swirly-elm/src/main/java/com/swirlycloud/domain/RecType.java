@@ -5,40 +5,26 @@
  *******************************************************************************/
 package com.swirlycloud.domain;
 
-public enum Kind {
+public enum RecType {
     /**
      * Asset.
      */
-    ASSET(1, "Asset"),
+    ASSET(1),
     /**
      * Contract.
      */
-    CONTR(2, "Contr"),
+    CONTR(2),
     /**
      * User.
      */
-    USER(3, "User"),
-    /**
-     * Order.
-     */
-    ORDER(4, "Order"),
-    /**
-     * Execution.
-     */
-    EXEC(5, "Exec");
+    USER(3);
     private final int value;
-    private final String camelName;
 
-    private Kind(int value, String camelName) {
+    private RecType(int value) {
         this.value = value;
-        this.camelName = camelName;
     }
 
     public final int intValue() {
         return this.value;
-    }
-
-    public final String camelName() {
-        return camelName;
     }
 }

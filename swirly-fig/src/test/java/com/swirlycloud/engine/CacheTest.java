@@ -5,17 +5,18 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
-import com.swirlycloud.domain.Kind;
 import com.swirlycloud.domain.Rec;
+import com.swirlycloud.domain.RecType;
 import com.swirlycloud.domain.User;
-import com.swirlycloud.engine.Cache;
-import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.mock.MockModel;
 
@@ -25,12 +26,12 @@ public final class CacheTest {
     @Test
     public final void testEmpty() {
         final Cache c = new Cache(257);
-        assertTrue(c.isEmptyRec(Kind.ASSET));
-        assertTrue(c.isEmptyRec(Kind.CONTR));
-        assertTrue(c.isEmptyRec(Kind.USER));
-        assertNull(c.getFirstRec(Kind.ASSET));
-        assertNull(c.getFirstRec(Kind.CONTR));
-        assertNull(c.getFirstRec(Kind.USER));
+        assertTrue(c.isEmptyRec(RecType.ASSET));
+        assertTrue(c.isEmptyRec(RecType.CONTR));
+        assertTrue(c.isEmptyRec(RecType.USER));
+        assertNull(c.getFirstRec(RecType.ASSET));
+        assertNull(c.getFirstRec(RecType.CONTR));
+        assertNull(c.getFirstRec(RecType.USER));
     }
 
     @Test
@@ -42,11 +43,11 @@ public final class CacheTest {
                 c.insertRec(arg);
             }
         });
-        assertFalse(c.isEmptyRec(Kind.ASSET));
-        assertEquals("AUD", ((Rec) c.getFirstRec(Kind.ASSET)).getMnem());
-        assertEquals("CAD", ((Rec) c.getFirstRec(Kind.ASSET).slNext()).getMnem());
-        assertEquals("CHF", c.findRec(Kind.ASSET, "CHF").getMnem());
-        assertEquals("CZK", c.findRec(Kind.ASSET, 4).getMnem());
+        assertFalse(c.isEmptyRec(RecType.ASSET));
+        assertEquals("AUD", ((Rec) c.getFirstRec(RecType.ASSET)).getMnem());
+        assertEquals("CAD", ((Rec) c.getFirstRec(RecType.ASSET).slNext()).getMnem());
+        assertEquals("CHF", c.findRec(RecType.ASSET, "CHF").getMnem());
+        assertEquals("CZK", c.findRec(RecType.ASSET, 4).getMnem());
     }
 
     @Test
@@ -58,11 +59,11 @@ public final class CacheTest {
                 c.insertRec(arg);
             }
         });
-        assertFalse(c.isEmptyRec(Kind.CONTR));
-        assertEquals("AUDUSD", ((Rec) c.getFirstRec(Kind.CONTR)).getMnem());
-        assertEquals("EURCHF", ((Rec) c.getFirstRec(Kind.CONTR).slNext()).getMnem());
-        assertEquals("EURCZK", c.findRec(Kind.CONTR, "EURCZK").getMnem());
-        assertEquals("EURDKK", c.findRec(Kind.CONTR, 4).getMnem());
+        assertFalse(c.isEmptyRec(RecType.CONTR));
+        assertEquals("AUDUSD", ((Rec) c.getFirstRec(RecType.CONTR)).getMnem());
+        assertEquals("EURCHF", ((Rec) c.getFirstRec(RecType.CONTR).slNext()).getMnem());
+        assertEquals("EURCZK", c.findRec(RecType.CONTR, "EURCZK").getMnem());
+        assertEquals("EURDKK", c.findRec(RecType.CONTR, 4).getMnem());
     }
 
     @Test
@@ -74,10 +75,10 @@ public final class CacheTest {
                 c.insertRec(arg);
             }
         });
-        assertFalse(c.isEmptyRec(Kind.USER));
-        assertEquals("EMIAYL", ((Rec) c.getFirstRec(Kind.USER)).getMnem());
-        assertEquals("GOSAYL", ((Rec) c.getFirstRec(Kind.USER).slNext()).getMnem());
-        assertEquals("MARAYL", c.findRec(Kind.USER, "MARAYL").getMnem());
-        assertEquals("TOBAYL", c.findRec(Kind.USER, 3).getMnem());
+        assertFalse(c.isEmptyRec(RecType.USER));
+        assertEquals("EMIAYL", ((Rec) c.getFirstRec(RecType.USER)).getMnem());
+        assertEquals("GOSAYL", ((Rec) c.getFirstRec(RecType.USER).slNext()).getMnem());
+        assertEquals("MARAYL", c.findRec(RecType.USER, "MARAYL").getMnem());
+        assertEquals("TOBAYL", c.findRec(RecType.USER, 3).getMnem());
     }
 }
