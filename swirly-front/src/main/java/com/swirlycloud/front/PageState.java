@@ -71,7 +71,8 @@ public final class PageState {
         if (userCount < 0) {
             // Lazy.
             final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Key key = KeyFactory.createKey("UserEmail", user.getEmail());
+            final Key parent = KeyFactory.createKey("Group", "User");
+            final Key key = KeyFactory.createKey(parent, "UserEmail", user.getEmail());
             final Filter filter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
                     FilterOperator.EQUAL, key);
             final Query q = new Query("UserEmail").setFilter(filter).setKeysOnly();

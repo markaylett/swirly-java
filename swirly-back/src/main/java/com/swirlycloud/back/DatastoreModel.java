@@ -24,7 +24,6 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.api.datastore.TransactionOptions;
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
@@ -44,6 +43,7 @@ import com.swirlycloud.util.SlNode;
 
 public final class DatastoreModel implements Model {
 
+    private static final String GROUP_KIND = "Group";
     @SuppressWarnings("unused")
     private static final String ASSET_KIND = Kind.ASSET.camelName();
     @SuppressWarnings("unused")
@@ -55,13 +55,10 @@ public final class DatastoreModel implements Model {
     private static final String EXEC_KIND = Kind.EXEC.camelName();
     private static final String BOOK_KIND = "Book";
 
-    // Cross-group transactions need to be explicitly specified.
-    private static final TransactionOptions XG_OPTION = TransactionOptions.Builder.withXG(true);
-
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    private final Entity newUser(User user) {
-        final Entity entity = new Entity(USER_KIND, user.getId());
+    private final Entity newUser(Key parent, User user) {
+        final Entity entity = new Entity(USER_KIND, user.getId(), parent);
         entity.setUnindexedProperty("mnem", user.getMnem());
         entity.setUnindexedProperty("display", user.getDisplay());
         entity.setUnindexedProperty("email", user.getEmail());
@@ -126,6 +123,19 @@ public final class DatastoreModel implements Model {
         return order;
     }
 
+    private final Entity getGroup(Transaction txn, String name) {
+        // Lazily for now, but we may want to explicitly create books in the future.
+        final Key key = KeyFactory.createKey(GROUP_KIND, name);
+        Entity entity;
+        try {
+            entity = datastore.get(txn, key);
+        } catch (final EntityNotFoundException e) {
+            entity = new Entity(key);
+            datastore.put(txn, entity);
+        }
+        return entity;
+    }
+
     private final Entity getBook(Transaction txn, long id) {
         // Lazily for now, but we may want to explicitly create books in the future.
         final Key key = KeyFactory.createKey(BOOK_KIND, id);
@@ -173,11 +183,14 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertUser(User user) {
-        final Transaction txn = datastore.beginTransaction(XG_OPTION);
+        final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity entity = newUser(user);
-            final Entity mnemIdx = new Entity(USER_MNEM_KIND, user.getMnem());
-            final Entity emailIdx = new Entity(USER_EMAIL_KIND, user.getEmail());
+            // User entities have common ancestor for strong consistency. 
+            final Key parent = getGroup(txn, USER_KIND).getKey();
+            final Entity entity = newUser(parent, user);
+            // Unique indexes.
+            final Entity mnemIdx = new Entity(USER_MNEM_KIND, user.getMnem(), parent);
+            final Entity emailIdx = new Entity(USER_EMAIL_KIND, user.getEmail(), parent);
             datastore.put(entity);
             datastore.put(mnemIdx);
             datastore.put(emailIdx);
@@ -194,7 +207,7 @@ public final class DatastoreModel implements Model {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
         final Map<Long, Entity> orders = new HashMap<>();
-        final Transaction txn = datastore.beginTransaction(XG_OPTION);
+        final Transaction txn = datastore.beginTransaction();
         try {
             final Key parent = getBook(txn, bookId).getKey();
             for (SlNode node = first; node != null; node = node.slNext()) {
@@ -226,7 +239,7 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertExec(long bookId, Exec exec) {
-        final Transaction txn = datastore.beginTransaction(XG_OPTION);
+        final Transaction txn = datastore.beginTransaction();
         try {
             final Key parent = getBook(txn, bookId).getKey();
             if (exec.getState() == State.NEW) {
@@ -245,7 +258,7 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void updateExec(long bookId, long id, long modified) {
-        final Transaction txn = datastore.beginTransaction(XG_OPTION);
+        final Transaction txn = datastore.beginTransaction();
         try {
             final Key parent = getBook(txn, bookId).getKey();
             final Entity entity = getExec(txn, parent, id);
@@ -274,7 +287,8 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void selectUser(UnaryCallback<User> cb) {
-        final Query q = new Query(USER_KIND);
+        final Key parent = KeyFactory.createKey(GROUP_KIND, USER_KIND);
+        final Query q = new Query(USER_KIND, parent);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             final long id = entity.getKey().getId();
