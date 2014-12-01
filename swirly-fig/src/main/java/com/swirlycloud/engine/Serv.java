@@ -405,7 +405,7 @@ public final class Serv implements AutoCloseable {
         // any unfilled quantity.
         boolean success = false;
         try {
-            model.insertExecList((Exec) trans.execs.getFirst());
+            model.insertExecList(book.getId(), (Exec) trans.execs.getFirst());
             success = true;
         } finally {
             if (!success && !order.isDone()) {
@@ -434,14 +434,15 @@ public final class Serv implements AutoCloseable {
                 || lots > order.getLots()) {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
+        final Book book = findBook(order.getContr(), order.getSettlDay());
+        assert book != null;
+
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.revise(lots);
-        model.insertExec(exec);
+        model.insertExec(book.getId(), exec);
 
         // Final commit phase cannot fail.
-        final Book book = findBook(order.getContr(), order.getSettlDay());
-        assert book != null;
         book.reviseOrder(order, lots, now);
 
         trans.clear();
@@ -471,14 +472,15 @@ public final class Serv implements AutoCloseable {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
+        final Book book = findBook(order.getContr(), order.getSettlDay());
+        assert book != null;
+
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.cancel();
-        model.insertExec(exec);
+        model.insertExec(book.getId(), exec);
 
         // Final commit phase cannot fail.
-        final Book book = findBook(order.getContr(), order.getSettlDay());
-        assert book != null;
         book.cancelOrder(order, now);
         accnt.removeOrder(order);
 
@@ -511,7 +513,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
         final long now = System.currentTimeMillis();
-        model.updateExec(id, now);
+        model.updateExec(Book.toId(trade.getContrId(), trade.getSettlDay()), id, now);
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);

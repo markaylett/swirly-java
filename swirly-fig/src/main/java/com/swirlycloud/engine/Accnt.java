@@ -45,7 +45,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     public final void removeOrder(Order order) {
-        assert user.getId() == order.getUser().getId();
+        assert user.getId() == order.getUserId();
         orders.remove(order);
         if (!order.getRef().isEmpty())
             refIdx.remove(user.getId(), order.getRef());

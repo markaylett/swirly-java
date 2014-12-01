@@ -11,7 +11,7 @@ public final class RefIdx {
 
     private static boolean equals(Order order, long trid, String ref) {
         assert ref != null;
-        return order.getUser().getId() == trid && order.getRef().equals(ref);
+        return order.getUserId() == trid && order.getRef().equals(ref);
     }
 
     private static int hashCode(long id) {
@@ -39,7 +39,7 @@ public final class RefIdx {
     public final void insert(Order order) {
         assert order != null;
         if (order.getRef() != null) {
-            final int bucket = indexFor(hashCode(order.getUser().getId(), order.getRef()),
+            final int bucket = indexFor(hashCode(order.getUserId(), order.getRef()),
                     buckets.length);
             order.refNext = buckets[bucket];
             buckets[bucket] = order;

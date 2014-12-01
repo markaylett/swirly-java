@@ -44,23 +44,32 @@ import com.swirlycloud.util.SlNode;
 
 public final class DatastoreModel implements Model {
 
+    @SuppressWarnings("unused")
+    private static final String ASSET_KIND = Kind.ASSET.camelName();
+    @SuppressWarnings("unused")
+    private static final String CONTR_KIND = Kind.CONTR.camelName();
+    private static final String USER_KIND = Kind.USER.camelName();
+    private static final String USER_MNEM_KIND = "UserMnem";
+    private static final String USER_EMAIL_KIND = "UserEmail";
+    private static final String ORDER_KIND = Kind.ORDER.camelName();
+    private static final String EXEC_KIND = Kind.EXEC.camelName();
+    private static final String BOOK_KIND = "Book";
+
     // Cross-group transactions need to be explicitly specified.
     private static final TransactionOptions XG_OPTION = TransactionOptions.Builder.withXG(true);
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     private final Entity newUser(User user) {
-        final String kind = Kind.USER.camelName();
-        final Entity entity = new Entity(kind, user.getId());
+        final Entity entity = new Entity(USER_KIND, user.getId());
         entity.setUnindexedProperty("mnem", user.getMnem());
         entity.setUnindexedProperty("display", user.getDisplay());
         entity.setUnindexedProperty("email", user.getEmail());
         return entity;
     }
 
-    private final Entity newOrder(Exec exec) {
-        final String kind = Kind.ORDER.camelName();
-        final Entity entity = new Entity(kind, exec.getOrderId());
+    private final Entity newOrder(Key parent, Exec exec) {
+        final Entity entity = new Entity(ORDER_KIND, exec.getOrderId(), parent);
         entity.setUnindexedProperty("userId", exec.getUserId());
         entity.setUnindexedProperty("contrId", exec.getContrId());
         entity.setUnindexedProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
@@ -79,9 +88,8 @@ public final class DatastoreModel implements Model {
         return entity;
     }
 
-    private final Entity newExec(Exec exec) {
-        final String kind = Kind.EXEC.camelName();
-        final Entity entity = new Entity(kind, exec.getId());
+    private final Entity newExec(Key parent, Exec exec) {
+        final Entity entity = new Entity(EXEC_KIND, exec.getId(), parent);
         entity.setUnindexedProperty("orderId", exec.getOrderId());
         entity.setUnindexedProperty("userId", exec.getUserId());
         entity.setUnindexedProperty("contrId", exec.getContrId());
@@ -118,23 +126,42 @@ public final class DatastoreModel implements Model {
         return order;
     }
 
-    private final Entity getOrder(long id) {
-        final String kind = Kind.ORDER.camelName();
-        final Key key = KeyFactory.createKey(kind, id);
+    private final Entity getBook(Transaction txn, long id) {
+        // Lazily for now, but we may want to explicitly create books in the future.
+        final Key key = KeyFactory.createKey(BOOK_KIND, id);
+        Entity entity;
         try {
-            return datastore.get(key);
+            entity = datastore.get(txn, key);
+        } catch (final EntityNotFoundException e) {
+            entity = new Entity(key);
+            datastore.put(txn, entity);
+        }
+        return entity;
+    }
+
+    private final Entity getOrder(Transaction txn, Key parent, long id) {
+        final Key key = KeyFactory.createKey(parent, ORDER_KIND, id);
+        try {
+            return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
-    private final Entity getExec(long id) {
-        final String kind = Kind.EXEC.camelName();
-        final Key key = KeyFactory.createKey(kind, id);
+    private final Entity getExec(Transaction txn, Key parent, long id) {
+        final Key key = KeyFactory.createKey(parent, EXEC_KIND, id);
         try {
-            return datastore.get(key);
+            return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    private final void selectBook(UnaryCallback<Entity> cb) {
+        final Query q = new Query(BOOK_KIND);
+        final PreparedQuery pq = datastore.prepare(q);
+        for (final Entity entity : pq.asIterable()) {
+            cb.call(entity);
         }
     }
 
@@ -149,8 +176,8 @@ public final class DatastoreModel implements Model {
         final Transaction txn = datastore.beginTransaction(XG_OPTION);
         try {
             final Entity entity = newUser(user);
-            final Entity mnemIdx = new Entity("UserMnem", user.getMnem());
-            final Entity emailIdx = new Entity("UserEmail", user.getEmail());
+            final Entity mnemIdx = new Entity(USER_MNEM_KIND, user.getMnem());
+            final Entity emailIdx = new Entity(USER_EMAIL_KIND, user.getEmail());
             datastore.put(entity);
             datastore.put(mnemIdx);
             datastore.put(emailIdx);
@@ -163,29 +190,30 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExecList(Exec first) {
+    public final void insertExecList(long bookId, Exec first) {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
         final Map<Long, Entity> orders = new HashMap<>();
         final Transaction txn = datastore.beginTransaction(XG_OPTION);
         try {
+            final Key parent = getBook(txn, bookId).getKey();
             for (SlNode node = first; node != null; node = node.slNext()) {
                 final Exec exec = (Exec) node;
                 if (exec.getState() == State.NEW) {
                     // Defer actual datastore put.
-                    orders.put(first.getOrderId(), newOrder(exec));
+                    orders.put(first.getOrderId(), newOrder(parent, exec));
                 } else {
                     final long id = exec.getOrderId();
                     // This exec may apply to a cached order.
                     Entity order = orders.get(id);
                     if (order == null) {
                         // Otherwise fetch the order from the datastore.
-                        order = getOrder(id);
+                        order = getOrder(txn, parent, id);
                         orders.put(id, order);
                     }
                     applyExec(order, exec);
                 }
-                datastore.put(newExec(exec));
+                datastore.put(newExec(parent, exec));
             }
             datastore.put(orders.values());
             txn.commit();
@@ -197,15 +225,16 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExec(Exec exec) {
+    public final void insertExec(long bookId, Exec exec) {
         final Transaction txn = datastore.beginTransaction(XG_OPTION);
         try {
+            final Key parent = getBook(txn, bookId).getKey();
             if (exec.getState() == State.NEW) {
-                datastore.put(newOrder(exec));
+                datastore.put(newOrder(parent, exec));
             } else {
-                datastore.put(applyExec(getOrder(exec.getOrderId()), exec));
+                datastore.put(applyExec(getOrder(txn, parent, exec.getOrderId()), exec));
             }
-            datastore.put(newExec(exec));
+            datastore.put(newExec(parent, exec));
             txn.commit();
         } finally {
             if (txn.isActive()) {
@@ -215,10 +244,11 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void updateExec(long id, long modified) {
+    public final void updateExec(long bookId, long id, long modified) {
         final Transaction txn = datastore.beginTransaction(XG_OPTION);
         try {
-            final Entity entity = getExec(id);
+            final Key parent = getBook(txn, bookId).getKey();
+            final Entity entity = getExec(txn, parent, id);
             entity.setProperty("confirmed", Boolean.TRUE);
             entity.setUnindexedProperty("modified", modified);
             datastore.put(entity);
@@ -244,8 +274,7 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void selectUser(UnaryCallback<User> cb) {
-        final String kind = Kind.USER.camelName();
-        final Query q = new Query(kind);
+        final Query q = new Query(USER_KIND);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             final long id = entity.getKey().getId();
@@ -258,103 +287,116 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void selectOrder(UnaryCallback<Order> cb) {
-        final String kind = Kind.ORDER.camelName();
+    public final void selectOrder(final UnaryCallback<Order> cb) {
         final Filter filter = new FilterPredicate("resd", FilterOperator.GREATER_THAN, 0);
-        final Query q = new Query(kind).setFilter(filter);
-        final PreparedQuery pq = datastore.prepare(q);
-        for (final Entity entity : pq.asIterable()) {
-            final long id = entity.getKey().getId();
-            final Identifiable user = newId((Long) entity.getProperty("userId"));
-            final Identifiable contr = newId((Long) entity.getProperty("contrId"));
-            final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-            final String ref = (String) entity.getProperty("ref");
-            final State state = State.valueOf((String) entity.getProperty("state"));
-            final Action action = Action.valueOf((String) entity.getProperty("action"));
-            final long ticks = (Long) entity.getProperty("ticks");
-            final long lots = (Long) entity.getProperty("lots");
-            final long resd = (Long) entity.getProperty("resd");
-            final long exec = (Long) entity.getProperty("exec");
-            final long lastTicks = (Long) entity.getProperty("lastTicks");
-            final long lastLots = (Long) entity.getProperty("lastLots");
-            final long minLots = (Long) entity.getProperty("minLots");
-            final long created = (Long) entity.getProperty("created");
-            final long modified = (Long) entity.getProperty("modified");
-            final Order order = new Order(id, user, contr, settlDay, ref, state, action, ticks,
-                    lots, resd, exec, lastTicks, lastLots, minLots, created, modified);
-            cb.call(order);
-        }
+        selectBook(new UnaryCallback<Entity>() {
+            @Override
+            public final void call(Entity arg) {
+                final Query q = new Query(ORDER_KIND, arg.getKey()).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(q);
+                for (final Entity entity : pq.asIterable()) {
+                    final long id = entity.getKey().getId();
+                    final Identifiable user = newId((Long) entity.getProperty("userId"));
+                    final Identifiable contr = newId((Long) entity.getProperty("contrId"));
+                    final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
+                    final String ref = (String) entity.getProperty("ref");
+                    final State state = State.valueOf((String) entity.getProperty("state"));
+                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final long ticks = (Long) entity.getProperty("ticks");
+                    final long lots = (Long) entity.getProperty("lots");
+                    final long resd = (Long) entity.getProperty("resd");
+                    final long exec = (Long) entity.getProperty("exec");
+                    final long lastTicks = (Long) entity.getProperty("lastTicks");
+                    final long lastLots = (Long) entity.getProperty("lastLots");
+                    final long minLots = (Long) entity.getProperty("minLots");
+                    final long created = (Long) entity.getProperty("created");
+                    final long modified = (Long) entity.getProperty("modified");
+                    final Order order = new Order(id, user, contr, settlDay, ref, state, action,
+                            ticks, lots, resd, exec, lastTicks, lastLots, minLots, created,
+                            modified);
+                    cb.call(order);
+                }
+            }
+        });
     }
 
     @Override
-    public final void selectTrade(UnaryCallback<Exec> cb) {
-        final String kind = Kind.EXEC.camelName();
+    public final void selectTrade(final UnaryCallback<Exec> cb) {
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
         final Filter confirmedFilter = new FilterPredicate("confirmed", FilterOperator.EQUAL,
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(stateFilter, confirmedFilter);
-        final Query q = new Query(kind).setFilter(filter);
-        final PreparedQuery pq = datastore.prepare(q);
-        for (final Entity entity : pq.asIterable()) {
-            final long id = entity.getKey().getId();
-            final long orderId = (Long) entity.getProperty("orderId");
-            final Identifiable user = newId((Long) entity.getProperty("userId"));
-            final Identifiable contr = newId((Long) entity.getProperty("contrId"));
-            final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-            final String ref = (String) entity.getProperty("ref");
-            final State state = State.valueOf((String) entity.getProperty("state"));
-            final Action action = Action.valueOf((String) entity.getProperty("action"));
-            final long ticks = (Long) entity.getProperty("ticks");
-            final long lots = (Long) entity.getProperty("lots");
-            final long resd = (Long) entity.getProperty("resd");
-            final long exec = (Long) entity.getProperty("exec");
-            final long lastTicks = (Long) entity.getProperty("lastTicks");
-            final long lastLots = (Long) entity.getProperty("lastLots");
-            final long minLots = (Long) entity.getProperty("minLots");
-            long matchId;
-            Role role;
-            Identifiable cpty;
-            if (state == State.TRADE) {
-                matchId = (Long) entity.getProperty("matchId");
-                role = Role.valueOf((String) entity.getProperty("role"));
-                cpty = newId((Long) entity.getProperty("cptyId"));
-            } else {
-                matchId = 0;
-                role = null;
-                cpty = null;
+        selectBook(new UnaryCallback<Entity>() {
+            @Override
+            public final void call(Entity arg) {
+                final Query q = new Query(EXEC_KIND, arg.getKey()).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(q);
+                for (final Entity entity : pq.asIterable()) {
+                    final long id = entity.getKey().getId();
+                    final long orderId = (Long) entity.getProperty("orderId");
+                    final Identifiable user = newId((Long) entity.getProperty("userId"));
+                    final Identifiable contr = newId((Long) entity.getProperty("contrId"));
+                    final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
+                    final String ref = (String) entity.getProperty("ref");
+                    final State state = State.valueOf((String) entity.getProperty("state"));
+                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final long ticks = (Long) entity.getProperty("ticks");
+                    final long lots = (Long) entity.getProperty("lots");
+                    final long resd = (Long) entity.getProperty("resd");
+                    final long exec = (Long) entity.getProperty("exec");
+                    final long lastTicks = (Long) entity.getProperty("lastTicks");
+                    final long lastLots = (Long) entity.getProperty("lastLots");
+                    final long minLots = (Long) entity.getProperty("minLots");
+                    long matchId;
+                    Role role;
+                    Identifiable cpty;
+                    if (state == State.TRADE) {
+                        matchId = (Long) entity.getProperty("matchId");
+                        role = Role.valueOf((String) entity.getProperty("role"));
+                        cpty = newId((Long) entity.getProperty("cptyId"));
+                    } else {
+                        matchId = 0;
+                        role = null;
+                        cpty = null;
+                    }
+                    final long created = (Long) entity.getProperty("created");
+                    final Exec trade = new Exec(id, orderId, user, contr, settlDay, ref, state,
+                            action, ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId,
+                            role, cpty, created);
+                    cb.call(trade);
+                }
             }
-            final long created = (Long) entity.getProperty("created");
-            final Exec trade = new Exec(id, orderId, user, contr, settlDay, ref, state, action,
-                    ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty,
-                    created);
-            cb.call(trade);
-        }
+        });
     }
 
     @Override
-    public final void selectPosn(UnaryCallback<Posn> cb) {
+    public final void selectPosn(final UnaryCallback<Posn> cb) {
         final Map<Long, Posn> m = new HashMap<>();
-        final String kind = Kind.EXEC.camelName();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
-        final Query q = new Query(kind).setFilter(filter);
-        final PreparedQuery pq = datastore.prepare(q);
-        for (final Entity entity : pq.asIterable()) {
-            final long userId = (Long) entity.getProperty("userId");
-            final long contrId = (Long) entity.getProperty("contrId");
-            final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-            final Long posnId = Long.valueOf(Posn.toId(userId, contrId, settlDay));
-            // Lazy position.
-            Posn posn = m.get(posnId);
-            if (posn == null) {
-                posn = new Posn(newId(userId), newId(contrId), settlDay);
-                m.put(posnId, posn);
+        selectBook(new UnaryCallback<Entity>() {
+            @Override
+            public final void call(Entity arg) {
+                final Query q = new Query(EXEC_KIND).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(q);
+                for (final Entity entity : pq.asIterable()) {
+                    final long userId = (Long) entity.getProperty("userId");
+                    final long contrId = (Long) entity.getProperty("contrId");
+                    final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
+                    final Long posnId = Long.valueOf(Posn.toId(userId, contrId, settlDay));
+                    // Lazy position.
+                    Posn posn = m.get(posnId);
+                    if (posn == null) {
+                        posn = new Posn(newId(userId), newId(contrId), settlDay);
+                        m.put(posnId, posn);
+                    }
+                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final long lastTicks = (Long) entity.getProperty("lastTicks");
+                    final long lastLots = (Long) entity.getProperty("lastLots");
+                    posn.applyTrade(action, lastTicks, lastLots);
+                }
             }
-            final Action action = Action.valueOf((String) entity.getProperty("action"));
-            final long lastTicks = (Long) entity.getProperty("lastTicks");
-            final long lastLots = (Long) entity.getProperty("lastLots");
-            posn.applyTrade(action, lastTicks, lastLots);
-        }
+        });
         for (final Posn posn : m.values()) {
             cb.call(posn);
         }
