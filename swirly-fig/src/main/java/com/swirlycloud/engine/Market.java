@@ -24,7 +24,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
      */
     private static final int DEPTH_MAX = 5;
 
-    private final long id;
+    private final long key;
     private final Contr contr;
     private final int settlDay;
     private final Side bidSide = new Side();
@@ -35,7 +35,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
     }
 
     private final void printTob(StringBuilder sb) {
-        sb.append("{\"id\":").append(id);
+        sb.append("{\"id\":").append(key);
         sb.append(",\"contr\":\"").append(contr.getMnem());
         sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
 
@@ -59,7 +59,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
     }
 
     private final void printDepth(StringBuilder sb, int levels) {
-        sb.append("{\"id\":").append(id);
+        sb.append("{\"id\":").append(key);
         sb.append(",\"contr\":\"").append(contr.getMnem());
         sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
         sb.append(",\"bidTicks\":[");
@@ -154,16 +154,16 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
     }
 
     public Market(Contr contr, int settlDay) {
-        this.id = toId(contr.getId(), settlDay);
+        this.key = toSynthId(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
     }
 
     /**
-     * Synthetic market id.
+     * Synthetic market key.
      */
 
-    public static long toId(long contrId, int settlDay) {
+    public static long toSynthId(long contrId, int settlDay) {
         // 16 bit contr-id.
         final int CONTR_MASK = (1 << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.
@@ -223,8 +223,13 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
     }
 
     @Override
+    public final long getKey() {
+        return key;
+    }
+
+    @Override
     public final long getId() {
-        return id;
+        return key;
     }
 
     public final Contr getContr() {

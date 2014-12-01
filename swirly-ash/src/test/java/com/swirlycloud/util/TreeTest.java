@@ -14,17 +14,17 @@ import com.swirlycloud.util.Tree;
 
 public final class TreeTest {
     private static final class Node extends BasicRbNode {
-        private final long id;
+        private final long key;
         private final String name;
 
-        Node(long id, String name) {
-            this.id = id;
+        Node(long key, String name) {
+            this.key = key;
             this.name = name;
         }
 
         @Override
-        public final long getId() {
-            return id;
+        public final long getKey() {
+            return key;
         }
 
         @Override

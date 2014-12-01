@@ -303,9 +303,9 @@ public final class Serv implements AutoCloseable {
 
     public final Market getLazyMarket(Contr contr, int settlDay) {
         Market market;
-        final long id = Market.toId(contr.getId(), settlDay);
-        final RbNode node = markets.pfind(id);
-        if (node == null || node.getId() != id) {
+        final long key = Market.toSynthId(contr.getId(), settlDay);
+        final RbNode node = markets.pfind(key);
+        if (node == null || node.getKey() != key) {
             market = new Market(contr, settlDay);
             final RbNode parent = node;
             markets.pinsert(market, parent);
@@ -324,7 +324,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Market findMarket(Contr contr, int settlDay) {
-        return (Market) markets.find(Market.toId(contr.getId(), settlDay));
+        return (Market) markets.find(Market.toSynthId(contr.getId(), settlDay));
     }
 
     public final Market findMarket(String mnem, int settlDay) {
@@ -349,9 +349,9 @@ public final class Serv implements AutoCloseable {
 
     public final Accnt getLazyAccnt(User user) {
         Accnt accnt;
-        final long id = user.getId();
-        final RbNode node = accnts.pfind(id);
-        if (node == null || node.getId() != id) {
+        final long key = user.getId();
+        final RbNode node = accnts.pfind(key);
+        if (node == null || node.getKey() != key) {
             accnt = new Accnt(user, refIdx);
             final RbNode parent = node;
             accnts.pinsert(accnt, parent);
@@ -513,7 +513,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
         final long now = System.currentTimeMillis();
-        model.updateExec(Market.toId(trade.getContrId(), trade.getSettlDay()), id, now);
+        model.updateExec(Market.toSynthId(trade.getContrId(), trade.getSettlDay()), id, now);
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);

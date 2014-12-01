@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
-public interface RbNode extends Identifiable {
+public interface RbNode {
 
     RbNode setLeft(RbNode left);
 
@@ -18,6 +18,8 @@ public interface RbNode extends Identifiable {
     RbNode rbNext();
 
     RbNode rbPrev();
+
+    long getKey();
 
     RbNode getLeft();
 

@@ -12,9 +12,9 @@ import com.swirlycloud.util.DlNode;
  * A level is an aggregation of orders by price.
  */
 public final class Level extends BasicRbNode {
-    Order firstOrder;
-    final long id;
+    final long key;
     final long ticks;
+    Order firstOrder;
     /**
      * Must be greater than zero.
      */
@@ -26,24 +26,24 @@ public final class Level extends BasicRbNode {
 
     public Level(Order order) {
         final long ticks = order.getTicks();
-        this.firstOrder = order;
-        this.id = toId(order.getAction(), ticks);
+        this.key = toSynthId(order.getAction(), ticks);
         this.ticks = ticks;
+        this.firstOrder = order;
         this.lots = order.getResd();
         this.count = 1;
     }
 
     /**
-     * Synthetic position id.
+     * Synthetic level key.
      */
 
-    public static long toId(Action action, long ticks) {
+    public static long toSynthId(Action action, long ticks) {
         return action == Action.BUY ? -ticks : ticks;
     }
 
     @Override
-    public final long getId() {
-        return id;
+    public final long getKey() {
+        return key;
     }
 
     public final void addOrder(Order order) {
@@ -51,12 +51,12 @@ public final class Level extends BasicRbNode {
         ++count;
     }
 
-    public final DlNode getFirstOrder() {
-        return firstOrder;
-    }
-
     public final long getTicks() {
         return ticks;
+    }
+
+    public final DlNode getFirstOrder() {
+        return firstOrder;
     }
 
     public final long getLots() {

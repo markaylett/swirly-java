@@ -180,6 +180,11 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     }
 
     @Override
+    public final long getKey() {
+        return id;
+    }
+
+    @Override
     public final long getId() {
         return id;
     }

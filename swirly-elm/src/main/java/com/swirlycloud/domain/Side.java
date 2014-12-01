@@ -20,11 +20,11 @@ public final class Side {
     private long lastTime = 0;
 
     private final Level getLazyLevel(Order order) {
-        final long id = Level.toId(order.getAction(), order.getTicks());
-        final RbNode node = levels.pfind(id);
+        final long key = Level.toSynthId(order.getAction(), order.getTicks());
+        final RbNode node = levels.pfind(key);
 
         Level level;
-        if (node == null || node.getId() != id) {
+        if (node == null || node.getKey() != key) {
             level = new Level(order);
             levels.pinsert(level, node);
         } else {

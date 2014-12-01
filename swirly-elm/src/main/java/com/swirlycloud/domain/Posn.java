@@ -14,7 +14,7 @@ import com.swirlycloud.util.Printable;
 
 public final class Posn extends BasicRbNode implements Identifiable, Printable {
 
-    private final long id;
+    private final long key;
     private Identifiable user;
     private Identifiable contr;
     private final int settlDay;
@@ -28,7 +28,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
     }
 
     public Posn(Identifiable user, Identifiable contr, int settlDay) {
-        this.id = toId(user.getId(), contr.getId(), settlDay);
+        this.key = toSynthId(user.getId(), contr.getId(), settlDay);
         this.user = user;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -43,7 +43,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
 
     @Override
     public final void print(StringBuilder sb, Object arg) {
-        sb.append("{\"id\":").append(id);
+        sb.append("{\"id\":").append(key);
         sb.append(",\"user\":\"").append(getRecMnem(user));
         sb.append("\",\"contr\":\"").append(getRecMnem(contr));
         sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
@@ -62,10 +62,10 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
     }
 
     /**
-     * Synthetic position id.
+     * Synthetic position key.
      */
 
-    public static long toId(long userId, long contrId, int settlDay) {
+    public static long toSynthId(long userId, long contrId, int settlDay) {
         // 16 bit contr-id.
         final int CONTR_MASK = (1 << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.
@@ -111,8 +111,13 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
     }
 
     @Override
+    public final long getKey() {
+        return key;
+    }
+
+    @Override
     public final long getId() {
-        return id;
+        return key;
     }
 
     public final long getUserId() {

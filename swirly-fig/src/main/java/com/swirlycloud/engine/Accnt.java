@@ -29,6 +29,11 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     @Override
+    public final long getKey() {
+        return user.getId();
+    }
+
+    @Override
     public final long getId() {
         return user.getId();
     }
@@ -156,9 +161,9 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     public final Posn getLazyPosn(Contr contr, int settlDay) {
 
         Posn posn;
-        final long id = Posn.toId(user.getId(), contr.getId(), settlDay);
-        final RbNode node = posns.pfind(id);
-        if (node == null || node.getId() != id) {
+        final long key = Posn.toSynthId(user.getId(), contr.getId(), settlDay);
+        final RbNode node = posns.pfind(key);
+        if (node == null || node.getKey() != key) {
             posn = new Posn(user, contr, settlDay);
             final RbNode parent = node;
             posns.pinsert(posn, parent);
@@ -169,7 +174,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     public final Posn findPosn(Contr contr, int settlDay) {
-        final long id = Posn.toId(user.getId(), contr.getId(), settlDay);
+        final long id = Posn.toSynthId(user.getId(), contr.getId(), settlDay);
         return (Posn) posns.find(id);
     }
 
