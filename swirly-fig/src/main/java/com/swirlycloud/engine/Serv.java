@@ -303,7 +303,7 @@ public final class Serv implements AutoCloseable {
 
     public final Market getLazyMarket(Contr contr, int settlDay) {
         Market market;
-        final long key = Market.toSynthId(contr.getId(), settlDay);
+        final long key = Market.composeId(contr.getId(), settlDay);
         final RbNode node = markets.pfind(key);
         if (node == null || node.getKey() != key) {
             market = new Market(contr, settlDay);
@@ -324,7 +324,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Market findMarket(Contr contr, int settlDay) {
-        return (Market) markets.find(Market.toSynthId(contr.getId(), settlDay));
+        return (Market) markets.find(Market.composeId(contr.getId(), settlDay));
     }
 
     public final Market findMarket(String mnem, int settlDay) {
@@ -513,7 +513,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
         final long now = System.currentTimeMillis();
-        model.updateExec(Market.toSynthId(trade.getContrId(), trade.getSettlDay()), id, now);
+        model.updateExec(Market.composeId(trade.getContrId(), trade.getSettlDay()), id, now);
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);

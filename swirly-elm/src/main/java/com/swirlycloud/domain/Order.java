@@ -8,6 +8,7 @@ package com.swirlycloud.domain;
 import static com.swirlycloud.util.Date.jdToIso;
 
 import com.swirlycloud.util.BasicRbDlNode;
+import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Printable;
 import com.swirlycloud.util.RbNode;
@@ -19,6 +20,8 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
     transient Order refNext;
     transient RbNode level;
 
+    @SuppressWarnings("unused")
+    private final long key;
     private final long id;
     /**
      * The executing trader.
@@ -67,6 +70,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         if (id >= (1 << 32)) {
             throw new IllegalArgumentException("order-id exceeds max-value");
         }
+        this.key = composeId(contr.getId(), settlDay, id);
         this.id = id;
         this.user = user;
         this.contr = contr;
@@ -93,6 +97,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         if (id >= (1 << 32)) {
             throw new IllegalArgumentException("order-id exceeds max-value");
         }
+        this.key = composeId(contr.getId(), settlDay, id);
         this.id = id;
         this.user = user;
         this.contr = contr;
@@ -144,6 +149,23 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         assert this.contr.getId() == contr.getId();
         this.user = user;
         this.contr = contr;
+    }
+
+    /**
+     * Synthetic order key.
+     */
+
+    public static long composeId(long contrId, int settlDay, long orderId) {
+        // 16 bit contr-id.
+        final int CONTR_MASK = (1 << 16) - 1;
+        // 16 bits is sufficient for truncated Julian day.
+        final int TJD_MASK = (1 << 16) - 1;
+        // 32 bit order-id.
+        final int ORDER_MASK = (1 << 32) - 1;
+
+        // Truncated Julian Day (TJD).
+        final long tjd = Date.jdToTjd(settlDay);
+        return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (orderId & ORDER_MASK);
     }
 
     public final void place(long now) {

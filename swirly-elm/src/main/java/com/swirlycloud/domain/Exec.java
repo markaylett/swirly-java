@@ -8,11 +8,14 @@ package com.swirlycloud.domain;
 import static com.swirlycloud.util.Date.jdToIso;
 
 import com.swirlycloud.util.BasicRbSlNode;
+import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Printable;
 
 public final class Exec extends BasicRbSlNode implements Identifiable, Printable, Instruct {
 
+    @SuppressWarnings("unused")
+    private final long key;
     private final long id;
     private final long orderId;
     /**
@@ -62,6 +65,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         if (id >= (1 << 32)) {
             throw new IllegalArgumentException("exec-id exceeds max-value");
         }
+        this.key = composeId(contr.getId(), settlDay, id);
         this.id = id;
         this.orderId = orderId;
         this.user = user;
@@ -87,6 +91,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
         if (id >= (1 << 32)) {
             throw new IllegalArgumentException("exec-id exceeds max-value");
         }
+        this.key = composeId(contr.getId(), instruct.getSettlDay(), id);
         this.id = id;
         this.orderId = orderId;
         this.user = instruct.getUser();
@@ -148,6 +153,23 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
             assert this.cpty.getId() == cpty.getId();
             this.cpty = cpty;
         }
+    }
+
+    /**
+     * Synthetic exec key.
+     */
+
+    public static long composeId(long contrId, int settlDay, long execId) {
+        // 16 bit contr-id.
+        final int CONTR_MASK = (1 << 16) - 1;
+        // 16 bits is sufficient for truncated Julian day.
+        final int TJD_MASK = (1 << 16) - 1;
+        // 32 bit exec-id.
+        final int EXEC_MASK = (1 << 32) - 1;
+
+        // Truncated Julian Day (TJD).
+        final long tjd = Date.jdToTjd(settlDay);
+        return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (execId & EXEC_MASK);
     }
 
     public final void revise(long lots) {

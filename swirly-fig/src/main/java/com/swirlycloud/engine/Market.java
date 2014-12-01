@@ -154,7 +154,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
     }
 
     public Market(Contr contr, int settlDay) {
-        this.key = toSynthId(contr.getId(), settlDay);
+        this.key = composeId(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
     }
@@ -163,7 +163,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
      * Synthetic market key.
      */
 
-    public static long toSynthId(long contrId, int settlDay) {
+    public static long composeId(long contrId, int settlDay) {
         // 16 bit contr-id.
         final int CONTR_MASK = (1 << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.

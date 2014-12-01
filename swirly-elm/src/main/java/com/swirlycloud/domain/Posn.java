@@ -28,7 +28,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
     }
 
     public Posn(Identifiable user, Identifiable contr, int settlDay) {
-        this.key = toSynthId(user.getId(), contr.getId(), settlDay);
+        this.key = composeId(contr.getId(), settlDay, user.getId());
         this.user = user;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -65,7 +65,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
      * Synthetic position key.
      */
 
-    public static long toSynthId(long userId, long contrId, int settlDay) {
+    public static long composeId(long contrId, int settlDay, long userId) {
         // 16 bit contr-id.
         final int CONTR_MASK = (1 << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.

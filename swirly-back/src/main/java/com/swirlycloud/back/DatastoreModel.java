@@ -397,7 +397,7 @@ public final class DatastoreModel implements Model {
                     final long userId = (Long) entity.getProperty("userId");
                     final long contrId = (Long) entity.getProperty("contrId");
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-                    final Long posnId = Long.valueOf(Posn.toSynthId(userId, contrId, settlDay));
+                    final Long posnId = Long.valueOf(Posn.composeId(contrId, settlDay, userId));
                     // Lazy position.
                     Posn posn = m.get(posnId);
                     if (posn == null) {
