@@ -64,6 +64,9 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         assert user != null;
         assert contr != null;
         assert lots > 0 && lots >= minLots;
+        if (id >= (1 << 32)) {
+            throw new IllegalArgumentException("order-id exceeds max-value");
+        }
         this.id = id;
         this.user = user;
         this.contr = contr;
@@ -87,6 +90,9 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
         assert user != null;
         assert contr != null;
         assert lots > 0 && lots >= minLots;
+        if (id >= (1 << 32)) {
+            throw new IllegalArgumentException("order-id exceeds max-value");
+        }
         this.id = id;
         this.user = user;
         this.contr = contr;

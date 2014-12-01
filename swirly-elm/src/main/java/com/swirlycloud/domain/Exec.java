@@ -59,6 +59,9 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
             String ref, State state, Action action, long ticks, long lots, long resd, long exec,
             long lastTicks, long lastLots, long minLots, long matchId, Role role,
             Identifiable cpty, long created) {
+        if (id >= (1 << 32)) {
+            throw new IllegalArgumentException("exec-id exceeds max-value");
+        }
         this.id = id;
         this.orderId = orderId;
         this.user = user;
@@ -81,6 +84,9 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
     }
 
     public Exec(long id, long orderId, Instruct instruct, long created) {
+        if (id >= (1 << 32)) {
+            throw new IllegalArgumentException("exec-id exceeds max-value");
+        }
         this.id = id;
         this.orderId = orderId;
         this.user = instruct.getUser();

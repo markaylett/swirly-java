@@ -66,14 +66,16 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
      */
 
     public static long toId(long userId, long contrId, int settlDay) {
-        // 16 million ids.
-        final int ID_MASK = (1 << 24) - 1;
+        // 16 bit contr-id.
+        final int CONTR_MASK = (1 << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.
-        final int JD_MASK = (1 << 16) - 1;
+        final int TJD_MASK = (1 << 16) - 1;
+        // 32 bit user-id.
+        final int USER_MASK = (1 << 32) - 1;
 
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);
-        return ((userId & ID_MASK) << 40) | ((contrId & ID_MASK) << 16) | (tjd & JD_MASK);
+        return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (userId & USER_MASK);
     }
 
     public final void applyTrade(Action action, long lastTicks, long lastLots) {

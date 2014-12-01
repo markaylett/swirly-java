@@ -164,14 +164,14 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
      */
 
     public static long toId(long contrId, int settlDay) {
-        // 16 million ids.
-        final int ID_MASK = (1 << 24) - 1;
+        // 16 bit contr-id.
+        final int CONTR_MASK = (1 << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.
-        final int JD_MASK = (1 << 16) - 1;
+        final int TJD_MASK = (1 << 16) - 1;
 
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);
-        return ((contrId & ID_MASK) << 16) | (tjd & JD_MASK);
+        return ((contrId & CONTR_MASK) << 16) | (tjd & TJD_MASK);
     }
 
     @Override
