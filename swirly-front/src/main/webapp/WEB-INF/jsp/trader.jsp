@@ -62,7 +62,7 @@
             <th style="text-align: right;">Offer Count</th>
           </tr>
         </thead>
-        <tbody data-bind="foreach: books">
+        <tbody data-bind="foreach: markets">
           <tr>
             <td data-bind="mnem: contr"></td>
             <td data-bind="text: settlDate"></td>

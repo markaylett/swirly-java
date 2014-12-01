@@ -35,7 +35,7 @@ public final class Serv implements AutoCloseable {
     private final Cache cache = new Cache(BUCKETS);
     private final EmailIdx emailIdx = new EmailIdx(BUCKETS);
     private final RefIdx refIdx = new RefIdx(BUCKETS);
-    private final Tree books = new Tree();
+    private final Tree markets = new Tree();
     private final Tree accnts = new Tree();
 
     private final void enrichOrder(Order order) {
@@ -59,8 +59,8 @@ public final class Serv implements AutoCloseable {
 
     private final void insertOrder(Order order) {
         enrichOrder(order);
-        final Book book = getLazyBook(order.getContr(), order.getSettlDay());
-        book.insertOrder(order);
+        final Market market = getLazyMarket(order.getContr(), order.getSettlDay());
+        market.insertOrder(order);
         boolean success = false;
         try {
             final Accnt accnt = getLazyAccnt(order.getUser());
@@ -68,7 +68,7 @@ public final class Serv implements AutoCloseable {
             success = true;
         } finally {
             if (!success) {
-                book.removeOrder(order);
+                market.removeOrder(order);
             }
         }
     }
@@ -153,7 +153,7 @@ public final class Serv implements AutoCloseable {
                 : takerOrder.getTicks() - makerOrder.getTicks();
     }
 
-    private final void matchOrders(Book book, Order takerOrder, Side side, Direct direct,
+    private final void matchOrders(Market market, Order takerOrder, Side side, Direct direct,
             Trans trans) {
 
         final long now = takerOrder.getCreated();
@@ -162,8 +162,8 @@ public final class Serv implements AutoCloseable {
         long lastTicks = 0;
         long lastLots = 0;
 
-        final Contr contr = book.getContr();
-        final int settlDay = book.getSettlDay();
+        final Contr contr = market.getContr();
+        final int settlDay = market.getSettlDay();
 
         DlNode node = side.getFirstOrder();
         for (; taken < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
@@ -215,30 +215,30 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    private final void matchOrders(Book book, Order order, Trans trans) {
+    private final void matchOrders(Market market, Order order, Trans trans) {
         Side side;
         Direct direct;
         if (order.getAction() == Action.BUY) {
             // Paid when the taker lifts the offer.
-            side = book.getOfferSide();
+            side = market.getOfferSide();
             direct = Direct.PAID;
         } else {
             assert order.getAction() == Action.SELL;
             // Given when the taker hits the bid.
-            side = book.getBidSide();
+            side = market.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(book, order, side, direct, trans);
+        matchOrders(market, order, side, direct, trans);
     }
 
     // Assumes that maker lots have not been reduced since matching took place.
 
-    private final void commitMatches(Accnt taker, Book book, long now, Trans trans) {
+    private final void commitMatches(Accnt taker, Market market, long now, Trans trans) {
         for (SlNode node = trans.matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
             // Reduce maker.
-            book.takeOrder(makerOrder, match.getLots(), now);
+            market.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
             final Accnt maker = getLazyAccnt(makerOrder.getUser());
             if (makerOrder.isDone()) {
@@ -301,50 +301,50 @@ public final class Serv implements AutoCloseable {
         return emailIdx.find(email);
     }
 
-    public final Book getLazyBook(Contr contr, int settlDay) {
-        Book book;
-        final long id = Book.toId(contr.getId(), settlDay);
-        final RbNode node = books.pfind(id);
+    public final Market getLazyMarket(Contr contr, int settlDay) {
+        Market market;
+        final long id = Market.toId(contr.getId(), settlDay);
+        final RbNode node = markets.pfind(id);
         if (node == null || node.getId() != id) {
-            book = new Book(contr, settlDay);
+            market = new Market(contr, settlDay);
             final RbNode parent = node;
-            books.pinsert(book, parent);
+            markets.pinsert(market, parent);
         } else {
-            book = (Book) node;
+            market = (Market) node;
         }
-        return book;
+        return market;
     }
 
-    public final Book getLazyBook(String mnem, int settlDay) {
+    public final Market getLazyMarket(String mnem, int settlDay) {
         final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }
-        return getLazyBook(contr, settlDay);
+        return getLazyMarket(contr, settlDay);
     }
 
-    public final Book findBook(Contr contr, int settlDay) {
-        return (Book) books.find(Book.toId(contr.getId(), settlDay));
+    public final Market findMarket(Contr contr, int settlDay) {
+        return (Market) markets.find(Market.toId(contr.getId(), settlDay));
     }
 
-    public final Book findBook(String mnem, int settlDay) {
+    public final Market findMarket(String mnem, int settlDay) {
         final Contr contr = (Contr) cache.findRec(Kind.CONTR, mnem);
         if (contr == null) {
             throw new IllegalArgumentException(String.format("invalid contr '%s'", mnem));
         }
-        return findBook(contr, settlDay);
+        return findMarket(contr, settlDay);
     }
 
-    public final RbNode getFirstBook() {
-        return books.getFirst();
+    public final RbNode getFirstMarket() {
+        return markets.getFirst();
     }
 
-    public final RbNode getLastBook() {
-        return books.getLast();
+    public final RbNode getLastMarket() {
+        return markets.getLast();
     }
 
-    public final boolean isEmptyBook() {
-        return books.isEmpty();
+    public final boolean isEmptyMarket() {
+        return markets.isEmpty();
     }
 
     public final Accnt getLazyAccnt(User user) {
@@ -377,40 +377,40 @@ public final class Serv implements AutoCloseable {
         return getLazyAccnt(user);
     }
 
-    public final Trans placeOrder(Accnt accnt, Book book, String ref, Action action, long ticks,
-            long lots, long minLots, Trans trans) {
+    public final Trans placeOrder(Accnt accnt, Market market, String ref, Action action,
+            long ticks, long lots, long minLots, Trans trans) {
         if (lots == 0 || lots < minLots) {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
         final long now = System.currentTimeMillis();
         final long orderId = model.allocIds(Kind.ORDER, 1);
-        final Contr contr = book.getContr();
-        final int settlDay = book.getSettlDay();
+        final Contr contr = market.getContr();
+        final int settlDay = market.getSettlDay();
         final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
                 ticks, lots, minLots, now);
         final Exec exec = newExec(order, now);
 
         trans.clear();
-        trans.book = book;
+        trans.market = market;
         trans.order = order;
         trans.execs.insertBack(exec);
         // Order fields are updated on match.
-        matchOrders(book, order, trans);
-        // Place incomplete order in book.
+        matchOrders(market, order, trans);
+        // Place incomplete order in market.
         if (!order.isDone()) {
             // This may fail if level cannot be allocated.
-            book.insertOrder(order);
+            market.insertOrder(order);
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
         // any unfilled quantity.
         boolean success = false;
         try {
-            model.insertExecList(book.getId(), (Exec) trans.execs.getFirst());
+            model.insertExecList(market.getId(), (Exec) trans.execs.getFirst());
             success = true;
         } finally {
             if (!success && !order.isDone()) {
-                // Undo book insertion.
-                book.removeOrder(order);
+                // Undo market insertion.
+                market.removeOrder(order);
             }
         }
         // Final commit phase cannot fail.
@@ -418,7 +418,7 @@ public final class Serv implements AutoCloseable {
             accnt.insertOrder(order);
         }
         // Commit trans to cycle and free matches.
-        commitMatches(accnt, book, now, trans);
+        commitMatches(accnt, market, now, trans);
         return trans;
     }
 
@@ -434,19 +434,19 @@ public final class Serv implements AutoCloseable {
                 || lots > order.getLots()) {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
-        final Book book = findBook(order.getContr(), order.getSettlDay());
-        assert book != null;
+        final Market market = findMarket(order.getContr(), order.getSettlDay());
+        assert market != null;
 
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.revise(lots);
-        model.insertExec(book.getId(), exec);
+        model.insertExec(market.getId(), exec);
 
         // Final commit phase cannot fail.
-        book.reviseOrder(order, lots, now);
+        market.reviseOrder(order, lots, now);
 
         trans.clear();
-        trans.book = book;
+        trans.market = market;
         trans.order = order;
         trans.execs.insertBack(exec);
         return trans;
@@ -472,20 +472,20 @@ public final class Serv implements AutoCloseable {
         if (order.isDone()) {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
-        final Book book = findBook(order.getContr(), order.getSettlDay());
-        assert book != null;
+        final Market market = findMarket(order.getContr(), order.getSettlDay());
+        assert market != null;
 
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.cancel();
-        model.insertExec(book.getId(), exec);
+        model.insertExec(market.getId(), exec);
 
         // Final commit phase cannot fail.
-        book.cancelOrder(order, now);
+        market.cancelOrder(order, now);
         accnt.removeOrder(order);
 
         trans.clear();
-        trans.book = book;
+        trans.market = market;
         trans.order = order;
         trans.execs.insertBack(exec);
         return trans;
@@ -513,7 +513,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
         final long now = System.currentTimeMillis();
-        model.updateExec(Book.toId(trade.getContrId(), trade.getSettlDay()), id, now);
+        model.updateExec(Market.toId(trade.getContrId(), trade.getSettlDay()), id, now);
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);

@@ -12,8 +12,8 @@
   </servlet>
 
   <servlet>
-    <servlet-name>book</servlet-name>
-    <servlet-class>com.swirlycloud.back.BookServlet</servlet-class>
+    <servlet-name>market</servlet-name>
+    <servlet-class>com.swirlycloud.back.MarketServlet</servlet-class>
   </servlet>
 
   <servlet>
@@ -27,8 +27,8 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>book</servlet-name>
-    <url-pattern>/api/book/*</url-pattern>
+    <servlet-name>market</servlet-name>
+    <url-pattern>/api/market/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

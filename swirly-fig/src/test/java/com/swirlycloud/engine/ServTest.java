@@ -14,7 +14,7 @@ import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.State;
 import com.swirlycloud.engine.Accnt;
-import com.swirlycloud.engine.Book;
+import com.swirlycloud.engine.Market;
 import com.swirlycloud.engine.Serv;
 import com.swirlycloud.engine.Trans;
 import com.swirlycloud.mock.MockModel;
@@ -25,13 +25,13 @@ public final class ServTest {
         try (final Serv s = new Serv(new MockModel())) {
             final Accnt accnt = s.getLazyAccnt("MARAYL");
             final int settlDay = ymdToJd(2014, 3, 14);
-            final Book book = s.getLazyBook("EURUSD", settlDay);
+            final Market market = s.getLazyMarket("EURUSD", settlDay);
 
             final Trans trans = new Trans();
-            final Order order = s.placeOrder(accnt, book, "", Action.BUY, 12345, 5, 1, trans)
+            final Order order = s.placeOrder(accnt, market, "", Action.BUY, 12345, 5, 1, trans)
                     .getOrder();
             assertEquals(accnt.getUser(), order.getUser());
-            assertEquals(book.getContr(), order.getContr());
+            assertEquals(market.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());
             assertEquals("", order.getRef());
             assertEquals(State.NEW, order.getState());
@@ -47,7 +47,7 @@ public final class ServTest {
 
             s.reviseOrder(accnt, order, 4, trans);
             assertEquals(accnt.getUser(), order.getUser());
-            assertEquals(book.getContr(), order.getContr());
+            assertEquals(market.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());
             assertEquals("", order.getRef());
             assertEquals(State.REVISE, order.getState());

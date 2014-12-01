@@ -111,7 +111,7 @@ function User(val) {
     self.email = ko.observable(val.email);
 }
 
-function Book(val, contrs) {
+function Market(val, contrs) {
     var self = this;
 
     var contr = contrs[val.contr];

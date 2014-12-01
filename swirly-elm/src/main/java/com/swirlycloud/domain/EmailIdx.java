@@ -26,8 +26,7 @@ public final class EmailIdx {
     public final void insert(User user) {
         assert user != null;
         if (user.getEmail() != null) {
-            final int bucket = indexFor(user.getEmail().hashCode(),
-                    buckets.length);
+            final int bucket = indexFor(user.getEmail().hashCode(), buckets.length);
             user.emailNext = buckets[bucket];
             buckets[bucket] = user;
         }

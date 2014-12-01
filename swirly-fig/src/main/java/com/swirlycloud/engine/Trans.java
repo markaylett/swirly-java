@@ -14,7 +14,7 @@ import com.swirlycloud.util.Queue;
 import com.swirlycloud.util.SlNode;
 
 public final class Trans implements Printable {
-    Book book;
+    Market market;
     Order order;
     final Queue matches = new Queue();
     /**
@@ -27,7 +27,7 @@ public final class Trans implements Printable {
     Posn posn;
 
     final void clear() {
-        book = null;
+        market = null;
         order = null;
         matches.clear();
         execs.clear();
@@ -37,13 +37,13 @@ public final class Trans implements Printable {
     @Override
     public final void print(StringBuilder sb, Object arg) {
         final User user = (User) arg;
-        if (book != null) {
-            sb.append("{\"book\":");
+        if (market != null) {
+            sb.append("{\"market\":");
             // FIXME: number of levels.
-            book.print(sb, Integer.valueOf(5));
+            market.print(sb, Integer.valueOf(5));
             sb.append(',');
         } else {
-            sb.append('{');            
+            sb.append('{');
         }
         sb.append("\"orders\":[");
         int i = 0;

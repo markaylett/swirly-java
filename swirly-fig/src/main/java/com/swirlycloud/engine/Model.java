@@ -23,11 +23,11 @@ public interface Model {
 
     void insertUser(User user);
 
-    void insertExecList(long bookId, Exec first);
+    void insertExecList(long marketId, Exec first);
 
-    void insertExec(long bookId, Exec exec);
+    void insertExec(long marketId, Exec exec);
 
-    void updateExec(long bookId, long id, long modified);
+    void updateExec(long marketId, long id, long modified);
 
     void selectAsset(UnaryCallback<Asset> cb);
 

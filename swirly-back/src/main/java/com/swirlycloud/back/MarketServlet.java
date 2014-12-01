@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
-public final class BookServlet extends HttpServlet {
+public final class MarketServlet extends HttpServlet {
 
-    private static final Integer LEVELS = Integer.valueOf(5);
+    private static final Integer DEPTH = Integer.valueOf(5);
 
     @Override
     public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
@@ -37,11 +37,11 @@ public final class BookServlet extends HttpServlet {
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
         if (parts.length == 0) {
-            ctx.getBook(sb, LEVELS);
+            ctx.getMarket(sb, DEPTH);
         } else if (parts.length == 1) {
-            ctx.getBook(sb, parts[0], LEVELS);
+            ctx.getMarket(sb, parts[0], DEPTH);
         } else if (parts.length == 2) {
-            if (!ctx.getBook(sb, parts[0], Integer.parseInt(parts[1]), LEVELS)) {
+            if (!ctx.getMarket(sb, parts[0], Integer.parseInt(parts[1]), DEPTH)) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }

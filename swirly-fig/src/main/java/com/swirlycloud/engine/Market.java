@@ -18,11 +18,11 @@ import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Printable;
 import com.swirlycloud.util.RbNode;
 
-public final class Book extends BasicRbNode implements Identifiable, Printable {
+public final class Market extends BasicRbNode implements Identifiable, Printable {
     /**
      * Maximum price levels in view.
      */
-    private static final int LEVEL_MAX = 5;
+    private static final int DEPTH_MAX = 5;
 
     private final long id;
     private final Contr contr;
@@ -153,14 +153,14 @@ public final class Book extends BasicRbNode implements Identifiable, Printable {
         sb.append("]}");
     }
 
-    public Book(Contr contr, int settlDay) {
+    public Market(Contr contr, int settlDay) {
         this.id = toId(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
     }
 
     /**
-     * Synthetic book id.
+     * Synthetic market id.
      */
 
     public static long toId(long contrId, int settlDay) {
@@ -190,7 +190,7 @@ public final class Book extends BasicRbNode implements Identifiable, Printable {
         // Round-up to minimum.
         levels = Math.max(levels, 1);
         // Round-down to maximum.
-        levels = Math.min(levels, LEVEL_MAX);
+        levels = Math.min(levels, DEPTH_MAX);
         if (levels == 1) {
             printTob(sb);
         } else {

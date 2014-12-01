@@ -64,7 +64,7 @@ function ViewModel() {
                 email: email
             })
         }).done(function(raw) {
-            self.books.push(new User(mnem, display, email));
+            self.markets.push(new User(mnem, display, email));
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });

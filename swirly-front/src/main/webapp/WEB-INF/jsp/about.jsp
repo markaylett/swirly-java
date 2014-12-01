@@ -18,7 +18,7 @@
 
       <div>
         <h2>About</h2>
-        <p class="lead">The gmail of finance.</p>
+        <p class="lead">Social finance.</p>
       </div>
 
     </div>

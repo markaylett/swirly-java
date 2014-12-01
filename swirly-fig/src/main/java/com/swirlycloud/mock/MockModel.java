@@ -37,15 +37,15 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void insertExecList(long bookId, Exec first) {
+    public final void insertExecList(long marketId, Exec first) {
     }
 
     @Override
-    public final void insertExec(long bookId, Exec exec) {
+    public final void insertExec(long marketId, Exec exec) {
     }
 
     @Override
-    public final void updateExec(long bookId, long id, long modified) {
+    public final void updateExec(long marketId, long id, long modified) {
     }
 
     @Override

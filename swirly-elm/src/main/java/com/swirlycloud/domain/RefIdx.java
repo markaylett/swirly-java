@@ -39,8 +39,7 @@ public final class RefIdx {
     public final void insert(Order order) {
         assert order != null;
         if (order.getRef() != null) {
-            final int bucket = indexFor(hashCode(order.getUserId(), order.getRef()),
-                    buckets.length);
+            final int bucket = indexFor(hashCode(order.getUserId(), order.getRef()), buckets.length);
             order.refNext = buckets[bucket];
             buckets[bucket] = order;
         }

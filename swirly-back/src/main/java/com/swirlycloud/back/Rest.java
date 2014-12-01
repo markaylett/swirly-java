@@ -16,7 +16,7 @@ import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.engine.Accnt;
-import com.swirlycloud.engine.Book;
+import com.swirlycloud.engine.Market;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.engine.Serv;
 import com.swirlycloud.engine.Trans;
@@ -68,49 +68,49 @@ public final class Rest {
         user.print(sb, null);
     }
 
-    public final synchronized void getBook(StringBuilder sb, Integer levels) {
+    public final synchronized void getMarket(StringBuilder sb, Integer levels) {
         sb.append('[');
-        RbNode node = serv.getFirstBook();
+        RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
-            final Book book = (Book) node;
+            final Market market = (Market) node;
             if (i > 0) {
                 sb.append(',');
             }
-            book.print(sb, levels);
+            market.print(sb, levels);
             ++i;
         }
         sb.append(']');
     }
 
-    public final synchronized void getBook(StringBuilder sb, String cmnem, Integer levels) {
+    public final synchronized void getMarket(StringBuilder sb, String cmnem, Integer levels) {
         sb.append('[');
-        RbNode node = serv.getFirstBook();
+        RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
-            final Book book = (Book) node;
-            if (!book.getContr().getMnem().equals(cmnem)) {
+            final Market market = (Market) node;
+            if (!market.getContr().getMnem().equals(cmnem)) {
                 continue;
             }
             if (i > 0) {
                 sb.append(',');
             }
-            book.print(sb, levels);
+            market.print(sb, levels);
             ++i;
         }
         sb.append(']');
     }
 
-    public final synchronized boolean getBook(StringBuilder sb, String cmnem, int settlDate,
+    public final synchronized boolean getMarket(StringBuilder sb, String cmnem, int settlDate,
             Integer levels) {
         final Contr contr = (Contr) serv.findRec(Kind.CONTR, cmnem);
         if (contr == null) {
             return false;
         }
         final int settlDay = isoToJd(settlDate);
-        final Book book = serv.findBook(contr, settlDay);
-        if (book == null) {
+        final Market market = serv.findMarket(contr, settlDay);
+        if (market == null) {
             return false;
         }
-        book.print(sb, levels);
+        market.print(sb, levels);
         return true;
     }
 
@@ -158,8 +158,8 @@ public final class Rest {
     public final synchronized void postOrder(StringBuilder sb, String email, String cmnem,
             int settlDate, String ref, Action action, long ticks, long lots, long minLots) {
         final Accnt accnt = serv.getLazyAccntByEmail(email);
-        final Book book = serv.getLazyBook(cmnem, isoToJd(settlDate));
-        final Trans trans = serv.placeOrder(accnt, book, ref, action, ticks, lots, minLots,
+        final Market market = serv.getLazyMarket(cmnem, isoToJd(settlDate));
+        final Trans trans = serv.placeOrder(accnt, market, ref, action, ticks, lots, minLots,
                 new Trans());
         trans.print(sb, accnt.getUser());
     }

@@ -53,7 +53,7 @@ public final class DatastoreModel implements Model {
     private static final String USER_EMAIL_KIND = "UserEmail";
     private static final String ORDER_KIND = Kind.ORDER.camelName();
     private static final String EXEC_KIND = Kind.EXEC.camelName();
-    private static final String BOOK_KIND = "Book";
+    private static final String MARKET_KIND = "Market";
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -124,7 +124,7 @@ public final class DatastoreModel implements Model {
     }
 
     private final Entity getGroup(Transaction txn, String name) {
-        // Lazily for now, but we may want to explicitly create books in the future.
+        // Lazily for now, but we may want to explicitly create markets in the future.
         final Key key = KeyFactory.createKey(GROUP_KIND, name);
         Entity entity;
         try {
@@ -136,9 +136,9 @@ public final class DatastoreModel implements Model {
         return entity;
     }
 
-    private final Entity getBook(Transaction txn, long id) {
-        // Lazily for now, but we may want to explicitly create books in the future.
-        final Key key = KeyFactory.createKey(BOOK_KIND, id);
+    private final Entity getMarket(Transaction txn, long id) {
+        // Lazily for now, but we may want to explicitly create markets in the future.
+        final Key key = KeyFactory.createKey(MARKET_KIND, id);
         Entity entity;
         try {
             entity = datastore.get(txn, key);
@@ -167,8 +167,8 @@ public final class DatastoreModel implements Model {
         }
     }
 
-    private final void selectBook(UnaryCallback<Entity> cb) {
-        final Query q = new Query(BOOK_KIND);
+    private final void selectMarket(UnaryCallback<Entity> cb) {
+        final Query q = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             cb.call(entity);
@@ -185,7 +185,7 @@ public final class DatastoreModel implements Model {
     public final void insertUser(User user) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            // User entities have common ancestor for strong consistency. 
+            // User entities have common ancestor for strong consistency.
             final Key parent = getGroup(txn, USER_KIND).getKey();
             final Entity entity = newUser(parent, user);
             // Unique indexes.
@@ -203,13 +203,13 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExecList(long bookId, Exec first) {
+    public final void insertExecList(long marketId, Exec first) {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
         final Map<Long, Entity> orders = new HashMap<>();
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getBook(txn, bookId).getKey();
+            final Key parent = getMarket(txn, marketId).getKey();
             for (SlNode node = first; node != null; node = node.slNext()) {
                 final Exec exec = (Exec) node;
                 if (exec.getState() == State.NEW) {
@@ -238,10 +238,10 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExec(long bookId, Exec exec) {
+    public final void insertExec(long marketId, Exec exec) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getBook(txn, bookId).getKey();
+            final Key parent = getMarket(txn, marketId).getKey();
             if (exec.getState() == State.NEW) {
                 datastore.put(newOrder(parent, exec));
             } else {
@@ -257,10 +257,10 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void updateExec(long bookId, long id, long modified) {
+    public final void updateExec(long marketId, long id, long modified) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getBook(txn, bookId).getKey();
+            final Key parent = getMarket(txn, marketId).getKey();
             final Entity entity = getExec(txn, parent, id);
             entity.setProperty("confirmed", Boolean.TRUE);
             entity.setUnindexedProperty("modified", modified);
@@ -303,7 +303,7 @@ public final class DatastoreModel implements Model {
     @Override
     public final void selectOrder(final UnaryCallback<Order> cb) {
         final Filter filter = new FilterPredicate("resd", FilterOperator.GREATER_THAN, 0);
-        selectBook(new UnaryCallback<Entity>() {
+        selectMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
                 final Query q = new Query(ORDER_KIND, arg.getKey()).setFilter(filter);
@@ -341,7 +341,7 @@ public final class DatastoreModel implements Model {
         final Filter confirmedFilter = new FilterPredicate("confirmed", FilterOperator.EQUAL,
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(stateFilter, confirmedFilter);
-        selectBook(new UnaryCallback<Entity>() {
+        selectMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
                 final Query q = new Query(EXEC_KIND, arg.getKey()).setFilter(filter);
@@ -388,7 +388,7 @@ public final class DatastoreModel implements Model {
     public final void selectPosn(final UnaryCallback<Posn> cb) {
         final Map<Long, Posn> m = new HashMap<>();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
-        selectBook(new UnaryCallback<Entity>() {
+        selectMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
                 final Query q = new Query(EXEC_KIND).setFilter(filter);

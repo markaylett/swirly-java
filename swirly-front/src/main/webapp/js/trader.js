@@ -28,7 +28,7 @@ function ViewModel(contrs) {
 
     self.contrs = contrs;
 
-    self.books = ko.observableArray([]);
+    self.markets = ko.observableArray([]);
     self.orders = ko.observableArray([]);
     self.trades = ko.observableArray([]);
     self.posns = ko.observableArray([]);
@@ -42,7 +42,7 @@ function ViewModel(contrs) {
     self.price = ko.observable();
     self.lots = ko.observable();
 
-    self.books.extend({ rateLimit: 25 });
+    self.markets.extend({ rateLimit: 25 });
     self.orders.extend({ rateLimit: 25 });
     self.trades.extend({ rateLimit: 25 });
     self.posns.extend({ rateLimit: 25 });
@@ -148,8 +148,8 @@ function ViewModel(contrs) {
         return true;
     };
 
-    self.findBook = function(id) {
-        return ko.utils.arrayFirst(self.books(), function(val) {
+    self.findMarket = function(id) {
+        return ko.utils.arrayFirst(self.markets(), function(val) {
             return val.id() === id;
         });
     };
@@ -185,12 +185,12 @@ function ViewModel(contrs) {
     };
 
     self.applyTrans = function(raw) {
-        if ('book' in raw) {
-            book = self.findBook(raw.book.id);
-            if (book !== null) {
-                book.update(raw.book);
+        if ('market' in raw) {
+            market = self.findMarket(raw.market.id);
+            if (market !== null) {
+                market.update(raw.market);
             } else {
-                self.books.push(new Book(raw.book, self.contrs));
+                self.markets.push(new Market(raw.market, self.contrs));
             }
         }
         $.each(raw.orders, function(key, val) {
@@ -224,12 +224,12 @@ function ViewModel(contrs) {
 
     self.refreshAll = function() {
 
-        $.getJSON('/api/book', function(raw) {
+        $.getJSON('/api/market', function(raw) {
 
             var cooked = $.map(raw, function(val) {
-                return new Book(val, self.contrs);
+                return new Market(val, self.contrs);
             });
-            self.books(cooked);
+            self.markets(cooked);
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });
