@@ -7,6 +7,8 @@ package com.swirlycloud.back;
 
 import static com.swirlycloud.util.Date.isoToJd;
 
+import java.io.IOException;
+
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Exec;
@@ -31,66 +33,69 @@ public final class Rest {
         serv = new Serv(model);
     }
 
-    public final synchronized boolean getRec(StringBuilder sb) {
-        sb.append("{\"assets\":");
-        getRec(sb, RecType.ASSET);
-        sb.append(",\"contrs\":");
-        getRec(sb, RecType.CONTR);
-        sb.append("}");
+    public final synchronized boolean getRec(Appendable out) throws IOException {
+        out.append("{\"assets\":");
+        getRec(out, RecType.ASSET);
+        out.append(",\"contrs\":");
+        getRec(out, RecType.CONTR);
+        out.append("}");
         return true;
     }
 
-    public final synchronized boolean getRec(StringBuilder sb, RecType recType) {
-        sb.append('[');
+    public final synchronized boolean getRec(Appendable out, RecType recType) throws IOException {
+        out.append('[');
         SlNode node = serv.getFirstRec(recType);
         for (int i = 0; node != null; node = node.slNext()) {
             final Rec rec = (Rec) node;
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            rec.print(sb, null);
+            rec.toJson(out, null);
             ++i;
         }
-        sb.append(']');
+        out.append(']');
         return true;
     }
 
-    public final synchronized boolean getRec(StringBuilder sb, RecType recType, String mnem) {
+    public final synchronized boolean getRec(Appendable out, RecType recType, String mnem)
+            throws IOException {
         final Rec rec = serv.findRec(recType, mnem);
         if (rec == null) {
             return false;
         }
-        rec.print(sb, null);
+        rec.toJson(out, null);
         return true;
     }
 
-    public final synchronized void registerUser(StringBuilder sb, String mnem, String display,
-            String email) {
+    public final synchronized void registerUser(Appendable out, String mnem, String display,
+            String email) throws IOException {
         final User user = serv.registerUser(mnem, display, email);
-        user.print(sb, null);
+        user.toJson(out, null);
     }
 
-    public final synchronized boolean getMarket(StringBuilder sb, Integer levels) {
-        sb.append('[');
+    public final synchronized boolean getMarket(Appendable out, Integer levels)
+            throws IOException {
+        out.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Market market = (Market) node;
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            market.print(sb, levels);
+            market.toJson(out, levels);
             ++i;
         }
-        sb.append(']');
+        out.append(']');
         return true;
     }
 
-    public final synchronized boolean getMarket(StringBuilder sb, String cmnem, Integer levels) {
+    public final synchronized boolean getMarket(Appendable out, String cmnem, Integer levels)
+            throws IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
         }
-        sb.append('[');
+        out.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Market market = (Market) node;
@@ -98,17 +103,17 @@ public final class Rest {
                 continue;
             }
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            market.print(sb, levels);
+            market.toJson(out, levels);
             ++i;
         }
-        sb.append(']');
+        out.append(']');
         return true;
     }
 
-    public final synchronized boolean getMarket(StringBuilder sb, String cmnem, int settlDate,
-            Integer levels) {
+    public final synchronized boolean getMarket(Appendable out, String cmnem, int settlDate,
+            Integer levels) throws IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
@@ -118,23 +123,23 @@ public final class Rest {
         if (market == null) {
             return false;
         }
-        market.print(sb, levels);
+        market.toJson(out, levels);
         return true;
     }
 
-    public final synchronized boolean getAccnt(StringBuilder sb, String email) {
-        sb.append("{\"orders\":");
-        getOrder(sb, email);
-        sb.append(",\"trades\":");
-        getTrade(sb, email);
-        sb.append(",\"posns\":");
-        getPosn(sb, email);
-        sb.append("}");
+    public final synchronized boolean getAccnt(Appendable out, String email) throws IOException {
+        out.append("{\"orders\":");
+        getOrder(out, email);
+        out.append(",\"trades\":");
+        getTrade(out, email);
+        out.append(",\"posns\":");
+        getPosn(out, email);
+        out.append("}");
         return true;
     }
 
-    public final synchronized boolean deleteOrder(StringBuilder sb, String email, String cmnem,
-            int settlDate, long id) {
+    public final synchronized boolean deleteOrder(Appendable out, String email, String cmnem,
+            int settlDate, long id) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -145,31 +150,31 @@ public final class Rest {
             return false;
         }
         final Trans trans = serv.cancelOrder(accnt, market, id, new Trans());
-        trans.print(sb, null);
+        trans.toJson(out, null);
         return true;
     }
 
-    public final synchronized boolean getOrder(StringBuilder sb, String email) {
+    public final synchronized boolean getOrder(Appendable out, String email) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
         }
-        sb.append('[');
+        out.append('[');
         RbNode node = accnt.getFirstOrder();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Order order = (Order) node;
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            order.print(sb, null);
+            order.toJson(out, null);
             ++i;
         }
-        sb.append(']');
+        out.append(']');
         return true;
     }
 
-    public final synchronized boolean getOrder(StringBuilder sb, String email, String cmnem,
-            int settlDate, long id) {
+    public final synchronized boolean getOrder(Appendable out, String email, String cmnem,
+            int settlDate, long id) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -183,12 +188,13 @@ public final class Rest {
         if (order == null) {
             return false;
         }
-        order.print(sb, null);
+        order.toJson(out, null);
         return true;
     }
 
-    public final synchronized boolean postOrder(StringBuilder sb, String email, String cmnem,
-            int settlDate, String ref, Action action, long ticks, long lots, long minLots) {
+    public final synchronized boolean postOrder(Appendable out, String email, String cmnem,
+            int settlDate, String ref, Action action, long ticks, long lots, long minLots)
+            throws IOException {
         final Accnt accnt = serv.getLazyAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -199,12 +205,12 @@ public final class Rest {
         }
         final Trans trans = serv.placeOrder(accnt, market, ref, action, ticks, lots, minLots,
                 new Trans());
-        trans.print(sb, accnt.getUser());
+        trans.toJson(out, accnt.getUser());
         return true;
     }
 
-    public final synchronized boolean putOrder(StringBuilder sb, String email, String cmnem,
-            int settlDate, long id, long lots) {
+    public final synchronized boolean putOrder(Appendable out, String email, String cmnem,
+            int settlDate, long id, long lots) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -219,30 +225,30 @@ public final class Rest {
         } else {
             serv.cancelOrder(accnt, market, id, trans);
         }
-        trans.print(sb, null);
+        trans.toJson(out, null);
         return true;
     }
 
-    public final synchronized boolean getTrade(StringBuilder sb, String email) {
+    public final synchronized boolean getTrade(Appendable out, String email) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
         }
-        sb.append('[');
+        out.append('[');
         RbNode node = accnt.getFirstTrade();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Exec trade = (Exec) node;
             if (i++ > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            trade.print(sb, null);
+            trade.toJson(out, null);
         }
-        sb.append(']');
+        out.append(']');
         return true;
     }
 
-    public final synchronized boolean getTrade(StringBuilder sb, String email, String cmnem,
-            int settlDate, long id) {
+    public final synchronized boolean getTrade(Appendable out, String email, String cmnem,
+            int settlDate, long id) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -256,11 +262,11 @@ public final class Rest {
         if (trade == null) {
             return false;
         }
-        trade.print(sb, null);
+        trade.toJson(out, null);
         return true;
     }
 
-    public final synchronized boolean deleteTrade(StringBuilder sb, String email, String cmnem,
+    public final synchronized boolean deleteTrade(String email, String cmnem,
             int settlDate, long id) {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
@@ -275,31 +281,32 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized boolean getPosn(StringBuilder sb, String email) {
+    public final synchronized boolean getPosn(Appendable out, String email) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
         }
-        sb.append('[');
+        out.append('[');
         RbNode node = accnt.getFirstPosn();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Posn posn = (Posn) node;
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            posn.print(sb, null);
+            posn.toJson(out, null);
             ++i;
         }
-        sb.append(']');
+        out.append(']');
         return true;
     }
 
-    public final synchronized boolean getPosn(StringBuilder sb, String email, String cmnem) {
+    public final synchronized boolean getPosn(Appendable out, String email, String cmnem)
+            throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
         }
-        sb.append('[');
+        out.append('[');
         RbNode node = accnt.getFirstPosn();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Posn posn = (Posn) node;
@@ -307,17 +314,17 @@ public final class Rest {
                 continue;
             }
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            posn.print(sb, null);
+            posn.toJson(out, null);
             ++i;
         }
-        sb.append(']');
+        out.append(']');
         return true;
     }
 
-    public final synchronized boolean getPosn(StringBuilder sb, String email, String cmnem,
-            int settlDate) {
+    public final synchronized boolean getPosn(Appendable out, String email, String cmnem,
+            int settlDate) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -331,7 +338,7 @@ public final class Rest {
         if (posn == null) {
             return false;
         }
-        posn.print(sb, null);
+        posn.toJson(out, null);
         return true;
     }
 }

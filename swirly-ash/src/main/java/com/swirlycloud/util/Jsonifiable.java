@@ -5,7 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
-public interface Printable {
-    // TODO: consider using Appendable.
-    void print(StringBuilder sb, Object arg);
+import java.io.IOException;
+
+public interface Jsonifiable {
+    void toJson(Appendable out, Object arg) throws IOException;
 }

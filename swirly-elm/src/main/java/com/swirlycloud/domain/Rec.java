@@ -8,9 +8,9 @@ package com.swirlycloud.domain;
 import com.swirlycloud.util.BasicSlNode;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Memorable;
-import com.swirlycloud.util.Printable;
+import com.swirlycloud.util.Jsonifiable;
 
-public abstract class Rec extends BasicSlNode implements Identifiable, Memorable, Printable {
+public abstract class Rec extends BasicSlNode implements Identifiable, Memorable, Jsonifiable {
     private transient Rec idNext;
     private transient Rec mnemNext;
     protected final RecType recType;

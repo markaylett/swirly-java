@@ -5,16 +5,19 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
+import java.io.IOException;
+
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.User;
-import com.swirlycloud.util.Printable;
+import com.swirlycloud.util.AshUtil;
+import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.Queue;
 import com.swirlycloud.util.SlNode;
 
-public final class Trans implements Printable {
+public final class Trans implements Jsonifiable {
     Market market;
     Order order;
     final Queue matches = new Queue();
@@ -36,21 +39,26 @@ public final class Trans implements Printable {
     }
 
     @Override
-    public final void print(StringBuilder sb, Object arg) {
+    public final String toString() {
+        return AshUtil.toJson(this, null);
+    }
+
+    @Override
+    public final void toJson(Appendable out, Object arg) throws IOException {
         final User user = (User) arg;
         if (market != null) {
-            sb.append("{\"market\":");
+            out.append("{\"market\":");
             // FIXME: number of levels.
-            market.print(sb, Integer.valueOf(5));
-            sb.append(',');
+            market.toJson(out, Integer.valueOf(5));
+            out.append(',');
         } else {
-            sb.append('{');
+            out.append('{');
         }
-        sb.append("\"orders\":[");
+        out.append("\"orders\":[");
         int i = 0;
         if (order != null) {
             assert user != null && order.getUserId() == user.getId();
-            order.print(sb, null);
+            order.toJson(out, null);
             ++i;
         }
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
@@ -59,12 +67,12 @@ public final class Trans implements Printable {
                 continue;
             }
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            match.makerOrder.print(sb, null);
+            match.makerOrder.toJson(out, null);
             ++i;
         }
-        sb.append("],\"execs\":[");
+        out.append("],\"execs\":[");
         i = 0;
         for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
@@ -72,18 +80,18 @@ public final class Trans implements Printable {
                 continue;
             }
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
-            exec.print(sb, null);
+            exec.toJson(out, null);
             ++i;
         }
         // Position is optional.
         if (posn != null) {
-            sb.append("],\"posn\":");
-            posn.print(sb, null);
-            sb.append('}');
+            out.append("],\"posn\":");
+            posn.toJson(out, null);
+            out.append('}');
         } else {
-            sb.append("]}");
+            out.append("]}");
         }
     }
 

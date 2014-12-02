@@ -7,13 +7,16 @@ package com.swirlycloud.domain;
 
 import static com.swirlycloud.util.Date.jdToIso;
 
+import java.io.IOException;
+
+import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.BasicRbDlNode;
 import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
-import com.swirlycloud.util.Printable;
+import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.RbNode;
 
-public final class Order extends BasicRbDlNode implements Identifiable, Printable, Instruct {
+public final class Order extends BasicRbDlNode implements Identifiable, Jsonifiable, Instruct {
 
     // Internals.
     // Singly-linked buckets.
@@ -117,30 +120,28 @@ public final class Order extends BasicRbDlNode implements Identifiable, Printabl
 
     @Override
     public final String toString() {
-        final StringBuilder sb = new StringBuilder();
-        print(sb, null);
-        return sb.toString();
+        return AshUtil.toJson(this, null);
     }
 
     @Override
-    public final void print(StringBuilder sb, Object arg) {
-        sb.append("{\"id\":").append(id);
-        sb.append(",\"user\":\"").append(getRecMnem(user));
-        sb.append("\",\"contr\":\"").append(getRecMnem(contr));
-        sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
-        sb.append(",\"ref\":\"").append(ref);
-        sb.append("\",\"state\":\"").append(state);
-        sb.append("\",\"action\":\"").append(action);
-        sb.append("\",\"ticks\":").append(ticks);
-        sb.append(",\"lots\":").append(lots);
-        sb.append(",\"resd\":").append(resd);
-        sb.append(",\"exec\":").append(exec);
-        sb.append(",\"lastTicks\":").append(lastTicks);
-        sb.append(",\"lastLots\":").append(lastLots);
-        sb.append(",\"minLots\":").append(minLots);
-        sb.append(",\"created\":").append(created);
-        sb.append(",\"modified\":").append(modified);
-        sb.append("}");
+    public final void toJson(Appendable out, Object arg) throws IOException {
+        out.append("{\"id\":").append(String.valueOf(id));
+        out.append(",\"user\":\"").append(getRecMnem(user));
+        out.append("\",\"contr\":\"").append(getRecMnem(contr));
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"ref\":\"").append(ref);
+        out.append("\",\"state\":\"").append(state.name());
+        out.append("\",\"action\":\"").append(action.name());
+        out.append("\",\"ticks\":").append(String.valueOf(ticks));
+        out.append(",\"lots\":").append(String.valueOf(lots));
+        out.append(",\"resd\":").append(String.valueOf(resd));
+        out.append(",\"exec\":").append(String.valueOf(exec));
+        out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+        out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+        out.append(",\"minLots\":").append(String.valueOf(minLots));
+        out.append(",\"created\":").append(String.valueOf(created));
+        out.append(",\"modified\":").append(String.valueOf(modified));
+        out.append("}");
     }
 
     public final void enrich(User user, Contr contr) {

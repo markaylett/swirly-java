@@ -41,31 +41,30 @@ public final class RecServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final Rest rest = Context.getRest();
-        final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
 
         boolean found = false;
         if (parts.length == 0) {
-            found = rest.getRec(sb);
+            found = rest.getRec(resp.getWriter());
         } else if ("asset".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getRec(sb, RecType.ASSET);
+                found = rest.getRec(resp.getWriter(), RecType.ASSET);
             } else if (parts.length == 2) {
-                found = rest.getRec(sb, RecType.ASSET, parts[CMNEM_PART]);
+                found = rest.getRec(resp.getWriter(), RecType.ASSET, parts[CMNEM_PART]);
             }
         } else if ("contr".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getRec(sb, RecType.CONTR);
+                found = rest.getRec(resp.getWriter(), RecType.CONTR);
             } else if (parts.length == 2) {
-                found = rest.getRec(sb, RecType.CONTR, parts[CMNEM_PART]);
+                found = rest.getRec(resp.getWriter(), RecType.CONTR, parts[CMNEM_PART]);
             }
         } else if ("user".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getRec(sb, RecType.USER);
+                found = rest.getRec(resp.getWriter(), RecType.USER);
             } else if (parts.length == 2) {
-                found = rest.getRec(sb, RecType.USER, parts[CMNEM_PART]);
+                found = rest.getRec(resp.getWriter(), RecType.USER, parts[CMNEM_PART]);
             }
         }
 
@@ -77,7 +76,6 @@ public final class RecServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().append(sb);
     }
 
     @Override
@@ -92,9 +90,7 @@ public final class RecServlet extends HttpServlet {
             return;
         }
         final String email = user.getEmail();
-
         final Rest rest = Context.getRest();
-        final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
@@ -116,12 +112,10 @@ public final class RecServlet extends HttpServlet {
             return;
         }
 
-        rest.registerUser(sb, r.getMnem(), r.getDisplay(), email);
+        rest.registerUser(resp.getWriter(), r.getMnem(), r.getDisplay(), email);
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
-        log(sb.toString());
-        resp.getWriter().append(sb);
     }
 }

@@ -7,13 +7,16 @@ package com.swirlycloud.domain;
 
 import static com.swirlycloud.util.Date.jdToIso;
 
+import java.io.IOException;
+
+import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.BasicRbNode;
 import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
-import com.swirlycloud.util.Printable;
+import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.RbNode;
 
-public final class Market extends BasicRbNode implements Identifiable, Printable {
+public final class Market extends BasicRbNode implements Identifiable, Jsonifiable {
     /**
      * Maximum price levels in view.
      */
@@ -35,35 +38,35 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
         return action == Action.BUY ? bidSide : offerSide;
     }
 
-    private final void printTob(StringBuilder sb) {
-        sb.append("{\"id\":").append(key);
-        sb.append(",\"contr\":\"").append(getRecMnem(contr));
-        sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
+    private final void toJsonTob(Appendable out) throws IOException {
+        out.append("{\"id\":").append(String.valueOf(key));
+        out.append(",\"contr\":\"").append(getRecMnem(contr));
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
 
         final Level firstBid = (Level) bidSide.getFirstLevel();
         if (firstBid != null) {
-            sb.append(",\"bidTicks\":").append(firstBid.getTicks());
-            sb.append(",\"bidLots\":").append(firstBid.getLots());
-            sb.append(",\"bidCount\":").append(firstBid.getCount());
+            out.append(",\"bidTicks\":").append(String.valueOf(firstBid.getTicks()));
+            out.append(",\"bidLots\":").append(String.valueOf(firstBid.getLots()));
+            out.append(",\"bidCount\":").append(String.valueOf(firstBid.getCount()));
         } else {
-            sb.append(",\"bidTicks\":0,\"bidLots\":0,\"bidCount\":0");
+            out.append(",\"bidTicks\":0,\"bidLots\":0,\"bidCount\":0");
         }
         final Level firstOffer = (Level) offerSide.getFirstLevel();
         if (firstOffer != null) {
-            sb.append(",\"offerTicks\":").append(firstOffer.getTicks());
-            sb.append(",\"offerLots\":").append(firstOffer.getLots());
-            sb.append(",\"offerCount\":").append(firstOffer.getCount());
+            out.append(",\"offerTicks\":").append(String.valueOf(firstOffer.getTicks()));
+            out.append(",\"offerLots\":").append(String.valueOf(firstOffer.getLots()));
+            out.append(",\"offerCount\":").append(String.valueOf(firstOffer.getCount()));
         } else {
-            sb.append(",\"offerTicks\":0,\"offerLots\":0,\"offerCount\":0");
+            out.append(",\"offerTicks\":0,\"offerLots\":0,\"offerCount\":0");
         }
-        sb.append("}");
+        out.append("}");
     }
 
-    private final void printDepth(StringBuilder sb, int levels) {
-        sb.append("{\"id\":").append(key);
-        sb.append(",\"contr\":\"").append(getRecMnem(contr));
-        sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
-        sb.append(",\"bidTicks\":[");
+    private final void toJsonDepth(Appendable out, int levels) throws IOException {
+        out.append("{\"id\":").append(String.valueOf(key));
+        out.append(",\"contr\":\"").append(getRecMnem(contr));
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"bidTicks\":[");
 
         final RbNode firstBid = bidSide.getFirstLevel();
         final RbNode firstOffer = offerSide.getFirstLevel();
@@ -71,87 +74,87 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
         RbNode node = firstBid;
         for (int i = 0; i < levels; ++i) {
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
             if (node != null) {
                 final Level level = (Level) node;
-                sb.append(level.getTicks());
+                out.append(String.valueOf(level.getTicks()));
                 node = node.rbNext();
             } else {
-                sb.append('0');
+                out.append('0');
             }
         }
-        sb.append("],\"bidLots\":[");
+        out.append("],\"bidLots\":[");
         node = firstBid;
         for (int i = 0; i < levels; ++i) {
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
             if (node != null) {
                 final Level level = (Level) node;
-                sb.append(level.getLots());
+                out.append(String.valueOf(level.getLots()));
                 node = node.rbNext();
             } else {
-                sb.append('0');
+                out.append('0');
             }
         }
-        sb.append("],\"bidCount\":[");
+        out.append("],\"bidCount\":[");
         node = firstBid;
         for (int i = 0; i < levels; ++i) {
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
             if (node != null) {
                 final Level level = (Level) node;
-                sb.append(level.getCount());
+                out.append(String.valueOf(level.getCount()));
                 node = node.rbNext();
             } else {
-                sb.append('0');
+                out.append('0');
             }
         }
-        sb.append("],\"offerTicks\":[");
+        out.append("],\"offerTicks\":[");
         node = firstOffer;
         for (int i = 0; i < levels; ++i) {
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
             if (node != null) {
                 final Level level = (Level) node;
-                sb.append(level.getTicks());
+                out.append(String.valueOf(level.getTicks()));
                 node = node.rbNext();
             } else {
-                sb.append('0');
+                out.append('0');
             }
         }
-        sb.append("],\"offerLots\":[");
+        out.append("],\"offerLots\":[");
         node = firstOffer;
         for (int i = 0; i < levels; ++i) {
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
             if (node != null) {
                 final Level level = (Level) node;
-                sb.append(level.getLots());
+                out.append(String.valueOf(level.getLots()));
                 node = node.rbNext();
             } else {
-                sb.append('0');
+                out.append('0');
             }
         }
-        sb.append("],\"offerCount\":[");
+        out.append("],\"offerCount\":[");
         node = firstOffer;
         for (int i = 0; i < levels; ++i) {
             if (i > 0) {
-                sb.append(',');
+                out.append(',');
             }
             if (node != null) {
                 final Level level = (Level) node;
-                sb.append(level.getCount());
+                out.append(String.valueOf(level.getCount()));
                 node = node.rbNext();
             } else {
-                sb.append('0');
+                out.append('0');
             }
         }
-        sb.append("]}");
+        out.append("]}");
     }
 
     public Market(Identifiable contr, int settlDay, long maxOrderId, long maxExecId) {
@@ -183,13 +186,11 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
 
     @Override
     public final String toString() {
-        final StringBuilder sb = new StringBuilder();
-        print(sb, null);
-        return sb.toString();
+        return AshUtil.toJson(this, null);
     }
 
     @Override
-    public final void print(StringBuilder sb, Object arg) {
+    public final void toJson(Appendable out, Object arg) throws IOException {
         int levels = 1;
         if (arg != null) {
             levels = (Integer) arg;
@@ -199,9 +200,9 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
         // Round-down to maximum.
         levels = Math.min(levels, DEPTH_MAX);
         if (levels == 1) {
-            printTob(sb);
+            toJsonTob(out);
         } else {
-            printDepth(sb, levels);
+            toJsonDepth(out, levels);
         }
     }
 

@@ -35,19 +35,18 @@ public final class MarketServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final Rest ctx = Context.getRest();
-        final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
 
         boolean found = false;
         if (parts.length == 0) {
-            found = ctx.getMarket(sb, DEPTH);
+            found = ctx.getMarket(resp.getWriter(), DEPTH);
         } else if (parts.length == 1) {
-            found = ctx.getMarket(sb, parts[CMNEM_PART], DEPTH);
+            found = ctx.getMarket(resp.getWriter(), parts[CMNEM_PART], DEPTH);
         } else if (parts.length == 2) {
-            found = ctx.getMarket(sb, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                    DEPTH);
+            found = ctx.getMarket(resp.getWriter(), parts[CMNEM_PART],
+                    Integer.parseInt(parts[SETTL_DATE_PART]), DEPTH);
         }
 
         if (!found) {
@@ -58,6 +57,5 @@ public final class MarketServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().append(sb);
     }
 }

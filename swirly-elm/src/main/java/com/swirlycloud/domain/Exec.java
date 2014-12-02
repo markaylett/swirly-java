@@ -7,12 +7,15 @@ package com.swirlycloud.domain;
 
 import static com.swirlycloud.util.Date.jdToIso;
 
+import java.io.IOException;
+
+import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.BasicRbSlNode;
 import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
-import com.swirlycloud.util.Printable;
+import com.swirlycloud.util.Jsonifiable;
 
-public final class Exec extends BasicRbSlNode implements Identifiable, Printable, Instruct {
+public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiable, Instruct {
 
     private final long key;
     private final long id;
@@ -111,36 +114,34 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Printable
 
     @Override
     public final String toString() {
-        final StringBuilder sb = new StringBuilder();
-        print(sb, null);
-        return sb.toString();
+        return AshUtil.toJson(this, null);
     }
 
     @Override
-    public final void print(StringBuilder sb, Object arg) {
-        sb.append("{\"id\":").append(id);
-        sb.append(",\"orderId\":").append(orderId);
-        sb.append(",\"user\":\"").append(getRecMnem(user));
-        sb.append("\",\"contr\":\"").append(getRecMnem(contr));
-        sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
-        sb.append(",\"ref\":\"").append(ref);
-        sb.append("\",\"state\":\"").append(state);
-        sb.append("\",\"action\":\"").append(action);
-        sb.append("\",\"ticks\":").append(ticks);
-        sb.append(",\"lots\":").append(lots);
-        sb.append(",\"resd\":").append(resd);
-        sb.append(",\"exec\":").append(exec);
-        sb.append(",\"lastTicks\":").append(lastTicks);
-        sb.append(",\"lastLots\":").append(lastLots);
-        sb.append(",\"minLots\":").append(minLots);
+    public final void toJson(Appendable out, Object arg) throws IOException {
+        out.append("{\"id\":").append(String.valueOf(id));
+        out.append(",\"orderId\":").append(String.valueOf(orderId));
+        out.append(",\"user\":\"").append(getRecMnem(user));
+        out.append("\",\"contr\":\"").append(getRecMnem(contr));
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"ref\":\"").append(ref);
+        out.append("\",\"state\":\"").append(state.name());
+        out.append("\",\"action\":\"").append(action.name());
+        out.append("\",\"ticks\":").append(String.valueOf(ticks));
+        out.append(",\"lots\":").append(String.valueOf(lots));
+        out.append(",\"resd\":").append(String.valueOf(resd));
+        out.append(",\"exec\":").append(String.valueOf(exec));
+        out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+        out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+        out.append(",\"minLots\":").append(String.valueOf(minLots));
         if (state == State.TRADE) {
-            sb.append(",\"matchId\":").append(matchId);
-            sb.append(",\"role\":\"").append(role);
-            sb.append("\",\"cpty\":\"").append(getRecMnem(cpty));
-            sb.append("\"");
+            out.append(",\"matchId\":").append(String.valueOf(matchId));
+            out.append(",\"role\":\"").append(role.name());
+            out.append("\",\"cpty\":\"").append(getRecMnem(cpty));
+            out.append("\"");
         }
-        sb.append(",\"created\":").append(created);
-        sb.append("}");
+        out.append(",\"created\":").append(String.valueOf(created));
+        out.append("}");
     }
 
     public final void enrich(User user, Contr contr, User cpty) {

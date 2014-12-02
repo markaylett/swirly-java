@@ -5,6 +5,10 @@
  *******************************************************************************/
 package com.swirlycloud.domain;
 
+import java.io.IOException;
+
+import com.swirlycloud.util.AshUtil;
+
 public final class User extends Rec {
     // Internals.
     // Singly-linked buckets.
@@ -19,17 +23,15 @@ public final class User extends Rec {
 
     @Override
     public final String toString() {
-        final StringBuilder sb = new StringBuilder();
-        print(sb, null);
-        return sb.toString();
+        return AshUtil.toJson(this, null);
     }
 
     @Override
-    public final void print(StringBuilder sb, Object arg) {
-        sb.append("{\"mnem\":\"").append(mnem);
-        sb.append("\",\"display\":\"").append(display);
-        sb.append("\",\"email\":\"").append(email);
-        sb.append("\"}");
+    public final void toJson(Appendable out, Object arg) throws IOException {
+        out.append("{\"mnem\":\"").append(mnem);
+        out.append("\",\"display\":\"").append(display);
+        out.append("\",\"email\":\"").append(email);
+        out.append("\"}");
     }
 
     public final String getEmail() {

@@ -8,6 +8,10 @@ package com.swirlycloud.domain;
 import static com.swirlycloud.domain.Conv.fractToReal;
 import static com.swirlycloud.domain.Conv.realToDp;
 
+import java.io.IOException;
+
+import com.swirlycloud.util.AshUtil;
+
 public final class Contr extends Rec {
     private final AssetType assetType;
     private final String asset;
@@ -49,28 +53,26 @@ public final class Contr extends Rec {
 
     @Override
     public final String toString() {
-        final StringBuilder sb = new StringBuilder();
-        print(sb, null);
-        return sb.toString();
+        return AshUtil.toJson(this, null);
     }
 
     @Override
-    public final void print(StringBuilder sb, Object arg) {
-        sb.append("{\"mnem\":\"").append(mnem);
-        sb.append("\",\"display\":\"").append(display);
-        sb.append("\",\"assetType\":\"").append(assetType);
-        sb.append("\",\"asset\":\"").append(asset);
-        sb.append("\",\"ccy\":\"").append(ccy);
-        sb.append("\",\"tickNumer\":").append(tickNumer);
-        sb.append(",\"tickDenom\":").append(tickDenom);
-        sb.append(",\"lotNumer\":").append(lotNumer);
-        sb.append(",\"lotDenom\":").append(lotDenom);
-        sb.append(",\"priceDp\":").append(priceDp);
-        sb.append(",\"pipDp\":").append(pipDp);
-        sb.append(",\"qtyDp\":").append(qtyDp);
-        sb.append(",\"minLots\":").append(minLots);
-        sb.append(",\"maxLots\":").append(maxLots);
-        sb.append("}");
+    public final void toJson(Appendable out, Object arg) throws IOException {
+        out.append("{\"mnem\":\"").append(mnem);
+        out.append("\",\"display\":\"").append(display);
+        out.append("\",\"assetType\":\"").append(assetType.name());
+        out.append("\",\"asset\":\"").append(asset);
+        out.append("\",\"ccy\":\"").append(ccy);
+        out.append("\",\"tickNumer\":").append(String.valueOf(tickNumer));
+        out.append(",\"tickDenom\":").append(String.valueOf(tickDenom));
+        out.append(",\"lotNumer\":").append(String.valueOf(lotNumer));
+        out.append(",\"lotDenom\":").append(String.valueOf(lotDenom));
+        out.append(",\"priceDp\":").append(String.valueOf(priceDp));
+        out.append(",\"pipDp\":").append(String.valueOf(pipDp));
+        out.append(",\"qtyDp\":").append(String.valueOf(qtyDp));
+        out.append(",\"minLots\":").append(String.valueOf(minLots));
+        out.append(",\"maxLots\":").append(String.valueOf(maxLots));
+        out.append("}");
     }
 
     public final AssetType getAssetType() {

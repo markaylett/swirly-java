@@ -5,6 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
+import java.io.IOException;
+
 public final class AshUtil {
     private AshUtil() {
     }
@@ -19,4 +21,14 @@ public final class AshUtil {
     }
 
     public static final Identifiable ZERO_ID = newId(0);
+
+    public static String toJson(Jsonifiable j, Object arg) {
+        final StringBuilder sb = new StringBuilder();
+        try {
+            j.toJson(sb, arg);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return sb.toString();
+    }
 }

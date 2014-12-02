@@ -7,12 +7,15 @@ package com.swirlycloud.domain;
 
 import static com.swirlycloud.util.Date.jdToIso;
 
+import java.io.IOException;
+
+import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.BasicRbNode;
 import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
-import com.swirlycloud.util.Printable;
+import com.swirlycloud.util.Jsonifiable;
 
-public final class Posn extends BasicRbNode implements Identifiable, Printable {
+public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable {
 
     private final long key;
     private Identifiable user;
@@ -36,22 +39,20 @@ public final class Posn extends BasicRbNode implements Identifiable, Printable {
 
     @Override
     public final String toString() {
-        final StringBuilder sb = new StringBuilder();
-        print(sb, null);
-        return sb.toString();
+        return AshUtil.toJson(this, null);
     }
 
     @Override
-    public final void print(StringBuilder sb, Object arg) {
-        sb.append("{\"id\":").append(key);
-        sb.append(",\"user\":\"").append(getRecMnem(user));
-        sb.append("\",\"contr\":\"").append(getRecMnem(contr));
-        sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
-        sb.append(",\"buyLicks\":").append(buyLicks);
-        sb.append(",\"buyLots\":").append(buyLots);
-        sb.append(",\"sellLicks\":").append(sellLicks);
-        sb.append(",\"sellLots\":").append(sellLots);
-        sb.append("}");
+    public final void toJson(Appendable out, Object arg) throws IOException {
+        out.append("{\"id\":").append(String.valueOf(key));
+        out.append(",\"user\":\"").append(getRecMnem(user));
+        out.append("\",\"contr\":\"").append(getRecMnem(contr));
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"buyLicks\":").append(String.valueOf(buyLicks));
+        out.append(",\"buyLots\":").append(String.valueOf(buyLots));
+        out.append(",\"sellLicks\":").append(String.valueOf(sellLicks));
+        out.append(",\"sellLots\":").append(String.valueOf(sellLots));
+        out.append("}");
     }
 
     public final void enrich(User user, Contr contr) {

@@ -55,9 +55,7 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
         final String email = user.getEmail();
-
         final Rest rest = Context.getRest();
-        final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
@@ -65,13 +63,17 @@ public final class AccntServlet extends HttpServlet {
         boolean found = false;
         if ("order".equals(parts[TYPE_PART])) {
             if (parts.length == 4) {
-                found = rest.deleteOrder(sb, email, parts[CMNEM_PART],
+                found = rest.deleteOrder(resp.getWriter(), email, parts[CMNEM_PART],
                         Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
             }
         } else if ("trade".equals(parts[TYPE_PART])) {
             if (parts.length == 4) {
-                found = rest.deleteTrade(sb, email, parts[CMNEM_PART],
+                found = rest.deleteTrade(email, parts[CMNEM_PART],
                         Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
+                if (found) {
+                    resp.sendError(HttpServletResponse.SC_NO_CONTENT);
+                    return;
+                }
             }
         }
 
@@ -79,16 +81,10 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        if (sb.length() == 0) {
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            return;
-        }
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
-        log(sb.toString());
-        resp.getWriter().append(sb);
     }
 
     @Override
@@ -102,37 +98,35 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
         final String email = user.getEmail();
-
         final Rest rest = Context.getRest();
-        final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
 
         boolean found = false;
         if (parts.length == 0) {
-            found = rest.getAccnt(sb, email);
+            found = rest.getAccnt(resp.getWriter(), email);
         } else if ("order".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getOrder(sb, email);
+                found = rest.getOrder(resp.getWriter(), email);
             } else if (parts.length == 4) {
-                found = rest.getOrder(sb, email, parts[CMNEM_PART],
+                found = rest.getOrder(resp.getWriter(), email, parts[CMNEM_PART],
                         Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
             }
         } else if ("trade".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getTrade(sb, email);
+                found = rest.getTrade(resp.getWriter(), email);
             } else if (parts.length == 4) {
-                found = rest.getTrade(sb, email, parts[CMNEM_PART],
+                found = rest.getTrade(resp.getWriter(), email, parts[CMNEM_PART],
                         Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
             }
         } else if ("posn".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getPosn(sb, email);
+                found = rest.getPosn(resp.getWriter(), email);
             } else if (parts.length == 2) {
-                found = rest.getPosn(sb, email, parts[CMNEM_PART]);
+                found = rest.getPosn(resp.getWriter(), email, parts[CMNEM_PART]);
             } else if (parts.length == 3) {
-                found = rest.getPosn(sb, email, parts[CMNEM_PART],
+                found = rest.getPosn(resp.getWriter(), email, parts[CMNEM_PART],
                         Integer.parseInt(parts[SETTL_DATE_PART]));
             }
         }
@@ -145,8 +139,6 @@ public final class AccntServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
-        log(sb.toString());
-        resp.getWriter().append(sb);
     }
 
     @Override
@@ -161,9 +153,7 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
         final String email = user.getEmail();
-
         final Rest rest = Context.getRest();
-        final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
@@ -185,7 +175,7 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (!rest.postOrder(sb, email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
+        if (!rest.postOrder(resp.getWriter(), email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
                 r.getLots(), r.getMinLots())) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -194,8 +184,6 @@ public final class AccntServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
-        log(sb.toString());
-        resp.getWriter().append(sb);
     }
 
     @Override
@@ -210,9 +198,7 @@ public final class AccntServlet extends HttpServlet {
             return;
         }
         final String email = user.getEmail();
-
         final Rest rest = Context.getRest();
-        final StringBuilder sb = new StringBuilder();
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
@@ -235,7 +221,7 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (!rest.putOrder(sb, email, cmnem, settlDate, id, r.getLots())) {
+        if (!rest.putOrder(resp.getWriter(), email, cmnem, settlDate, id, r.getLots())) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -243,7 +229,5 @@ public final class AccntServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
-        log(sb.toString());
-        resp.getWriter().append(sb);
     }
 }
