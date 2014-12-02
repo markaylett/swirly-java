@@ -3,17 +3,10 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.engine;
+package com.swirlycloud.domain;
 
 import static com.swirlycloud.util.Date.jdToIso;
 
-import com.swirlycloud.domain.Action;
-import com.swirlycloud.domain.Contr;
-import com.swirlycloud.domain.Level;
-import com.swirlycloud.domain.Order;
-import com.swirlycloud.domain.Rec;
-import com.swirlycloud.domain.Side;
-import com.swirlycloud.domain.User;
 import com.swirlycloud.util.BasicRbNode;
 import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
@@ -204,7 +197,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
         }
     }
 
-    public final void enrich(User user, Contr contr) {
+    public final void enrich(Contr contr) {
         assert this.contr.getId() == contr.getId();
         this.contr = contr;
     }

@@ -8,10 +8,10 @@ package com.swirlycloud.mock;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Exec;
+import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.User;
-import com.swirlycloud.engine.Market;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
 

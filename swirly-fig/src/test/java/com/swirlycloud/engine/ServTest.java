@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 import com.swirlycloud.domain.Action;
+import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.State;
 import com.swirlycloud.mock.MockModel;

@@ -13,6 +13,7 @@ import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Direct;
 import com.swirlycloud.domain.EmailIdx;
 import com.swirlycloud.domain.Exec;
+import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
@@ -38,6 +39,11 @@ public final class Serv implements AutoCloseable {
     private final Tree markets = new Tree();
     private final Tree accnts = new Tree();
 
+    private final void enrichMarket(Market market) {
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, market.getContrId());
+        market.enrich(contr);
+    }
+
     private final void enrichOrder(Order order) {
         final User user = (User) cache.findRec(RecType.USER, order.getUserId());
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, order.getContrId());
@@ -59,7 +65,8 @@ public final class Serv implements AutoCloseable {
 
     private final void insertOrder(Order order) {
         enrichOrder(order);
-        final Market market = getLazyMarket(order.getContr(), order.getSettlDay());
+        final Market market = (Market) markets.find(Market.composeId(order.getContrId(),
+                order.getSettlDay()));
         market.insertOrder(order);
         boolean success = false;
         try {
@@ -97,6 +104,16 @@ public final class Serv implements AutoCloseable {
             public final void call(User arg) {
                 cache.insertRec(arg);
                 emailIdx.insert(arg);
+            }
+        });
+    }
+
+    private final void insertMarkets() {
+        model.selectMarket(new UnaryCallback<Market>() {
+            @Override
+            public final void call(Market arg) {
+                enrichMarket(arg);
+                markets.insert(arg);
             }
         });
     }
@@ -262,6 +279,7 @@ public final class Serv implements AutoCloseable {
         insertAssets();
         insertContrs();
         insertUsers();
+        insertMarkets();
         insertOrders();
         insertTrades();
         insertPosns();

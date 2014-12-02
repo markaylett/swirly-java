@@ -3,7 +3,7 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.engine;
+package com.swirlycloud.domain;
 
 import static com.swirlycloud.util.Date.ymdToJd;
 import static org.junit.Assert.assertEquals;
@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Contr;
+import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.mock.MockContr;
