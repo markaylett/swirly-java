@@ -153,13 +153,12 @@ public final class Serv implements AutoCloseable {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new IllegalArgumentException(String.format("invalid mnem '%s'", mnem));
         }
-        final long userId = model.allocUserIds(1);
+        final long userId = model.allocUserId();
         return new User(userId, mnem, display, email);
     }
 
-    private final Exec newExec(Order order, long now) {
-        final long execId = model.allocExecIds(1);
-        return new Exec(execId, order.getId(), order, now);
+    private final Exec newExec(long id, Order order, long now) {
+        return new Exec(id, order.getId(), order, now);
     }
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
@@ -191,8 +190,8 @@ public final class Serv implements AutoCloseable {
                 break;
             }
 
-            final long makerId = model.allocExecIds(2);
-            final long takerId = makerId + 1;
+            final long makerId = market.allocExecId();
+            final long takerId = market.allocExecId();
 
             final Accnt makerAccnt = findAccnt(makerOrder.getUser());
             assert makerAccnt != null;
@@ -424,12 +423,12 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("invalid lots '%d'", lots));
         }
         final long now = System.currentTimeMillis();
-        final long orderId = model.allocOrderIds(1);
+        final long orderId = market.allocOrderId();
         final Contr contr = market.getContr();
         final int settlDay = market.getSettlDay();
         final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
                 ticks, lots, minLots, now);
-        final Exec exec = newExec(order, now);
+        final Exec exec = newExec(market.allocExecId(), order, now);
 
         trans.clear();
         trans.market = market;
@@ -477,7 +476,7 @@ public final class Serv implements AutoCloseable {
         }
 
         final long now = System.currentTimeMillis();
-        final Exec exec = newExec(order, now);
+        final Exec exec = newExec(market.allocExecId(), order, now);
         exec.revise(lots);
         model.insertExec(market.getContrId(), market.getSettlDay(), exec);
 
@@ -516,7 +515,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
         }
         final long now = System.currentTimeMillis();
-        final Exec exec = newExec(order, now);
+        final Exec exec = newExec(market.allocExecId(), order, now);
         exec.cancel();
         model.insertExec(market.getContrId(), market.getSettlDay(), exec);
 

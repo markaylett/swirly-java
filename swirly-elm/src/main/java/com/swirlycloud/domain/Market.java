@@ -24,6 +24,8 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
     private final int settlDay;
     private final Side bidSide = new Side();
     private final Side offerSide = new Side();
+    private long maxOrderId;
+    private long maxExecId;
 
     private static String getRecMnem(Identifiable iden) {
         return iden instanceof Rec ? ((Rec) iden).getMnem() : String.valueOf(iden.getId());
@@ -152,10 +154,16 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
         sb.append("]}");
     }
 
-    public Market(Identifiable contr, int settlDay) {
+    public Market(Identifiable contr, int settlDay, long maxOrderId, long maxExecId) {
         this.key = composeId(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
+        this.maxOrderId = maxOrderId;
+        this.maxExecId = maxExecId;
+    }
+
+    public Market(Identifiable contr, int settlDay) {
+        this(contr, settlDay, 0L, 0L);
     }
 
     /**
@@ -224,6 +232,14 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
 
     public final void takeOrder(Order order, long lots, long now) {
         side(order.getAction()).takeOrder(order, lots, now);
+    }
+
+    public final long allocOrderId() { 
+        return ++maxOrderId;
+    }
+
+    public final long allocExecId() { 
+        return ++maxExecId;        
     }
 
     @Override

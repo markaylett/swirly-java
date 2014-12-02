@@ -7,6 +7,7 @@ package com.swirlycloud.back;
 
 import static com.swirlycloud.util.AshUtil.newId;
 
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,16 +58,33 @@ public final class DatastoreModel implements Model {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    private final Entity newUser(Key parent, User user) {
-        final Entity entity = new Entity(USER_KIND, user.getId(), parent);
+    private final void updateMaxOrderId(Entity market, long id) {
+        Long maxOrderId = (Long) market.getProperty("maxOrderId");
+        if (maxOrderId.longValue() < id) {
+            maxOrderId = Long.valueOf(id);
+            market.setUnindexedProperty("maxOrderId", maxOrderId);
+        }
+    }
+
+    private final void updateMaxExecId(Entity market, long id) {
+        Long maxExecId = (Long) market.getProperty("maxExecId");
+        if (maxExecId.longValue() < id) {
+            maxExecId = Long.valueOf(id);
+            market.setUnindexedProperty("maxExecId", maxExecId);
+        }
+    }
+
+    private final Entity newUser(Entity group, User user) {
+        final Entity entity = new Entity(USER_KIND, user.getId(), group.getKey());
         entity.setUnindexedProperty("mnem", user.getMnem());
         entity.setUnindexedProperty("display", user.getDisplay());
         entity.setUnindexedProperty("email", user.getEmail());
         return entity;
     }
 
-    private final Entity newOrder(Key parent, Exec exec) {
-        final Entity entity = new Entity(ORDER_KIND, exec.getOrderId(), parent);
+    private final Entity newOrder(Entity market, Exec exec) {
+        updateMaxOrderId(market, exec.getOrderId());
+        final Entity entity = new Entity(ORDER_KIND, exec.getOrderId(), market.getKey());
         entity.setUnindexedProperty("userId", exec.getUserId());
         entity.setUnindexedProperty("contrId", exec.getContrId());
         entity.setUnindexedProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
@@ -85,8 +103,9 @@ public final class DatastoreModel implements Model {
         return entity;
     }
 
-    private final Entity newExec(Key parent, Exec exec) {
-        final Entity entity = new Entity(EXEC_KIND, exec.getId(), parent);
+    private final Entity newExec(Entity market, Exec exec) {
+        updateMaxExecId(market, exec.getId());
+        final Entity entity = new Entity(EXEC_KIND, exec.getId(), market.getKey());
         entity.setUnindexedProperty("orderId", exec.getOrderId());
         entity.setUnindexedProperty("userId", exec.getUserId());
         entity.setUnindexedProperty("contrId", exec.getContrId());
@@ -138,8 +157,7 @@ public final class DatastoreModel implements Model {
 
     private final Entity getMarket(Transaction txn, long contrId, int settlDay) {
         // Lazily for now, but we may want to explicitly create markets in the future.
-        final Key key = KeyFactory
-                .createKey(MARKET_KIND, Market.composeId(contrId, settlDay));
+        final Key key = KeyFactory.createKey(MARKET_KIND, Market.composeId(contrId, settlDay));
         Entity entity;
         try {
             entity = datastore.get(txn, key);
@@ -147,6 +165,8 @@ public final class DatastoreModel implements Model {
             entity = new Entity(key);
             entity.setUnindexedProperty("contrId", contrId);
             entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
+            entity.setUnindexedProperty("maxOrderId", Long.valueOf(0L));
+            entity.setUnindexedProperty("maxExecId", Long.valueOf(0L));
             datastore.put(txn, entity);
         }
         return entity;
@@ -179,20 +199,8 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final long allocUserIds(long num) {
-        final KeyRange range = datastore.allocateIds(USER_KIND, num);
-        return range.getStart().getId();
-    }
-
-    @Override
-    public final long allocOrderIds(long num) {
-        final KeyRange range = datastore.allocateIds(ORDER_KIND, num);
-        return range.getStart().getId();
-    }
-
-    @Override
-    public final long allocExecIds(long num) {
-        final KeyRange range = datastore.allocateIds(EXEC_KIND, num);
+    public final long allocUserId() {
+        final KeyRange range = datastore.allocateIds(USER_KIND, 1L);
         return range.getStart().getId();
     }
 
@@ -201,15 +209,18 @@ public final class DatastoreModel implements Model {
         final Transaction txn = datastore.beginTransaction();
         try {
             // User entities have common ancestor for strong consistency.
-            final Key parent = getGroup(txn, USER_KIND).getKey();
-            final Entity entity = newUser(parent, user);
+            final Entity group = getGroup(txn, USER_KIND);
+            final Entity entity = newUser(group, user);
             // Unique indexes.
-            final Entity mnemIdx = new Entity(USER_MNEM_KIND, user.getMnem(), parent);
-            final Entity emailIdx = new Entity(USER_EMAIL_KIND, user.getEmail(), parent);
+            final Entity mnemIdx = new Entity(USER_MNEM_KIND, user.getMnem(), group.getKey());
+            final Entity emailIdx = new Entity(USER_EMAIL_KIND, user.getEmail(), group.getKey());
             datastore.put(entity);
             datastore.put(mnemIdx);
             datastore.put(emailIdx);
             txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
         } finally {
             if (txn.isActive()) {
                 txn.rollback();
@@ -224,27 +235,31 @@ public final class DatastoreModel implements Model {
         final Map<Long, Entity> orders = new HashMap<>();
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getMarket(txn, contrId, settlDay).getKey();
+            final Entity market = getMarket(txn, contrId, settlDay);
             for (SlNode node = first; node != null; node = node.slNext()) {
                 final Exec exec = (Exec) node;
                 if (exec.getState() == State.NEW) {
                     // Defer actual datastore put.
-                    orders.put(first.getOrderId(), newOrder(parent, exec));
+                    orders.put(first.getOrderId(), newOrder(market, exec));
                 } else {
                     final long id = exec.getOrderId();
                     // This exec may apply to a cached order.
                     Entity order = orders.get(id);
                     if (order == null) {
                         // Otherwise fetch the order from the datastore.
-                        order = getOrder(txn, parent, id);
+                        order = getOrder(txn, market.getKey(), id);
                         orders.put(id, order);
                     }
                     applyExec(order, exec);
                 }
-                datastore.put(newExec(parent, exec));
+                datastore.put(newExec(market, exec));
             }
             datastore.put(orders.values());
+            datastore.put(market);
             txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
         } finally {
             if (txn.isActive()) {
                 txn.rollback();
@@ -256,14 +271,18 @@ public final class DatastoreModel implements Model {
     public final void insertExec(long contrId, int settlDay, Exec exec) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getMarket(txn, contrId, settlDay).getKey();
+            final Entity market = getMarket(txn, contrId, settlDay);
             if (exec.getState() == State.NEW) {
-                datastore.put(newOrder(parent, exec));
+                datastore.put(newOrder(market, exec));
             } else {
-                datastore.put(applyExec(getOrder(txn, parent, exec.getOrderId()), exec));
+                datastore.put(applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
             }
-            datastore.put(newExec(parent, exec));
+            datastore.put(newExec(market, exec));
+            datastore.put(market);
             txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
         } finally {
             if (txn.isActive()) {
                 txn.rollback();
@@ -275,12 +294,15 @@ public final class DatastoreModel implements Model {
     public final void updateExec(long contrId, int settlDay, long id, long modified) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getMarket(txn, contrId, settlDay).getKey();
-            final Entity entity = getExec(txn, parent, id);
+            final Entity market = getMarket(txn, contrId, settlDay);
+            final Entity entity = getExec(txn, market.getKey(), id);
             entity.setProperty("confirmed", Boolean.TRUE);
             entity.setUnindexedProperty("modified", modified);
             datastore.put(entity);
             txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
         } finally {
             if (txn.isActive()) {
                 txn.rollback();
@@ -322,7 +344,9 @@ public final class DatastoreModel implements Model {
         for (final Entity entity : pq.asIterable()) {
             final Identifiable contr = newId((Long) entity.getProperty("contrId"));
             final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-            final Market market = new Market(contr, settlDay);
+            final long maxOrderId = (Long) entity.getProperty("maxOrderId");
+            final long maxExecId = (Long) entity.getProperty("maxExecId");
+            final Market market = new Market(contr, settlDay, maxOrderId, maxExecId);
             cb.call(market);
         }
     }

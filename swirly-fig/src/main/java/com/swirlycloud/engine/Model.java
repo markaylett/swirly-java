@@ -17,19 +17,11 @@ import com.swirlycloud.function.UnaryCallback;
 public interface Model {
 
     /**
-     * Allocate contiguous sequence of identifiers and return the first.
+     * Allocate a "global" user-id.
+     * 
+     * @return the newly allocated id.
      */
-    long allocUserIds(long num);
-
-    /**
-     * Allocate contiguous sequence of identifiers and return the first.
-     */
-    long allocOrderIds(long num);
-
-    /**
-     * Allocate contiguous sequence of identifiers and return the first.
-     */
-    long allocExecIds(long num);
+    long allocUserId();
 
     void insertUser(User user);
 
