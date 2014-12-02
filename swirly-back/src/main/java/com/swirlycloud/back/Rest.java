@@ -73,8 +73,7 @@ public final class Rest {
         user.toJson(out, null);
     }
 
-    public final synchronized boolean getMarket(Appendable out, Integer levels)
-            throws IOException {
+    public final synchronized boolean getMarket(Appendable out, Integer levels) throws IOException {
         out.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -173,6 +172,18 @@ public final class Rest {
         return true;
     }
 
+    public final synchronized boolean getOrder(Appendable out, String email, String cmnem)
+            throws IOException {
+        // TODO.
+        return false;
+    }
+
+    public final synchronized boolean getOrder(Appendable out, String email, String cmnem,
+            int settlDate) throws IOException {
+        // TODO.
+        return false;
+    }
+
     public final synchronized boolean getOrder(Appendable out, String email, String cmnem,
             int settlDate, long id) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
@@ -247,6 +258,18 @@ public final class Rest {
         return true;
     }
 
+    public final synchronized boolean getTrade(Appendable out, String email, String cmnem)
+            throws IOException {
+        // TODO.
+        return false;
+    }
+
+    public final synchronized boolean getTrade(Appendable out, String email, String cmnem,
+            int settlDate) throws IOException {
+        // TODO.
+        return false;
+    }
+
     public final synchronized boolean getTrade(Appendable out, String email, String cmnem,
             int settlDate, long id) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
@@ -266,8 +289,7 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized boolean deleteTrade(String email, String cmnem,
-            int settlDate, long id) {
+    public final synchronized boolean deleteTrade(String email, String cmnem, int settlDate, long id) {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -304,6 +326,9 @@ public final class Rest {
             throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
+            return false;
+        }
+        if (serv.findRec(RecType.CONTR, cmnem) == null) {
             return false;
         }
         out.append('[');

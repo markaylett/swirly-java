@@ -109,6 +109,11 @@ public final class AccntServlet extends HttpServlet {
         } else if ("order".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
                 found = rest.getOrder(resp.getWriter(), email);
+            } else if (parts.length == 2) {
+                found = rest.getOrder(resp.getWriter(), email, parts[CMNEM_PART]);
+            } else if (parts.length == 3) {
+                found = rest.getOrder(resp.getWriter(), email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]));
             } else if (parts.length == 4) {
                 found = rest.getOrder(resp.getWriter(), email, parts[CMNEM_PART],
                         Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
@@ -116,6 +121,11 @@ public final class AccntServlet extends HttpServlet {
         } else if ("trade".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
                 found = rest.getTrade(resp.getWriter(), email);
+            } else if (parts.length == 2) {
+                found = rest.getTrade(resp.getWriter(), email, parts[CMNEM_PART]);
+            } else if (parts.length == 3) {
+                found = rest.getTrade(resp.getWriter(), email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]));
             } else if (parts.length == 4) {
                 found = rest.getTrade(resp.getWriter(), email, parts[CMNEM_PART],
                         Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
@@ -175,8 +185,8 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (!rest.postOrder(resp.getWriter(), email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
-                r.getLots(), r.getMinLots())) {
+        if (!rest.postOrder(resp.getWriter(), email, cmnem, settlDate, r.getRef(), r.getAction(),
+                r.getTicks(), r.getLots(), r.getMinLots())) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
