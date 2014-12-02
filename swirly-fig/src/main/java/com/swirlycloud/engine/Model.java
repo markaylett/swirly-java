@@ -14,7 +14,7 @@ import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.function.UnaryCallback;
 
-public interface Model {
+public interface Model extends Journ {
 
     /**
      * Allocate a "global" user-id.
@@ -24,12 +24,6 @@ public interface Model {
     long allocUserId();
 
     void insertUser(User user);
-
-    void insertExecList(long contrId, int settlDay, Exec first);
-
-    void insertExec(long contrId, int settlDay, Exec exec);
-
-    void updateExec(long contrId, int settlDay, long id, long modified);
 
     void selectAsset(UnaryCallback<Asset> cb);
 

@@ -199,36 +199,6 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final long allocUserId() {
-        final KeyRange range = datastore.allocateIds(USER_KIND, 1L);
-        return range.getStart().getId();
-    }
-
-    @Override
-    public final void insertUser(User user) {
-        final Transaction txn = datastore.beginTransaction();
-        try {
-            // User entities have common ancestor for strong consistency.
-            final Entity group = getGroup(txn, USER_KIND);
-            final Entity entity = newUser(group, user);
-            // Unique indexes.
-            final Entity mnemIdx = new Entity(USER_MNEM_KIND, user.getMnem(), group.getKey());
-            final Entity emailIdx = new Entity(USER_EMAIL_KIND, user.getEmail(), group.getKey());
-            datastore.put(entity);
-            datastore.put(mnemIdx);
-            datastore.put(emailIdx);
-            txn.commit();
-        } catch (ConcurrentModificationException e) {
-            // FIXME: implement retry logic.
-            throw e;
-        } finally {
-            if (txn.isActive()) {
-                txn.rollback();
-            }
-        }
-    }
-
-    @Override
     public final void insertExecList(long contrId, int settlDay, Exec first) {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
@@ -279,6 +249,36 @@ public final class DatastoreModel implements Model {
             }
             datastore.put(newExec(market, exec));
             datastore.put(market);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final long allocUserId() {
+        final KeyRange range = datastore.allocateIds(USER_KIND, 1L);
+        return range.getStart().getId();
+    }
+
+    @Override
+    public final void insertUser(User user) {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            // User entities have common ancestor for strong consistency.
+            final Entity group = getGroup(txn, USER_KIND);
+            final Entity entity = newUser(group, user);
+            // Unique indexes.
+            final Entity mnemIdx = new Entity(USER_MNEM_KIND, user.getMnem(), group.getKey());
+            final Entity emailIdx = new Entity(USER_EMAIL_KIND, user.getEmail(), group.getKey());
+            datastore.put(entity);
+            datastore.put(mnemIdx);
+            datastore.put(emailIdx);
             txn.commit();
         } catch (ConcurrentModificationException e) {
             // FIXME: implement retry logic.
