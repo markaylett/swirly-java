@@ -33,6 +33,7 @@ import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.State;
 import com.swirlycloud.domain.User;
+import com.swirlycloud.engine.Market;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.mock.MockAsset;
@@ -50,9 +51,9 @@ public final class DatastoreModel implements Model {
     private static final String USER_KIND = "User";
     private static final String USER_MNEM_KIND = "UserMnem";
     private static final String USER_EMAIL_KIND = "UserEmail";
+    private static final String MARKET_KIND = "Market";
     private static final String ORDER_KIND = "Order";
     private static final String EXEC_KIND = "Exec";
-    private static final String MARKET_KIND = "Market";
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -135,14 +136,17 @@ public final class DatastoreModel implements Model {
         return entity;
     }
 
-    private final Entity getMarket(Transaction txn, long id) {
+    private final Entity getMarket(Transaction txn, long contrId, int settlDay) {
         // Lazily for now, but we may want to explicitly create markets in the future.
-        final Key key = KeyFactory.createKey(MARKET_KIND, id);
+        final Key key = KeyFactory
+                .createKey(MARKET_KIND, Market.composeId(contrId, settlDay));
         Entity entity;
         try {
             entity = datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
             entity = new Entity(key);
+            entity.setUnindexedProperty("contrId", contrId);
+            entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
             datastore.put(txn, entity);
         }
         return entity;
@@ -166,7 +170,7 @@ public final class DatastoreModel implements Model {
         }
     }
 
-    private final void selectMarket(UnaryCallback<Entity> cb) {
+    private final void foreachMarket(UnaryCallback<Entity> cb) {
         final Query q = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
@@ -214,13 +218,13 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExecList(long marketId, Exec first) {
+    public final void insertExecList(long contrId, int settlDay, Exec first) {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
         final Map<Long, Entity> orders = new HashMap<>();
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getMarket(txn, marketId).getKey();
+            final Key parent = getMarket(txn, contrId, settlDay).getKey();
             for (SlNode node = first; node != null; node = node.slNext()) {
                 final Exec exec = (Exec) node;
                 if (exec.getState() == State.NEW) {
@@ -249,10 +253,10 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExec(long marketId, Exec exec) {
+    public final void insertExec(long contrId, int settlDay, Exec exec) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getMarket(txn, marketId).getKey();
+            final Key parent = getMarket(txn, contrId, settlDay).getKey();
             if (exec.getState() == State.NEW) {
                 datastore.put(newOrder(parent, exec));
             } else {
@@ -268,10 +272,10 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void updateExec(long marketId, long id, long modified) {
+    public final void updateExec(long contrId, int settlDay, long id, long modified) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Key parent = getMarket(txn, marketId).getKey();
+            final Key parent = getMarket(txn, contrId, settlDay).getKey();
             final Entity entity = getExec(txn, parent, id);
             entity.setProperty("confirmed", Boolean.TRUE);
             entity.setUnindexedProperty("modified", modified);
@@ -312,9 +316,21 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
+    public final void selectMarket(final UnaryCallback<Market> cb) {
+        final Query q = new Query(MARKET_KIND);
+        final PreparedQuery pq = datastore.prepare(q);
+        for (final Entity entity : pq.asIterable()) {
+            final Identifiable contr = newId((Long) entity.getProperty("contrId"));
+            final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
+            final Market market = new Market(contr, settlDay);
+            cb.call(market);
+        }
+    }
+
+    @Override
     public final void selectOrder(final UnaryCallback<Order> cb) {
         final Filter filter = new FilterPredicate("resd", FilterOperator.GREATER_THAN, 0);
-        selectMarket(new UnaryCallback<Entity>() {
+        foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
                 final Query q = new Query(ORDER_KIND, arg.getKey()).setFilter(filter);
@@ -352,7 +368,7 @@ public final class DatastoreModel implements Model {
         final Filter confirmedFilter = new FilterPredicate("confirmed", FilterOperator.EQUAL,
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(stateFilter, confirmedFilter);
-        selectMarket(new UnaryCallback<Entity>() {
+        foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
                 final Query q = new Query(EXEC_KIND, arg.getKey()).setFilter(filter);
@@ -399,7 +415,7 @@ public final class DatastoreModel implements Model {
     public final void selectPosn(final UnaryCallback<Posn> cb) {
         final Map<Long, Posn> m = new HashMap<>();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
-        selectMarket(new UnaryCallback<Entity>() {
+        foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
                 final Query q = new Query(EXEC_KIND).setFilter(filter);

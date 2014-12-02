@@ -32,17 +32,19 @@ public interface Model {
 
     void insertUser(User user);
 
-    void insertExecList(long marketId, Exec first);
+    void insertExecList(long contrId, int settlDay, Exec first);
 
-    void insertExec(long marketId, Exec exec);
+    void insertExec(long contrId, int settlDay, Exec exec);
 
-    void updateExec(long marketId, long id, long modified);
+    void updateExec(long contrId, int settlDay, long id, long modified);
 
     void selectAsset(UnaryCallback<Asset> cb);
 
     void selectContr(UnaryCallback<Contr> cb);
 
     void selectUser(UnaryCallback<User> cb);
+
+    void selectMarket(UnaryCallback<Market> cb);
 
     void selectOrder(UnaryCallback<Order> cb);
 

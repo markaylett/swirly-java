@@ -276,14 +276,6 @@ public final class Serv implements AutoCloseable {
     public final void close() {
     }
 
-    public final User registerUser(String mnem, String display, String email) {
-        final User user = newUser(mnem, display, email);
-        model.insertUser(user);
-        cache.insertRec(user);
-        emailIdx.insert(user);
-        return user;
-    }
-
     public final Rec findRec(RecType recType, long id) {
         return cache.findRec(recType, id);
     }
@@ -298,6 +290,14 @@ public final class Serv implements AutoCloseable {
 
     public final boolean isEmptyRec(RecType recType) {
         return cache.isEmptyRec(recType);
+    }
+
+    public final User registerUser(String mnem, String display, String email) {
+        final User user = newUser(mnem, display, email);
+        model.insertUser(user);
+        cache.insertRec(user);
+        emailIdx.insert(user);
+        return user;
     }
 
     public final User findUserByEmail(String email) {
@@ -428,7 +428,7 @@ public final class Serv implements AutoCloseable {
         // any unfilled quantity.
         boolean success = false;
         try {
-            model.insertExecList(market.getId(), (Exec) trans.execs.getFirst());
+            model.insertExecList(contr.getId(), settlDay, (Exec) trans.execs.getFirst());
             success = true;
         } finally {
             if (!success && !order.isDone()) {
@@ -461,7 +461,7 @@ public final class Serv implements AutoCloseable {
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.revise(lots);
-        model.insertExec(market.getId(), exec);
+        model.insertExec(market.getContrId(), market.getSettlDay(), exec);
 
         // Final commit phase cannot fail.
         market.reviseOrder(order, lots, now);
@@ -500,7 +500,7 @@ public final class Serv implements AutoCloseable {
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(order, now);
         exec.cancel();
-        model.insertExec(market.getId(), exec);
+        model.insertExec(market.getContrId(), market.getSettlDay(), exec);
 
         // Final commit phase cannot fail.
         market.cancelOrder(order, now);
@@ -539,7 +539,7 @@ public final class Serv implements AutoCloseable {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
         final long now = System.currentTimeMillis();
-        model.updateExec(Market.composeId(trade.getContrId(), trade.getSettlDay()), id, now);
+        model.updateExec(trade.getContrId(), trade.getSettlDay(), id, now);
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);

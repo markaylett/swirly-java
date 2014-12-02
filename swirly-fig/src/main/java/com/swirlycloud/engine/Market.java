@@ -11,7 +11,9 @@ import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Level;
 import com.swirlycloud.domain.Order;
+import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.Side;
+import com.swirlycloud.domain.User;
 import com.swirlycloud.util.BasicRbNode;
 import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
@@ -25,10 +27,14 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
     private static final int DEPTH_MAX = 5;
 
     private final long key;
-    private final Contr contr;
+    private Identifiable contr;
     private final int settlDay;
     private final Side bidSide = new Side();
     private final Side offerSide = new Side();
+
+    private static String getRecMnem(Identifiable iden) {
+        return iden instanceof Rec ? ((Rec) iden).getMnem() : String.valueOf(iden.getId());
+    }
 
     private final Side side(Action action) {
         return action == Action.BUY ? bidSide : offerSide;
@@ -36,7 +42,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
 
     private final void printTob(StringBuilder sb) {
         sb.append("{\"id\":").append(key);
-        sb.append(",\"contr\":\"").append(contr.getMnem());
+        sb.append(",\"contr\":\"").append(getRecMnem(contr));
         sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
 
         final Level firstBid = (Level) bidSide.getFirstLevel();
@@ -60,7 +66,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
 
     private final void printDepth(StringBuilder sb, int levels) {
         sb.append("{\"id\":").append(key);
-        sb.append(",\"contr\":\"").append(contr.getMnem());
+        sb.append(",\"contr\":\"").append(getRecMnem(contr));
         sb.append("\",\"settlDate\":").append(jdToIso(settlDay));
         sb.append(",\"bidTicks\":[");
 
@@ -153,7 +159,7 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
         sb.append("]}");
     }
 
-    public Market(Contr contr, int settlDay) {
+    public Market(Identifiable contr, int settlDay) {
         this.key = composeId(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
@@ -198,6 +204,11 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
         }
     }
 
+    public final void enrich(User user, Contr contr) {
+        assert this.contr.getId() == contr.getId();
+        this.contr = contr;
+    }
+
     public final void insertOrder(Order order) {
         side(order.getAction()).insertOrder(order);
     }
@@ -232,8 +243,12 @@ public final class Market extends BasicRbNode implements Identifiable, Printable
         return key;
     }
 
+    public final long getContrId() {
+        return contr.getId();
+    }
+
     public final Contr getContr() {
-        return contr;
+        return (Contr) contr;
     }
 
     public final int getSettlDay() {

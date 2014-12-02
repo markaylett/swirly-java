@@ -11,6 +11,7 @@ import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.User;
+import com.swirlycloud.engine.Market;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
 
@@ -45,15 +46,15 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void insertExecList(long marketId, Exec first) {
+    public final void insertExecList(long contrId, int settlDay, Exec first) {
     }
 
     @Override
-    public final void insertExec(long marketId, Exec exec) {
+    public final void insertExec(long contrId, int settlDay, Exec exec) {
     }
 
     @Override
-    public final void updateExec(long marketId, long id, long modified) {
+    public final void updateExec(long contrId, int settlDay, long id, long modified) {
     }
 
     @Override
@@ -69,6 +70,10 @@ public final class MockModel implements Model {
     @Override
     public final void selectUser(UnaryCallback<User> cb) {
         MockUser.selectUser(cb);
+    }
+
+    @Override
+    public final void selectMarket(UnaryCallback<Market> cb) {
     }
 
     @Override
