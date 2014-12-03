@@ -18,7 +18,7 @@
 
       <div class="jumbotron">
 
-        <img src="/img/swirly-small.png" class="img-responsive pull-left"
+        <img src="/img/swirly-sm.png" class="img-responsive pull-left"
              style="padding: 16px 32px 64px 0px;"/>
         <h2>Swirly Cloud</h2>
         <p>We aim to build an Internet-scale trading application in the cloud, where traders
