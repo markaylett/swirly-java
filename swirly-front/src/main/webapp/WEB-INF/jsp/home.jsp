@@ -18,12 +18,20 @@
 
       <div class="jumbotron" style="margin-top: 32px">
 
-        <img src="/img/swirly-sm.png" class="img-responsive pull-left"
-             style="margin: 16px 32px 64px 0;"/>
-        <h2>Swirly Cloud</h2>
-        <p>We aim to build an Internet-scale trading application in the cloud, where people can
-        trade on exciting new markets.</p>
-        <p><a href="/page/trade" class="btn btn-primary btn-lg" role="button">Try the demo now &raquo;</a></p>
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-2">
+              <br/>
+              <img src="/img/swirly-md.png" class="img-responsive"/>
+            </div>
+            <div class="col-sm-10">
+              <h2>Swirly Cloud</h2>
+              <p>We aim to build an Internet-scale trading application in the cloud, where people
+                 can trade on exciting new markets.</p>
+              <p><a href="/page/trade" class="btn btn-primary btn-lg" role="button">Try the demo now &raquo;</a></p>
+            </div>
+          </div>
+        </div>
 
       </div>
 
