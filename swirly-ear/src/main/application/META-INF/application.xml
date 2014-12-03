@@ -10,11 +10,11 @@
   <module>
     <!-- The default module must be listed first. -->
     <web>
-      <web-uri>swirly-front-0.1.0-SNAPSHOT.war</web-uri>
+      <web-uri>swirly-front-0.1</web-uri>
       <context-root>default</context-root>
     </web>
     <web>
-      <web-uri>swirly-back-0.1.0-SNAPSHOT.war</web-uri>
+      <web-uri>swirly-back-0.1</web-uri>
       <context-root>backend</context-root>
     </web>
   </module>

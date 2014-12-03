@@ -1,0 +1,22 @@
+apply plugin: 'ear'
+apply plugin: 'appengine'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.15'
+    }
+}
+
+dependencies {
+    appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.15'
+    deploy project(path: ':swirly-front', configuration: 'archives')
+    deploy project(path: ':swirly-back', configuration: 'archives')
+}
+
+appengine {
+    downloadSdk = true
+}
