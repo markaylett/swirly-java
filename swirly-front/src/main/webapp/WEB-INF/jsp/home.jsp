@@ -16,14 +16,14 @@
 
     <div class="container">
 
-      <div class="jumbotron">
+      <div class="jumbotron" style="margin-top: 32px">
 
         <img src="/img/swirly-sm.png" class="img-responsive pull-left"
-             style="padding: 16px 32px 64px 0px;"/>
+             style="margin: 16px 32px 64px 0;"/>
         <h2>Swirly Cloud</h2>
-        <p>We aim to build an Internet-scale trading application in the cloud, where traders
-          world-wide can participate in exciting new markets.</p>
-        <p><a href="/page/trader" class="btn btn-primary btn-lg" role="button">Try the demo &raquo;</a></p>
+        <p>We aim to build an Internet-scale trading application in the cloud, where people can
+        trade on exciting new markets.</p>
+        <p><a href="/page/trade" class="btn btn-primary btn-lg" role="button">Try the demo now &raquo;</a></p>
 
       </div>
 

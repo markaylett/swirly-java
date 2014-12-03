@@ -34,8 +34,8 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>trader</web-resource-name>
-      <url-pattern>/page/trader</url-pattern>
+      <web-resource-name>user</web-resource-name>
+      <url-pattern>/page/trade</url-pattern>
       <url-pattern>/page/contr</url-pattern>
     </web-resource-collection>
     <auth-constraint>

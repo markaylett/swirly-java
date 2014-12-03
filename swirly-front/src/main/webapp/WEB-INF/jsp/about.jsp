@@ -16,10 +16,11 @@
 
     <div class="container">
 
-      <div>
+      <div class="page-header" style="margin-bottom: 32px;">
         <h2>About</h2>
-        <p class="lead">Social finance.</p>
       </div>
+
+      <p class="lead">Social finance.</p>
 
     </div>
 

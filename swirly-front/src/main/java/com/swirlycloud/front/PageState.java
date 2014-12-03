@@ -36,8 +36,8 @@ public final class PageState {
         return page == Page.HOME;
     }
 
-    public final boolean isTraderPage() {
-        return page == Page.TRADER;
+    public final boolean isTradePage() {
+        return page == Page.TRADE;
     }
 
     public final boolean isContrPage() {

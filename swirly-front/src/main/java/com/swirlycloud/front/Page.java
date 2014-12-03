@@ -7,7 +7,7 @@ package com.swirlycloud.front;
 
 public enum Page {
     HOME("/page/home", "/WEB-INF/jsp/home.jsp", false), //
-    TRADER("/page/trader", "/WEB-INF/jsp/trader.jsp", true), //
+    TRADE("/page/trade", "/WEB-INF/jsp/trade.jsp", true), //
     CONTR("/page/contr", "/WEB-INF/jsp/contr.jsp", true), //
     USER("/page/user", "/WEB-INF/jsp/user.jsp", true), //
     ABOUT("/page/about", "/WEB-INF/jsp/about.jsp", false), //

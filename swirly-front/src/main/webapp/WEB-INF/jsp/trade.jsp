@@ -255,7 +255,7 @@
     <script type="text/javascript" src="/js/knockout.min.js"></script>
 
     <script type="text/javascript" src="/js/swirly.js"></script>
-    <script type="text/javascript" src="/js/trader.js"></script>
+    <script type="text/javascript" src="/js/trade.js"></script>
     <script type="text/javascript">
       $(initApp);
     </script>

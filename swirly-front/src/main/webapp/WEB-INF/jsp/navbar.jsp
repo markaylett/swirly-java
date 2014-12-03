@@ -20,10 +20,10 @@
       <ul class="nav navbar-nav">
         <li ${state.homePage ? 'class="active"' : ""}><a href="/page/home">Home</a></li>
         <c:if test="${state.userLoggedIn}">
-          <li ${state.traderPage ? 'class="active"' : ""}><a href="/page/trader">Trader</a></li>
+          <li ${state.tradePage ? 'class="active"' : ""}><a href="/page/trade">Trade</a></li>
           <li ${state.contrPage ? 'class="active"' : ""}><a href="/page/contr">Contract</a></li>
           <c:if test="${state.userAdmin}">
-            <li ${state.userPage ? 'class="active"' : ""}><a href="/page/user">User</a></li>
+            <!--li ${state.userPage ? 'class="active"' : ""}><a href="/page/user">User</a></li-->
           </c:if>
         </c:if>
         <li ${state.aboutPage ? 'class="active"' : ""}><a href="/page/about">About</a></li>
