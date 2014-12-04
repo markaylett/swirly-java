@@ -39,7 +39,7 @@
         fundamentally changed as a consequence. We think that the world of finance can benefit
         tremendously from these innovations.</p>
 
-      <p>The beauty of the Cloud computing is that we only pay for what we use, so we don't need to
+      <p>The beauty of Cloud computing is that we only pay for what we use, so we don't need to
         invest our capital on infrastructure and extra capacity for future growth. The Cloud also
         simplifies maintenance, operations, disaster recovery and security, so that we can focus our
         efforts on writing great software.</p>
