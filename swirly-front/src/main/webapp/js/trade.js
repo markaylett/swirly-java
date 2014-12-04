@@ -261,6 +261,13 @@ function ViewModel(contrs) {
 
     self.submitOrder = function(action) {
         var contr = self.contrs[self.contrMnem()];
+        if (contr === undefined) {
+            self.showError(new Error({
+                num: 500,
+                msg: 'invalid contract: ' + self.contrMnem()
+            }));
+            return;
+        }
         var settlDate = toDateInt(self.settlDate());
         var ticks = priceToTicks(self.price(), contr);
         var lots = parseInt(self.lots());
@@ -291,6 +298,13 @@ function ViewModel(contrs) {
 
     self.reviseOrder = function(order) {
         var contr = order.contr().mnem;
+        if (contr === undefined) {
+            self.showError(new Error({
+                num: 500,
+                msg: 'invalid contract: ' + self.contrMnem()
+            }));
+            return;
+        }
         var settlDate = toDateInt(order.settlDate());
         var id = order.id();
         var lots = parseInt(self.lots());
@@ -319,6 +333,13 @@ function ViewModel(contrs) {
 
     self.cancelOrder = function(order) {
         var contr = order.contr().mnem;
+        if (contr === undefined) {
+            self.showError(new Error({
+                num: 500,
+                msg: 'invalid contract: ' + self.contrMnem()
+            }));
+            return;
+        }
         var settlDate = toDateInt(order.settlDate());
         var id = order.id();
         $.ajax({
@@ -344,6 +365,13 @@ function ViewModel(contrs) {
 
     self.confirmTrade = function(trade) {
         var contr = trade.contr().mnem;
+        if (contr === undefined) {
+            self.showError(new Error({
+                num: 500,
+                msg: 'invalid contract: ' + self.contrMnem()
+            }));
+            return;
+        }
         var settlDate = toDateInt(trade.settlDate());
         var id = trade.id();
         $.ajax({

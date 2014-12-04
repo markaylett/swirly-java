@@ -37,7 +37,7 @@ function ViewModel() {
             });
             self.contrs(cooked);
         }).fail(function(xhr) {
-            self.showError(new Error($.parseJSON(xhr.responseText)));
+            self.showError(new Error(xhr));
         });
     };
 }

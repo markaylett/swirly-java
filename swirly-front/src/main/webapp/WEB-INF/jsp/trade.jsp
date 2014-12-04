@@ -54,9 +54,9 @@
           <tr>
             <th>Contr</th>
             <th>Settl Date</th>
-            <th style="text-align: right;">Bid Price</th>
-            <th style="text-align: right;">Bid Lots</th>
             <th style="text-align: right;">Bid Count</th>
+            <th style="text-align: right;">Bid Lots</th>
+            <th style="text-align: right;">Bid Price</th>
             <th style="text-align: right;">Offer Price</th>
             <th style="text-align: right;">Offer Lots</th>
             <th style="text-align: right;">Offer Count</th>
@@ -67,11 +67,11 @@
             <td data-bind="mnem: contr"></td>
             <td data-bind="text: settlDate"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optnum: bidPrice, click: $root.selectBid"></td>
+                data-bind="optnum: bidCount, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="optnum: bidLots, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optnum: bidCount, click: $root.selectBid"></td>
+                data-bind="optnum: bidPrice, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="optnum: offerPrice, click: $root.selectOffer"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
@@ -212,8 +212,8 @@
               <tr>
                 <th>Contr</th>
                 <th>Settl Date</th>
-                <th style="text-align: right;">Buy Price</th>
                 <th style="text-align: right;">Buy Lots</th>
+                <th style="text-align: right;">Buy Price</th>
                 <th style="text-align: right;">Sell Price</th>
                 <th style="text-align: right;">Sell Lots</th>
                 <th style="text-align: right;">Net Price</th>
@@ -225,9 +225,9 @@
                 <td data-bind="mnem: contr"></td>
                 <td data-bind="text: settlDate"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="optnum: buyPrice, click: $root.selectBuy"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="optnum: buyLots, click: $root.selectBuy"></td>
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
+                    data-bind="optnum: buyPrice, click: $root.selectBuy"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="optnum: sellPrice, click: $root.selectSell"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
