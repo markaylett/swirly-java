@@ -20,10 +20,8 @@
 
       <form class="form-inline" style="margin-bottom: 24px;">
         <div class="form-group">
-          <div id="the-basics">
-            <input id="contr" type="text" class="form-control" placeholder="Enter contract"
-                   data-bind="value: contrMnem, disable: isOrderSelected"/>
-          </div>
+          <input id="contr" type="text" class="form-control" placeholder="Enter contract"
+                 data-bind="value: contrMnem, disable: isOrderSelected"/>
         </div>
         <div class="form-group">
           <input id="settlDate" type="date" class="form-control" placeholder="Enter settl date"
@@ -35,7 +33,7 @@
         </div>
         <div class="form-group">
             <input id="lots" type="number" class="form-control" placeholder="Enter lots"
-                 data-bind="value: lots"/>
+                 data-bind="value: lots, disable: isOrderSelected"/>
         </div>
         <button type="button" class="btn btn-default"
                 data-bind="click: submitBuy, disable: isOrderSelected">
@@ -82,16 +80,11 @@
         </tbody>
       </table>
 
-      <div class="btn-group" style="margin-bottom: 24px;">
+      <div class="btn-group" style="float: left; margin-bottom: 24px; margin-right: 4px;">
         <button type="button" class="btn btn-default"
                 data-bind="click: refreshAll">
           <span class="glyphicon glyphicon-refresh"></span>
           Refresh
-        </button>
-        <button type="button" class="btn btn-default"
-                data-bind="click: reviseAll, enable: isOrderSelected">
-          <span class="glyphicon glyphicon-pencil"></span>
-          Revise
         </button>
         <button type="button" class="btn btn-default"
                 data-bind="click: cancelAll, enable: isOrderSelected">
@@ -104,6 +97,18 @@
           Confirm
         </button>
       </div>
+
+      <form class="form-inline" style="margin-bottom: 24px;">
+        <div class="form-group">
+            <input id="reviseLots" type="number" class="form-control" placeholder="Enter lots"
+                 data-bind="value: lots, enable: isOrderSelected"/>
+        </div>
+        <button type="button" class="btn btn-default"
+                data-bind="click: reviseAll, enable: isOrderSelected">
+          <span class="glyphicon glyphicon-pencil"></span>
+          Revise
+        </button>
+      </form>
 
       <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
         <li>

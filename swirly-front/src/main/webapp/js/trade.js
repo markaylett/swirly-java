@@ -90,6 +90,7 @@ function ViewModel(contrs) {
             var contr = self.contrs[val];
             $('#price').attr('step', contr.priceInc);
             $('#lots').attr('min', contr.minLots);
+            $('#reviseLots').attr('min', contr.minLots);
         }
     });
 
