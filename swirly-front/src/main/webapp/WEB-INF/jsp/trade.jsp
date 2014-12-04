@@ -14,11 +14,11 @@
 
     <jsp:include page="navbar.jsp"/>
 
-    <div class="container" style="padding: 90px 15px 0;">
+    <div class="container" style="padding-top: 104px;">
 
       <jsp:include page="alert.jsp"/>
 
-      <form class="form-inline" style="margin-bottom: 20px;">
+      <form class="form-inline" style="margin-bottom: 24px;">
         <div class="form-group">
           <div id="the-basics">
             <input id="contr" type="text" class="form-control" placeholder="Enter contract"
@@ -49,7 +49,7 @@
         </button>
       </form>
 
-      <table class="table table-hover table-striped">
+      <table class="table table-hover table-striped" style="margin-bottom: 24px;">
         <thead>
           <tr>
             <th>Contr</th>
@@ -82,7 +82,7 @@
         </tbody>
       </table>
 
-      <div class="btn-group" style="margin-bottom: 20px;">
+      <div class="btn-group" style="margin-bottom: 24px;">
         <button type="button" class="btn btn-default"
                 data-bind="click: refreshAll">
           <span class="glyphicon glyphicon-refresh"></span>

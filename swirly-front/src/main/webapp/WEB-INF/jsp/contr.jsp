@@ -14,7 +14,11 @@
 
     <jsp:include page="navbar.jsp"/>
 
-    <div class="container" style="padding: 90px 15px 0;">
+    <div class="container">
+
+      <div class="page-header" style="margin-bottom: 32px;">
+        <h2>Contract</h2>
+      </div>
 
       <jsp:include page="alert.jsp"/>
 

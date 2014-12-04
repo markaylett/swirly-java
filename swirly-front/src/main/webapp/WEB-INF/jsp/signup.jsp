@@ -14,7 +14,7 @@
 
     <jsp:include page="navbar.jsp"/>
 
-    <div class="container">
+    <div class="container" style="padding-top: 88px;">
 
       <jsp:include page="alert.jsp"/>
 
