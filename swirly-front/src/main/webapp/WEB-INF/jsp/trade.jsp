@@ -65,17 +65,17 @@
             <td data-bind="mnem: contr"></td>
             <td data-bind="text: settlDate"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optnum: bidCount, click: $root.selectBid"></td>
+                data-bind="optdob: bidCount, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optnum: bidLots, click: $root.selectBid"></td>
+                data-bind="optdob: bidLots, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optnum: bidPrice, click: $root.selectBid"></td>
+                data-bind="optdob: bidPrice, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optnum: offerPrice, click: $root.selectOffer"></td>
+                data-bind="optdob: offerPrice, click: $root.selectOffer"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optnum: offerLots, click: $root.selectOffer"></td>
+                data-bind="optdob: offerLots, click: $root.selectOffer"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optnum: offerCount, click: $root.selectOffer"></td>
+                data-bind="optdob: offerCount, click: $root.selectOffer"></td>
           </tr>
         </tbody>
       </table>

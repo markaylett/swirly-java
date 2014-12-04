@@ -5,6 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
+import static com.swirlycloud.engine.Constants.DEPTH;
 import static com.swirlycloud.util.PathUtil.splitPath;
 
 import java.io.IOException;
@@ -15,8 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
 public final class MarketServlet extends HttpServlet {
-
-    private static final Integer DEPTH = Integer.valueOf(5);
 
     private static final int CMNEM_PART = 0;
     private static final int SETTL_DATE_PART = 1;
@@ -41,12 +40,12 @@ public final class MarketServlet extends HttpServlet {
 
         boolean found = false;
         if (parts.length == 0) {
-            found = ctx.getMarket(resp.getWriter(), DEPTH);
+            found = ctx.getMarket(DEPTH, resp.getWriter());
         } else if (parts.length == 1) {
-            found = ctx.getMarket(resp.getWriter(), parts[CMNEM_PART], DEPTH);
+            found = ctx.getMarket(parts[CMNEM_PART], DEPTH, resp.getWriter());
         } else if (parts.length == 2) {
-            found = ctx.getMarket(resp.getWriter(), parts[CMNEM_PART],
-                    Integer.parseInt(parts[SETTL_DATE_PART]), DEPTH);
+            found = ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                    DEPTH, resp.getWriter());
         }
 
         if (!found) {

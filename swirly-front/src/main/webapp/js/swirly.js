@@ -53,6 +53,10 @@ function toDateStr(i) {
         + '-' + ('0' + mday).slice(-2);
 }
 
+function optNum(x) {
+    return parseFloat(x) === 0 ? '-' : x;
+}
+
 ko.bindingHandlers.mnem = {
     update: function(elem, valAccessor) {
         var val = valAccessor();
@@ -63,7 +67,24 @@ ko.bindingHandlers.mnem = {
 ko.bindingHandlers.optnum = {
     update: function(elem, valAccessor) {
         var val = valAccessor();
-        $(elem).text(parseFloat(val()) === 0 ? '-' : val());
+        $(elem).text(optNum(val()));
+    }
+};
+
+// Optional depth of book.
+
+ko.bindingHandlers.optdob = {
+    update: function(elem, valAccessor, allBindings, viewModel, bindingContext) {
+        var val = valAccessor();
+        var arr = val();
+        var html = '';
+        for (var i = 0; i < arr.length; ++i) {
+            if (i > 0) {
+                html += '<br/>';
+            }
+            html += optNum(arr[i]);
+        }
+        $(elem).html(html);
     }
 };
 
@@ -116,31 +137,36 @@ function Market(val, contrs) {
 
     var contr = contrs[val.contr];
 
+    //self.isSelected = ko.observable(val.isSelected);
     self.id = ko.observable(val.id);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
-    self.bidTicks = ko.observable(val.bidTicks[0]);
-    self.bidLots = ko.observable(val.bidLots[0]);
-    self.bidCount = ko.observable(val.bidCount[0]);
-    self.offerTicks = ko.observable(val.offerTicks[0]);
-    self.offerLots = ko.observable(val.offerLots[0]);
-    self.offerCount = ko.observable(val.offerCount[0]);
+    self.bidTicks = ko.observableArray(val.bidTicks);
+    self.bidLots = ko.observableArray(val.bidLots);
+    self.bidCount = ko.observableArray(val.bidCount);
+    self.offerTicks = ko.observableArray(val.offerTicks);
+    self.offerLots = ko.observableArray(val.offerLots);
+    self.offerCount = ko.observableArray(val.offerCount);
 
     self.bidPrice = ko.computed(function() {
-        return ticksToPrice(self.bidTicks(), self.contr());
+        return $.map(self.bidTicks(), function(val) {
+            return ticksToPrice(val, self.contr());
+        });
     });
 
     self.offerPrice = ko.computed(function() {
-        return ticksToPrice(self.offerTicks(), self.contr());
+        return $.map(self.offerTicks(), function(val) {
+            return ticksToPrice(val, self.contr());
+        });
     });
 
     self.update = function(val) {
-        self.bidTicks(val.bidTicks[0]);
-        self.bidLots(val.bidLots[0]);
-        self.bidCount(val.bidCount[0]);
-        self.offerTicks(val.offerTicks[0]);
-        self.offerLots(val.offerLots[0]);
-        self.offerCount(val.offerCount[0]);
+        self.bidTicks(val.bidTicks);
+        self.bidLots(val.bidLots);
+        self.bidCount(val.bidCount);
+        self.offerTicks(val.offerTicks);
+        self.offerLots(val.offerLots);
+        self.offerCount(val.offerCount);
     };
 }
 

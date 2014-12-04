@@ -50,21 +50,21 @@ public final class RecServlet extends HttpServlet {
             found = rest.getRec(resp.getWriter());
         } else if ("asset".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getRec(resp.getWriter(), RecType.ASSET);
+                found = rest.getRec(RecType.ASSET, resp.getWriter());
             } else if (parts.length == 2) {
-                found = rest.getRec(resp.getWriter(), RecType.ASSET, parts[CMNEM_PART]);
+                found = rest.getRec(RecType.ASSET, parts[CMNEM_PART], resp.getWriter());
             }
         } else if ("contr".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getRec(resp.getWriter(), RecType.CONTR);
+                found = rest.getRec(RecType.CONTR, resp.getWriter());
             } else if (parts.length == 2) {
-                found = rest.getRec(resp.getWriter(), RecType.CONTR, parts[CMNEM_PART]);
+                found = rest.getRec(RecType.CONTR, parts[CMNEM_PART], resp.getWriter());
             }
         } else if ("user".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getRec(resp.getWriter(), RecType.USER);
+                found = rest.getRec(RecType.USER, resp.getWriter());
             } else if (parts.length == 2) {
-                found = rest.getRec(resp.getWriter(), RecType.USER, parts[CMNEM_PART]);
+                found = rest.getRec(RecType.USER, parts[CMNEM_PART], resp.getWriter());
             }
         }
 
@@ -112,7 +112,7 @@ public final class RecServlet extends HttpServlet {
             return;
         }
 
-        rest.registerUser(resp.getWriter(), r.getMnem(), r.getDisplay(), email);
+        rest.registerUser(r.getMnem(), r.getDisplay(), email, resp.getWriter());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");

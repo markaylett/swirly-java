@@ -63,8 +63,8 @@ public final class AccntServlet extends HttpServlet {
         boolean found = false;
         if ("order".equals(parts[TYPE_PART])) {
             if (parts.length == 4) {
-                found = rest.deleteOrder(resp.getWriter(), email, parts[CMNEM_PART],
-                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
+                found = rest.deleteOrder(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                        Long.parseLong(parts[ID_PART]), resp.getWriter());
             }
         } else if ("trade".equals(parts[TYPE_PART])) {
             if (parts.length == 4) {
@@ -105,39 +105,39 @@ public final class AccntServlet extends HttpServlet {
 
         boolean found = false;
         if (parts.length == 0) {
-            found = rest.getAccnt(resp.getWriter(), email);
+            found = rest.getAccnt(email, resp.getWriter());
         } else if ("order".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getOrder(resp.getWriter(), email);
+                found = rest.getOrder(email, resp.getWriter());
             } else if (parts.length == 2) {
-                found = rest.getOrder(resp.getWriter(), email, parts[CMNEM_PART]);
+                found = rest.getOrder(email, parts[CMNEM_PART], resp.getWriter());
             } else if (parts.length == 3) {
-                found = rest.getOrder(resp.getWriter(), email, parts[CMNEM_PART],
-                        Integer.parseInt(parts[SETTL_DATE_PART]));
+                found = rest.getOrder(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                        resp.getWriter());
             } else if (parts.length == 4) {
-                found = rest.getOrder(resp.getWriter(), email, parts[CMNEM_PART],
-                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
+                found = rest.getOrder(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                        Long.parseLong(parts[ID_PART]), resp.getWriter());
             }
         } else if ("trade".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getTrade(resp.getWriter(), email);
+                found = rest.getTrade(email, resp.getWriter());
             } else if (parts.length == 2) {
-                found = rest.getTrade(resp.getWriter(), email, parts[CMNEM_PART]);
+                found = rest.getTrade(email, parts[CMNEM_PART], resp.getWriter());
             } else if (parts.length == 3) {
-                found = rest.getTrade(resp.getWriter(), email, parts[CMNEM_PART],
-                        Integer.parseInt(parts[SETTL_DATE_PART]));
+                found = rest.getTrade(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                        resp.getWriter());
             } else if (parts.length == 4) {
-                found = rest.getTrade(resp.getWriter(), email, parts[CMNEM_PART],
-                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
+                found = rest.getTrade(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                        Long.parseLong(parts[ID_PART]), resp.getWriter());
             }
         } else if ("posn".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getPosn(resp.getWriter(), email);
+                found = rest.getPosn(email, resp.getWriter());
             } else if (parts.length == 2) {
-                found = rest.getPosn(resp.getWriter(), email, parts[CMNEM_PART]);
+                found = rest.getPosn(email, parts[CMNEM_PART], resp.getWriter());
             } else if (parts.length == 3) {
-                found = rest.getPosn(resp.getWriter(), email, parts[CMNEM_PART],
-                        Integer.parseInt(parts[SETTL_DATE_PART]));
+                found = rest.getPosn(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                        resp.getWriter());
             }
         }
 
@@ -185,8 +185,8 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (!rest.postOrder(resp.getWriter(), email, cmnem, settlDate, r.getRef(), r.getAction(),
-                r.getTicks(), r.getLots(), r.getMinLots())) {
+        if (!rest.postOrder(email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
+                r.getLots(), r.getMinLots(), resp.getWriter())) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -231,7 +231,7 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (!rest.putOrder(resp.getWriter(), email, cmnem, settlDate, id, r.getLots())) {
+        if (!rest.putOrder(email, cmnem, settlDate, id, r.getLots(), resp.getWriter())) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }

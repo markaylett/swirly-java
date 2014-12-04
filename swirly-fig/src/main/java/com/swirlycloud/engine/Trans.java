@@ -5,6 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
+import static com.swirlycloud.engine.Constants.DEPTH;
+
 import java.io.IOException;
 
 import com.swirlycloud.domain.Exec;
@@ -48,8 +50,7 @@ public final class Trans implements Jsonifiable {
         final User user = (User) arg;
         if (market != null) {
             out.append("{\"market\":");
-            // FIXME: number of levels.
-            market.toJson(out, Integer.valueOf(5));
+            market.toJson(out, DEPTH);
             out.append(',');
         } else {
             out.append('{');

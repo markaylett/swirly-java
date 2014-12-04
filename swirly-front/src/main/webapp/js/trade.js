@@ -97,7 +97,7 @@ function ViewModel(contrs) {
     self.selectBid = function(val) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
-        self.price(val.bidPrice());
+        self.price(val.bidPrice()[0]);
         return true;
     };
 
@@ -108,7 +108,7 @@ function ViewModel(contrs) {
     self.selectOffer = function(val) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
-        self.price(val.offerPrice());
+        self.price(val.offerPrice()[0]);
         return true;
     };
 
