@@ -71,23 +71,6 @@ ko.bindingHandlers.optnum = {
     }
 };
 
-// Optional depth of book.
-
-ko.bindingHandlers.optdob = {
-    update: function(elem, valAccessor, allBindings, viewModel, bindingContext) {
-        var val = valAccessor();
-        var arr = val();
-        var html = '';
-        for (var i = 0; i < arr.length; ++i) {
-            if (i > 0) {
-                html += '<br/>';
-            }
-            html += optNum(arr[i]);
-        }
-        $(elem).html(html);
-    }
-};
-
 function Error(val) {
     var self = this;
 
@@ -137,7 +120,7 @@ function Market(val, contrs) {
 
     var contr = contrs[val.contr];
 
-    //self.isSelected = ko.observable(val.isSelected);
+    self.isSelected = ko.observable(val.isSelected);
     self.id = ko.observable(val.id);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));

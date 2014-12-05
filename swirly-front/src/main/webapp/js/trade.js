@@ -4,6 +4,25 @@
  * All rights reserved.
  **************************************************************************************************/
  
+ko.bindingHandlers.depth = {
+    update: function(elem, valAccessor, allBindings, viewModel, bindingContext) {
+        var val = valAccessor();
+        var arr = val();
+        if (!bindingContext.$rawData.isSelected()) {
+            $(elem).text(optNum(arr[0]));
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < arr.length; ++i) {
+            if (i > 0) {
+                html += '<br/>';
+            }
+            html += optNum(arr[i]);
+        }
+        $(elem).html(html);
+    }
+};
+
 function ViewModel(contrs) {
     var self = this;
 
@@ -34,6 +53,7 @@ function ViewModel(contrs) {
     self.posns = ko.observableArray([]);
 
     self.selectedTab = ko.observable();
+    self.allMarkets = ko.observable(false);
     self.allOrders = ko.observable(false);
     self.allTrades = ko.observable(false);
 
@@ -46,6 +66,15 @@ function ViewModel(contrs) {
     self.orders.extend({ rateLimit: 25 });
     self.trades.extend({ rateLimit: 25 });
     self.posns.extend({ rateLimit: 25 });
+
+    self.isMarketSelected = ko.computed(function() {
+        var markets = self.markets();
+        for (var i = 0; i < markets.length; ++i) {
+            if (markets[i].isSelected())
+                return true;
+        }
+        return false;
+    });
 
     self.isOrderSelected = ko.computed(function() {
         if (self.selectedTab() != 'orderTab') {
@@ -69,6 +98,13 @@ function ViewModel(contrs) {
                 return true;
         }
         return false;
+    });
+
+    self.allMarkets.subscribe(function(val) {
+        var markets = self.markets();
+        for (var i = 0; i < markets.length; ++i) {
+            markets[i].isSelected(val);
+        }
     });
 
     self.allOrders.subscribe(function(val) {
@@ -191,6 +227,7 @@ function ViewModel(contrs) {
             if (market !== null) {
                 market.update(raw.market);
             } else {
+                raw.market.isSelected = false;
                 self.markets.push(new Market(raw.market, self.contrs));
             }
         }
@@ -228,7 +265,14 @@ function ViewModel(contrs) {
         $.getJSON('/api/market', function(raw) {
 
             var cooked = $.map(raw, function(val) {
-                return new Market(val, self.contrs);
+                market = self.findMarket(val.id);
+                if (market !== null) {
+                    market.update(val);
+                } else {
+                    val.isSelected = false;
+                    market = new Market(val, self.contrs);
+                }
+                return market;
             });
             self.markets(cooked);
         }).fail(function(xhr) {
@@ -239,20 +283,35 @@ function ViewModel(contrs) {
 
             var cooked = $.map(raw.orders, function(val) {
                 order = self.findOrder(val.id);
-                val.isSelected = (order !== null && order.isSelected());
-                return new Order(val, self.contrs);
+                if (order !== null) {
+                    order.update(val);
+                } else {
+                    val.isSelected = false;
+                    order = new Order(val, self.contrs);
+                }
+                return order;
             });
             self.orders(cooked);
 
             cooked = $.map(raw.trades, function(val) {
-                order = self.findTrade(val.id);
-                val.isSelected = (order !== null && order.isSelected());
-                return new Trade(val, self.contrs);
+                trade = self.findTrade(val.id);
+                if (trade === null) {
+                    val.isSelected = false;
+                    trade = new Trade(val, self.contrs);
+                }
+                return trade;
             });
             self.trades(cooked);
 
             cooked = $.map(raw.posns, function(val) {
-                return new Posn(val, self.contrs);
+                posn = self.findPosn(val.id);
+                if (posn !== null) {
+                    posn.update(val);
+                } else {
+                    val.isSelected = false;
+                    posn = new Posn(val, self.contrs);
+                }
+                return posn;
             });
             self.posns(cooked);
         }).fail(function(xhr) {

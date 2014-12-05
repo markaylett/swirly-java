@@ -50,6 +50,9 @@
       <table class="table table-hover table-striped" style="margin-bottom: 24px;">
         <thead>
           <tr>
+            <th>
+              <input type="checkbox" data-bind="checked: allMarkets"/>
+            </th>
             <th>Contr</th>
             <th>Settl Date</th>
             <th style="text-align: right;">Bid Count</th>
@@ -62,20 +65,23 @@
         </thead>
         <tbody data-bind="foreach: markets">
           <tr>
+            <td>
+              <input type="checkbox" data-bind="checked: isSelected"/>
+            </td>
             <td data-bind="mnem: contr"></td>
             <td data-bind="text: settlDate"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optdob: bidCount, click: $root.selectBid"></td>
+                data-bind="depth: bidCount, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optdob: bidLots, click: $root.selectBid"></td>
+                data-bind="depth: bidLots, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optdob: bidPrice, click: $root.selectBid"></td>
+                data-bind="depth: bidPrice, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optdob: offerPrice, click: $root.selectOffer"></td>
+                data-bind="depth: offerPrice, click: $root.selectOffer"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optdob: offerLots, click: $root.selectOffer"></td>
+                data-bind="depth: offerLots, click: $root.selectOffer"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
-                data-bind="optdob: offerCount, click: $root.selectOffer"></td>
+                data-bind="depth: offerCount, click: $root.selectOffer"></td>
           </tr>
         </tbody>
       </table>
@@ -184,8 +190,8 @@
                 <th style="text-align: right;">Lots</th>
                 <th style="text-align: right;">Resd</th>
                 <th style="text-align: right;">Exec</th>
-                <th style="text-align: right;">Last Price</th>
-                <th style="text-align: right;">Last Lots</th>
+                <th style="text-align: right;">Orig Price</th>
+                <th style="text-align: right;">Orig Lots</th>
               </tr>
             </thead>
             <tbody data-bind="foreach: trades">
@@ -201,12 +207,12 @@
                 <td data-bind="mnem: contr"></td>
                 <td data-bind="text: settlDate"></td>
                 <td data-bind="text: action"></td>
-                <td style="text-align: right;" data-bind="text: price"></td>
-                <td style="text-align: right;" data-bind="text: lots"></td>
-                <td style="text-align: right;" data-bind="text: resd"></td>
-                <td style="text-align: right;" data-bind="text: exec"></td>
                 <td style="text-align: right;" data-bind="text: lastPrice"></td>
                 <td style="text-align: right;" data-bind="text: lastLots"></td>
+                <td style="text-align: right;" data-bind="text: resd"></td>
+                <td style="text-align: right;" data-bind="text: exec"></td>
+                <td style="text-align: right;" data-bind="text: price"></td>
+                <td style="text-align: right;" data-bind="text: lots"></td>
               </tr>
             </tbody>
           </table>
