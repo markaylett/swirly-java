@@ -32,12 +32,14 @@
 
       <h3>Why are we doing it?</h3>
 
-      <p>We believe that cost-cutting by financial organisations will lead them to consider new
-        software architectures that can dynamically grow or shrink on demand. Large online retailers
-        and tech companies have invested heavily in technologies such as Google's BigTable that can
-        cope with Internet-scale workloads. The landscape of modern software development has
-        fundamentally changed as a consequence. We think that the world of finance can benefit
-        tremendously from these innovations.</p>
+      <p>We believe that cost-cutting by financial organisations will lead them to consider new software
+        architectures that can dynamically grow or shrink to meet demand.</p>
+
+      <p>Large online retailers and tech companies have invested heavily in technologies, such as
+        Google's BigTable, that can cope with Internet-scale workloads, and they are providing
+        access to their global infrastructure and compute as a managed service (the Cloud). The
+        landscape of modern software development has fundamentally changed as a consequence. We
+        think that the world of finance can benefit tremendously from these innovations.</p>
 
       <p>The beauty of Cloud computing is that we only pay for what we use, so we don't need to
         invest our capital on infrastructure and extra capacity for future growth. The Cloud also
