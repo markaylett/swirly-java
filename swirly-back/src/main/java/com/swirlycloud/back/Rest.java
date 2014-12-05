@@ -64,10 +64,11 @@ public final class Rest {
         RbNode node = accnt.getFirstTrade();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Exec trade = (Exec) node;
-            if (i++ > 0) {
+            if (i > 0) {
                 out.append(',');
             }
             trade.toJson(out, null);
+            ++i;
         }
         out.append(']');
         return true;
@@ -235,14 +236,67 @@ public final class Rest {
 
     public final synchronized boolean getOrder(String email, String cmnem, Appendable out)
             throws IOException {
-        // TODO.
-        return false;
+        final User user = serv.findUserByEmail(email);
+        if (user == null) {
+            return false;
+        }
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final Accnt accnt = serv.findAccnt(user);
+        if (accnt == null) {
+            out.append("[]");
+            return true;
+        }
+        out.append('[');
+        RbNode node = accnt.getFirstOrder();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Order order = (Order) node;
+            if (order.getContrId() != contr.getId()) {
+                continue;
+            }
+            if (i > 0) {
+                out.append(',');
+            }
+            order.toJson(out, null);
+            ++i;
+        }
+        out.append(']');
+        return true;
     }
 
     public final synchronized boolean getOrder(String email, String cmnem, int settlDate,
             Appendable out) throws IOException {
-        // TODO.
-        return false;
+        final User user = serv.findUserByEmail(email);
+        if (user == null) {
+            return false;
+        }
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final Accnt accnt = serv.findAccnt(user);
+        if (accnt == null) {
+            out.append("[]");
+            return true;
+        }
+        out.append('[');
+        RbNode node = accnt.getFirstOrder();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Order order = (Order) node;
+            if (order.getContrId() != contr.getId() || order.getSettlDay() != settlDay) {
+                continue;
+            }
+            if (i > 0) {
+                out.append(',');
+            }
+            order.toJson(out, null);
+            ++i;
+        }
+        out.append(']');
+        return true;
     }
 
     public final synchronized boolean getOrder(String email, String cmnem, int settlDate,
@@ -316,14 +370,67 @@ public final class Rest {
 
     public final synchronized boolean getTrade(String email, String cmnem, Appendable out)
             throws IOException {
-        // TODO.
-        return false;
+        final User user = serv.findUserByEmail(email);
+        if (user == null) {
+            return false;
+        }
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final Accnt accnt = serv.findAccnt(user);
+        if (accnt == null) {
+            out.append("[]");
+            return true;
+        }
+        out.append('[');
+        RbNode node = accnt.getFirstTrade();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Exec trade = (Exec) node;
+            if (trade.getContrId() != contr.getId()) {
+                continue;
+            }
+            if (i > 0) {
+                out.append(',');
+            }
+            trade.toJson(out, null);
+            ++i;
+        }
+        out.append(']');
+        return true;
     }
 
     public final synchronized boolean getTrade(String email, String cmnem, int settlDate,
             Appendable out) throws IOException {
-        // TODO.
-        return false;
+        final User user = serv.findUserByEmail(email);
+        if (user == null) {
+            return false;
+        }
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final Accnt accnt = serv.findAccnt(user);
+        if (accnt == null) {
+            out.append("[]");
+            return true;
+        }
+        out.append('[');
+        RbNode node = accnt.getFirstTrade();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Exec trade = (Exec) node;
+            if (trade.getContrId() != contr.getId() || trade.getSettlDay() != settlDay) {
+                continue;
+            }
+            if (i > 0) {
+                out.append(',');
+            }
+            trade.toJson(out, null);
+            ++i;
+        }
+        out.append(']');
+        return true;
     }
 
     public final synchronized boolean getTrade(String email, String cmnem, int settlDate,
@@ -374,12 +481,17 @@ public final class Rest {
 
     public final synchronized boolean getPosn(String email, String cmnem, Appendable out)
             throws IOException {
-        final Accnt accnt = serv.findAccntByEmail(email);
-        if (accnt == null) {
+        final User user = serv.findUserByEmail(email);
+        if (user == null) {
             return false;
         }
         if (serv.findRec(RecType.CONTR, cmnem) == null) {
             return false;
+        }
+        final Accnt accnt = serv.findAccnt(user);
+        if (accnt == null) {
+            out.append("[]");
+            return true;
         }
         out.append('[');
         RbNode node = accnt.getFirstPosn();
