@@ -167,6 +167,10 @@ public final class Side {
         return (Level) levels.find(id);
     }
 
+    public final RbNode getRootLevel() {
+        return levels.getRoot();
+    }
+
     public final RbNode getFirstLevel() {
         return levels.getFirst();
     }

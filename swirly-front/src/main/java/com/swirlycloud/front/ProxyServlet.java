@@ -45,7 +45,7 @@ public final class ProxyServlet extends HttpServlet {
      *            The original request.
      * @param module
      *            The target module.
-     * @return New URL.
+     * @return the new URL.
      * @throws IOException
      */
     private static URL getModuleUrl(HttpServletRequest req, String module) throws IOException {

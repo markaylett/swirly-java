@@ -42,7 +42,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return user;
     }
 
-    public final void insertOrder(Order order) {
+    final void insertOrder(Order order) {
         final RbNode node = orders.insert(order);
         assert node == order;
         if (!order.getRef().isEmpty()) {
@@ -50,7 +50,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         }
     }
 
-    public final void removeOrder(Order order) {
+    final void removeOrder(Order order) {
         assert user.getId() == order.getUserId();
         orders.remove(order);
         if (!order.getRef().isEmpty()) {
@@ -58,7 +58,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         }
     }
 
-    public final Order removeOrder(long contrId, int settlDay, long id) {
+    final Order removeOrder(long contrId, int settlDay, long id) {
         final RbNode node = orders.find(Order.composeId(contrId, settlDay, id));
         if (node == null) {
             return null;
@@ -68,7 +68,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return order;
     }
 
-    public final Order removeOrder(String ref) {
+    final Order removeOrder(String ref) {
         final Order order = refIdx.remove(user.getId(), ref);
         if (order != null) {
             orders.remove(order);
@@ -89,6 +89,10 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return refIdx.find(user.getId(), ref);
     }
 
+    public final RbNode getRootOrder() {
+        return orders.getRoot();
+    }
+
     public final RbNode getFirstOrder() {
         return orders.getFirst();
     }
@@ -101,16 +105,16 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return orders.isEmpty();
     }
 
-    public final void insertTrade(Exec trade) {
+    final void insertTrade(Exec trade) {
         final RbNode node = trades.insert(trade);
         assert node == trade;
     }
 
-    public final void removeTrade(Exec trade) {
+    final void removeTrade(Exec trade) {
         trades.remove(trade);
     }
 
-    public final boolean removeTrade(long contrId, int settlDay, long id) {
+    final boolean removeTrade(long contrId, int settlDay, long id) {
         final RbNode node = trades.find(Exec.composeId(contrId, settlDay, id));
         if (node == null) {
             return false;
@@ -122,6 +126,10 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
     public final Exec findTrade(long contrId, int settlDay, long id) {
         return (Exec) trades.find(Exec.composeId(contrId, settlDay, id));
+    }
+
+    public final RbNode getRootTrade() {
+        return trades.getRoot();
     }
 
     public final RbNode getFirstTrade() {
@@ -136,12 +144,12 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return trades.isEmpty();
     }
 
-    public final void insertPosn(Posn posn) {
+    final void insertPosn(Posn posn) {
         final RbNode node = posns.insert(posn);
         assert node == posn;
     }
 
-    public final Posn updatePosn(Posn posn) {
+    final Posn updatePosn(Posn posn) {
         final RbNode node = posns.insert(posn);
         if (node != posn) {
             final Posn exist = (Posn) node;
@@ -162,7 +170,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return (Posn) node;
     }
 
-    public final Posn getLazyPosn(Contr contr, int settlDay) {
+    final Posn getLazyPosn(Contr contr, int settlDay) {
         Posn posn;
         final long key = Posn.composeId(contr.getId(), settlDay, user.getId());
         final RbNode node = posns.pfind(key);
@@ -179,6 +187,10 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     public final Posn findPosn(Contr contr, int settlDay) {
         final long key = Posn.composeId(contr.getId(), settlDay, user.getId());
         return (Posn) posns.find(key);
+    }
+
+    public final RbNode getRootPosn() {
+        return posns.getRoot();
     }
 
     public final RbNode getFirstPosn() {

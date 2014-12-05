@@ -388,6 +388,15 @@ public final class Tree {
         return parent;
     }
 
+    /**
+     * If you want fast access to any node, then root is your best choice.
+     * 
+     * @return the root node.
+     */
+    public final RbNode getRoot() {
+        return root;
+    }
+
     public final RbNode getFirst() {
         RbNode tmp = root;
         RbNode parent = null;

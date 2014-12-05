@@ -21,6 +21,7 @@ import com.swirlycloud.domain.RecType;
 import com.swirlycloud.domain.RefIdx;
 import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.Side;
+import com.swirlycloud.domain.State;
 import com.swirlycloud.domain.User;
 import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.util.DlNode;
@@ -259,7 +260,7 @@ public final class Serv implements AutoCloseable {
             market.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
             final Accnt maker = findAccnt(makerOrder.getUser());
-            assert maker != null; 
+            assert maker != null;
             if (makerOrder.isDone()) {
                 maker.removeOrder(makerOrder);
             }
@@ -353,6 +354,10 @@ public final class Serv implements AutoCloseable {
             return null;
         }
         return findMarket(contr, settlDay);
+    }
+
+    public final RbNode getRootMarket() {
+        return markets.getRoot();
     }
 
     public final RbNode getFirstMarket() {
@@ -550,15 +555,74 @@ public final class Serv implements AutoCloseable {
         return cancelOrder(accnt, market, order, trans);
     }
 
+    /**
+     * Cancels all orders.
+     * 
+     * This method is not executed atomically, so it may partially fail.
+     * 
+     * @param accnt
+     *            the account.
+     */
+    public final void cancelAll(Accnt accnt) {
+        final long now = System.currentTimeMillis();
+        for (;;) {
+            final Order order = (Order) accnt.getRootOrder();
+            if (order == null) {
+                break;
+            }
+            final Market market = (Market) markets.find(Market.composeId(order.getContrId(),
+                    order.getSettlDay()));
+            assert market != null;
+
+            final Exec exec = newExec(market.allocExecId(), order, now);
+            exec.cancel();
+            model.insertExec(market.getContrId(), market.getSettlDay(), exec);
+
+            // Final commit phase cannot fail.
+            market.cancelOrder(order, now);
+            accnt.removeOrder(order);
+        }
+    }
+
+    public final void confirmTrade(Accnt accnt, Exec trade) {
+        if (trade.getState() != State.TRADE) {
+            throw new IllegalArgumentException(String.format("exec '%d' is not a trade",
+                    trade.getId()));
+        }
+        final long now = System.currentTimeMillis();
+        model.updateExec(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
+
+        // No need to update timestamps on trade because it is immediately freed.
+        accnt.removeTrade(trade);
+    }
+
     public final void confirmTrade(Accnt accnt, long contrId, int settlDay, long id) {
         final Exec trade = accnt.findTrade(contrId, settlDay, id);
         if (trade == null) {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
-        final long now = System.currentTimeMillis();
-        model.updateExec(trade.getContrId(), trade.getSettlDay(), id, now);
+        confirmTrade(accnt, trade);
+    }
 
-        // No need to update timestamps on trade because it is immediately freed.
-        accnt.removeTrade(trade);
+    /**
+     * Confirm all trades.
+     * 
+     * This method is not executed atomically, so it may partially fail.
+     * 
+     * @param accnt
+     *            the account.
+     */
+    public final void confirmAll(Accnt accnt) {
+        final long now = System.currentTimeMillis();
+        for (;;) {
+            final Exec trade = (Exec) accnt.getRootTrade();
+            if (trade == null) {
+                break;
+            }
+            model.updateExec(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
+
+            // No need to update timestamps on trade because it is immediately freed.
+            accnt.removeTrade(trade);
+        }
     }
 }
