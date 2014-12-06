@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+APPENGINE_HOME=$HOME/.gradle/appengine-sdk/appengine-java-sdk-1.9.15; export APPENGINE_HOME
+PATH=$APPENGINE_HOME/bin:$PATH; export PATH
+chmod +x $APPENGINE_HOME/bin/*.sh 2>/dev/null || true
+exec appcfg.sh --oauth2 $*
