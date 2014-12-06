@@ -62,7 +62,7 @@
 
       <h3>Who is doing it?</h3>
 
-      <p>The project was originally started by Mark Alert as a proof-of-concept for a low-latency
+      <p>The project was originally started by Mark Aylett as a proof-of-concept for a low-latency
         matching-engine. Mark has now been joined by several former colleagues from the
         industry.</p>
 
