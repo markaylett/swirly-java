@@ -214,6 +214,11 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
     }
 
     @Override
+    public final long getOrderId() {
+        return id;
+    }
+
+    @Override
     public final long getUserId() {
         return user.getId();
     }

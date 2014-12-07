@@ -11,6 +11,8 @@ package com.swirlycloud.domain;
 
 public interface Instruct {
 
+    long getOrderId();
+
     long getUserId();
 
     User getUser();

@@ -89,13 +89,13 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         this.created = created;
     }
 
-    public Exec(long id, long orderId, Instruct instruct, long created) {
+    public Exec(long id, Instruct instruct, long created) {
         if (id >= (1L << 32)) {
             throw new IllegalArgumentException("exec-id exceeds max-value");
         }
         this.key = composeId(instruct.getContrId(), instruct.getSettlDay(), id);
         this.id = id;
-        this.orderId = orderId;
+        this.orderId = instruct.getOrderId();
         this.user = instruct.getUser();
         this.contr = instruct.getContr();
         this.settlDay = instruct.getSettlDay();
@@ -211,6 +211,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         return id;
     }
 
+    @Override
     public final long getOrderId() {
         return orderId;
     }

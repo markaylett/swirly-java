@@ -13,6 +13,7 @@ import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Direct;
 import com.swirlycloud.domain.EmailIdx;
 import com.swirlycloud.domain.Exec;
+import com.swirlycloud.domain.Instruct;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
@@ -158,8 +159,8 @@ public final class Serv implements AutoCloseable {
         return new User(userId, mnem, display, email);
     }
 
-    private final Exec newExec(long id, Order order, long now) {
-        return new Exec(id, order.getId(), order, now);
+    private final Exec newExec(long id, Instruct instruct, long now) {
+        return new Exec(id, instruct, now);
     }
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
@@ -208,12 +209,12 @@ public final class Serv implements AutoCloseable {
             lastTicks = match.ticks;
             lastLots = match.lots;
 
-            final Exec makerTrade = new Exec(makerId, makerOrder.getId(), makerOrder, now);
+            final Exec makerTrade = new Exec(makerId, makerOrder, now);
             makerTrade.trade(match.lots, match.ticks, match.lots, takerId, Role.MAKER,
                     takerOrder.getUser());
             match.makerTrade = makerTrade;
 
-            final Exec takerTrade = new Exec(takerId, takerOrder.getId(), takerOrder, now);
+            final Exec takerTrade = new Exec(takerId, takerOrder, now);
             takerTrade.trade(taken, match.ticks, match.lots, makerId, Role.TAKER,
                     makerOrder.getUser());
             match.takerTrade = takerTrade;
