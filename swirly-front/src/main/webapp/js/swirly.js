@@ -266,7 +266,9 @@ function Posn(val, contrs) {
         if (lots !== 0) {
             ticks = fractToReal(self.buyLicks(), lots);
         }
-        return ticksToPrice(ticks, self.contr());
+        var contr = self.contr();
+        // Extra decimal place.
+        return incsToReal(ticks, contr.priceInc).toFixed(contr.priceDp + 1);
     });
 
     self.sellPrice = ko.computed(function() {
@@ -275,7 +277,9 @@ function Posn(val, contrs) {
         if (lots !== 0) {
             ticks = fractToReal(self.sellLicks(), lots);
         }
-        return ticksToPrice(ticks, self.contr());
+        var contr = self.contr();
+        // Extra decimal place.
+        return incsToReal(ticks, contr.priceInc).toFixed(contr.priceDp + 1);
     });
 
     self.netPrice = ko.computed(function() {
@@ -285,7 +289,9 @@ function Posn(val, contrs) {
         if (lots !== 0) {
             ticks = fractToReal(licks, lots);
         }
-        return ticksToPrice(ticks, self.contr());
+        var contr = self.contr();
+        // Extra decimal place.
+        return incsToReal(ticks, contr.priceInc).toFixed(contr.priceDp + 1);
     });
 
     self.netLots = ko.computed(function() {
