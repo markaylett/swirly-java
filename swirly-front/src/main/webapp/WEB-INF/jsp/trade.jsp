@@ -190,8 +190,8 @@
                 <th style="text-align: right;">Lots</th>
                 <th style="text-align: right;">Resd</th>
                 <th style="text-align: right;">Exec</th>
-                <th style="text-align: right;">Orig Price</th>
-                <th style="text-align: right;">Orig Lots</th>
+                <th>Role</th>
+                <th>Cpty</th>
               </tr>
             </thead>
             <tbody data-bind="foreach: trades">
@@ -211,8 +211,8 @@
                 <td style="text-align: right;" data-bind="text: lastLots"></td>
                 <td style="text-align: right;" data-bind="text: resd"></td>
                 <td style="text-align: right;" data-bind="text: exec"></td>
-                <td style="text-align: right;" data-bind="text: price"></td>
-                <td style="text-align: right;" data-bind="text: lots"></td>
+                <td data-bind="text: role"></td>
+                <td data-bind="text: cpty"></td>
               </tr>
             </tbody>
           </table>
