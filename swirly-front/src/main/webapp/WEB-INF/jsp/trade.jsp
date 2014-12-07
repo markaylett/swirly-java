@@ -29,7 +29,7 @@
         </div>
         <div class="form-group">
           <input id="price" type="number" class="form-control" placeholder="Enter price"
-                 data-bind="value: price, disable: isOrderSelected" min="0"/>
+                 data-bind="value: price, disable: isOrderSelected"/>
         </div>
         <div class="form-group">
             <input id="lots" type="number" class="form-control" placeholder="Enter lots"

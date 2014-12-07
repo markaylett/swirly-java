@@ -326,17 +326,35 @@ function ViewModel(contrs) {
     };
 
     self.submitOrder = function(action) {
-        var contr = self.contrs[self.contrMnem()];
-        if (contr === undefined) {
-            self.showError(new Error({
-                num: 500,
-                msg: 'invalid contract: ' + self.contrMnem()
-            }));
+        var contr = self.contrMnem();
+        if (!isSpecified(contr)) {
+            self.showError(internalError('contract not specified'));
             return;
         }
-        var settlDate = toDateInt(self.settlDate());
-        var ticks = priceToTicks(self.price(), contr);
-        var lots = parseInt(self.lots());
+        contr = self.contrs[contr];
+        if (contr === undefined) {
+            self.showError(internalError('invalid contract: ' + self.contrMnem()));
+            return;
+        }
+        var settlDate = self.settlDate();
+        if (!isSpecified(settlDate)) {
+            self.showError(internalError('settl-date not specified'));
+            return;
+        }
+        settlDate = toDateInt(settlDate);
+        var price = self.price();
+        if (!isSpecified(price)) {
+            self.showError(internalError('price not specified'));
+            return;
+        }
+        var ticks = priceToTicks(price, contr);
+        var lots = self.lots();
+        if (!isSpecified(lots)) {
+            self.showError(internalError('lots not specified'));
+            return;
+        }
+        lots = parseInt(lots);
+
         $.ajax({
             type: 'post',
             url: '/api/accnt/order/' + contr.mnem + '/' + settlDate,
@@ -364,16 +382,15 @@ function ViewModel(contrs) {
 
     self.reviseOrder = function(order) {
         var contr = order.contr().mnem;
-        if (contr === undefined) {
-            self.showError(new Error({
-                num: 500,
-                msg: 'invalid contract: ' + self.contrMnem()
-            }));
-            return;
-        }
         var settlDate = toDateInt(order.settlDate());
         var id = order.id();
-        var lots = parseInt(self.lots());
+        var lots = self.lots();
+        if (!isSpecified(lots)) {
+            self.showError(internalError('lots not specified'));
+            return;
+        }
+        lots = parseInt(lots);
+
         $.ajax({
             type: 'put',
             url: '/api/accnt/order/' + contr + '/' + settlDate + '/' + id,
@@ -399,15 +416,9 @@ function ViewModel(contrs) {
 
     self.cancelOrder = function(order) {
         var contr = order.contr().mnem;
-        if (contr === undefined) {
-            self.showError(new Error({
-                num: 500,
-                msg: 'invalid contract: ' + self.contrMnem()
-            }));
-            return;
-        }
         var settlDate = toDateInt(order.settlDate());
         var id = order.id();
+
         $.ajax({
             type: 'put',
             url: '/api/accnt/order/' + contr + '/' + settlDate + '/' + id,
@@ -431,14 +442,7 @@ function ViewModel(contrs) {
 
     self.archiveTrade = function(trade) {
         var contr = trade.contr().mnem;
-        if (contr === undefined) {
-            self.showError(new Error({
-                num: 500,
-                msg: 'invalid contract: ' + self.contrMnem()
-            }));
-            return;
-        }
-        var settlDate = toDateInt(trade.settlDate());
+        var settlDate = trade.settlDate();
         var id = trade.id();
         $.ajax({
             type: 'delete',

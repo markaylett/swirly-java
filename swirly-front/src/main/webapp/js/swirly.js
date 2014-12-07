@@ -88,6 +88,17 @@ function Error(val) {
     self.msg = ko.observable(val.msg);
 }
 
+function internalError(msg) {
+    return new Error({
+        num: 500,
+        msg: msg
+    });
+}
+
+function isSpecified(x) {
+    return x !== undefined && x !== '';
+}
+
 function Contr(val) {
     var self = this;
 
