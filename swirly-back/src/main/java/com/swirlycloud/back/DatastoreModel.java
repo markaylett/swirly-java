@@ -125,7 +125,7 @@ public final class DatastoreModel implements Model {
             entity.setUnindexedProperty("role", exec.getRole().name());
             entity.setUnindexedProperty("cptyId", exec.getCptyId());
         }
-        entity.setProperty("confirmed", Boolean.FALSE);
+        entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
         return entity;
@@ -296,7 +296,7 @@ public final class DatastoreModel implements Model {
         try {
             final Entity market = getMarket(txn, contrId, settlDay);
             final Entity entity = getExec(txn, market.getKey(), id);
-            entity.setProperty("confirmed", Boolean.TRUE);
+            entity.setProperty("archive", Boolean.TRUE);
             entity.setUnindexedProperty("modified", modified);
             datastore.put(entity);
             txn.commit();
@@ -389,9 +389,9 @@ public final class DatastoreModel implements Model {
     public final void selectTrade(final UnaryCallback<Exec> cb) {
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
-        final Filter confirmedFilter = new FilterPredicate("confirmed", FilterOperator.EQUAL,
+        final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
                 Boolean.FALSE);
-        final Filter filter = CompositeFilterOperator.and(stateFilter, confirmedFilter);
+        final Filter filter = CompositeFilterOperator.and(stateFilter, archiveFilter);
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {

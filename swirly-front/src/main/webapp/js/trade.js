@@ -423,7 +423,7 @@ function ViewModel(contrs) {
         }
     };
 
-    self.confirmTrade = function(trade) {
+    self.archiveTrade = function(trade) {
         var contr = trade.contr().mnem;
         if (contr === undefined) {
             self.showError(new Error({
@@ -444,12 +444,12 @@ function ViewModel(contrs) {
         });
     };
 
-    self.confirmAll = function() {
+    self.archiveAll = function() {
         var trades = self.trades();
         for (var i = 0; i < trades.length; ++i) {
             var trade = trades[i];
             if (trade.isSelected()) {
-                self.confirmTrade(trade);
+                self.archiveTrade(trade);
             }
         }
     };

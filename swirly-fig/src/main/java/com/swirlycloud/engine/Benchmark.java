@@ -58,10 +58,10 @@ public final class Benchmark {
             // Taker buy-side.
             s.placeOrder(emiayl, market, "", Action.BUY, 12348, 30, 1, trans);
 
-            s.confirmAll(marayl);
-            s.confirmAll(gosayl);
-            s.confirmAll(tobayl);
-            s.confirmAll(emiayl);
+            s.archiveAll(marayl);
+            s.archiveAll(gosayl);
+            s.archiveAll(tobayl);
+            s.archiveAll(emiayl);
 
             long totalNanos = System.nanoTime() - startNanos;
             if (i >= 80000) {

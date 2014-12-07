@@ -585,7 +585,7 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    public final void confirmTrade(Accnt accnt, Exec trade) {
+    public final void archiveTrade(Accnt accnt, Exec trade) {
         if (trade.getState() != State.TRADE) {
             throw new IllegalArgumentException(String.format("exec '%d' is not a trade",
                     trade.getId()));
@@ -597,23 +597,23 @@ public final class Serv implements AutoCloseable {
         accnt.removeTrade(trade);
     }
 
-    public final void confirmTrade(Accnt accnt, long contrId, int settlDay, long id) {
+    public final void archiveTrade(Accnt accnt, long contrId, int settlDay, long id) {
         final Exec trade = accnt.findTrade(contrId, settlDay, id);
         if (trade == null) {
             throw new IllegalArgumentException(String.format("no such trade '%d'", id));
         }
-        confirmTrade(accnt, trade);
+        archiveTrade(accnt, trade);
     }
 
     /**
-     * Confirm all trades.
+     * Archive all trades.
      * 
      * This method is not executed atomically, so it may partially fail.
      * 
      * @param accnt
      *            the account.
      */
-    public final void confirmAll(Accnt accnt) {
+    public final void archiveAll(Accnt accnt) {
         final long now = System.currentTimeMillis();
         for (;;) {
             final Exec trade = (Exec) accnt.getRootTrade();

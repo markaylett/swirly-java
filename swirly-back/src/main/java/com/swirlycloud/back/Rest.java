@@ -462,7 +462,7 @@ public final class Rest {
             return false;
         }
         final int settlDay = isoToJd(settlDate);
-        serv.confirmTrade(accnt, contr.getId(), settlDay, id);
+        serv.archiveTrade(accnt, contr.getId(), settlDay, id);
         return true;
     }
 

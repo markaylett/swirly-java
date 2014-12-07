@@ -98,9 +98,9 @@
           Cancel
         </button>
         <button type="button" class="btn btn-default"
-                data-bind="click: confirmAll, enable: isTradeSelected">
+                data-bind="click: archiveAll, enable: isTradeSelected">
           <span class="glyphicon glyphicon-ok"></span>
-          Confirm
+          Archive
         </button>
       </div>
 
