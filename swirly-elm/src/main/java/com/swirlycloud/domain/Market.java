@@ -49,7 +49,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
             out.append(",\"bidLots\":").append(String.valueOf(firstBid.getLots()));
             out.append(",\"bidCount\":").append(String.valueOf(firstBid.getCount()));
         } else {
-            out.append(",\"bidTicks\":0,\"bidLots\":0,\"bidCount\":0");
+            out.append(",\"bidTicks\":null,\"bidLots\":null,\"bidCount\":null");
         }
         final Level firstOffer = (Level) offerSide.getFirstLevel();
         if (firstOffer != null) {
@@ -57,7 +57,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
             out.append(",\"offerLots\":").append(String.valueOf(firstOffer.getLots()));
             out.append(",\"offerCount\":").append(String.valueOf(firstOffer.getCount()));
         } else {
-            out.append(",\"offerTicks\":0,\"offerLots\":0,\"offerCount\":0");
+            out.append(",\"offerTicks\":null,\"offerLots\":null,\"offerCount\":null");
         }
         out.append("}");
     }
@@ -81,7 +81,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
                 out.append(String.valueOf(level.getTicks()));
                 node = node.rbNext();
             } else {
-                out.append('0');
+                out.append("null");
             }
         }
         out.append("],\"bidLots\":[");
@@ -95,7 +95,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
                 out.append(String.valueOf(level.getLots()));
                 node = node.rbNext();
             } else {
-                out.append('0');
+                out.append("null");
             }
         }
         out.append("],\"bidCount\":[");
@@ -109,7 +109,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
                 out.append(String.valueOf(level.getCount()));
                 node = node.rbNext();
             } else {
-                out.append('0');
+                out.append("null");
             }
         }
         out.append("],\"offerTicks\":[");
@@ -123,7 +123,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
                 out.append(String.valueOf(level.getTicks()));
                 node = node.rbNext();
             } else {
-                out.append('0');
+                out.append("null");
             }
         }
         out.append("],\"offerLots\":[");
@@ -137,7 +137,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
                 out.append(String.valueOf(level.getLots()));
                 node = node.rbNext();
             } else {
-                out.append('0');
+                out.append("null");
             }
         }
         out.append("],\"offerCount\":[");
@@ -151,7 +151,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
                 out.append(String.valueOf(level.getCount()));
                 node = node.rbNext();
             } else {
-                out.append('0');
+                out.append("null");
             }
         }
         out.append("]}");

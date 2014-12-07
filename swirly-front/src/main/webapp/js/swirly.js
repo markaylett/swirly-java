@@ -53,8 +53,8 @@ function toDateStr(i) {
         + '-' + ('0' + mday).slice(-2);
 }
 
-function optNum(x) {
-    return parseFloat(x) === 0 ? '-' : x;
+function optional(x) {
+    return x !== null ? x : '-';
 }
 
 ko.bindingHandlers.mnem = {
@@ -64,10 +64,10 @@ ko.bindingHandlers.mnem = {
     }
 };
 
-ko.bindingHandlers.optnum = {
+ko.bindingHandlers.optional = {
     update: function(elem, valAccessor) {
         var val = valAccessor();
-        $(elem).text(optNum(val()));
+        $(elem).text(optional(val()));
     }
 };
 
@@ -132,14 +132,16 @@ function Market(val, contrs) {
     self.offerCount = ko.observableArray(val.offerCount);
 
     self.bidPrice = ko.computed(function() {
-        return $.map(self.bidTicks(), function(val) {
-            return ticksToPrice(val, self.contr());
+        // We use Ko's map function because jQuery's ignores null elements.
+        return ko.utils.arrayMap(self.bidTicks(), function(val) {
+            return val !== null ? ticksToPrice(val, self.contr()) : null;
         });
     });
 
     self.offerPrice = ko.computed(function() {
-        return $.map(self.offerTicks(), function(val) {
-            return ticksToPrice(val, self.contr());
+        // We use Ko's map function because jQuery's ignores null elements.
+        return ko.utils.arrayMap(self.offerTicks(), function(val) {
+            return val !== null ? ticksToPrice(val, self.contr()) : null;
         });
     });
 
@@ -181,7 +183,8 @@ function Order(val, contrs) {
     });
 
     self.lastPrice = ko.computed(function() {
-        return ticksToPrice(self.lastTicks(), self.contr());
+        var ticks = self.lastTicks();
+        return ticks !== null ? ticksToPrice(ticks, self.contr()) : null;
     });
 
     self.update = function(val) {

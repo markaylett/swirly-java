@@ -9,7 +9,7 @@ ko.bindingHandlers.depth = {
         var val = valAccessor();
         var arr = val();
         if (!bindingContext.$rawData.isSelected()) {
-            $(elem).text(optNum(arr[0]));
+            $(elem).text(optional(arr[0]));
             return;
         }
         var html = '';
@@ -17,7 +17,7 @@ ko.bindingHandlers.depth = {
             if (i > 0) {
                 html += '<br/>';
             }
-            html += optNum(arr[i]);
+            html += optional(arr[i]);
         }
         $(elem).html(html);
     }
@@ -130,21 +130,27 @@ function ViewModel(contrs) {
         }
     });
 
+    self.selectTab = function(val, event) {
+        self.selectedTab(event.target.id);
+    };
+
     self.selectBid = function(val) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
-        self.price(val.bidPrice()[0]);
+        var price = val.bidPrice()[0];
+        if (price !== null) {
+            self.price(price);
+        }
         return true;
-    };
-
-    self.selectTab = function(val, event) {
-        self.selectedTab(event.target.id);
     };
 
     self.selectOffer = function(val) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
-        self.price(val.offerPrice()[0]);
+        var price = val.offerPrice()[0];
+        if (price !== null) {
+            self.price(price);
+        }
         return true;
     };
 
@@ -222,7 +228,7 @@ function ViewModel(contrs) {
     };
 
     self.applyTrans = function(raw) {
-        if ('market' in raw) {
+        if (raw.market !== null) {
             market = self.findMarket(raw.market.id);
             if (market !== null) {
                 market.update(raw.market);
@@ -250,7 +256,7 @@ function ViewModel(contrs) {
                 self.trades.push(new Trade(val, self.contrs));
             }
         });
-        if ('posn' in raw) {
+        if (raw.posn !== null) {
             posn = self.findPosn(raw.posn.id);
             if (posn !== null) {
                 posn.update(raw.posn);

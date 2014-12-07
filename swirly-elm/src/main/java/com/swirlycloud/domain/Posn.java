@@ -48,10 +48,18 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         out.append(",\"user\":\"").append(getRecMnem(user));
         out.append("\",\"contr\":\"").append(getRecMnem(contr));
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"buyLicks\":").append(String.valueOf(buyLicks));
-        out.append(",\"buyLots\":").append(String.valueOf(buyLots));
-        out.append(",\"sellLicks\":").append(String.valueOf(sellLicks));
-        out.append(",\"sellLots\":").append(String.valueOf(sellLots));
+        if (buyLots != 0) {
+            out.append(",\"buyLicks\":").append(String.valueOf(buyLicks));
+            out.append(",\"buyLots\":").append(String.valueOf(buyLots));
+        } else {
+            out.append(",\"buyLicks\":0,\"buyLots\":0");
+        }
+        if (sellLots != 0) {
+            out.append(",\"sellLicks\":").append(String.valueOf(sellLicks));
+            out.append(",\"sellLots\":").append(String.valueOf(sellLots));
+        } else {
+            out.append(",\"sellLicks\":0,\"sellLots\":0");
+        }
         out.append("}");
     }
 

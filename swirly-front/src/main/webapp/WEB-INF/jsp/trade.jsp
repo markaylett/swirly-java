@@ -168,8 +168,8 @@
                 <td style="text-align: right;" data-bind="text: lots"></td>
                 <td style="text-align: right;" data-bind="text: resd"></td>
                 <td style="text-align: right;" data-bind="text: exec"></td>
-                <td style="text-align: right;" data-bind="optnum: lastPrice"></td>
-                <td style="text-align: right;" data-bind="optnum: lastLots"></td>
+                <td style="text-align: right;" data-bind="optional: lastPrice"></td>
+                <td style="text-align: right;" data-bind="optional: lastLots"></td>
               </tr>
             </tbody>
           </table>
@@ -236,13 +236,13 @@
                 <td data-bind="mnem: contr"></td>
                 <td data-bind="text: settlDate"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="optnum: buyLots, click: $root.selectBuy"></td>
+                    data-bind="text: buyLots, click: $root.selectBuy"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="optnum: buyPrice, click: $root.selectBuy"></td>
+                    data-bind="text: buyPrice, click: $root.selectBuy"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="optnum: sellPrice, click: $root.selectSell"></td>
+                    data-bind="text: sellPrice, click: $root.selectSell"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="optnum: sellLots, click: $root.selectSell"></td>
+                    data-bind="text: sellLots, click: $root.selectSell"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="text: netPrice, click: $root.selectNet"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"

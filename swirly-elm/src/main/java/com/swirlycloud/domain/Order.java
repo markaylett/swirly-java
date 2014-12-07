@@ -136,8 +136,12 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         out.append(",\"lots\":").append(String.valueOf(lots));
         out.append(",\"resd\":").append(String.valueOf(resd));
         out.append(",\"exec\":").append(String.valueOf(exec));
-        out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
-        out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+        if (lastLots != 0) {
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+        } else {
+            out.append(",\"lastTicks\":null,\"lastLots\":null");
+        }
         out.append(",\"minLots\":").append(String.valueOf(minLots));
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"modified\":").append(String.valueOf(modified));

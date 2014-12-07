@@ -48,14 +48,13 @@ public final class Trans implements Jsonifiable {
     @Override
     public final void toJson(Appendable out, Object arg) throws IOException {
         final User user = (User) arg;
+        out.append("{\"market\":");
         if (market != null) {
-            out.append("{\"market\":");
             market.toJson(out, DEPTH);
-            out.append(',');
         } else {
-            out.append('{');
+            out.append("null");
         }
-        out.append("\"orders\":[");
+        out.append(",\"orders\":[");
         int i = 0;
         if (order != null) {
             assert user != null && order.getUserId() == user.getId();
@@ -86,14 +85,13 @@ public final class Trans implements Jsonifiable {
             exec.toJson(out, null);
             ++i;
         }
-        // Position is optional.
+        out.append("],\"posn\":");
         if (posn != null) {
-            out.append("],\"posn\":");
             posn.toJson(out, null);
-            out.append('}');
         } else {
-            out.append("]}");
+            out.append("null");
         }
+        out.append('}');
     }
 
     public final Order getOrder() {
