@@ -94,7 +94,7 @@
             Cancel
           </button>
           <button type="button" class="btn btn-default"
-                  data-bind="click: archiveAll, enable: isDoneOrTradeSelected">
+                  data-bind="click: archiveAll, enable: isArchivableSelected">
             <span class="glyphicon glyphicon-ok"></span>
             Archive
           </button>
@@ -118,19 +118,27 @@
       <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
         <li>
           <a id="workingTab" href="#working" data-toggle="tab"
-             data-bind="click: selectTab;">Working</a>
+             data-bind="click: selectTab;">
+            Working (<span data-bind="text: working().length"></span>)
+          </a>
         </li>
         <li>
           <a id="doneTab" href="#done" data-toggle="tab"
-             data-bind="click: selectTab;">Done</a>
+             data-bind="click: selectTab;">
+            Done (<span data-bind="text: done().length"></span>)
+          </a>
         </li>
         <li>
           <a id="tradeTab" href="#trades" data-toggle="tab"
-             data-bind="click: selectTab;">Trades</a>
+             data-bind="click: selectTab;">
+            Trades (<span data-bind="text: trades().length"></span>)
+          </a>
         </li>
         <li>
           <a id="posnTab" href="#posns" data-toggle="tab"
-             data-bind="click: selectTab;">Posns</a>
+             data-bind="click: selectTab;">
+            Posns (<span data-bind="text: posns().length"></span>)
+          </a>
         </li>
       </ul>
       <div id="tab-content" class="tab-content">

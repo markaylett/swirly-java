@@ -522,7 +522,6 @@ public final class Serv implements AutoCloseable {
 
         // Final commit phase cannot fail.
         market.cancelOrder(order, now);
-        accnt.removeOrder(order);
 
         trans.clear();
         trans.market = market;
@@ -576,7 +575,6 @@ public final class Serv implements AutoCloseable {
 
             // Final commit phase cannot fail.
             market.cancelOrder(order, now);
-            accnt.removeOrder(order);
         }
     }
 

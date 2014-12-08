@@ -129,7 +129,7 @@ function ViewModel(contrs) {
         return false;
     });
 
-    self.isDoneOrTradeSelected = ko.computed(function() {
+    self.isArchivableSelected = ko.computed(function() {
         return self.isDoneSelected() || self.isTradeSelected();
     });
 
