@@ -277,10 +277,10 @@
               <tr>
                 <th>Contr</th>
                 <th>Settl Date</th>
-                <th style="text-align: right;">Buy Lots</th>
-                <th style="text-align: right;">Buy Price</th>
                 <th style="text-align: right;">Sell Price</th>
                 <th style="text-align: right;">Sell Lots</th>
+                <th style="text-align: right;">Buy Lots</th>
+                <th style="text-align: right;">Buy Price</th>
                 <th style="text-align: right;">Net Price</th>
                 <th style="text-align: right;">Net Lots</th>
               </tr>
@@ -290,13 +290,13 @@
                 <td data-bind="mnem: contr"></td>
                 <td data-bind="text: settlDate"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="text: buyLots, click: $root.selectBuy"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="text: buyPrice, click: $root.selectBuy"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="text: sellPrice, click: $root.selectSell"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="text: sellLots, click: $root.selectSell"></td>
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
+                    data-bind="text: buyLots, click: $root.selectBuy"></td>
+                <td style="cursor: pointer; cursor: hand; text-align: right;"
+                    data-bind="text: buyPrice, click: $root.selectBuy"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="text: netPrice, click: $root.selectNet"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"

@@ -16,3 +16,9 @@ Deploy to appengine:
 Update dispatch config:
 
     $ ./appcfg.sh update_dispatch swirly-front/src/main/webapp
+
+Full release:
+
+    $ gradle build
+    $ ./appcfg.sh -A swirly-uat update swirly-ear/build/exploded-app
+    $ ./appcfg.sh -A swirly-uat update_dispatch swirly-front/src/main/webapp

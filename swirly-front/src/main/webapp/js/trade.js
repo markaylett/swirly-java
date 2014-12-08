@@ -385,7 +385,7 @@ function ViewModel(contrs) {
         }
         var ticks = priceToTicks(price, contr);
         var lots = self.lots();
-        if (!isSpecified(lots)) {
+        if (!isSpecified(lots) || lots == 0) {
             self.showError(internalError('lots not specified'));
             return;
         }
