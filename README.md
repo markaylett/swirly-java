@@ -19,6 +19,6 @@ Update dispatch config:
 
 Full release:
 
-    $ gradle build
-    $ ./appcfg.sh -A swirly-uat update swirly-ear/build/exploded-app
-    $ ./appcfg.sh -A swirly-uat update_dispatch swirly-front/src/main/webapp
+    $ ./update.sh swirly-dev
+    $ ./update.sh swirly-uat
+    $ ./update.sh swirly-prd

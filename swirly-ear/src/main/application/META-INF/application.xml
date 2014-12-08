@@ -6,7 +6,7 @@
 
   <!-- App Engine will ignore the <context-root> elements, so HTTP clients need not prepend it to
        the URL path when addressing a module. -->
-  <display-name>swirly-prod</display-name>
+  <display-name>swirly-prd</display-name>
   <module>
     <!-- The default module must be listed first. -->
     <web>

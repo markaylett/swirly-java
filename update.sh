@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-appid=${1:-'swirly_prod'}
+appid=${1:-'swirly-prd'}
 gradle build
 patch -p1 <<EOF
 --- a/swirly-ear/build/exploded-app/swirly-back-0.1/WEB-INF/appengine-web.xml
