@@ -665,4 +665,9 @@ public final class Serv implements AutoCloseable {
             accnt.removeTrade(trade);
         }
     }
+
+    public final void archiveAll(Accnt accnt) {
+        archiveOrder(accnt);
+        archiveTrade(accnt);
+    }
 }

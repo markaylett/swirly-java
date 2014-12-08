@@ -33,7 +33,7 @@ public final class Benchmark {
 
         final Trans trans = new Trans();
 
-        for (int i = 0; i < 100000; ++i) {
+        for (int i = 0; i < 250000; ++i) {
             final long startNanos = System.nanoTime();
 
             // Maker sell-side.
@@ -58,13 +58,13 @@ public final class Benchmark {
             // Taker buy-side.
             s.placeOrder(emiayl, market, "", Action.BUY, 12348, 30, 1, trans);
 
-            s.archiveTrade(marayl);
-            s.archiveTrade(gosayl);
-            s.archiveTrade(tobayl);
-            s.archiveTrade(emiayl);
+            s.archiveAll(marayl);
+            s.archiveAll(gosayl);
+            s.archiveAll(tobayl);
+            s.archiveAll(emiayl);
 
             long totalNanos = System.nanoTime() - startNanos;
-            if (i >= 80000) {
+            if ((i % 1000) == 0) {
                 System.out.println(totalNanos / 1000L + " usec");
             }
         }
