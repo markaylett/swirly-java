@@ -58,6 +58,7 @@
             <th style="text-align: right;">Bid Count</th>
             <th style="text-align: right;">Bid Lots</th>
             <th style="text-align: right;">Bid Price</th>
+            <th style="text-align: right;">Last Price</th>
             <th style="text-align: right;">Offer Price</th>
             <th style="text-align: right;">Offer Lots</th>
             <th style="text-align: right;">Offer Count</th>
@@ -76,6 +77,7 @@
                 data-bind="depth: bidLots, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="depth: bidPrice, click: $root.selectBid"></td>
+            <td style="text-align: right;" data-bind="optional: lastPrice"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="depth: offerPrice, click: $root.selectOffer"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"

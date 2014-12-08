@@ -141,6 +141,9 @@ function Market(val, contrs) {
     self.offerTicks = ko.observableArray(val.offerTicks);
     self.offerLots = ko.observableArray(val.offerLots);
     self.offerCount = ko.observableArray(val.offerCount);
+    self.lastTicks = ko.observable(val.lastTicks);
+    self.lastLots = ko.observable(val.lastLots);
+    self.lastTime = ko.observable(val.lastTime);
 
     self.bidPrice = ko.computed(function() {
         // We use Ko's map function because jQuery's ignores null elements.
@@ -156,6 +159,11 @@ function Market(val, contrs) {
         });
     });
 
+    self.lastPrice = ko.computed(function() {
+        var ticks = self.lastTicks();
+        return ticks !== null ? ticksToPrice(ticks, self.contr()) : null;
+    });
+
     self.update = function(val) {
         self.bidTicks(val.bidTicks);
         self.bidLots(val.bidLots);
@@ -163,6 +171,9 @@ function Market(val, contrs) {
         self.offerTicks(val.offerTicks);
         self.offerLots(val.offerLots);
         self.offerCount(val.offerCount);
+        self.lastTicks(val.lastTicks);
+        self.lastLots(val.lastLots);
+        self.lastTime(val.lastTime);
     };
 }
 

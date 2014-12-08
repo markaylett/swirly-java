@@ -83,7 +83,6 @@ public final class DatastoreModel implements Model {
     }
 
     private final Entity newOrder(Entity market, Exec exec) {
-        updateMaxOrderId(market, exec.getOrderId());
         final Entity entity = new Entity(ORDER_KIND, exec.getOrderId(), market.getKey());
         entity.setUnindexedProperty("userId", exec.getUserId());
         entity.setUnindexedProperty("contrId", exec.getContrId());
@@ -101,11 +100,11 @@ public final class DatastoreModel implements Model {
         entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
+        updateMaxOrderId(market, exec.getOrderId());
         return entity;
     }
 
     private final Entity newExec(Entity market, Exec exec) {
-        updateMaxExecId(market, exec.getId());
         final Entity entity = new Entity(EXEC_KIND, exec.getId(), market.getKey());
         entity.setUnindexedProperty("orderId", exec.getOrderId());
         entity.setUnindexedProperty("userId", exec.getUserId());
@@ -125,10 +124,14 @@ public final class DatastoreModel implements Model {
             entity.setUnindexedProperty("matchId", exec.getMatchId());
             entity.setUnindexedProperty("role", exec.getRole().name());
             entity.setUnindexedProperty("cptyId", exec.getCptyId());
+            market.setUnindexedProperty("lastTicks", exec.getLastTicks());
+            market.setUnindexedProperty("lastLots", exec.getLastLots());
+            market.setUnindexedProperty("lastTime", exec.getCreated());
         }
         entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
+        updateMaxExecId(market, exec.getId());
         return entity;
     }
 
@@ -166,6 +169,10 @@ public final class DatastoreModel implements Model {
             entity = new Entity(key);
             entity.setUnindexedProperty("contrId", contrId);
             entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
+            entity.setUnindexedProperty("expiryDay", Integer.valueOf(settlDay));
+            entity.setUnindexedProperty("lastTicks", Long.valueOf(0L));
+            entity.setUnindexedProperty("lastLots", Long.valueOf(0L));
+            entity.setUnindexedProperty("lastTime", Long.valueOf(0L));
             entity.setUnindexedProperty("maxOrderId", Long.valueOf(0L));
             entity.setUnindexedProperty("maxExecId", Long.valueOf(0L));
             datastore.put(txn, entity);
@@ -365,9 +372,14 @@ public final class DatastoreModel implements Model {
         for (final Entity entity : pq.asIterable()) {
             final Identifiable contr = newId((Long) entity.getProperty("contrId"));
             final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
+            final int expiryDay = ((Long) entity.getProperty("expiryDay")).intValue();
+            final long lastTicks = (Long) entity.getProperty("lastTicks");
+            final long lastLots = (Long) entity.getProperty("lastLots");
+            final long lastTime = (Long) entity.getProperty("lastTime");
             final long maxOrderId = (Long) entity.getProperty("maxOrderId");
             final long maxExecId = (Long) entity.getProperty("maxExecId");
-            final Market market = new Market(contr, settlDay, maxOrderId, maxExecId);
+            final Market market = new Market(contr, settlDay, expiryDay, lastTicks, lastLots,
+                    lastTime, maxOrderId, maxExecId);
             cb.call(market);
         }
     }

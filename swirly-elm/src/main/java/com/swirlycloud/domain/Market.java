@@ -25,8 +25,12 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     private final long key;
     private Identifiable contr;
     private final int settlDay;
+    private final int expiryDay;
     private final Side bidSide = new Side();
     private final Side offerSide = new Side();
+    private long lastTicks;
+    private long lastLots;
+    private long lastTime;
     private long maxOrderId;
     private long maxExecId;
 
@@ -34,7 +38,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         return iden instanceof Rec ? ((Rec) iden).getMnem() : String.valueOf(iden.getId());
     }
 
-    private final Side side(Action action) {
+    private final Side getSide(Action action) {
         return action == Action.BUY ? bidSide : offerSide;
     }
 
@@ -66,6 +70,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         out.append("{\"id\":").append(String.valueOf(key));
         out.append(",\"contr\":\"").append(getRecMnem(contr));
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
         out.append(",\"bidTicks\":[");
 
         final RbNode firstBid = bidSide.getFirstLevel();
@@ -154,19 +159,31 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
                 out.append("null");
             }
         }
-        out.append("]}");
+        if (lastLots != 0) {
+            out.append("],\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
+        } else {
+            out.append("],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
+        }
+        out.append('}');
     }
 
-    public Market(Identifiable contr, int settlDay, long maxOrderId, long maxExecId) {
+    public Market(Identifiable contr, int settlDay, int expiryDay, long lastTicks, long lastLots,
+            long lastTime, long maxOrderId, long maxExecId) {
         this.key = composeId(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
+        this.expiryDay = expiryDay;
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.lastTime = lastTime;
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
     }
 
     public Market(Identifiable contr, int settlDay) {
-        this(contr, settlDay, 0L, 0L);
+        this(contr, settlDay, settlDay, 0L, 0L, 0L, 0L, 0L);
     }
 
     /**
@@ -212,35 +229,39 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     }
 
     public final void insertOrder(Order order) {
-        side(order.getAction()).insertOrder(order);
+        getSide(order.getAction()).insertOrder(order);
     }
 
     public final void removeOrder(Order order) {
-        side(order.getAction()).removeOrder(order);
+        getSide(order.getAction()).removeOrder(order);
     }
 
     public final void placeOrder(Order order, long now) {
-        side(order.getAction()).placeOrder(order, now);
+        getSide(order.getAction()).placeOrder(order, now);
     }
 
     public final void reviseOrder(Order order, long lots, long now) {
-        side(order.getAction()).reviseOrder(order, lots, now);
+        getSide(order.getAction()).reviseOrder(order, lots, now);
     }
 
     public final void cancelOrder(Order order, long now) {
-        side(order.getAction()).cancelOrder(order, now);
+        getSide(order.getAction()).cancelOrder(order, now);
     }
 
     public final void takeOrder(Order order, long lots, long now) {
-        side(order.getAction()).takeOrder(order, lots, now);
+        final Side side = getSide(order.getAction());
+        side.takeOrder(order, lots, now);
+        lastTicks = side.getLastTicks();
+        lastLots = side.getLastLots();
+        lastTime = side.getLastTime();
     }
 
-    public final long allocOrderId() { 
+    public final long allocOrderId() {
         return ++maxOrderId;
     }
 
-    public final long allocExecId() { 
-        return ++maxExecId;        
+    public final long allocExecId() {
+        return ++maxExecId;
     }
 
     @Override
@@ -265,11 +286,27 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         return settlDay;
     }
 
+    public final int getExpiryDay() {
+        return expiryDay;
+    }
+
     public final Side getBidSide() {
         return bidSide;
     }
 
     public final Side getOfferSide() {
         return offerSide;
+    }
+
+    public final long getLastTicks() {
+        return lastTicks;
+    }
+
+    public final long getLastLots() {
+        return lastLots;
+    }
+
+    public final long getLastTime() {
+        return lastTime;
     }
 }
