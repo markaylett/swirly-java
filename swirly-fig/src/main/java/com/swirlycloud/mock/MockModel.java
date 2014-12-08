@@ -19,15 +19,11 @@ public final class MockModel implements Model {
     private long maxUserId = 0L;
 
     @Override
-    public final void insertExecList(long contrId, int settlDay, Exec first) {
-    }
-
-    @Override
     public final void insertExec(long contrId, int settlDay, Exec exec) {
     }
 
     @Override
-    public final void updateExec(long contrId, int settlDay, long id, long modified) {
+    public final void insertExecList(long contrId, int settlDay, Exec first) {
     }
 
     @Override
@@ -37,6 +33,14 @@ public final class MockModel implements Model {
 
     @Override
     public final void insertUser(User user) {
+    }
+
+    @Override
+    public final void archiveOrder(long contrId, int settlDay, long id, long modified) {
+    }
+
+    @Override
+    public final void archiveTrade(long contrId, int settlDay, long id, long modified) {
     }
 
     @Override

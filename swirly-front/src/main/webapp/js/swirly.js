@@ -198,6 +198,10 @@ function Order(val, contrs) {
         return ticks !== null ? ticksToPrice(ticks, self.contr()) : null;
     });
 
+    self.isDone = function() {
+        return self.resd() === 0;
+    };
+
     self.update = function(val) {
         self.state(val.state);
         self.lots(val.lots);

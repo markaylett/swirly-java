@@ -262,9 +262,6 @@ public final class Serv implements AutoCloseable {
             // Must succeed because maker order exists.
             final Accnt maker = findAccnt(makerOrder.getUser());
             assert maker != null;
-            if (makerOrder.isDone()) {
-                maker.removeOrder(makerOrder);
-            }
             // Maker updated first because this is consistent with last-look semantics.
             // Update maker.
             maker.insertTrade(match.makerTrade);
@@ -460,9 +457,7 @@ public final class Serv implements AutoCloseable {
             }
         }
         // Final commit phase cannot fail.
-        if (!order.isDone()) {
-            accnt.insertOrder(order);
-        }
+        accnt.insertOrder(order);
         // Commit trans to cycle and free matches.
         commitMatches(accnt, market, now, trans);
         return trans;
@@ -470,7 +465,7 @@ public final class Serv implements AutoCloseable {
 
     public final Trans reviseOrder(Accnt accnt, Market market, Order order, long lots, Trans trans) {
         if (order.isDone()) {
-            throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
+            throw new IllegalArgumentException(String.format("order '%d' is done", order.getId()));
         }
         // Revised lots must not be:
         // 1. less than min lots;
@@ -518,7 +513,7 @@ public final class Serv implements AutoCloseable {
 
     public final Trans cancelOrder(Accnt accnt, Market market, Order order, Trans trans) {
         if (order.isDone()) {
-            throw new IllegalArgumentException(String.format("order complete '%d'", order.getId()));
+            throw new IllegalArgumentException(String.format("order '%d' is done", order.getId()));
         }
         final long now = System.currentTimeMillis();
         final Exec exec = newExec(market.allocExecId(), order, now);
@@ -564,7 +559,7 @@ public final class Serv implements AutoCloseable {
      * @param accnt
      *            the account.
      */
-    public final void cancelAll(Accnt accnt) {
+    public final void cancelOrder(Accnt accnt) {
         final long now = System.currentTimeMillis();
         for (;;) {
             final Order order = (Order) accnt.getRootOrder();
@@ -585,13 +580,59 @@ public final class Serv implements AutoCloseable {
         }
     }
 
+    public final void archiveOrder(Accnt accnt, Order order) {
+        if (!order.isDone()) {
+            throw new IllegalArgumentException(String.format("order '%d' is not done",
+                    order.getId()));
+        }
+        final long now = System.currentTimeMillis();
+        model.archiveOrder(order.getContrId(), order.getSettlDay(), order.getId(), now);
+
+        // No need to update timestamps on order because it is immediately freed.
+        accnt.removeOrder(order);
+    }
+
+    public final void archiveOrder(Accnt accnt, long contrId, int settlDay, long id) {
+        final Order order = accnt.findOrder(contrId, settlDay, id);
+        if (order == null) {
+            throw new IllegalArgumentException(String.format("no such order '%d'", id));
+        }
+        archiveOrder(accnt, order);
+    }
+
+    /**
+     * Archive all orders.
+     * 
+     * This method is not updated atomically, so it may partially fail.
+     * 
+     * @param accnt
+     *            the account.
+     */
+    public final void archiveOrder(Accnt accnt) {
+        final long now = System.currentTimeMillis();
+        RbNode node = accnt.getFirstOrder();
+        while (node != null) {
+            final Order order = (Order) node;
+            // Move to next node before this order is unlinked.
+            node = node.rbNext();
+            if (!order.isDone()) {
+                continue;
+            }
+
+            model.archiveOrder(order.getContrId(), order.getSettlDay(), order.getId(), now);
+
+            // No need to update timestamps on order because it is immediately freed.
+            accnt.removeOrder(order);
+        }
+    }
+
     public final void archiveTrade(Accnt accnt, Exec trade) {
         if (trade.getState() != State.TRADE) {
             throw new IllegalArgumentException(String.format("exec '%d' is not a trade",
                     trade.getId()));
         }
         final long now = System.currentTimeMillis();
-        model.updateExec(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
+        model.archiveTrade(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);
@@ -613,14 +654,14 @@ public final class Serv implements AutoCloseable {
      * @param accnt
      *            the account.
      */
-    public final void archiveAll(Accnt accnt) {
+    public final void archiveTrade(Accnt accnt) {
         final long now = System.currentTimeMillis();
         for (;;) {
             final Exec trade = (Exec) accnt.getRootTrade();
             if (trade == null) {
                 break;
             }
-            model.updateExec(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
+            model.archiveTrade(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
 
             // No need to update timestamps on trade because it is immediately freed.
             accnt.removeTrade(trade);

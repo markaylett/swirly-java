@@ -21,27 +21,27 @@
       <form class="form-inline" style="margin-bottom: 24px;">
         <div class="form-group">
           <input id="contr" type="text" class="form-control" placeholder="Enter contract"
-                 data-bind="value: contrMnem, disable: isOrderSelected"/>
+                 data-bind="value: contrMnem, disable: isWorkingSelected"/>
         </div>
         <div class="form-group">
           <input id="settlDate" type="date" class="form-control" placeholder="Enter settl date"
-                 data-bind="value: settlDate, disable: isOrderSelected"/>
+                 data-bind="value: settlDate, disable: isWorkingSelected"/>
         </div>
         <div class="form-group">
           <input id="price" type="number" class="form-control" placeholder="Enter price"
-                 data-bind="value: price, disable: isOrderSelected"/>
+                 data-bind="value: price, disable: isWorkingSelected"/>
         </div>
         <div class="form-group">
             <input id="lots" type="number" class="form-control" placeholder="Enter lots"
-                 data-bind="value: lots, disable: isOrderSelected"/>
+                 data-bind="value: lots, disable: isWorkingSelected"/>
         </div>
         <button type="button" class="btn btn-default"
-                data-bind="click: submitBuy, disable: isOrderSelected">
+                data-bind="click: submitBuy, disable: isWorkingSelected">
           <span class="glyphicon glyphicon-plus"></span>
           Buy
         </button>
         <button type="button" class="btn btn-default"
-                data-bind="click: submitSell, disable: isOrderSelected">
+                data-bind="click: submitSell, disable: isWorkingSelected">
           <span class="glyphicon glyphicon-minus"></span>
           Sell
         </button>
@@ -86,31 +86,30 @@
         </tbody>
       </table>
 
-      <div class="btn-group" style="float: left; margin-bottom: 24px; margin-right: 4px;">
-        <button type="button" class="btn btn-default"
-                data-bind="click: refreshAll">
-          <span class="glyphicon glyphicon-refresh"></span>
-          Refresh
-        </button>
-        <button type="button" class="btn btn-default"
-                data-bind="click: cancelAll, enable: isOrderSelected">
-          <span class="glyphicon glyphicon-remove"></span>
-          Cancel
-        </button>
-        <button type="button" class="btn btn-default"
-                data-bind="click: archiveAll, enable: isTradeSelected">
-          <span class="glyphicon glyphicon-ok"></span>
-          Archive
-        </button>
-      </div>
-
       <form class="form-inline" style="margin-bottom: 24px;">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default"
+                  data-bind="click: cancelAll, enable: isWorkingSelected">
+            <span class="glyphicon glyphicon-remove"></span>
+            Cancel
+          </button>
+          <button type="button" class="btn btn-default"
+                  data-bind="click: archiveAll, enable: isDoneOrTradeSelected">
+            <span class="glyphicon glyphicon-ok"></span>
+            Archive
+          </button>
+          <button type="button" class="btn btn-default"
+                  data-bind="click: refreshAll">
+            <span class="glyphicon glyphicon-refresh"></span>
+            Refresh
+          </button>
+        </div>
         <div class="form-group">
             <input id="reviseLots" type="number" class="form-control" placeholder="Enter lots"
-                 data-bind="value: lots, enable: isOrderSelected"/>
+                 data-bind="value: lots, enable: isWorkingSelected"/>
         </div>
         <button type="button" class="btn btn-default"
-                data-bind="click: reviseAll, enable: isOrderSelected">
+                data-bind="click: reviseAll, enable: isWorkingSelected">
           <span class="glyphicon glyphicon-pencil"></span>
           Revise
         </button>
@@ -118,8 +117,12 @@
 
       <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
         <li>
-          <a id="orderTab" href="#orders" data-toggle="tab"
-             data-bind="click: selectTab;">Orders</a>
+          <a id="workingTab" href="#working" data-toggle="tab"
+             data-bind="click: selectTab;">Working</a>
+        </li>
+        <li>
+          <a id="doneTab" href="#done" data-toggle="tab"
+             data-bind="click: selectTab;">Done</a>
         </li>
         <li>
           <a id="tradeTab" href="#trades" data-toggle="tab"
@@ -131,16 +134,16 @@
         </li>
       </ul>
       <div id="tab-content" class="tab-content">
-        <div id="orders" class="tab-pane active">
+        <div id="working" class="tab-pane active">
           <table class="table table-hover table-striped">
             <thead>
               <tr>
                 <th>
-                  <input type="checkbox" data-bind="checked: allOrders"/>
+                  <input type="checkbox" data-bind="checked: allWorking"/>
                 </th>
-                <th>Id</th>
                 <th>Contr</th>
                 <th>Settl Date</th>
+                <th>Id</th>
                 <th>State</th>
                 <th>Action</th>
                 <th style="text-align: right;">Price</th>
@@ -151,7 +154,7 @@
                 <th style="text-align: right;">Last Lots</th>
               </tr>
             </thead>
-            <tbody data-bind="foreach: orders">
+            <tbody data-bind="foreach: working">
               <tr style="cursor: pointer; cursor: hand;"
                   data-bind="click: $root.selectOrder">
                 <td>
@@ -159,9 +162,52 @@
                          data-bind="checked: isSelected, click: $root.selectOrder,
                                     clickBubble: false"/>
                 </td>
-                <td data-bind="text: id"></td>
                 <td data-bind="mnem: contr"></td>
                 <td data-bind="text: settlDate"></td>
+                <td data-bind="text: id"></td>
+                <td data-bind="text: state"></td>
+                <td data-bind="text: action"></td>
+                <td style="text-align: right;" data-bind="text: price"></td>
+                <td style="text-align: right;" data-bind="text: lots"></td>
+                <td style="text-align: right;" data-bind="text: resd"></td>
+                <td style="text-align: right;" data-bind="text: exec"></td>
+                <td style="text-align: right;" data-bind="optional: lastPrice"></td>
+                <td style="text-align: right;" data-bind="optional: lastLots"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="done" class="tab-pane active">
+          <table class="table table-hover table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" data-bind="checked: allDone"/>
+                </th>
+                <th>Contr</th>
+                <th>Settl Date</th>
+                <th>Id</th>
+                <th>State</th>
+                <th>Action</th>
+                <th style="text-align: right;">Price</th>
+                <th style="text-align: right;">Lots</th>
+                <th style="text-align: right;">Resd</th>
+                <th style="text-align: right;">Exec</th>
+                <th style="text-align: right;">Last Price</th>
+                <th style="text-align: right;">Last Lots</th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: done">
+              <tr style="cursor: pointer; cursor: hand;"
+                  data-bind="click: $root.selectOrder">
+                <td>
+                  <input type="checkbox"
+                         data-bind="checked: isSelected, click: $root.selectOrder,
+                                    clickBubble: false"/>
+                </td>
+                <td data-bind="mnem: contr"></td>
+                <td data-bind="text: settlDate"></td>
+                <td data-bind="text: id"></td>
                 <td data-bind="text: state"></td>
                 <td data-bind="text: action"></td>
                 <td style="text-align: right;" data-bind="text: price"></td>
@@ -181,10 +227,10 @@
                 <th>
                   <input type="checkbox" data-bind="checked: allTrades"/>
                 </th>
-                <th>Id</th>
-                <th>Order Id</th>
                 <th>Contr</th>
                 <th>Settl Date</th>
+                <th>Id</th>
+                <th>Order Id</th>
                 <th>Action</th>
                 <th style="text-align: right;">Price</th>
                 <th style="text-align: right;">Lots</th>
@@ -202,10 +248,10 @@
                          data-bind="checked: isSelected, click: $root.selectTrade,
                                     clickBubble: false"/>
                 </td>
-                <td data-bind="text: id"></td>
-                <td data-bind="text: orderId"></td>
                 <td data-bind="mnem: contr"></td>
                 <td data-bind="text: settlDate"></td>
+                <td data-bind="text: id"></td>
+                <td data-bind="text: orderId"></td>
                 <td data-bind="text: action"></td>
                 <td style="text-align: right;" data-bind="text: lastPrice"></td>
                 <td style="text-align: right;" data-bind="text: lastLots"></td>

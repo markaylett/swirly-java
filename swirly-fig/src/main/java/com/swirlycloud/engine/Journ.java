@@ -14,9 +14,7 @@ import com.swirlycloud.domain.Exec;
  */
 public interface Journ {
 
-    void insertExecList(long contrId, int settlDay, Exec first);
-
     void insertExec(long contrId, int settlDay, Exec exec);
 
-    void updateExec(long contrId, int settlDay, long id, long modified);
+    void insertExecList(long contrId, int settlDay, Exec first);
 }

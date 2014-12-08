@@ -25,6 +25,10 @@ public interface Model extends Journ {
 
     void insertUser(User user);
 
+    void archiveOrder(long contrId, int settlDay, long id, long modified);
+
+    void archiveTrade(long contrId, int settlDay, long id, long modified);
+
     void selectAsset(UnaryCallback<Asset> cb);
 
     void selectContr(UnaryCallback<Contr> cb);

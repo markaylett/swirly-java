@@ -63,17 +63,13 @@ public final class AccntServlet extends HttpServlet {
         boolean found = false;
         if ("order".equals(parts[TYPE_PART])) {
             if (parts.length == 4) {
-                found = rest.deleteOrder(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                        Long.parseLong(parts[ID_PART]), resp.getWriter());
+                found = rest.deleteOrder(email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
             }
         } else if ("trade".equals(parts[TYPE_PART])) {
             if (parts.length == 4) {
                 found = rest.deleteTrade(email, parts[CMNEM_PART],
                         Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
-                if (found) {
-                    resp.sendError(HttpServletResponse.SC_NO_CONTENT);
-                    return;
-                }
             }
         }
 
@@ -81,10 +77,7 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/json");
-        resp.setHeader("Cache-Control", "no-cache");
-        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.sendError(HttpServletResponse.SC_NO_CONTENT);
     }
 
     @Override
@@ -112,11 +105,12 @@ public final class AccntServlet extends HttpServlet {
             } else if (parts.length == 2) {
                 found = rest.getOrder(email, parts[CMNEM_PART], resp.getWriter());
             } else if (parts.length == 3) {
-                found = rest.getOrder(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                        resp.getWriter());
+                found = rest.getOrder(email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
             } else if (parts.length == 4) {
-                found = rest.getOrder(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                        Long.parseLong(parts[ID_PART]), resp.getWriter());
+                found = rest.getOrder(email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]),
+                        resp.getWriter());
             }
         } else if ("trade".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
@@ -124,11 +118,12 @@ public final class AccntServlet extends HttpServlet {
             } else if (parts.length == 2) {
                 found = rest.getTrade(email, parts[CMNEM_PART], resp.getWriter());
             } else if (parts.length == 3) {
-                found = rest.getTrade(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                        resp.getWriter());
+                found = rest.getTrade(email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
             } else if (parts.length == 4) {
-                found = rest.getTrade(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                        Long.parseLong(parts[ID_PART]), resp.getWriter());
+                found = rest.getTrade(email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]),
+                        resp.getWriter());
             }
         } else if ("posn".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
@@ -136,8 +131,8 @@ public final class AccntServlet extends HttpServlet {
             } else if (parts.length == 2) {
                 found = rest.getPosn(email, parts[CMNEM_PART], resp.getWriter());
             } else if (parts.length == 3) {
-                found = rest.getPosn(email, parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                        resp.getWriter());
+                found = rest.getPosn(email, parts[CMNEM_PART],
+                        Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
             }
         }
 

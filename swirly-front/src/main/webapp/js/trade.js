@@ -54,7 +54,8 @@ function ViewModel(contrs) {
 
     self.selectedTab = ko.observable();
     self.allMarkets = ko.observable(false);
-    self.allOrders = ko.observable(false);
+    self.allWorking = ko.observable(false);
+    self.allDone = ko.observable(false);
     self.allTrades = ko.observable(false);
 
     self.contrMnem = ko.observable();
@@ -67,6 +68,18 @@ function ViewModel(contrs) {
     self.trades.extend({ rateLimit: 25 });
     self.posns.extend({ rateLimit: 25 });
 
+    self.working = ko.computed(function() {
+        return ko.utils.arrayFilter(self.orders(), function(val) {
+            return !val.isDone();
+        });
+    });
+
+    self.done = ko.computed(function() {
+        return ko.utils.arrayFilter(self.orders(), function(val) {
+            return val.isDone();
+        });
+    });
+
     self.isMarketSelected = ko.computed(function() {
         var markets = self.markets();
         for (var i = 0; i < markets.length; ++i) {
@@ -76,16 +89,32 @@ function ViewModel(contrs) {
         return false;
     });
 
-    self.isOrderSelected = ko.computed(function() {
-        if (self.selectedTab() != 'orderTab') {
+    self.isWorkingSelected = ko.computed(function() {
+        if (self.selectedTab() != 'workingTab') {
             return false;
         }
-        var orders = self.orders();
+        var orders = self.working();
         for (var i = 0; i < orders.length; ++i) {
             if (orders[i].isSelected())
                 return true;
         }
         return false;
+    });
+
+    self.isDoneSelected = ko.computed(function() {
+        if (self.selectedTab() != 'doneTab') {
+            return false;
+        }
+        var orders = self.done();
+        for (var i = 0; i < orders.length; ++i) {
+            if (orders[i].isSelected())
+                return true;
+        }
+        return false;
+    });
+
+    self.isOrderSelected = ko.computed(function() {
+        return self.isWorkingSelected() || self.isDoneSelected();
     });
 
     self.isTradeSelected = ko.computed(function() {
@@ -100,6 +129,10 @@ function ViewModel(contrs) {
         return false;
     });
 
+    self.isDoneOrTradeSelected = ko.computed(function() {
+        return self.isDoneSelected() || self.isTradeSelected();
+    });
+
     self.allMarkets.subscribe(function(val) {
         var markets = self.markets();
         for (var i = 0; i < markets.length; ++i) {
@@ -107,10 +140,17 @@ function ViewModel(contrs) {
         }
     });
 
-    self.allOrders.subscribe(function(val) {
-        var orders = self.orders();
-        for (var i = 0; i < orders.length; ++i) {
-            orders[i].isSelected(val);
+    self.allWorking.subscribe(function(val) {
+        var working = self.working();
+        for (var i = 0; i < working.length; ++i) {
+            working[i].isSelected(val);
+        }
+    });
+
+    self.allDone.subscribe(function(val) {
+        var done = self.done();
+        for (var i = 0; i < done.length; ++i) {
+            done[i].isSelected(val);
         }
     });
 
@@ -238,16 +278,12 @@ function ViewModel(contrs) {
             }
         }
         $.each(raw.orders, function(key, val) {
-            if (val.resd > 0) {
-                order = self.findOrder(val.id);
-                if (order !== null) {
-                    order.update(val);
-                } else {
-                    val.isSelected = false;
-                    self.orders.push(new Order(val, self.contrs));
-                }
+            order = self.findOrder(val.id);
+            if (order !== null) {
+                order.update(val);
             } else {
-                self.removeOrder(val.id);
+                val.isSelected = false;
+                self.orders.push(new Order(val, self.contrs));
             }
         });
         $.each(raw.execs, function(key, val) {
@@ -440,9 +476,23 @@ function ViewModel(contrs) {
         }
     };
 
+    self.archiveOrder = function(order) {
+        var contr = order.contr().mnem;
+        var settlDate = toDateInt(order.settlDate());
+        var id = order.id();
+        $.ajax({
+            type: 'delete',
+            url: '/api/accnt/order/' + contr + '/' + settlDate + '/' + id
+        }).done(function(raw) {
+            self.removeOrder(id);
+        }).fail(function(xhr) {
+            self.showError(new Error(xhr));
+        });
+    };
+
     self.archiveTrade = function(trade) {
         var contr = trade.contr().mnem;
-        var settlDate = trade.settlDate();
+        var settlDate = toDateInt(trade.settlDate());
         var id = trade.id();
         $.ajax({
             type: 'delete',
@@ -455,11 +505,21 @@ function ViewModel(contrs) {
     };
 
     self.archiveAll = function() {
-        var trades = self.trades();
-        for (var i = 0; i < trades.length; ++i) {
-            var trade = trades[i];
-            if (trade.isSelected()) {
-                self.archiveTrade(trade);
+        if (self.selectedTab() === 'doneTab') {
+            var orders = self.done();
+            for (var i = 0; i < orders.length; ++i) {
+                var order = orders[i];
+                if (order.isSelected()) {
+                    self.archiveOrder(order);
+                }
+            }
+        } else if (self.selectedTab() === 'tradeTab') {
+            var trades = self.trades();
+            for (var i = 0; i < trades.length; ++i) {
+                var trade = trades[i];
+                if (trade.isSelected()) {
+                    self.archiveTrade(trade);
+                }
             }
         }
     };
@@ -482,7 +542,7 @@ function initApp() {
         });
         var model = new ViewModel(contrs);
         ko.applyBindings(model);
-        $('#orderTab').click();
+        $('#workingTab').click();
         model.refreshAll();
         setInterval(function() {
             model.refreshAll();

@@ -205,19 +205,18 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized boolean deleteOrder(String email, String cmnem, int settlDate,
-            long id, Appendable out) throws IOException {
+    public final synchronized boolean deleteOrder(String email, String cmnem, int settlDate, long id)
+            throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
         }
-        final int settlDay = isoToJd(settlDate);
-        final Market market = serv.findMarket(cmnem, settlDay);
-        if (market == null) {
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
             return false;
         }
-        final Trans trans = serv.cancelOrder(accnt, market, id, new Trans());
-        trans.toJson(out, null);
+        final int settlDay = isoToJd(settlDate);
+        serv.archiveOrder(accnt, contr.getId(), settlDay, id);
         return true;
     }
 
@@ -299,8 +298,8 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized boolean getOrder(String email, String cmnem, int settlDate,
-            long id, Appendable out) throws IOException {
+    public final synchronized boolean getOrder(String email, String cmnem, int settlDate, long id,
+            Appendable out) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -335,8 +334,8 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized boolean putOrder(String email, String cmnem, int settlDate,
-            long id, long lots, Appendable out) throws IOException {
+    public final synchronized boolean putOrder(String email, String cmnem, int settlDate, long id,
+            long lots, Appendable out) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -352,6 +351,20 @@ public final class Rest {
             serv.cancelOrder(accnt, market, id, trans);
         }
         trans.toJson(out, null);
+        return true;
+    }
+
+    public final synchronized boolean deleteTrade(String email, String cmnem, int settlDate, long id) {
+        final Accnt accnt = serv.findAccntByEmail(email);
+        if (accnt == null) {
+            return false;
+        }
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        serv.archiveTrade(accnt, contr.getId(), settlDay, id);
         return true;
     }
 
@@ -433,8 +446,8 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized boolean getTrade(String email, String cmnem, int settlDate,
-            long id, Appendable out) throws IOException {
+    public final synchronized boolean getTrade(String email, String cmnem, int settlDate, long id,
+            Appendable out) throws IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             return false;
@@ -449,20 +462,6 @@ public final class Rest {
             return false;
         }
         trade.toJson(out, null);
-        return true;
-    }
-
-    public final synchronized boolean deleteTrade(String email, String cmnem, int settlDate, long id) {
-        final Accnt accnt = serv.findAccntByEmail(email);
-        if (accnt == null) {
-            return false;
-        }
-        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
-        if (contr == null) {
-            return false;
-        }
-        final int settlDay = isoToJd(settlDate);
-        serv.archiveTrade(accnt, contr.getId(), settlDay, id);
         return true;
     }
 

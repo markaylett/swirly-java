@@ -98,6 +98,7 @@ public final class DatastoreModel implements Model {
         entity.setUnindexedProperty("lastTicks", exec.getLastTicks());
         entity.setUnindexedProperty("lastLots", exec.getLastLots());
         entity.setUnindexedProperty("minLots", exec.getMinLots());
+        entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
         return entity;
@@ -199,6 +200,29 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
+    public final void insertExec(long contrId, int settlDay, Exec exec) {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity market = getMarket(txn, contrId, settlDay);
+            if (exec.getState() == State.NEW) {
+                datastore.put(newOrder(market, exec));
+            } else {
+                datastore.put(applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
+            }
+            datastore.put(newExec(market, exec));
+            datastore.put(market);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
     public final void insertExecList(long contrId, int settlDay, Exec first) {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
@@ -225,29 +249,6 @@ public final class DatastoreModel implements Model {
                 datastore.put(newExec(market, exec));
             }
             datastore.put(orders.values());
-            datastore.put(market);
-            txn.commit();
-        } catch (ConcurrentModificationException e) {
-            // FIXME: implement retry logic.
-            throw e;
-        } finally {
-            if (txn.isActive()) {
-                txn.rollback();
-            }
-        }
-    }
-
-    @Override
-    public final void insertExec(long contrId, int settlDay, Exec exec) {
-        final Transaction txn = datastore.beginTransaction();
-        try {
-            final Entity market = getMarket(txn, contrId, settlDay);
-            if (exec.getState() == State.NEW) {
-                datastore.put(newOrder(market, exec));
-            } else {
-                datastore.put(applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
-            }
-            datastore.put(newExec(market, exec));
             datastore.put(market);
             txn.commit();
         } catch (ConcurrentModificationException e) {
@@ -291,7 +292,27 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void updateExec(long contrId, int settlDay, long id, long modified) {
+    public final void archiveOrder(long contrId, int settlDay, long id, long modified) {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity market = getMarket(txn, contrId, settlDay);
+            final Entity entity = getOrder(txn, market.getKey(), id);
+            entity.setProperty("archive", Boolean.TRUE);
+            entity.setUnindexedProperty("modified", modified);
+            datastore.put(entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void archiveTrade(long contrId, int settlDay, long id, long modified) {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, contrId, settlDay);
@@ -353,7 +374,7 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void selectOrder(final UnaryCallback<Order> cb) {
-        final Filter filter = new FilterPredicate("resd", FilterOperator.GREATER_THAN, 0);
+        final Filter filter = new FilterPredicate("archive", FilterOperator.EQUAL, Boolean.FALSE);
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
