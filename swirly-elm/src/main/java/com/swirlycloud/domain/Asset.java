@@ -33,5 +33,4 @@ public final class Asset extends Rec {
     public final AssetType getAssetType() {
         return type;
     }
-
 }

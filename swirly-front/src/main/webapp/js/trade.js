@@ -4,25 +4,6 @@
  * All rights reserved.
  **************************************************************************************************/
  
-ko.bindingHandlers.depth = {
-    update: function(elem, valAccessor, allBindings, viewModel, bindingContext) {
-        var val = valAccessor();
-        var arr = val();
-        if (!bindingContext.$rawData.isSelected()) {
-            $(elem).text(optional(arr[0]));
-            return;
-        }
-        var html = '';
-        for (var i = 0; i < arr.length; ++i) {
-            if (i > 0) {
-                html += '<br/>';
-            }
-            html += optional(arr[i]);
-        }
-        $(elem).html(html);
-    }
-};
-
 function ViewModel(contrs) {
     var self = this;
 

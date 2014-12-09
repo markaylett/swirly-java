@@ -71,6 +71,25 @@ ko.bindingHandlers.optional = {
     }
 };
 
+ko.bindingHandlers.depth = {
+    update: function(elem, valAccessor, allBindings, viewModel, bindingContext) {
+        var val = valAccessor();
+        var arr = val();
+        if (!bindingContext.$rawData.isSelected()) {
+            $(elem).text(optional(arr[0]));
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < arr.length; ++i) {
+            if (i > 0) {
+                html += '<br/>';
+            }
+            html += optional(arr[i]);
+        }
+        $(elem).html(html);
+    }
+};
+
 function Error(val) {
     var self = this;
 
@@ -135,6 +154,7 @@ function Market(val, contrs) {
     self.id = ko.observable(val.id);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
+    self.expiryDate = ko.observable(toDateStr(val.expiryDate));
     self.bidTicks = ko.observableArray(val.bidTicks);
     self.bidLots = ko.observableArray(val.bidLots);
     self.bidCount = ko.observableArray(val.bidCount);
@@ -165,6 +185,7 @@ function Market(val, contrs) {
     });
 
     self.update = function(val) {
+        self.expiryDate(toDateStr(val.expiryDate));
         self.bidTicks(val.bidTicks);
         self.bidLots(val.bidLots);
         self.bidCount(val.bidCount);

@@ -44,6 +44,10 @@ public final class PageState {
         return page == Page.CONTR;
     }
 
+    public final boolean isMarketPage() {
+        return page == Page.MARKET;
+    }
+
     public final boolean isUserPage() {
         return page == Page.USER;
     }
