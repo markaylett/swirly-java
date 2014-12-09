@@ -77,7 +77,8 @@
                 data-bind="depth: bidLots, click: $root.selectBid"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="depth: bidPrice, click: $root.selectBid"></td>
-            <td style="text-align: right;" data-bind="optional: lastPrice"></td>
+            <td style="cursor: pointer; cursor: hand; text-align: right;"
+                data-bind="optional: lastPrice, click: $root.selectLast"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"
                 data-bind="depth: offerPrice, click: $root.selectOffer"></td>
             <td style="cursor: pointer; cursor: hand; text-align: right;"

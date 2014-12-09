@@ -194,6 +194,16 @@ function ViewModel(contrs) {
         return true;
     };
 
+    self.selectLast = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        var price = val.lastPrice();
+        if (price !== null) {
+            self.price(price);
+        }
+        return true;
+    };
+
     self.selectOrder = function(val) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());
