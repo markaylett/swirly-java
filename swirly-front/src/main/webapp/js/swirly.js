@@ -94,7 +94,8 @@ function Error(val) {
     var self = this;
 
     if ('responseText' in val) {
-        if (val.responseText.length > 0) {
+        if (val.responseText.length > 0
+            && val.getResponseHeader('Content-Type') == 'application/json') {
             val = $.parseJSON(val.responseText);
         } else {
             val = {

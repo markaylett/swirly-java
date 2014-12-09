@@ -519,6 +519,7 @@ function ViewModel(contrs) {
 function initApp() {
 
     $('#tabs').tab();
+    $('#workingTab').click();
 
     $.getJSON('/api/rec/contr', function(raw) {
         var contrs = [];
@@ -533,12 +534,13 @@ function initApp() {
         });
         var model = new ViewModel(contrs);
         ko.applyBindings(model);
-        $('#workingTab').click();
         model.refreshAll();
         setInterval(function() {
             model.refreshAll();
-        }, 10000);
+        }, 5000);
     }).fail(function(xhr) {
-        self.showError(new Error(xhr));
+        var model = new ViewModel([]);
+        ko.applyBindings(model);
+        model.showError(new Error(xhr));
     });
 }

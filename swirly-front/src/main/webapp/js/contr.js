@@ -49,5 +49,5 @@ function initApp() {
     model.refreshAll();
     setInterval(function() {
         model.refreshAll();
-    }, 10000);
+    }, 5000);
 }

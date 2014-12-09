@@ -89,8 +89,10 @@ function initApp() {
         model.refreshAll();
         setInterval(function() {
             model.refreshAll();
-        }, 10000);
+        }, 5000);
     }).fail(function(xhr) {
-        self.showError(new Error(xhr));
+        var model = new ViewModel([]);
+        ko.applyBindings(model);
+        model.showError(new Error(xhr));
     });
 }
