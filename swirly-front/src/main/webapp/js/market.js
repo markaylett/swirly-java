@@ -32,6 +32,10 @@ function ViewModel(contrs) {
     self.allMarkets = ko.observable(false);
     self.markets.extend({ rateLimit: 25 });
 
+    self.contrMnem = ko.observable();
+    self.settlDate = ko.observable();
+    self.expiryDate = ko.observable();
+
     self.isMarketSelected = ko.computed(function() {
         var markets = self.markets();
         for (var i = 0; i < markets.length; ++i) {
@@ -73,6 +77,56 @@ function ViewModel(contrs) {
             self.showError(new Error(xhr));
         });
     };
+
+    self.clearMarket = function() {
+        //self.contrMnem(undefined);
+        //self.settlDate(undefined);
+        //self.expiryDate(undefined);
+    };
+
+    self.submitMarket = function() {
+        var contr = self.contrMnem();
+        if (!isSpecified(contr)) {
+            self.showError(internalError('contract not specified'));
+            return;
+        }
+        contr = self.contrs[contr];
+        if (contr === undefined) {
+            self.showError(internalError('invalid contract: ' + self.contrMnem()));
+            return;
+        }
+        var settlDate = self.settlDate();
+        if (!isSpecified(settlDate)) {
+            self.showError(internalError('settl-date not specified'));
+            return;
+        }
+        settlDate = toDateInt(settlDate);
+        var expiryDate = self.expiryDate();
+        if (!isSpecified(expiryDate)) {
+            self.showError(internalError('expiry-date not specified'));
+            return;
+        }
+        expiryDate = toDateInt(expiryDate);
+
+        $.ajax({
+            type: 'post',
+            url: '/api/market/' + contr.mnem,
+            data: JSON.stringify({
+                settlDate: settlDate,
+                expiryDate: expiryDate
+            })
+        }).done(function(raw) {
+            market = self.findMarket(raw.id);
+            if (market !== null) {
+                market.update(raw);
+            } else {
+                raw.isSelected = false;
+                self.markets.push(new Market(raw, self.contrs));
+            }
+        }).fail(function(xhr) {
+            self.showError(new Error(xhr));
+        });
+    };
 }
 
 function initApp() {
@@ -83,6 +137,10 @@ function initApp() {
             val.priceInc = priceInc(val);
             val.qtyInc = qtyInc(val);
             contrs[val.mnem] = val;
+        });
+        $('#contr').typeahead({
+            items: 4,
+            source: Object.keys(contrs)
         });
         var model = new ViewModel(contrs);
         ko.applyBindings(model);

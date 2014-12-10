@@ -16,8 +16,8 @@
 
     <div class="container">
 
-      <div class="page-header" style="margin-bottom: 32px;">
-        <h2>Contract</h2>
+      <div class="page-header" style="margin-bottom: 16px;">
+        <h3>Contract</h3>
       </div>
 
       <jsp:include page="alert.jsp"/>

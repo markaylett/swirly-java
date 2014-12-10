@@ -120,10 +120,11 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized void registerUser(String mnem, String display, String email,
+    public final synchronized boolean postUser(String mnem, String display, String email,
             Appendable out) throws IOException {
-        final User user = serv.registerUser(mnem, display, email);
+        final User user = serv.createUser(mnem, display, email);
         user.toJson(out, null);
+        return true;
     }
 
     public final synchronized boolean getMarket(Integer levels, Appendable out) throws IOException {
@@ -176,6 +177,19 @@ public final class Rest {
             return false;
         }
         market.toJson(out, levels);
+        return true;
+    }
+
+    public final synchronized boolean postMarket(String cmnem, int settlDate,
+            int expiryDate, Appendable out) throws IOException {
+        final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
+        if (contr == null) {
+            return false;
+        }
+        final int settlDay = isoToJd(settlDate);
+        final int expiryDay = isoToJd(expiryDate);
+        final Market market = serv.createMarket(contr, settlDay, expiryDay);
+        market.toJson(out, null);
         return true;
     }
 

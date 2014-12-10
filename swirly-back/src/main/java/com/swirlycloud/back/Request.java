@@ -19,11 +19,12 @@ public final class Request implements ContentHandler {
     public static final int ID = 1 << 2;
     public static final int CONTR = 1 << 3;
     public static final int SETTL_DATE = 1 << 4;
-    public static final int REF = 1 << 5;
-    public static final int ACTION = 1 << 6;
-    public static final int TICKS = 1 << 7;
-    public static final int LOTS = 1 << 8;
-    public static final int MIN_LOTS = 1 << 9;
+    public static final int EXPIRY_DATE = 1 << 5;
+    public static final int REF = 1 << 6;
+    public static final int ACTION = 1 << 7;
+    public static final int TICKS = 1 << 8;
+    public static final int LOTS = 1 << 9;
+    public static final int MIN_LOTS = 1 << 10;
 
     private transient String key;
     private boolean valid;
@@ -34,6 +35,7 @@ public final class Request implements ContentHandler {
     private long id;
     private String contr;
     private int settlDate;
+    private int expiryDate;
     private String ref;
     private Action action;
     private long ticks;
@@ -93,6 +95,12 @@ public final class Request implements ContentHandler {
             }
             fields |= SETTL_DATE;
             settlDate = ((Long) value).intValue();
+        } else if ("expiryDate".equals(key)) {
+            if (!(value instanceof Long) || (fields & EXPIRY_DATE) != 0) {
+                return false;
+            }
+            fields |= EXPIRY_DATE;
+            expiryDate = ((Long) value).intValue();
         } else if ("ref".equals(key)) {
             if (!(value instanceof String) || (fields & REF) != 0) {
                 return false;
@@ -175,6 +183,10 @@ public final class Request implements ContentHandler {
 
     public final int getSettlDate() {
         return settlDate;
+    }
+
+    public final int getExpiryDate() {
+        return expiryDate;
     }
 
     public final String getRef() {

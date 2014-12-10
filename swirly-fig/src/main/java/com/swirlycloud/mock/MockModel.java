@@ -36,6 +36,10 @@ public final class MockModel implements Model {
     }
 
     @Override
+    public final void insertMarket(long contrId, int settlDay, int expiryDay) {
+    }
+
+    @Override
     public final void archiveOrder(long contrId, int settlDay, long id, long modified) {
     }
 

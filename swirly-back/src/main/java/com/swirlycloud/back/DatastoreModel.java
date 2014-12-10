@@ -299,6 +299,31 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
+    public final void insertMarket(long contrId, int settlDay, int expiryDay) {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity entity = new Entity(MARKET_KIND, Market.composeId(contrId, settlDay));
+            entity.setUnindexedProperty("contrId", contrId);
+            entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
+            entity.setUnindexedProperty("expiryDay", Integer.valueOf(expiryDay));
+            entity.setUnindexedProperty("lastTicks", Long.valueOf(0L));
+            entity.setUnindexedProperty("lastLots", Long.valueOf(0L));
+            entity.setUnindexedProperty("lastTime", Long.valueOf(0L));
+            entity.setUnindexedProperty("maxOrderId", Long.valueOf(0L));
+            entity.setUnindexedProperty("maxExecId", Long.valueOf(0L));
+            datastore.put(txn, entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
     public final void archiveOrder(long contrId, int settlDay, long id, long modified) {
         final Transaction txn = datastore.beginTransaction();
         try {

@@ -25,7 +25,7 @@ public final class MarketTest {
     public final void test() throws IOException {
         final Contr contr = MockContr.newContr("EURUSD");
         final int settlDay = ymdToJd(2014, 3, 14);
-        final Market market = new Market(contr, settlDay);
+        final Market market = new Market(contr, settlDay, settlDay);
 
         final User user = MockUser.newUser("MARAYL");
         final long now = 1414932078620L;

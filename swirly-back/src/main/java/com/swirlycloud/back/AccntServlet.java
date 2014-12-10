@@ -50,10 +50,8 @@ public final class AccntServlet extends HttpServlet {
 
         final UserService userService = UserServiceFactory.getUserService();
         final User user = userService.getCurrentUser();
-        if (user == null) {
-            resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
-            return;
-        }
+        assert user != null;
+
         final String email = user.getEmail();
         final Rest rest = Context.getRest();
 
@@ -86,10 +84,8 @@ public final class AccntServlet extends HttpServlet {
 
         final UserService userService = UserServiceFactory.getUserService();
         final User user = userService.getCurrentUser();
-        if (user == null) {
-            resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
-            return;
-        }
+        assert user != null;
+
         final String email = user.getEmail();
         final Rest rest = Context.getRest();
 
@@ -153,10 +149,8 @@ public final class AccntServlet extends HttpServlet {
 
         final UserService userService = UserServiceFactory.getUserService();
         final User user = userService.getCurrentUser();
-        if (user == null) {
-            resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
-            return;
-        }
+        assert user != null;
+
         final String email = user.getEmail();
         final Rest rest = Context.getRest();
 
@@ -198,10 +192,8 @@ public final class AccntServlet extends HttpServlet {
 
         final UserService userService = UserServiceFactory.getUserService();
         final User user = userService.getCurrentUser();
-        if (user == null) {
-            resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
-            return;
-        }
+        assert user != null;
+
         final String email = user.getEmail();
         final Rest rest = Context.getRest();
 

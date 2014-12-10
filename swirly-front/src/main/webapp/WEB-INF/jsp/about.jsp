@@ -16,11 +16,11 @@
 
     <div class="container">
 
-      <div class="page-header" style="margin-bottom: 32px;">
-        <h2>About</h2>
+      <div class="page-header" style="margin-bottom: 16px;">
+        <h3>About</h3>
       </div>
 
-      <h3>What are we doing?</h3>
+      <h4>What are we doing?</h4>
 
       <p>Swirly Cloud will match buyers and sellers in a online Exchange with markets for various
         kinds of goods and services. Traders will be notified of their trades, and these trades will
@@ -30,7 +30,7 @@
         transactions, and we do not intend to compete with high-frequency streaming platforms or
         APIs.</p>
 
-      <h3>Why are we doing it?</h3>
+      <h4>Why are we doing it?</h4>
 
       <p>We believe that cost-cutting by financial organisations will lead them to consider new software
         architectures that can dynamically grow or shrink to meet demand.</p>
@@ -46,7 +46,7 @@
         simplifies maintenance, operations, disaster recovery and security, so that we can focus our
         efforts on writing great software.</p>
 
-      <h3>How are we doing it?</h3>
+      <h4>How are we doing it?</h4>
 
       <p>Our system has been designed from the ground-up to run efficiently in the Cloud with
         limited resources.  It draws on lessons learned from years spent building front-office
@@ -60,7 +60,7 @@
         the option to target different application containers, run on dedicated infrastructure, or
         to open-source the software.</p>
 
-      <h3>Who is doing it?</h3>
+      <h4>Who is doing it?</h4>
 
       <p>The project was originally started by Mark Aylett as a proof-of-concept for a low-latency
         matching-engine. Mark has now been joined by several former colleagues from the

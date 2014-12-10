@@ -46,6 +46,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         out.append("{\"id\":").append(String.valueOf(key));
         out.append(",\"contr\":\"").append(getRecMnem(contr));
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
 
         final Level firstBid = (Level) bidSide.getFirstLevel();
         if (firstBid != null) {
@@ -63,7 +64,14 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         } else {
             out.append(",\"offerTicks\":null,\"offerLots\":null,\"offerCount\":null");
         }
-        out.append("}");
+        if (lastLots != 0) {
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
+        } else {
+            out.append(",\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
+        }
+        out.append('}');        
     }
 
     private final void toJsonDepth(Appendable out, int levels) throws IOException {
@@ -182,8 +190,8 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         this.maxExecId = maxExecId;
     }
 
-    public Market(Identifiable contr, int settlDay) {
-        this(contr, settlDay, settlDay, 0L, 0L, 0L, 0L, 0L);
+    public Market(Identifiable contr, int settlDay, int expiryDay) {
+        this(contr, settlDay, expiryDay, 0L, 0L, 0L, 0L, 0L);
     }
 
     /**

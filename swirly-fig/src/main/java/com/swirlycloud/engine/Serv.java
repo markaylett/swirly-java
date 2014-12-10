@@ -5,6 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
+import static com.swirlycloud.util.Date.jdToIso;
+
 import java.util.regex.Pattern;
 
 import com.swirlycloud.domain.Action;
@@ -292,6 +294,15 @@ public final class Serv implements AutoCloseable {
     public final void close() {
     }
 
+    public final User createUser(String mnem, String display, String email) {
+        // Validate.
+        final User user = newUser(mnem, display, email);
+        model.insertUser(user);
+        cache.insertRec(user);
+        emailIdx.insert(user);
+        return user;
+    }
+
     public final Rec findRec(RecType recType, long id) {
         return cache.findRec(recType, id);
     }
@@ -308,16 +319,22 @@ public final class Serv implements AutoCloseable {
         return cache.isEmptyRec(recType);
     }
 
-    public final User registerUser(String mnem, String display, String email) {
-        final User user = newUser(mnem, display, email);
-        model.insertUser(user);
-        cache.insertRec(user);
-        emailIdx.insert(user);
-        return user;
-    }
-
     public final User findUserByEmail(String email) {
         return emailIdx.find(email);
+    }
+
+    public final Market createMarket(Contr contr, int settlDay, int expiryDay) {
+        final long key = Market.composeId(contr.getId(), settlDay);
+        final RbNode node = markets.pfind(key);
+        if (node != null && node.getKey() == key) {
+            throw new IllegalArgumentException(String.format("market '%s' for '%d' already exists",
+                    contr.getMnem(), jdToIso(settlDay)));
+        }
+        final Market market = new Market(contr, settlDay, expiryDay);
+        model.insertMarket(contr.getId(), settlDay, expiryDay);
+        final RbNode parent = node;
+        markets.pinsert(market, parent);
+        return market;
     }
 
     public final Market getLazyMarket(Contr contr, int settlDay) {
@@ -325,7 +342,7 @@ public final class Serv implements AutoCloseable {
         final long key = Market.composeId(contr.getId(), settlDay);
         final RbNode node = markets.pfind(key);
         if (node == null || node.getKey() != key) {
-            market = new Market(contr, settlDay);
+            market = new Market(contr, settlDay, settlDay);
             final RbNode parent = node;
             markets.pinsert(market, parent);
         } else {

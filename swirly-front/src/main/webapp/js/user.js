@@ -32,12 +32,6 @@ function ViewModel() {
     self.display = ko.observable();
     self.email = ko.observable();
 
-    self.clearUser = function() {
-        self.mnem('');
-        self.display('');
-        self.email('');
-    };
-
     self.refreshAll = function() {
 
         $.getJSON('/api/rec/user', function(raw) {
@@ -49,6 +43,12 @@ function ViewModel() {
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });
+    };
+
+    self.clearUser = function() {
+        self.mnem(undefined);
+        self.display(undefined);
+        self.email(undefined);
     };
 
     self.submitUser = function() {

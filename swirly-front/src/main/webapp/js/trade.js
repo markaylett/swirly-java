@@ -155,6 +155,12 @@ function ViewModel(contrs) {
         self.selectedTab(event.target.id);
     };
 
+    self.selectMarket = function(val) {
+        self.contrMnem(val.contr().mnem);
+        self.settlDate(val.settlDate());
+        return true;
+    };
+
     self.selectBid = function(val) {
         self.contrMnem(val.contr().mnem);
         self.settlDate(val.settlDate());

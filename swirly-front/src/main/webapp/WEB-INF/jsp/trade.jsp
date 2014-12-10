@@ -65,25 +65,27 @@
           </tr>
         </thead>
         <tbody data-bind="foreach: markets">
-          <tr>
-            <td>
+          <tr style="cursor: pointer; cursor: hand;">
+            <td style="cursor: initial;">
               <input type="checkbox" data-bind="checked: isSelected"/>
             </td>
-            <td data-bind="mnem: contr"></td>
-            <td data-bind="text: settlDate"></td>
-            <td style="cursor: pointer; cursor: hand; text-align: right;"
+            <td
+               data-bind="mnem: contr, click: $root.selectMarket"></td>
+            <td
+               data-bind="text: settlDate, click: $root.selectMarket"></td>
+            <td style="text-align: right;"
                 data-bind="depth: bidCount, click: $root.selectBid"></td>
-            <td style="cursor: pointer; cursor: hand; text-align: right;"
+            <td style="text-align: right;"
                 data-bind="depth: bidLots, click: $root.selectBid"></td>
-            <td style="cursor: pointer; cursor: hand; text-align: right;"
+            <td style="text-align: right;"
                 data-bind="depth: bidPrice, click: $root.selectBid"></td>
-            <td style="cursor: pointer; cursor: hand; text-align: right;"
+            <td style="text-align: right;"
                 data-bind="optional: lastPrice, click: $root.selectLast"></td>
-            <td style="cursor: pointer; cursor: hand; text-align: right;"
+            <td style="text-align: right;"
                 data-bind="depth: offerPrice, click: $root.selectOffer"></td>
-            <td style="cursor: pointer; cursor: hand; text-align: right;"
+            <td style="text-align: right;"
                 data-bind="depth: offerLots, click: $root.selectOffer"></td>
-            <td style="cursor: pointer; cursor: hand; text-align: right;"
+            <td style="text-align: right;"
                 data-bind="depth: offerCount, click: $root.selectOffer"></td>
           </tr>
         </tbody>

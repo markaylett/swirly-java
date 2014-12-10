@@ -16,8 +16,8 @@
 
     <div class="container">
 
-      <div class="page-header" style="margin-bottom: 32px;">
-        <h2>Contact</h2>
+      <div class="page-header" style="margin-bottom: 16px;">
+        <h3>Contact</h3>
       </div>
 
       <table class="table">
