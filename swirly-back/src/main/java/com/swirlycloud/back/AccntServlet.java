@@ -49,6 +49,10 @@ public final class AccntServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
+        if (!userService.isUserLoggedIn()) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         final User user = userService.getCurrentUser();
         assert user != null;
 
@@ -83,6 +87,10 @@ public final class AccntServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
+        if (!userService.isUserLoggedIn()) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         final User user = userService.getCurrentUser();
         assert user != null;
 
@@ -148,6 +156,10 @@ public final class AccntServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
+        if (!userService.isUserLoggedIn()) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         final User user = userService.getCurrentUser();
         assert user != null;
 
@@ -191,6 +203,10 @@ public final class AccntServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
+        if (!userService.isUserLoggedIn()) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         final User user = userService.getCurrentUser();
         assert user != null;
 

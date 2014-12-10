@@ -24,7 +24,7 @@
           <li ${state.contrPage ? 'class="active"' : ""}><a href="/page/contr">Contract</a></li>
           <c:if test="${state.userAdmin}">
             <li ${state.adminPage ? 'class="active dropdown"' : 'class="dropdown"'}>
-              <a href="#" data-toggle="dropdown" role="button">Admin <span class="caret"></span></a>
+              <a data-toggle="dropdown" role="button">Admin <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
                 <li><a href="/page/market">Market</a></li>
                 <li><a href="/page/trader">Trader</a></li>
@@ -38,13 +38,13 @@
       <ul class="nav navbar-nav navbar-right">
         <c:choose>
           <c:when test="${state.userLoggedIn}">
-            <li><a href="#">Hello, ${fn:escapeXml(state.userName)}</a></li>
+            <li><a>Hello, ${fn:escapeXml(state.userName)}</a></li>
             <li>
               <a href="${state.logoutURL}">Sign Out</a>
             </li>
           </c:when>
           <c:otherwise>
-            <li><a href="#">Welcome</a></li>
+            <li><a>Welcome</a></li>
             <li>
               <a href="${state.loginURL}">Sign In</a>
             </li>

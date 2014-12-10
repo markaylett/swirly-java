@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
@@ -39,6 +38,12 @@ public final class MarketServlet extends HttpServlet {
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setHeader("Access-Control-Allow-Origin", "*");
+
+        final UserService userService = UserServiceFactory.getUserService();
+        if (!userService.isUserLoggedIn()) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         final Rest ctx = Context.getRest();
 
@@ -71,8 +76,10 @@ public final class MarketServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
-        final User user = userService.getCurrentUser();
-        assert user != null;
+        if (!userService.isUserLoggedIn() || !userService.isUserAdmin()) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         final Rest rest = Context.getRest();
 

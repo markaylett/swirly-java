@@ -93,7 +93,7 @@ public final class Rest {
         serv = new Serv(model);
     }
 
-    public final synchronized boolean getRec(Appendable out) throws IOException {
+    public final synchronized boolean getRec(boolean isAdmin, Appendable out) throws IOException {
         out.append("{\"assets\":");
         if (!doGetRec(RecType.ASSET, out)) {
             return false;
@@ -102,7 +102,13 @@ public final class Rest {
         if (!doGetRec(RecType.CONTR, out)) {
             return false;
         }
-        out.append("}");
+        if (isAdmin) {
+            out.append(",\"traders\":");
+            if (!doGetRec(RecType.TRADER, out)) {
+                return false;
+            }
+        }
+        out.append('}');
         return true;
     }
 
@@ -180,8 +186,8 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized boolean postMarket(String cmnem, int settlDate,
-            int expiryDate, Appendable out) throws IOException {
+    public final synchronized boolean postMarket(String cmnem, int settlDate, int expiryDate,
+            Appendable out) throws IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
@@ -215,7 +221,7 @@ public final class Rest {
         if (!doGetPosn(accnt, email, out)) {
             return false;
         }
-        out.append("}");
+        out.append('}');
         return true;
     }
 

@@ -40,6 +40,12 @@ public final class RecServlet extends HttpServlet {
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
+        final UserService userService = UserServiceFactory.getUserService();
+        if (!userService.isUserLoggedIn()) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
         final Rest rest = Context.getRest();
 
         final String pathInfo = req.getPathInfo();
@@ -47,7 +53,7 @@ public final class RecServlet extends HttpServlet {
 
         boolean found = false;
         if (parts.length == 0) {
-            found = rest.getRec(resp.getWriter());
+            found = rest.getRec(userService.isUserAdmin(), resp.getWriter());
         } else if ("asset".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
                 found = rest.getRec(RecType.ASSET, resp.getWriter());
@@ -61,6 +67,10 @@ public final class RecServlet extends HttpServlet {
                 found = rest.getRec(RecType.CONTR, parts[CMNEM_PART], resp.getWriter());
             }
         } else if ("trader".equals(parts[TYPE_PART])) {
+            if (!userService.isUserAdmin()) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
             if (parts.length == 1) {
                 found = rest.getRec(RecType.TRADER, resp.getWriter());
             } else if (parts.length == 2) {
@@ -84,6 +94,10 @@ public final class RecServlet extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Origin", "*");
 
         final UserService userService = UserServiceFactory.getUserService();
+        if (!userService.isUserLoggedIn()) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         final User user = userService.getCurrentUser();
         assert user != null;
 
