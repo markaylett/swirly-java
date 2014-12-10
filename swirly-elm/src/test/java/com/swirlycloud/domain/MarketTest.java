@@ -34,8 +34,8 @@ public final class MarketTest {
                 now), now);
         market.placeOrder(new Order(1, trader, contr, settlDay, "orange", Action.BUY, 12344, 5, 0,
                 now), now);
-        market.placeOrder(
-                new Order(1, trader, contr, settlDay, "pear", Action.SELL, 12346, 5, 0, now), now);
+        market.placeOrder(new Order(1, trader, contr, settlDay, "pear", Action.SELL, 12346, 5, 0,
+                now), now);
         market.placeOrder(new Order(1, trader, contr, settlDay, "banana", Action.SELL, 12346, 2, 0,
                 now), now);
 
@@ -44,21 +44,21 @@ public final class MarketTest {
         // Default to TOB.
         market.toJson(sb, null);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":12344,\"bidLots\":5,\"bidCount\":1,\"offerTicks\":12346,\"offerLots\":7,\"offerCount\":2}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":12344,\"bidLots\":5,\"bidCount\":1,\"offerTicks\":12346,\"offerLots\":7,\"offerCount\":2,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Explicit TOB.
         sb.setLength(0);
         market.toJson(sb, Integer.valueOf(1));
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":12344,\"bidLots\":5,\"bidCount\":1,\"offerTicks\":12346,\"offerLots\":7,\"offerCount\":2}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":12344,\"bidLots\":5,\"bidCount\":1,\"offerTicks\":12346,\"offerLots\":7,\"offerCount\":2,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Round-up to minimum.
         sb.setLength(0);
         market.toJson(sb, Integer.valueOf(-1));
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":12344,\"bidLots\":5,\"bidCount\":1,\"offerTicks\":12346,\"offerLots\":7,\"offerCount\":2}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":12344,\"bidLots\":5,\"bidCount\":1,\"offerTicks\":12346,\"offerLots\":7,\"offerCount\":2,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Somewhere between minimum and maximum.
