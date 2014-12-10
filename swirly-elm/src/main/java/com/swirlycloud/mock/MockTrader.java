@@ -9,19 +9,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.function.NullaryFunction;
 import com.swirlycloud.function.UnaryCallback;
 
-public final class MockUser {
-    private static final Map<String, NullaryFunction<User>> FACTORIES = new TreeMap<>();
+public final class MockTrader {
+    private static final Map<String, NullaryFunction<Trader>> FACTORIES = new TreeMap<>();
 
     private static void put(final long id, final String mnem, final String display,
             final String email) {
-        FACTORIES.put(mnem, new NullaryFunction<User>() {
+        FACTORIES.put(mnem, new NullaryFunction<Trader>() {
             @Override
-            public final User call() {
-                return new User(id, mnem, display, email);
+            public final Trader call() {
+                return new Trader(id, mnem, display, email);
             }
         });
     }
@@ -35,15 +35,15 @@ public final class MockUser {
         put(i++, "SWIRLY", "Swirly Cloud", "mark.aylett@swirlycloud.com");
     }
 
-    private MockUser() {
+    private MockTrader() {
     }
 
-    public static User newUser(String mnem) {
+    public static Trader newTrader(String mnem) {
         return FACTORIES.get(mnem).call();
     }
 
-    public static void selectUser(UnaryCallback<User> cb) {
-        for (final Entry<String, NullaryFunction<User>> entry : FACTORIES.entrySet()) {
+    public static void selectTrader(UnaryCallback<Trader> cb) {
+        for (final Entry<String, NullaryFunction<Trader>> entry : FACTORIES.entrySet()) {
             cb.call(entry.getValue().call());
         }
     }

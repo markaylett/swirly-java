@@ -60,11 +60,11 @@ public final class RecServlet extends HttpServlet {
             } else if (parts.length == 2) {
                 found = rest.getRec(RecType.CONTR, parts[CMNEM_PART], resp.getWriter());
             }
-        } else if ("user".equals(parts[TYPE_PART])) {
+        } else if ("trader".equals(parts[TYPE_PART])) {
             if (parts.length == 1) {
-                found = rest.getRec(RecType.USER, resp.getWriter());
+                found = rest.getRec(RecType.TRADER, resp.getWriter());
             } else if (parts.length == 2) {
-                found = rest.getRec(RecType.USER, parts[CMNEM_PART], resp.getWriter());
+                found = rest.getRec(RecType.TRADER, parts[CMNEM_PART], resp.getWriter());
             }
         }
 
@@ -93,7 +93,7 @@ public final class RecServlet extends HttpServlet {
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
 
-        if (parts.length != 1 || !"user".equals(parts[TYPE_PART])) {
+        if (parts.length != 1 || !"trader".equals(parts[TYPE_PART])) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -118,7 +118,7 @@ public final class RecServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (!rest.postUser(r.getMnem(), r.getDisplay(), email, resp.getWriter())) {
+        if (!rest.postTrader(r.getMnem(), r.getDisplay(), email, resp.getWriter())) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }

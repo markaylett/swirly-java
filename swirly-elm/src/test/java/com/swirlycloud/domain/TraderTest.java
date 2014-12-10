@@ -9,13 +9,13 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.mock.MockUser;
+import com.swirlycloud.mock.MockTrader;
 
-public final class UserTest {
+public final class TraderTest {
     @Test
     public final void test() {
         assertEquals(
                 "{\"mnem\":\"MARAYL\",\"display\":\"Mark Aylett\",\"email\":\"mark.aylett@gmail.com\"}",
-                MockUser.newUser("MARAYL").toString());
+                MockTrader.newTrader("MARAYL").toString());
     }
 }

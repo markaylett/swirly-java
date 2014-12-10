@@ -10,36 +10,36 @@ import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.RefIdx;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.util.BasicRbNode;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.RbNode;
 import com.swirlycloud.util.Tree;
 
 public final class Accnt extends BasicRbNode implements Identifiable {
-    private final User user;
+    private final Trader trader;
     private final RefIdx refIdx;
     private final Tree orders = new Tree();
     private final Tree trades = new Tree();
     private final Tree posns = new Tree();
 
-    public Accnt(User user, RefIdx refIdx) {
-        this.user = user;
+    public Accnt(Trader trader, RefIdx refIdx) {
+        this.trader = trader;
         this.refIdx = refIdx;
     }
 
     @Override
     public final long getKey() {
-        return user.getId();
+        return trader.getId();
     }
 
     @Override
     public final long getId() {
-        return user.getId();
+        return trader.getId();
     }
 
-    public final User getUser() {
-        return user;
+    public final Trader getTrader() {
+        return trader;
     }
 
     final void insertOrder(Order order) {
@@ -51,10 +51,10 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     final void removeOrder(Order order) {
-        assert user.getId() == order.getUserId();
+        assert trader.getId() == order.getTraderId();
         orders.remove(order);
         if (!order.getRef().isEmpty()) {
-            refIdx.remove(user.getId(), order.getRef());
+            refIdx.remove(trader.getId(), order.getRef());
         }
     }
 
@@ -69,7 +69,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     final Order removeOrder(String ref) {
-        final Order order = refIdx.remove(user.getId(), ref);
+        final Order order = refIdx.remove(trader.getId(), ref);
         if (order != null) {
             orders.remove(order);
         }
@@ -86,7 +86,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
     public final Order findOrder(long contrId, int settlDay, String ref) {
         assert ref != null && !ref.isEmpty();
-        return refIdx.find(user.getId(), ref);
+        return refIdx.find(trader.getId(), ref);
     }
 
     public final RbNode getRootOrder() {
@@ -156,7 +156,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
             // Update existing position.
 
-            assert exist.getUser().equals(posn.getUser());
+            assert exist.getTrader().equals(posn.getTrader());
             assert exist.getContr().equals(posn.getContr());
             assert exist.getSettlDay() == posn.getSettlDay();
 
@@ -172,10 +172,10 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
     final Posn getLazyPosn(Contr contr, int settlDay) {
         Posn posn;
-        final long key = Posn.composeId(contr.getId(), settlDay, user.getId());
+        final long key = Posn.composeId(contr.getId(), settlDay, trader.getId());
         final RbNode node = posns.pfind(key);
         if (node == null || node.getKey() != key) {
-            posn = new Posn(user, contr, settlDay);
+            posn = new Posn(trader, contr, settlDay);
             final RbNode parent = node;
             posns.pinsert(posn, parent);
         } else {
@@ -185,7 +185,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     public final Posn findPosn(Contr contr, int settlDay) {
-        final long key = Posn.composeId(contr.getId(), settlDay, user.getId());
+        final long key = Posn.composeId(contr.getId(), settlDay, trader.getId());
         return (Posn) posns.find(key);
     }
 

@@ -24,7 +24,7 @@ public final class PageState {
     private final Page page;
     private final UserService userService;
     private final User user;
-    private int userCount = -1;
+    private int traderCount = -1;
 
     public PageState(Page page) {
         this.page = page;
@@ -45,15 +45,15 @@ public final class PageState {
     }
 
     public final boolean isAdminPage() {
-        return page == Page.MARKET || page == Page.USER;
+        return page == Page.MARKET || page == Page.TRADER;
     }
 
     public final boolean isMarketPage() {
         return page == Page.MARKET;
     }
 
-    public final boolean isUserPage() {
-        return page == Page.USER;
+    public final boolean isTraderPage() {
+        return page == Page.TRADER;
     }
 
     public final boolean isAboutPage() {
@@ -76,18 +76,18 @@ public final class PageState {
         if (!isUserLoggedIn()) {
             return false;
         }
-        if (userCount < 0) {
+        if (traderCount < 0) {
             // Lazy.
             final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Key parent = KeyFactory.createKey("Group", "User");
-            final Key key = KeyFactory.createKey(parent, "UserEmail", user.getEmail());
+            final Key parent = KeyFactory.createKey("Group", "Trader");
+            final Key key = KeyFactory.createKey(parent, "TraderEmail", user.getEmail());
             final Filter filter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
                     FilterOperator.EQUAL, key);
-            final Query q = new Query("UserEmail").setFilter(filter).setKeysOnly();
+            final Query q = new Query("TraderEmail").setFilter(filter).setKeysOnly();
             final PreparedQuery pq = datastore.prepare(q);
-            userCount = pq.countEntities(FetchOptions.Builder.withLimit(1));
+            traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));
         }
-        return userCount == 1;
+        return traderCount == 1;
     }
 
     public final String getUserName() {

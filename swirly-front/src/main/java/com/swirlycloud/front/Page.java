@@ -10,7 +10,7 @@ public enum Page {
     TRADE("/page/trade", "/WEB-INF/jsp/trade.jsp", true), //
     CONTR("/page/contr", "/WEB-INF/jsp/contr.jsp", true), //
     MARKET("/page/market", "/WEB-INF/jsp/market.jsp", true), //
-    USER("/page/user", "/WEB-INF/jsp/user.jsp", true), //
+    TRADER("/page/trader", "/WEB-INF/jsp/trader.jsp", true), //
     ABOUT("/page/about", "/WEB-INF/jsp/about.jsp", false), //
     CONTACT("/page/contact", "/WEB-INF/jsp/contact.jsp", false), //
     SIGNUP("/page/signup", "/WEB-INF/jsp/signup.jsp", false);

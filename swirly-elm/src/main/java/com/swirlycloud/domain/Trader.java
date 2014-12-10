@@ -9,15 +9,15 @@ import java.io.IOException;
 
 import com.swirlycloud.util.AshUtil;
 
-public final class User extends Rec {
+public final class Trader extends Rec {
     // Internals.
     // Singly-linked buckets.
-    transient User emailNext;
+    transient Trader emailNext;
 
     private final String email;
 
-    public User(long id, String mnem, String display, String email) {
-        super(RecType.USER, id, mnem, display);
+    public Trader(long id, String mnem, String display, String email) {
+        super(RecType.TRADER, id, mnem, display);
         this.email = email;
     }
 

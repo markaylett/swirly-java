@@ -27,7 +27,7 @@
               <a href="#" data-toggle="dropdown" role="button">Admin <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
                 <li><a href="/page/market">Market</a></li>
-                <li><a href="/page/user">User</a></li>
+                <li><a href="/page/trader">Trader</a></li>
               </ul>
             </li>
           </c:if>

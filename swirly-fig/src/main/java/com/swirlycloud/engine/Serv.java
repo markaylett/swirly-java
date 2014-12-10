@@ -25,7 +25,7 @@ import com.swirlycloud.domain.RefIdx;
 import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.Side;
 import com.swirlycloud.domain.State;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.util.DlNode;
 import com.swirlycloud.util.RbNode;
@@ -49,22 +49,22 @@ public final class Serv implements AutoCloseable {
     }
 
     private final void enrichOrder(Order order) {
-        final User user = (User) cache.findRec(RecType.USER, order.getUserId());
+        final Trader trader = (Trader) cache.findRec(RecType.TRADER, order.getTraderId());
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, order.getContrId());
-        order.enrich(user, contr);
+        order.enrich(trader, contr);
     }
 
     private final void enrichTrade(Exec trade) {
-        final User user = (User) cache.findRec(RecType.USER, trade.getUserId());
+        final Trader trader = (Trader) cache.findRec(RecType.TRADER, trade.getTraderId());
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, trade.getContrId());
-        final User cpty = (User) cache.findRec(RecType.USER, trade.getCptyId());
-        trade.enrich(user, contr, cpty);
+        final Trader cpty = (Trader) cache.findRec(RecType.TRADER, trade.getCptyId());
+        trade.enrich(trader, contr, cpty);
     }
 
     private final void enrichPosn(Posn posn) {
-        final User user = (User) cache.findRec(RecType.USER, posn.getUserId());
+        final Trader trader = (Trader) cache.findRec(RecType.TRADER, posn.getTraderId());
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, posn.getContrId());
-        posn.enrich(user, contr);
+        posn.enrich(trader, contr);
     }
 
     private final void insertOrder(Order order) {
@@ -74,7 +74,7 @@ public final class Serv implements AutoCloseable {
         market.insertOrder(order);
         boolean success = false;
         try {
-            final Accnt accnt = getLazyAccnt(order.getUser());
+            final Accnt accnt = getLazyAccnt(order.getTrader());
             accnt.insertOrder(order);
             success = true;
         } finally {
@@ -102,10 +102,10 @@ public final class Serv implements AutoCloseable {
         });
     }
 
-    private final void insertUsers() {
-        model.selectUser(new UnaryCallback<User>() {
+    private final void insertTraders() {
+        model.selectTrader(new UnaryCallback<Trader>() {
             @Override
-            public final void call(User arg) {
+            public final void call(Trader arg) {
                 cache.insertRec(arg);
                 emailIdx.insert(arg);
             }
@@ -136,7 +136,7 @@ public final class Serv implements AutoCloseable {
             @Override
             public final void call(Exec arg) {
                 enrichTrade(arg);
-                final Accnt accnt = getLazyAccnt(arg.getUser());
+                final Accnt accnt = getLazyAccnt(arg.getTrader());
                 accnt.insertTrade(arg);
             }
         });
@@ -147,18 +147,18 @@ public final class Serv implements AutoCloseable {
             @Override
             public final void call(Posn arg) {
                 enrichPosn(arg);
-                final Accnt accnt = getLazyAccnt(arg.getUser());
+                final Accnt accnt = getLazyAccnt(arg.getTrader());
                 accnt.insertPosn(arg);
             }
         });
     }
 
-    private final User newUser(String mnem, String display, String email) {
+    private final Trader newTrader(String mnem, String display, String email) {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new IllegalArgumentException(String.format("invalid mnem '%s'", mnem));
         }
-        final long userId = model.allocUserId();
-        return new User(userId, mnem, display, email);
+        final long traderId = model.allocTraderId();
+        return new Trader(traderId, mnem, display, email);
     }
 
     private final Exec newExec(long id, Instruct instruct, long now) {
@@ -197,7 +197,7 @@ public final class Serv implements AutoCloseable {
             final long makerId = market.allocExecId();
             final long takerId = market.allocExecId();
 
-            final Accnt makerAccnt = findAccnt(makerOrder.getUser());
+            final Accnt makerAccnt = findAccnt(makerOrder.getTrader());
             assert makerAccnt != null;
             final Posn makerPosn = makerAccnt.getLazyPosn(contr, settlDay);
 
@@ -213,12 +213,12 @@ public final class Serv implements AutoCloseable {
 
             final Exec makerTrade = new Exec(makerId, makerOrder, now);
             makerTrade.trade(match.lots, match.ticks, match.lots, takerId, Role.MAKER,
-                    takerOrder.getUser());
+                    takerOrder.getTrader());
             match.makerTrade = makerTrade;
 
             final Exec takerTrade = new Exec(takerId, takerOrder, now);
             takerTrade.trade(taken, match.ticks, match.lots, makerId, Role.TAKER,
-                    makerOrder.getUser());
+                    makerOrder.getTrader());
             match.takerTrade = takerTrade;
 
             trans.matches.insertBack(match);
@@ -231,7 +231,7 @@ public final class Serv implements AutoCloseable {
 
         if (!trans.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
-            final Accnt takerAccnt = getLazyAccnt(takerOrder.getUser());
+            final Accnt takerAccnt = getLazyAccnt(takerOrder.getTrader());
             trans.posn = takerAccnt.getLazyPosn(contr, settlDay);
             takerOrder.trade(taken, lastTicks, lastLots, now);
         }
@@ -262,7 +262,7 @@ public final class Serv implements AutoCloseable {
             // Reduce maker.
             market.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
-            final Accnt maker = findAccnt(makerOrder.getUser());
+            final Accnt maker = findAccnt(makerOrder.getTrader());
             assert maker != null;
             // Maker updated first because this is consistent with last-look semantics.
             // Update maker.
@@ -278,15 +278,15 @@ public final class Serv implements AutoCloseable {
         this.model = model;
         insertAssets();
         insertContrs();
-        insertUsers();
+        insertTraders();
         insertMarkets();
         insertOrders();
         insertTrades();
         insertPosns();
         // Build email index.
-        for (SlNode node = cache.getFirstRec(RecType.USER); node != null; node = node.slNext()) {
-            final User user = (User) node;
-            emailIdx.insert(user);
+        for (SlNode node = cache.getFirstRec(RecType.TRADER); node != null; node = node.slNext()) {
+            final Trader trader = (Trader) node;
+            emailIdx.insert(trader);
         }
     }
 
@@ -294,13 +294,13 @@ public final class Serv implements AutoCloseable {
     public final void close() {
     }
 
-    public final User createUser(String mnem, String display, String email) {
+    public final Trader createTrader(String mnem, String display, String email) {
         // Validate.
-        final User user = newUser(mnem, display, email);
-        model.insertUser(user);
-        cache.insertRec(user);
-        emailIdx.insert(user);
-        return user;
+        final Trader trader = newTrader(mnem, display, email);
+        model.insertTrader(trader);
+        cache.insertRec(trader);
+        emailIdx.insert(trader);
+        return trader;
     }
 
     public final Rec findRec(RecType recType, long id) {
@@ -319,7 +319,7 @@ public final class Serv implements AutoCloseable {
         return cache.isEmptyRec(recType);
     }
 
-    public final User findUserByEmail(String email) {
+    public final Trader findTraderByEmail(String email) {
         return emailIdx.find(email);
     }
 
@@ -387,12 +387,12 @@ public final class Serv implements AutoCloseable {
         return markets.isEmpty();
     }
 
-    public final Accnt getLazyAccnt(User user) {
+    public final Accnt getLazyAccnt(Trader trader) {
         Accnt accnt;
-        final long key = user.getId();
+        final long key = trader.getId();
         final RbNode node = accnts.pfind(key);
         if (node == null || node.getKey() != key) {
-            accnt = new Accnt(user, refIdx);
+            accnt = new Accnt(trader, refIdx);
             final RbNode parent = node;
             accnts.pinsert(accnt, parent);
         } else {
@@ -402,39 +402,39 @@ public final class Serv implements AutoCloseable {
     }
 
     public final Accnt getLazyAccnt(String mnem) {
-        final User user = (User) cache.findRec(RecType.USER, mnem);
-        if (user == null) {
+        final Trader trader = (Trader) cache.findRec(RecType.TRADER, mnem);
+        if (trader == null) {
             return null;
         }
-        return getLazyAccnt(user);
+        return getLazyAccnt(trader);
     }
 
     public final Accnt getLazyAccntByEmail(String email) {
-        final User user = emailIdx.find(email);
-        if (user == null) {
+        final Trader trader = emailIdx.find(email);
+        if (trader == null) {
             return null;
         }
-        return getLazyAccnt(user);
+        return getLazyAccnt(trader);
     }
 
-    public final Accnt findAccnt(User user) {
-        return (Accnt) accnts.find(user.getId());
+    public final Accnt findAccnt(Trader trader) {
+        return (Accnt) accnts.find(trader.getId());
     }
 
     public final Accnt findAccnt(String mnem) {
-        final User user = (User) cache.findRec(RecType.USER, mnem);
-        if (user == null) {
+        final Trader trader = (Trader) cache.findRec(RecType.TRADER, mnem);
+        if (trader == null) {
             return null;
         }
-        return findAccnt(user);
+        return findAccnt(trader);
     }
 
     public final Accnt findAccntByEmail(String email) {
-        final User user = emailIdx.find(email);
-        if (user == null) {
+        final Trader trader = emailIdx.find(email);
+        if (trader == null) {
             return null;
         }
-        return findAccnt(user);
+        return findAccnt(trader);
     }
 
     public final Trans placeOrder(Accnt accnt, Market market, String ref, Action action,
@@ -446,7 +446,7 @@ public final class Serv implements AutoCloseable {
         final long orderId = market.allocOrderId();
         final Contr contr = market.getContr();
         final int settlDay = market.getSettlDay();
-        final Order order = new Order(orderId, accnt.getUser(), contr, settlDay, ref, action,
+        final Order order = new Order(orderId, accnt.getTrader(), contr, settlDay, ref, action,
                 ticks, lots, minLots, now);
         final Exec exec = newExec(market.allocExecId(), order, now);
 

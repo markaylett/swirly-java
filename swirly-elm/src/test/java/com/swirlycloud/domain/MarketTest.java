@@ -16,9 +16,9 @@ import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.mock.MockContr;
-import com.swirlycloud.mock.MockUser;
+import com.swirlycloud.mock.MockTrader;
 
 public final class MarketTest {
     @Test
@@ -27,16 +27,16 @@ public final class MarketTest {
         final int settlDay = ymdToJd(2014, 3, 14);
         final Market market = new Market(contr, settlDay, settlDay);
 
-        final User user = MockUser.newUser("MARAYL");
+        final Trader trader = MockTrader.newTrader("MARAYL");
         final long now = 1414932078620L;
 
-        market.placeOrder(new Order(1, user, contr, settlDay, "apple", Action.BUY, 12343, 10, 0,
+        market.placeOrder(new Order(1, trader, contr, settlDay, "apple", Action.BUY, 12343, 10, 0,
                 now), now);
-        market.placeOrder(new Order(1, user, contr, settlDay, "orange", Action.BUY, 12344, 5, 0,
+        market.placeOrder(new Order(1, trader, contr, settlDay, "orange", Action.BUY, 12344, 5, 0,
                 now), now);
         market.placeOrder(
-                new Order(1, user, contr, settlDay, "pear", Action.SELL, 12346, 5, 0, now), now);
-        market.placeOrder(new Order(1, user, contr, settlDay, "banana", Action.SELL, 12346, 2, 0,
+                new Order(1, trader, contr, settlDay, "pear", Action.SELL, 12346, 5, 0, now), now);
+        market.placeOrder(new Order(1, trader, contr, settlDay, "banana", Action.SELL, 12346, 2, 0,
                 now), now);
 
         final StringBuilder sb = new StringBuilder();

@@ -37,8 +37,8 @@ public final class PageServlet extends HttpServlet {
             page = Page.CONTR;
         } else if ("market".equals(parts[0])) {
             page = Page.MARKET;
-        } else if ("user".equals(parts[0])) {
-            page = Page.USER;
+        } else if ("trader".equals(parts[0])) {
+            page = Page.TRADER;
         } else if ("about".equals(parts[0])) {
             page = Page.ABOUT;
         } else if ("contact".equals(parts[0])) {

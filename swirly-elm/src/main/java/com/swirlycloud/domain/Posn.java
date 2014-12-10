@@ -18,7 +18,7 @@ import com.swirlycloud.util.Jsonifiable;
 public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable {
 
     private final long key;
-    private Identifiable user;
+    private Identifiable trader;
     private Identifiable contr;
     private final int settlDay;
     private long buyLicks;
@@ -30,9 +30,9 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
     }
 
-    public Posn(Identifiable user, Identifiable contr, int settlDay) {
-        this.key = composeId(contr.getId(), settlDay, user.getId());
-        this.user = user;
+    public Posn(Identifiable trader, Identifiable contr, int settlDay) {
+        this.key = composeId(contr.getId(), settlDay, trader.getId());
+        this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
     }
@@ -45,7 +45,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
     @Override
     public final void toJson(Appendable out, Object arg) throws IOException {
         out.append("{\"id\":").append(String.valueOf(key));
-        out.append(",\"user\":\"").append(getRecMnem(user));
+        out.append(",\"trader\":\"").append(getRecMnem(trader));
         out.append("\",\"contr\":\"").append(getRecMnem(contr));
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         if (buyLots != 0) {
@@ -63,10 +63,10 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         out.append("}");
     }
 
-    public final void enrich(User user, Contr contr) {
-        assert this.user.getId() == user.getId();
+    public final void enrich(Trader trader, Contr contr) {
+        assert this.trader.getId() == trader.getId();
         assert this.contr.getId() == contr.getId();
-        this.user = user;
+        this.trader = trader;
         this.contr = contr;
     }
 
@@ -74,17 +74,17 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
      * Synthetic position key.
      */
 
-    public static long composeId(long contrId, int settlDay, long userId) {
+    public static long composeId(long contrId, int settlDay, long traderId) {
         // 16 bit contr-id.
         final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.
         final long TJD_MASK = (1L << 16) - 1;
-        // 32 bit user-id.
-        final long USER_MASK = (1L << 32) - 1;
+        // 32 bit trader-id.
+        final long TRADER_MASK = (1L << 32) - 1;
 
         // Truncated Julian Day (TJD).
         final long tjd = Date.jdToTjd(settlDay);
-        return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (userId & USER_MASK);
+        return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (traderId & TRADER_MASK);
     }
 
     public final void applyTrade(Action action, long lastTicks, long lastLots) {
@@ -129,12 +129,12 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         return key;
     }
 
-    public final long getUserId() {
-        return user.getId();
+    public final long getTraderId() {
+        return trader.getId();
     }
 
-    public final User getUser() {
-        return (User) user;
+    public final Trader getTrader() {
+        return (Trader) trader;
     }
 
     public final long getContrId() {

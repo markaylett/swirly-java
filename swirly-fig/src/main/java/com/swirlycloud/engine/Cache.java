@@ -17,7 +17,7 @@ public final class Cache {
     private final int nBuckets;
     private final Queue assets;
     private final Queue contrs;
-    private final Queue users;
+    private final Queue traders;
     private final Rec[][] buckets;
 
     private static int hashCode(long id) {
@@ -63,7 +63,7 @@ public final class Cache {
         this.nBuckets = nBuckets;
         assets = new Queue();
         contrs = new Queue();
-        users = new Queue();
+        traders = new Queue();
         buckets = new Rec[nBuckets][COLS];
     }
 
@@ -75,8 +75,8 @@ public final class Cache {
         case CONTR:
             contrs.insertBack(rec);
             break;
-        case USER:
-            users.insertBack(rec);
+        case TRADER:
+            traders.insertBack(rec);
             break;
         default:
             throw new IllegalArgumentException("invalid record-type");
@@ -114,8 +114,8 @@ public final class Cache {
         case CONTR:
             first = contrs.getFirst();
             break;
-        case USER:
-            first = users.getFirst();
+        case TRADER:
+            first = traders.getFirst();
             break;
         default:
             throw new IllegalArgumentException("invalid record-type");

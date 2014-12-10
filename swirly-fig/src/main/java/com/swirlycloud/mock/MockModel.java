@@ -11,12 +11,12 @@ import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
 
 public final class MockModel implements Model {
-    private long maxUserId = 0L;
+    private long maxTraderId = 0L;
 
     @Override
     public final void insertExec(long contrId, int settlDay, Exec exec) {
@@ -27,12 +27,12 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final long allocUserId() {
-        return ++maxUserId;
+    public final long allocTraderId() {
+        return ++maxTraderId;
     }
 
     @Override
-    public final void insertUser(User user) {
+    public final void insertTrader(Trader trader) {
     }
 
     @Override
@@ -58,8 +58,8 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void selectUser(UnaryCallback<User> cb) {
-        MockUser.selectUser(cb);
+    public final void selectTrader(UnaryCallback<Trader> cb) {
+        MockTrader.selectTrader(cb);
     }
 
     @Override

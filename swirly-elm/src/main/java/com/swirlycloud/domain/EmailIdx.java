@@ -7,11 +7,11 @@ package com.swirlycloud.domain;
 
 public final class EmailIdx {
 
-    private final User[] buckets;
+    private final Trader[] buckets;
 
-    private static boolean equals(User user, String email) {
+    private static boolean equals(Trader trader, String email) {
         assert email != null;
-        return user.getEmail().equals(email);
+        return trader.getEmail().equals(email);
     }
 
     private static int indexFor(int hash, int length) {
@@ -20,22 +20,22 @@ public final class EmailIdx {
 
     public EmailIdx(int nBuckets) {
         assert nBuckets > 0;
-        this.buckets = new User[nBuckets];
+        this.buckets = new Trader[nBuckets];
     }
 
-    public final void insert(User user) {
-        assert user != null;
-        if (user.getEmail() != null) {
-            final int bucket = indexFor(user.getEmail().hashCode(), buckets.length);
-            user.emailNext = buckets[bucket];
-            buckets[bucket] = user;
+    public final void insert(Trader trader) {
+        assert trader != null;
+        if (trader.getEmail() != null) {
+            final int bucket = indexFor(trader.getEmail().hashCode(), buckets.length);
+            trader.emailNext = buckets[bucket];
+            buckets[bucket] = trader;
         }
     }
 
-    public final User find(String email) {
+    public final Trader find(String email) {
         assert email != null;
         final int bucket = indexFor(email.hashCode(), buckets.length);
-        for (User it = buckets[bucket]; it != null; it = it.emailNext) {
+        for (Trader it = buckets[bucket]; it != null; it = it.emailNext) {
             if (equals(it, email)) {
                 return it;
             }

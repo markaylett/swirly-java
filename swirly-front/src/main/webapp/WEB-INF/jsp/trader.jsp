@@ -19,8 +19,8 @@
       <jsp:include page="alert.jsp"/>
 
       <button type="button" class="btn btn-default" style="margin-bottom: 24px;"
-              data-toggle="modal" data-target="#userDialog" data-bind="click: clearUser">
-        New User
+              data-toggle="modal" data-target="#traderDialog" data-bind="click: clearTrader">
+        New Trader
       </button>
 
       <table class="table table-hover table-striped">
@@ -31,7 +31,7 @@
             <th>Email</th>
           </tr>
         </thead>
-        <tbody data-bind="foreach: users">
+        <tbody data-bind="foreach: traders">
           <tr>
             <td data-bind="text: mnem"></td>
             <td data-bind="text: display"></td>
@@ -42,12 +42,12 @@
 
     </div>
 
-    <div id="userDialog" class="modal fade" tabindex="-1">
+    <div id="traderDialog" class="modal fade" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            <h4 class="modal-title">New User</h4>
+            <h4 class="modal-title">New Trader</h4>
           </div>
           <div class="modal-body">
             <form role="form">
@@ -68,7 +68,7 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-primary" data-dismiss="modal"
-                    data-bind="click: submitUser">Save</button>
+                    data-bind="click: submitTrader">Save</button>
           </div>
         </div>
       </div>
@@ -85,7 +85,7 @@
     <script type="text/javascript" src="/js/knockout.min.js"></script>
 
     <script type="text/javascript" src="/js/swirly.js"></script>
-    <script type="text/javascript" src="/js/user.js"></script>
+    <script type="text/javascript" src="/js/trader.js"></script>
     <script type="text/javascript">
       $(initApp);
     </script>

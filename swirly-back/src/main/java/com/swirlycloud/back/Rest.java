@@ -17,7 +17,7 @@ import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.RecType;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.engine.Accnt;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.engine.Serv;
@@ -120,10 +120,10 @@ public final class Rest {
         return true;
     }
 
-    public final synchronized boolean postUser(String mnem, String display, String email,
+    public final synchronized boolean postTrader(String mnem, String display, String email,
             Appendable out) throws IOException {
-        final User user = serv.createUser(mnem, display, email);
-        user.toJson(out, null);
+        final Trader trader = serv.createTrader(mnem, display, email);
+        trader.toJson(out, null);
         return true;
     }
 
@@ -194,11 +194,11 @@ public final class Rest {
     }
 
     public final synchronized boolean getAccnt(String email, Appendable out) throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("{\"orders\":[],\"trades\":[],\"posns\":[]}");
             return true;
@@ -235,11 +235,11 @@ public final class Rest {
     }
 
     public final synchronized boolean getOrder(String email, Appendable out) throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("[]");
             return true;
@@ -249,15 +249,15 @@ public final class Rest {
 
     public final synchronized boolean getOrder(String email, String cmnem, Appendable out)
             throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
         }
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("[]");
             return true;
@@ -281,8 +281,8 @@ public final class Rest {
 
     public final synchronized boolean getOrder(String email, String cmnem, int settlDate,
             Appendable out) throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
@@ -290,7 +290,7 @@ public final class Rest {
             return false;
         }
         final int settlDay = isoToJd(settlDate);
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("[]");
             return true;
@@ -344,7 +344,7 @@ public final class Rest {
         }
         final Trans trans = serv.placeOrder(accnt, market, ref, action, ticks, lots, minLots,
                 new Trans());
-        trans.toJson(out, accnt.getUser());
+        trans.toJson(out, accnt.getTrader());
         return true;
     }
 
@@ -383,11 +383,11 @@ public final class Rest {
     }
 
     public final synchronized boolean getTrade(String email, Appendable out) throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("[]");
             return true;
@@ -397,15 +397,15 @@ public final class Rest {
 
     public final synchronized boolean getTrade(String email, String cmnem, Appendable out)
             throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             return false;
         }
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("[]");
             return true;
@@ -429,8 +429,8 @@ public final class Rest {
 
     public final synchronized boolean getTrade(String email, String cmnem, int settlDate,
             Appendable out) throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
@@ -438,7 +438,7 @@ public final class Rest {
             return false;
         }
         final int settlDay = isoToJd(settlDate);
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("[]");
             return true;
@@ -480,11 +480,11 @@ public final class Rest {
     }
 
     public final synchronized boolean getPosn(String email, Appendable out) throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("[]");
             return true;
@@ -494,14 +494,14 @@ public final class Rest {
 
     public final synchronized boolean getPosn(String email, String cmnem, Appendable out)
             throws IOException {
-        final User user = serv.findUserByEmail(email);
-        if (user == null) {
+        final Trader trader = serv.findTraderByEmail(email);
+        if (trader == null) {
             return false;
         }
         if (serv.findRec(RecType.CONTR, cmnem) == null) {
             return false;
         }
-        final Accnt accnt = serv.findAccnt(user);
+        final Accnt accnt = serv.findAccnt(trader);
         if (accnt == null) {
             out.append("[]");
             return true;

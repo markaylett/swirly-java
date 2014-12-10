@@ -34,7 +34,7 @@ import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.State;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.mock.MockAsset;
@@ -49,9 +49,9 @@ public final class DatastoreModel implements Model {
     private static final String ASSET_KIND = "Asset";
     @SuppressWarnings("unused")
     private static final String CONTR_KIND = "Contr";
-    private static final String USER_KIND = "User";
-    private static final String USER_MNEM_KIND = "UserMnem";
-    private static final String USER_EMAIL_KIND = "UserEmail";
+    private static final String TRADER_KIND = "Trader";
+    private static final String TRADER_MNEM_KIND = "TraderMnem";
+    private static final String TRADER_EMAIL_KIND = "TraderEmail";
     private static final String MARKET_KIND = "Market";
     private static final String ORDER_KIND = "Order";
     private static final String EXEC_KIND = "Exec";
@@ -74,17 +74,17 @@ public final class DatastoreModel implements Model {
         }
     }
 
-    private final Entity newUser(Entity group, User user) {
-        final Entity entity = new Entity(USER_KIND, user.getId(), group.getKey());
-        entity.setUnindexedProperty("mnem", user.getMnem());
-        entity.setUnindexedProperty("display", user.getDisplay());
-        entity.setUnindexedProperty("email", user.getEmail());
+    private final Entity newTrader(Entity group, Trader trader) {
+        final Entity entity = new Entity(TRADER_KIND, trader.getId(), group.getKey());
+        entity.setUnindexedProperty("mnem", trader.getMnem());
+        entity.setUnindexedProperty("display", trader.getDisplay());
+        entity.setUnindexedProperty("email", trader.getEmail());
         return entity;
     }
 
     private final Entity newOrder(Entity market, Exec exec) {
         final Entity entity = new Entity(ORDER_KIND, exec.getOrderId(), market.getKey());
-        entity.setUnindexedProperty("userId", exec.getUserId());
+        entity.setUnindexedProperty("traderId", exec.getTraderId());
         entity.setUnindexedProperty("contrId", exec.getContrId());
         entity.setUnindexedProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
         entity.setUnindexedProperty("ref", exec.getRef());
@@ -107,7 +107,7 @@ public final class DatastoreModel implements Model {
     private final Entity newExec(Entity market, Exec exec) {
         final Entity entity = new Entity(EXEC_KIND, exec.getId(), market.getKey());
         entity.setUnindexedProperty("orderId", exec.getOrderId());
-        entity.setUnindexedProperty("userId", exec.getUserId());
+        entity.setUnindexedProperty("traderId", exec.getTraderId());
         entity.setUnindexedProperty("contrId", exec.getContrId());
         entity.setUnindexedProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
         entity.setUnindexedProperty("ref", exec.getRef());
@@ -269,21 +269,21 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final long allocUserId() {
-        final KeyRange range = datastore.allocateIds(USER_KIND, 1L);
+    public final long allocTraderId() {
+        final KeyRange range = datastore.allocateIds(TRADER_KIND, 1L);
         return range.getStart().getId();
     }
 
     @Override
-    public final void insertUser(User user) {
+    public final void insertTrader(Trader trader) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            // User entities have common ancestor for strong consistency.
-            final Entity group = getGroup(txn, USER_KIND);
-            final Entity entity = newUser(group, user);
+            // Trader entities have common ancestor for strong consistency.
+            final Entity group = getGroup(txn, TRADER_KIND);
+            final Entity entity = newTrader(group, trader);
             // Unique indexes.
-            final Entity mnemIdx = new Entity(USER_MNEM_KIND, user.getMnem(), group.getKey());
-            final Entity emailIdx = new Entity(USER_EMAIL_KIND, user.getEmail(), group.getKey());
+            final Entity mnemIdx = new Entity(TRADER_MNEM_KIND, trader.getMnem(), group.getKey());
+            final Entity emailIdx = new Entity(TRADER_EMAIL_KIND, trader.getEmail(), group.getKey());
             datastore.put(entity);
             datastore.put(mnemIdx);
             datastore.put(emailIdx);
@@ -376,17 +376,17 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void selectUser(UnaryCallback<User> cb) {
-        final Key parent = KeyFactory.createKey(GROUP_KIND, USER_KIND);
-        final Query q = new Query(USER_KIND, parent);
+    public final void selectTrader(UnaryCallback<Trader> cb) {
+        final Key parent = KeyFactory.createKey(GROUP_KIND, TRADER_KIND);
+        final Query q = new Query(TRADER_KIND, parent);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             final long id = entity.getKey().getId();
             final String mnem = (String) entity.getProperty("mnem");
             final String display = (String) entity.getProperty("display");
             final String email = (String) entity.getProperty("email");
-            final User user = new User(id, mnem, display, email);
-            cb.call(user);
+            final Trader trader = new Trader(id, mnem, display, email);
+            cb.call(trader);
         }
     }
 
@@ -419,7 +419,7 @@ public final class DatastoreModel implements Model {
                 final PreparedQuery pq = datastore.prepare(q);
                 for (final Entity entity : pq.asIterable()) {
                     final long id = entity.getKey().getId();
-                    final Identifiable user = newId((Long) entity.getProperty("userId"));
+                    final Identifiable trader = newId((Long) entity.getProperty("traderId"));
                     final Identifiable contr = newId((Long) entity.getProperty("contrId"));
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
                     final String ref = (String) entity.getProperty("ref");
@@ -434,7 +434,7 @@ public final class DatastoreModel implements Model {
                     final long minLots = (Long) entity.getProperty("minLots");
                     final long created = (Long) entity.getProperty("created");
                     final long modified = (Long) entity.getProperty("modified");
-                    final Order order = new Order(id, user, contr, settlDay, ref, state, action,
+                    final Order order = new Order(id, trader, contr, settlDay, ref, state, action,
                             ticks, lots, resd, exec, lastTicks, lastLots, minLots, created,
                             modified);
                     cb.call(order);
@@ -458,7 +458,7 @@ public final class DatastoreModel implements Model {
                 for (final Entity entity : pq.asIterable()) {
                     final long id = entity.getKey().getId();
                     final long orderId = (Long) entity.getProperty("orderId");
-                    final Identifiable user = newId((Long) entity.getProperty("userId"));
+                    final Identifiable trader = newId((Long) entity.getProperty("traderId"));
                     final Identifiable contr = newId((Long) entity.getProperty("contrId"));
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
                     final String ref = (String) entity.getProperty("ref");
@@ -484,7 +484,7 @@ public final class DatastoreModel implements Model {
                         cpty = null;
                     }
                     final long created = (Long) entity.getProperty("created");
-                    final Exec trade = new Exec(id, orderId, user, contr, settlDay, ref, state,
+                    final Exec trade = new Exec(id, orderId, trader, contr, settlDay, ref, state,
                             action, ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId,
                             role, cpty, created);
                     cb.call(trade);
@@ -503,14 +503,14 @@ public final class DatastoreModel implements Model {
                 final Query q = new Query(EXEC_KIND).setFilter(filter);
                 final PreparedQuery pq = datastore.prepare(q);
                 for (final Entity entity : pq.asIterable()) {
-                    final long userId = (Long) entity.getProperty("userId");
+                    final long traderId = (Long) entity.getProperty("traderId");
                     final long contrId = (Long) entity.getProperty("contrId");
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-                    final Long posnId = Long.valueOf(Posn.composeId(contrId, settlDay, userId));
+                    final Long posnId = Long.valueOf(Posn.composeId(contrId, settlDay, traderId));
                     // Lazy position.
                     Posn posn = m.get(posnId);
                     if (posn == null) {
-                        posn = new Posn(newId(userId), newId(contrId), settlDay);
+                        posn = new Posn(newId(traderId), newId(contrId), settlDay);
                         m.put(posnId, posn);
                     }
                     final Action action = Action.valueOf((String) entity.getProperty("action"));

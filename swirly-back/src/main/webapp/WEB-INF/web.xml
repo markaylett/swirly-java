@@ -85,8 +85,8 @@
       <http-method>PUT</http-method>
     </web-resource-collection>
     <web-resource-collection>
-      <web-resource-name>user</web-resource-name>
-      <url-pattern>/api/rec/user/*</url-pattern>
+      <web-resource-name>trader</web-resource-name>
+      <url-pattern>/api/rec/trader/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>

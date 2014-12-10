@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.swirlycloud.mock.MockContr;
-import com.swirlycloud.mock.MockUser;
+import com.swirlycloud.mock.MockTrader;
 import com.swirlycloud.util.DlNode;
 import com.swirlycloud.util.RbNode;
 
@@ -36,11 +36,11 @@ public final class SideTest {
     public final void testOrders() {
         long now = System.currentTimeMillis();
         final Contr contr = MockContr.newContr("EURUSD");
-        final User user = MockUser.newUser("MARAYL");
+        final Trader trader = MockTrader.newTrader("MARAYL");
         // Two orders at the same price level.
-        final Order apple = new Order(1, user, contr, ymdToJd(2014, 3, 14), "apple", Action.BUY,
+        final Order apple = new Order(1, trader, contr, ymdToJd(2014, 3, 14), "apple", Action.BUY,
                 12345, 10, 0, now);
-        final Order orange = new Order(2, user, contr, ymdToJd(2014, 3, 14), "orange", Action.BUY,
+        final Order orange = new Order(2, trader, contr, ymdToJd(2014, 3, 14), "orange", Action.BUY,
                 12345, 20, 0, now);
         final Side side = new Side();
 
@@ -135,14 +135,14 @@ public final class SideTest {
     public final void testLevels() {
         final long now = System.currentTimeMillis();
         final Contr contr = MockContr.newContr("EURUSD");
-        final User user = MockUser.newUser("MARAYL");
+        final Trader trader = MockTrader.newTrader("MARAYL");
         // Two orders at the same price level.
-        final Order apple = new Order(1, user, contr, ymdToJd(2014, 3, 14), "apple", Action.BUY,
+        final Order apple = new Order(1, trader, contr, ymdToJd(2014, 3, 14), "apple", Action.BUY,
                 12345, 10, 0, now);
-        final Order orange = new Order(2, user, contr, ymdToJd(2014, 3, 14), "orange", Action.BUY,
+        final Order orange = new Order(2, trader, contr, ymdToJd(2014, 3, 14), "orange", Action.BUY,
                 12345, 20, 0, now);
         // Best inserted last.
-        final Order pear = new Order(3, user, contr, ymdToJd(2014, 3, 14), "pear", Action.BUY,
+        final Order pear = new Order(3, trader, contr, ymdToJd(2014, 3, 14), "pear", Action.BUY,
                 12346, 25, 0, now);
         final Side side = new Side();
 

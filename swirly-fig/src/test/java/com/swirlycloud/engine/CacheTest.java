@@ -16,7 +16,7 @@ import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.RecType;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.mock.MockModel;
 
@@ -28,10 +28,10 @@ public final class CacheTest {
         final Cache c = new Cache(257);
         assertTrue(c.isEmptyRec(RecType.ASSET));
         assertTrue(c.isEmptyRec(RecType.CONTR));
-        assertTrue(c.isEmptyRec(RecType.USER));
+        assertTrue(c.isEmptyRec(RecType.TRADER));
         assertNull(c.getFirstRec(RecType.ASSET));
         assertNull(c.getFirstRec(RecType.CONTR));
-        assertNull(c.getFirstRec(RecType.USER));
+        assertNull(c.getFirstRec(RecType.TRADER));
     }
 
     @Test
@@ -67,18 +67,18 @@ public final class CacheTest {
     }
 
     @Test
-    public final void testUser() {
+    public final void testTrader() {
         final Cache c = new Cache(257);
-        model.selectUser(new UnaryCallback<User>() {
+        model.selectTrader(new UnaryCallback<Trader>() {
             @Override
-            public final void call(User arg) {
+            public final void call(Trader arg) {
                 c.insertRec(arg);
             }
         });
-        assertFalse(c.isEmptyRec(RecType.USER));
-        assertEquals("EMIAYL", ((Rec) c.getFirstRec(RecType.USER)).getMnem());
-        assertEquals("GOSAYL", ((Rec) c.getFirstRec(RecType.USER).slNext()).getMnem());
-        assertEquals("MARAYL", c.findRec(RecType.USER, "MARAYL").getMnem());
-        assertEquals("TOBAYL", c.findRec(RecType.USER, 3).getMnem());
+        assertFalse(c.isEmptyRec(RecType.TRADER));
+        assertEquals("EMIAYL", ((Rec) c.getFirstRec(RecType.TRADER)).getMnem());
+        assertEquals("GOSAYL", ((Rec) c.getFirstRec(RecType.TRADER).slNext()).getMnem());
+        assertEquals("MARAYL", c.findRec(RecType.TRADER, "MARAYL").getMnem());
+        assertEquals("TOBAYL", c.findRec(RecType.TRADER, 3).getMnem());
     }
 }

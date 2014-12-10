@@ -15,9 +15,9 @@ public enum RecType {
      */
     CONTR(2),
     /**
-     * User.
+     * Trader.
      */
-    USER(3);
+    TRADER(3);
     private final int value;
 
     private RecType(int value) {

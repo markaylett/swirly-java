@@ -21,7 +21,7 @@
       <form class="form-signup">
         <h2>Trader sign-up</h2>
         <div class="form-group">
-          <label for="mnem">Username:</label>
+          <label for="mnem">Trader name:</label>
           <input id="mnem" type="text" class="form-control" data-bind="value: mnem"/>
         </div>
         <div class="form-group">

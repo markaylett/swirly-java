@@ -34,7 +34,7 @@ function ViewModel() {
         var display = self.display();
         $.ajax({
             type: 'post',
-            url: '/api/rec/user/',
+            url: '/api/rec/trader/',
             data: JSON.stringify({
                 mnem: mnem,
                 display: display

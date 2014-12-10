@@ -13,7 +13,7 @@ import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.Queue;
@@ -47,7 +47,7 @@ public final class Trans implements Jsonifiable {
 
     @Override
     public final void toJson(Appendable out, Object arg) throws IOException {
-        final User user = (User) arg;
+        final Trader trader = (Trader) arg;
         out.append("{\"market\":");
         if (market != null) {
             market.toJson(out, DEPTH);
@@ -57,13 +57,13 @@ public final class Trans implements Jsonifiable {
         out.append(",\"orders\":[");
         int i = 0;
         if (order != null) {
-            assert user != null && order.getUserId() == user.getId();
+            assert trader != null && order.getTraderId() == trader.getId();
             order.toJson(out, null);
             ++i;
         }
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
-            if (user != null && match.makerOrder.getUserId() != user.getId()) {
+            if (trader != null && match.makerOrder.getTraderId() != trader.getId()) {
                 continue;
             }
             if (i > 0) {
@@ -76,7 +76,7 @@ public final class Trans implements Jsonifiable {
         i = 0;
         for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
-            if (user != null && exec.getUserId() != user.getId()) {
+            if (trader != null && exec.getTraderId() != trader.getId()) {
                 continue;
             }
             if (i > 0) {

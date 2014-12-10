@@ -23,7 +23,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
     /**
      * The executing trader.
      */
-    private Identifiable user;
+    private Identifiable trader;
     private Identifiable contr;
     private final int settlDay;
     /**
@@ -60,7 +60,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
     }
 
-    public Exec(long id, long orderId, Identifiable user, Identifiable contr, int settlDay,
+    public Exec(long id, long orderId, Identifiable trader, Identifiable contr, int settlDay,
             String ref, State state, Action action, long ticks, long lots, long resd, long exec,
             long lastTicks, long lastLots, long minLots, long matchId, Role role,
             Identifiable cpty, long created) {
@@ -70,7 +70,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         this.key = composeId(contr.getId(), settlDay, id);
         this.id = id;
         this.orderId = orderId;
-        this.user = user;
+        this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
         this.ref = ref;
@@ -96,7 +96,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         this.key = composeId(instruct.getContrId(), instruct.getSettlDay(), id);
         this.id = id;
         this.orderId = instruct.getOrderId();
-        this.user = instruct.getUser();
+        this.trader = instruct.getTrader();
         this.contr = instruct.getContr();
         this.settlDay = instruct.getSettlDay();
         this.ref = instruct.getRef();
@@ -121,7 +121,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
     public final void toJson(Appendable out, Object arg) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));
-        out.append(",\"user\":\"").append(getRecMnem(user));
+        out.append(",\"trader\":\"").append(getRecMnem(trader));
         out.append("\",\"contr\":\"").append(getRecMnem(contr));
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"ref\":\"").append(ref);
@@ -144,10 +144,10 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         out.append("}");
     }
 
-    public final void enrich(User user, Contr contr, User cpty) {
-        assert this.user.getId() == user.getId();
+    public final void enrich(Trader trader, Contr contr, Trader cpty) {
+        assert this.trader.getId() == trader.getId();
         assert this.contr.getId() == contr.getId();
-        this.user = user;
+        this.trader = trader;
         this.contr = contr;
         if (state == State.TRADE) {
             assert this.cpty.getId() == cpty.getId();
@@ -186,7 +186,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
     }
 
     public final void trade(long lots, long lastTicks, long lastLots, long matchId, Role role,
-            User cpty) {
+            Trader cpty) {
         state = State.TRADE;
         resd -= lots;
         exec += lots;
@@ -197,7 +197,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         this.cpty = cpty;
     }
 
-    public final void trade(long lastTicks, long lastLots, long matchId, Role role, User cpty) {
+    public final void trade(long lastTicks, long lastLots, long matchId, Role role, Trader cpty) {
         trade(lastLots, lastTicks, lastLots, matchId, role, cpty);
     }
 
@@ -217,13 +217,13 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
     }
 
     @Override
-    public final long getUserId() {
-        return user.getId();
+    public final long getTraderId() {
+        return trader.getId();
     }
 
     @Override
-    public final User getUser() {
-        return (User) user;
+    public final Trader getTrader() {
+        return (Trader) trader;
     }
 
     @Override
@@ -308,8 +308,8 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         return cpty != null ? cpty.getId() : 0;
     }
 
-    public final User getCpty() {
-        return (User) cpty;
+    public final Trader getCpty() {
+        return (Trader) cpty;
     }
 
     public final long getCreated() {

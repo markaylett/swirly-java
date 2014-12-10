@@ -28,7 +28,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
     /**
      * The executing trader.
      */
-    private Identifiable user;
+    private Identifiable trader;
     private Identifiable contr;
     private final int settlDay;
     /**
@@ -63,10 +63,10 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
     }
 
-    public Order(long id, Identifiable user, Identifiable contr, int settlDay, String ref,
+    public Order(long id, Identifiable trader, Identifiable contr, int settlDay, String ref,
             State state, Action action, long ticks, long lots, long resd, long exec,
             long lastTicks, long lastLots, long minLots, long created, long modified) {
-        assert user != null;
+        assert trader != null;
         assert contr != null;
         assert lots > 0 && lots >= minLots;
         if (id >= (1L << 32)) {
@@ -74,7 +74,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         }
         this.key = composeId(contr.getId(), settlDay, id);
         this.id = id;
-        this.user = user;
+        this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
         this.ref = ref;
@@ -91,9 +91,9 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         this.modified = modified;
     }
 
-    public Order(long id, Identifiable user, Identifiable contr, int settlDay, String ref,
+    public Order(long id, Identifiable trader, Identifiable contr, int settlDay, String ref,
             Action action, long ticks, long lots, long minLots, long created) {
-        assert user != null;
+        assert trader != null;
         assert contr != null;
         assert lots > 0 && lots >= minLots;
         if (id >= (1L << 32)) {
@@ -101,7 +101,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         }
         this.key = composeId(contr.getId(), settlDay, id);
         this.id = id;
-        this.user = user;
+        this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
         this.ref = ref;
@@ -126,7 +126,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
     @Override
     public final void toJson(Appendable out, Object arg) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
-        out.append(",\"user\":\"").append(getRecMnem(user));
+        out.append(",\"trader\":\"").append(getRecMnem(trader));
         out.append("\",\"contr\":\"").append(getRecMnem(contr));
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"ref\":\"").append(ref);
@@ -148,10 +148,10 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         out.append("}");
     }
 
-    public final void enrich(User user, Contr contr) {
-        assert this.user.getId() == user.getId();
+    public final void enrich(Trader trader, Contr contr) {
+        assert this.trader.getId() == trader.getId();
         assert this.contr.getId() == contr.getId();
-        this.user = user;
+        this.trader = trader;
         this.contr = contr;
     }
 
@@ -223,13 +223,13 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
     }
 
     @Override
-    public final long getUserId() {
-        return user.getId();
+    public final long getTraderId() {
+        return trader.getId();
     }
 
     @Override
-    public final User getUser() {
-        return (User) user;
+    public final Trader getTrader() {
+        return (Trader) trader;
     }
 
     @Override

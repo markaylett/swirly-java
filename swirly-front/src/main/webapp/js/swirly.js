@@ -138,7 +138,7 @@ function Contr(val) {
     self.maxLots = ko.observable(val.maxLots);
 }
 
-function User(val) {
+function Trader(val) {
     var self = this;
 
     self.mnem = ko.observable(val.mnem);
@@ -206,7 +206,7 @@ function Order(val, contrs) {
 
     self.isSelected = ko.observable(val.isSelected);
     self.id = ko.observable(val.id);
-    self.user = ko.observable(val.user);
+    self.trader = ko.observable(val.trader);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.ref = ko.observable(val.ref);
@@ -254,7 +254,7 @@ function Trade(val, contrs) {
     self.isSelected = ko.observable(val.isSelected);
     self.id = ko.observable(val.id);
     self.orderId = ko.observable(val.orderId);
-    self.user = ko.observable(val.user);
+    self.trader = ko.observable(val.trader);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.ref = ko.observable(val.ref);
@@ -289,7 +289,7 @@ function Posn(val, contrs) {
     var contr = contrs[val.contr];
 
     self.id = ko.observable(val.id);
-    self.user = ko.observable(val.user);
+    self.trader = ko.observable(val.trader);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.buyLicks = ko.observable(val.buyLicks);

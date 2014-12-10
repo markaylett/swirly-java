@@ -11,19 +11,19 @@ import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
-import com.swirlycloud.domain.User;
+import com.swirlycloud.domain.Trader;
 import com.swirlycloud.function.UnaryCallback;
 
 public interface Model extends Journ {
 
     /**
-     * Allocate a "global" user-id.
+     * Allocate a "global" trader-id.
      * 
      * @return the newly allocated id.
      */
-    long allocUserId();
+    long allocTraderId();
 
-    void insertUser(User user);
+    void insertTrader(Trader trader);
 
     void insertMarket(long contrId, int settlDay, int expiryDay);
 
@@ -35,7 +35,7 @@ public interface Model extends Journ {
 
     void selectContr(UnaryCallback<Contr> cb);
 
-    void selectUser(UnaryCallback<User> cb);
+    void selectTrader(UnaryCallback<Trader> cb);
 
     void selectMarket(UnaryCallback<Market> cb);
 

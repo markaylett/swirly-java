@@ -26,56 +26,56 @@ function ViewModel() {
         }
     };
 
-    self.users = ko.observableArray([]);
+    self.traders = ko.observableArray([]);
 
     self.mnem = ko.observable();
     self.display = ko.observable();
     self.email = ko.observable();
 
-    self.findUser = function(mnem) {
-        return ko.utils.arrayFirst(self.users(), function(val) {
+    self.findTrader = function(mnem) {
+        return ko.utils.arrayFirst(self.traders(), function(val) {
             return val.mnem() == mnem;
         });
     };
 
     self.refreshAll = function() {
 
-        $.getJSON('/api/rec/user', function(raw) {
+        $.getJSON('/api/rec/trader', function(raw) {
 
             var cooked = $.map(raw, function(val) {
-                return new User(val);
+                return new Trader(val);
             });
-            self.users(cooked);
+            self.traders(cooked);
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });
     };
 
-    self.clearUser = function() {
+    self.clearTrader = function() {
         self.mnem(undefined);
         self.display(undefined);
         self.email(undefined);
     };
 
-    self.submitUser = function() {
+    self.submitTrader = function() {
         var mnem = self.mnem();
         var display = self.display();
         var email = self.email();
         $.ajax({
             type: 'post',
-            url: '/api/rec/user/',
+            url: '/api/rec/trader/',
             data: JSON.stringify({
                 mnem: mnem,
                 display: display,
                 email: email
             })
         }).done(function(raw) {
-            user = self.findUser(raw.id);
-            if (user !== null) {
-                user.update(raw);
+            trader = self.findTrader(raw.id);
+            if (trader !== null) {
+                trader.update(raw);
             } else {
                 raw.isSelected = false;
-                self.users.push(new User(raw));
+                self.traders.push(new Trader(raw));
             }
         }).fail(function(xhr) {
             self.showError(new Error(xhr));

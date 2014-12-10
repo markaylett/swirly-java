@@ -31,7 +31,7 @@ public final class ServTest {
             final Trans trans = new Trans();
             final Order order = s.placeOrder(accnt, market, "", Action.BUY, 12345, 5, 1, trans)
                     .getOrder();
-            assertEquals(accnt.getUser(), order.getUser());
+            assertEquals(accnt.getTrader(), order.getTrader());
             assertEquals(market.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());
             assertEquals("", order.getRef());
@@ -47,7 +47,7 @@ public final class ServTest {
             assertEquals(order.getCreated(), order.getModified());
 
             s.reviseOrder(accnt, market, order, 4, trans);
-            assertEquals(accnt.getUser(), order.getUser());
+            assertEquals(accnt.getTrader(), order.getTrader());
             assertEquals(market.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());
             assertEquals("", order.getRef());

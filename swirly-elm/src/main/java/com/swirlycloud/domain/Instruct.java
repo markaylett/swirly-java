@@ -13,9 +13,9 @@ public interface Instruct {
 
     long getOrderId();
 
-    long getUserId();
+    long getTraderId();
 
-    User getUser();
+    Trader getTrader();
 
     long getContrId();
 
