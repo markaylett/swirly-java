@@ -22,9 +22,14 @@
         <c:if test="${state.userLoggedIn}">
           <li ${state.tradePage ? 'class="active"' : ""}><a href="/page/trade">Trade</a></li>
           <li ${state.contrPage ? 'class="active"' : ""}><a href="/page/contr">Contract</a></li>
-          <li ${state.marketPage ? 'class="active"' : ""}><a href="/page/market">Market</a></li>
           <c:if test="${state.userAdmin}">
-            <!--li ${state.userPage ? 'class="active"' : ""}><a href="/page/user">User</a></li-->
+            <li ${state.adminPage ? 'class="active dropdown"' : 'class="dropdown"'}>
+              <a href="#" data-toggle="dropdown" role="button">Admin <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="/page/market">Market</a></li>
+                <li><a href="/page/user">User</a></li>
+              </ul>
+            </li>
           </c:if>
         </c:if>
         <li ${state.aboutPage ? 'class="active"' : ""}><a href="/page/about">About</a></li>

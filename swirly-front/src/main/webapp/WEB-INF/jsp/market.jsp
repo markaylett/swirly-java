@@ -23,7 +23,7 @@
         New Market
       </button>
 
-      <table class="table table-hover table-striped" style="margin-bottom: 24px;">
+      <table class="table table-hover table-striped">
         <thead>
           <tr>
             <th>

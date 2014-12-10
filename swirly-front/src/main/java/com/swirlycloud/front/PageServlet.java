@@ -37,8 +37,8 @@ public final class PageServlet extends HttpServlet {
             page = Page.CONTR;
         } else if ("market".equals(parts[0])) {
             page = Page.MARKET;
-//        } else if ("user".equals(parts[0])) {
-//            page = Page.USER;
+        } else if ("user".equals(parts[0])) {
+            page = Page.USER;
         } else if ("about".equals(parts[0])) {
             page = Page.ABOUT;
         } else if ("contact".equals(parts[0])) {
@@ -54,9 +54,9 @@ public final class PageServlet extends HttpServlet {
                 resp.sendRedirect(state.getLoginURL());
                 return;
             }
-            if (!state.isUserRegistered()) {
-                page = Page.SIGNUP;
-            }
+        }
+        if (page == Page.TRADE && !state.isTrader()) {
+            page = Page.SIGNUP;
         }
         req.setAttribute("state", state);
         final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(

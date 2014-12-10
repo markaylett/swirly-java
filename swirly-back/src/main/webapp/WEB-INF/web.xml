@@ -68,7 +68,7 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>user</web-resource-name>
+      <web-resource-name>api</web-resource-name>
       <url-pattern>/api/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
@@ -78,8 +78,15 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>admin</web-resource-name>
-      <url-pattern>/api/rec/user</url-pattern>
+      <web-resource-name>market</web-resource-name>
+      <url-pattern>/api/market/*</url-pattern>
+      <http-method>DELETE</http-method>
+      <http-method>POST</http-method>
+      <http-method>PUT</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+      <web-resource-name>user</web-resource-name>
+      <url-pattern>/api/rec/user/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>

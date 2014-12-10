@@ -44,6 +44,10 @@ public final class PageState {
         return page == Page.CONTR;
     }
 
+    public final boolean isAdminPage() {
+        return page == Page.MARKET || page == Page.USER;
+    }
+
     public final boolean isMarketPage() {
         return page == Page.MARKET;
     }
@@ -68,7 +72,7 @@ public final class PageState {
         return isUserLoggedIn() && userService.isUserAdmin();
     }
 
-    public final boolean isUserRegistered() {
+    public final boolean isTrader() {
         if (!isUserLoggedIn()) {
             return false;
         }

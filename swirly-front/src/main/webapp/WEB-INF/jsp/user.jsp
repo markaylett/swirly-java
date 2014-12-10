@@ -14,12 +14,12 @@
 
     <jsp:include page="navbar.jsp"/>
 
-    <div class="container" style="padding: 90px 15px 0;">
+    <div class="container" style="padding-top: 104px;">
 
       <jsp:include page="alert.jsp"/>
 
-      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#userDialog"
-              data-bind="click: clearUser">
+      <button type="button" class="btn btn-default" style="margin-bottom: 24px;"
+              data-toggle="modal" data-target="#userDialog" data-bind="click: clearUser">
         New User
       </button>
 

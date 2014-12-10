@@ -87,7 +87,7 @@ public final class RecServlet extends HttpServlet {
         final User user = userService.getCurrentUser();
         assert user != null;
 
-        final String email = user.getEmail();
+        String email = user.getEmail();
         final Rest rest = Context.getRest();
 
         final String pathInfo = req.getPathInfo();
@@ -105,7 +105,16 @@ public final class RecServlet extends HttpServlet {
         } catch (final ParseException e) {
             throw new IOException(e);
         }
-        if (r.getFields() != (Request.MNEM | Request.DISPLAY)) {
+        int fields = r.getFields();
+        if ((fields & Request.EMAIL) != 0) {
+            if (!r.getEmail().equals(email) && !userService.isUserAdmin()) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+            fields &= ~Request.EMAIL;
+            email = r.getEmail();
+        }
+        if (fields != (Request.MNEM | Request.DISPLAY)) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }

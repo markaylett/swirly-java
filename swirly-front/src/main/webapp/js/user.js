@@ -32,6 +32,12 @@ function ViewModel() {
     self.display = ko.observable();
     self.email = ko.observable();
 
+    self.findUser = function(mnem) {
+        return ko.utils.arrayFirst(self.users(), function(val) {
+            return val.mnem() == mnem;
+        });
+    };
+
     self.refreshAll = function() {
 
         $.getJSON('/api/rec/user', function(raw) {
@@ -64,7 +70,13 @@ function ViewModel() {
                 email: email
             })
         }).done(function(raw) {
-            self.markets.push(new User(mnem, display, email));
+            user = self.findUser(raw.id);
+            if (user !== null) {
+                user.update(raw);
+            } else {
+                raw.isSelected = false;
+                self.users.push(new User(raw));
+            }
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });
