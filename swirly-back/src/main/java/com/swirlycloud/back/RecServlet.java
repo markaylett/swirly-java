@@ -21,6 +21,10 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.swirlycloud.domain.RecType;
+import com.swirlycloud.exception.BadRequestException;
+import com.swirlycloud.exception.NotFoundException;
+import com.swirlycloud.exception.ServException;
+import com.swirlycloud.exception.UnauthorizedException;
 
 @SuppressWarnings("serial")
 public final class RecServlet extends RestServlet {
@@ -38,50 +42,50 @@ public final class RecServlet extends RestServlet {
         if (isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
+        try {
+            final UserService userService = UserServiceFactory.getUserService();
+            if (!userService.isUserLoggedIn()) {
+                throw new UnauthorizedException("Not logged-in");
+            }
 
-        final UserService userService = UserServiceFactory.getUserService();
-        if (!userService.isUserLoggedIn()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+            final Rest rest = Context.getRest();
+
+            final String pathInfo = req.getPathInfo();
+            final String[] parts = splitPath(pathInfo);
+
+            boolean found = false;
+            if (parts.length == 0) {
+                found = rest.getRec(userService.isUserAdmin(), resp.getWriter());
+            } else if ("asset".equals(parts[TYPE_PART])) {
+                if (parts.length == 1) {
+                    found = rest.getRec(RecType.ASSET, resp.getWriter());
+                } else if (parts.length == 2) {
+                    found = rest.getRec(RecType.ASSET, parts[CMNEM_PART], resp.getWriter());
+                }
+            } else if ("contr".equals(parts[TYPE_PART])) {
+                if (parts.length == 1) {
+                    found = rest.getRec(RecType.CONTR, resp.getWriter());
+                } else if (parts.length == 2) {
+                    found = rest.getRec(RecType.CONTR, parts[CMNEM_PART], resp.getWriter());
+                }
+            } else if ("trader".equals(parts[TYPE_PART])) {
+                if (!userService.isUserAdmin()) {
+                    throw new BadRequestException("User is not an admin");
+                }
+                if (parts.length == 1) {
+                    found = rest.getRec(RecType.TRADER, resp.getWriter());
+                } else if (parts.length == 2) {
+                    found = rest.getRec(RecType.TRADER, parts[CMNEM_PART], resp.getWriter());
+                }
+            }
+
+            if (!found) {
+                throw new NotFoundException("Not found");
+            }
+            sendJsonResponse(resp);
+        } catch (final ServException e) {
+            sendJsonResponse(resp, e);
         }
-
-        final Rest rest = Context.getRest();
-
-        final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPath(pathInfo);
-
-        boolean found = false;
-        if (parts.length == 0) {
-            found = rest.getRec(userService.isUserAdmin(), resp.getWriter());
-        } else if ("asset".equals(parts[TYPE_PART])) {
-            if (parts.length == 1) {
-                found = rest.getRec(RecType.ASSET, resp.getWriter());
-            } else if (parts.length == 2) {
-                found = rest.getRec(RecType.ASSET, parts[CMNEM_PART], resp.getWriter());
-            }
-        } else if ("contr".equals(parts[TYPE_PART])) {
-            if (parts.length == 1) {
-                found = rest.getRec(RecType.CONTR, resp.getWriter());
-            } else if (parts.length == 2) {
-                found = rest.getRec(RecType.CONTR, parts[CMNEM_PART], resp.getWriter());
-            }
-        } else if ("trader".equals(parts[TYPE_PART])) {
-            if (!userService.isUserAdmin()) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-            if (parts.length == 1) {
-                found = rest.getRec(RecType.TRADER, resp.getWriter());
-            } else if (parts.length == 2) {
-                found = rest.getRec(RecType.TRADER, parts[CMNEM_PART], resp.getWriter());
-            }
-        }
-
-        if (!found) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        sendJsonResponse(resp);
     }
 
     @Override
@@ -90,50 +94,48 @@ public final class RecServlet extends RestServlet {
         if (isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
-
-        final UserService userService = UserServiceFactory.getUserService();
-        if (!userService.isUserLoggedIn()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-        final User user = userService.getCurrentUser();
-        assert user != null;
-
-        String email = user.getEmail();
-        final Rest rest = Context.getRest();
-
-        final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPath(pathInfo);
-
-        if (parts.length != 1 || !"trader".equals(parts[TYPE_PART])) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
-        final JSONParser p = new JSONParser();
-        final Request r = new Request();
         try {
-            p.parse(req.getReader(), r);
-        } catch (final ParseException e) {
-            throw new IOException(e);
-        }
-        int fields = r.getFields();
-        if ((fields & Request.EMAIL) != 0) {
-            if (!r.getEmail().equals(email) && !userService.isUserAdmin()) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
+            final UserService userService = UserServiceFactory.getUserService();
+            if (!userService.isUserLoggedIn()) {
+                throw new UnauthorizedException("Not logged-in");
             }
-            fields &= ~Request.EMAIL;
-            email = r.getEmail();
+            final User user = userService.getCurrentUser();
+            assert user != null;
+
+            String email = user.getEmail();
+            final Rest rest = Context.getRest();
+
+            final String pathInfo = req.getPathInfo();
+            final String[] parts = splitPath(pathInfo);
+
+            if (parts.length != 1 || !"trader".equals(parts[TYPE_PART])) {
+                throw new NotFoundException("Not found");
+            }
+
+            final JSONParser p = new JSONParser();
+            final Request r = new Request();
+            try {
+                p.parse(req.getReader(), r);
+            } catch (final ParseException e) {
+                throw new IOException(e);
+            }
+            int fields = r.getFields();
+            if ((fields & Request.EMAIL) != 0) {
+                if (!r.getEmail().equals(email) && !userService.isUserAdmin()) {
+                    throw new BadRequestException("User is not an admin");
+                }
+                fields &= ~Request.EMAIL;
+                email = r.getEmail();
+            }
+            if (fields != (Request.MNEM | Request.DISPLAY)) {
+                throw new BadRequestException("Invalid json fields");
+            }
+            if (!rest.postTrader(r.getMnem(), r.getDisplay(), email, resp.getWriter())) {
+                throw new NotFoundException("Not found");
+            }
+            sendJsonResponse(resp);
+        } catch (final ServException e) {
+            sendJsonResponse(resp, e);
         }
-        if (fields != (Request.MNEM | Request.DISPLAY)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        if (!rest.postTrader(r.getMnem(), r.getDisplay(), email, resp.getWriter())) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        sendJsonResponse(resp);
     }
 }

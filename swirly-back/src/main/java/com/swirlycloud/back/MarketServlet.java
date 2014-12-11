@@ -20,6 +20,10 @@ import org.json.simple.parser.ParseException;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.swirlycloud.exception.BadRequestException;
+import com.swirlycloud.exception.NotFoundException;
+import com.swirlycloud.exception.ServException;
+import com.swirlycloud.exception.UnauthorizedException;
 
 @SuppressWarnings("serial")
 public final class MarketServlet extends RestServlet {
@@ -37,33 +41,34 @@ public final class MarketServlet extends RestServlet {
         if (isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
+        try {
+            final UserService userService = UserServiceFactory.getUserService();
+            if (!userService.isUserLoggedIn()) {
+                throw new UnauthorizedException("Not logged-in");
+            }
 
-        final UserService userService = UserServiceFactory.getUserService();
-        if (!userService.isUserLoggedIn()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+            final Rest ctx = Context.getRest();
+
+            final String pathInfo = req.getPathInfo();
+            final String[] parts = splitPath(pathInfo);
+
+            boolean found = false;
+            if (parts.length == 0) {
+                found = ctx.getMarket(DEPTH, resp.getWriter());
+            } else if (parts.length == 1) {
+                found = ctx.getMarket(parts[CMNEM_PART], DEPTH, resp.getWriter());
+            } else if (parts.length == 2) {
+                found = ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                        DEPTH, resp.getWriter());
+            }
+
+            if (!found) {
+                throw new NotFoundException("Not found");
+            }
+            sendJsonResponse(resp);
+        } catch (final ServException e) {
+            sendJsonResponse(resp, e);
         }
-
-        final Rest ctx = Context.getRest();
-
-        final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPath(pathInfo);
-
-        boolean found = false;
-        if (parts.length == 0) {
-            found = ctx.getMarket(DEPTH, resp.getWriter());
-        } else if (parts.length == 1) {
-            found = ctx.getMarket(parts[CMNEM_PART], DEPTH, resp.getWriter());
-        } else if (parts.length == 2) {
-            found = ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                    DEPTH, resp.getWriter());
-        }
-
-        if (!found) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        sendJsonResponse(resp);
     }
 
     @Override
@@ -72,38 +77,37 @@ public final class MarketServlet extends RestServlet {
         if (isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
-
-        final UserService userService = UserServiceFactory.getUserService();
-        if (!userService.isUserLoggedIn() || !userService.isUserAdmin()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
-        final Rest rest = Context.getRest();
-
-        final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPath(pathInfo);
-        if (parts.length != 1) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        final String cmnem = parts[CMNEM_PART];
-
-        final JSONParser p = new JSONParser();
-        final Request r = new Request();
         try {
-            p.parse(req.getReader(), r);
-        } catch (final ParseException e) {
-            throw new IOException(e);
+            final UserService userService = UserServiceFactory.getUserService();
+            if (!userService.isUserLoggedIn()) {
+                throw new UnauthorizedException("Not logged-in");
+            }
+
+            final Rest rest = Context.getRest();
+
+            final String pathInfo = req.getPathInfo();
+            final String[] parts = splitPath(pathInfo);
+            if (parts.length != 1) {
+                throw new NotFoundException("Not found");
+            }
+            final String cmnem = parts[CMNEM_PART];
+
+            final JSONParser p = new JSONParser();
+            final Request r = new Request();
+            try {
+                p.parse(req.getReader(), r);
+            } catch (final ParseException e) {
+                throw new IOException(e);
+            }
+            if (r.getFields() != (Request.SETTL_DATE | Request.EXPIRY_DATE)) {
+                throw new BadRequestException("Invalid json fields");
+            }
+            if (!rest.postMarket(cmnem, r.getSettlDate(), r.getExpiryDate(), resp.getWriter())) {
+                throw new NotFoundException("Not found");
+            }
+            sendJsonResponse(resp);
+        } catch (final ServException e) {
+            sendJsonResponse(resp, e);
         }
-        if (r.getFields() != (Request.SETTL_DATE | Request.EXPIRY_DATE)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        if (!rest.postMarket(cmnem, r.getSettlDate(), r.getExpiryDate(), resp.getWriter())) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        sendJsonResponse(resp);
     }
 }
