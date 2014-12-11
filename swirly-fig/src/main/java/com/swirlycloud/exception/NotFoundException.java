@@ -3,17 +3,18 @@
  *
  * All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.util;
+package com.swirlycloud.exception;
 
-public final class UncheckedIOException extends RuntimeException {
+public final class NotFoundException extends ServException {
 
     private static final long serialVersionUID = 1L;
+    private static final int NUM = 404;
 
-    public UncheckedIOException(Throwable cause) {
-        super(cause);
+    public NotFoundException(String msg) {
+        super(NUM, msg);
     }
 
-    public UncheckedIOException(String message, Throwable cause) {
-        super(message, cause);
+    public NotFoundException(String msg, Throwable cause) {
+        super(NUM, msg, cause);
     }
 }

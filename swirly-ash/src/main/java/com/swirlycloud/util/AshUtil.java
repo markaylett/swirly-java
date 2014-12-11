@@ -7,6 +7,8 @@ package com.swirlycloud.util;
 
 import java.io.IOException;
 
+import com.swirlycloud.exception.UncheckedIOException;
+
 public final class AshUtil {
     private AshUtil() {
     }
