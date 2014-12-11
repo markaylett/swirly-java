@@ -11,7 +11,6 @@ import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,9 +20,11 @@ import org.json.simple.parser.ParseException;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.swirlycloud.exception.ForbiddenException;
+import com.swirlycloud.exception.ServException;
 
 @SuppressWarnings("serial")
-public final class AccntServlet extends HttpServlet {
+public final class AccntServlet extends RestServlet {
     private static final int TYPE_PART = 0;
     private static final int CMNEM_PART = 1;
     private static final int SETTL_DATE_PART = 2;
@@ -35,56 +36,56 @@ public final class AccntServlet extends HttpServlet {
     }
 
     @Override
-    public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
-        resp.setHeader("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, POST, PUT");
-        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        resp.setHeader("Access-Control-Max-Age", "86400");
-    }
-
-    @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
-
-        final UserService userService = UserServiceFactory.getUserService();
-        if (!userService.isUserLoggedIn()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+        if (isDevEnv()) {
+            resp.setHeader("Access-Control-Allow-Origin", "*");
         }
-        final User user = userService.getCurrentUser();
-        assert user != null;
-
-        final String email = user.getEmail();
-        final Rest rest = Context.getRest();
-
-        final String pathInfo = req.getPathInfo();
-        final String[] parts = splitPath(pathInfo);
-
-        boolean found = false;
-        if ("order".equals(parts[TYPE_PART])) {
-            if (parts.length == 4) {
-                found = rest.deleteOrder(email, parts[CMNEM_PART],
-                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
+        try {
+            final UserService userService = UserServiceFactory.getUserService();
+            if (!userService.isUserLoggedIn()) {
+                throw new ForbiddenException("Not logged-in");
             }
-        } else if ("trade".equals(parts[TYPE_PART])) {
-            if (parts.length == 4) {
-                found = rest.deleteTrade(email, parts[CMNEM_PART],
-                        Integer.parseInt(parts[SETTL_DATE_PART]), Long.parseLong(parts[ID_PART]));
-            }
-        }
+            final User user = userService.getCurrentUser();
+            assert user != null;
 
-        if (!found) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
+            final String email = user.getEmail();
+            final Rest rest = Context.getRest();
+
+            final String pathInfo = req.getPathInfo();
+            final String[] parts = splitPath(pathInfo);
+
+            boolean found = false;
+            if ("order".equals(parts[TYPE_PART])) {
+                if (parts.length == 4) {
+                    found = rest.deleteOrder(email, parts[CMNEM_PART],
+                            Integer.parseInt(parts[SETTL_DATE_PART]),
+                            Long.parseLong(parts[ID_PART]));
+                }
+            } else if ("trade".equals(parts[TYPE_PART])) {
+                if (parts.length == 4) {
+                    found = rest.deleteTrade(email, parts[CMNEM_PART],
+                            Integer.parseInt(parts[SETTL_DATE_PART]),
+                            Long.parseLong(parts[ID_PART]));
+                }
+            }
+
+            if (!found) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            resp.setHeader("Cache-Control", "no-cache");
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (final ServException e) {
+            sendJsonResponse(resp, e);
         }
-        resp.sendError(HttpServletResponse.SC_NO_CONTENT);
     }
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
+        if (isDevEnv()) {
+            resp.setHeader("Access-Control-Allow-Origin", "*");
+        }
 
         final UserService userService = UserServiceFactory.getUserService();
         if (!userService.isUserLoggedIn()) {
@@ -144,16 +145,15 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/json");
-        resp.setHeader("Cache-Control", "no-cache");
-        resp.setStatus(HttpServletResponse.SC_OK);
+        sendJsonResponse(resp);
     }
 
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
+        if (isDevEnv()) {
+            resp.setHeader("Access-Control-Allow-Origin", "*");
+        }
 
         final UserService userService = UserServiceFactory.getUserService();
         if (!userService.isUserLoggedIn()) {
@@ -191,16 +191,15 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/json");
-        resp.setHeader("Cache-Control", "no-cache");
-        resp.setStatus(HttpServletResponse.SC_OK);
+        sendJsonResponse(resp);
     }
 
     @Override
     protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
+        if (isDevEnv()) {
+            resp.setHeader("Access-Control-Allow-Origin", "*");
+        }
 
         final UserService userService = UserServiceFactory.getUserService();
         if (!userService.isUserLoggedIn()) {
@@ -238,9 +237,6 @@ public final class AccntServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/json");
-        resp.setHeader("Cache-Control", "no-cache");
-        resp.setStatus(HttpServletResponse.SC_OK);
+        sendJsonResponse(resp);
     }
 }

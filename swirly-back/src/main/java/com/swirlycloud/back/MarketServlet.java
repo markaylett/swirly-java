@@ -10,7 +10,8 @@ import static com.swirlycloud.util.PathUtil.splitPath;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,23 +22,21 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 @SuppressWarnings("serial")
-public final class MarketServlet extends HttpServlet {
+public final class MarketServlet extends RestServlet {
 
     private static final int CMNEM_PART = 0;
     private static final int SETTL_DATE_PART = 1;
 
     @Override
-    public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
-        resp.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS, POST");
-        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        resp.setHeader("Access-Control-Max-Age", "86400");
+    public final void init(ServletConfig config) throws ServletException {
+        super.init(config);
     }
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
+        if (isDevEnv()) {
+            resp.setHeader("Access-Control-Allow-Origin", "*");
+        }
 
         final UserService userService = UserServiceFactory.getUserService();
         if (!userService.isUserLoggedIn()) {
@@ -64,16 +63,15 @@ public final class MarketServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/json");
-        resp.setHeader("Cache-Control", "no-cache");
-        resp.setStatus(HttpServletResponse.SC_OK);
+        sendJsonResponse(resp);
     }
 
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "*");
+        if (isDevEnv()) {
+            resp.setHeader("Access-Control-Allow-Origin", "*");
+        }
 
         final UserService userService = UserServiceFactory.getUserService();
         if (!userService.isUserLoggedIn() || !userService.isUserAdmin()) {
@@ -106,9 +104,6 @@ public final class MarketServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/json");
-        resp.setHeader("Cache-Control", "no-cache");
-        resp.setStatus(HttpServletResponse.SC_OK);
+        sendJsonResponse(resp);
     }
 }
