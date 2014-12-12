@@ -3,22 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
   <listener>
-    <listener-class>com.swirlycloud.back.Context</listener-class>
+    <listener-class>com.swirlycloud.web.Context</listener-class>
   </listener>
 
   <servlet>
     <servlet-name>rec</servlet-name>
-    <servlet-class>com.swirlycloud.back.RecServlet</servlet-class>
+    <servlet-class>com.swirlycloud.web.RecServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>market</servlet-name>
-    <servlet-class>com.swirlycloud.back.MarketServlet</servlet-class>
+    <servlet-class>com.swirlycloud.web.MarketServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>accnt</servlet-name>
-    <servlet-class>com.swirlycloud.back.AccntServlet</servlet-class>
+    <servlet-class>com.swirlycloud.web.AccntServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>

@@ -7,13 +7,13 @@ package com.swirlycloud.engine;
 
 import java.io.IOException;
 
+import com.swirlycloud.collection.Queue;
+import com.swirlycloud.collection.SlNode;
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.util.Jsonifiable;
-import com.swirlycloud.util.Queue;
-import com.swirlycloud.util.SlNode;
 import com.swirlycloud.util.StringUtil;
 
 public final class Trans implements Jsonifiable {

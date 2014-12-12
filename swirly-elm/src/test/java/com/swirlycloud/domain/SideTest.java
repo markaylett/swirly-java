@@ -5,15 +5,15 @@
  *******************************************************************************/
 package com.swirlycloud.domain;
 
-import static com.swirlycloud.util.Date.ymdToJd;
+import static com.swirlycloud.date.DateUtil.ymdToJd;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.swirlycloud.collection.DlNode;
+import com.swirlycloud.collection.RbNode;
 import com.swirlycloud.mock.MockContr;
 import com.swirlycloud.mock.MockTrader;
-import com.swirlycloud.util.DlNode;
-import com.swirlycloud.util.RbNode;
 
 public final class SideTest {
     private static final int size(RbNode node) {

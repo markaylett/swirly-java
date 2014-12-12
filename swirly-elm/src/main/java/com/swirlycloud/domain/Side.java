@@ -5,10 +5,10 @@
  *******************************************************************************/
 package com.swirlycloud.domain;
 
-import com.swirlycloud.util.DlNode;
-import com.swirlycloud.util.List;
-import com.swirlycloud.util.RbNode;
-import com.swirlycloud.util.Tree;
+import com.swirlycloud.collection.DlNode;
+import com.swirlycloud.collection.List;
+import com.swirlycloud.collection.RbNode;
+import com.swirlycloud.collection.Tree;
 
 public final class Side {
     private final Tree levels = new Tree();

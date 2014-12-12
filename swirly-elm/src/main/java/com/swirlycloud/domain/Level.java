@@ -5,8 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.domain;
 
-import com.swirlycloud.util.BasicRbNode;
-import com.swirlycloud.util.DlNode;
+import com.swirlycloud.collection.BasicRbNode;
+import com.swirlycloud.collection.DlNode;
 
 /**
  * A level is an aggregation of orders by price.

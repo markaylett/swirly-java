@@ -5,10 +5,10 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
+import com.swirlycloud.collection.Queue;
+import com.swirlycloud.collection.SlNode;
 import com.swirlycloud.domain.Rec;
 import com.swirlycloud.domain.RecType;
-import com.swirlycloud.util.Queue;
-import com.swirlycloud.util.SlNode;
 
 public final class Cache {
     private static int ID = 0;

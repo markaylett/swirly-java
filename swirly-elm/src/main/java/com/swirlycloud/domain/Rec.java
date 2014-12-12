@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.domain;
 
-import com.swirlycloud.util.BasicSlNode;
+import com.swirlycloud.collection.BasicSlNode;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Memorable;
 import com.swirlycloud.util.Jsonifiable;

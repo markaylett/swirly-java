@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.domain;
 
-import static com.swirlycloud.util.Date.ymdToJd;
+import static com.swirlycloud.date.DateUtil.ymdToJd;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
-import static com.swirlycloud.util.Date.ymdToJd;
+import static com.swirlycloud.date.DateUtil.ymdToJd;
 
 import java.io.IOException;
 

@@ -5,10 +5,10 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
+import com.swirlycloud.collection.BasicSlNode;
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
-import com.swirlycloud.util.BasicSlNode;
 
 /**
  * A Match represents two orders from opposing sides of the market that may trade.
