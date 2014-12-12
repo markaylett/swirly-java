@@ -299,7 +299,12 @@ public final class Serv implements AutoCloseable {
 
     public final Trader createTrader(String mnem, String display, String email)
             throws BadRequestException {
-        // Validate.
+        if (cache.findRec(RecType.TRADER, mnem) != null) {
+            throw new BadRequestException(String.format("trader '%s' already exists", mnem));
+        }
+        if (emailIdx.find(email) != null) {
+            throw new BadRequestException(String.format("email '%s' is already in use", email));
+        }
         final Trader trader = newTrader(mnem, display, email);
         model.insertTrader(trader);
         cache.insertRec(trader);

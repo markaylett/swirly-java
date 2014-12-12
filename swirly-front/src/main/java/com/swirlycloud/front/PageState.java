@@ -7,10 +7,7 @@ package com.swirlycloud.front;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
@@ -79,11 +76,9 @@ public final class PageState {
         if (traderCount < 0) {
             // Lazy.
             final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Key parent = KeyFactory.createKey("Group", "Trader");
-            final Key key = KeyFactory.createKey(parent, "TraderEmail", user.getEmail());
-            final Filter filter = new FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
-                    FilterOperator.EQUAL, key);
-            final Query q = new Query("TraderEmail").setFilter(filter).setKeysOnly();
+            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL,
+                    user.getEmail());
+            final Query q = new Query("Trader").setFilter(filter).setKeysOnly();
             final PreparedQuery pq = datastore.prepare(q);
             traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));
         }

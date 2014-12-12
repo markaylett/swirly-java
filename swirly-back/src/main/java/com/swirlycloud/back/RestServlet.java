@@ -26,7 +26,10 @@ public abstract class RestServlet extends HttpServlet {
 
     protected void sendJsonResponse(HttpServletResponse resp, ServException e) throws IOException {
         e.toJson(resp.getWriter(), null);
-        sendJsonResponse(resp);
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json");
+        resp.setHeader("Cache-Control", "no-cache");
+        resp.setStatus(e.getNum());
     }
 
     protected boolean isDevEnv() {

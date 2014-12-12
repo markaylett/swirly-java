@@ -45,14 +45,11 @@ import com.swirlycloud.util.SlNode;
 
 public final class DatastoreModel implements Model {
 
-    private static final String GROUP_KIND = "Group";
     @SuppressWarnings("unused")
     private static final String ASSET_KIND = "Asset";
     @SuppressWarnings("unused")
     private static final String CONTR_KIND = "Contr";
     private static final String TRADER_KIND = "Trader";
-    private static final String TRADER_MNEM_KIND = "TraderMnem";
-    private static final String TRADER_EMAIL_KIND = "TraderEmail";
     private static final String MARKET_KIND = "Market";
     private static final String ORDER_KIND = "Order";
     private static final String EXEC_KIND = "Exec";
@@ -75,11 +72,11 @@ public final class DatastoreModel implements Model {
         }
     }
 
-    private final Entity newTrader(Entity group, Trader trader) {
-        final Entity entity = new Entity(TRADER_KIND, trader.getId(), group.getKey());
-        entity.setUnindexedProperty("mnem", trader.getMnem());
+    private final Entity newTrader(Trader trader) {
+        final Entity entity = new Entity(TRADER_KIND, trader.getId());
+        entity.setProperty("mnem", trader.getMnem());
         entity.setUnindexedProperty("display", trader.getDisplay());
-        entity.setUnindexedProperty("email", trader.getEmail());
+        entity.setProperty("email", trader.getEmail());
         return entity;
     }
 
@@ -145,19 +142,6 @@ public final class DatastoreModel implements Model {
         order.setUnindexedProperty("lastLots", exec.getLastLots());
         order.setUnindexedProperty("modified", exec.getCreated());
         return order;
-    }
-
-    private final Entity getGroup(Transaction txn, String name) {
-        // Lazily for now, but we may want to explicitly create markets in the future.
-        final Key key = KeyFactory.createKey(GROUP_KIND, name);
-        Entity entity;
-        try {
-            entity = datastore.get(txn, key);
-        } catch (final EntityNotFoundException e) {
-            entity = new Entity(key);
-            datastore.put(txn, entity);
-        }
-        return entity;
     }
 
     private final Entity getMarket(Transaction txn, long contrId, int settlDay) {
@@ -281,14 +265,8 @@ public final class DatastoreModel implements Model {
         final Transaction txn = datastore.beginTransaction();
         try {
             // Trader entities have common ancestor for strong consistency.
-            final Entity group = getGroup(txn, TRADER_KIND);
-            final Entity entity = newTrader(group, trader);
-            // Unique indexes.
-            final Entity mnemIdx = new Entity(TRADER_MNEM_KIND, trader.getMnem(), group.getKey());
-            final Entity emailIdx = new Entity(TRADER_EMAIL_KIND, trader.getEmail(), group.getKey());
+            final Entity entity = newTrader(trader);
             datastore.put(entity);
-            datastore.put(mnemIdx);
-            datastore.put(emailIdx);
             txn.commit();
         } catch (ConcurrentModificationException e) {
             // FIXME: implement retry logic.
@@ -381,8 +359,7 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void selectTrader(UnaryCallback<Trader> cb) {
-        final Key parent = KeyFactory.createKey(GROUP_KIND, TRADER_KIND);
-        final Query q = new Query(TRADER_KIND, parent);
+        final Query q = new Query(TRADER_KIND);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
             final long id = entity.getKey().getId();
