@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
-import static com.swirlycloud.util.AshUtil.newId;
+import static com.swirlycloud.util.IdUtil.newId;
 
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;

@@ -11,10 +11,10 @@ import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
-import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.Queue;
 import com.swirlycloud.util.SlNode;
+import com.swirlycloud.util.StringUtil;
 
 public final class Trans implements Jsonifiable {
     private Market market;
@@ -43,7 +43,7 @@ public final class Trans implements Jsonifiable {
 
     @Override
     public final String toString() {
-        return AshUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override

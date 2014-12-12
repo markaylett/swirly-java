@@ -10,7 +10,7 @@ import static com.swirlycloud.domain.Conv.realToDp;
 
 import java.io.IOException;
 
-import com.swirlycloud.util.AshUtil;
+import com.swirlycloud.util.StringUtil;
 
 public final class Contr extends Rec {
     private final AssetType assetType;
@@ -53,7 +53,7 @@ public final class Contr extends Rec {
 
     @Override
     public final String toString() {
-        return AshUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override

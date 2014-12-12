@@ -9,11 +9,11 @@ import static com.swirlycloud.util.Date.jdToIso;
 
 import java.io.IOException;
 
-import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.BasicRbSlNode;
 import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Jsonifiable;
+import com.swirlycloud.util.StringUtil;
 
 public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiable, Instruct {
 
@@ -114,7 +114,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
 
     @Override
     public final String toString() {
-        return AshUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override

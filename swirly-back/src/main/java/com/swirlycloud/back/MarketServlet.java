@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
-import static com.swirlycloud.util.PathUtil.splitPath;
+import static com.swirlycloud.util.StringUtil.splitPath;
 
 import java.io.IOException;
 

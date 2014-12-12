@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
-import static com.swirlycloud.util.PathUtil.splitPath;
+import static com.swirlycloud.util.StringUtil.splitPath;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

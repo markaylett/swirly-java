@@ -7,7 +7,7 @@ package com.swirlycloud.domain;
 
 import java.io.IOException;
 
-import com.swirlycloud.util.AshUtil;
+import com.swirlycloud.util.StringUtil;
 
 public final class Asset extends Rec {
     private final AssetType type;
@@ -19,7 +19,7 @@ public final class Asset extends Rec {
 
     @Override
     public final String toString() {
-        return AshUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override

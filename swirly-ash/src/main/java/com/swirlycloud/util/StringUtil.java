@@ -5,13 +5,16 @@
  *******************************************************************************/
 package com.swirlycloud.util;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
 
-public final class PathUtil {
+import com.swirlycloud.exception.UncheckedIOException;
+
+public final class StringUtil {
     private static final String[] EMPTY = {};
     private static final Pattern PATTERN = Pattern.compile("/");
 
-    private PathUtil() {
+    private StringUtil() {
     }
 
     public static String[] splitPath(String path) {
@@ -32,5 +35,15 @@ public final class PathUtil {
             return EMPTY;
         }
         return PATTERN.split(path.substring(begin, end));
+    }
+
+    public static String toJson(Jsonifiable j) {
+        final StringBuilder sb = new StringBuilder();
+        try {
+            j.toJson(sb);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return sb.toString();
     }
 }

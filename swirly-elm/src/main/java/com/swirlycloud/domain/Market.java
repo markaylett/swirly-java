@@ -9,12 +9,12 @@ import static com.swirlycloud.util.Date.jdToIso;
 
 import java.io.IOException;
 
-import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.BasicRbNode;
 import com.swirlycloud.util.Date;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.RbNode;
+import com.swirlycloud.util.StringUtil;
 
 public final class Market extends BasicRbNode implements Identifiable, Jsonifiable {
     /**
@@ -76,7 +76,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
 
     @Override
     public final String toString() {
-        return AshUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override
