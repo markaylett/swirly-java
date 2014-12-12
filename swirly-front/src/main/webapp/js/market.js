@@ -138,12 +138,12 @@ function initApp() {
             val.qtyInc = qtyInc(val);
             contrs[val.mnem] = val;
         });
+        var model = new ViewModel(contrs);
+        ko.applyBindings(model);
         $('#contr').typeahead({
             items: 4,
             source: Object.keys(contrs)
         });
-        var model = new ViewModel(contrs);
-        ko.applyBindings(model);
         model.refreshAll();
         setInterval(function() {
             model.refreshAll();

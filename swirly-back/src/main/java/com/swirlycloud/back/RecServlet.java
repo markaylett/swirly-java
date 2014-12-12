@@ -22,6 +22,8 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.swirlycloud.domain.RecType;
 import com.swirlycloud.exception.BadRequestException;
+import com.swirlycloud.exception.ForbiddenException;
+import com.swirlycloud.exception.MethodNotAllowedException;
 import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.exception.ServException;
 import com.swirlycloud.exception.UnauthorizedException;
@@ -45,7 +47,7 @@ public final class RecServlet extends RestServlet {
         try {
             final UserService userService = UserServiceFactory.getUserService();
             if (!userService.isUserLoggedIn()) {
-                throw new UnauthorizedException("Not logged-in");
+                throw new UnauthorizedException("user is not logged-in");
             }
 
             final Rest rest = Context.getRest();
@@ -53,34 +55,41 @@ public final class RecServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
 
-            boolean found = false;
+            boolean match = false;
             if (parts.length == 0) {
-                found = rest.getRec(userService.isUserAdmin(), resp.getWriter());
+                rest.getRec(userService.isUserAdmin(), resp.getWriter());
+                match = true;
             } else if ("asset".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    found = rest.getRec(RecType.ASSET, resp.getWriter());
+                    rest.getRec(RecType.ASSET, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    found = rest.getRec(RecType.ASSET, parts[CMNEM_PART], resp.getWriter());
+                    rest.getRec(RecType.ASSET, parts[CMNEM_PART], resp.getWriter());
+                    match = true;
                 }
             } else if ("contr".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    found = rest.getRec(RecType.CONTR, resp.getWriter());
+                    rest.getRec(RecType.CONTR, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    found = rest.getRec(RecType.CONTR, parts[CMNEM_PART], resp.getWriter());
+                    rest.getRec(RecType.CONTR, parts[CMNEM_PART], resp.getWriter());
+                    match = true;
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
                 if (!userService.isUserAdmin()) {
-                    throw new BadRequestException("User is not an admin");
+                    throw new BadRequestException("user is not an admin");
                 }
                 if (parts.length == 1) {
-                    found = rest.getRec(RecType.TRADER, resp.getWriter());
+                    rest.getRec(RecType.TRADER, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    found = rest.getRec(RecType.TRADER, parts[CMNEM_PART], resp.getWriter());
+                    rest.getRec(RecType.TRADER, parts[CMNEM_PART], resp.getWriter());
+                    match = true;
                 }
             }
 
-            if (!found) {
-                throw new NotFoundException("Not found");
+            if (!match) {
+                throw new NotFoundException("resource does not exist");
             }
             sendJsonResponse(resp);
         } catch (final ServException e) {
@@ -97,7 +106,7 @@ public final class RecServlet extends RestServlet {
         try {
             final UserService userService = UserServiceFactory.getUserService();
             if (!userService.isUserLoggedIn()) {
-                throw new UnauthorizedException("Not logged-in");
+                throw new UnauthorizedException("user is not logged-in");
             }
             final User user = userService.getCurrentUser();
             assert user != null;
@@ -109,7 +118,7 @@ public final class RecServlet extends RestServlet {
             final String[] parts = splitPath(pathInfo);
 
             if (parts.length != 1 || !"trader".equals(parts[TYPE_PART])) {
-                throw new NotFoundException("Not found");
+                throw new MethodNotAllowedException("post is not allowed on this resource");
             }
 
             final JSONParser p = new JSONParser();
@@ -117,22 +126,20 @@ public final class RecServlet extends RestServlet {
             try {
                 p.parse(req.getReader(), r);
             } catch (final ParseException e) {
-                throw new IOException(e);
+                throw new BadRequestException("request could not be parsed");
             }
             int fields = r.getFields();
             if ((fields & Request.EMAIL) != 0) {
                 if (!r.getEmail().equals(email) && !userService.isUserAdmin()) {
-                    throw new BadRequestException("User is not an admin");
+                    throw new ForbiddenException("user is not an admin");
                 }
                 fields &= ~Request.EMAIL;
                 email = r.getEmail();
             }
             if (fields != (Request.MNEM | Request.DISPLAY)) {
-                throw new BadRequestException("Invalid json fields");
+                throw new BadRequestException("request fields are invalid");
             }
-            if (!rest.postTrader(r.getMnem(), r.getDisplay(), email, resp.getWriter())) {
-                throw new NotFoundException("Not found");
-            }
+            rest.postTrader(r.getMnem(), r.getDisplay(), email, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

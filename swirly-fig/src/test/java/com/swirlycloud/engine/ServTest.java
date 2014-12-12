@@ -15,11 +15,13 @@ import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.State;
+import com.swirlycloud.exception.BadRequestException;
+import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.mock.MockModel;
 
 public final class ServTest {
     @Test
-    public final void test() {
+    public final void test() throws BadRequestException, NotFoundException {
         try (final Serv s = new Serv(new MockModel())) {
             final Accnt accnt = s.getLazyAccnt("MARAYL");
             assertNotNull(accnt);

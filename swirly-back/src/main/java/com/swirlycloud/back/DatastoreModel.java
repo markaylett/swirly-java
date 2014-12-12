@@ -36,6 +36,7 @@ import com.swirlycloud.domain.Role;
 import com.swirlycloud.domain.State;
 import com.swirlycloud.domain.Trader;
 import com.swirlycloud.engine.Model;
+import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.function.UnaryCallback;
 import com.swirlycloud.mock.MockAsset;
 import com.swirlycloud.mock.MockContr;
@@ -180,21 +181,21 @@ public final class DatastoreModel implements Model {
         return entity;
     }
 
-    private final Entity getOrder(Transaction txn, Key parent, long id) {
+    private final Entity getOrder(Transaction txn, Key parent, long id) throws NotFoundException {
         final Key key = KeyFactory.createKey(parent, ORDER_KIND, id);
         try {
             return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            throw new IllegalArgumentException(e);
+            throw new NotFoundException(String.format("order '%d' does not exist in datastore", id));
         }
     }
 
-    private final Entity getExec(Transaction txn, Key parent, long id) {
+    private final Entity getExec(Transaction txn, Key parent, long id) throws NotFoundException {
         final Key key = KeyFactory.createKey(parent, EXEC_KIND, id);
         try {
             return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            throw new IllegalArgumentException(e);
+            throw new NotFoundException(String.format("exec '%d' does not exist in datastore", id));
         }
     }
 
@@ -207,7 +208,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExec(long contrId, int settlDay, Exec exec) {
+    public final void insertExec(long contrId, int settlDay, Exec exec) throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, contrId, settlDay);
@@ -230,7 +231,8 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExecList(long contrId, int settlDay, Exec first) {
+    public final void insertExecList(long contrId, int settlDay, Exec first)
+            throws NotFoundException {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
         final Map<Long, Entity> orders = new HashMap<>();
@@ -324,7 +326,8 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void archiveOrder(long contrId, int settlDay, long id, long modified) {
+    public final void archiveOrder(long contrId, int settlDay, long id, long modified)
+            throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, contrId, settlDay);
@@ -344,7 +347,8 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void archiveTrade(long contrId, int settlDay, long id, long modified) {
+    public final void archiveTrade(long contrId, int settlDay, long id, long modified)
+            throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, contrId, settlDay);

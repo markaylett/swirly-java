@@ -21,6 +21,7 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.swirlycloud.exception.BadRequestException;
+import com.swirlycloud.exception.MethodNotAllowedException;
 import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.exception.ServException;
 import com.swirlycloud.exception.UnauthorizedException;
@@ -46,7 +47,7 @@ public final class AccntServlet extends RestServlet {
         try {
             final UserService userService = UserServiceFactory.getUserService();
             if (!userService.isUserLoggedIn()) {
-                throw new UnauthorizedException("Not logged-in");
+                throw new UnauthorizedException("user is not logged-in");
             }
             final User user = userService.getCurrentUser();
             assert user != null;
@@ -57,23 +58,25 @@ public final class AccntServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
 
-            boolean found = false;
+            boolean match = false;
             if ("order".equals(parts[TYPE_PART])) {
                 if (parts.length == 4) {
-                    found = rest.deleteOrder(email, parts[CMNEM_PART],
+                    rest.deleteOrder(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]),
                             Long.parseLong(parts[ID_PART]));
+                    match = true;
                 }
             } else if ("trade".equals(parts[TYPE_PART])) {
                 if (parts.length == 4) {
-                    found = rest.deleteTrade(email, parts[CMNEM_PART],
+                    rest.deleteTrade(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]),
                             Long.parseLong(parts[ID_PART]));
+                    match = true;
                 }
             }
 
-            if (!found) {
-                throw new NotFoundException("Not found");
+            if (!match) {
+                throw new NotFoundException("resource does not exist");
             }
             resp.setHeader("Cache-Control", "no-cache");
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -90,7 +93,7 @@ public final class AccntServlet extends RestServlet {
         try {
             final UserService userService = UserServiceFactory.getUserService();
             if (!userService.isUserLoggedIn()) {
-                throw new UnauthorizedException("Not logged-in");
+                throw new UnauthorizedException("user is not logged-in");
             }
             final User user = userService.getCurrentUser();
             assert user != null;
@@ -101,48 +104,60 @@ public final class AccntServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
 
-            boolean found = false;
+            boolean match = false;
             if (parts.length == 0) {
-                found = rest.getAccnt(email, resp.getWriter());
+                rest.getAccnt(email, resp.getWriter());
+                match = true;
             } else if ("order".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    found = rest.getOrder(email, resp.getWriter());
+                    rest.getOrder(email, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    found = rest.getOrder(email, parts[CMNEM_PART], resp.getWriter());
+                    rest.getOrder(email, parts[CMNEM_PART], resp.getWriter());
+                    match = true;
                 } else if (parts.length == 3) {
-                    found = rest.getOrder(email, parts[CMNEM_PART],
+                    rest.getOrder(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
+                    match = true;
                 } else if (parts.length == 4) {
-                    found = rest.getOrder(email, parts[CMNEM_PART],
+                    rest.getOrder(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]),
                             Long.parseLong(parts[ID_PART]), resp.getWriter());
+                    match = true;
                 }
             } else if ("trade".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    found = rest.getTrade(email, resp.getWriter());
+                    rest.getTrade(email, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    found = rest.getTrade(email, parts[CMNEM_PART], resp.getWriter());
+                    rest.getTrade(email, parts[CMNEM_PART], resp.getWriter());
+                    match = true;
                 } else if (parts.length == 3) {
-                    found = rest.getTrade(email, parts[CMNEM_PART],
+                    rest.getTrade(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
+                    match = true;
                 } else if (parts.length == 4) {
-                    found = rest.getTrade(email, parts[CMNEM_PART],
+                    rest.getTrade(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]),
                             Long.parseLong(parts[ID_PART]), resp.getWriter());
+                    match = true;
                 }
             } else if ("posn".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    found = rest.getPosn(email, resp.getWriter());
+                    rest.getPosn(email, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    found = rest.getPosn(email, parts[CMNEM_PART], resp.getWriter());
+                    rest.getPosn(email, parts[CMNEM_PART], resp.getWriter());
+                    match = true;
                 } else if (parts.length == 3) {
-                    found = rest.getPosn(email, parts[CMNEM_PART],
+                    rest.getPosn(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
+                    match = true;
                 }
             }
 
-            if (!found) {
-                throw new NotFoundException("Not found");
+            if (!match) {
+                throw new NotFoundException("resource does not exist");
             }
             sendJsonResponse(resp);
         } catch (final ServException e) {
@@ -159,7 +174,7 @@ public final class AccntServlet extends RestServlet {
         try {
             final UserService userService = UserServiceFactory.getUserService();
             if (!userService.isUserLoggedIn()) {
-                throw new UnauthorizedException("Not logged-in");
+                throw new UnauthorizedException("user is not logged-in");
             }
             final User user = userService.getCurrentUser();
             assert user != null;
@@ -170,7 +185,7 @@ public final class AccntServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             if (parts.length != 3 || !"order".equals(parts[TYPE_PART])) {
-                throw new NotFoundException("Not found");
+                throw new MethodNotAllowedException("post is not allowed on this resource");
             }
             final String cmnem = parts[CMNEM_PART];
             final int settlDate = Integer.parseInt(parts[SETTL_DATE_PART]);
@@ -180,15 +195,13 @@ public final class AccntServlet extends RestServlet {
             try {
                 p.parse(req.getReader(), r);
             } catch (final ParseException e) {
-                throw new IOException(e);
+                throw new BadRequestException("request could not be parsed");
             }
             if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
-                throw new BadRequestException("Invalid json fields");
+                throw new BadRequestException("request fields are invalid");
             }
-            if (!rest.postOrder(email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
-                    r.getLots(), r.getMinLots(), resp.getWriter())) {
-                throw new NotFoundException("Not found");
-            }
+            rest.postOrder(email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
+                    r.getLots(), r.getMinLots(), resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
@@ -204,7 +217,7 @@ public final class AccntServlet extends RestServlet {
         try {
             final UserService userService = UserServiceFactory.getUserService();
             if (!userService.isUserLoggedIn()) {
-                throw new UnauthorizedException("Not logged-in");
+                throw new UnauthorizedException("user is not logged-in");
             }
             final User user = userService.getCurrentUser();
             assert user != null;
@@ -215,7 +228,7 @@ public final class AccntServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             if (parts.length != 4 || !"order".equals(parts[TYPE_PART])) {
-                throw new NotFoundException("Not found");
+                throw new MethodNotAllowedException("put is not allowed on this resource");
             }
             final String cmnem = parts[CMNEM_PART];
             final int settlDate = Integer.parseInt(parts[SETTL_DATE_PART]);
@@ -226,14 +239,12 @@ public final class AccntServlet extends RestServlet {
             try {
                 p.parse(req.getReader(), r);
             } catch (final ParseException e) {
-                throw new IOException(e);
+                throw new BadRequestException("request could not be parsed");
             }
             if (r.getFields() != Request.LOTS) {
-                throw new BadRequestException("Invalid json fields");
+                throw new BadRequestException("request fields are invalid");
             }
-            if (!rest.putOrder(email, cmnem, settlDate, id, r.getLots(), resp.getWriter())) {
-                throw new NotFoundException("Not found");
-            }
+            rest.putOrder(email, cmnem, settlDate, id, r.getLots(), resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

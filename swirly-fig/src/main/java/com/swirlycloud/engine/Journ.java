@@ -6,6 +6,7 @@
 package com.swirlycloud.engine;
 
 import com.swirlycloud.domain.Exec;
+import com.swirlycloud.exception.NotFoundException;
 
 /**
  * Transaction journal.
@@ -14,7 +15,7 @@ import com.swirlycloud.domain.Exec;
  */
 public interface Journ {
 
-    void insertExec(long contrId, int settlDay, Exec exec);
+    void insertExec(long contrId, int settlDay, Exec exec) throws NotFoundException;
 
-    void insertExecList(long contrId, int settlDay, Exec first);
+    void insertExecList(long contrId, int settlDay, Exec first) throws NotFoundException;
 }

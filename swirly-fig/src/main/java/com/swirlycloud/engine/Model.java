@@ -12,6 +12,7 @@ import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Trader;
+import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.function.UnaryCallback;
 
 public interface Model extends Journ {
@@ -27,9 +28,9 @@ public interface Model extends Journ {
 
     void insertMarket(long contrId, int settlDay, int expiryDay);
 
-    void archiveOrder(long contrId, int settlDay, long id, long modified);
+    void archiveOrder(long contrId, int settlDay, long id, long modified) throws NotFoundException;
 
-    void archiveTrade(long contrId, int settlDay, long id, long modified);
+    void archiveTrade(long contrId, int settlDay, long id, long modified) throws NotFoundException;
 
     void selectAsset(UnaryCallback<Asset> cb);
 

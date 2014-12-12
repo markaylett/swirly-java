@@ -21,6 +21,7 @@ import org.json.simple.parser.ParseException;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.swirlycloud.exception.BadRequestException;
+import com.swirlycloud.exception.MethodNotAllowedException;
 import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.exception.ServException;
 import com.swirlycloud.exception.UnauthorizedException;
@@ -44,7 +45,7 @@ public final class MarketServlet extends RestServlet {
         try {
             final UserService userService = UserServiceFactory.getUserService();
             if (!userService.isUserLoggedIn()) {
-                throw new UnauthorizedException("Not logged-in");
+                throw new UnauthorizedException("user is not logged-in");
             }
 
             final Rest ctx = Context.getRest();
@@ -52,18 +53,21 @@ public final class MarketServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
 
-            boolean found = false;
+            boolean match = false;
             if (parts.length == 0) {
-                found = ctx.getMarket(DEPTH, resp.getWriter());
+                ctx.getMarket(DEPTH, resp.getWriter());
+                match = true;
             } else if (parts.length == 1) {
-                found = ctx.getMarket(parts[CMNEM_PART], DEPTH, resp.getWriter());
+                ctx.getMarket(parts[CMNEM_PART], DEPTH, resp.getWriter());
+                match = true;
             } else if (parts.length == 2) {
-                found = ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
-                        DEPTH, resp.getWriter());
+                ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]), DEPTH,
+                        resp.getWriter());
+                match = true;
             }
 
-            if (!found) {
-                throw new NotFoundException("Not found");
+            if (!match) {
+                throw new NotFoundException("resource does not exist");
             }
             sendJsonResponse(resp);
         } catch (final ServException e) {
@@ -80,7 +84,7 @@ public final class MarketServlet extends RestServlet {
         try {
             final UserService userService = UserServiceFactory.getUserService();
             if (!userService.isUserLoggedIn()) {
-                throw new UnauthorizedException("Not logged-in");
+                throw new UnauthorizedException("user is not logged-in");
             }
 
             final Rest rest = Context.getRest();
@@ -88,7 +92,7 @@ public final class MarketServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             if (parts.length != 1) {
-                throw new NotFoundException("Not found");
+                throw new MethodNotAllowedException("post is not allowed on this resource");
             }
             final String cmnem = parts[CMNEM_PART];
 
@@ -97,14 +101,12 @@ public final class MarketServlet extends RestServlet {
             try {
                 p.parse(req.getReader(), r);
             } catch (final ParseException e) {
-                throw new IOException(e);
+                throw new BadRequestException("request could not be parsed");
             }
             if (r.getFields() != (Request.SETTL_DATE | Request.EXPIRY_DATE)) {
-                throw new BadRequestException("Invalid json fields");
+                throw new BadRequestException("request fields are invalid");
             }
-            if (!rest.postMarket(cmnem, r.getSettlDate(), r.getExpiryDate(), resp.getWriter())) {
-                throw new NotFoundException("Not found");
-            }
+            rest.postMarket(cmnem, r.getSettlDate(), r.getExpiryDate(), resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

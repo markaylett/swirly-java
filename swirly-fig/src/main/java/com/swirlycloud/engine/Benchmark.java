@@ -11,21 +11,20 @@ import java.io.IOException;
 
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Market;
+import com.swirlycloud.exception.BadRequestException;
+import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.mock.MockModel;
 
 // -server -verbose:gc -Xprof
 
 public final class Benchmark {
 
-    private static void run(final Serv s) throws IOException {
+    private static void run(final Serv s) throws BadRequestException, NotFoundException,
+            IOException {
         final Accnt marayl = s.getLazyAccnt("MARAYL");
-        assert marayl != null;
         final Accnt gosayl = s.getLazyAccnt("GOSAYL");
-        assert gosayl != null;
         final Accnt tobayl = s.getLazyAccnt("TOBAYL");
-        assert tobayl != null;
         final Accnt emiayl = s.getLazyAccnt("EMIAYL");
-        assert emiayl != null;
 
         final int settlDay = ymdToJd(2014, 3, 14);
         final Market market = s.getLazyMarket("EURUSD", settlDay);
@@ -70,7 +69,8 @@ public final class Benchmark {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws BadRequestException, NotFoundException,
+            IOException {
         try (final Serv s = new Serv(new MockModel())) {
             run(s);
         }

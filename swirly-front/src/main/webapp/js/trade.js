@@ -524,9 +524,6 @@ function ViewModel(contrs) {
 
 function initApp() {
 
-    $('#tabs').tab();
-    $('#workingTab').click();
-
     $.getJSON('/api/rec/contr', function(raw) {
         var contrs = [];
         $.each(raw, function(key, val) {
@@ -534,12 +531,14 @@ function initApp() {
             val.qtyInc = qtyInc(val);
             contrs[val.mnem] = val;
         });
+        var model = new ViewModel(contrs);
+        ko.applyBindings(model);
         $('#contr').typeahead({
             items: 4,
             source: Object.keys(contrs)
         });
-        var model = new ViewModel(contrs);
-        ko.applyBindings(model);
+        $('#tabs').tab();
+        $('#workingTab').click();
         model.refreshAll();
         setInterval(function() {
             model.refreshAll();
@@ -547,6 +546,8 @@ function initApp() {
     }).fail(function(xhr) {
         var model = new ViewModel([]);
         ko.applyBindings(model);
+        $('#tabs').tab();
+        $('#workingTab').click();
         model.showError(new Error(xhr));
     });
 }
