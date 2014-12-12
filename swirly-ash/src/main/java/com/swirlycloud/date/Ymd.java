@@ -28,4 +28,9 @@ public final class Ymd {
         this.mon = mon;
         this.mday = mday;
     }
+
+    @Override
+    public final String toString() {
+        return String.valueOf(year * 10000 + mon * 100 + mday);
+    }
 }
