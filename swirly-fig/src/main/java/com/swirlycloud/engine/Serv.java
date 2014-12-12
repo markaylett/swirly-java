@@ -9,6 +9,9 @@ import static com.swirlycloud.util.Date.jdToIso;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
@@ -155,6 +158,7 @@ public final class Serv implements AutoCloseable {
         });
     }
 
+    @NonNull
     private final Trader newTrader(String mnem, String display, String email)
             throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
@@ -164,6 +168,7 @@ public final class Serv implements AutoCloseable {
         return new Trader(traderId, mnem, display, email);
     }
 
+    @NonNull
     private final Exec newExec(long id, Instruct instruct, long now) {
         return new Exec(id, instruct, now);
     }
@@ -297,6 +302,7 @@ public final class Serv implements AutoCloseable {
     public final void close() {
     }
 
+    @NonNull
     public final Trader createTrader(String mnem, String display, String email)
             throws BadRequestException {
         if (cache.findRec(RecType.TRADER, mnem) != null) {
@@ -312,14 +318,17 @@ public final class Serv implements AutoCloseable {
         return trader;
     }
 
+    @Nullable
     public final Rec findRec(RecType recType, long id) {
         return cache.findRec(recType, id);
     }
 
+    @Nullable
     public final Rec findRec(RecType recType, String mnem) {
         return cache.findRec(recType, mnem);
     }
 
+    @Nullable
     public final SlNode getFirstRec(RecType recType) {
         return cache.getFirstRec(recType);
     }
@@ -328,10 +337,12 @@ public final class Serv implements AutoCloseable {
         return cache.isEmptyRec(recType);
     }
 
+    @Nullable
     public final Trader findTraderByEmail(String email) {
         return emailIdx.find(email);
     }
 
+    @NonNull
     public final Market createMarket(Contr contr, int settlDay, int expiryDay)
             throws BadRequestException {
         final long key = Market.composeId(contr.getId(), settlDay);
@@ -347,6 +358,18 @@ public final class Serv implements AutoCloseable {
         return market;
     }
 
+    @NonNull
+    public final Market createMarket(String mnem, int settlDay, int expiryDay)
+            throws BadRequestException, NotFoundException {
+        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
+        if (contr == null) {
+            throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
+        }
+        return createMarket(contr, settlDay, expiryDay);
+    }
+
+    @Deprecated
+    @NonNull
     public final Market getLazyMarket(Contr contr, int settlDay) {
         Market market;
         final long key = Market.composeId(contr.getId(), settlDay);
@@ -361,34 +384,41 @@ public final class Serv implements AutoCloseable {
         return market;
     }
 
-    public final Market getLazyMarket(String mnem, int settlDay) {
+    @Deprecated
+    @NonNull
+    public final Market getLazyMarket(String mnem, int settlDay) throws NotFoundException {
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
-            return null;
+            throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
         }
         return getLazyMarket(contr, settlDay);
     }
 
+    @Nullable
     public final Market findMarket(Contr contr, int settlDay) {
         return (Market) markets.find(Market.composeId(contr.getId(), settlDay));
     }
 
-    public final Market findMarket(String mnem, int settlDay) {
+    @Nullable
+    public final Market findMarket(String mnem, int settlDay) throws NotFoundException {
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
-            return null;
+            throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
         }
         return findMarket(contr, settlDay);
     }
 
+    @Nullable
     public final RbNode getRootMarket() {
         return markets.getRoot();
     }
 
+    @Nullable
     public final RbNode getFirstMarket() {
         return markets.getFirst();
     }
 
+    @Nullable
     public final RbNode getLastMarket() {
         return markets.getLast();
     }
@@ -397,6 +427,7 @@ public final class Serv implements AutoCloseable {
         return markets.isEmpty();
     }
 
+    @NonNull
     public final Accnt getLazyAccnt(Trader trader) {
         Accnt accnt;
         final long key = trader.getId();
@@ -411,6 +442,7 @@ public final class Serv implements AutoCloseable {
         return accnt;
     }
 
+    @NonNull
     public final Accnt getLazyAccnt(String mnem) throws NotFoundException {
         final Trader trader = (Trader) cache.findRec(RecType.TRADER, mnem);
         if (trader == null) {
@@ -419,6 +451,7 @@ public final class Serv implements AutoCloseable {
         return getLazyAccnt(trader);
     }
 
+    @NonNull
     public final Accnt getLazyAccntByEmail(String email) throws NotFoundException {
         final Trader trader = emailIdx.find(email);
         if (trader == null) {
@@ -427,10 +460,12 @@ public final class Serv implements AutoCloseable {
         return getLazyAccnt(trader);
     }
 
+    @Nullable
     public final Accnt findAccnt(Trader trader) {
         return (Accnt) accnts.find(trader.getId());
     }
 
+    @Nullable
     public final Accnt findAccnt(String mnem) throws NotFoundException {
         final Trader trader = (Trader) cache.findRec(RecType.TRADER, mnem);
         if (trader == null) {
@@ -439,6 +474,7 @@ public final class Serv implements AutoCloseable {
         return findAccnt(trader);
     }
 
+    @Nullable
     public final Accnt findAccntByEmail(String email) throws NotFoundException {
         final Trader trader = emailIdx.find(email);
         if (trader == null) {
@@ -447,6 +483,7 @@ public final class Serv implements AutoCloseable {
         return findAccnt(trader);
     }
 
+    @NonNull
     public final Trans placeOrder(Accnt accnt, Market market, String ref, Action action,
             long ticks, long lots, long minLots, Trans trans) throws BadRequestException,
             NotFoundException {
@@ -488,6 +525,7 @@ public final class Serv implements AutoCloseable {
         return trans;
     }
 
+    @NonNull
     public final Trans reviseOrder(Accnt accnt, Market market, Order order, long lots, Trans trans)
             throws BadRequestException, NotFoundException {
         if (order.isDone()) {
@@ -514,6 +552,7 @@ public final class Serv implements AutoCloseable {
         return trans;
     }
 
+    @NonNull
     public final Trans reviseOrder(Accnt accnt, Market market, long id, long lots, Trans trans)
             throws BadRequestException, NotFoundException {
         final Contr contr = market.getContr();
@@ -525,6 +564,7 @@ public final class Serv implements AutoCloseable {
         return reviseOrder(accnt, market, order, lots, trans);
     }
 
+    @NonNull
     public final Trans reviseOrder(Accnt accnt, Market market, String ref, long lots, Trans trans)
             throws BadRequestException, NotFoundException {
         final Contr contr = market.getContr();
@@ -536,6 +576,7 @@ public final class Serv implements AutoCloseable {
         return reviseOrder(accnt, market, order, lots, trans);
     }
 
+    @NonNull
     public final Trans cancelOrder(Accnt accnt, Market market, Order order, Trans trans)
             throws BadRequestException, NotFoundException {
         if (order.isDone()) {
@@ -553,6 +594,7 @@ public final class Serv implements AutoCloseable {
         return trans;
     }
 
+    @NonNull
     public final Trans cancelOrder(Accnt accnt, Market market, long id, Trans trans)
             throws BadRequestException, NotFoundException {
         final Contr contr = market.getContr();
@@ -564,6 +606,7 @@ public final class Serv implements AutoCloseable {
         return cancelOrder(accnt, market, order, trans);
     }
 
+    @NonNull
     public final Trans cancelOrder(Accnt accnt, Market market, String ref, Trans trans)
             throws BadRequestException, NotFoundException {
         final Contr contr = market.getContr();

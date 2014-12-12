@@ -20,7 +20,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     /**
      * Maximum price levels in view.
      */
-    private static final int DEPTH = 5;
+    private static final int DEPTH = 3;
 
     private final long key;
     private Identifiable contr;

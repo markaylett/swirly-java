@@ -319,7 +319,7 @@ public final class Rest {
             Action action, long ticks, long lots, long minLots, Appendable out)
             throws BadRequestException, NotFoundException, IOException {
         final Accnt accnt = serv.getLazyAccntByEmail(email);
-        final Market market = serv.getLazyMarket(cmnem, isoToJd(settlDate));
+        final Market market = serv.findMarket(cmnem, isoToJd(settlDate));
         if (market == null) {
             throw new NotFoundException(String.format("market for '%s' on '%d' does not exist",
                     cmnem, settlDate));
