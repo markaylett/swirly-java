@@ -118,7 +118,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
     }
 
     @Override
-    public final void toJson(Appendable out, Object arg) throws IOException {
+    public final void toJson(Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));
         out.append(",\"trader\":\"").append(getRecMnem(trader));

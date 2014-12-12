@@ -124,7 +124,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
     }
 
     @Override
-    public final void toJson(Appendable out, Object arg) throws IOException {
+    public final void toJson(Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"trader\":\"").append(getRecMnem(trader));
         out.append("\",\"contr\":\"").append(getRecMnem(contr));

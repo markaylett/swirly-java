@@ -461,10 +461,7 @@ public final class Serv implements AutoCloseable {
                 ticks, lots, minLots, now);
         final Exec exec = newExec(market.allocExecId(), order, now);
 
-        trans.clear();
-        trans.market = market;
-        trans.order = order;
-        trans.execs.insertBack(exec);
+        trans.init(market, order, exec);
         // Order fields are updated on match.
         matchOrders(market, order, trans);
         // Place incomplete order in market.
@@ -513,10 +510,7 @@ public final class Serv implements AutoCloseable {
         // Final commit phase cannot fail.
         market.reviseOrder(order, lots, now);
 
-        trans.clear();
-        trans.market = market;
-        trans.order = order;
-        trans.execs.insertBack(exec);
+        trans.init(market, order, exec);
         return trans;
     }
 
@@ -555,10 +549,7 @@ public final class Serv implements AutoCloseable {
         // Final commit phase cannot fail.
         market.cancelOrder(order, now);
 
-        trans.clear();
-        trans.market = market;
-        trans.order = order;
-        trans.execs.insertBack(exec);
+        trans.init(market, order, exec);
         return trans;
     }
 

@@ -57,7 +57,7 @@ public final class Contr extends Rec {
     }
 
     @Override
-    public final void toJson(Appendable out, Object arg) throws IOException {
+    public final void toJson(Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"assetType\":\"").append(assetType.name());

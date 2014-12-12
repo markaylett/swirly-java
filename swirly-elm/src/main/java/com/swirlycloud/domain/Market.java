@@ -20,7 +20,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     /**
      * Maximum price levels in view.
      */
-    private static final int DEPTH_MAX = 5;
+    private static final int DEPTH = 5;
 
     private final long key;
     private Identifiable contr;
@@ -40,141 +40,6 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
 
     private final Side getSide(Action action) {
         return action == Action.BUY ? bidSide : offerSide;
-    }
-
-    private final void toJsonTob(Appendable out) throws IOException {
-        out.append("{\"id\":").append(String.valueOf(key));
-        out.append(",\"contr\":\"").append(getRecMnem(contr));
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
-
-        final Level firstBid = (Level) bidSide.getFirstLevel();
-        if (firstBid != null) {
-            out.append(",\"bidTicks\":").append(String.valueOf(firstBid.getTicks()));
-            out.append(",\"bidLots\":").append(String.valueOf(firstBid.getLots()));
-            out.append(",\"bidCount\":").append(String.valueOf(firstBid.getCount()));
-        } else {
-            out.append(",\"bidTicks\":null,\"bidLots\":null,\"bidCount\":null");
-        }
-        final Level firstOffer = (Level) offerSide.getFirstLevel();
-        if (firstOffer != null) {
-            out.append(",\"offerTicks\":").append(String.valueOf(firstOffer.getTicks()));
-            out.append(",\"offerLots\":").append(String.valueOf(firstOffer.getLots()));
-            out.append(",\"offerCount\":").append(String.valueOf(firstOffer.getCount()));
-        } else {
-            out.append(",\"offerTicks\":null,\"offerLots\":null,\"offerCount\":null");
-        }
-        if (lastLots != 0) {
-            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
-            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
-            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
-        } else {
-            out.append(",\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
-        }
-        out.append('}');        
-    }
-
-    private final void toJsonDepth(Appendable out, int levels) throws IOException {
-        out.append("{\"id\":").append(String.valueOf(key));
-        out.append(",\"contr\":\"").append(getRecMnem(contr));
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
-        out.append(",\"bidTicks\":[");
-
-        final RbNode firstBid = bidSide.getFirstLevel();
-        final RbNode firstOffer = offerSide.getFirstLevel();
-
-        RbNode node = firstBid;
-        for (int i = 0; i < levels; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getTicks()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"bidLots\":[");
-        node = firstBid;
-        for (int i = 0; i < levels; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getLots()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"bidCount\":[");
-        node = firstBid;
-        for (int i = 0; i < levels; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getCount()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"offerTicks\":[");
-        node = firstOffer;
-        for (int i = 0; i < levels; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getTicks()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"offerLots\":[");
-        node = firstOffer;
-        for (int i = 0; i < levels; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getLots()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"offerCount\":[");
-        node = firstOffer;
-        for (int i = 0; i < levels; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getCount()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        if (lastLots != 0) {
-            out.append("],\"lastTicks\":").append(String.valueOf(lastTicks));
-            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
-            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
-        } else {
-            out.append("],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
-        }
-        out.append('}');
     }
 
     public Market(Identifiable contr, int settlDay, int expiryDay, long lastTicks, long lastLots,
@@ -215,20 +80,107 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     }
 
     @Override
-    public final void toJson(Appendable out, Object arg) throws IOException {
-        int levels = 1;
-        if (arg != null) {
-            levels = (Integer) arg;
+    public final void toJson(Appendable out) throws IOException {
+        out.append("{\"id\":").append(String.valueOf(key));
+        out.append(",\"contr\":\"").append(getRecMnem(contr));
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
+        out.append(",\"bidTicks\":[");
+
+        final RbNode firstBid = bidSide.getFirstLevel();
+        final RbNode firstOffer = offerSide.getFirstLevel();
+
+        RbNode node = firstBid;
+        for (int i = 0; i < DEPTH; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                out.append(String.valueOf(level.getTicks()));
+                node = node.rbNext();
+            } else {
+                out.append("null");
+            }
         }
-        // Round-up to minimum.
-        levels = Math.max(levels, 1);
-        // Round-down to maximum.
-        levels = Math.min(levels, DEPTH_MAX);
-        if (levels == 1) {
-            toJsonTob(out);
+        out.append("],\"bidLots\":[");
+        node = firstBid;
+        for (int i = 0; i < DEPTH; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                out.append(String.valueOf(level.getLots()));
+                node = node.rbNext();
+            } else {
+                out.append("null");
+            }
+        }
+        out.append("],\"bidCount\":[");
+        node = firstBid;
+        for (int i = 0; i < DEPTH; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                out.append(String.valueOf(level.getCount()));
+                node = node.rbNext();
+            } else {
+                out.append("null");
+            }
+        }
+        out.append("],\"offerTicks\":[");
+        node = firstOffer;
+        for (int i = 0; i < DEPTH; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                out.append(String.valueOf(level.getTicks()));
+                node = node.rbNext();
+            } else {
+                out.append("null");
+            }
+        }
+        out.append("],\"offerLots\":[");
+        node = firstOffer;
+        for (int i = 0; i < DEPTH; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                out.append(String.valueOf(level.getLots()));
+                node = node.rbNext();
+            } else {
+                out.append("null");
+            }
+        }
+        out.append("],\"offerCount\":[");
+        node = firstOffer;
+        for (int i = 0; i < DEPTH; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                out.append(String.valueOf(level.getCount()));
+                node = node.rbNext();
+            } else {
+                out.append("null");
+            }
+        }
+        if (lastLots != 0) {
+            out.append("],\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
         } else {
-            toJsonDepth(out, levels);
+            out.append("],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
         }
+        out.append('}');
     }
 
     public final void enrich(Contr contr) {

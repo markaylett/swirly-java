@@ -27,7 +27,7 @@ public final class AshUtil {
     public static String toJson(Jsonifiable j, Object arg) {
         final StringBuilder sb = new StringBuilder();
         try {
-            j.toJson(sb, arg);
+            j.toJson(sb);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -43,7 +43,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
     }
 
     @Override
-    public final void toJson(Appendable out, Object arg) throws IOException {
+    public final void toJson(Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(key));
         out.append(",\"trader\":\"").append(getRecMnem(trader));
         out.append("\",\"contr\":\"").append(getRecMnem(contr));

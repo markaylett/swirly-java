@@ -5,23 +5,20 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
-import static com.swirlycloud.engine.Constants.DEPTH;
-
 import java.io.IOException;
 
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
-import com.swirlycloud.domain.Trader;
 import com.swirlycloud.util.AshUtil;
 import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.Queue;
 import com.swirlycloud.util.SlNode;
 
 public final class Trans implements Jsonifiable {
-    Market market;
-    Order order;
+    private Market market;
+    private Order order;
     final Queue matches = new Queue();
     /**
      * All executions referenced in matches.
@@ -32,11 +29,15 @@ public final class Trans implements Jsonifiable {
      */
     Posn posn;
 
-    final void clear() {
-        market = null;
-        order = null;
+    final void init(Market market, Order order, Exec exec) {
+        assert market != null;
+        assert order != null;
+        assert exec != null;
+        this.market = market;
+        this.order = order;
         matches.clear();
         execs.clear();
+        execs.insertBack(exec);
         posn = null;
     }
 
@@ -46,48 +47,37 @@ public final class Trans implements Jsonifiable {
     }
 
     @Override
-    public final void toJson(Appendable out, Object arg) throws IOException {
-        final Trader trader = (Trader) arg;
+    public final void toJson(Appendable out) throws IOException {
+        final long traderId = order.getTraderId();
         out.append("{\"market\":");
-        if (market != null) {
-            market.toJson(out, DEPTH);
-        } else {
-            out.append("null");
-        }
+        market.toJson(out);
+        // Multiple orders may be updated if one trades with one's self.
         out.append(",\"orders\":[");
-        int i = 0;
-        if (order != null) {
-            assert trader != null && order.getTraderId() == trader.getId();
-            order.toJson(out, null);
-            ++i;
-        }
+        order.toJson(out);
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
-            if (trader != null && match.makerOrder.getTraderId() != trader.getId()) {
+            if (match.makerOrder.getTraderId() != traderId) {
                 continue;
             }
-            if (i > 0) {
-                out.append(',');
-            }
-            match.makerOrder.toJson(out, null);
-            ++i;
+            out.append(',');
+            match.makerOrder.toJson(out);
         }
         out.append("],\"execs\":[");
-        i = 0;
+        int i = 0;
         for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
-            if (trader != null && exec.getTraderId() != trader.getId()) {
+            if (exec.getTraderId() != traderId) {
                 continue;
             }
             if (i > 0) {
                 out.append(',');
             }
-            exec.toJson(out, null);
+            exec.toJson(out);
             ++i;
         }
         out.append("],\"posn\":");
         if (posn != null) {
-            posn.toJson(out, null);
+            posn.toJson(out);
         } else {
             out.append("null");
         }

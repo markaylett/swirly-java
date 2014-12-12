@@ -8,5 +8,5 @@ package com.swirlycloud.util;
 import java.io.IOException;
 
 public interface Jsonifiable {
-    void toJson(Appendable out, Object arg) throws IOException;
+    void toJson(Appendable out) throws IOException;
 }

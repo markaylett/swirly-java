@@ -27,7 +27,7 @@ public final class Trader extends Rec {
     }
 
     @Override
-    public final void toJson(Appendable out, Object arg) throws IOException {
+    public final void toJson(Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"email\":\"").append(email);

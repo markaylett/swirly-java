@@ -5,7 +5,6 @@
  *******************************************************************************/
 package com.swirlycloud.back;
 
-import static com.swirlycloud.engine.Constants.DEPTH;
 import static com.swirlycloud.util.PathUtil.splitPath;
 
 import java.io.IOException;
@@ -55,13 +54,13 @@ public final class MarketServlet extends RestServlet {
 
             boolean match = false;
             if (parts.length == 0) {
-                ctx.getMarket(DEPTH, resp.getWriter());
+                ctx.getMarket(resp.getWriter());
                 match = true;
             } else if (parts.length == 1) {
-                ctx.getMarket(parts[CMNEM_PART], DEPTH, resp.getWriter());
+                ctx.getMarket(parts[CMNEM_PART], resp.getWriter());
                 match = true;
             } else if (parts.length == 2) {
-                ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]), DEPTH,
+                ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
                         resp.getWriter());
                 match = true;
             }
