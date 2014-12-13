@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.web;
 
-import static com.swirlycloud.date.DateUtil.isoToJd;
+import static com.swirlycloud.date.JulianDay.isoToJd;
 
 import java.io.IOException;
 

@@ -5,8 +5,9 @@
  *******************************************************************************/
 package com.swirlycloud.date;
 
-public final class DateUtil {
-    private DateUtil() {
+public final class JulianDay {
+
+    private JulianDay() {
     }
 
     /**
@@ -14,20 +15,9 @@ public final class DateUtil {
      */
 
     public static int ymdToIso(int year, int mon, int mday) {
-        assert mon <= 12;
+        assert mon <= 11;
         assert mday <= 31;
-        return year * 10000 + mon * 100 + mday;
-    }
-
-    /**
-     * ISO8601 to Gregorian date.
-     */
-
-    public static Ymd isoToYmd(int iso) {
-        final int year = iso / 10000;
-        final int mon = iso / 100 % 100;
-        final int mday = iso % 100;
-        return new Ymd(year, mon, mday);
+        return year * 10000 + (mon + 1) * 100 + mday;
     }
 
     /**
@@ -39,16 +29,27 @@ public final class DateUtil {
         // Almanac for Computers.
         // See http://aa.usno.navy.mil/faq/docs/JD_Formula.php.
 
-        final int i = year, j = mon, k = mday;
+        final int i = year, j = mon + 1, k = mday;
         return k - 32075 + 1461 * (i + 4800 + (j - 14) / 12) / 4 + 367
                 * (j - 2 - (j - 14) / 12 * 12) / 12 - 3 * ((i + 4900 + (j - 14) / 12) / 100) / 4;
     }
 
     /**
-     * Julian day to Gregorian date.
+     * ISO8601 to Julian day.
      */
 
-    public static Ymd jdToYmd(int jd) {
+    public static int isoToJd(int iso) {
+        final int year = iso / 10000;
+        final int mon = (iso / 100 % 100) - 1;
+        final int mday = iso % 100;
+        return ymdToJd(year, mon, mday);
+    }
+
+    /**
+     * Julian day to ISO8601.
+     */
+
+    public static int jdToIso(int jd) {
         // The formula given above was taken from the 1990 edition of the U.S. Naval Observatory's
         // Almanac for Computers.
         // See http://aa.usno.navy.mil/faq/docs/JD_Formula.php.
@@ -64,25 +65,7 @@ public final class DateUtil {
         j = j + 2 - 12 * l;
         i = 100 * (n - 49) + i + l;
 
-        return new Ymd(i, j, k);
-    }
-
-    /**
-     * ISO8601 to Julian day.
-     */
-
-    public static int isoToJd(int iso) {
-        final Ymd ymd = isoToYmd(iso);
-        return ymdToJd(ymd.year, ymd.mon, ymd.mday);
-    }
-
-    /**
-     * Julian day to ISO8601.
-     */
-
-    public static int jdToIso(int jd) {
-        final Ymd ymd = jdToYmd(jd);
-        return ymdToIso(ymd.year, ymd.mon, ymd.mday);
+        return i * 10000 + j * 100 + k;
     }
 
     /**

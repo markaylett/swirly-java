@@ -18,7 +18,7 @@ import java.util.LinkedList;
  *
  * @author Mark Aylett
  * @param <T>
- *            element type.
+ *            The element type.
  */
 public final class SortedList<T> implements Collection<T> {
 

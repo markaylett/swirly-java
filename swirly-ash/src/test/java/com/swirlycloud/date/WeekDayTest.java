@@ -5,8 +5,8 @@
  *******************************************************************************/
 package com.swirlycloud.date;
 
-import static com.swirlycloud.date.DateUtil.*;
-import static org.junit.Assert.*;
+import static com.swirlycloud.date.JulianDay.ymdToJd;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

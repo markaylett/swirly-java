@@ -5,13 +5,13 @@
  *******************************************************************************/
 package com.swirlycloud.domain;
 
-import static com.swirlycloud.date.DateUtil.jdToIso;
+import static com.swirlycloud.date.JulianDay.jdToIso;
 
 import java.io.IOException;
 
 import com.swirlycloud.collection.BasicRbDlNode;
 import com.swirlycloud.collection.RbNode;
-import com.swirlycloud.date.DateUtil;
+import com.swirlycloud.date.JulianDay;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.StringUtil;
@@ -168,7 +168,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         final long ORDER_MASK = (1L << 32) - 1;
 
         // Truncated Julian Day (TJD).
-        final long tjd = DateUtil.jdToTjd(settlDay);
+        final long tjd = JulianDay.jdToTjd(settlDay);
         return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (orderId & ORDER_MASK);
     }
 

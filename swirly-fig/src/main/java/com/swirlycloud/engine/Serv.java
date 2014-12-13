@@ -5,7 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
-import static com.swirlycloud.date.DateUtil.jdToIso;
+import static com.swirlycloud.date.JulianDay.jdToIso;
 
 import java.util.regex.Pattern;
 
@@ -624,7 +624,7 @@ public final class Serv implements AutoCloseable {
      * This method is not executed atomically, so it may partially fail.
      * 
      * @param accnt
-     *            the account.
+     *            The account.
      * @throws NotFoundException
      */
     public final void cancelOrder(Accnt accnt) throws NotFoundException {
@@ -674,7 +674,7 @@ public final class Serv implements AutoCloseable {
      * This method is not updated atomically, so it may partially fail.
      * 
      * @param accnt
-     *            the account.
+     *            The account.
      * @throws NotFoundException
      */
     public final void archiveOrder(Accnt accnt) throws NotFoundException {
@@ -722,7 +722,7 @@ public final class Serv implements AutoCloseable {
      * This method is not executed atomically, so it may partially fail.
      * 
      * @param accnt
-     *            the account.
+     *            The account.
      * @throws NotFoundException
      */
     public final void archiveTrade(Accnt accnt) throws NotFoundException {
