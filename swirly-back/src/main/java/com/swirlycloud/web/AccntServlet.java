@@ -59,19 +59,21 @@ public final class AccntServlet extends RestServlet {
             final String[] parts = splitPath(pathInfo);
 
             boolean match = false;
-            if ("order".equals(parts[TYPE_PART])) {
-                if (parts.length == 4) {
-                    rest.deleteOrder(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]),
-                            Long.parseLong(parts[ID_PART]));
-                    match = true;
-                }
-            } else if ("trade".equals(parts[TYPE_PART])) {
-                if (parts.length == 4) {
-                    rest.deleteTrade(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]),
-                            Long.parseLong(parts[ID_PART]));
-                    match = true;
+            if (parts.length > 0) {
+                if ("order".equals(parts[TYPE_PART])) {
+                    if (parts.length == 4) {
+                        rest.deleteOrder(email, parts[CMNEM_PART],
+                                Integer.parseInt(parts[SETTL_DATE_PART]),
+                                Long.parseLong(parts[ID_PART]));
+                        match = true;
+                    }
+                } else if ("trade".equals(parts[TYPE_PART])) {
+                    if (parts.length == 4) {
+                        rest.deleteTrade(email, parts[CMNEM_PART],
+                                Integer.parseInt(parts[SETTL_DATE_PART]),
+                                Long.parseLong(parts[ID_PART]));
+                        match = true;
+                    }
                 }
             }
 

@@ -12,6 +12,8 @@ import static com.swirlycloud.date.JulianDay.ymdToJd;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Gregorian date.
  */
@@ -127,6 +129,7 @@ public final class GregDate implements Comparable<GregDate> {
         return ymdToJd(year, mon, mday);
     }
 
+    @NonNull
     public final Calendar toCalendar(TimeZone tz) {
         final Calendar cal = Calendar.getInstance(tz);
         cal.set(year, mon, mday, 0, 0, 0);
@@ -134,10 +137,12 @@ public final class GregDate implements Comparable<GregDate> {
         return cal;
     }
 
+    @NonNull
     public final Calendar toCalendar() {
         return toCalendar(TimeZone.getDefault());
     }
 
+    @NonNull
     public final WeekDay toWeekDay() {
         return WeekDay.valueOfJd(toJd());
     }
@@ -146,6 +151,7 @@ public final class GregDate implements Comparable<GregDate> {
      * ISO8601 to Gregorian date.
      */
 
+    @NonNull
     public static GregDate valueOfIso(int iso) {
         final int year = iso / 10000;
         final int mon = (iso / 100 % 100) - 1;
@@ -153,14 +159,17 @@ public final class GregDate implements Comparable<GregDate> {
         return new GregDate(year, mon, mday);
     }
 
+    @NonNull
     public static GregDate valueOfJd(int jd) {
         return valueOfIso(jdToIso(jd));
     }
 
+    @NonNull
     public static GregDate valueOf(String s) {
         return valueOfIso(Integer.parseInt(s));
     }
 
+    @NonNull
     public static GregDate valueOf(Calendar c) {
         return new GregDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH),
                 c.get(Calendar.DAY_OF_MONTH));

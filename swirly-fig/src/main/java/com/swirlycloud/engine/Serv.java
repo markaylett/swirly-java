@@ -6,6 +6,7 @@
 package com.swirlycloud.engine;
 
 import static com.swirlycloud.date.JulianDay.jdToIso;
+import static com.swirlycloud.engine.DateUtil.getBusDate;
 
 import java.util.regex.Pattern;
 
@@ -345,6 +346,16 @@ public final class Serv implements AutoCloseable {
     @NonNull
     public final Market createMarket(Contr contr, int settlDay, int expiryDay)
             throws BadRequestException {
+        final int busDay = getBusDate().toJd();
+        if (settlDay < busDay) {
+            throw new BadRequestException("settl-day before bus-day");
+        }
+        if (expiryDay < busDay) {
+            throw new BadRequestException("expiry-day before bus-day");
+        }
+        if (expiryDay > settlDay) {
+            throw new BadRequestException("expiry-day after settl-day");
+        }
         final long key = Market.composeId(contr.getId(), settlDay);
         final RbNode node = markets.pfind(key);
         if (node != null && node.getKey() == key) {

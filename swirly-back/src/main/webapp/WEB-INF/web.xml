@@ -21,6 +21,11 @@
     <servlet-class>com.swirlycloud.web.AccntServlet</servlet-class>
   </servlet>
 
+  <servlet>
+    <servlet-name>cron</servlet-name>
+    <servlet-class>com.swirlycloud.web.CronServlet</servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>rec</servlet-name>
     <url-pattern>/api/rec/*</url-pattern>
@@ -34,6 +39,11 @@
   <servlet-mapping>
     <servlet-name>accnt</servlet-name>
     <url-pattern>/api/accnt/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>cron</servlet-name>
+    <url-pattern>/api/cron/*</url-pattern>
   </servlet-mapping>
 
   <error-page>
@@ -65,5 +75,15 @@
     <error-code>500</error-code>
     <location>/WEB-INF/error/error-500.json</location>
   </error-page>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>cron</web-resource-name>
+      <url-pattern>/api/cron/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
 
 </web-app>
