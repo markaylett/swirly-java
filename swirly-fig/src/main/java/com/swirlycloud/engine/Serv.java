@@ -344,9 +344,9 @@ public final class Serv implements AutoCloseable {
     }
 
     @NonNull
-    public final Market createMarket(Contr contr, int settlDay, int expiryDay)
+    public final Market createMarket(Contr contr, int settlDay, int expiryDay, long now)
             throws BadRequestException {
-        final int busDay = getBusDate().toJd();
+        final int busDay = getBusDate(now).toJd();
         if (settlDay < busDay) {
             throw new BadRequestException("settl-day before bus-day");
         }
@@ -370,13 +370,13 @@ public final class Serv implements AutoCloseable {
     }
 
     @NonNull
-    public final Market createMarket(String mnem, int settlDay, int expiryDay)
+    public final Market createMarket(String mnem, int settlDay, int expiryDay, long now)
             throws BadRequestException, NotFoundException {
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
         }
-        return createMarket(contr, settlDay, expiryDay);
+        return createMarket(contr, settlDay, expiryDay, now);
     }
 
     @Deprecated
@@ -496,12 +496,11 @@ public final class Serv implements AutoCloseable {
 
     @NonNull
     public final Trans placeOrder(Accnt accnt, Market market, String ref, Action action,
-            long ticks, long lots, long minLots, Trans trans) throws BadRequestException,
+            long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
             NotFoundException {
         if (lots == 0 || lots < minLots) {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
-        final long now = System.currentTimeMillis();
         final long orderId = market.allocOrderId();
         final Contr contr = market.getContr();
         final int settlDay = market.getSettlDay();
@@ -537,8 +536,8 @@ public final class Serv implements AutoCloseable {
     }
 
     @NonNull
-    public final Trans reviseOrder(Accnt accnt, Market market, Order order, long lots, Trans trans)
-            throws BadRequestException, NotFoundException {
+    public final Trans reviseOrder(Accnt accnt, Market market, Order order, long lots, long now,
+            Trans trans) throws BadRequestException, NotFoundException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
@@ -551,7 +550,6 @@ public final class Serv implements AutoCloseable {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
 
-        final long now = System.currentTimeMillis();
         final Exec exec = newExec(market.allocExecId(), order, now);
         exec.revise(lots);
         model.insertExec(market.getContrId(), market.getSettlDay(), exec);
@@ -564,36 +562,35 @@ public final class Serv implements AutoCloseable {
     }
 
     @NonNull
-    public final Trans reviseOrder(Accnt accnt, Market market, long id, long lots, Trans trans)
-            throws BadRequestException, NotFoundException {
+    public final Trans reviseOrder(Accnt accnt, Market market, long id, long lots, long now,
+            Trans trans) throws BadRequestException, NotFoundException {
         final Contr contr = market.getContr();
         final int settlDay = market.getSettlDay();
         final Order order = accnt.findOrder(contr.getId(), settlDay, id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        return reviseOrder(accnt, market, order, lots, trans);
+        return reviseOrder(accnt, market, order, lots, now, trans);
     }
 
     @NonNull
-    public final Trans reviseOrder(Accnt accnt, Market market, String ref, long lots, Trans trans)
-            throws BadRequestException, NotFoundException {
+    public final Trans reviseOrder(Accnt accnt, Market market, String ref, long lots, long now,
+            Trans trans) throws BadRequestException, NotFoundException {
         final Contr contr = market.getContr();
         final int settlDay = market.getSettlDay();
         final Order order = accnt.findOrder(contr.getId(), settlDay, ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
         }
-        return reviseOrder(accnt, market, order, lots, trans);
+        return reviseOrder(accnt, market, order, lots, now, trans);
     }
 
     @NonNull
-    public final Trans cancelOrder(Accnt accnt, Market market, Order order, Trans trans)
+    public final Trans cancelOrder(Accnt accnt, Market market, Order order, long now, Trans trans)
             throws BadRequestException, NotFoundException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
-        final long now = System.currentTimeMillis();
         final Exec exec = newExec(market.allocExecId(), order, now);
         exec.cancel();
         model.insertExec(market.getContrId(), market.getSettlDay(), exec);
@@ -606,7 +603,7 @@ public final class Serv implements AutoCloseable {
     }
 
     @NonNull
-    public final Trans cancelOrder(Accnt accnt, Market market, long id, Trans trans)
+    public final Trans cancelOrder(Accnt accnt, Market market, long id, long now, Trans trans)
             throws BadRequestException, NotFoundException {
         final Contr contr = market.getContr();
         final int settlDay = market.getSettlDay();
@@ -614,11 +611,11 @@ public final class Serv implements AutoCloseable {
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        return cancelOrder(accnt, market, order, trans);
+        return cancelOrder(accnt, market, order, now, trans);
     }
 
     @NonNull
-    public final Trans cancelOrder(Accnt accnt, Market market, String ref, Trans trans)
+    public final Trans cancelOrder(Accnt accnt, Market market, String ref, long now, Trans trans)
             throws BadRequestException, NotFoundException {
         final Contr contr = market.getContr();
         final int settlDay = market.getSettlDay();
@@ -626,7 +623,7 @@ public final class Serv implements AutoCloseable {
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
         }
-        return cancelOrder(accnt, market, order, trans);
+        return cancelOrder(accnt, market, order, now, trans);
     }
 
     /**
@@ -636,10 +633,11 @@ public final class Serv implements AutoCloseable {
      * 
      * @param accnt
      *            The account.
+     * @param now
+     *            The current time.
      * @throws NotFoundException
      */
-    public final void cancelOrder(Accnt accnt) throws NotFoundException {
-        final long now = System.currentTimeMillis();
+    public final void cancelOrder(Accnt accnt, long now) throws NotFoundException {
         for (;;) {
             final Order order = (Order) accnt.getRootOrder();
             if (order == null) {
@@ -658,25 +656,24 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    public final void archiveOrder(Accnt accnt, Order order) throws BadRequestException,
+    public final void archiveOrder(Accnt accnt, Order order, long now) throws BadRequestException,
             NotFoundException {
         if (!order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is not done", order.getId()));
         }
-        final long now = System.currentTimeMillis();
         model.archiveOrder(order.getContrId(), order.getSettlDay(), order.getId(), now);
 
         // No need to update timestamps on order because it is immediately freed.
         accnt.removeOrder(order);
     }
 
-    public final void archiveOrder(Accnt accnt, long contrId, int settlDay, long id)
+    public final void archiveOrder(Accnt accnt, long contrId, int settlDay, long id, long now)
             throws BadRequestException, NotFoundException {
         final Order order = accnt.findOrder(contrId, settlDay, id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        archiveOrder(accnt, order);
+        archiveOrder(accnt, order, now);
     }
 
     /**
@@ -686,10 +683,11 @@ public final class Serv implements AutoCloseable {
      * 
      * @param accnt
      *            The account.
+     * @param now
+     *            The current time.
      * @throws NotFoundException
      */
-    public final void archiveOrder(Accnt accnt) throws NotFoundException {
-        final long now = System.currentTimeMillis();
+    public final void archiveOrder(Accnt accnt, long now) throws NotFoundException {
         RbNode node = accnt.getFirstOrder();
         while (node != null) {
             final Order order = (Order) node;
@@ -706,25 +704,24 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    public final void archiveTrade(Accnt accnt, Exec trade) throws BadRequestException,
+    public final void archiveTrade(Accnt accnt, Exec trade, long now) throws BadRequestException,
             NotFoundException {
         if (trade.getState() != State.TRADE) {
             throw new BadRequestException(String.format("exec '%d' is not a trade", trade.getId()));
         }
-        final long now = System.currentTimeMillis();
         model.archiveTrade(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
 
         // No need to update timestamps on trade because it is immediately freed.
         accnt.removeTrade(trade);
     }
 
-    public final void archiveTrade(Accnt accnt, long contrId, int settlDay, long id)
+    public final void archiveTrade(Accnt accnt, long contrId, int settlDay, long id, long now)
             throws BadRequestException, NotFoundException {
         final Exec trade = accnt.findTrade(contrId, settlDay, id);
         if (trade == null) {
             throw new NotFoundException(String.format("trade '%d' does not exist", id));
         }
-        archiveTrade(accnt, trade);
+        archiveTrade(accnt, trade, now);
     }
 
     /**
@@ -734,10 +731,11 @@ public final class Serv implements AutoCloseable {
      * 
      * @param accnt
      *            The account.
+     * @param now
+     *            The current time.
      * @throws NotFoundException
      */
-    public final void archiveTrade(Accnt accnt) throws NotFoundException {
-        final long now = System.currentTimeMillis();
+    public final void archiveTrade(Accnt accnt, long now) throws NotFoundException {
         for (;;) {
             final Exec trade = (Exec) accnt.getRootTrade();
             if (trade == null) {
@@ -750,8 +748,8 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    public final void archiveAll(Accnt accnt) throws NotFoundException {
-        archiveOrder(accnt);
-        archiveTrade(accnt);
+    public final void archiveAll(Accnt accnt, long now) throws NotFoundException {
+        archiveOrder(accnt, now);
+        archiveTrade(accnt, now);
     }
 }

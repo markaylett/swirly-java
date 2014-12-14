@@ -42,6 +42,7 @@ public final class CronServlet extends RestServlet {
             boolean match = false;
             if (parts.length > 0) {
                 if ("endofday".equals(parts[JOB_PART])) {
+                    log("End of day processing");
                     match = true;
                 }
             }

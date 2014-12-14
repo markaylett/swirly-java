@@ -26,13 +26,14 @@ public final class ServTest {
             final Accnt accnt = s.getLazyAccnt("MARAYL");
             assertNotNull(accnt);
 
-            final int settlDay = ymdToJd(2014, 3, 14);
-            final int expiryDay = ymdToJd(2014, 3, 12);
-            final Market market = s.createMarket("EURUSD", settlDay, expiryDay);
+            final int settlDay = ymdToJd(2014, 2, 14);
+            final int expiryDay = ymdToJd(2014, 2, 12);
+            final long now = 1394625600000L;
+            final Market market = s.createMarket("EURUSD", settlDay, expiryDay, now);
             assertNotNull(market);
 
             final Trans trans = new Trans();
-            final Order order = s.placeOrder(accnt, market, "", Action.BUY, 12345, 5, 1, trans)
+            final Order order = s.placeOrder(accnt, market, "", Action.BUY, 12345, 5, 1, now, trans)
                     .getOrder();
             assertEquals(accnt.getTrader(), order.getTrader());
             assertEquals(market.getContr(), order.getContr());
@@ -47,9 +48,10 @@ public final class ServTest {
             assertEquals(0, order.getLastTicks());
             assertEquals(0, order.getLastLots());
             assertEquals(1, order.getMinLots());
-            assertEquals(order.getCreated(), order.getModified());
+            assertEquals(now, order.getCreated());
+            assertEquals(now, order.getModified());
 
-            s.reviseOrder(accnt, market, order, 4, trans);
+            s.reviseOrder(accnt, market, order, 4, now + 1, trans);
             assertEquals(accnt.getTrader(), order.getTrader());
             assertEquals(market.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());
@@ -63,6 +65,8 @@ public final class ServTest {
             assertEquals(0, order.getLastTicks());
             assertEquals(0, order.getLastLots());
             assertEquals(1, order.getMinLots());
+            assertEquals(now, order.getCreated());
+            assertEquals(now + 1, order.getModified());
         }
     }
 }

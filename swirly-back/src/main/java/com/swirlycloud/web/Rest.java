@@ -182,7 +182,8 @@ public final class Rest {
         }
         final int settlDay = isoToJd(settlDate);
         final int expiryDay = isoToJd(expiryDate);
-        final Market market = serv.createMarket(contr, settlDay, expiryDay);
+        final long now = System.currentTimeMillis();
+        final Market market = serv.createMarket(contr, settlDay, expiryDay, now);
         market.toJson(out);
     }
 
@@ -217,7 +218,8 @@ public final class Rest {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
         }
         final int settlDay = isoToJd(settlDate);
-        serv.archiveOrder(accnt, contr.getId(), settlDay, id);
+        final long now = System.currentTimeMillis();
+        serv.archiveOrder(accnt, contr.getId(), settlDay, id, now);
     }
 
     public final synchronized void getOrder(String email, Appendable out) throws NotFoundException,
@@ -324,8 +326,9 @@ public final class Rest {
             throw new NotFoundException(String.format("market for '%s' on '%d' does not exist",
                     cmnem, settlDate));
         }
+        final long now = System.currentTimeMillis();
         final Trans trans = serv.placeOrder(accnt, market, ref, action, ticks, lots, minLots,
-                new Trans());
+                now, new Trans());
         trans.toJson(out);
     }
 
@@ -340,11 +343,12 @@ public final class Rest {
             throw new NotFoundException(String.format("market for '%s' on '%d' does not exist",
                     cmnem, settlDate));
         }
+        final long now = System.currentTimeMillis();
         final Trans trans = new Trans();
         if (lots > 0) {
-            serv.reviseOrder(accnt, market, id, lots, trans);
+            serv.reviseOrder(accnt, market, id, lots, now, trans);
         } else {
-            serv.cancelOrder(accnt, market, id, trans);
+            serv.cancelOrder(accnt, market, id, now, trans);
         }
         trans.toJson(out);
     }
@@ -360,7 +364,8 @@ public final class Rest {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
         }
         final int settlDay = isoToJd(settlDate);
-        serv.archiveTrade(accnt, contr.getId(), settlDay, id);
+        final long now = System.currentTimeMillis();
+        serv.archiveTrade(accnt, contr.getId(), settlDay, id, now);
     }
 
     public final synchronized void getTrade(String email, Appendable out) throws NotFoundException,

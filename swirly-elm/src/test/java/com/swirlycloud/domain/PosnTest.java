@@ -17,7 +17,7 @@ public final class PosnTest {
     @Test
     public final void test() {
         final Posn posn = new Posn(MockTrader.newTrader("MARAYL"), MockContr.newContr("EURUSD"),
-                ymdToJd(2014, 3, 14));
+                ymdToJd(2014, 2, 14));
         posn.setBuyLicks(1);
         posn.setBuyLots(2);
         posn.setSellLicks(3);

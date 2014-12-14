@@ -13,8 +13,8 @@ import org.junit.Test;
 public final class WeekDayTest {
     @Test
     public final void test() {
-        assertEquals(WeekDay.THU, WeekDay.valueOfJd(ymdToJd(2014, 3, 13)));
-        assertEquals(WeekDay.FRI, WeekDay.valueOfJd(ymdToJd(2014, 3, 14)));
-        assertEquals(WeekDay.SAT, WeekDay.valueOfJd(ymdToJd(2014, 3, 15)));
+        assertEquals(WeekDay.THU, WeekDay.valueOfJd(ymdToJd(2014, 2, 13)));
+        assertEquals(WeekDay.FRI, WeekDay.valueOfJd(ymdToJd(2014, 2, 14)));
+        assertEquals(WeekDay.SAT, WeekDay.valueOfJd(ymdToJd(2014, 2, 15)));
     }
 }
