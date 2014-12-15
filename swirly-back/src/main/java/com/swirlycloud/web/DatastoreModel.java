@@ -215,7 +215,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExecList(long contrId, int settlDay, Exec first)
+    public final void insertExecList(long contrId, int settlDay, SlNode first)
             throws NotFoundException {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
@@ -227,7 +227,7 @@ public final class DatastoreModel implements Model {
                 final Exec exec = (Exec) node;
                 if (exec.getState() == State.NEW) {
                     // Defer actual datastore put.
-                    orders.put(first.getOrderId(), newOrder(market, exec));
+                    orders.put(exec.getOrderId(), newOrder(market, exec));
                 } else {
                     final long id = exec.getOrderId();
                     // This exec may apply to a cached order.

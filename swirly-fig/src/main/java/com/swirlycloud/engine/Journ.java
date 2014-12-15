@@ -5,6 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.engine;
 
+import com.swirlycloud.collection.SlNode;
 import com.swirlycloud.domain.Exec;
 import com.swirlycloud.exception.NotFoundException;
 
@@ -17,5 +18,5 @@ public interface Journ {
 
     void insertExec(long contrId, int settlDay, Exec exec) throws NotFoundException;
 
-    void insertExecList(long contrId, int settlDay, Exec first) throws NotFoundException;
+    void insertExecList(long contrId, int settlDay, SlNode first) throws NotFoundException;
 }

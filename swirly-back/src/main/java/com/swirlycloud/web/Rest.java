@@ -525,4 +525,11 @@ public final class Rest {
         }
         posn.toJson(out);
     }
+
+    // Cron jobs.
+
+    public final synchronized void getEndOfDay() throws NotFoundException {
+        final long now = System.currentTimeMillis();
+        serv.expireMarkets(now);
+    }
 }

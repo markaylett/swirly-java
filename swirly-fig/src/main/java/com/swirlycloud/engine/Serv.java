@@ -379,6 +379,18 @@ public final class Serv implements AutoCloseable {
         return createMarket(contr, settlDay, expiryDay, now);
     }
 
+    public final void expireMarkets(long now) throws NotFoundException {
+        final int busDay = DateUtil.getBusDate(now).toJd();
+        for (RbNode node = markets.getFirst(); node != null;) {
+            final Market market = (Market) node;
+            node = node.rbNext();
+            if (market.getExpiryDay() < busDay) {
+                cancelOrders(market, now);
+                markets.remove(market);
+            }
+        }
+    }
+
     @Deprecated
     @NonNull
     public final Market getLazyMarket(Contr contr, int settlDay) {
@@ -520,7 +532,7 @@ public final class Serv implements AutoCloseable {
         // any unfilled quantity.
         boolean success = false;
         try {
-            model.insertExecList(contr.getId(), settlDay, (Exec) trans.execs.getFirst());
+            model.insertExecList(contr.getId(), settlDay, trans.execs.getFirst());
             success = true;
         } finally {
             if (!success && !order.isDone()) {
@@ -637,7 +649,7 @@ public final class Serv implements AutoCloseable {
      *            The current time.
      * @throws NotFoundException
      */
-    public final void cancelOrder(Accnt accnt, long now) throws NotFoundException {
+    public final void cancelOrders(Accnt accnt, long now) throws NotFoundException {
         for (;;) {
             final Order order = (Order) accnt.getRootOrder();
             if (order == null) {
@@ -653,6 +665,39 @@ public final class Serv implements AutoCloseable {
 
             // Final commit phase cannot fail.
             market.cancelOrder(order, now);
+        }
+    }
+
+    public final void cancelOrders(Market market, long now) throws NotFoundException {
+        final Side bidSide = market.getBidSide();
+        final Side offerSide = market.getOfferSide();
+
+        SlNode first = null;
+        for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
+            final Order order = (Order) node;
+            final Exec exec = newExec(market.allocExecId(), order, now);
+            exec.cancel();
+            exec.setSlNext(first);
+            first = exec;
+        }
+        for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
+            final Order order = (Order) node;
+            final Exec exec = newExec(market.allocExecId(), order, now);
+            exec.cancel();
+            exec.setSlNext(first);
+            first = exec;
+        }
+        model.insertExecList(market.getContrId(), market.getSettlDay(), first);
+        // Commit phase.
+        for (DlNode node = bidSide.getFirstOrder(); !node.isEnd();) {
+            final Order order = (Order) node;
+            node = node.dlNext();
+            bidSide.cancelOrder(order, now);
+        }
+        for (DlNode node = offerSide.getFirstOrder(); !node.isEnd();) {
+            final Order order = (Order) node;
+            node = node.dlNext();
+            offerSide.cancelOrder(order, now);
         }
     }
 
@@ -687,7 +732,7 @@ public final class Serv implements AutoCloseable {
      *            The current time.
      * @throws NotFoundException
      */
-    public final void archiveOrder(Accnt accnt, long now) throws NotFoundException {
+    public final void archiveOrders(Accnt accnt, long now) throws NotFoundException {
         RbNode node = accnt.getFirstOrder();
         while (node != null) {
             final Order order = (Order) node;
@@ -735,7 +780,7 @@ public final class Serv implements AutoCloseable {
      *            The current time.
      * @throws NotFoundException
      */
-    public final void archiveTrade(Accnt accnt, long now) throws NotFoundException {
+    public final void archiveTrades(Accnt accnt, long now) throws NotFoundException {
         for (;;) {
             final Exec trade = (Exec) accnt.getRootTrade();
             if (trade == null) {
@@ -749,7 +794,7 @@ public final class Serv implements AutoCloseable {
     }
 
     public final void archiveAll(Accnt accnt, long now) throws NotFoundException {
-        archiveOrder(accnt, now);
-        archiveTrade(accnt, now);
+        archiveOrders(accnt, now);
+        archiveTrades(accnt, now);
     }
 }

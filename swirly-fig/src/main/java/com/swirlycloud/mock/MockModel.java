@@ -5,6 +5,7 @@
  *******************************************************************************/
 package com.swirlycloud.mock;
 
+import com.swirlycloud.collection.SlNode;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Exec;
@@ -23,7 +24,7 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void insertExecList(long contrId, int settlDay, Exec first) {
+    public final void insertExecList(long contrId, int settlDay, SlNode first) {
     }
 
     @Override

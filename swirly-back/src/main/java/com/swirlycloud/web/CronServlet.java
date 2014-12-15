@@ -33,7 +33,6 @@ public final class CronServlet extends RestServlet {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            @SuppressWarnings("unused")
             final Rest rest = Context.getRest();
 
             final String pathInfo = req.getPathInfo();
@@ -42,7 +41,8 @@ public final class CronServlet extends RestServlet {
             boolean match = false;
             if (parts.length > 0) {
                 if ("endofday".equals(parts[JOB_PART])) {
-                    log("End of day processing");
+                    log("end-of-day processing");
+                    rest.getEndOfDay();
                     match = true;
                 }
             }
