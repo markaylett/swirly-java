@@ -5,7 +5,6 @@
  *******************************************************************************/
 package com.swirlycloud.collection;
 
-
 public final class List {
     private final DlNode end = new BasicDlNode() {
         @Override

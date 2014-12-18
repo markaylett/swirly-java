@@ -5,7 +5,6 @@
  *******************************************************************************/
 package com.swirlycloud.collection;
 
-
 public final class Queue {
     private SlNode first;
     private SlNode last;

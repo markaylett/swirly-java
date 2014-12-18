@@ -16,8 +16,9 @@ import com.swirlycloud.mock.MockTrader;
 public final class ExecTest {
     @Test
     public final void test() {
-        final Order order = new Order(1, MockTrader.newTrader("MARAYL"), MockContr.newContr("EURUSD"),
-                ymdToJd(2014, 2, 14), "test", Action.BUY, 12345, 3, 1, 1414692516006L);
+        final Order order = new Order(1, MockTrader.newTrader("MARAYL"),
+                MockContr.newContr("EURUSD"), ymdToJd(2014, 2, 14), "test", Action.BUY, 12345, 3,
+                1, 1414692516006L);
         final Exec exec = new Exec(2, order, 1414692516007L);
         assertEquals(
                 "{\"id\":2,\"orderId\":1,\"trader\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":3,\"exec\":0,\"lastTicks\":0,\"lastLots\":0,\"minLots\":1,\"created\":1414692516007}",

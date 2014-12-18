@@ -8,7 +8,6 @@ package com.swirlycloud.web;
 import static com.swirlycloud.util.StringUtil.splitPath;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -28,6 +27,7 @@ import com.swirlycloud.exception.MethodNotAllowedException;
 import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.exception.ServException;
 import com.swirlycloud.exception.UnauthorizedException;
+import com.swirlycloud.function.UnaryFunction;
 
 @SuppressWarnings("serial")
 public final class RecServlet extends RestServlet {
@@ -55,8 +55,7 @@ public final class RecServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
-            @SuppressWarnings("unchecked")
-            final Map<String, String> params = req.getParameterMap();
+            final UnaryFunction<String, String> params = newParams(req);
 
             boolean match = false;
             if (parts.length == 0) {
@@ -119,8 +118,6 @@ public final class RecServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
-            @SuppressWarnings("unchecked")
-            final Map<String, String> params = req.getParameterMap();
 
             if (parts.length != 1 || !"trader".equals(parts[TYPE_PART])) {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
@@ -144,7 +141,7 @@ public final class RecServlet extends RestServlet {
             if (fields != (Request.MNEM | Request.DISPLAY)) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.postTrader(r.getMnem(), r.getDisplay(), email, params, resp.getWriter());
+            rest.postTrader(r.getMnem(), r.getDisplay(), email, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

@@ -8,11 +8,11 @@ package com.swirlycloud.domain;
 import static com.swirlycloud.date.JulianDay.jdToIso;
 
 import java.io.IOException;
-import java.util.Map;
 
 import com.swirlycloud.collection.BasicRbNode;
 import com.swirlycloud.collection.RbNode;
 import com.swirlycloud.date.JulianDay;
+import com.swirlycloud.function.UnaryFunction;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.StringUtil;
@@ -81,10 +81,11 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     }
 
     @Override
-    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
+    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+            throws IOException {
         int depth = 3; // Default depth.
         if (params != null) {
-            final String arg = params.get("depth");
+            final String arg = params.call("depth");
             if (arg != null) {
                 depth = Integer.parseInt(arg);
             }

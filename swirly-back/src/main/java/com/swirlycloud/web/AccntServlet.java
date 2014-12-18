@@ -8,7 +8,6 @@ package com.swirlycloud.web;
 import static com.swirlycloud.util.StringUtil.splitPath;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -26,6 +25,7 @@ import com.swirlycloud.exception.MethodNotAllowedException;
 import com.swirlycloud.exception.NotFoundException;
 import com.swirlycloud.exception.ServException;
 import com.swirlycloud.exception.UnauthorizedException;
+import com.swirlycloud.function.UnaryFunction;
 
 @SuppressWarnings("serial")
 public final class AccntServlet extends RestServlet {
@@ -106,8 +106,7 @@ public final class AccntServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
-            @SuppressWarnings("unchecked")
-            final Map<String, String> params = req.getParameterMap();
+            final UnaryFunction<String, String> params = newParams(req);
 
             boolean match = false;
             if (parts.length == 0) {
@@ -189,8 +188,6 @@ public final class AccntServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
-            @SuppressWarnings("unchecked")
-            final Map<String, String> params = req.getParameterMap();
 
             if (parts.length != 3 || !"order".equals(parts[TYPE_PART])) {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
@@ -209,7 +206,7 @@ public final class AccntServlet extends RestServlet {
                 throw new BadRequestException("request fields are invalid");
             }
             rest.postOrder(email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
-                    r.getLots(), r.getMinLots(), params, resp.getWriter());
+                    r.getLots(), r.getMinLots(), resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
@@ -235,8 +232,6 @@ public final class AccntServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
-            @SuppressWarnings("unchecked")
-            final Map<String, String> params = req.getParameterMap();
 
             if (parts.length != 4 || !"order".equals(parts[TYPE_PART])) {
                 throw new MethodNotAllowedException("put is not allowed on this resource");
@@ -255,7 +250,7 @@ public final class AccntServlet extends RestServlet {
             if (r.getFields() != Request.LOTS) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.putOrder(email, cmnem, settlDate, id, r.getLots(), params, resp.getWriter());
+            rest.putOrder(email, cmnem, settlDate, id, r.getLots(), resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

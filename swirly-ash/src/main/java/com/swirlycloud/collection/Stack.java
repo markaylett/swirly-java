@@ -5,7 +5,6 @@
  *******************************************************************************/
 package com.swirlycloud.collection;
 
-
 public final class Stack {
     private SlNode first;
 

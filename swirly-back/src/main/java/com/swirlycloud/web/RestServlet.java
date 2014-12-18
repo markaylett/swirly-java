@@ -13,9 +13,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.swirlycloud.exception.ServException;
+import com.swirlycloud.function.UnaryFunction;
 
 @SuppressWarnings("serial")
 public abstract class RestServlet extends HttpServlet {
+
+    protected UnaryFunction<String, String> newParams(final HttpServletRequest req) {
+        return new UnaryFunction<String, String>() {
+            @Override
+            public final String call(String arg) {
+                return req.getParameter(arg);
+            }
+        };
+    }
 
     protected void sendJsonResponse(HttpServletResponse resp) {
         resp.setCharacterEncoding("UTF-8");

@@ -6,8 +6,8 @@
 package com.swirlycloud.exception;
 
 import java.io.IOException;
-import java.util.Map;
 
+import com.swirlycloud.function.UnaryFunction;
 import com.swirlycloud.util.Jsonifiable;
 
 public abstract class ServException extends Exception implements Jsonifiable {
@@ -27,7 +27,8 @@ public abstract class ServException extends Exception implements Jsonifiable {
     }
 
     @Override
-    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
+    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+            throws IOException {
         out.append("{\"num\":");
         out.append(String.valueOf(num));
         out.append(",\"msg\":\"");

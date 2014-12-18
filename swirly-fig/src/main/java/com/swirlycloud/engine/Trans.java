@@ -6,7 +6,6 @@
 package com.swirlycloud.engine;
 
 import java.io.IOException;
-import java.util.Map;
 
 import com.swirlycloud.collection.Queue;
 import com.swirlycloud.collection.SlNode;
@@ -14,6 +13,7 @@ import com.swirlycloud.domain.Exec;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
+import com.swirlycloud.function.UnaryFunction;
 import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.StringUtil;
 
@@ -48,7 +48,8 @@ public final class Trans implements Jsonifiable {
     }
 
     @Override
-    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
+    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+            throws IOException {
         final long traderId = order.getTraderId();
         out.append("{\"market\":");
         market.toJson(params, out);

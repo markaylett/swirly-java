@@ -5,7 +5,6 @@
  *******************************************************************************/
 package com.swirlycloud.collection;
 
-
 public final class Tree {
     private static final int NONE = 0;
     private static final int BLACK = 1;

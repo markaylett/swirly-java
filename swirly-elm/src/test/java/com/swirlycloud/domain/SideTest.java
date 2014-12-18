@@ -40,8 +40,8 @@ public final class SideTest {
         // Two orders at the same price level.
         final Order apple = new Order(1, trader, contr, ymdToJd(2014, 3, 14), "apple", Action.BUY,
                 12345, 10, 0, now);
-        final Order orange = new Order(2, trader, contr, ymdToJd(2014, 3, 14), "orange", Action.BUY,
-                12345, 20, 0, now);
+        final Order orange = new Order(2, trader, contr, ymdToJd(2014, 3, 14), "orange",
+                Action.BUY, 12345, 20, 0, now);
         final Side side = new Side();
 
         apple.state = null;
@@ -139,8 +139,8 @@ public final class SideTest {
         // Two orders at the same price level.
         final Order apple = new Order(1, trader, contr, ymdToJd(2014, 3, 14), "apple", Action.BUY,
                 12345, 10, 0, now);
-        final Order orange = new Order(2, trader, contr, ymdToJd(2014, 3, 14), "orange", Action.BUY,
-                12345, 20, 0, now);
+        final Order orange = new Order(2, trader, contr, ymdToJd(2014, 3, 14), "orange",
+                Action.BUY, 12345, 20, 0, now);
         // Best inserted last.
         final Order pear = new Order(3, trader, contr, ymdToJd(2014, 3, 14), "pear", Action.BUY,
                 12346, 25, 0, now);

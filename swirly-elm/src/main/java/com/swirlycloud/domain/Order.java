@@ -8,11 +8,11 @@ package com.swirlycloud.domain;
 import static com.swirlycloud.date.JulianDay.jdToIso;
 
 import java.io.IOException;
-import java.util.Map;
 
 import com.swirlycloud.collection.BasicRbDlNode;
 import com.swirlycloud.collection.RbNode;
 import com.swirlycloud.date.JulianDay;
+import com.swirlycloud.function.UnaryFunction;
 import com.swirlycloud.util.Identifiable;
 import com.swirlycloud.util.Jsonifiable;
 import com.swirlycloud.util.StringUtil;
@@ -125,7 +125,8 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
     }
 
     @Override
-    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
+    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+            throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"trader\":\"").append(getRecMnem(trader));
         out.append("\",\"contr\":\"").append(getRecMnem(contr));

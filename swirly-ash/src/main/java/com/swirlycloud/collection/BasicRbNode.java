@@ -5,7 +5,6 @@
  *******************************************************************************/
 package com.swirlycloud.collection;
 
-
 public abstract class BasicRbNode implements RbNode {
 
     private transient RbNode left;

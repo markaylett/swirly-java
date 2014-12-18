@@ -33,8 +33,8 @@ public final class ServTest {
             assertNotNull(market);
 
             final Trans trans = new Trans();
-            final Order order = s.placeOrder(accnt, market, "", Action.BUY, 12345, 5, 1, now, trans)
-                    .getOrder();
+            final Order order = s
+                    .placeOrder(accnt, market, "", Action.BUY, 12345, 5, 1, now, trans).getOrder();
             assertEquals(accnt.getTrader(), order.getTrader());
             assertEquals(market.getContr(), order.getContr());
             assertEquals(settlDay, order.getSettlDay());
