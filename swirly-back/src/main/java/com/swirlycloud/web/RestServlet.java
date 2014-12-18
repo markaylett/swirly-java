@@ -25,7 +25,7 @@ public abstract class RestServlet extends HttpServlet {
     }
 
     protected void sendJsonResponse(HttpServletResponse resp, ServException e) throws IOException {
-        e.toJson(resp.getWriter());
+        e.toJson(null, resp.getWriter());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");

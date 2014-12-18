@@ -6,6 +6,7 @@
 package com.swirlycloud.util;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.swirlycloud.exception.UncheckedIOException;
@@ -37,10 +38,10 @@ public final class StringUtil {
         return PATTERN.split(path.substring(begin, end));
     }
 
-    public static String toJson(Jsonifiable j) {
+    public static String toJson(Jsonifiable j, Map<String, String> params) {
         final StringBuilder sb = new StringBuilder();
         try {
-            j.toJson(sb);
+            j.toJson(params, sb);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

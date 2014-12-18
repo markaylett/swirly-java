@@ -8,6 +8,7 @@ package com.swirlycloud.domain;
 import static com.swirlycloud.date.JulianDay.jdToIso;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.swirlycloud.collection.BasicRbNode;
 import com.swirlycloud.date.JulianDay;
@@ -39,11 +40,11 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return StringUtil.toJson(this, null);
     }
 
     @Override
-    public final void toJson(Appendable out) throws IOException {
+    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(key));
         out.append(",\"trader\":\"").append(getRecMnem(trader));
         out.append("\",\"contr\":\"").append(getRecMnem(contr));

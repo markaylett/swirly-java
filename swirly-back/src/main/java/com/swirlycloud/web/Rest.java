@@ -8,6 +8,7 @@ package com.swirlycloud.web;
 import static com.swirlycloud.date.JulianDay.isoToJd;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.swirlycloud.collection.RbNode;
 import com.swirlycloud.collection.SlNode;
@@ -32,7 +33,8 @@ public final class Rest {
 
     private final Serv serv;
 
-    private final void doGetRec(RecType recType, Appendable out) throws IOException {
+    private final void doGetRec(RecType recType, Map<String, String> params, Appendable out)
+            throws IOException {
         out.append('[');
         SlNode node = serv.getFirstRec(recType);
         for (int i = 0; node != null; node = node.slNext()) {
@@ -40,13 +42,14 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            rec.toJson(out);
+            rec.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
-    private final void doGetOrder(Accnt accnt, String email, Appendable out) throws IOException {
+    private final void doGetOrder(Accnt accnt, String email, Map<String, String> params,
+            Appendable out) throws IOException {
         out.append('[');
         RbNode node = accnt.getFirstOrder();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -54,13 +57,14 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            order.toJson(out);
+            order.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
-    private final void doGetTrade(Accnt accnt, String email, Appendable out) throws IOException {
+    private final void doGetTrade(Accnt accnt, String email, Map<String, String> params,
+            Appendable out) throws IOException {
         out.append('[');
         RbNode node = accnt.getFirstTrade();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -68,13 +72,14 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            trade.toJson(out);
+            trade.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
-    private final void doGetPosn(Accnt accnt, String email, Appendable out) throws IOException {
+    private final void doGetPosn(Accnt accnt, String email, Map<String, String> params,
+            Appendable out) throws IOException {
         out.append('[');
         RbNode node = accnt.getFirstPosn();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -82,7 +87,7 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            posn.toJson(out);
+            posn.toJson(params, out);
             ++i;
         }
         out.append(']');
@@ -92,38 +97,41 @@ public final class Rest {
         serv = new Serv(model);
     }
 
-    public final synchronized void getRec(boolean isAdmin, Appendable out) throws IOException {
+    public final synchronized void getRec(boolean isAdmin, Map<String, String> params,
+            Appendable out) throws IOException {
         out.append("{\"assets\":");
-        doGetRec(RecType.ASSET, out);
+        doGetRec(RecType.ASSET, params, out);
         out.append(",\"contrs\":");
-        doGetRec(RecType.CONTR, out);
+        doGetRec(RecType.CONTR, params, out);
         if (isAdmin) {
             out.append(",\"traders\":");
-            doGetRec(RecType.TRADER, out);
+            doGetRec(RecType.TRADER, params, out);
         }
         out.append('}');
     }
 
-    public final synchronized void getRec(RecType recType, Appendable out) throws IOException {
-        doGetRec(recType, out);
+    public final synchronized void getRec(RecType recType, Map<String, String> params,
+            Appendable out) throws IOException {
+        doGetRec(recType, params, out);
     }
 
-    public final synchronized void getRec(RecType recType, String mnem, Appendable out)
-            throws NotFoundException, IOException {
+    public final synchronized void getRec(RecType recType, String mnem, Map<String, String> params,
+            Appendable out) throws NotFoundException, IOException {
         final Rec rec = serv.findRec(recType, mnem);
         if (rec == null) {
             throw new NotFoundException(String.format("record '%s' does not exist", mnem));
         }
-        rec.toJson(out);
+        rec.toJson(params, out);
     }
 
     public final synchronized void postTrader(String mnem, String display, String email,
-            Appendable out) throws BadRequestException, IOException {
+            Map<String, String> params, Appendable out) throws BadRequestException, IOException {
         final Trader trader = serv.createTrader(mnem, display, email);
-        trader.toJson(out);
+        trader.toJson(params, out);
     }
 
-    public final synchronized void getMarket(Appendable out) throws IOException {
+    public final synchronized void getMarket(Map<String, String> params, Appendable out)
+            throws IOException {
         out.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -131,14 +139,14 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            market.toJson(out);
+            market.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
-    public final synchronized void getMarket(String cmnem, Appendable out)
-            throws NotFoundException, IOException {
+    public final synchronized void getMarket(String cmnem, Map<String, String> params,
+            Appendable out) throws NotFoundException, IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
@@ -153,14 +161,14 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            market.toJson(out);
+            market.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
-    public final synchronized void getMarket(String cmnem, int settlDate, Appendable out)
-            throws NotFoundException, IOException {
+    public final synchronized void getMarket(String cmnem, int settlDate,
+            Map<String, String> params, Appendable out) throws NotFoundException, IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
@@ -171,11 +179,12 @@ public final class Rest {
             throw new NotFoundException(String.format("market for '%s' on '%d' does not exist",
                     cmnem, settlDate));
         }
-        market.toJson(out);
+        market.toJson(params, out);
     }
 
     public final synchronized void postMarket(String cmnem, int settlDate, int expiryDate,
-            Appendable out) throws BadRequestException, NotFoundException, IOException {
+            Map<String, String> params, Appendable out) throws BadRequestException,
+            NotFoundException, IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
@@ -184,11 +193,11 @@ public final class Rest {
         final int expiryDay = isoToJd(expiryDate);
         final long now = System.currentTimeMillis();
         final Market market = serv.createMarket(contr, settlDay, expiryDay, now);
-        market.toJson(out);
+        market.toJson(params, out);
     }
 
-    public final synchronized void getAccnt(String email, Appendable out) throws NotFoundException,
-            IOException {
+    public final synchronized void getAccnt(String email, Map<String, String> params, Appendable out)
+            throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -199,11 +208,11 @@ public final class Rest {
             return;
         }
         out.append("{\"orders\":");
-        doGetOrder(accnt, email, out);
+        doGetOrder(accnt, email, params, out);
         out.append(",\"trades\":");
-        doGetTrade(accnt, email, out);
+        doGetTrade(accnt, email, params, out);
         out.append(",\"posns\":");
-        doGetPosn(accnt, email, out);
+        doGetPosn(accnt, email, params, out);
         out.append('}');
     }
 
@@ -222,8 +231,8 @@ public final class Rest {
         serv.archiveOrder(accnt, contr.getId(), settlDay, id, now);
     }
 
-    public final synchronized void getOrder(String email, Appendable out) throws NotFoundException,
-            IOException {
+    public final synchronized void getOrder(String email, Map<String, String> params, Appendable out)
+            throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -233,11 +242,11 @@ public final class Rest {
             out.append("[]");
             return;
         }
-        doGetOrder(accnt, email, out);
+        doGetOrder(accnt, email, params, out);
     }
 
-    public final synchronized void getOrder(String email, String cmnem, Appendable out)
-            throws ForbiddenException, NotFoundException, IOException {
+    public final synchronized void getOrder(String email, String cmnem, Map<String, String> params,
+            Appendable out) throws ForbiddenException, NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -261,14 +270,15 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            order.toJson(out);
+            order.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
     public final synchronized void getOrder(String email, String cmnem, int settlDate,
-            Appendable out) throws ForbiddenException, NotFoundException, IOException {
+            Map<String, String> params, Appendable out) throws ForbiddenException,
+            NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -293,14 +303,14 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            order.toJson(out);
+            order.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
     public final synchronized void getOrder(String email, String cmnem, int settlDate, long id,
-            Appendable out) throws IOException, NotFoundException {
+            Map<String, String> params, Appendable out) throws IOException, NotFoundException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             throw new NotFoundException(String.format("trader '%s' has no orders", email));
@@ -314,12 +324,12 @@ public final class Rest {
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        order.toJson(out);
+        order.toJson(params, out);
     }
 
     public final synchronized void postOrder(String email, String cmnem, int settlDate, String ref,
-            Action action, long ticks, long lots, long minLots, Appendable out)
-            throws BadRequestException, NotFoundException, IOException {
+            Action action, long ticks, long lots, long minLots, Map<String, String> params,
+            Appendable out) throws BadRequestException, NotFoundException, IOException {
         final Accnt accnt = serv.getLazyAccntByEmail(email);
         final Market market = serv.findMarket(cmnem, isoToJd(settlDate));
         if (market == null) {
@@ -327,13 +337,14 @@ public final class Rest {
                     cmnem, settlDate));
         }
         final long now = System.currentTimeMillis();
-        final Trans trans = serv.placeOrder(accnt, market, ref, action, ticks, lots, minLots,
-                now, new Trans());
-        trans.toJson(out);
+        final Trans trans = serv.placeOrder(accnt, market, ref, action, ticks, lots, minLots, now,
+                new Trans());
+        trans.toJson(params, out);
     }
 
     public final synchronized void putOrder(String email, String cmnem, int settlDate, long id,
-            long lots, Appendable out) throws BadRequestException, NotFoundException, IOException {
+            long lots, Map<String, String> params, Appendable out) throws BadRequestException,
+            NotFoundException, IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             throw new NotFoundException(String.format("trader '%s' has no orders", email));
@@ -350,7 +361,7 @@ public final class Rest {
         } else {
             serv.cancelOrder(accnt, market, id, now, trans);
         }
-        trans.toJson(out);
+        trans.toJson(params, out);
     }
 
     public final synchronized void deleteTrade(String email, String cmnem, int settlDate, long id)
@@ -368,8 +379,8 @@ public final class Rest {
         serv.archiveTrade(accnt, contr.getId(), settlDay, id, now);
     }
 
-    public final synchronized void getTrade(String email, Appendable out) throws NotFoundException,
-            IOException {
+    public final synchronized void getTrade(String email, Map<String, String> params, Appendable out)
+            throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -379,11 +390,11 @@ public final class Rest {
             out.append("[]");
             return;
         }
-        doGetTrade(accnt, email, out);
+        doGetTrade(accnt, email, params, out);
     }
 
-    public final synchronized void getTrade(String email, String cmnem, Appendable out)
-            throws ForbiddenException, NotFoundException, IOException {
+    public final synchronized void getTrade(String email, String cmnem, Map<String, String> params,
+            Appendable out) throws ForbiddenException, NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -407,14 +418,15 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            trade.toJson(out);
+            trade.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
     public final synchronized void getTrade(String email, String cmnem, int settlDate,
-            Appendable out) throws ForbiddenException, NotFoundException, IOException {
+            Map<String, String> params, Appendable out) throws ForbiddenException,
+            NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -439,14 +451,14 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            trade.toJson(out);
+            trade.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
     public final synchronized void getTrade(String email, String cmnem, int settlDate, long id,
-            Appendable out) throws NotFoundException, IOException {
+            Map<String, String> params, Appendable out) throws NotFoundException, IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             throw new NotFoundException(String.format("trader '%s' has no trades", email));
@@ -460,11 +472,11 @@ public final class Rest {
         if (trade == null) {
             throw new NotFoundException(String.format("trade '%d' does not exist", id));
         }
-        trade.toJson(out);
+        trade.toJson(params, out);
     }
 
-    public final synchronized void getPosn(String email, Appendable out) throws NotFoundException,
-            IOException {
+    public final synchronized void getPosn(String email, Map<String, String> params, Appendable out)
+            throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -474,11 +486,11 @@ public final class Rest {
             out.append("[]");
             return;
         }
-        doGetPosn(accnt, email, out);
+        doGetPosn(accnt, email, params, out);
     }
 
-    public final synchronized void getPosn(String email, String cmnem, Appendable out)
-            throws ForbiddenException, NotFoundException, IOException {
+    public final synchronized void getPosn(String email, String cmnem, Map<String, String> params,
+            Appendable out) throws ForbiddenException, NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -501,14 +513,14 @@ public final class Rest {
             if (i > 0) {
                 out.append(',');
             }
-            posn.toJson(out);
+            posn.toJson(params, out);
             ++i;
         }
         out.append(']');
     }
 
-    public final synchronized void getPosn(String email, String cmnem, int settlDate, Appendable out)
-            throws NotFoundException, IOException {
+    public final synchronized void getPosn(String email, String cmnem, int settlDate,
+            Map<String, String> params, Appendable out) throws NotFoundException, IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             throw new NotFoundException(String.format("trader '%s' has no posns", email));
@@ -523,7 +535,7 @@ public final class Rest {
             throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",
                     cmnem, settlDate));
         }
-        posn.toJson(out);
+        posn.toJson(params, out);
     }
 
     // Cron jobs.

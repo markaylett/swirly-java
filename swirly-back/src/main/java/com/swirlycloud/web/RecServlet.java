@@ -8,6 +8,7 @@ package com.swirlycloud.web;
 import static com.swirlycloud.util.StringUtil.splitPath;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -54,25 +55,27 @@ public final class RecServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            @SuppressWarnings("unchecked")
+            final Map<String, String> params = req.getParameterMap();
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getRec(userService.isUserAdmin(), resp.getWriter());
+                rest.getRec(userService.isUserAdmin(), params, resp.getWriter());
                 match = true;
             } else if ("asset".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getRec(RecType.ASSET, resp.getWriter());
+                    rest.getRec(RecType.ASSET, params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getRec(RecType.ASSET, parts[CMNEM_PART], resp.getWriter());
+                    rest.getRec(RecType.ASSET, parts[CMNEM_PART], params, resp.getWriter());
                     match = true;
                 }
             } else if ("contr".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getRec(RecType.CONTR, resp.getWriter());
+                    rest.getRec(RecType.CONTR, params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getRec(RecType.CONTR, parts[CMNEM_PART], resp.getWriter());
+                    rest.getRec(RecType.CONTR, parts[CMNEM_PART], params, resp.getWriter());
                     match = true;
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
@@ -80,10 +83,10 @@ public final class RecServlet extends RestServlet {
                     throw new BadRequestException("user is not an admin");
                 }
                 if (parts.length == 1) {
-                    rest.getRec(RecType.TRADER, resp.getWriter());
+                    rest.getRec(RecType.TRADER, params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getRec(RecType.TRADER, parts[CMNEM_PART], resp.getWriter());
+                    rest.getRec(RecType.TRADER, parts[CMNEM_PART], params, resp.getWriter());
                     match = true;
                 }
             }
@@ -116,6 +119,8 @@ public final class RecServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            @SuppressWarnings("unchecked")
+            final Map<String, String> params = req.getParameterMap();
 
             if (parts.length != 1 || !"trader".equals(parts[TYPE_PART])) {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
@@ -139,7 +144,7 @@ public final class RecServlet extends RestServlet {
             if (fields != (Request.MNEM | Request.DISPLAY)) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.postTrader(r.getMnem(), r.getDisplay(), email, resp.getWriter());
+            rest.postTrader(r.getMnem(), r.getDisplay(), email, params, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

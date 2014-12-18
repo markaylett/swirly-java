@@ -8,6 +8,7 @@ package com.swirlycloud.domain;
 import static com.swirlycloud.date.JulianDay.jdToIso;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.swirlycloud.collection.BasicRbNode;
 import com.swirlycloud.collection.RbNode;
@@ -20,7 +21,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     /**
      * Maximum price levels in view.
      */
-    private static final int DEPTH = 3;
+    private static final int DEPTH_MAX = 5;
 
     private final long key;
     private Identifiable contr;
@@ -76,11 +77,23 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return StringUtil.toJson(this, null);
     }
 
     @Override
-    public final void toJson(Appendable out) throws IOException {
+    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
+        int depth = 3; // Default depth.
+        if (params != null) {
+            final String arg = params.get("depth");
+            if (arg != null) {
+                depth = Integer.parseInt(arg);
+            }
+        }
+        // Round-up to minimum.
+        depth = Math.max(depth, 1);
+        // Round-down to maximum.
+        depth = Math.min(depth, DEPTH_MAX);
+
         out.append("{\"id\":").append(String.valueOf(key));
         out.append(",\"contr\":\"").append(getRecMnem(contr));
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
@@ -91,7 +104,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         final RbNode firstOffer = offerSide.getFirstLevel();
 
         RbNode node = firstBid;
-        for (int i = 0; i < DEPTH; ++i) {
+        for (int i = 0; i < depth; ++i) {
             if (i > 0) {
                 out.append(',');
             }
@@ -105,7 +118,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         }
         out.append("],\"bidLots\":[");
         node = firstBid;
-        for (int i = 0; i < DEPTH; ++i) {
+        for (int i = 0; i < depth; ++i) {
             if (i > 0) {
                 out.append(',');
             }
@@ -119,7 +132,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         }
         out.append("],\"bidCount\":[");
         node = firstBid;
-        for (int i = 0; i < DEPTH; ++i) {
+        for (int i = 0; i < depth; ++i) {
             if (i > 0) {
                 out.append(',');
             }
@@ -133,7 +146,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         }
         out.append("],\"offerTicks\":[");
         node = firstOffer;
-        for (int i = 0; i < DEPTH; ++i) {
+        for (int i = 0; i < depth; ++i) {
             if (i > 0) {
                 out.append(',');
             }
@@ -147,7 +160,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         }
         out.append("],\"offerLots\":[");
         node = firstOffer;
-        for (int i = 0; i < DEPTH; ++i) {
+        for (int i = 0; i < depth; ++i) {
             if (i > 0) {
                 out.append(',');
             }
@@ -161,7 +174,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         }
         out.append("],\"offerCount\":[");
         node = firstOffer;
-        for (int i = 0; i < DEPTH; ++i) {
+        for (int i = 0; i < depth; ++i) {
             if (i > 0) {
                 out.append(',');
             }

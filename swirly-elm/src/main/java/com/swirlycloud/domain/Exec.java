@@ -8,6 +8,7 @@ package com.swirlycloud.domain;
 import static com.swirlycloud.date.JulianDay.jdToIso;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.swirlycloud.collection.BasicRbSlNode;
 import com.swirlycloud.date.JulianDay;
@@ -114,11 +115,11 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return StringUtil.toJson(this, null);
     }
 
     @Override
-    public final void toJson(Appendable out) throws IOException {
+    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));
         out.append(",\"trader\":\"").append(getRecMnem(trader));

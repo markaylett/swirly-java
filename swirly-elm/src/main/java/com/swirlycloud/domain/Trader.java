@@ -6,6 +6,7 @@
 package com.swirlycloud.domain;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.swirlycloud.util.StringUtil;
 
@@ -23,11 +24,11 @@ public final class Trader extends Rec {
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return StringUtil.toJson(this, null);
     }
 
     @Override
-    public final void toJson(Appendable out) throws IOException {
+    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"email\":\"").append(email);

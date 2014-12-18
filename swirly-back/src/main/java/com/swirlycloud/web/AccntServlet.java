@@ -8,6 +8,7 @@ package com.swirlycloud.web;
 import static com.swirlycloud.util.StringUtil.splitPath;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -105,55 +106,57 @@ public final class AccntServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            @SuppressWarnings("unchecked")
+            final Map<String, String> params = req.getParameterMap();
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getAccnt(email, resp.getWriter());
+                rest.getAccnt(email, params, resp.getWriter());
                 match = true;
             } else if ("order".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getOrder(email, resp.getWriter());
+                    rest.getOrder(email, params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getOrder(email, parts[CMNEM_PART], resp.getWriter());
+                    rest.getOrder(email, parts[CMNEM_PART], params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 3) {
                     rest.getOrder(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
+                            Integer.parseInt(parts[SETTL_DATE_PART]), params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 4) {
                     rest.getOrder(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]),
-                            Long.parseLong(parts[ID_PART]), resp.getWriter());
+                            Long.parseLong(parts[ID_PART]), params, resp.getWriter());
                     match = true;
                 }
             } else if ("trade".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getTrade(email, resp.getWriter());
+                    rest.getTrade(email, params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getTrade(email, parts[CMNEM_PART], resp.getWriter());
+                    rest.getTrade(email, parts[CMNEM_PART], params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 3) {
                     rest.getTrade(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
+                            Integer.parseInt(parts[SETTL_DATE_PART]), params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 4) {
                     rest.getTrade(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]),
-                            Long.parseLong(parts[ID_PART]), resp.getWriter());
+                            Long.parseLong(parts[ID_PART]), params, resp.getWriter());
                     match = true;
                 }
             } else if ("posn".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getPosn(email, resp.getWriter());
+                    rest.getPosn(email, params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getPosn(email, parts[CMNEM_PART], resp.getWriter());
+                    rest.getPosn(email, parts[CMNEM_PART], params, resp.getWriter());
                     match = true;
                 } else if (parts.length == 3) {
                     rest.getPosn(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), resp.getWriter());
+                            Integer.parseInt(parts[SETTL_DATE_PART]), params, resp.getWriter());
                     match = true;
                 }
             }
@@ -186,6 +189,9 @@ public final class AccntServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            @SuppressWarnings("unchecked")
+            final Map<String, String> params = req.getParameterMap();
+
             if (parts.length != 3 || !"order".equals(parts[TYPE_PART])) {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
             }
@@ -203,7 +209,7 @@ public final class AccntServlet extends RestServlet {
                 throw new BadRequestException("request fields are invalid");
             }
             rest.postOrder(email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
-                    r.getLots(), r.getMinLots(), resp.getWriter());
+                    r.getLots(), r.getMinLots(), params, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
@@ -229,6 +235,9 @@ public final class AccntServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            @SuppressWarnings("unchecked")
+            final Map<String, String> params = req.getParameterMap();
+
             if (parts.length != 4 || !"order".equals(parts[TYPE_PART])) {
                 throw new MethodNotAllowedException("put is not allowed on this resource");
             }
@@ -246,7 +255,7 @@ public final class AccntServlet extends RestServlet {
             if (r.getFields() != Request.LOTS) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.putOrder(email, cmnem, settlDate, id, r.getLots(), resp.getWriter());
+            rest.putOrder(email, cmnem, settlDate, id, r.getLots(), params, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

@@ -6,6 +6,7 @@
 package com.swirlycloud.engine;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.swirlycloud.collection.Queue;
 import com.swirlycloud.collection.SlNode;
@@ -43,24 +44,24 @@ public final class Trans implements Jsonifiable {
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return StringUtil.toJson(this, null);
     }
 
     @Override
-    public final void toJson(Appendable out) throws IOException {
+    public final void toJson(Map<String, String> params, Appendable out) throws IOException {
         final long traderId = order.getTraderId();
         out.append("{\"market\":");
-        market.toJson(out);
+        market.toJson(params, out);
         // Multiple orders may be updated if one trades with one's self.
         out.append(",\"orders\":[");
-        order.toJson(out);
+        order.toJson(params, out);
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             if (match.makerOrder.getTraderId() != traderId) {
                 continue;
             }
             out.append(',');
-            match.makerOrder.toJson(out);
+            match.makerOrder.toJson(params, out);
         }
         out.append("],\"execs\":[");
         int i = 0;
@@ -72,12 +73,12 @@ public final class Trans implements Jsonifiable {
             if (i > 0) {
                 out.append(',');
             }
-            exec.toJson(out);
+            exec.toJson(params, out);
             ++i;
         }
         out.append("],\"posn\":");
         if (posn != null) {
-            posn.toJson(out);
+            posn.toJson(params, out);
         } else {
             out.append("null");
         }

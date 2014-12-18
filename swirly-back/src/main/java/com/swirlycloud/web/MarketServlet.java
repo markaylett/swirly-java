@@ -8,6 +8,7 @@ package com.swirlycloud.web;
 import static com.swirlycloud.util.StringUtil.splitPath;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -51,16 +52,18 @@ public final class MarketServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            @SuppressWarnings("unchecked")
+            final Map<String, String> params = req.getParameterMap();
 
             boolean match = false;
             if (parts.length == 0) {
-                ctx.getMarket(resp.getWriter());
+                ctx.getMarket(params, resp.getWriter());
                 match = true;
             } else if (parts.length == 1) {
-                ctx.getMarket(parts[CMNEM_PART], resp.getWriter());
+                ctx.getMarket(parts[CMNEM_PART], params, resp.getWriter());
                 match = true;
             } else if (parts.length == 2) {
-                ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]),
+                ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]), params,
                         resp.getWriter());
                 match = true;
             }
@@ -90,6 +93,9 @@ public final class MarketServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            @SuppressWarnings("unchecked")
+            final Map<String, String> params = req.getParameterMap();
+
             if (parts.length != 1) {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
             }
@@ -105,7 +111,7 @@ public final class MarketServlet extends RestServlet {
             if (r.getFields() != (Request.SETTL_DATE | Request.EXPIRY_DATE)) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.postMarket(cmnem, r.getSettlDate(), r.getExpiryDate(), resp.getWriter());
+            rest.postMarket(cmnem, r.getSettlDate(), r.getExpiryDate(), params, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
