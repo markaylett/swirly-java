@@ -1,8 +1,6 @@
 <%-- -*- html -*- --%>
 <%--
-   Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
-
-   All rights reserved.
+   Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
 --%>
 <div class="alert alert-warning alert-dismissible" role="alert" style="display: none;"
      data-bind="visible: hasErrors">

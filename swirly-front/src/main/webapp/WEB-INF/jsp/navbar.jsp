@@ -1,8 +1,6 @@
 <%-- -*- html -*- --%>
 <%--
-   Copyright (C) 2013, 2014 Mark Aylett <mark.aylett@gmail.com>
-
-   All rights reserved.
+   Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
