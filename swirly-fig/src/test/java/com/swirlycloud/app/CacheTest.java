@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.engine;
+package com.swirlycloud.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -10,6 +10,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.swirlycloud.app.Cache;
+import com.swirlycloud.app.Model;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
 import com.swirlycloud.domain.Rec;

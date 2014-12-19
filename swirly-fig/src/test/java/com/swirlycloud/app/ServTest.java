@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.engine;
+package com.swirlycloud.app;
 
 import static com.swirlycloud.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
@@ -9,6 +9,9 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
+import com.swirlycloud.app.Accnt;
+import com.swirlycloud.app.Serv;
+import com.swirlycloud.app.Trans;
 import com.swirlycloud.domain.Action;
 import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;

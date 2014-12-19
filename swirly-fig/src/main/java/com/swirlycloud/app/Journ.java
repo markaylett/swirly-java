@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.engine;
+package com.swirlycloud.app;
 
 import com.swirlycloud.collection.SlNode;
 import com.swirlycloud.domain.Exec;

@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.mock;
 
+import com.swirlycloud.app.Model;
 import com.swirlycloud.collection.SlNode;
 import com.swirlycloud.domain.Asset;
 import com.swirlycloud.domain.Contr;
@@ -11,7 +12,6 @@ import com.swirlycloud.domain.Market;
 import com.swirlycloud.domain.Order;
 import com.swirlycloud.domain.Posn;
 import com.swirlycloud.domain.Trader;
-import com.swirlycloud.engine.Model;
 import com.swirlycloud.function.UnaryCallback;
 
 public final class MockModel implements Model {
