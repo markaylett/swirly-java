@@ -15,10 +15,10 @@ Deploy to appengine:
 
 Update dispatch config:
 
-    $ ./appcfg.sh update_dispatch swirly-front/src/main/webapp
+    $ ./appcfg.sh update_dispatch twirly-front/src/main/webapp
 
 Full release:
 
-    $ ./update.sh swirly-dev
-    $ ./update.sh swirly-uat
-    $ ./update.sh swirly-prd
+    $ ./update.sh twirly-dev
+    $ ./update.sh twirly-uat
+    $ ./update.sh twirly-prd

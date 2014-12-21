@@ -1,5 +1,5 @@
 allprojects  {
-    group = 'com.swirlycloud'
+    group = 'com.swirlycloud.twirly'
     version = '0.1'
 }
 

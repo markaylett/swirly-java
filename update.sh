@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
-appid=${1:-'swirly-prd'}
+appid=${1:-'twirly-prd'}
 gradle build
 patch -p1 <<EOF
---- a/swirly-ear/build/exploded-app/swirly-back-0.1/WEB-INF/appengine-web.xml
-+++ b/swirly-ear/build/exploded-app/swirly-back-0.1/WEB-INF/appengine-web.xml
+--- a/twirly-ear/build/exploded-app/twirly-back-0.1/WEB-INF/appengine-web.xml
++++ b/twirly-ear/build/exploded-app/twirly-back-0.1/WEB-INF/appengine-web.xml
 @@ -5,13 +5,13 @@
    <version>1</version>
    <threadsafe>true</threadsafe>
@@ -24,5 +24,5 @@ patch -p1 <<EOF
      <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
    </system-properties>
 EOF
-./appcfg.sh -A $appid update swirly-ear/build/exploded-app
-./appcfg.sh -A $appid update_dispatch swirly-front/src/main/webapp
+./appcfg.sh -A $appid update twirly-ear/build/exploded-app
+./appcfg.sh -A $appid update_dispatch twirly-front/src/main/webapp
