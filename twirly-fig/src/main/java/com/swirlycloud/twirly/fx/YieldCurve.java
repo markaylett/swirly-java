@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -50,6 +52,7 @@ public final class YieldCurve {
     private String ccy;
     private String dayCountConvention;
     private GregDate spotDate;
+    private final Map<String, CurvePoint> curvePoints = new HashMap<>();
 
     private static GregDate parseDate(char[] ch, int start, int length) {
         final int year = Integer.parseInt(new String(ch, start + 0, 4));
@@ -143,6 +146,9 @@ public final class YieldCurve {
             case currency:
                 break;
             case curvepoint:
+                if (deposits) {
+                    curvePoints.put(tenor, new CurvePoint(tenor, maturityDate, parRate));
+                }
                 break;
             case daycountconvention:
                 break;
@@ -238,5 +244,9 @@ public final class YieldCurve {
 
     public final GregDate getSpotDate() {
         return spotDate;
+    }
+
+    public final CurvePoint getCurvePoint(String tenor) {
+        return curvePoints.get(tenor);
     }
 }

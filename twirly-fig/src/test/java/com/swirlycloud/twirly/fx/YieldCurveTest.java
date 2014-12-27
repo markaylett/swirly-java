@@ -17,8 +17,7 @@ import org.xml.sax.SAXException;
 import com.swirlycloud.twirly.date.GregDate;
 
 public final class YieldCurveTest {
-    @SuppressWarnings("unused")
-    private static final double DELTA = 0.0000001;
+    private static final double DELTA = 0.000000000001;
     private static final String EXAMPLE = "<?xml version=\"1.0\" standalone=\"yes\" ?>\n" //
             + "<interestRateCurve>\n" //
             + "  <effectiveasof>2014-12-25</effectiveasof>\n" //
@@ -150,5 +149,10 @@ public final class YieldCurveTest {
         assertEquals("GBP", yc.getCcy());
         assertEquals("ACT/365", yc.getDayCountConvention());
         assertEquals(new GregDate(2014, 11, 25), yc.getSpotDate());
+
+        CurvePoint cp = yc.getCurvePoint("1M");
+        assertEquals("1M", cp.getTenor());
+        assertEquals(new GregDate(2015, 0, 26), cp.getMaturityDate());
+        assertEquals(0.005016, cp.getParRate(), DELTA);
     }
 }
