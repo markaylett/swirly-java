@@ -94,21 +94,21 @@ public final class YieldTest {
 
     @Test
     public final void testPeriodCompPv() {
-        pv(Yield.newPeriodComp(2));
+        pv(Yield.SEMI_ANNUAL);
         pv(Yield.newPeriodComp(4));
         pv(Yield.newPeriodComp(12));
     }
 
     @Test
     public final void testPeriodCompIr() {
-        ir(Yield.newPeriodComp(2));
+        ir(Yield.SEMI_ANNUAL);
         ir(Yield.newPeriodComp(4));
         ir(Yield.newPeriodComp(12));
     }
 
     @Test
     public final void testPeriodCompFr() {
-        fr(Yield.newPeriodComp(2));
+        fr(Yield.SEMI_ANNUAL);
         fr(Yield.newPeriodComp(4));
         fr(Yield.newPeriodComp(12));
     }

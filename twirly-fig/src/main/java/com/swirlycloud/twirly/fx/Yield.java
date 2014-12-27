@@ -62,6 +62,21 @@ public abstract class Yield {
         return ir(fv(r2, t2) / fv(r1, t1), t2 - t1);
     }
 
+    public static Yield newPeriodComp(final int n) {
+        return new Yield() {
+
+            @Override
+            public final double fv(double r, double t) {
+                return Math.pow(1 + r / n, t * n);
+            }
+
+            @Override
+            public final double ir(double fv, double t) {
+                return n * (Math.pow(fv, (1 / (t * n))) - 1);
+            }
+        };
+    }
+
     public static final Yield SIMPLE_INTEREST = new Yield() {
 
         @Override
@@ -88,6 +103,8 @@ public abstract class Yield {
         }
     };
 
+    public static final Yield SEMI_ANNUAL = newPeriodComp(2);
+
     public static final Yield CONT_COMP = new Yield() {
 
         @Override
@@ -110,19 +127,4 @@ public abstract class Yield {
             return (r2 * t2 - r1 * t1) / (t2 - t1);
         }
     };
-
-    public static Yield newPeriodComp(final int n) {
-        return new Yield() {
-
-            @Override
-            public final double fv(double r, double t) {
-                return Math.pow(1 + r / n, t * n);
-            }
-
-            @Override
-            public final double ir(double fv, double t) {
-                return n * (Math.pow(fv, (1 / (t * n))) - 1);
-            }
-        };
-    }
 }
