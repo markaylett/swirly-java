@@ -84,6 +84,10 @@ public final class GregDate implements Comparable<GregDate> {
         return n;
     }
 
+    public final int diffDays(GregDate rhs) {
+        return rhs.toJd() - toJd();
+    }
+
     public static boolean isLeapYear(int year) {
         return year % 100 == 0 ? year % 400 == 0 : year % 4 == 0;
     }
