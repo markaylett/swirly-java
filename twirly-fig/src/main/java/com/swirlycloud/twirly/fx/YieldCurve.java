@@ -23,35 +23,158 @@ import com.swirlycloud.twirly.date.GregDate;
 
 public final class YieldCurve {
 
-    private transient SAXParserFactory factory;
+    private enum Element {
+        baddayconvention, //
+        calendar, //
+        calendars, //
+        currency, //
+        curvepoint, //
+        daycountconvention, //
+        deposits, //
+        effectiveasof, //
+        fixeddaycountconvention, //
+        fixedpaymentfrequency, //
+        floatingdaycountconvention, //
+        floatingpaymentfrequency, //
+        interestRateCurve, //
+        maturitydate, //
+        parrate, //
+        snaptime, //
+        spotdate, //
+        swaps, //
+        tenor //
+    }
 
-    private static final class Handler extends DefaultHandler {
+    private transient SAXParserFactory factory;
+    private GregDate effectiveAsOf;
+    private String ccy;
+    private String dayCountConvention;
+    private GregDate spotDate;
+
+    private static GregDate parseDate(char[] ch, int start, int length) {
+        final int year = Integer.parseInt(new String(ch, start + 0, 4));
+        final int mon = Integer.parseInt(new String(ch, start + 5, 2)) - 1;
+        final int mday = Integer.parseInt(new String(ch, start + 8, 2));
+        return new GregDate(year, mon, mday);
+    }
+
+    private final class Handler extends DefaultHandler {
+
+        private Element element;
+        private boolean deposits = false;
+
+        // Curve Point.
+        private String tenor;
+        private GregDate maturityDate;
+        private double parRate;
 
         @Override
         public final void characters(char[] ch, int start, int length) throws SAXException {
-            System.out.println(new String(ch, start, length));
-        }
-
-        @Override
-        public final void startDocument() throws SAXException {
-            System.out.println("startDocument");
-        }
-
-        @Override
-        public final void endDocument() throws SAXException {
-            System.out.println("endDocument");
+            if (element == null) {
+                return;
+            }
+            switch (element) {
+            case baddayconvention:
+                break;
+            case calendar:
+                break;
+            case calendars:
+                break;
+            case currency:
+                ccy = new String(ch, start, length);
+                break;
+            case curvepoint:
+                break;
+            case daycountconvention:
+                dayCountConvention = new String(ch, start, length);
+                break;
+            case deposits:
+                deposits = true;
+                break;
+            case effectiveasof:
+                effectiveAsOf = parseDate(ch, start, length);
+                break;
+            case fixeddaycountconvention:
+                break;
+            case fixedpaymentfrequency:
+                break;
+            case floatingdaycountconvention:
+                break;
+            case floatingpaymentfrequency:
+                break;
+            case interestRateCurve:
+                break;
+            case maturitydate:
+                maturityDate = parseDate(ch, start, length);
+                break;
+            case parrate:
+                parRate = Double.parseDouble(new String(ch, start, length));
+                break;
+            case snaptime:
+                break;
+            case spotdate:
+                if (deposits) {
+                    spotDate = parseDate(ch, start, length);
+                }
+                break;
+            case swaps:
+                break;
+            case tenor:
+                tenor = new String(ch, start, length);
+                break;
+            }
         }
 
         @Override
         public final void startElement(String uri, String localName, String qName,
                 Attributes attributes) throws SAXException {
-            System.out.println("startElement: " + qName);
+            element = Element.valueOf(qName);
         }
 
         @Override
-        public final void endElement(String uri, String localName, String qName)
-                throws SAXException {
-            System.out.println("endElement: " + qName);
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            switch (Element.valueOf(qName)) {
+            case baddayconvention:
+                break;
+            case calendar:
+                break;
+            case calendars:
+                break;
+            case currency:
+                break;
+            case curvepoint:
+                break;
+            case daycountconvention:
+                break;
+            case deposits:
+                deposits = false;
+                break;
+            case effectiveasof:
+                break;
+            case fixeddaycountconvention:
+                break;
+            case fixedpaymentfrequency:
+                break;
+            case floatingdaycountconvention:
+                break;
+            case floatingpaymentfrequency:
+                break;
+            case interestRateCurve:
+                break;
+            case maturitydate:
+                break;
+            case parrate:
+                break;
+            case snaptime:
+                break;
+            case spotdate:
+                break;
+            case swaps:
+                break;
+            case tenor:
+                break;
+            }
+            element = null;
         }
     }
 
@@ -99,5 +222,21 @@ public final class YieldCurve {
                 entry = is.getNextEntry();
             }
         }
+    }
+
+    public final GregDate getEffectiveAsOf() {
+        return effectiveAsOf;
+    }
+
+    public final String getCcy() {
+        return ccy;
+    }
+
+    public final String getDayCountConvention() {
+        return dayCountConvention;
+    }
+
+    public final GregDate getSpotDate() {
+        return spotDate;
     }
 }
