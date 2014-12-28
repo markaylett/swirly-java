@@ -5,12 +5,12 @@ package com.swirlycloud.twirly.fx;
 
 import com.swirlycloud.twirly.date.GregDate;
 
-public final class CurvePoint {
+public final class IrPoint {
     private final String tenor;
     private final GregDate maturityDate;
     private final double parRate;
 
-    public CurvePoint(String tenor, GregDate maturityDate, double parRate) {
+    public IrPoint(String tenor, GregDate maturityDate, double parRate) {
         this.tenor = tenor;
         this.maturityDate = maturityDate;
         this.parRate = parRate;

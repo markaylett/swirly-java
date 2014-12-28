@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
 
 import com.swirlycloud.twirly.date.GregDate;
 
-public final class YieldCurveTest {
+public final class IrCurveTest {
     private static final double DELTA = 0.000000000001;
     private static final String EXAMPLE = "<?xml version=\"1.0\" standalone=\"yes\" ?>\n" //
             + "<interestRateCurve>\n" //
@@ -141,18 +141,23 @@ public final class YieldCurveTest {
     public final void test() throws IOException, ParserConfigurationException, SAXException {
 
         final InputSource is = new InputSource(new StringReader(EXAMPLE));
-        final YieldCurve yc = new YieldCurve();
+        final IrCurve irc = new IrCurve();
         //yc.parse("USD", GregDate.valueOfIso(20141224));
-        yc.parse(is);
+        irc.parse(is);
 
-        assertEquals(new GregDate(2014, 11, 25), yc.getEffectiveAsOf());
-        assertEquals("GBP", yc.getCcy());
-        assertEquals("ACT/365", yc.getDayCountConvention());
-        assertEquals(new GregDate(2014, 11, 25), yc.getSpotDate());
+        assertEquals(new GregDate(2014, 11, 25), irc.getEffectiveAsOf());
+        assertEquals("GBP", irc.getCcy());
+        assertEquals("ACT/365", irc.getDayCountConvention());
+        assertEquals(new GregDate(2014, 11, 25), irc.getSpotDate());
 
-        CurvePoint cp = yc.getCurvePoint("1M");
-        assertEquals("1M", cp.getTenor());
-        assertEquals(new GregDate(2015, 0, 26), cp.getMaturityDate());
-        assertEquals(0.005016, cp.getParRate(), DELTA);
-    }
+        IrPoint irp = irc.getCurvePoint("1M");
+        assertEquals("1M", irp.getTenor());
+        assertEquals(new GregDate(2015, 0, 26), irp.getMaturityDate());
+        assertEquals(0.005016, irp.getParRate(), DELTA);
+
+        irp = irc.getCurvePoint("2M");
+        assertEquals("2M", irp.getTenor());
+        assertEquals(new GregDate(2015, 1, 25), irp.getMaturityDate());
+        assertEquals(0.00524, irp.getParRate(), DELTA);
+}
 }

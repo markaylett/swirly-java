@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.fx;
 
-public abstract class Yield {
+public abstract class IrCalc {
     /**
      * Calculate future-value factor.
      * 
@@ -62,8 +62,8 @@ public abstract class Yield {
         return ir(fv(r2, t2) / fv(r1, t1), t2 - t1);
     }
 
-    public static Yield newPeriodComp(final int n) {
-        return new Yield() {
+    public static IrCalc newPeriodComp(final int n) {
+        return new IrCalc() {
 
             @Override
             public final double fv(double r, double t) {
@@ -77,7 +77,7 @@ public abstract class Yield {
         };
     }
 
-    public static final Yield SIMPLE_INTEREST = new Yield() {
+    public static final IrCalc SIMPLE_INTEREST = new IrCalc() {
 
         @Override
         public final double fv(double r, double t) {
@@ -90,7 +90,7 @@ public abstract class Yield {
         }
     };
 
-    public static final Yield ANNUAL_COMP = new Yield() {
+    public static final IrCalc ANNUAL_COMP = new IrCalc() {
 
         @Override
         public final double fv(double r, double t) {
@@ -103,9 +103,9 @@ public abstract class Yield {
         }
     };
 
-    public static final Yield SEMI_ANNUAL = newPeriodComp(2);
+    public static final IrCalc SEMI_ANNUAL = newPeriodComp(2);
 
-    public static final Yield CONT_COMP = new Yield() {
+    public static final IrCalc CONT_COMP = new IrCalc() {
 
         @Override
         public final double fv(double r, double t) {
@@ -127,4 +127,20 @@ public abstract class Yield {
             return (r2 * t2 - r1 * t1) / (t2 - t1);
         }
     };
+
+    public static double periodToCont(int n, double r) {
+        return n * Math.log(1 + r / n);
+    }
+
+    public static double contToPeriod(int n, double r) {
+        return n * (Math.exp(r / n) - 1);
+    }
+
+    public static double annualToPeriod(int n, double r) {
+        return n * (Math.pow(1 + r, 1 / n) - 1);
+    }
+
+    public static double annualToTime(double fv, double r) {
+        return Math.log(fv) / Math.log(1 + r);
+    }
 }

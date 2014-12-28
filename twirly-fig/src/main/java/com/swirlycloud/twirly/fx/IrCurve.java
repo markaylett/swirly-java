@@ -23,7 +23,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.swirlycloud.twirly.date.GregDate;
 
-public final class YieldCurve {
+public final class IrCurve {
 
     private enum Element {
         baddayconvention, //
@@ -52,7 +52,7 @@ public final class YieldCurve {
     private String ccy;
     private String dayCountConvention;
     private GregDate spotDate;
-    private final Map<String, CurvePoint> curvePoints = new HashMap<>();
+    private final Map<String, IrPoint> curvePoints = new HashMap<>();
 
     private static GregDate parseDate(char[] ch, int start, int length) {
         final int year = Integer.parseInt(new String(ch, start + 0, 4));
@@ -135,7 +135,7 @@ public final class YieldCurve {
         }
 
         @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
+        public final void endElement(String uri, String localName, String qName) throws SAXException {
             switch (Element.valueOf(qName)) {
             case baddayconvention:
                 break;
@@ -147,7 +147,7 @@ public final class YieldCurve {
                 break;
             case curvepoint:
                 if (deposits) {
-                    curvePoints.put(tenor, new CurvePoint(tenor, maturityDate, parRate));
+                    curvePoints.put(tenor, new IrPoint(tenor, maturityDate, parRate));
                 }
                 break;
             case daycountconvention:
@@ -246,7 +246,7 @@ public final class YieldCurve {
         return spotDate;
     }
 
-    public final CurvePoint getCurvePoint(String tenor) {
+    public final IrPoint getCurvePoint(String tenor) {
         return curvePoints.get(tenor);
     }
 }
