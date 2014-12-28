@@ -147,7 +147,7 @@ public final class IrCurveTest {
 
         assertEquals(new GregDate(2014, 11, 25), irc.getEffectiveAsOf());
         assertEquals("GBP", irc.getCcy());
-        assertEquals("ACT/365", irc.getDayCountConvention());
+        assertEquals(DayCount.ACTUAL365FIXED, irc.getDayCount());
         assertEquals(new GregDate(2014, 11, 25), irc.getSpotDate());
 
         IrPoint irp = irc.getCurvePoint("1M");

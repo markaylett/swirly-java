@@ -50,7 +50,7 @@ public final class IrCurve {
     private transient SAXParserFactory factory;
     private GregDate effectiveAsOf;
     private String ccy;
-    private String dayCountConvention;
+    private DayCount dayCount;
     private GregDate spotDate;
     private final Map<String, IrPoint> curvePoints = new HashMap<>();
 
@@ -59,6 +59,17 @@ public final class IrCurve {
         final int mon = Integer.parseInt(new String(ch, start + 5, 2)) - 1;
         final int mday = Integer.parseInt(new String(ch, start + 8, 2));
         return new GregDate(year, mon, mday);
+    }
+
+    private static DayCount parseDayCount(char[] ch, int start, int length) {
+        final String s = new String(ch, start, length);
+        if ("ACT/360".equals(s)) {
+            return DayCount.ACTUAL360;
+        } else if ("ACT/365".equals(s)) {
+            return DayCount.ACTUAL365FIXED;
+        } else {
+            throw new IllegalArgumentException(String.format("invalid day-count convention '%s'", s));
+        }
     }
 
     private final class Handler extends DefaultHandler {
@@ -89,7 +100,7 @@ public final class IrCurve {
             case curvepoint:
                 break;
             case daycountconvention:
-                dayCountConvention = new String(ch, start, length);
+                dayCount = parseDayCount(ch, start, length);
                 break;
             case deposits:
                 deposits = true;
@@ -135,7 +146,8 @@ public final class IrCurve {
         }
 
         @Override
-        public final void endElement(String uri, String localName, String qName) throws SAXException {
+        public final void endElement(String uri, String localName, String qName)
+                throws SAXException {
             switch (Element.valueOf(qName)) {
             case baddayconvention:
                 break;
@@ -238,8 +250,8 @@ public final class IrCurve {
         return ccy;
     }
 
-    public final String getDayCountConvention() {
-        return dayCountConvention;
+    public final DayCount getDayCount() {
+        return dayCount;
     }
 
     public final GregDate getSpotDate() {
