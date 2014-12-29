@@ -118,7 +118,6 @@ public final class IrCurve {
                 dayCount = parseDayCount(ch, start, length);
                 break;
             case deposits:
-                deposits = true;
                 break;
             case effectiveasof:
                 effectiveAsOf = parseDate(ch, start, length);
@@ -158,6 +157,47 @@ public final class IrCurve {
         public final void startElement(String uri, String localName, String qName,
                 Attributes attributes) throws SAXException {
             element = Element.valueOf(qName);
+            switch (element) {
+            case baddayconvention:
+                break;
+            case calendar:
+                break;
+            case calendars:
+                break;
+            case currency:
+                break;
+            case curvepoint:
+                break;
+            case daycountconvention:
+                break;
+            case deposits:
+                deposits = true;
+                break;
+            case effectiveasof:
+                break;
+            case fixeddaycountconvention:
+                break;
+            case fixedpaymentfrequency:
+                break;
+            case floatingdaycountconvention:
+                break;
+            case floatingpaymentfrequency:
+                break;
+            case interestRateCurve:
+                break;
+            case maturitydate:
+                break;
+            case parrate:
+                break;
+            case snaptime:
+                break;
+            case spotdate:
+                break;
+            case swaps:
+                break;
+            case tenor:
+                break;
+            }
         }
 
         @Override
@@ -274,8 +314,15 @@ public final class IrCurve {
         return spotDate;
     }
 
+    public final int diffDays(GregDate maturityDate) {
+        return dayCount.diffDays(spotDate, maturityDate);
+    }
+
+    public final double getRate(int days) {
+        return linearInterp(xs, ys, days);
+    }
+
     public final double getRate(GregDate maturityDate) {
-        final double x = dayCount.diffDays(spotDate, maturityDate);
-        return linearInterp(xs, ys, x);
+        return getRate(diffDays(maturityDate));
     }
 }
