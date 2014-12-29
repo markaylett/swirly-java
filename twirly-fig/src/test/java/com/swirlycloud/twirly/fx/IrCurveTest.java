@@ -142,7 +142,7 @@ public final class IrCurveTest {
 
         final InputSource is = new InputSource(new StringReader(EXAMPLE));
         final IrCurve irc = new IrCurve();
-        //yc.parse("USD", GregDate.valueOfIso(20141224));
+        // yc.parse("USD", GregDate.valueOfIso(20141224));
         irc.parse(is);
 
         assertEquals(new GregDate(2014, 11, 25), irc.getEffectiveAsOf());
@@ -150,14 +150,18 @@ public final class IrCurveTest {
         assertEquals(DayCount.ACTUAL365FIXED, irc.getDayCount());
         assertEquals(new GregDate(2014, 11, 25), irc.getSpotDate());
 
-        IrPoint irp = irc.getCurvePoint("1M");
-        assertEquals("1M", irp.getTenor());
-        assertEquals(new GregDate(2015, 0, 26), irp.getMaturityDate());
-        assertEquals(0.005016, irp.getParRate(), DELTA);
+        // 1M.
+        assertEquals(0.005016, irc.getRate(new GregDate(2015, 0, 26)), DELTA);
+        // 2M.
+        assertEquals(0.005240, irc.getRate(new GregDate(2015, 1, 25)), DELTA);
+        // 3M.
+        assertEquals(0.005596, irc.getRate(new GregDate(2015, 2, 25)), DELTA);
+        // 6M.
+        assertEquals(0.006823, irc.getRate(new GregDate(2015, 5, 25)), DELTA);
+        // 12M.
+        assertEquals(0.009774, irc.getRate(new GregDate(2015, 11, 25)), DELTA);
 
-        irp = irc.getCurvePoint("2M");
-        assertEquals("2M", irp.getTenor());
-        assertEquals(new GregDate(2015, 1, 25), irp.getMaturityDate());
-        assertEquals(0.00524, irp.getParRate(), DELTA);
-}
+        // Interpolated.
+        assertEquals(0.0062095, irc.getRate(new GregDate(2015, 4, 10)), DELTA);
+    }
 }

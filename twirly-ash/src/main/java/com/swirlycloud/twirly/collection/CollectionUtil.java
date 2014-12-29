@@ -13,7 +13,7 @@ public final class CollectionUtil {
 
     public static int binsearch(double[] xs, double x) {
         int lo = 0, hi = xs.length - 1;
-        while (lo < hi) {
+        while (hi - lo > 1) {
             final int mid = midpoint(lo, hi);
             if (xs[mid] <= x) {
                 lo = mid;

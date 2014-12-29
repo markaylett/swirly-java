@@ -3,12 +3,14 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.fx;
 
+import static com.swirlycloud.twirly.math.MathUtil.linearInterp;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -52,7 +54,7 @@ public final class IrCurve {
     private String ccy;
     private DayCount dayCount;
     private GregDate spotDate;
-    private final Map<String, IrPoint> curvePoints = new HashMap<>();
+    private double[] xs, ys;
 
     private static GregDate parseDate(char[] ch, int start, int length) {
         final int year = Integer.parseInt(new String(ch, start + 0, 4));
@@ -81,6 +83,19 @@ public final class IrCurve {
         private String tenor;
         private GregDate maturityDate;
         private double parRate;
+
+        private final List<IrPoint> irPoints = new ArrayList<>();
+
+        private final void createArrays() {
+            final int n = irPoints.size();
+            xs = new double[n];
+            ys = new double[n];
+            for (int i = 0; i < n; ++i) {
+                final IrPoint cp = irPoints.get(i);
+                xs[i] = dayCount.diffDays(spotDate, cp.getMaturityDate());
+                ys[i] = cp.getParRate();
+            }
+        }
 
         @Override
         public final void characters(char[] ch, int start, int length) throws SAXException {
@@ -159,7 +174,7 @@ public final class IrCurve {
                 break;
             case curvepoint:
                 if (deposits) {
-                    curvePoints.put(tenor, new IrPoint(tenor, maturityDate, parRate));
+                    irPoints.add(new IrPoint(tenor, maturityDate, parRate));
                 }
                 break;
             case daycountconvention:
@@ -178,6 +193,7 @@ public final class IrCurve {
             case floatingpaymentfrequency:
                 break;
             case interestRateCurve:
+                createArrays();
                 break;
             case maturitydate:
                 break;
@@ -258,7 +274,8 @@ public final class IrCurve {
         return spotDate;
     }
 
-    public final IrPoint getCurvePoint(String tenor) {
-        return curvePoints.get(tenor);
+    public final double getRate(GregDate maturityDate) {
+        final double x = dayCount.diffDays(spotDate, maturityDate);
+        return linearInterp(xs, ys, x);
     }
 }
