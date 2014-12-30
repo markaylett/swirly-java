@@ -8,6 +8,7 @@ import static com.swirlycloud.twirly.math.MathUtil.linearInterp;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -283,20 +284,24 @@ public final class IrCurve {
         parser.parse(is, new Handler());
     }
 
-    public final void parse(String ccy, GregDate date) throws Exception {
+    public final boolean parse(String ccy, GregDate gd) throws IOException,
+            ParserConfigurationException, SAXException {
+        boolean success = false;
         final URL url = new URL(String.format(
-                "https://www.markit.com/news/InterestRates_%s_%d.zip", ccy, date.toIso()));
+                "https://www.markit.com/news/InterestRates_%s_%d.zip", ccy, gd.toIso()));
         try (final ZipInputStream is = new ZipInputStream(url.openStream())) {
             ZipEntry entry = is.getNextEntry();
             while (entry != null) {
                 if (entry.getName().startsWith("InterestRates_")) {
                     final SAXParser parser = newSaxParser();
                     parser.parse(is, new Handler());
+                    success = true;
                     break;
                 }
                 entry = is.getNextEntry();
             }
         }
+        return success;
     }
 
     public final GregDate getEffectiveAsOf() {

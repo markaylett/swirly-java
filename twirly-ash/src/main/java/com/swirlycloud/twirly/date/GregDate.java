@@ -46,10 +46,9 @@ public final class GregDate implements Comparable<GregDate> {
 
     public GregDate(int year, int mon, int mday) {
         assert mon <= 11;
-        assert mday <= mdays(year, mon);
         this.year = year;
         this.mon = mon;
-        this.mday = mday;
+        this.mday = Math.min(mday, mdays(year, mon));
     }
 
     @Override
@@ -109,6 +108,19 @@ public final class GregDate implements Comparable<GregDate> {
 
     public final int mdays() {
         return mdays(year, mon);
+    }
+
+    public final GregDate addYears(int n) {
+        return new GregDate(year + n, mon, mday);
+    }
+
+    public final GregDate addMonths(int n) {
+        final int total = year * 12 + mon + n;
+        return new GregDate(total / 12, total % 12, mday);
+    }
+
+    public final GregDate addDays(int n) {
+        return valueOfJd(toJd() + n);
     }
 
     public final int getYear() {
