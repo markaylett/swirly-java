@@ -8,6 +8,10 @@ import com.swirlycloud.twirly.date.GregDate;
 public abstract class DayCount {
     public abstract int diffDays(GregDate lhs, GregDate rhs);
 
+    public final double diffYears(GregDate lhs, GregDate rhs) {
+        return daysToYears(diffDays(lhs, rhs));
+    }
+
     public abstract double daysToYears(int days);
 
     public static boolean isLastDayInFeb(int year, int mon, int mday) {
@@ -37,7 +41,7 @@ public abstract class DayCount {
 
         @Override
         public final double daysToYears(int days) {
-            return 365;
+            return days / 365;
         }
     };
 
