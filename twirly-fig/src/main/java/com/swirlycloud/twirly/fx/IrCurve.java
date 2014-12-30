@@ -70,7 +70,8 @@ public final class IrCurve {
         } else if ("ACT/365".equals(s)) {
             return DayCount.ACTUAL365FIXED;
         } else {
-            throw new IllegalArgumentException(String.format("invalid day-count convention '%s'", s));
+            throw new IllegalArgumentException(
+                    String.format("invalid day-count convention '%s'", s));
         }
     }
 
@@ -92,7 +93,7 @@ public final class IrCurve {
             ys = new double[n];
             for (int i = 0; i < n; ++i) {
                 final IrPoint cp = irPoints.get(i);
-                xs[i] = dayCount.diffDays(spotDate, cp.getMaturityDate());
+                xs[i] = dayCount.diffYears(spotDate, cp.getMaturityDate());
                 ys[i] = cp.getParRate();
             }
         }
@@ -314,15 +315,35 @@ public final class IrCurve {
         return spotDate;
     }
 
-    public final int diffDays(GregDate maturityDate) {
-        return dayCount.diffDays(spotDate, maturityDate);
+    public final double getTime(GregDate gd) {
+        return dayCount.diffYears(spotDate, gd);
     }
 
-    public final double getRate(int days) {
-        return linearInterp(xs, ys, days);
+    public final double ir(double t) {
+        return linearInterp(xs, ys, t);
     }
 
-    public final double getRate(GregDate maturityDate) {
-        return getRate(diffDays(maturityDate));
+    public final double ir(GregDate gd) {
+        return ir(getTime(gd));
+    }
+
+    public double fr(double t1, double t2, IrCalc irc) {
+        final double r1 = ir(t1);
+        final double r2 = ir(t2);
+        return irc.fr(r1, t1, r2, t2);
+    }
+
+    public double fr(GregDate gd1, GregDate gd2, IrCalc irc) {
+        return fr(getTime(gd1), getTime(gd2), irc);
+    }
+
+    public double fv(double t1, double t2, IrCalc irc) {
+        final double r1 = ir(t1);
+        final double r2 = ir(t2);
+        return irc.fv(r1, t1, r2, t2);
+    }
+
+    public double fv(GregDate gd1, GregDate gd2, IrCalc irc) {
+        return fv(getTime(gd1), getTime(gd2), irc);
     }
 }

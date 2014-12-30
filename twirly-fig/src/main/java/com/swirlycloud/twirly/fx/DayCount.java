@@ -6,10 +6,10 @@ package com.swirlycloud.twirly.fx;
 import com.swirlycloud.twirly.date.GregDate;
 
 public abstract class DayCount {
-    public abstract int diffDays(GregDate lhs, GregDate rhs);
+    public abstract int diffDays(GregDate gd1, GregDate gd2);
 
-    public final double diffYears(GregDate lhs, GregDate rhs) {
-        return daysToYears(diffDays(lhs, rhs));
+    public final double diffYears(GregDate gd1, GregDate gd2) {
+        return daysToYears(diffDays(gd1, gd2));
     }
 
     public abstract double daysToYears(int days);
@@ -22,8 +22,8 @@ public abstract class DayCount {
     public static final DayCount ACTUAL360 = new DayCount() {
 
         @Override
-        public final int diffDays(GregDate lhs, GregDate rhs) {
-            return lhs.diffDays(rhs);
+        public final int diffDays(GregDate gd1, GregDate gd2) {
+            return gd1.diffDays(gd2);
         }
 
         @Override
@@ -35,28 +35,28 @@ public abstract class DayCount {
     public static final DayCount ACTUAL365FIXED = new DayCount() {
 
         @Override
-        public final int diffDays(GregDate lhs, GregDate rhs) {
-            return lhs.diffDays(rhs);
+        public final int diffDays(GregDate gd1, GregDate gd2) {
+            return gd1.diffDays(gd2);
         }
 
         @Override
         public final double daysToYears(int days) {
-            return days / 365;
+            return days / 365.0;
         }
     };
 
     public static final DayCount US30360 = new DayCount() {
 
         @Override
-        public final int diffDays(GregDate lhs, GregDate rhs) {
-            final int y1 = lhs.getYear();
-            final int m1 = lhs.getMon();
-            int d1 = lhs.getMDay();
+        public final int diffDays(GregDate gd1, GregDate gd2) {
+            final int y1 = gd1.getYear();
+            final int m1 = gd1.getMon();
+            int d1 = gd1.getMDay();
             final boolean f1 = isLastDayInFeb(y1, m1, d1);
 
-            final int y2 = rhs.getYear();
-            final int m2 = rhs.getMon();
-            int d2 = rhs.getMDay();
+            final int y2 = gd2.getYear();
+            final int m2 = gd2.getMon();
+            int d2 = gd2.getMDay();
             final boolean f2 = isLastDayInFeb(y2, m2, d2);
 
             // If the investment is EOM and (Date1 is the last day of February) and (Date2 is the
@@ -90,14 +90,14 @@ public abstract class DayCount {
     public static final DayCount EU30360 = new DayCount() {
 
         @Override
-        public final int diffDays(GregDate lhs, GregDate rhs) {
-            final int y1 = lhs.getYear();
-            final int m1 = lhs.getMon();
-            int d1 = lhs.getMDay();
+        public final int diffDays(GregDate gd1, GregDate gd2) {
+            final int y1 = gd1.getYear();
+            final int m1 = gd1.getMon();
+            int d1 = gd1.getMDay();
 
-            final int y2 = rhs.getYear();
-            final int m2 = rhs.getMon();
-            int d2 = rhs.getMDay();
+            final int y2 = gd2.getYear();
+            final int m2 = gd2.getMon();
+            int d2 = gd2.getMDay();
 
             // If D2 is 31, then change D2 to 30.
             d2 = d2 == 31 ? 30 : d2;

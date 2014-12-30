@@ -62,6 +62,10 @@ public abstract class IrCalc {
         return ir(fv(r2, t2) / fv(r1, t1), t2 - t1);
     }
 
+    public final double fv(double r1, double t1, double r2, double t2) {
+        return fv(r2, t2) / fv(r1, t1);
+    }
+
     public static IrCalc newPeriodComp(final int n) {
         return new IrCalc() {
 

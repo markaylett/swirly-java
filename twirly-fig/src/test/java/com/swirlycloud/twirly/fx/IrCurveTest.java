@@ -28,17 +28,17 @@ public final class IrCurveTest {
         assertEquals(new GregDate(2014, 11, 25), irc.getSpotDate());
 
         // 1M.
-        assertEquals(0.005016, irc.getRate(new GregDate(2015, 0, 26)), DELTA);
+        assertEquals(0.005016, irc.ir(new GregDate(2015, 0, 26)), DELTA);
         // 2M.
-        assertEquals(0.005240, irc.getRate(new GregDate(2015, 1, 25)), DELTA);
+        assertEquals(0.005240, irc.ir(new GregDate(2015, 1, 25)), DELTA);
         // 3M.
-        assertEquals(0.005596, irc.getRate(new GregDate(2015, 2, 25)), DELTA);
+        assertEquals(0.005596, irc.ir(new GregDate(2015, 2, 25)), DELTA);
         // 6M.
-        assertEquals(0.006823, irc.getRate(new GregDate(2015, 5, 25)), DELTA);
+        assertEquals(0.006823, irc.ir(new GregDate(2015, 5, 25)), DELTA);
         // 12M.
-        assertEquals(0.009774, irc.getRate(new GregDate(2015, 11, 25)), DELTA);
+        assertEquals(0.009774, irc.ir(new GregDate(2015, 11, 25)), DELTA);
 
         // Interpolated.
-        assertEquals(0.0062095, irc.getRate(new GregDate(2015, 4, 10)), DELTA);
+        assertEquals(0.0062095, irc.ir(new GregDate(2015, 4, 10)), DELTA);
     }
 }
