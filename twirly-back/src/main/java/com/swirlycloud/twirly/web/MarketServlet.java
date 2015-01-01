@@ -103,10 +103,11 @@ public final class MarketServlet extends RestServlet {
             } catch (final ParseException e) {
                 throw new BadRequestException("request could not be parsed");
             }
-            if (r.getFields() != (Request.SETTL_DATE | Request.EXPIRY_DATE)) {
+            if (r.getFields() != (Request.SETTL_DATE | Request.FIXING_DATE | Request.EXPIRY_DATE)) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.postMarket(cmnem, r.getSettlDate(), r.getExpiryDate(), resp.getWriter());
+            rest.postMarket(cmnem, r.getSettlDate(), r.getFixingDate(), r.getExpiryDate(),
+                    resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

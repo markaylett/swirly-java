@@ -24,6 +24,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     private final long key;
     private Identifiable contr;
     private final int settlDay;
+    private final int fixingDay;
     private final int expiryDay;
     private final Side bidSide = new Side();
     private final Side offerSide = new Side();
@@ -41,11 +42,12 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         return action == Action.BUY ? bidSide : offerSide;
     }
 
-    public Market(Identifiable contr, int settlDay, int expiryDay, long lastTicks, long lastLots,
-            long lastTime, long maxOrderId, long maxExecId) {
+    public Market(Identifiable contr, int settlDay, int fixingDay, int expiryDay, long lastTicks,
+            long lastLots, long lastTime, long maxOrderId, long maxExecId) {
         this.key = composeId(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
+        this.fixingDay = fixingDay;
         this.expiryDay = expiryDay;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
@@ -54,8 +56,8 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         this.maxExecId = maxExecId;
     }
 
-    public Market(Identifiable contr, int settlDay, int expiryDay) {
-        this(contr, settlDay, expiryDay, 0L, 0L, 0L, 0L, 0L);
+    public Market(Identifiable contr, int settlDay, int fixingDay, int expiryDay) {
+        this(contr, settlDay, fixingDay, expiryDay, 0L, 0L, 0L, 0L, 0L);
     }
 
     /**
@@ -96,6 +98,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         out.append("{\"id\":").append(String.valueOf(key));
         out.append(",\"contr\":\"").append(getRecMnem(contr));
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"fixingDate\":").append(String.valueOf(jdToIso(fixingDay)));
         out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
         out.append(",\"bidTicks\":[");
 
@@ -256,6 +259,10 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
 
     public final int getSettlDay() {
         return settlDay;
+    }
+
+    public final int getFixingDay() {
+        return fixingDay;
     }
 
     public final int getExpiryDay() {

@@ -38,7 +38,7 @@ public final class FwdPrice {
         final EcbRates ecbRates = new EcbRates();
         ecbRates.parse();
 
-        final double spotPrice = ecbRates.getRate("USD") / ecbRates.getRate("GBP");
+        final double spotPrice = ecbRates.getRate("GBP", "USD");
         System.out.printf("spot: %.6f\n", spotPrice);
 
         final IrCurve gbpCurve = parseCurve("GBP", today);

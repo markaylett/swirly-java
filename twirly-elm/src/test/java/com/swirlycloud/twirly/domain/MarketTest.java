@@ -19,7 +19,7 @@ public final class MarketTest {
     public final void test() throws IOException {
         final Contr contr = MockContr.newContr("EURUSD");
         final int settlDay = ymdToJd(2014, 2, 14);
-        final Market market = new Market(contr, settlDay, settlDay);
+        final Market market = new Market(contr, settlDay, settlDay, settlDay);
 
         final Trader trader = MockTrader.newTrader("MARAYL");
         final long now = 1414932078620L;
@@ -38,7 +38,7 @@ public final class MarketTest {
         // Null params.
         market.toJson(null, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null],\"bidLots\":[5,10,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerLots\":[7,null,null],\"offerCount\":[2,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"fixingDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null],\"bidLots\":[5,10,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerLots\":[7,null,null],\"offerCount\":[2,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Empty params.
@@ -50,7 +50,7 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null],\"bidLots\":[5,10,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerLots\":[7,null,null],\"offerCount\":[2,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"fixingDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null],\"bidLots\":[5,10,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerLots\":[7,null,null],\"offerCount\":[2,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Explicit TOB.
@@ -62,7 +62,7 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344],\"bidLots\":[5],\"bidCount\":[1],\"offerTicks\":[12346],\"offerLots\":[7],\"offerCount\":[2],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"fixingDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344],\"bidLots\":[5],\"bidCount\":[1],\"offerTicks\":[12346],\"offerLots\":[7],\"offerCount\":[2],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Round-up to minimum.
@@ -74,7 +74,7 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344],\"bidLots\":[5],\"bidCount\":[1],\"offerTicks\":[12346],\"offerLots\":[7],\"offerCount\":[2],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"fixingDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344],\"bidLots\":[5],\"bidCount\":[1],\"offerTicks\":[12346],\"offerLots\":[7],\"offerCount\":[2],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Between minimum and maximum.
@@ -86,7 +86,7 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343],\"bidLots\":[5,10],\"bidCount\":[1,1],\"offerTicks\":[12346,null],\"offerLots\":[7,null],\"offerCount\":[2,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"fixingDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343],\"bidLots\":[5,10],\"bidCount\":[1,1],\"offerTicks\":[12346,null],\"offerLots\":[7,null],\"offerCount\":[2,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Round-down to maximum.
@@ -98,7 +98,7 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null,null,null],\"bidLots\":[5,10,null,null,null],\"bidCount\":[1,1,null,null,null],\"offerTicks\":[12346,null,null,null,null],\"offerLots\":[7,null,null,null,null],\"offerCount\":[2,null,null,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"fixingDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null,null,null],\"bidLots\":[5,10,null,null,null],\"bidCount\":[1,1,null,null,null],\"offerTicks\":[12346,null,null,null,null],\"offerLots\":[7,null,null,null,null],\"offerCount\":[2,null,null,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
     }
 }

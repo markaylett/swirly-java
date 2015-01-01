@@ -34,6 +34,7 @@ function ViewModel(contrs) {
 
     self.contrMnem = ko.observable();
     self.settlDate = ko.observable();
+    self.fixingDate = ko.observable();
     self.expiryDate = ko.observable();
 
     self.isMarketSelected = ko.computed(function() {
@@ -81,6 +82,7 @@ function ViewModel(contrs) {
     self.clearMarket = function() {
         //self.contrMnem(undefined);
         //self.settlDate(undefined);
+        //self.fixingDate(undefined);
         //self.expiryDate(undefined);
     };
 
@@ -101,6 +103,12 @@ function ViewModel(contrs) {
             return;
         }
         settlDate = toDateInt(settlDate);
+        var fixingDate = self.fixingDate();
+        if (!isSpecified(fixingDate)) {
+            self.showError(internalError('fixing-date not specified'));
+            return;
+        }
+        fixingDate = toDateInt(fixingDate);
         var expiryDate = self.expiryDate();
         if (!isSpecified(expiryDate)) {
             self.showError(internalError('expiry-date not specified'));
@@ -113,6 +121,7 @@ function ViewModel(contrs) {
             url: '/api/market/' + contr.mnem,
             data: JSON.stringify({
                 settlDate: settlDate,
+                fixingDate: fixingDate,
                 expiryDate: expiryDate
             })
         }).done(function(raw) {

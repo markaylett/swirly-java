@@ -92,7 +92,15 @@ public class EcbRates {
         return date;
     }
 
-    public final Double getRate(String ccy) {
-        return rates.get(ccy);
+    public final double getRate(String lhs, String rhs) {
+        double r;
+        if ("EUR".equals(lhs)) {
+            r = rates.get(rhs);
+        } else if ("EUR".equals(rhs)) {
+            r = 1.0 / rates.get(lhs);
+        } else {
+            r = rates.get(rhs) / rates.get(lhs);
+        }
+        return r;
     }
 }

@@ -18,12 +18,13 @@ public final class Request implements ContentHandler {
     public static final int EMAIL = 1 << 3;
     public static final int CONTR = 1 << 4;
     public static final int SETTL_DATE = 1 << 5;
-    public static final int EXPIRY_DATE = 1 << 6;
-    public static final int REF = 1 << 7;
-    public static final int ACTION = 1 << 8;
-    public static final int TICKS = 1 << 9;
-    public static final int LOTS = 1 << 10;
-    public static final int MIN_LOTS = 1 << 11;
+    public static final int FIXING_DATE = 1 << 6;
+    public static final int EXPIRY_DATE = 1 << 7;
+    public static final int REF = 1 << 8;
+    public static final int ACTION = 1 << 9;
+    public static final int TICKS = 1 << 10;
+    public static final int LOTS = 1 << 11;
+    public static final int MIN_LOTS = 1 << 12;
 
     private transient String key;
     private boolean valid;
@@ -35,6 +36,7 @@ public final class Request implements ContentHandler {
     private String email;
     private String contr;
     private int settlDate;
+    private int fixingDate;
     private int expiryDate;
     private String ref;
     private Action action;
@@ -101,6 +103,12 @@ public final class Request implements ContentHandler {
             }
             fields |= SETTL_DATE;
             settlDate = ((Long) value).intValue();
+        } else if ("fixingDate".equals(key)) {
+            if (!(value instanceof Long) || (fields & FIXING_DATE) != 0) {
+                return false;
+            }
+            fields |= FIXING_DATE;
+            fixingDate = ((Long) value).intValue();
         } else if ("expiryDate".equals(key)) {
             if (!(value instanceof Long) || (fields & EXPIRY_DATE) != 0) {
                 return false;
@@ -193,6 +201,10 @@ public final class Request implements ContentHandler {
 
     public final int getSettlDate() {
         return settlDate;
+    }
+
+    public final int getFixingDate() {
+        return fixingDate;
     }
 
     public final int getExpiryDate() {

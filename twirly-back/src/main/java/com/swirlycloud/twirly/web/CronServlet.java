@@ -48,7 +48,7 @@ public final class CronServlet extends RestServlet {
                     final EcbRates ecbRates = new EcbRates();
                     try {
                         ecbRates.parse();
-                        log("USD: " + ecbRates.getRate("USD"));
+                        log("EURUSD: " + ecbRates.getRate("EUR", "USD"));
                     } catch (Throwable t) {
                         log("error: " + t.getLocalizedMessage());
                     }
