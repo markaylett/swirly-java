@@ -3,7 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -30,31 +32,31 @@ public final class RestTest {
         String display = null;
         AssetType type = null;
 
-        String name = null;
+        String key = null;
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
                 return new Asset(id, mnem, display, type);
             case KEY_NAME:
-                name = p.getString();
+                key = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
+                if ("id".equals(key)) {
                     id = p.getLong();
                 } else {
-                    throw new IOException(String.format("unexpected number field '%s'", name));
+                    throw new IOException(String.format("unexpected number field '%s'", key));
                 }
                 break;
             case VALUE_STRING:
-                if ("mnem".equals(name)) {
+                if ("mnem".equals(key)) {
                     mnem = p.getString();
-                } else if ("display".equals(name)) {
+                } else if ("display".equals(key)) {
                     display = p.getString();
-                } else if ("type".equals(name)) {
+                } else if ("type".equals(key)) {
                     type = AssetType.valueOf(p.getString());
                 } else {
-                    throw new IOException(String.format("unexpected string field '%s'", name));
+                    throw new IOException(String.format("unexpected string field '%s'", key));
                 }
                 break;
             default:
@@ -97,7 +99,7 @@ public final class RestTest {
         long minLots = 0;
         long maxLots = 0;
 
-        String name = null;
+        String key = null;
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
@@ -105,42 +107,42 @@ public final class RestTest {
                 return new Contr(id, mnem, display, assetType, asset, ccy, tickNumer, tickDenom,
                         lotNumer, lotDenom, pipDp, minLots, maxLots);
             case KEY_NAME:
-                name = p.getString();
+                key = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
+                if ("id".equals(key)) {
                     id = p.getLong();
-                } else if ("tickNumer".equals(name)) {
+                } else if ("tickNumer".equals(key)) {
                     tickNumer = p.getInt();
-                } else if ("tickDenom".equals(name)) {
+                } else if ("tickDenom".equals(key)) {
                     tickDenom = p.getInt();
-                } else if ("lotNumer".equals(name)) {
+                } else if ("lotNumer".equals(key)) {
                     lotNumer = p.getInt();
-                } else if ("lotDenom".equals(name)) {
+                } else if ("lotDenom".equals(key)) {
                     lotDenom = p.getInt();
-                } else if ("pipDp".equals(name)) {
+                } else if ("pipDp".equals(key)) {
                     pipDp = p.getInt();
-                } else if ("minLots".equals(name)) {
+                } else if ("minLots".equals(key)) {
                     minLots = p.getLong();
-                } else if ("maxLots".equals(name)) {
+                } else if ("maxLots".equals(key)) {
                     maxLots = p.getLong();
                 } else {
-                    throw new IOException(String.format("unexpected number field '%s'", name));
+                    throw new IOException(String.format("unexpected number field '%s'", key));
                 }
                 break;
             case VALUE_STRING:
-                if ("mnem".equals(name)) {
+                if ("mnem".equals(key)) {
                     mnem = p.getString();
-                } else if ("display".equals(name)) {
+                } else if ("display".equals(key)) {
                     display = p.getString();
-                } else if ("assetType".equals(name)) {
+                } else if ("assetType".equals(key)) {
                     assetType = AssetType.valueOf(p.getString());
-                } else if ("asset".equals(name)) {
+                } else if ("asset".equals(key)) {
                     asset = p.getString();
-                } else if ("ccy".equals(name)) {
+                } else if ("ccy".equals(key)) {
                     ccy = p.getString();
                 } else {
-                    throw new IOException(String.format("unexpected string field '%s'", name));
+                    throw new IOException(String.format("unexpected string field '%s'", key));
                 }
                 break;
             default:
@@ -174,31 +176,31 @@ public final class RestTest {
         String display = null;
         String email = null;
 
-        String name = null;
+        String key = null;
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
                 return new Trader(id, mnem, display, email);
             case KEY_NAME:
-                name = p.getString();
+                key = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
+                if ("id".equals(key)) {
                     id = p.getLong();
                 } else {
-                    throw new IOException(String.format("unexpected number field '%s'", name));
+                    throw new IOException(String.format("unexpected number field '%s'", key));
                 }
                 break;
             case VALUE_STRING:
-                if ("mnem".equals(name)) {
+                if ("mnem".equals(key)) {
                     mnem = p.getString();
-                } else if ("display".equals(name)) {
+                } else if ("display".equals(key)) {
                     display = p.getString();
-                } else if ("email".equals(name)) {
+                } else if ("email".equals(key)) {
                     email = p.getString();
                 } else {
-                    throw new IOException(String.format("unexpected string field '%s'", name));
+                    throw new IOException(String.format("unexpected string field '%s'", key));
                 }
                 break;
             default:
@@ -240,7 +242,7 @@ public final class RestTest {
         Map<String, Asset> assets = null;
         Map<String, Contr> contrs = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            String name = null;
+            String key = null;
             while (p.hasNext()) {
                 final Event event = p.next();
                 switch (event) {
@@ -250,19 +252,19 @@ public final class RestTest {
                 case END_OBJECT:
                     break;
                 case KEY_NAME:
-                    name = p.getString();
+                    key = p.getString();
                     break;
                 case START_ARRAY:
-                    if ("assets".equals(name)) {
+                    if ("assets".equals(key)) {
                         assets = parseAssets(p, new HashMap<String, Asset>());
-                    } else if ("contrs".equals(name)) {
+                    } else if ("contrs".equals(key)) {
                         contrs = parseContrs(p, new HashMap<String, Contr>());
                     } else {
                         assertTrue(false);
                     }
                     break;
                 case START_OBJECT:
-                    assertTrue(name == null);
+                    assertTrue(key == null);
                     break;
                 case VALUE_FALSE:
                     assertTrue(false);
@@ -321,7 +323,7 @@ public final class RestTest {
         Map<String, Contr> contrs = null;
         Map<String, Trader> traders = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            String name = null;
+            String key = null;
             while (p.hasNext()) {
                 final Event event = p.next();
                 switch (event) {
@@ -331,21 +333,21 @@ public final class RestTest {
                 case END_OBJECT:
                     break;
                 case KEY_NAME:
-                    name = p.getString();
+                    key = p.getString();
                     break;
                 case START_ARRAY:
-                    if ("assets".equals(name)) {
+                    if ("assets".equals(key)) {
                         assets = parseAssets(p, new HashMap<String, Asset>());
-                    } else if ("contrs".equals(name)) {
+                    } else if ("contrs".equals(key)) {
                         contrs = parseContrs(p, new HashMap<String, Contr>());
-                    } else if ("traders".equals(name)) {
+                    } else if ("traders".equals(key)) {
                         traders = parseTraders(p, new HashMap<String, Trader>());
                     } else {
                         assertTrue(false);
                     }
                     break;
                 case START_OBJECT:
-                    assertTrue(name == null);
+                    assertTrue(key == null);
                     break;
                 case VALUE_FALSE:
                     assertTrue(false);

@@ -3,14 +3,13 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ContentHandler;
-import org.json.simple.parser.ParseException;
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.exception.BadRequestException;
 
-public final class Request implements ContentHandler {
+public final class Request {
 
     public static final int ID = 1 << 0;
     public static final int MNEM = 1 << 1;
@@ -26,8 +25,6 @@ public final class Request implements ContentHandler {
     public static final int LOTS = 1 << 11;
     public static final int MIN_LOTS = 1 << 12;
 
-    private transient String key;
-    private boolean valid;
     private int fields;
 
     private long id;
@@ -44,135 +41,111 @@ public final class Request implements ContentHandler {
     private long lots;
     private long minLots;
 
-    @Override
-    public final boolean endArray() throws ParseException, IOException {
-        assert false;
-        return false;
+    public final void clear() {
+        fields = 0;
+        id = 0;
+        mnem = null;
+        display = null;
+        email = null;
+        contr = null;
+        settlDate = 0;
+        fixingDate = 0;
+        expiryDate = 0;
+        ref = null;
+        action = null;
+        ticks = 0;
+        lots = 0;
+        minLots = 0;        
     }
 
-    @Override
-    public final void endJSON() throws ParseException, IOException {
-        valid = true;
-    }
-
-    @Override
-    public final boolean endObject() throws ParseException, IOException {
-        return true;
-    }
-
-    @Override
-    public final boolean endObjectEntry() throws ParseException, IOException {
-        return true;
-    }
-
-    @Override
-    public final boolean primitive(Object value) throws ParseException, IOException {
-        if ("id".equals(key)) {
-            if (!(value instanceof Long) || (fields & ID) != 0) {
-                return false;
+    public final void parse(JsonParser p) throws BadRequestException {
+        String key = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                break;
+            case KEY_NAME:
+                key = p.getString();
+                break;
+            case START_OBJECT:
+                break;
+            case VALUE_NULL:
+                if ("mnem".equals(key)) {
+                    fields |= MNEM;
+                    mnem = null;
+                } else if ("display".equals(key)) {
+                    fields |= DISPLAY;
+                    display = null;
+                } else if ("email".equals(key)) {
+                    fields |= EMAIL;
+                    email = null;
+                } else if ("contr".equals(key)) {
+                    fields |= CONTR;
+                    contr = null;
+                } else if ("ref".equals(key)) {
+                    fields |= REF;
+                    ref = null;
+                } else if ("action".equals(key)) {
+                    fields |= ACTION;
+                    action = null;
+                } else {
+                    throw new BadRequestException(String.format("unexpected nullable field '%s'", key));
+                }
+                break;
+            case VALUE_NUMBER:
+                if ("id".equals(key)) {
+                    fields |= ID;
+                    id = p.getLong();
+                } else if ("settlDate".equals(key)) {
+                    fields |= SETTL_DATE;
+                    settlDate = p.getInt();
+                } else if ("fixingDate".equals(key)) {
+                    fields |= FIXING_DATE;
+                    fixingDate = p.getInt();
+                } else if ("expiryDate".equals(key)) {
+                    fields |= EXPIRY_DATE;
+                    expiryDate = p.getInt();
+                } else if ("ticks".equals(key)) {
+                    fields |= TICKS;
+                    ticks = p.getLong();
+                } else if ("lots".equals(key)) {
+                    fields |= LOTS;
+                    lots = p.getLong();
+                } else if ("minLots".equals(key)) {
+                    fields |= MIN_LOTS;
+                    minLots = p.getLong();
+                } else {
+                    throw new BadRequestException(String.format("unexpected number field '%s'", key));
+                }
+                break;
+            case VALUE_STRING:
+                if ("mnem".equals(key)) {
+                    fields |= MNEM;
+                    mnem = p.getString();
+                } else if ("display".equals(key)) {
+                    fields |= DISPLAY;
+                    display = p.getString();
+                } else if ("email".equals(key)) {
+                    fields |= EMAIL;
+                    email = p.getString();
+                } else if ("contr".equals(key)) {
+                    fields |= CONTR;
+                    contr = p.getString();
+                } else if ("ref".equals(key)) {
+                    fields |= REF;
+                    ref = p.getString();
+                } else if ("action".equals(key)) {
+                    fields |= ACTION;
+                    action = Action.valueOf(p.getString());
+                } else {
+                    throw new BadRequestException(String.format("unexpected string field '%s'", key));
+                }
+                break;
+            default:
+                throw new BadRequestException(String.format("unexpected json token '%s'", event));
             }
-            fields |= ID;
-            id = (Long) value;
-        } else if ("mnem".equals(key)) {
-            if (!(value instanceof String) || (fields & MNEM) != 0) {
-                return false;
-            }
-            fields |= MNEM;
-            mnem = (String) value;
-        } else if ("display".equals(key)) {
-            if (!(value instanceof String) || (fields & DISPLAY) != 0) {
-                return false;
-            }
-            fields |= DISPLAY;
-            display = (String) value;
-        } else if ("email".equals(key)) {
-            if (!(value instanceof String) || (fields & EMAIL) != 0) {
-                return false;
-            }
-            fields |= EMAIL;
-            email = (String) value;
-        } else if ("contr".equals(key)) {
-            if (!(value instanceof String) || (fields & CONTR) != 0) {
-                return false;
-            }
-            fields |= CONTR;
-            contr = (String) value;
-        } else if ("settlDate".equals(key)) {
-            if (!(value instanceof Long) || (fields & SETTL_DATE) != 0) {
-                return false;
-            }
-            fields |= SETTL_DATE;
-            settlDate = ((Long) value).intValue();
-        } else if ("fixingDate".equals(key)) {
-            if (!(value instanceof Long) || (fields & FIXING_DATE) != 0) {
-                return false;
-            }
-            fields |= FIXING_DATE;
-            fixingDate = ((Long) value).intValue();
-        } else if ("expiryDate".equals(key)) {
-            if (!(value instanceof Long) || (fields & EXPIRY_DATE) != 0) {
-                return false;
-            }
-            fields |= EXPIRY_DATE;
-            expiryDate = ((Long) value).intValue();
-        } else if ("ref".equals(key)) {
-            if (!(value instanceof String) || (fields & REF) != 0) {
-                return false;
-            }
-            fields |= REF;
-            ref = (String) value;
-        } else if ("action".equals(key)) {
-            if (!(value instanceof String) || (fields & ACTION) != 0) {
-                return false;
-            }
-            fields |= ACTION;
-            action = Action.valueOf((String) value);
-        } else if ("ticks".equals(key)) {
-            if (!(value instanceof Long) || (fields & TICKS) != 0) {
-                return false;
-            }
-            fields |= TICKS;
-            ticks = (Long) value;
-        } else if ("lots".equals(key)) {
-            if (!(value instanceof Long) || (fields & LOTS) != 0) {
-                return false;
-            }
-            fields |= LOTS;
-            lots = (Long) value;
-        } else if ("minLots".equals(key)) {
-            if (!(value instanceof Long) || (fields & MIN_LOTS) != 0) {
-                return false;
-            }
-            fields |= MIN_LOTS;
-            minLots = (Long) value;
-        } else {
-            return false;
         }
-        return true;
-    }
-
-    @Override
-    public final boolean startArray() throws ParseException, IOException {
-        return false;
-    }
-
-    @Override
-    public final void startJSON() throws ParseException, IOException {
-    }
-
-    @Override
-    public final boolean startObject() throws ParseException, IOException {
-        return true;
-    }
-
-    @Override
-    public final boolean startObjectEntry(String key) throws ParseException, IOException {
-        this.key = key;
-        return true;
-    }
-
-    public final boolean isValid() {
-        return valid;
     }
 
     public final int getFields() {

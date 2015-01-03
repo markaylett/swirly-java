@@ -7,13 +7,12 @@ import static com.swirlycloud.twirly.util.StringUtil.splitPath;
 
 import java.io.IOException;
 
+import javax.json.Json;
+import javax.json.stream.JsonParser;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -121,12 +120,9 @@ public final class RecServlet extends RestServlet {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
             }
 
-            final JSONParser p = new JSONParser();
             final Request r = new Request();
-            try {
-                p.parse(req.getReader(), r);
-            } catch (final ParseException e) {
-                throw new BadRequestException("request could not be parsed");
+            try (JsonParser p = Json.createParser(req.getReader())) {
+                r.parse(p);
             }
             int fields = r.getFields();
             if ((fields & Request.EMAIL) != 0) {
