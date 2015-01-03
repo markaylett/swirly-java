@@ -67,9 +67,7 @@ public final class Contr extends Rec {
         out.append(",\"tickDenom\":").append(String.valueOf(tickDenom));
         out.append(",\"lotNumer\":").append(String.valueOf(lotNumer));
         out.append(",\"lotDenom\":").append(String.valueOf(lotDenom));
-        out.append(",\"priceDp\":").append(String.valueOf(priceDp));
         out.append(",\"pipDp\":").append(String.valueOf(pipDp));
-        out.append(",\"qtyDp\":").append(String.valueOf(qtyDp));
         out.append(",\"minLots\":").append(String.valueOf(minLots));
         out.append(",\"maxLots\":").append(String.valueOf(maxLots));
         out.append("}");

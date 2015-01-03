@@ -8,6 +8,7 @@ import static com.swirlycloud.twirly.date.JulianDay.isoToJd;
 import java.io.IOException;
 
 import com.swirlycloud.twirly.app.Accnt;
+import com.swirlycloud.twirly.app.DateUtil;
 import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Trans;
@@ -30,6 +31,11 @@ import com.swirlycloud.twirly.function.UnaryFunction;
 public final class Rest {
 
     private final Serv serv;
+
+    private final boolean getExpiredParam(UnaryFunction<String, String> params) {
+        final String s = params.call("expired");
+        return s == null ? false : Boolean.parseBoolean(s);
+    }
 
     private final void doGetRec(RecType recType, UnaryFunction<String, String> params,
             Appendable out) throws IOException {
@@ -131,10 +137,18 @@ public final class Rest {
 
     public final synchronized void getMarket(UnaryFunction<String, String> params, Appendable out)
             throws IOException {
+        int busDay = 0;
+        if (getExpiredParam(params)) {
+            busDay = DateUtil.getBusDate().toJd();
+        }
         out.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Market market = (Market) node;
+            if (market.getExpiryDay() < busDay) {
+                // Ignore expired contracts.
+                continue;
+            }
             if (i > 0) {
                 out.append(',');
             }
@@ -150,11 +164,19 @@ public final class Rest {
         if (contr == null) {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
         }
+        int busDay = 0;
+        if (getExpiredParam(params)) {
+            busDay = DateUtil.getBusDate().toJd();
+        }
         out.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Market market = (Market) node;
             if (!market.getContr().getMnem().equals(cmnem)) {
+                continue;
+            }
+            if (market.getExpiryDay() < busDay) {
+                // Ignore expired contracts.
                 continue;
             }
             if (i > 0) {
@@ -173,10 +195,18 @@ public final class Rest {
         if (contr == null) {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
         }
+        int busDay = 0;
+        if (getExpiredParam(params)) {
+            busDay = DateUtil.getBusDate().toJd();
+        }
         final int settlDay = isoToJd(settlDate);
         final Market market = serv.findMarket(contr, settlDay);
         if (market == null) {
             throw new NotFoundException(String.format("market for '%s' on '%d' does not exist",
+                    cmnem, settlDate));
+        }
+        if (market.getExpiryDay() < busDay) {
+            throw new NotFoundException(String.format("market for '%s' on '%d' has expired",
                     cmnem, settlDate));
         }
         market.toJson(params, out);
@@ -548,5 +578,6 @@ public final class Rest {
     public final synchronized void getEndOfDay() throws NotFoundException {
         final long now = System.currentTimeMillis();
         serv.expireMarkets(now);
+        serv.settlMarkets(now);
     }
 }

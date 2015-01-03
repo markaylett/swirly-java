@@ -3,7 +3,7 @@
  *
  * All rights reserved.
  **************************************************************************************************/
- 
+
 function ViewModel(contrs) {
     var self = this;
 
@@ -527,8 +527,21 @@ function initApp() {
     $.getJSON('/api/rec/contr', function(raw) {
         var contrs = [];
         $.each(raw, function(key, val) {
-            val.priceInc = priceInc(val);
-            val.qtyInc = qtyInc(val);
+
+            var tickNumer = val.tickNumer;
+            var tickDenom = val.tickDenom;
+            var priceInc = fractToReal(tickNumer, tickDenom);
+
+            var lotNumer = val.lotNumer;
+            var lotDenom = val.lotDenom;
+            var qtyInc = fractToReal(lotNumer, lotDenom);
+
+            val.priceDp = realToDp(priceInc);
+            val.priceInc = priceInc.toFixed(val.priceDp);
+
+            val.qtyDp = realToDp(qtyInc);
+            val.qtyInc = qtyInc.toFixed(val.qtyDp);
+
             contrs[val.mnem] = val;
         });
         var model = new ViewModel(contrs);

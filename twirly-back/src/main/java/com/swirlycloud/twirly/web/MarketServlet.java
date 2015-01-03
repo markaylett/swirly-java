@@ -46,7 +46,7 @@ public final class MarketServlet extends RestServlet {
                 throw new UnauthorizedException("user is not logged-in");
             }
 
-            final Rest ctx = Context.getRest();
+            final Rest rest = Context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -54,13 +54,13 @@ public final class MarketServlet extends RestServlet {
 
             boolean match = false;
             if (parts.length == 0) {
-                ctx.getMarket(params, resp.getWriter());
+                rest.getMarket(params, resp.getWriter());
                 match = true;
             } else if (parts.length == 1) {
-                ctx.getMarket(parts[CMNEM_PART], params, resp.getWriter());
+                rest.getMarket(parts[CMNEM_PART], params, resp.getWriter());
                 match = true;
             } else if (parts.length == 2) {
-                ctx.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]), params,
+                rest.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]), params,
                         resp.getWriter());
                 match = true;
             }

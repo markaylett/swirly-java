@@ -36,7 +36,7 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryCallback;
 
-public final class Serv implements AutoCloseable {
+public final class Serv {
     private static final int BUCKETS = 257;
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z_]{3,16}$");
 
@@ -297,10 +297,6 @@ public final class Serv implements AutoCloseable {
         }
     }
 
-    @Override
-    public final void close() {
-    }
-
     @NonNull
     public final Trader createTrader(String mnem, String display, String email)
             throws BadRequestException {
@@ -342,8 +338,8 @@ public final class Serv implements AutoCloseable {
     }
 
     @NonNull
-    public final Market createMarket(Contr contr, int settlDay, int fixingDay, int expiryDay, long now)
-            throws BadRequestException {
+    public final Market createMarket(Contr contr, int settlDay, int fixingDay, int expiryDay,
+            long now) throws BadRequestException {
         // busDay <= expiryDay <= fixingDay <= settlDay.
         final int busDay = getBusDate(now).toJd();
         if (busDay > expiryDay) {
@@ -369,8 +365,8 @@ public final class Serv implements AutoCloseable {
     }
 
     @NonNull
-    public final Market createMarket(String mnem, int settlDay, int fixingDay, int expiryDay, long now)
-            throws BadRequestException, NotFoundException {
+    public final Market createMarket(String mnem, int settlDay, int fixingDay, int expiryDay,
+            long now) throws BadRequestException, NotFoundException {
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
@@ -385,6 +381,16 @@ public final class Serv implements AutoCloseable {
             node = node.rbNext();
             if (market.getExpiryDay() < busDay) {
                 cancelOrders(market, now);
+            }
+        }
+    }
+
+    public final void settlMarkets(long now) throws NotFoundException {
+        final int busDay = DateUtil.getBusDate(now).toJd();
+        for (RbNode node = markets.getFirst(); node != null;) {
+            final Market market = (Market) node;
+            node = node.rbNext();
+            if (market.getSettlDay() < busDay) {
                 markets.remove(market);
             }
         }
@@ -509,6 +515,11 @@ public final class Serv implements AutoCloseable {
     public final Trans placeOrder(Accnt accnt, Market market, String ref, Action action,
             long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
             NotFoundException {
+        final int busDay = DateUtil.getBusDate(now).toJd();
+        if (market.getExpiryDay() < busDay) {
+            throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
+                    .getContr().getMnem(), market.getSettlDay()));
+        }
         if (lots == 0 || lots < minLots) {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }

@@ -32,12 +32,16 @@ function ticksToPrice(ticks, contr) {
     return incsToReal(ticks, contr.priceInc).toFixed(contr.priceDp);
 }
 
-function qtyInc(contr) {
-    return fractToReal(contr.lotNumer, contr.lotDenom).toFixed(contr.qtyDp);
-}
-
-function priceInc(contr) {
-    return fractToReal(contr.tickNumer, contr.tickDenom).toFixed(contr.priceDp);
+function realToDp(d) {
+    var dp = 0;
+    for (; dp < 9; ++dp) {
+        var fp = d % 1.0;
+        if (fp < 0.000000001) {
+            break;
+        }
+        d *= 10;
+    }
+    return dp;
 }
 
 function toDateInt(s) {
@@ -132,11 +136,33 @@ function Contr(val) {
     self.tickDenom = ko.observable(val.tickDenom);
     self.lotNumer = ko.observable(val.lotNumer);
     self.lotDenom = ko.observable(val.lotDenom);
-    self.priceDp = ko.observable(val.priceDp);
     self.pipDp = ko.observable(val.pipDp);
-    self.qtyDp = ko.observable(val.qtyDp);
     self.minLots = ko.observable(val.minLots);
     self.maxLots = ko.observable(val.maxLots);
+
+    self.priceDp = ko.computed(function() {
+        var tickNumer = self.tickNumer();
+        var tickDenom = self.tickDenom();
+        return realToDp(fractToReal(tickNumer, tickDenom));
+    });
+
+    self.qtyDp = ko.computed(function() {
+        var lotNumer = self.lotNumer();
+        var lotDenom = self.lotDenom();
+        return realToDp(fractToReal(lotNumer, lotDenom));
+    });
+
+    self.priceInc = ko.computed(function() {
+        var tickNumer = self.tickNumer();
+        var tickDenom = self.tickDenom();
+        return fractToReal(tickNumer, tickDenom).toFixed(self.priceDp());
+    });
+
+    self.qtyInc = ko.computed(function() {
+        var lotNumer = self.lotNumer();
+        var lotDenom = self.lotDenom();
+        return fractToReal(lotNumer, lotDenom).toFixed(self.qtyDp());
+    });
 }
 
 function Trader(val) {

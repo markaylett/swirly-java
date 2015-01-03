@@ -76,8 +76,6 @@ public final class Benchmark {
 
     public static void main(String[] args) throws BadRequestException, NotFoundException,
             IOException {
-        try (final Serv s = new Serv(new MockModel())) {
-            run(s);
-        }
+        run(new Serv(new MockModel()));
     }
 }
