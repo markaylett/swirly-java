@@ -21,50 +21,18 @@ import org.junit.Test;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.domain.Contr;
+import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.mock.MockModel;
 
 public final class RestTest {
-    private static Asset parseAsset(JsonParser p) throws IOException {
-        long id = 0;
-        String mnem = null;
-        String display = null;
-        AssetType type = null;
-
-        String key = null;
-        while (p.hasNext()) {
-            final Event event = p.next();
-            switch (event) {
-            case END_OBJECT:
-                return new Asset(id, mnem, display, type);
-            case KEY_NAME:
-                key = p.getString();
-                break;
-            case VALUE_NUMBER:
-                if ("id".equals(key)) {
-                    id = p.getLong();
-                } else {
-                    throw new IOException(String.format("unexpected number field '%s'", key));
-                }
-                break;
-            case VALUE_STRING:
-                if ("mnem".equals(key)) {
-                    mnem = p.getString();
-                } else if ("display".equals(key)) {
-                    display = p.getString();
-                } else if ("type".equals(key)) {
-                    type = AssetType.valueOf(p.getString());
-                } else {
-                    throw new IOException(String.format("unexpected string field '%s'", key));
-                }
-                break;
-            default:
-                throw new IOException(String.format("unexpected json token '%s'", event));
-            }
+    private static final UnaryFunction<String, String> NO_PARAMS = new UnaryFunction<String, String>() {
+        @Override
+        public final String call(String arg) {
+            return null;
         }
-        throw new IOException("end-of object not found");
-    }
+    };
 
     private static <T extends Map<String, Asset>> T parseAssets(JsonParser p, T out)
             throws IOException {
@@ -74,7 +42,7 @@ public final class RestTest {
             case END_ARRAY:
                 return out;
             case START_OBJECT:
-                final Asset asset = parseAsset(p);
+                final Asset asset = Asset.parse(p);
                 out.put(asset.getMnem(), asset);
                 break;
             default:
@@ -82,74 +50,6 @@ public final class RestTest {
             }
         }
         throw new IOException("end-of array not found");
-    }
-
-    private static Contr parseContr(JsonParser p) throws IOException {
-        long id = 0;
-        String mnem = null;
-        String display = null;
-        AssetType assetType = null;
-        String asset = null;
-        String ccy = null;
-        int tickNumer = 0;
-        int tickDenom = 0;
-        int lotNumer = 0;
-        int lotDenom = 0;
-        int pipDp = 0;
-        long minLots = 0;
-        long maxLots = 0;
-
-        String key = null;
-        while (p.hasNext()) {
-            final Event event = p.next();
-            switch (event) {
-            case END_OBJECT:
-                return new Contr(id, mnem, display, assetType, asset, ccy, tickNumer, tickDenom,
-                        lotNumer, lotDenom, pipDp, minLots, maxLots);
-            case KEY_NAME:
-                key = p.getString();
-                break;
-            case VALUE_NUMBER:
-                if ("id".equals(key)) {
-                    id = p.getLong();
-                } else if ("tickNumer".equals(key)) {
-                    tickNumer = p.getInt();
-                } else if ("tickDenom".equals(key)) {
-                    tickDenom = p.getInt();
-                } else if ("lotNumer".equals(key)) {
-                    lotNumer = p.getInt();
-                } else if ("lotDenom".equals(key)) {
-                    lotDenom = p.getInt();
-                } else if ("pipDp".equals(key)) {
-                    pipDp = p.getInt();
-                } else if ("minLots".equals(key)) {
-                    minLots = p.getLong();
-                } else if ("maxLots".equals(key)) {
-                    maxLots = p.getLong();
-                } else {
-                    throw new IOException(String.format("unexpected number field '%s'", key));
-                }
-                break;
-            case VALUE_STRING:
-                if ("mnem".equals(key)) {
-                    mnem = p.getString();
-                } else if ("display".equals(key)) {
-                    display = p.getString();
-                } else if ("assetType".equals(key)) {
-                    assetType = AssetType.valueOf(p.getString());
-                } else if ("asset".equals(key)) {
-                    asset = p.getString();
-                } else if ("ccy".equals(key)) {
-                    ccy = p.getString();
-                } else {
-                    throw new IOException(String.format("unexpected string field '%s'", key));
-                }
-                break;
-            default:
-                throw new IOException(String.format("unexpected json token '%s'", event));
-            }
-        }
-        throw new IOException("end-of object not found");
     }
 
     private static <T extends Map<String, Contr>> T parseContrs(JsonParser p, T out)
@@ -160,7 +60,7 @@ public final class RestTest {
             case END_ARRAY:
                 return out;
             case START_OBJECT:
-                final Contr contr = parseContr(p);
+                final Contr contr = Contr.parse(p);
                 out.put(contr.getMnem(), contr);
                 break;
             default:
@@ -168,46 +68,6 @@ public final class RestTest {
             }
         }
         throw new IOException("end-of array not found");
-    }
-
-    private static Trader parseTrader(JsonParser p) throws IOException {
-        long id = 0;
-        String mnem = null;
-        String display = null;
-        String email = null;
-
-        String key = null;
-        while (p.hasNext()) {
-            final Event event = p.next();
-            switch (event) {
-            case END_OBJECT:
-                return new Trader(id, mnem, display, email);
-            case KEY_NAME:
-                key = p.getString();
-                break;
-            case VALUE_NUMBER:
-                if ("id".equals(key)) {
-                    id = p.getLong();
-                } else {
-                    throw new IOException(String.format("unexpected number field '%s'", key));
-                }
-                break;
-            case VALUE_STRING:
-                if ("mnem".equals(key)) {
-                    mnem = p.getString();
-                } else if ("display".equals(key)) {
-                    display = p.getString();
-                } else if ("email".equals(key)) {
-                    email = p.getString();
-                } else {
-                    throw new IOException(String.format("unexpected string field '%s'", key));
-                }
-                break;
-            default:
-                throw new IOException(String.format("unexpected json token '%s'", event));
-            }
-        }
-        throw new IOException("end-of object not found");
     }
 
     private static <T extends Map<String, Trader>> T parseTraders(JsonParser p, T out)
@@ -218,7 +78,7 @@ public final class RestTest {
             case END_ARRAY:
                 return out;
             case START_OBJECT:
-                final Trader trader = parseTrader(p);
+                final Trader trader = Trader.parse(p);
                 out.put(trader.getMnem(), trader);
                 break;
             default:
@@ -228,16 +88,50 @@ public final class RestTest {
         throw new IOException("end-of array not found");
     }
 
+    public static void assertAssets(Map<String, Asset> assets) {
+        assertNotNull(assets);
+        assertEquals(25, assets.size());
+        final Asset asset = assets.get("JPY");
+        assertNotNull(asset);
+        assertEquals("JPY", asset.getMnem());
+        assertEquals("Japan, Yen", asset.getDisplay());
+        assertEquals(AssetType.CURRENCY, asset.getAssetType());
+    }
+
+    public static void assertContrs(Map<String, Contr> contrs) {
+        assertNotNull(contrs);
+        assertEquals(27, contrs.size());
+        final Contr contr = contrs.get("USDJPY");
+        assertNotNull(contr);
+        assertEquals("USDJPY", contr.getMnem());
+        assertEquals("USDJPY", contr.getDisplay());
+        assertEquals(AssetType.CURRENCY, contr.getAssetType());
+        assertEquals("USD", contr.getAsset());
+        assertEquals("JPY", contr.getCcy());
+        assertEquals(1, contr.getTickNumer());
+        assertEquals(100, contr.getTickDenom());
+        assertEquals(1000000, contr.getLotNumer());
+        assertEquals(1, contr.getLotDenom());
+        assertEquals(2, contr.getPipDp());
+        assertEquals(1, contr.getMinLots());
+        assertEquals(10, contr.getMaxLots());
+    }
+
+    public static void assertTraders(Map<String, Trader> traders) {
+        assertNotNull(traders);
+        assertEquals(5, traders.size());
+        final Trader trader = traders.get("TOBAYL");
+        assertNotNull(trader);
+        assertEquals("TOBAYL", trader.getMnem());
+        assertEquals("Toby Aylett", trader.getDisplay());
+        assertEquals("toby.aylett@gmail.com", trader.getEmail());
+    }
+
     @Test
-    public final void testGetRecNotAdmin() throws IOException {
+    public final void testGetRecWithoutTraders() throws IOException {
         final Rest rest = new Rest(new MockModel());
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(false, new UnaryFunction<String, String>() {
-            @Override
-            public final String call(String arg) {
-                return null;
-            }
-        }, sb);
+        rest.getRec(false, NO_PARAMS, sb);
 
         Map<String, Asset> assets = null;
         Map<String, Contr> contrs = null;
@@ -284,40 +178,15 @@ public final class RestTest {
                 }
             }
         }
-        assertNotNull(assets);
-        assertEquals(25, assets.size());
-        final Asset asset = assets.get("JPY");
-        assertEquals("JPY", asset.getMnem());
-        assertEquals("Japan, Yen", asset.getDisplay());
-        assertEquals(AssetType.CURRENCY, asset.getAssetType());
-
-        assertNotNull(contrs);
-        assertEquals(27, contrs.size());
-        final Contr contr = contrs.get("USDJPY");
-        assertEquals("USDJPY", contr.getMnem());
-        assertEquals("USDJPY", contr.getDisplay());
-        assertEquals(AssetType.CURRENCY, contr.getAssetType());
-        assertEquals("USD", contr.getAsset());
-        assertEquals("JPY", contr.getCcy());
-        assertEquals(1, contr.getTickNumer());
-        assertEquals(100, contr.getTickDenom());
-        assertEquals(1000000, contr.getLotNumer());
-        assertEquals(1, contr.getLotDenom());
-        assertEquals(2, contr.getPipDp());
-        assertEquals(1, contr.getMinLots());
-        assertEquals(10, contr.getMaxLots());
+        assertAssets(assets);
+        assertContrs(contrs);
     }
 
     @Test
-    public final void testGetRecAdmin() throws IOException {
+    public final void testGetRecWithTraders() throws IOException {
         final Rest rest = new Rest(new MockModel());
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(true, new UnaryFunction<String, String>() {
-            @Override
-            public final String call(String arg) {
-                return null;
-            }
-        }, sb);
+        rest.getRec(true, NO_PARAMS, sb);
 
         Map<String, Asset> assets = null;
         Map<String, Contr> contrs = null;
@@ -367,34 +236,149 @@ public final class RestTest {
                 }
             }
         }
-        assertNotNull(assets);
-        assertEquals(25, assets.size());
-        final Asset asset = assets.get("JPY");
-        assertEquals("JPY", asset.getMnem());
-        assertEquals("Japan, Yen", asset.getDisplay());
-        assertEquals(AssetType.CURRENCY, asset.getAssetType());
+        assertAssets(assets);
+        assertContrs(contrs);
+        assertTraders(traders);
+    }
 
-        assertNotNull(contrs);
-        assertEquals(27, contrs.size());
-        final Contr contr = contrs.get("USDJPY");
-        assertEquals("USDJPY", contr.getMnem());
-        assertEquals("USDJPY", contr.getDisplay());
-        assertEquals(AssetType.CURRENCY, contr.getAssetType());
-        assertEquals("USD", contr.getAsset());
-        assertEquals("JPY", contr.getCcy());
-        assertEquals(1, contr.getTickNumer());
-        assertEquals(100, contr.getTickDenom());
-        assertEquals(1000000, contr.getLotNumer());
-        assertEquals(1, contr.getLotDenom());
-        assertEquals(2, contr.getPipDp());
-        assertEquals(1, contr.getMinLots());
-        assertEquals(10, contr.getMaxLots());
+    @Test
+    public final void testGetRecAsset() throws IOException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.ASSET, NO_PARAMS, sb);
 
-        assertNotNull(traders);
-        assertEquals(5, traders.size());
-        final Trader trader = traders.get("TOBAYL");
-        assertEquals("TOBAYL", trader.getMnem());
-        assertEquals("Toby Aylett", trader.getDisplay());
-        assertEquals("toby.aylett@gmail.com", trader.getEmail());
+        Map<String, Asset> assets = null;
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            while (p.hasNext()) {
+                final Event event = p.next();
+                switch (event) {
+                case END_ARRAY:
+                    assertTrue(false);
+                    break;
+                case END_OBJECT:
+                    assertTrue(false);
+                    break;
+                case KEY_NAME:
+                    assertTrue(false);
+                    break;
+                case START_ARRAY:
+                    assets = parseAssets(p, new HashMap<String, Asset>());
+                    break;
+                case START_OBJECT:
+                    assertTrue(false);
+                    break;
+                case VALUE_FALSE:
+                    assertTrue(false);
+                    break;
+                case VALUE_NULL:
+                    assertTrue(false);
+                    break;
+                case VALUE_NUMBER:
+                    assertTrue(false);
+                    break;
+                case VALUE_STRING:
+                    assertTrue(false);
+                    break;
+                case VALUE_TRUE:
+                    assertTrue(false);
+                    break;
+                }
+            }
+        }
+        assertAssets(assets);
+    }
+
+    @Test
+    public final void testGetRecContr() throws IOException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.CONTR, NO_PARAMS, sb);
+
+        Map<String, Contr> contrs = null;
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            while (p.hasNext()) {
+                final Event event = p.next();
+                switch (event) {
+                case END_ARRAY:
+                    assertTrue(false);
+                    break;
+                case END_OBJECT:
+                    assertTrue(false);
+                    break;
+                case KEY_NAME:
+                    assertTrue(false);
+                    break;
+                case START_ARRAY:
+                    contrs = parseContrs(p, new HashMap<String, Contr>());
+                    break;
+                case START_OBJECT:
+                    assertTrue(false);
+                    break;
+                case VALUE_FALSE:
+                    assertTrue(false);
+                    break;
+                case VALUE_NULL:
+                    assertTrue(false);
+                    break;
+                case VALUE_NUMBER:
+                    assertTrue(false);
+                    break;
+                case VALUE_STRING:
+                    assertTrue(false);
+                    break;
+                case VALUE_TRUE:
+                    assertTrue(false);
+                    break;
+                }
+            }
+        }
+        assertContrs(contrs);
+    }
+
+    @Test
+    public final void testGetRecTrader() throws IOException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.TRADER, NO_PARAMS, sb);
+
+        Map<String, Trader> traders = null;
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            while (p.hasNext()) {
+                final Event event = p.next();
+                switch (event) {
+                case END_ARRAY:
+                    assertTrue(false);
+                    break;
+                case END_OBJECT:
+                    assertTrue(false);
+                    break;
+                case KEY_NAME:
+                    assertTrue(false);
+                    break;
+                case START_ARRAY:
+                    traders = parseTraders(p, new HashMap<String, Trader>());
+                    break;
+                case START_OBJECT:
+                    assertTrue(false);
+                    break;
+                case VALUE_FALSE:
+                    assertTrue(false);
+                    break;
+                case VALUE_NULL:
+                    assertTrue(false);
+                    break;
+                case VALUE_NUMBER:
+                    assertTrue(false);
+                    break;
+                case VALUE_STRING:
+                    assertTrue(false);
+                    break;
+                case VALUE_TRUE:
+                    assertTrue(false);
+                    break;
+                }
+            }
+        }
+        assertTraders(traders);
     }
 }

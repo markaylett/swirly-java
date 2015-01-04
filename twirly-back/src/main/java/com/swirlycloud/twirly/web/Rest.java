@@ -101,13 +101,13 @@ public final class Rest {
         serv = new Serv(model);
     }
 
-    public final synchronized void getRec(boolean isAdmin, UnaryFunction<String, String> params,
+    public final synchronized void getRec(boolean withTraders, UnaryFunction<String, String> params,
             Appendable out) throws IOException {
         out.append("{\"assets\":");
         doGetRec(RecType.ASSET, params, out);
         out.append(",\"contrs\":");
         doGetRec(RecType.CONTR, params, out);
-        if (isAdmin) {
+        if (withTraders) {
             out.append(",\"traders\":");
             doGetRec(RecType.TRADER, params, out);
         }

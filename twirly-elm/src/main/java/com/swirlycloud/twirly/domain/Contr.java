@@ -8,6 +8,9 @@ import static com.swirlycloud.twirly.domain.Conv.realToDp;
 
 import java.io.IOException;
 
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
+
 import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.util.StringUtil;
 
@@ -48,6 +51,74 @@ public final class Contr extends Rec {
         this.qtyDp = realToDp(qtyInc);
         this.minLots = minLots;
         this.maxLots = maxLots;
+    }
+
+    public static Contr parse(JsonParser p) throws IOException {
+        long id = 0;
+        String mnem = null;
+        String display = null;
+        AssetType assetType = null;
+        String asset = null;
+        String ccy = null;
+        int tickNumer = 0;
+        int tickDenom = 0;
+        int lotNumer = 0;
+        int lotDenom = 0;
+        int pipDp = 0;
+        long minLots = 0;
+        long maxLots = 0;
+
+        String key = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return new Contr(id, mnem, display, assetType, asset, ccy, tickNumer, tickDenom,
+                        lotNumer, lotDenom, pipDp, minLots, maxLots);
+            case KEY_NAME:
+                key = p.getString();
+                break;
+            case VALUE_NUMBER:
+                if ("id".equals(key)) {
+                    id = p.getLong();
+                } else if ("tickNumer".equals(key)) {
+                    tickNumer = p.getInt();
+                } else if ("tickDenom".equals(key)) {
+                    tickDenom = p.getInt();
+                } else if ("lotNumer".equals(key)) {
+                    lotNumer = p.getInt();
+                } else if ("lotDenom".equals(key)) {
+                    lotDenom = p.getInt();
+                } else if ("pipDp".equals(key)) {
+                    pipDp = p.getInt();
+                } else if ("minLots".equals(key)) {
+                    minLots = p.getLong();
+                } else if ("maxLots".equals(key)) {
+                    maxLots = p.getLong();
+                } else {
+                    throw new IOException(String.format("unexpected number field '%s'", key));
+                }
+                break;
+            case VALUE_STRING:
+                if ("mnem".equals(key)) {
+                    mnem = p.getString();
+                } else if ("display".equals(key)) {
+                    display = p.getString();
+                } else if ("assetType".equals(key)) {
+                    assetType = AssetType.valueOf(p.getString());
+                } else if ("asset".equals(key)) {
+                    asset = p.getString();
+                } else if ("ccy".equals(key)) {
+                    ccy = p.getString();
+                } else {
+                    throw new IOException(String.format("unexpected string field '%s'", key));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
     }
 
     @Override

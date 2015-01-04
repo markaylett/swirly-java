@@ -5,6 +5,9 @@ package com.swirlycloud.twirly.domain;
 
 import java.io.IOException;
 
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
+
 import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.util.StringUtil;
 
@@ -14,6 +17,46 @@ public final class Asset extends Rec {
     public Asset(long id, String mnem, String display, AssetType type) {
         super(RecType.ASSET, id, mnem, display);
         this.type = type;
+    }
+
+    public static Asset parse(JsonParser p) throws IOException {
+        long id = 0;
+        String mnem = null;
+        String display = null;
+        AssetType type = null;
+
+        String key = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return new Asset(id, mnem, display, type);
+            case KEY_NAME:
+                key = p.getString();
+                break;
+            case VALUE_NUMBER:
+                if ("id".equals(key)) {
+                    id = p.getLong();
+                } else {
+                    throw new IOException(String.format("unexpected number field '%s'", key));
+                }
+                break;
+            case VALUE_STRING:
+                if ("mnem".equals(key)) {
+                    mnem = p.getString();
+                } else if ("display".equals(key)) {
+                    display = p.getString();
+                } else if ("type".equals(key)) {
+                    type = AssetType.valueOf(p.getString());
+                } else {
+                    throw new IOException(String.format("unexpected string field '%s'", key));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
     }
 
     @Override
