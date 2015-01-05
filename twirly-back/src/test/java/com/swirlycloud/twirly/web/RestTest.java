@@ -5,9 +5,11 @@ package com.swirlycloud.twirly.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,8 @@ import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
+import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.mock.MockModel;
 
@@ -88,20 +92,64 @@ public final class RestTest {
         throw new IOException("end-of array not found");
     }
 
-    public static void assertAssets(Map<String, Asset> assets) {
-        assertNotNull(assets);
-        assertEquals(25, assets.size());
-        final Asset asset = assets.get("JPY");
+    private static Trader parseTrader(Reader reader) throws IOException {
+        Trader trader = null;
+        try (JsonParser p = Json.createParser(reader)) {
+            while (p.hasNext()) {
+                final Event event = p.next();
+                switch (event) {
+                case END_ARRAY:
+                    assertTrue(false);
+                    break;
+                case END_OBJECT:
+                    assertTrue(false);
+                    break;
+                case KEY_NAME:
+                    assertTrue(false);
+                    break;
+                case START_ARRAY:
+                    assertTrue(false);
+                    break;
+                case START_OBJECT:
+                    assertNull(trader);
+                    trader = Trader.parse(p);
+                    break;
+                case VALUE_FALSE:
+                    assertTrue(false);
+                    break;
+                case VALUE_NULL:
+                    assertTrue(false);
+                    break;
+                case VALUE_NUMBER:
+                    assertTrue(false);
+                    break;
+                case VALUE_STRING:
+                    assertTrue(false);
+                    break;
+                case VALUE_TRUE:
+                    assertTrue(false);
+                    break;
+                }
+            }
+        }
+        return trader;
+    }
+
+    public static void assertAsset(Asset asset) {
         assertNotNull(asset);
         assertEquals("JPY", asset.getMnem());
         assertEquals("Japan, Yen", asset.getDisplay());
         assertEquals(AssetType.CURRENCY, asset.getAssetType());
     }
 
-    public static void assertContrs(Map<String, Contr> contrs) {
-        assertNotNull(contrs);
-        assertEquals(27, contrs.size());
-        final Contr contr = contrs.get("USDJPY");
+    public static void assertAssets(Map<String, Asset> assets) {
+        assertNotNull(assets);
+        assertEquals(25, assets.size());
+        final Asset asset = assets.get("JPY");
+        assertAsset(asset);
+    }
+
+    public static void assertContr(Contr contr) {
         assertNotNull(contr);
         assertEquals("USDJPY", contr.getMnem());
         assertEquals("USDJPY", contr.getDisplay());
@@ -117,14 +165,25 @@ public final class RestTest {
         assertEquals(10, contr.getMaxLots());
     }
 
-    public static void assertTraders(Map<String, Trader> traders) {
-        assertNotNull(traders);
-        assertEquals(5, traders.size());
-        final Trader trader = traders.get("TOBAYL");
+    public static void assertContrs(Map<String, Contr> contrs) {
+        assertNotNull(contrs);
+        assertEquals(27, contrs.size());
+        final Contr contr = contrs.get("USDJPY");
+        assertContr(contr);
+    }
+
+    public static void assertTrader(Trader trader) {
         assertNotNull(trader);
         assertEquals("TOBAYL", trader.getMnem());
         assertEquals("Toby Aylett", trader.getDisplay());
         assertEquals("toby.aylett@gmail.com", trader.getEmail());
+    }
+
+    public static void assertTraders(Map<String, Trader> traders) {
+        assertNotNull(traders);
+        assertEquals(5, traders.size());
+        final Trader trader = traders.get("TOBAYL");
+        assertTrader(trader);
     }
 
     @Test
@@ -150,8 +209,10 @@ public final class RestTest {
                     break;
                 case START_ARRAY:
                     if ("assets".equals(key)) {
+                        assertNull(assets);
                         assets = parseAssets(p, new HashMap<String, Asset>());
                     } else if ("contrs".equals(key)) {
+                        assertNull(contrs);
                         contrs = parseContrs(p, new HashMap<String, Contr>());
                     } else {
                         assertTrue(false);
@@ -206,10 +267,13 @@ public final class RestTest {
                     break;
                 case START_ARRAY:
                     if ("assets".equals(key)) {
+                        assertNull(assets);
                         assets = parseAssets(p, new HashMap<String, Asset>());
                     } else if ("contrs".equals(key)) {
+                        assertNull(contrs);
                         contrs = parseContrs(p, new HashMap<String, Contr>());
                     } else if ("traders".equals(key)) {
+                        assertNull(traders);
                         traders = parseTraders(p, new HashMap<String, Trader>());
                     } else {
                         assertTrue(false);
@@ -262,6 +326,7 @@ public final class RestTest {
                     assertTrue(false);
                     break;
                 case START_ARRAY:
+                    assertNull(assets);
                     assets = parseAssets(p, new HashMap<String, Asset>());
                     break;
                 case START_OBJECT:
@@ -309,6 +374,7 @@ public final class RestTest {
                     assertTrue(false);
                     break;
                 case START_ARRAY:
+                    assertNull(contrs);
                     contrs = parseContrs(p, new HashMap<String, Contr>());
                     break;
                 case START_OBJECT:
@@ -356,6 +422,7 @@ public final class RestTest {
                     assertTrue(false);
                     break;
                 case START_ARRAY:
+                    assertNull(traders);
                     traders = parseTraders(p, new HashMap<String, Trader>());
                     break;
                 case START_OBJECT:
@@ -380,5 +447,163 @@ public final class RestTest {
             }
         }
         assertTraders(traders);
+    }
+
+    @Test
+    public final void testGetRecAssetMnem() throws IOException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.ASSET, "JPY", NO_PARAMS, sb);
+
+        Asset asset = null;
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            while (p.hasNext()) {
+                final Event event = p.next();
+                switch (event) {
+                case END_ARRAY:
+                    assertTrue(false);
+                    break;
+                case END_OBJECT:
+                    assertTrue(false);
+                    break;
+                case KEY_NAME:
+                    assertTrue(false);
+                    break;
+                case START_ARRAY:
+                    assertTrue(false);
+                    break;
+                case START_OBJECT:
+                    assertNull(asset);
+                    asset = Asset.parse(p);
+                    break;
+                case VALUE_FALSE:
+                    assertTrue(false);
+                    break;
+                case VALUE_NULL:
+                    assertTrue(false);
+                    break;
+                case VALUE_NUMBER:
+                    assertTrue(false);
+                    break;
+                case VALUE_STRING:
+                    assertTrue(false);
+                    break;
+                case VALUE_TRUE:
+                    assertTrue(false);
+                    break;
+                }
+            }
+        }
+        assertAsset(asset);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public final void testGetRecAssetNotFound() throws IOException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.ASSET, "JPYx", NO_PARAMS, sb);
+    }
+
+    @Test
+    public final void testGetRecContrMnem() throws IOException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.CONTR, "USDJPY", NO_PARAMS, sb);
+
+        Contr contr = null;
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            while (p.hasNext()) {
+                final Event event = p.next();
+                switch (event) {
+                case END_ARRAY:
+                    assertTrue(false);
+                    break;
+                case END_OBJECT:
+                    assertTrue(false);
+                    break;
+                case KEY_NAME:
+                    assertTrue(false);
+                    break;
+                case START_ARRAY:
+                    assertTrue(false);
+                    break;
+                case START_OBJECT:
+                    assertNull(contr);
+                    contr = Contr.parse(p);
+                    break;
+                case VALUE_FALSE:
+                    assertTrue(false);
+                    break;
+                case VALUE_NULL:
+                    assertTrue(false);
+                    break;
+                case VALUE_NUMBER:
+                    assertTrue(false);
+                    break;
+                case VALUE_STRING:
+                    assertTrue(false);
+                    break;
+                case VALUE_TRUE:
+                    assertTrue(false);
+                    break;
+                }
+            }
+        }
+        assertContr(contr);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public final void testGetRecContrNotFound() throws IOException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.CONTR, "USDJPYx", NO_PARAMS, sb);
+    }
+
+    @Test
+    public final void testGetRecTraderMnem() throws IOException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.TRADER, "TOBAYL", NO_PARAMS, sb);
+
+        assertTrader(parseTrader(new StringReader(sb.toString())));
+    }
+
+    @Test(expected = NotFoundException.class)
+    public final void testGetRecTraderNotFound() throws IOException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(RecType.TRADER, "TOBAYLx", NO_PARAMS, sb);
+    }
+
+    @Test
+    public final void testPostTrader() throws IOException, BadRequestException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com", sb);
+
+        Trader trader = parseTrader(new StringReader(sb.toString()));
+        int i = 0;
+        do {
+            assertNotNull(trader);
+            assertEquals("MARAYL2", trader.getMnem());
+            assertEquals("Mark Aylett", trader.getDisplay());
+            assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
+            sb.setLength(0);
+            rest.getRec(RecType.TRADER, "MARAYL2", NO_PARAMS, sb);
+        } while (i++ == 0);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public final void testPostTraderDupMnem() throws IOException, BadRequestException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com", sb);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public final void testPostTraderDupEmail() throws IOException, BadRequestException, NotFoundException {
+        final Rest rest = new Rest(new MockModel());
+        final StringBuilder sb = new StringBuilder();
+        rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@gmail.com", sb);
     }
 }

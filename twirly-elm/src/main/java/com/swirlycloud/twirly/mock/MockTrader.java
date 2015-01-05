@@ -30,7 +30,7 @@ public final class MockTrader {
         put(i++, "GOSAYL", "Goska Aylett", "goska.aylett@gmail.com");
         put(i++, "TOBAYL", "Toby Aylett", "toby.aylett@gmail.com");
         put(i++, "EMIAYL", "Emily Aylett", "emily.aylett@gmail.com");
-        put(i++, "SWIRLY", "Swirly Cloud", "mark.aylett@swirlycloud.com");
+        put(i++, "SWIRLY", "Swirly Cloud", "info@swirlycloud.com");
     }
 
     private MockTrader() {
