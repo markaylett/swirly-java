@@ -50,17 +50,18 @@ public final class MarketServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final UnaryFunction<String, String> params = newParams(req);
+            final long now = System.currentTimeMillis();
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getMarket(params, resp.getWriter());
+                rest.getMarket(params, now, resp.getWriter());
                 match = true;
             } else if (parts.length == 1) {
-                rest.getMarket(parts[CMNEM_PART], params, resp.getWriter());
+                rest.getMarket(parts[CMNEM_PART], params, now, resp.getWriter());
                 match = true;
             } else if (parts.length == 2) {
                 rest.getMarket(parts[CMNEM_PART], Integer.parseInt(parts[SETTL_DATE_PART]), params,
-                        resp.getWriter());
+                        now, resp.getWriter());
                 match = true;
             }
 
@@ -102,7 +103,8 @@ public final class MarketServlet extends RestServlet {
             if (r.getFields() != (Request.SETTL_DATE | Request.FIXING_DATE | Request.EXPIRY_DATE)) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.postMarket(cmnem, r.getSettlDate(), r.getFixingDate(), r.getExpiryDate(),
+            final long now = System.currentTimeMillis();
+            rest.postMarket(cmnem, r.getSettlDate(), r.getFixingDate(), r.getExpiryDate(), now,
                     resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {

@@ -104,55 +104,56 @@ public final class AccntServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final UnaryFunction<String, String> params = newParams(req);
+            final long now = System.currentTimeMillis();
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getAccnt(email, params, resp.getWriter());
+                rest.getAccnt(email, params, now, resp.getWriter());
                 match = true;
             } else if ("order".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getOrder(email, params, resp.getWriter());
+                    rest.getOrder(email, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getOrder(email, parts[CMNEM_PART], params, resp.getWriter());
+                    rest.getOrder(email, parts[CMNEM_PART], params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 3) {
                     rest.getOrder(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), params, resp.getWriter());
+                            Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 4) {
                     rest.getOrder(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]),
-                            Long.parseLong(parts[ID_PART]), params, resp.getWriter());
+                            Long.parseLong(parts[ID_PART]), params, now, resp.getWriter());
                     match = true;
                 }
             } else if ("trade".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getTrade(email, params, resp.getWriter());
+                    rest.getTrade(email, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getTrade(email, parts[CMNEM_PART], params, resp.getWriter());
+                    rest.getTrade(email, parts[CMNEM_PART], params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 3) {
                     rest.getTrade(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), params, resp.getWriter());
+                            Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 4) {
                     rest.getTrade(email, parts[CMNEM_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]),
-                            Long.parseLong(parts[ID_PART]), params, resp.getWriter());
+                            Long.parseLong(parts[ID_PART]), params, now, resp.getWriter());
                     match = true;
                 }
             } else if ("posn".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getPosn(email, params, resp.getWriter());
+                    rest.getPosn(email, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getPosn(email, parts[CMNEM_PART], params, resp.getWriter());
+                    rest.getPosn(email, parts[CMNEM_PART], params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 3) {
                     rest.getPosn(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), params, resp.getWriter());
+                            Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
                     match = true;
                 }
             }
@@ -199,8 +200,9 @@ public final class AccntServlet extends RestServlet {
             if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
                 throw new BadRequestException("request fields are invalid");
             }
+            final long now = System.currentTimeMillis();
             rest.postOrder(email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
-                    r.getLots(), r.getMinLots(), resp.getWriter());
+                    r.getLots(), r.getMinLots(), now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
@@ -241,7 +243,8 @@ public final class AccntServlet extends RestServlet {
             if (r.getFields() != Request.LOTS) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.putOrder(email, cmnem, settlDate, id, r.getLots(), resp.getWriter());
+            final long now = System.currentTimeMillis();
+            rest.putOrder(email, cmnem, settlDate, id, r.getLots(), now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

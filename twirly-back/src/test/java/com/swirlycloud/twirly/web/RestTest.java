@@ -189,8 +189,9 @@ public final class RestTest {
     @Test
     public final void testGetRecWithoutTraders() throws IOException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(false, NO_PARAMS, sb);
+        rest.getRec(false, NO_PARAMS, now, sb);
 
         Map<String, Asset> assets = null;
         Map<String, Contr> contrs = null;
@@ -246,8 +247,9 @@ public final class RestTest {
     @Test
     public final void testGetRecWithTraders() throws IOException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(true, NO_PARAMS, sb);
+        rest.getRec(true, NO_PARAMS, now, sb);
 
         Map<String, Asset> assets = null;
         Map<String, Contr> contrs = null;
@@ -308,8 +310,9 @@ public final class RestTest {
     @Test
     public final void testGetRecAsset() throws IOException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.ASSET, NO_PARAMS, sb);
+        rest.getRec(RecType.ASSET, NO_PARAMS, now, sb);
 
         Map<String, Asset> assets = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -356,8 +359,9 @@ public final class RestTest {
     @Test
     public final void testGetRecContr() throws IOException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.CONTR, NO_PARAMS, sb);
+        rest.getRec(RecType.CONTR, NO_PARAMS, now, sb);
 
         Map<String, Contr> contrs = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -404,8 +408,9 @@ public final class RestTest {
     @Test
     public final void testGetRecTrader() throws IOException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.TRADER, NO_PARAMS, sb);
+        rest.getRec(RecType.TRADER, NO_PARAMS, now, sb);
 
         Map<String, Trader> traders = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -452,8 +457,9 @@ public final class RestTest {
     @Test
     public final void testGetRecAssetMnem() throws IOException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.ASSET, "JPY", NO_PARAMS, sb);
+        rest.getRec(RecType.ASSET, "JPY", NO_PARAMS, now, sb);
 
         Asset asset = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -500,15 +506,17 @@ public final class RestTest {
     @Test(expected = NotFoundException.class)
     public final void testGetRecAssetNotFound() throws IOException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.ASSET, "JPYx", NO_PARAMS, sb);
+        rest.getRec(RecType.ASSET, "JPYx", NO_PARAMS, now, sb);
     }
 
     @Test
     public final void testGetRecContrMnem() throws IOException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.CONTR, "USDJPY", NO_PARAMS, sb);
+        rest.getRec(RecType.CONTR, "USDJPY", NO_PARAMS, now, sb);
 
         Contr contr = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -555,15 +563,17 @@ public final class RestTest {
     @Test(expected = NotFoundException.class)
     public final void testGetRecContrNotFound() throws IOException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.CONTR, "USDJPYx", NO_PARAMS, sb);
+        rest.getRec(RecType.CONTR, "USDJPYx", NO_PARAMS, now, sb);
     }
 
     @Test
     public final void testGetRecTraderMnem() throws IOException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.TRADER, "TOBAYL", NO_PARAMS, sb);
+        rest.getRec(RecType.TRADER, "TOBAYL", NO_PARAMS, now, sb);
 
         assertTrader(parseTrader(new StringReader(sb.toString())));
     }
@@ -571,15 +581,17 @@ public final class RestTest {
     @Test(expected = NotFoundException.class)
     public final void testGetRecTraderNotFound() throws IOException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(RecType.TRADER, "TOBAYLx", NO_PARAMS, sb);
+        rest.getRec(RecType.TRADER, "TOBAYLx", NO_PARAMS, now, sb);
     }
 
     @Test
     public final void testPostTrader() throws IOException, BadRequestException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com", sb);
+        rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com", now, sb);
 
         Trader trader = parseTrader(new StringReader(sb.toString()));
         int i = 0;
@@ -589,21 +601,23 @@ public final class RestTest {
             assertEquals("Mark Aylett", trader.getDisplay());
             assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
             sb.setLength(0);
-            rest.getRec(RecType.TRADER, "MARAYL2", NO_PARAMS, sb);
+            rest.getRec(RecType.TRADER, "MARAYL2", NO_PARAMS, now, sb);
         } while (i++ == 0);
     }
 
     @Test(expected = BadRequestException.class)
     public final void testPostTraderDupMnem() throws IOException, BadRequestException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com", sb);
+        rest.postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com", now, sb);
     }
 
     @Test(expected = BadRequestException.class)
     public final void testPostTraderDupEmail() throws IOException, BadRequestException, NotFoundException {
         final Rest rest = new Rest(new MockModel());
+        final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@gmail.com", sb);
+        rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@gmail.com", now, sb);
     }
 }

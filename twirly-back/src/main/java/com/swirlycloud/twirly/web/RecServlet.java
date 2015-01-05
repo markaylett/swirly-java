@@ -53,25 +53,26 @@ public final class RecServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final UnaryFunction<String, String> params = newParams(req);
+            final long now = System.currentTimeMillis();
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getRec(userService.isUserAdmin(), params, resp.getWriter());
+                rest.getRec(userService.isUserAdmin(), params, now, resp.getWriter());
                 match = true;
             } else if ("asset".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getRec(RecType.ASSET, params, resp.getWriter());
+                    rest.getRec(RecType.ASSET, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getRec(RecType.ASSET, parts[CMNEM_PART], params, resp.getWriter());
+                    rest.getRec(RecType.ASSET, parts[CMNEM_PART], params, now, resp.getWriter());
                     match = true;
                 }
             } else if ("contr".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getRec(RecType.CONTR, params, resp.getWriter());
+                    rest.getRec(RecType.CONTR, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getRec(RecType.CONTR, parts[CMNEM_PART], params, resp.getWriter());
+                    rest.getRec(RecType.CONTR, parts[CMNEM_PART], params, now, resp.getWriter());
                     match = true;
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
@@ -79,10 +80,10 @@ public final class RecServlet extends RestServlet {
                     throw new BadRequestException("user is not an admin");
                 }
                 if (parts.length == 1) {
-                    rest.getRec(RecType.TRADER, params, resp.getWriter());
+                    rest.getRec(RecType.TRADER, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getRec(RecType.TRADER, parts[CMNEM_PART], params, resp.getWriter());
+                    rest.getRec(RecType.TRADER, parts[CMNEM_PART], params, now, resp.getWriter());
                     match = true;
                 }
             }
@@ -135,7 +136,8 @@ public final class RecServlet extends RestServlet {
             if (fields != (Request.MNEM | Request.DISPLAY)) {
                 throw new BadRequestException("request fields are invalid");
             }
-            rest.postTrader(r.getMnem(), r.getDisplay(), email, resp.getWriter());
+            final long now = System.currentTimeMillis();
+            rest.postTrader(r.getMnem(), r.getDisplay(), email, now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
