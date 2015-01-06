@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import com.swirlycloud.twirly.exception.UncheckedIOException;
-import com.swirlycloud.twirly.function.UnaryFunction;
 
 public final class StringUtil {
     private static final String[] EMPTY = {};
@@ -15,6 +14,14 @@ public final class StringUtil {
 
     private StringUtil() {
     }
+
+    public static final Params INTERNAL = new Params() {
+        @SuppressWarnings("unchecked")
+        @Override
+        public final <T> T getParam(String name, Class<T> clazz) {
+            return "internal".equals(name) ? (T) Boolean.TRUE : null;
+        }
+    };
 
     public static String[] splitPath(String path) {
         if (path == null) {
@@ -36,10 +43,10 @@ public final class StringUtil {
         return PATTERN.split(path.substring(begin, end));
     }
 
-    public static String toJson(Jsonifiable j, UnaryFunction<String, String> params) {
+    public static String toJson(Jsonifiable j) {
         final StringBuilder sb = new StringBuilder();
         try {
-            j.toJson(params, sb);
+            j.toJson(INTERNAL, sb);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

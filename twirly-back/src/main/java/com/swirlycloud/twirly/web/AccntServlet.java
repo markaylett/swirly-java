@@ -22,7 +22,7 @@ import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
-import com.swirlycloud.twirly.function.UnaryFunction;
+import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
 public final class AccntServlet extends RestServlet {
@@ -103,7 +103,7 @@ public final class AccntServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
-            final UnaryFunction<String, String> params = newParams(req);
+            final Params params = newParams(req);
             final long now = System.currentTimeMillis();
 
             boolean match = false;

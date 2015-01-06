@@ -11,8 +11,8 @@ import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Params;
 import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Trans implements Jsonifiable {
@@ -42,11 +42,11 @@ public final class Trans implements Jsonifiable {
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override
-    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+    public final void toJson(Params params, Appendable out)
             throws IOException {
         final long traderId = order.getTraderId();
         out.append("{\"market\":");

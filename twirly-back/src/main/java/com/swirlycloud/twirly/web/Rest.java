@@ -26,18 +26,18 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ForbiddenException;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.function.UnaryFunction;
+import com.swirlycloud.twirly.util.Params;
 
 public final class Rest {
 
     private final Serv serv;
 
-    private final boolean getExpiredParam(UnaryFunction<String, String> params) {
-        final String s = params.call("expired");
-        return s == null ? false : Boolean.parseBoolean(s);
+    private final boolean getExpiredParam(Params params) {
+        final Boolean val = params.getParam("expired", Boolean.class);
+        return val == null ? false : val.booleanValue();
     }
 
-    private final void doGetRec(RecType recType, UnaryFunction<String, String> params, long now,
+    private final void doGetRec(RecType recType, Params params, long now,
             Appendable out) throws IOException {
         out.append('[');
         SlNode node = serv.getFirstRec(recType);
@@ -52,7 +52,7 @@ public final class Rest {
         out.append(']');
     }
 
-    private final void doGetOrder(Accnt accnt, String email, UnaryFunction<String, String> params,
+    private final void doGetOrder(Accnt accnt, String email, Params params,
             long now, Appendable out) throws IOException {
         out.append('[');
         RbNode node = accnt.getFirstOrder();
@@ -67,7 +67,7 @@ public final class Rest {
         out.append(']');
     }
 
-    private final void doGetTrade(Accnt accnt, String email, UnaryFunction<String, String> params,
+    private final void doGetTrade(Accnt accnt, String email, Params params,
             long now, Appendable out) throws IOException {
         out.append('[');
         RbNode node = accnt.getFirstTrade();
@@ -82,7 +82,7 @@ public final class Rest {
         out.append(']');
     }
 
-    private final void doGetPosn(Accnt accnt, String email, UnaryFunction<String, String> params,
+    private final void doGetPosn(Accnt accnt, String email, Params params,
             long now, Appendable out) throws IOException {
         out.append('[');
         RbNode node = accnt.getFirstPosn();
@@ -102,7 +102,7 @@ public final class Rest {
     }
 
     public final synchronized void getRec(boolean withTraders,
-            UnaryFunction<String, String> params, long now, Appendable out) throws IOException {
+            Params params, long now, Appendable out) throws IOException {
         out.append("{\"assets\":");
         doGetRec(RecType.ASSET, params, now, out);
         out.append(",\"contrs\":");
@@ -114,13 +114,13 @@ public final class Rest {
         out.append('}');
     }
 
-    public final synchronized void getRec(RecType recType, UnaryFunction<String, String> params,
+    public final synchronized void getRec(RecType recType, Params params,
             long now, Appendable out) throws IOException {
         doGetRec(recType, params, now, out);
     }
 
     public final synchronized void getRec(RecType recType, String mnem,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final Rec rec = serv.findRec(recType, mnem);
         if (rec == null) {
@@ -135,7 +135,7 @@ public final class Rest {
         trader.toJson(null, out);
     }
 
-    public final synchronized void getMarket(UnaryFunction<String, String> params, long now,
+    public final synchronized void getMarket(Params params, long now,
             Appendable out) throws IOException {
         int busDay = 0;
         if (getExpiredParam(params)) {
@@ -158,7 +158,7 @@ public final class Rest {
         out.append(']');
     }
 
-    public final synchronized void getMarket(String cmnem, UnaryFunction<String, String> params,
+    public final synchronized void getMarket(String cmnem, Params params,
             long now, Appendable out) throws NotFoundException, IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
@@ -189,7 +189,7 @@ public final class Rest {
     }
 
     public final synchronized void getMarket(String cmnem, int settlDate,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
@@ -226,7 +226,7 @@ public final class Rest {
         market.toJson(null, out);
     }
 
-    public final synchronized void getAccnt(String email, UnaryFunction<String, String> params,
+    public final synchronized void getAccnt(String email, Params params,
             long now, Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -261,7 +261,7 @@ public final class Rest {
         serv.archiveOrder(accnt, contr.getId(), settlDay, id, now);
     }
 
-    public final synchronized void getOrder(String email, UnaryFunction<String, String> params,
+    public final synchronized void getOrder(String email, Params params,
             long now, Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -276,7 +276,7 @@ public final class Rest {
     }
 
     public final synchronized void getOrder(String email, String cmnem,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws ForbiddenException, NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -308,7 +308,7 @@ public final class Rest {
     }
 
     public final synchronized void getOrder(String email, String cmnem, int settlDate,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws ForbiddenException, NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -341,7 +341,7 @@ public final class Rest {
     }
 
     public final synchronized void getOrder(String email, String cmnem, int settlDate, long id,
-            UnaryFunction<String, String> params, long now, Appendable out) throws IOException,
+            Params params, long now, Appendable out) throws IOException,
             NotFoundException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
@@ -409,7 +409,7 @@ public final class Rest {
         serv.archiveTrade(accnt, contr.getId(), settlDay, id, now);
     }
 
-    public final synchronized void getTrade(String email, UnaryFunction<String, String> params,
+    public final synchronized void getTrade(String email, Params params,
             long now, Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -424,7 +424,7 @@ public final class Rest {
     }
 
     public final synchronized void getTrade(String email, String cmnem,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws ForbiddenException, NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -456,7 +456,7 @@ public final class Rest {
     }
 
     public final synchronized void getTrade(String email, String cmnem, int settlDate,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws ForbiddenException, NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -489,7 +489,7 @@ public final class Rest {
     }
 
     public final synchronized void getTrade(String email, String cmnem, int settlDate, long id,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
@@ -507,7 +507,7 @@ public final class Rest {
         trade.toJson(params, out);
     }
 
-    public final synchronized void getPosn(String email, UnaryFunction<String, String> params,
+    public final synchronized void getPosn(String email, Params params,
             long now, Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -522,7 +522,7 @@ public final class Rest {
     }
 
     public final synchronized void getPosn(String email, String cmnem,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws ForbiddenException, NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
@@ -553,7 +553,7 @@ public final class Rest {
     }
 
     public final synchronized void getPosn(String email, String cmnem, int settlDate,
-            UnaryFunction<String, String> params, long now, Appendable out)
+            Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {

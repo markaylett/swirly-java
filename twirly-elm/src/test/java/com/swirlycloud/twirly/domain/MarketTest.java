@@ -10,9 +10,9 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockTrader;
+import com.swirlycloud.twirly.util.Params;
 
 public final class MarketTest {
     @Test
@@ -43,9 +43,9 @@ public final class MarketTest {
 
         // Empty params.
         sb.setLength(0);
-        market.toJson(new UnaryFunction<String, String>() {
+        market.toJson(new Params() {
             @Override
-            public final String call(String arg) {
+            public final <T> T getParam(String name, Class<T> clazz) {
                 return null;
             }
         }, sb);
@@ -55,10 +55,11 @@ public final class MarketTest {
 
         // Explicit TOB.
         sb.setLength(0);
-        market.toJson(new UnaryFunction<String, String>() {
+        market.toJson(new Params() {
+            @SuppressWarnings("unchecked")
             @Override
-            public final String call(String arg) {
-                return "depth".equals(arg) ? "1" : null;
+            public final <T> T getParam(String name, Class<T> clazz) {
+                return "depth".equals(name) ? (T) Integer.valueOf(1) : null;
             }
         }, sb);
         assertEquals(
@@ -67,10 +68,11 @@ public final class MarketTest {
 
         // Round-up to minimum.
         sb.setLength(0);
-        market.toJson(new UnaryFunction<String, String>() {
+        market.toJson(new Params() {
+            @SuppressWarnings("unchecked")
             @Override
-            public final String call(String arg) {
-                return "depth".equals(arg) ? "-1" : null;
+            public final <T> T getParam(String name, Class<T> clazz) {
+                return "depth".equals(name) ? (T) Integer.valueOf(-1) : null;
             }
         }, sb);
         assertEquals(
@@ -79,10 +81,11 @@ public final class MarketTest {
 
         // Between minimum and maximum.
         sb.setLength(0);
-        market.toJson(new UnaryFunction<String, String>() {
+        market.toJson(new Params() {
+            @SuppressWarnings("unchecked")
             @Override
-            public final String call(String arg) {
-                return "depth".equals(arg) ? "2" : null;
+            public final <T> T getParam(String name, Class<T> clazz) {
+                return "depth".equals(name) ? (T) Integer.valueOf(2) : null;
             }
         }, sb);
         assertEquals(
@@ -91,10 +94,11 @@ public final class MarketTest {
 
         // Round-down to maximum.
         sb.setLength(0);
-        market.toJson(new UnaryFunction<String, String>() {
+        market.toJson(new Params() {
+            @SuppressWarnings("unchecked")
             @Override
-            public final String call(String arg) {
-                return "depth".equals(arg) ? "100" : null;
+            public final <T> T getParam(String name, Class<T> clazz) {
+                return "depth".equals(name) ? (T) Integer.valueOf(100) : null;
             }
         }, sb);
         assertEquals(

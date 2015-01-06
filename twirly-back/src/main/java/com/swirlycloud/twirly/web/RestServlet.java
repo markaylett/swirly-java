@@ -11,16 +11,30 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.swirlycloud.twirly.exception.ServException;
-import com.swirlycloud.twirly.function.UnaryFunction;
+import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
 public abstract class RestServlet extends HttpServlet {
 
-    protected UnaryFunction<String, String> newParams(final HttpServletRequest req) {
-        return new UnaryFunction<String, String>() {
+    protected Params newParams(final HttpServletRequest req) {
+        return new Params() {
+            @SuppressWarnings("unchecked")
             @Override
-            public final String call(String arg) {
-                return req.getParameter(arg);
+            public final <T> T getParam(String name, Class<T> clazz) {
+                final String s = req.getParameter(name);
+                final Object val;
+                if (s != null) {
+                    if ("depth".equals(name)) {
+                        val = Integer.valueOf(s);
+                    } else if ("expired".equals(name) || "internal".equals(name)) {
+                        val = Boolean.valueOf(s);
+                    } else {
+                        val = s;
+                    }
+                } else {
+                    val = null;
+                }
+                return (T) val;
             }
         };
     }

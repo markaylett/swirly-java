@@ -10,9 +10,9 @@ import java.io.IOException;
 import com.swirlycloud.twirly.collection.BasicRbDlNode;
 import com.swirlycloud.twirly.collection.RbNode;
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Params;
 import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Order extends BasicRbDlNode implements Identifiable, Jsonifiable, Instruct {
@@ -22,7 +22,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
     transient Order refNext;
     transient RbNode level;
 
-    private final long key;
+    private final transient long key;
     private final long id;
     /**
      * The executing trader.
@@ -119,11 +119,11 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override
-    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+    public final void toJson(Params params, Appendable out)
             throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"trader\":\"").append(getRecMnem(trader));

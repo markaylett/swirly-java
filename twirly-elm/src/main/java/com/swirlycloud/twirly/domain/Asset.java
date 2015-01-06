@@ -8,7 +8,7 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.function.UnaryFunction;
+import com.swirlycloud.twirly.util.Params;
 import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Asset extends Rec {
@@ -61,11 +61,11 @@ public final class Asset extends Rec {
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override
-    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+    public final void toJson(Params params, Appendable out)
             throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);

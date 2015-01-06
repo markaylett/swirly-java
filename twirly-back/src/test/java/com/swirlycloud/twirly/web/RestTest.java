@@ -27,13 +27,13 @@ import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.mock.MockModel;
+import com.swirlycloud.twirly.util.Params;
 
 public final class RestTest {
-    private static final UnaryFunction<String, String> NO_PARAMS = new UnaryFunction<String, String>() {
+    private static final Params NO_PARAMS = new Params() {
         @Override
-        public final String call(String arg) {
+        public final <T> T getParam(String name, Class<T> clazz) {
             return null;
         }
     };

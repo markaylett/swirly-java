@@ -5,8 +5,8 @@ package com.swirlycloud.twirly.exception;
 
 import java.io.IOException;
 
-import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Params;
 
 public abstract class ServException extends Exception implements Jsonifiable {
 
@@ -25,7 +25,7 @@ public abstract class ServException extends Exception implements Jsonifiable {
     }
 
     @Override
-    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+    public final void toJson(Params params, Appendable out)
             throws IOException {
         out.append("{\"num\":");
         out.append(String.valueOf(num));

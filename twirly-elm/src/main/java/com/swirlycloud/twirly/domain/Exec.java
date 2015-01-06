@@ -9,14 +9,14 @@ import java.io.IOException;
 
 import com.swirlycloud.twirly.collection.BasicRbSlNode;
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Params;
 import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiable, Instruct {
 
-    private final long key;
+    private final transient long key;
     private final long id;
     private final long orderId;
     /**
@@ -113,11 +113,11 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override
-    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+    public final void toJson(Params params, Appendable out)
             throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));

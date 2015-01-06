@@ -10,9 +10,9 @@ import java.io.IOException;
 import com.swirlycloud.twirly.collection.BasicRbNode;
 import com.swirlycloud.twirly.collection.RbNode;
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Params;
 import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Market extends BasicRbNode implements Identifiable, Jsonifiable {
@@ -21,7 +21,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
      */
     private static final int DEPTH_MAX = 5;
 
-    private final long key;
+    private final transient long key;
     private Identifiable contr;
     private final int settlDay;
     private final int fixingDay;
@@ -77,17 +77,17 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this, null);
+        return StringUtil.toJson(this);
     }
 
     @Override
-    public final void toJson(UnaryFunction<String, String> params, Appendable out)
+    public final void toJson(Params params, Appendable out)
             throws IOException {
         int depth = 3; // Default depth.
         if (params != null) {
-            final String arg = params.call("depth");
-            if (arg != null) {
-                depth = Integer.parseInt(arg);
+            final Integer val = params.getParam("depth", Integer.class);
+            if (val != null) {
+                depth = val.intValue();
             }
         }
         // Round-up to minimum.
