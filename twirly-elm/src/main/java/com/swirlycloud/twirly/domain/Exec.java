@@ -4,15 +4,16 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 
 import java.io.IOException;
 
 import com.swirlycloud.twirly.collection.BasicRbSlNode;
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.util.Identifiable;
+import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
-import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiable, Instruct {
 
@@ -54,10 +55,6 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
     private Role role;
     private Identifiable cpty;
     private final long created;
-
-    private static String getRecMnem(Identifiable iden) {
-        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
-    }
 
     public Exec(long id, long orderId, Identifiable trader, Identifiable contr, int settlDay,
             String ref, State state, Action action, long ticks, long lots, long resd, long exec,
@@ -113,7 +110,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return JsonUtil.toJson(this);
     }
 
     @Override
@@ -121,9 +118,9 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
             throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));
-        out.append(",\"trader\":\"").append(getRecMnem(trader));
-        out.append("\",\"contr\":\"").append(getRecMnem(contr));
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"trader\":").append(getIdOrMnem(trader, params));
+        out.append(",\"contr\":").append(getIdOrMnem(contr, params));
+        out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"ref\":\"").append(ref);
         out.append("\",\"state\":\"").append(state.name());
         out.append("\",\"action\":\"").append(action.name());
@@ -137,8 +134,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         if (state == State.TRADE) {
             out.append(",\"matchId\":").append(String.valueOf(matchId));
             out.append(",\"role\":\"").append(role.name());
-            out.append("\",\"cpty\":\"").append(getRecMnem(cpty));
-            out.append("\"");
+            out.append("\",\"cpty\":").append(getIdOrMnem(cpty, params));
         }
         out.append(",\"created\":").append(String.valueOf(created));
         out.append("}");

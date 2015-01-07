@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 
 import java.io.IOException;
 
@@ -11,9 +12,9 @@ import com.swirlycloud.twirly.collection.BasicRbDlNode;
 import com.swirlycloud.twirly.collection.RbNode;
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.util.Identifiable;
+import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
-import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Order extends BasicRbDlNode implements Identifiable, Jsonifiable, Instruct {
 
@@ -57,10 +58,6 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
     private final long minLots;
     long created;
     long modified;
-
-    private static String getRecMnem(Identifiable iden) {
-        return iden instanceof Rec ? ((Rec) iden).mnem : String.valueOf(iden.getId());
-    }
 
     public Order(long id, Identifiable trader, Identifiable contr, int settlDay, String ref,
             State state, Action action, long ticks, long lots, long resd, long exec,
@@ -119,16 +116,16 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return JsonUtil.toJson(this);
     }
 
     @Override
     public final void toJson(Params params, Appendable out)
             throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
-        out.append(",\"trader\":\"").append(getRecMnem(trader));
-        out.append("\",\"contr\":\"").append(getRecMnem(contr));
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"trader\":").append(getIdOrMnem(trader, params));
+        out.append(",\"contr\":").append(getIdOrMnem(contr, params));
+        out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"ref\":\"").append(ref);
         out.append("\",\"state\":\"").append(state.name());
         out.append("\",\"action\":\"").append(action.name());

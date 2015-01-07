@@ -8,8 +8,8 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Params;
-import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Trader extends Rec {
     // Internals.
@@ -65,7 +65,7 @@ public final class Trader extends Rec {
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return JsonUtil.toJson(this);
     }
 
     @Override

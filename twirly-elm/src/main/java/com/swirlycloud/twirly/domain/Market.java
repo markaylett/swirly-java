@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 
 import java.io.IOException;
 
@@ -11,9 +12,9 @@ import com.swirlycloud.twirly.collection.BasicRbNode;
 import com.swirlycloud.twirly.collection.RbNode;
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.util.Identifiable;
+import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
-import com.swirlycloud.twirly.util.StringUtil;
 
 public final class Market extends BasicRbNode implements Identifiable, Jsonifiable {
     /**
@@ -33,10 +34,6 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     private long lastTime;
     private long maxOrderId;
     private long maxExecId;
-
-    private static String getRecMnem(Identifiable iden) {
-        return iden instanceof Rec ? ((Rec) iden).getMnem() : String.valueOf(iden.getId());
-    }
 
     private final Side getSide(Action action) {
         return action == Action.BUY ? bidSide : offerSide;
@@ -77,7 +74,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
 
     @Override
     public final String toString() {
-        return StringUtil.toJson(this);
+        return JsonUtil.toJson(this);
     }
 
     @Override
@@ -96,8 +93,8 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         depth = Math.min(depth, DEPTH_MAX);
 
         out.append("{\"id\":").append(String.valueOf(key));
-        out.append(",\"contr\":\"").append(getRecMnem(contr));
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"contr\":").append(getIdOrMnem(contr, params));
+        out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"fixingDate\":").append(String.valueOf(jdToIso(fixingDay)));
         out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
         out.append(",\"bidTicks\":[");
