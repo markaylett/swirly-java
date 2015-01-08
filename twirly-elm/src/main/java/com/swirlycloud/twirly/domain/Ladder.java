@@ -23,6 +23,35 @@ public final class Ladder extends Matrix {
         super(DEPTH_MAX, 6);
     }
 
+    public void vwap() {
+        final int rows = getRows();
+        // Accumulators.
+        double bidLots = 0.0, bidLicks = 0.0, bidCount = 0.0;
+        double offerLots = 0.0, offerLicks = 0.0, offerCount = 0.0;
+        for (int row = 0; row < rows; ++row) {
+            if (isValidBid(row)) {
+                final double lots = getBidLots(row);
+                bidLots += lots;
+                bidLicks += lots * getBidTicks(row);
+                bidCount += getBidCount(row);
+                setBidRung(row, bidLicks / bidLots, bidLots, bidCount);
+            }
+            if (isValidOffer(row)) {
+                final double lots = getOfferLots(row);
+                offerLots += lots;
+                offerLicks += lots * getOfferTicks(row);
+                offerCount += getOfferCount(row);
+                setOfferRung(row, offerLicks / offerLots, offerLots, offerCount);
+            }
+        }
+    }
+
+    public final void setBidRung(int row, double ticks, double lots, double count) {
+        setValue(row, BID_TICKS, ticks);
+        setValue(row, BID_LOTS, lots);
+        setValue(row, BID_COUNT, count);
+    }
+
     public final void setBidTicks(int row, double ticks) {
         setValue(row, BID_TICKS, ticks);
     }
@@ -33,6 +62,12 @@ public final class Ladder extends Matrix {
 
     public final void setBidCount(int row, double count) {
         setValue(row, BID_COUNT, count);
+    }
+
+    public final void setOfferRung(int row, double ticks, double lots, double count) {
+        setValue(row, OFFER_TICKS, ticks);
+        setValue(row, OFFER_LOTS, lots);
+        setValue(row, OFFER_COUNT, count);
     }
 
     public final void setOfferTicks(int row, double ticks) {

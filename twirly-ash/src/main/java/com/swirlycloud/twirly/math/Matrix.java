@@ -69,6 +69,23 @@ public class Matrix {
         return new Matrix(extent, extent, data);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < rows; ++i) {
+            if (0 < i) {
+                sb.append('\n');
+            }
+            for (int j = 0; j < cols; ++j) {
+                if (0 < j) {
+                    sb.append(' ');
+                }
+                sb.append(String.format("%.7g", data[i * cols + j]));
+            }
+        }
+        return sb.toString();
+    }
+
     public final Matrix transpose() {
         final Matrix m = Matrix.zero(cols, rows);
         for (int i = 0; i < rows; ++i) {
