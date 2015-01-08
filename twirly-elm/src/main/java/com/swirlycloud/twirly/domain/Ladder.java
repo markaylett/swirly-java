@@ -84,11 +84,11 @@ public final class Ladder extends Matrix {
     }
 
     public final long roundBidTicks(int row) {
-        return (long) Math.floor(getBidTicks(row));
+        return (long) getBidTicks(row);
     }
 
     public final long roundBidLots(int row) {
-        return (long) Math.floor(getBidLots(row));
+        return (long) getBidLots(row);
     }
 
     public final int roundBidCount(int row) {
@@ -100,7 +100,7 @@ public final class Ladder extends Matrix {
     }
 
     public final long roundOfferLots(int row) {
-        return (long) Math.ceil(getOfferLots(row));
+        return (long) getOfferLots(row);
     }
 
     public final int roundOfferCount(int row) {
