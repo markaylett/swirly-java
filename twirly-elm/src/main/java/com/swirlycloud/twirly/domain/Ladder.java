@@ -23,25 +23,50 @@ public final class Ladder extends Matrix {
         super(DEPTH_MAX, 6);
     }
 
-    public void vwap() {
+    public void setVwap(boolean on) {
         final int rows = getRows();
-        // Accumulators.
-        double bidLots = 0.0, bidLicks = 0.0, bidCount = 0.0;
-        double offerLots = 0.0, offerLicks = 0.0, offerCount = 0.0;
-        for (int row = 0; row < rows; ++row) {
-            if (isValidBid(row)) {
-                final double lots = getBidLots(row);
-                bidLots += lots;
-                bidLicks += lots * getBidTicks(row);
-                bidCount += getBidCount(row);
-                setBidRung(row, bidLicks / bidLots, bidLots, bidCount);
+        if (on) {
+            // Accumulators.
+            double bidLots = 0.0, bidLicks = 0.0, bidCount = 0.0;
+            double offerLots = 0.0, offerLicks = 0.0, offerCount = 0.0;
+            for (int row = 0; row < rows; ++row) {
+                if (isValidBid(row)) {
+                    final double lots = getBidLots(row);
+                    bidLots += lots;
+                    bidLicks += lots * getBidTicks(row);
+                    bidCount += getBidCount(row);
+                    setBidRung(row, bidLicks / bidLots, bidLots, bidCount);
+                }
+                if (isValidOffer(row)) {
+                    final double lots = getOfferLots(row);
+                    offerLots += lots;
+                    offerLicks += lots * getOfferTicks(row);
+                    offerCount += getOfferCount(row);
+                    setOfferRung(row, offerLicks / offerLots, offerLots, offerCount);
+                }
             }
-            if (isValidOffer(row)) {
-                final double lots = getOfferLots(row);
-                offerLots += lots;
-                offerLicks += lots * getOfferTicks(row);
-                offerCount += getOfferCount(row);
-                setOfferRung(row, offerLicks / offerLots, offerLots, offerCount);
+        } else {
+            for (int row = rows - 1; row > 0; --row) {
+                if (isValidBid(row)) {
+                    double bidLots = getBidLots(row);
+                    double bidLicks = bidLots * getBidTicks(row);
+                    double bidCount = getBidCount(row);
+                    final double prevLots = getBidLots(row - 1);
+                    bidLots -= prevLots;
+                    bidLicks -= prevLots * getBidTicks(row - 1);
+                    bidCount -= getBidCount(row - 1);
+                    setBidRung(row, bidLicks / bidLots, bidLots, bidCount);
+                }
+                if (isValidOffer(row)) {
+                    double offerLots = getOfferLots(row);
+                    double offerLicks = offerLots * getOfferTicks(row);
+                    double offerCount = getOfferCount(row);
+                    final double prevLots = getOfferLots(row - 1);
+                    offerLots -= prevLots;
+                    offerLicks -= prevLots * getOfferTicks(row - 1);
+                    offerCount -= getOfferCount(row - 1);
+                    setOfferRung(row, offerLicks / offerLots, offerLots, offerCount);
+                }
             }
         }
     }

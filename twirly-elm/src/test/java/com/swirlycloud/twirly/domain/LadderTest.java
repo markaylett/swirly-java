@@ -54,11 +54,7 @@ public final class LadderTest {
         ladder.setBidRung(1, 12343, 20, 2);
         ladder.setBidRung(2, 12342, 30, 3);
 
-        // 12344.00 10.00000 1.000000 12346.00 10.00000 1.000000
-        // 12343.00 20.00000 2.000000 12347.00 20.00000 2.000000
-        // 12342.00 30.00000 3.000000 12348.00 30.00000 3.000000
-
-        ladder.vwap();
+        ladder.setVwap(true);
 
         // 12344.00 10.00000 1.000000 12346.00 10.00000 1.000000
 
@@ -86,5 +82,34 @@ public final class LadderTest {
         assertEquals(12347.33, ladder.getOfferTicks(2), 0.01);
         assertEquals(60, ladder.getOfferLots(2), DELTA);
         assertEquals(6, ladder.getOfferCount(2), DELTA);
-}
+
+        ladder.setVwap(false);
+
+        // 12344.00 10.00000 1.000000 12346.00 10.00000 1.000000
+
+        assertEquals(12344, ladder.getBidTicks(0), DELTA);
+        assertEquals(10, ladder.getBidLots(0), DELTA);
+        assertEquals(1, ladder.getBidCount(0), DELTA);
+        assertEquals(12346, ladder.getOfferTicks(0), DELTA);
+        assertEquals(10, ladder.getOfferLots(0), DELTA);
+        assertEquals(1, ladder.getOfferCount(0), DELTA);
+
+        // 12343.00 20.00000 2.000000 12347.00 20.00000 2.000000
+
+        assertEquals(12343.00, ladder.getBidTicks(1), 0.01);
+        assertEquals(20, ladder.getBidLots(1), DELTA);
+        assertEquals(2, ladder.getBidCount(1), DELTA);
+        assertEquals(12347.00, ladder.getOfferTicks(1), 0.01);
+        assertEquals(20, ladder.getOfferLots(1), DELTA);
+        assertEquals(2, ladder.getOfferCount(1), DELTA);
+
+        // 12342.00 30.00000 3.000000 12348.00 30.00000 3.000000
+
+        assertEquals(12342.00, ladder.getBidTicks(2), 0.01);
+        assertEquals(30, ladder.getBidLots(2), DELTA);
+        assertEquals(3, ladder.getBidCount(2), DELTA);
+        assertEquals(12348, ladder.getOfferTicks(2), 0.01);
+        assertEquals(30, ladder.getOfferLots(2), DELTA);
+        assertEquals(3, ladder.getOfferCount(2), DELTA);
+    }
 }
