@@ -98,7 +98,7 @@ public final class MarketServlet extends RestServlet {
 
             final Request r = new Request();
             try (JsonParser p = Json.createParser(req.getReader())) {
-                r.parse(p);
+                r.parse(p, true);
             }
             if (r.getFields() != (Request.SETTL_DATE | Request.FIXING_DATE | Request.EXPIRY_DATE)) {
                 throw new BadRequestException("request fields are invalid");

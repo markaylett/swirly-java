@@ -138,7 +138,7 @@ public final class ViewTest {
                 lastLots, lastTime);
 
         try (JsonParser p = Json.createParser(new StringReader(in.toString()))) {
-            final View out = View.parse(p);
+            final View out = View.parse(p, true);
 
             assertEquals(contr.getId(), out.getContrId());
             assertEquals(settlDay, out.getSettlDay());

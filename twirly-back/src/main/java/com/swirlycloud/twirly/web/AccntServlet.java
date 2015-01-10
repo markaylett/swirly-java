@@ -195,7 +195,7 @@ public final class AccntServlet extends RestServlet {
 
             final Request r = new Request();
             try (JsonParser p = Json.createParser(req.getReader())) {
-                r.parse(p);
+                r.parse(p, true);
             }
             if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
                 throw new BadRequestException("request fields are invalid");
@@ -238,7 +238,7 @@ public final class AccntServlet extends RestServlet {
 
             final Request r = new Request();
             try (JsonParser p = Json.createParser(req.getReader())) {
-                r.parse(p);
+                r.parse(p, true);
             }
             if (r.getFields() != Request.LOTS) {
                 throw new BadRequestException("request fields are invalid");

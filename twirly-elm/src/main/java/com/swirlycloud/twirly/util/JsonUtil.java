@@ -5,6 +5,9 @@ package com.swirlycloud.twirly.util;
 
 import java.io.IOException;
 
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
+
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 
 public final class JsonUtil {
@@ -34,5 +37,15 @@ public final class JsonUtil {
         return params != null && params.getParam("internal", Boolean.class) == Boolean.TRUE //
         ? String.valueOf(iden.getId()) //
                 : '"' + ((Memorable) iden).getMnem() + '"';
+    }
+
+    public static void parseStartObject(JsonParser p) throws IOException {
+        if (!p.hasNext()) {
+            throw new IOException("start object not found");
+        }
+        final Event event = p.next();
+        if (event != Event.START_OBJECT) {
+            throw new IOException(String.format("unexpected json token '%s'", event));
+        }
     }
 }

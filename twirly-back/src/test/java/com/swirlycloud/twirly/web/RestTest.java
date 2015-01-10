@@ -9,7 +9,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +45,7 @@ public final class RestTest {
             case END_ARRAY:
                 return out;
             case START_OBJECT:
-                final Asset asset = Asset.parse(p);
+                final Asset asset = Asset.parse(p, false);
                 out.put(asset.getMnem(), asset);
                 break;
             default:
@@ -64,7 +63,7 @@ public final class RestTest {
             case END_ARRAY:
                 return out;
             case START_OBJECT:
-                final Contr contr = Contr.parse(p);
+                final Contr contr = Contr.parse(p, false);
                 out.put(contr.getMnem(), contr);
                 break;
             default:
@@ -82,7 +81,7 @@ public final class RestTest {
             case END_ARRAY:
                 return out;
             case START_OBJECT:
-                final Trader trader = Trader.parse(p);
+                final Trader trader = Trader.parse(p, false);
                 out.put(trader.getMnem(), trader);
                 break;
             default:
@@ -90,49 +89,6 @@ public final class RestTest {
             }
         }
         throw new IOException("end-of array not found");
-    }
-
-    private static Trader parseTrader(Reader reader) throws IOException {
-        Trader trader = null;
-        try (JsonParser p = Json.createParser(reader)) {
-            while (p.hasNext()) {
-                final Event event = p.next();
-                switch (event) {
-                case END_ARRAY:
-                    assertTrue(false);
-                    break;
-                case END_OBJECT:
-                    assertTrue(false);
-                    break;
-                case KEY_NAME:
-                    assertTrue(false);
-                    break;
-                case START_ARRAY:
-                    assertTrue(false);
-                    break;
-                case START_OBJECT:
-                    assertNull(trader);
-                    trader = Trader.parse(p);
-                    break;
-                case VALUE_FALSE:
-                    assertTrue(false);
-                    break;
-                case VALUE_NULL:
-                    assertTrue(false);
-                    break;
-                case VALUE_NUMBER:
-                    assertTrue(false);
-                    break;
-                case VALUE_STRING:
-                    assertTrue(false);
-                    break;
-                case VALUE_TRUE:
-                    assertTrue(false);
-                    break;
-                }
-            }
-        }
-        return trader;
     }
 
     public static void assertAsset(Asset asset) {
@@ -461,46 +417,10 @@ public final class RestTest {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(RecType.ASSET, "JPY", NO_PARAMS, now, sb);
 
-        Asset asset = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            while (p.hasNext()) {
-                final Event event = p.next();
-                switch (event) {
-                case END_ARRAY:
-                    assertTrue(false);
-                    break;
-                case END_OBJECT:
-                    assertTrue(false);
-                    break;
-                case KEY_NAME:
-                    assertTrue(false);
-                    break;
-                case START_ARRAY:
-                    assertTrue(false);
-                    break;
-                case START_OBJECT:
-                    assertNull(asset);
-                    asset = Asset.parse(p);
-                    break;
-                case VALUE_FALSE:
-                    assertTrue(false);
-                    break;
-                case VALUE_NULL:
-                    assertTrue(false);
-                    break;
-                case VALUE_NUMBER:
-                    assertTrue(false);
-                    break;
-                case VALUE_STRING:
-                    assertTrue(false);
-                    break;
-                case VALUE_TRUE:
-                    assertTrue(false);
-                    break;
-                }
-            }
+            final Asset asset = Asset.parse(p, true);
+            assertAsset(asset);
         }
-        assertAsset(asset);
     }
 
     @Test(expected = NotFoundException.class)
@@ -518,46 +438,10 @@ public final class RestTest {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(RecType.CONTR, "USDJPY", NO_PARAMS, now, sb);
 
-        Contr contr = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            while (p.hasNext()) {
-                final Event event = p.next();
-                switch (event) {
-                case END_ARRAY:
-                    assertTrue(false);
-                    break;
-                case END_OBJECT:
-                    assertTrue(false);
-                    break;
-                case KEY_NAME:
-                    assertTrue(false);
-                    break;
-                case START_ARRAY:
-                    assertTrue(false);
-                    break;
-                case START_OBJECT:
-                    assertNull(contr);
-                    contr = Contr.parse(p);
-                    break;
-                case VALUE_FALSE:
-                    assertTrue(false);
-                    break;
-                case VALUE_NULL:
-                    assertTrue(false);
-                    break;
-                case VALUE_NUMBER:
-                    assertTrue(false);
-                    break;
-                case VALUE_STRING:
-                    assertTrue(false);
-                    break;
-                case VALUE_TRUE:
-                    assertTrue(false);
-                    break;
-                }
-            }
+            final Contr contr = Contr.parse(p, true);
+            assertContr(contr);
         }
-        assertContr(contr);
     }
 
     @Test(expected = NotFoundException.class)
@@ -575,7 +459,10 @@ public final class RestTest {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(RecType.TRADER, "TOBAYL", NO_PARAMS, now, sb);
 
-        assertTrader(parseTrader(new StringReader(sb.toString())));
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            final Trader trader = Trader.parse(p, true);
+            assertTrader(trader);
+        }
     }
 
     @Test(expected = NotFoundException.class)
@@ -593,20 +480,23 @@ public final class RestTest {
         final StringBuilder sb = new StringBuilder();
         rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com", now, sb);
 
-        Trader trader = parseTrader(new StringReader(sb.toString()));
-        int i = 0;
-        do {
-            assertNotNull(trader);
-            assertEquals("MARAYL2", trader.getMnem());
-            assertEquals("Mark Aylett", trader.getDisplay());
-            assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
-            sb.setLength(0);
-            rest.getRec(RecType.TRADER, "MARAYL2", NO_PARAMS, now, sb);
-        } while (i++ == 0);
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            final Trader trader = Trader.parse(p, true);
+            int i = 0;
+            do {
+                assertNotNull(trader);
+                assertEquals("MARAYL2", trader.getMnem());
+                assertEquals("Mark Aylett", trader.getDisplay());
+                assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
+                sb.setLength(0);
+                rest.getRec(RecType.TRADER, "MARAYL2", NO_PARAMS, now, sb);
+            } while (i++ == 0);
+        }
     }
 
     @Test(expected = BadRequestException.class)
-    public final void testPostTraderDupMnem() throws IOException, BadRequestException, NotFoundException {
+    public final void testPostTraderDupMnem() throws IOException, BadRequestException,
+            NotFoundException {
         final Rest rest = new Rest(new MockModel());
         final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
@@ -614,7 +504,8 @@ public final class RestTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public final void testPostTraderDupEmail() throws IOException, BadRequestException, NotFoundException {
+    public final void testPostTraderDupEmail() throws IOException, BadRequestException,
+            NotFoundException {
         final Rest rest = new Rest(new MockModel());
         final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();

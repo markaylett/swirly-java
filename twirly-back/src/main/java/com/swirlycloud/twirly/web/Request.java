@@ -41,6 +41,16 @@ public final class Request {
     private long lots;
     private long minLots;
 
+    private static void parseStartObject(JsonParser p) throws BadRequestException {
+        if (!p.hasNext()) {
+            throw new BadRequestException("start object not found");
+        }
+        final Event event = p.next();
+        if (event != Event.START_OBJECT) {
+            throw new BadRequestException(String.format("unexpected json token '%s'", event));
+        }
+    }
+
     public final void clear() {
         fields = 0;
         id = 0;
@@ -58,7 +68,10 @@ public final class Request {
         minLots = 0;        
     }
 
-    public final void parse(JsonParser p) throws BadRequestException {
+    public final void parse(JsonParser p, boolean withStartObject) throws BadRequestException {
+        if (withStartObject) {
+            parseStartObject(p);
+        }
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
@@ -67,8 +80,6 @@ public final class Request {
                 break;
             case KEY_NAME:
                 name = p.getString();
-                break;
-            case START_OBJECT:
                 break;
             case VALUE_NULL:
                 if ("mnem".equals(name)) {

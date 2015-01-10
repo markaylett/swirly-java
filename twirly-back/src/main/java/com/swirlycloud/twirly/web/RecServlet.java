@@ -123,7 +123,7 @@ public final class RecServlet extends RestServlet {
 
             final Request r = new Request();
             try (JsonParser p = Json.createParser(req.getReader())) {
-                r.parse(p);
+                r.parse(p, true);
             }
             int fields = r.getFields();
             if ((fields & Request.EMAIL) != 0) {

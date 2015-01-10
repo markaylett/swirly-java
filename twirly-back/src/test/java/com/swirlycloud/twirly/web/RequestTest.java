@@ -19,7 +19,7 @@ public final class RequestTest {
     private static final Request parse(String s) throws BadRequestException {
         final Request r = new Request();
         try (JsonParser p = Json.createParser(new StringReader(s))) {
-            r.parse(p);
+            r.parse(p, true);
         }
         return r;
     }
