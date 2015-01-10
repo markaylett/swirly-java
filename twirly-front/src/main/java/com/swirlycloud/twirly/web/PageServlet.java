@@ -18,7 +18,7 @@ public final class PageServlet extends HttpServlet {
 
     @Override
     protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException, ServletException {
+            throws ServletException, IOException {
 
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);

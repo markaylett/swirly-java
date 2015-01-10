@@ -61,8 +61,8 @@ public final class MockEcbRates {
     private MockEcbRates() {
     }
 
-    public static EcbRates newEcbRates() throws IOException, ParserConfigurationException,
-            SAXException {
+    public static EcbRates newEcbRates() throws ParserConfigurationException, SAXException,
+            IOException {
         final InputSource is = new InputSource(new StringReader(MOCK));
         final EcbRates ecbRates = new EcbRates();
         ecbRates.parse(is);

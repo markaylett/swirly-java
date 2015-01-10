@@ -15,7 +15,7 @@ public final class JsonUtil {
     private JsonUtil() {
     }
 
-    public static final Params INTERNAL = new Params() {
+    public static final Params PARAMS_INTERNAL = new Params() {
         @SuppressWarnings("unchecked")
         @Override
         public final <T> T getParam(String name, Class<T> clazz) {
@@ -23,10 +23,17 @@ public final class JsonUtil {
         }
     };
 
+    public static final Params PARAMS_NONE = new Params() {
+        @Override
+        public final <T> T getParam(String name, Class<T> clazz) {
+            return null;
+        }
+    };
+
     public static String toJson(Jsonifiable j) {
         final StringBuilder sb = new StringBuilder();
         try {
-            j.toJson(INTERNAL, sb);
+            j.toJson(PARAMS_INTERNAL, sb);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

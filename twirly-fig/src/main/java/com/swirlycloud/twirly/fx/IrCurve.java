@@ -260,25 +260,25 @@ public final class IrCurve {
         return factory.newSAXParser();
     }
 
-    public final void parse(InputStream is) throws IOException, ParserConfigurationException,
-            SAXException {
+    public final void parse(InputStream is) throws ParserConfigurationException,
+            SAXException, IOException {
         final SAXParser parser = newSaxParser();
         parser.parse(is, new Handler());
     }
 
-    public final void parse(String uri) throws IOException, ParserConfigurationException,
-            SAXException {
+    public final void parse(String uri) throws ParserConfigurationException,
+            SAXException, IOException {
         final SAXParser parser = newSaxParser();
         parser.parse(uri, new Handler());
     }
 
-    public final void parse(File f) throws IOException, ParserConfigurationException, SAXException {
+    public final void parse(File f) throws ParserConfigurationException, SAXException, IOException {
         final SAXParser parser = newSaxParser();
         parser.parse(f, new Handler());
     }
 
-    public final void parse(InputSource is) throws IOException, ParserConfigurationException,
-            SAXException {
+    public final void parse(InputSource is) throws ParserConfigurationException,
+            SAXException, IOException {
         final SAXParser parser = newSaxParser();
         parser.parse(is, new Handler());
     }

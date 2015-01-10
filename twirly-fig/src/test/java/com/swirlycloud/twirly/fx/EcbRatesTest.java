@@ -19,7 +19,7 @@ public final class EcbRatesTest {
     private static final double DELTA = 0.0000001;
 
     @Test
-    public final void test() throws IOException, ParserConfigurationException, SAXException {
+    public final void test() throws ParserConfigurationException, SAXException, IOException {
 
         final EcbRates ecbRates = newEcbRates();
 

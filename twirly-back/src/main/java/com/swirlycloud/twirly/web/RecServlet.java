@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static com.swirlycloud.twirly.util.StringUtil.splitPath;
 
 import java.io.IOException;
@@ -137,7 +138,7 @@ public final class RecServlet extends RestServlet {
                 throw new BadRequestException("request fields are invalid");
             }
             final long now = System.currentTimeMillis();
-            rest.postTrader(r.getMnem(), r.getDisplay(), email, now, resp.getWriter());
+            rest.postTrader(r.getMnem(), r.getDisplay(), email, PARAMS_NONE, now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

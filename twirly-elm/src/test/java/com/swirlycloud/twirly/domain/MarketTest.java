@@ -26,11 +26,11 @@ public final class MarketTest {
 
         market.placeOrder(new Order(1, trader, contr, settlDay, "apple", Action.BUY, 12343, 10, 0,
                 now), now);
-        market.placeOrder(new Order(1, trader, contr, settlDay, "orange", Action.BUY, 12344, 5, 0,
+        market.placeOrder(new Order(2, trader, contr, settlDay, "orange", Action.BUY, 12344, 5, 0,
                 now), now);
-        market.placeOrder(new Order(1, trader, contr, settlDay, "pear", Action.SELL, 12346, 5, 0,
+        market.placeOrder(new Order(3, trader, contr, settlDay, "pear", Action.SELL, 12346, 5, 0,
                 now), now);
-        market.placeOrder(new Order(1, trader, contr, settlDay, "banana", Action.SELL, 12346, 2, 0,
+        market.placeOrder(new Order(4, trader, contr, settlDay, "banana", Action.SELL, 12346, 2, 0,
                 now), now);
 
         final StringBuilder sb = new StringBuilder();

@@ -18,7 +18,7 @@ import com.swirlycloud.twirly.date.GregDate;
 public final class IrCurveTest {
     private static final double DELTA = 0.000000000001;
     @Test
-    public final void test() throws IOException, ParserConfigurationException, SAXException {
+    public final void test() throws ParserConfigurationException, SAXException, IOException {
 
         final IrCurve irc = newIrCurve("GBP");
 

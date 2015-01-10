@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static com.swirlycloud.twirly.util.StringUtil.splitPath;
 
 import java.io.IOException;
@@ -104,8 +105,8 @@ public final class MarketServlet extends RestServlet {
                 throw new BadRequestException("request fields are invalid");
             }
             final long now = System.currentTimeMillis();
-            rest.postMarket(cmnem, r.getSettlDate(), r.getFixingDate(), r.getExpiryDate(), now,
-                    resp.getWriter());
+            rest.postMarket(cmnem, r.getSettlDate(), r.getFixingDate(), r.getExpiryDate(),
+                    PARAMS_NONE, now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
