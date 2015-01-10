@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.util.JsonUtil.parseStartArray;
+import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -152,13 +154,11 @@ public final class RestTest {
         Map<String, Asset> assets = null;
         Map<String, Contr> contrs = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
             String name = null;
             while (p.hasNext()) {
                 final Event event = p.next();
                 switch (event) {
-                case END_ARRAY:
-                    assertTrue(false);
-                    break;
                 case END_OBJECT:
                     break;
                 case KEY_NAME:
@@ -175,22 +175,7 @@ public final class RestTest {
                         assertTrue(false);
                     }
                     break;
-                case START_OBJECT:
-                    assertTrue(name == null);
-                    break;
-                case VALUE_FALSE:
-                    assertTrue(false);
-                    break;
-                case VALUE_NULL:
-                    assertTrue(false);
-                    break;
-                case VALUE_NUMBER:
-                    assertTrue(false);
-                    break;
-                case VALUE_STRING:
-                    assertTrue(false);
-                    break;
-                case VALUE_TRUE:
+                default:
                     assertTrue(false);
                     break;
                 }
@@ -211,13 +196,11 @@ public final class RestTest {
         Map<String, Contr> contrs = null;
         Map<String, Trader> traders = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
             String name = null;
             while (p.hasNext()) {
                 final Event event = p.next();
                 switch (event) {
-                case END_ARRAY:
-                    assertTrue(false);
-                    break;
                 case END_OBJECT:
                     break;
                 case KEY_NAME:
@@ -237,22 +220,7 @@ public final class RestTest {
                         assertTrue(false);
                     }
                     break;
-                case START_OBJECT:
-                    assertTrue(name == null);
-                    break;
-                case VALUE_FALSE:
-                    assertTrue(false);
-                    break;
-                case VALUE_NULL:
-                    assertTrue(false);
-                    break;
-                case VALUE_NUMBER:
-                    assertTrue(false);
-                    break;
-                case VALUE_STRING:
-                    assertTrue(false);
-                    break;
-                case VALUE_TRUE:
+                default:
                     assertTrue(false);
                     break;
                 }
@@ -270,46 +238,11 @@ public final class RestTest {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(RecType.ASSET, NO_PARAMS, now, sb);
 
-        Map<String, Asset> assets = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            while (p.hasNext()) {
-                final Event event = p.next();
-                switch (event) {
-                case END_ARRAY:
-                    assertTrue(false);
-                    break;
-                case END_OBJECT:
-                    assertTrue(false);
-                    break;
-                case KEY_NAME:
-                    assertTrue(false);
-                    break;
-                case START_ARRAY:
-                    assertNull(assets);
-                    assets = parseAssets(p, new HashMap<String, Asset>());
-                    break;
-                case START_OBJECT:
-                    assertTrue(false);
-                    break;
-                case VALUE_FALSE:
-                    assertTrue(false);
-                    break;
-                case VALUE_NULL:
-                    assertTrue(false);
-                    break;
-                case VALUE_NUMBER:
-                    assertTrue(false);
-                    break;
-                case VALUE_STRING:
-                    assertTrue(false);
-                    break;
-                case VALUE_TRUE:
-                    assertTrue(false);
-                    break;
-                }
-            }
+            parseStartArray(p);
+            final Map<String, Asset> assets = parseAssets(p, new HashMap<String, Asset>());
+            assertAssets(assets);
         }
-        assertAssets(assets);
     }
 
     @Test
@@ -319,46 +252,11 @@ public final class RestTest {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(RecType.CONTR, NO_PARAMS, now, sb);
 
-        Map<String, Contr> contrs = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            while (p.hasNext()) {
-                final Event event = p.next();
-                switch (event) {
-                case END_ARRAY:
-                    assertTrue(false);
-                    break;
-                case END_OBJECT:
-                    assertTrue(false);
-                    break;
-                case KEY_NAME:
-                    assertTrue(false);
-                    break;
-                case START_ARRAY:
-                    assertNull(contrs);
-                    contrs = parseContrs(p, new HashMap<String, Contr>());
-                    break;
-                case START_OBJECT:
-                    assertTrue(false);
-                    break;
-                case VALUE_FALSE:
-                    assertTrue(false);
-                    break;
-                case VALUE_NULL:
-                    assertTrue(false);
-                    break;
-                case VALUE_NUMBER:
-                    assertTrue(false);
-                    break;
-                case VALUE_STRING:
-                    assertTrue(false);
-                    break;
-                case VALUE_TRUE:
-                    assertTrue(false);
-                    break;
-                }
-            }
+            parseStartArray(p);
+            final Map<String, Contr> contrs = parseContrs(p, new HashMap<String, Contr>());
+            assertContrs(contrs);
         }
-        assertContrs(contrs);
     }
 
     @Test
@@ -368,46 +266,11 @@ public final class RestTest {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(RecType.TRADER, NO_PARAMS, now, sb);
 
-        Map<String, Trader> traders = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            while (p.hasNext()) {
-                final Event event = p.next();
-                switch (event) {
-                case END_ARRAY:
-                    assertTrue(false);
-                    break;
-                case END_OBJECT:
-                    assertTrue(false);
-                    break;
-                case KEY_NAME:
-                    assertTrue(false);
-                    break;
-                case START_ARRAY:
-                    assertNull(traders);
-                    traders = parseTraders(p, new HashMap<String, Trader>());
-                    break;
-                case START_OBJECT:
-                    assertTrue(false);
-                    break;
-                case VALUE_FALSE:
-                    assertTrue(false);
-                    break;
-                case VALUE_NULL:
-                    assertTrue(false);
-                    break;
-                case VALUE_NUMBER:
-                    assertTrue(false);
-                    break;
-                case VALUE_STRING:
-                    assertTrue(false);
-                    break;
-                case VALUE_TRUE:
-                    assertTrue(false);
-                    break;
-                }
-            }
+            parseStartArray(p);
+            final Map<String, Trader> traders = parseTraders(p, new HashMap<String, Trader>());
+            assertTraders(traders);
         }
-        assertTraders(traders);
     }
 
     @Test

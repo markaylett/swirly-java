@@ -39,6 +39,16 @@ public final class JsonUtil {
                 : '"' + ((Memorable) iden).getMnem() + '"';
     }
 
+    public static void parseStartArray(JsonParser p) throws IOException {
+        if (!p.hasNext()) {
+            throw new IOException("start array not found");
+        }
+        final Event event = p.next();
+        if (event != Event.START_ARRAY) {
+            throw new IOException(String.format("unexpected json token '%s'", event));
+        }
+    }
+
     public static void parseStartObject(JsonParser p) throws IOException {
         if (!p.hasNext()) {
             throw new IOException("start object not found");
