@@ -356,20 +356,22 @@ public final class RestTest {
         final Rest rest = new Rest(new MockModel());
         final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com", PARAMS_NONE, now, sb);
 
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            final Trader trader = Trader.parse(p, true);
-            int i = 0;
-            do {
+        rest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com", PARAMS_NONE, now,
+                sb);
+        int i = 0;
+        do {
+            try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+                final Trader trader = Trader.parse(p, true);
+
                 assertNotNull(trader);
                 assertEquals("MARAYL2", trader.getMnem());
                 assertEquals("Mark Aylett", trader.getDisplay());
                 assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
-                sb.setLength(0);
-                rest.getRec(RecType.TRADER, "MARAYL2", PARAMS_NONE, now, sb);
-            } while (i++ == 0);
-        }
+            }
+            sb.setLength(0);
+            rest.getRec(RecType.TRADER, "MARAYL2", PARAMS_NONE, now, sb);
+        } while (i++ == 0);
     }
 
     @Test(expected = BadRequestException.class)
@@ -378,7 +380,8 @@ public final class RestTest {
         final Rest rest = new Rest(new MockModel());
         final long now = System.currentTimeMillis();
         final StringBuilder sb = new StringBuilder();
-        rest.postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com", PARAMS_NONE, now, sb);
+        rest.postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com", PARAMS_NONE, now,
+                sb);
     }
 
     @Test(expected = BadRequestException.class)
@@ -402,27 +405,31 @@ public final class RestTest {
 
         rest.postMarket("EURUSD", jdToIso(settlDay), jdToIso(fixingDay), jdToIso(expiryDay),
                 PARAMS_INTERNAL, now, sb);
+        int i = 0;
+        do {
+            try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+                final View view = View.parse(p, true);
 
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            final View view = View.parse(p, true);
+                assertEquals(12, view.getContrId());
+                assertEquals(settlDay, view.getSettlDay());
+                assertEquals(fixingDay, view.getFixingDay());
+                assertEquals(expiryDay, view.getExpiryDay());
 
-            assertEquals(12, view.getContrId());
-            assertEquals(settlDay, view.getSettlDay());
-            assertEquals(fixingDay, view.getFixingDay());
-            assertEquals(expiryDay, view.getExpiryDay());
+                assertEquals(0, view.getOfferTicks(0));
+                assertEquals(0, view.getOfferLots(0));
+                assertEquals(0, view.getOfferCount(0));
 
-            assertEquals(0, view.getOfferTicks(0));
-            assertEquals(0, view.getOfferLots(0));
-            assertEquals(0, view.getOfferCount(0));
+                assertEquals(0, view.getBidTicks(0));
+                assertEquals(0, view.getBidLots(0));
+                assertEquals(0, view.getOfferCount(0));
 
-            assertEquals(0, view.getBidTicks(0));
-            assertEquals(0, view.getBidLots(0));
-            assertEquals(0, view.getOfferCount(0));
-
-            assertEquals(0, view.getLastTicks());
-            assertEquals(0, view.getLastLots());
-            assertEquals(0, view.getLastTime());
-        }
+                assertEquals(0, view.getLastTicks());
+                assertEquals(0, view.getLastLots());
+                assertEquals(0, view.getLastTime());
+            }
+            sb.setLength(0);
+            rest.getMarket("EURUSD", jdToIso(settlDay), PARAMS_INTERNAL, now, sb);
+        } while (i++ == 0);
     }
 
     @Test
