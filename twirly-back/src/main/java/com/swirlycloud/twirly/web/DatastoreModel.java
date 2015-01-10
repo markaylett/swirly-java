@@ -144,7 +144,7 @@ public final class DatastoreModel implements Model {
 
     private final Entity getMarket(Transaction txn, long contrId, int settlDay) {
         // Lazily for now, but we may want to explicitly create markets in the future.
-        final Key key = KeyFactory.createKey(MARKET_KIND, Market.composeId(contrId, settlDay));
+        final Key key = KeyFactory.createKey(MARKET_KIND, Market.composeKey(contrId, settlDay));
         Entity entity;
         try {
             entity = datastore.get(txn, key);
@@ -281,7 +281,7 @@ public final class DatastoreModel implements Model {
     public final void insertMarket(long contrId, int settlDay, int fixingDay, int expiryDay) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity entity = new Entity(MARKET_KIND, Market.composeId(contrId, settlDay));
+            final Entity entity = new Entity(MARKET_KIND, Market.composeKey(contrId, settlDay));
             entity.setUnindexedProperty("contrId", contrId);
             entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
             entity.setUnindexedProperty("fixingDay", Integer.valueOf(fixingDay));
@@ -488,7 +488,7 @@ public final class DatastoreModel implements Model {
                     final long traderId = (Long) entity.getProperty("traderId");
                     final long contrId = (Long) entity.getProperty("contrId");
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-                    final Long posnId = Long.valueOf(Posn.composeId(contrId, settlDay, traderId));
+                    final Long posnId = Long.valueOf(Posn.composeKey(contrId, settlDay, traderId));
                     // Lazy position.
                     Posn posn = m.get(posnId);
                     if (posn == null) {

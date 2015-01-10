@@ -59,87 +59,87 @@ public final class Request {
     }
 
     public final void parse(JsonParser p) throws BadRequestException {
-        String key = null;
+        String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
                 break;
             case KEY_NAME:
-                key = p.getString();
+                name = p.getString();
                 break;
             case START_OBJECT:
                 break;
             case VALUE_NULL:
-                if ("mnem".equals(key)) {
+                if ("mnem".equals(name)) {
                     fields |= MNEM;
                     mnem = null;
-                } else if ("display".equals(key)) {
+                } else if ("display".equals(name)) {
                     fields |= DISPLAY;
                     display = null;
-                } else if ("email".equals(key)) {
+                } else if ("email".equals(name)) {
                     fields |= EMAIL;
                     email = null;
-                } else if ("contr".equals(key)) {
+                } else if ("contr".equals(name)) {
                     fields |= CONTR;
                     contr = null;
-                } else if ("ref".equals(key)) {
+                } else if ("ref".equals(name)) {
                     fields |= REF;
                     ref = null;
-                } else if ("action".equals(key)) {
+                } else if ("action".equals(name)) {
                     fields |= ACTION;
                     action = null;
                 } else {
-                    throw new BadRequestException(String.format("unexpected nullable field '%s'", key));
+                    throw new BadRequestException(String.format("unexpected nullable field '%s'", name));
                 }
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(key)) {
+                if ("id".equals(name)) {
                     fields |= ID;
                     id = p.getLong();
-                } else if ("settlDate".equals(key)) {
+                } else if ("settlDate".equals(name)) {
                     fields |= SETTL_DATE;
                     settlDate = p.getInt();
-                } else if ("fixingDate".equals(key)) {
+                } else if ("fixingDate".equals(name)) {
                     fields |= FIXING_DATE;
                     fixingDate = p.getInt();
-                } else if ("expiryDate".equals(key)) {
+                } else if ("expiryDate".equals(name)) {
                     fields |= EXPIRY_DATE;
                     expiryDate = p.getInt();
-                } else if ("ticks".equals(key)) {
+                } else if ("ticks".equals(name)) {
                     fields |= TICKS;
                     ticks = p.getLong();
-                } else if ("lots".equals(key)) {
+                } else if ("lots".equals(name)) {
                     fields |= LOTS;
                     lots = p.getLong();
-                } else if ("minLots".equals(key)) {
+                } else if ("minLots".equals(name)) {
                     fields |= MIN_LOTS;
                     minLots = p.getLong();
                 } else {
-                    throw new BadRequestException(String.format("unexpected number field '%s'", key));
+                    throw new BadRequestException(String.format("unexpected number field '%s'", name));
                 }
                 break;
             case VALUE_STRING:
-                if ("mnem".equals(key)) {
+                if ("mnem".equals(name)) {
                     fields |= MNEM;
                     mnem = p.getString();
-                } else if ("display".equals(key)) {
+                } else if ("display".equals(name)) {
                     fields |= DISPLAY;
                     display = p.getString();
-                } else if ("email".equals(key)) {
+                } else if ("email".equals(name)) {
                     fields |= EMAIL;
                     email = p.getString();
-                } else if ("contr".equals(key)) {
+                } else if ("contr".equals(name)) {
                     fields |= CONTR;
                     contr = p.getString();
-                } else if ("ref".equals(key)) {
+                } else if ("ref".equals(name)) {
                     fields |= REF;
                     ref = p.getString();
-                } else if ("action".equals(key)) {
+                } else if ("action".equals(name)) {
                     fields |= ACTION;
                     action = Action.valueOf(p.getString());
                 } else {
-                    throw new BadRequestException(String.format("unexpected string field '%s'", key));
+                    throw new BadRequestException(String.format("unexpected string field '%s'", name));
                 }
                 break;
             default:

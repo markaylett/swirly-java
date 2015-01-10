@@ -13,7 +13,7 @@ import com.swirlycloud.twirly.mock.MockTrader;
 
 public final class PosnTest {
     @Test
-    public final void test() {
+    public final void testToString() {
         final Posn posn = new Posn(MockTrader.newTrader("MARAYL"), MockContr.newContr("EURUSD"),
                 ymdToJd(2014, 2, 14));
         posn.setBuyLicks(1);

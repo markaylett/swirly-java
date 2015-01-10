@@ -11,7 +11,7 @@ import com.swirlycloud.twirly.mock.MockTrader;
 
 public final class TraderTest {
     @Test
-    public final void test() {
+    public final void testToString() {
         assertEquals(
                 "{\"mnem\":\"MARAYL\",\"display\":\"Mark Aylett\",\"email\":\"mark.aylett@gmail.com\"}",
                 MockTrader.newTrader("MARAYL").toString());

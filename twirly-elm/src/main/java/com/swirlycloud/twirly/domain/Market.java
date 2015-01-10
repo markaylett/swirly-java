@@ -41,7 +41,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
 
     public Market(Identifiable contr, int settlDay, int fixingDay, int expiryDay, long lastTicks,
             long lastLots, long lastTime, long maxOrderId, long maxExecId) {
-        this.key = composeId(contr.getId(), settlDay);
+        this.key = composeKey(contr.getId(), settlDay);
         this.contr = contr;
         this.settlDay = settlDay;
         this.fixingDay = fixingDay;
@@ -61,7 +61,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
      * Synthetic market key.
      */
 
-    public static long composeId(long contrId, int settlDay) {
+    public static long composeKey(long contrId, int settlDay) {
         // 16 bit contr-id.
         final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.

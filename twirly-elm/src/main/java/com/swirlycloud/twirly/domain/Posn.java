@@ -27,7 +27,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
     private long sellLots;
 
     public Posn(Identifiable trader, Identifiable contr, int settlDay) {
-        this.key = composeId(contr.getId(), settlDay, trader.getId());
+        this.key = composeKey(contr.getId(), settlDay, trader.getId());
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -71,7 +71,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
      * Synthetic position key.
      */
 
-    public static long composeId(long contrId, int settlDay, long traderId) {
+    public static long composeKey(long contrId, int settlDay, long traderId) {
         // 16 bit contr-id.
         final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.

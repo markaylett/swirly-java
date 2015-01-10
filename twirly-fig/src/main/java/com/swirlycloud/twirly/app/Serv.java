@@ -73,7 +73,7 @@ public final class Serv {
 
     private final void insertOrder(Order order) {
         enrichOrder(order);
-        final Market market = (Market) markets.find(Market.composeId(order.getContrId(),
+        final Market market = (Market) markets.find(Market.composeKey(order.getContrId(),
                 order.getSettlDay()));
         market.insertOrder(order);
         boolean success = false;
@@ -351,7 +351,7 @@ public final class Serv {
         if (fixingDay > settlDay) {
             throw new BadRequestException("settl-day before fixing-day");
         }
-        final long key = Market.composeId(contr.getId(), settlDay);
+        final long key = Market.composeKey(contr.getId(), settlDay);
         final RbNode node = markets.pfind(key);
         if (node != null && node.getKey() == key) {
             throw new BadRequestException(String.format("market '%s' for '%d' already exists",
@@ -400,7 +400,7 @@ public final class Serv {
     @NonNull
     public final Market getLazyMarket(Contr contr, int settlDay) {
         Market market;
-        final long key = Market.composeId(contr.getId(), settlDay);
+        final long key = Market.composeKey(contr.getId(), settlDay);
         final RbNode node = markets.pfind(key);
         if (node == null || node.getKey() != key) {
             market = new Market(contr, settlDay, settlDay, settlDay);
@@ -424,7 +424,7 @@ public final class Serv {
 
     @Nullable
     public final Market findMarket(Contr contr, int settlDay) {
-        return (Market) markets.find(Market.composeId(contr.getId(), settlDay));
+        return (Market) markets.find(Market.composeKey(contr.getId(), settlDay));
     }
 
     @Nullable
@@ -665,7 +665,7 @@ public final class Serv {
             if (order == null) {
                 break;
             }
-            final Market market = (Market) markets.find(Market.composeId(order.getContrId(),
+            final Market market = (Market) markets.find(Market.composeKey(order.getContrId(),
                     order.getSettlDay()));
             assert market != null;
 

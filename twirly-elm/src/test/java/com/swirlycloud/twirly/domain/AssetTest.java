@@ -11,7 +11,7 @@ import com.swirlycloud.twirly.mock.MockAsset;
 
 public final class AssetTest {
     @Test
-    public final void test() {
+    public final void testToString() {
         assertEquals(
                 "{\"mnem\":\"GBP\",\"display\":\"United Kingdom, Pounds\",\"type\":\"CURRENCY\"}",
                 MockAsset.newAsset("GBP").toString());

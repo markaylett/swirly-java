@@ -13,7 +13,7 @@ import com.swirlycloud.twirly.mock.MockTrader;
 
 public final class ExecTest {
     @Test
-    public final void test() {
+    public final void testToString() {
         final Order order = new Order(1, MockTrader.newTrader("MARAYL"),
                 MockContr.newContr("EURUSD"), ymdToJd(2014, 2, 14), "test", Action.BUY, 12345, 3,
                 1, 1414692516006L);

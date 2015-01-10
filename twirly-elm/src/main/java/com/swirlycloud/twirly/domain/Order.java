@@ -68,7 +68,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         if (id >= (1L << 32)) {
             throw new IllegalArgumentException("order-id exceeds max-value");
         }
-        this.key = composeId(contr.getId(), settlDay, id);
+        this.key = composeKey(contr.getId(), settlDay, id);
         this.id = id;
         this.trader = trader;
         this.contr = contr;
@@ -95,7 +95,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         if (id >= (1L << 32)) {
             throw new IllegalArgumentException("order-id exceeds max-value");
         }
-        this.key = composeId(contr.getId(), settlDay, id);
+        this.key = composeKey(contr.getId(), settlDay, id);
         this.id = id;
         this.trader = trader;
         this.contr = contr;
@@ -156,7 +156,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
      * Synthetic order key.
      */
 
-    public static long composeId(long contrId, int settlDay, long orderId) {
+    public static long composeKey(long contrId, int settlDay, long orderId) {
         // 16 bit contr-id.
         final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.

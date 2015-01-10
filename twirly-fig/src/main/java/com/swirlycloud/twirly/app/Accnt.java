@@ -57,7 +57,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     final Order removeOrder(long contrId, int settlDay, long id) {
-        final RbNode node = orders.find(Order.composeId(contrId, settlDay, id));
+        final RbNode node = orders.find(Order.composeKey(contrId, settlDay, id));
         if (node == null) {
             return null;
         }
@@ -75,7 +75,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     public final Order findOrder(long contrId, int settlDay, long id) {
-        return (Order) orders.find(Order.composeId(contrId, settlDay, id));
+        return (Order) orders.find(Order.composeKey(contrId, settlDay, id));
     }
 
     /**
@@ -113,7 +113,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     final boolean removeTrade(long contrId, int settlDay, long id) {
-        final RbNode node = trades.find(Exec.composeId(contrId, settlDay, id));
+        final RbNode node = trades.find(Exec.composeKey(contrId, settlDay, id));
         if (node == null) {
             return false;
         }
@@ -123,7 +123,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     public final Exec findTrade(long contrId, int settlDay, long id) {
-        return (Exec) trades.find(Exec.composeId(contrId, settlDay, id));
+        return (Exec) trades.find(Exec.composeKey(contrId, settlDay, id));
     }
 
     public final RbNode getRootTrade() {
@@ -170,7 +170,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
     final Posn getLazyPosn(Contr contr, int settlDay) {
         Posn posn;
-        final long key = Posn.composeId(contr.getId(), settlDay, trader.getId());
+        final long key = Posn.composeKey(contr.getId(), settlDay, trader.getId());
         final RbNode node = posns.pfind(key);
         if (node == null || node.getKey() != key) {
             posn = new Posn(trader, contr, settlDay);
@@ -183,7 +183,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     public final Posn findPosn(Contr contr, int settlDay) {
-        final long key = Posn.composeId(contr.getId(), settlDay, trader.getId());
+        final long key = Posn.composeKey(contr.getId(), settlDay, trader.getId());
         return (Posn) posns.find(key);
     }
 

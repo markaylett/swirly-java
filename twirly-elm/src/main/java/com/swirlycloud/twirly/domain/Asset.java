@@ -25,31 +25,31 @@ public final class Asset extends Rec {
         String display = null;
         AssetType type = null;
 
-        String key = null;
+        String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
                 return new Asset(id, mnem, display, type);
             case KEY_NAME:
-                key = p.getString();
+                name = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(key)) {
+                if ("id".equals(name)) {
                     id = p.getLong();
                 } else {
-                    throw new IOException(String.format("unexpected number field '%s'", key));
+                    throw new IOException(String.format("unexpected number field '%s'", name));
                 }
                 break;
             case VALUE_STRING:
-                if ("mnem".equals(key)) {
+                if ("mnem".equals(name)) {
                     mnem = p.getString();
-                } else if ("display".equals(key)) {
+                } else if ("display".equals(name)) {
                     display = p.getString();
-                } else if ("type".equals(key)) {
+                } else if ("type".equals(name)) {
                     type = AssetType.valueOf(p.getString());
                 } else {
-                    throw new IOException(String.format("unexpected string field '%s'", key));
+                    throw new IOException(String.format("unexpected string field '%s'", name));
                 }
                 break;
             default:

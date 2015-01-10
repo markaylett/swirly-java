@@ -16,7 +16,7 @@ import com.swirlycloud.twirly.util.Params;
 
 public final class MarketTest {
     @Test
-    public final void test() throws IOException {
+    public final void testToJson() throws IOException {
         final Contr contr = MockContr.newContr("EURUSD");
         final int settlDay = ymdToJd(2014, 2, 14);
         final Market market = new Market(contr, settlDay, settlDay, settlDay);

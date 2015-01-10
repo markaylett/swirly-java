@@ -63,7 +63,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         if (id >= (1L << 32)) {
             throw new IllegalArgumentException("exec-id exceeds max-value");
         }
-        this.key = composeId(contr.getId(), settlDay, id);
+        this.key = composeKey(contr.getId(), settlDay, id);
         this.id = id;
         this.orderId = orderId;
         this.trader = trader;
@@ -89,7 +89,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         if (id >= (1L << 32)) {
             throw new IllegalArgumentException("exec-id exceeds max-value");
         }
-        this.key = composeId(instruct.getContrId(), instruct.getSettlDay(), id);
+        this.key = composeKey(instruct.getContrId(), instruct.getSettlDay(), id);
         this.id = id;
         this.orderId = instruct.getOrderId();
         this.trader = instruct.getTrader();
@@ -155,7 +155,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
      * Synthetic exec key.
      */
 
-    public static long composeId(long contrId, int settlDay, long execId) {
+    public static long composeKey(long contrId, int settlDay, long execId) {
         // 16 bit contr-id.
         final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.

@@ -68,7 +68,7 @@ public final class Contr extends Rec {
         long minLots = 0;
         long maxLots = 0;
 
-        String key = null;
+        String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
@@ -76,42 +76,42 @@ public final class Contr extends Rec {
                 return new Contr(id, mnem, display, assetType, asset, ccy, tickNumer, tickDenom,
                         lotNumer, lotDenom, pipDp, minLots, maxLots);
             case KEY_NAME:
-                key = p.getString();
+                name = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(key)) {
+                if ("id".equals(name)) {
                     id = p.getLong();
-                } else if ("tickNumer".equals(key)) {
+                } else if ("tickNumer".equals(name)) {
                     tickNumer = p.getInt();
-                } else if ("tickDenom".equals(key)) {
+                } else if ("tickDenom".equals(name)) {
                     tickDenom = p.getInt();
-                } else if ("lotNumer".equals(key)) {
+                } else if ("lotNumer".equals(name)) {
                     lotNumer = p.getInt();
-                } else if ("lotDenom".equals(key)) {
+                } else if ("lotDenom".equals(name)) {
                     lotDenom = p.getInt();
-                } else if ("pipDp".equals(key)) {
+                } else if ("pipDp".equals(name)) {
                     pipDp = p.getInt();
-                } else if ("minLots".equals(key)) {
+                } else if ("minLots".equals(name)) {
                     minLots = p.getLong();
-                } else if ("maxLots".equals(key)) {
+                } else if ("maxLots".equals(name)) {
                     maxLots = p.getLong();
                 } else {
-                    throw new IOException(String.format("unexpected number field '%s'", key));
+                    throw new IOException(String.format("unexpected number field '%s'", name));
                 }
                 break;
             case VALUE_STRING:
-                if ("mnem".equals(key)) {
+                if ("mnem".equals(name)) {
                     mnem = p.getString();
-                } else if ("display".equals(key)) {
+                } else if ("display".equals(name)) {
                     display = p.getString();
-                } else if ("assetType".equals(key)) {
+                } else if ("assetType".equals(name)) {
                     assetType = AssetType.valueOf(p.getString());
-                } else if ("asset".equals(key)) {
+                } else if ("asset".equals(name)) {
                     asset = p.getString();
-                } else if ("ccy".equals(key)) {
+                } else if ("ccy".equals(name)) {
                     ccy = p.getString();
                 } else {
-                    throw new IOException(String.format("unexpected string field '%s'", key));
+                    throw new IOException(String.format("unexpected string field '%s'", name));
                 }
                 break;
             default:

@@ -29,31 +29,31 @@ public final class Trader extends Rec {
         String display = null;
         String email = null;
 
-        String key = null;
+        String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
                 return new Trader(id, mnem, display, email);
             case KEY_NAME:
-                key = p.getString();
+                name = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(key)) {
+                if ("id".equals(name)) {
                     id = p.getLong();
                 } else {
-                    throw new IOException(String.format("unexpected number field '%s'", key));
+                    throw new IOException(String.format("unexpected number field '%s'", name));
                 }
                 break;
             case VALUE_STRING:
-                if ("mnem".equals(key)) {
+                if ("mnem".equals(name)) {
                     mnem = p.getString();
-                } else if ("display".equals(key)) {
+                } else if ("display".equals(name)) {
                     display = p.getString();
-                } else if ("email".equals(key)) {
+                } else if ("email".equals(name)) {
                     email = p.getString();
                 } else {
-                    throw new IOException(String.format("unexpected string field '%s'", key));
+                    throw new IOException(String.format("unexpected string field '%s'", name));
                 }
                 break;
             default:

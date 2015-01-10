@@ -4,9 +4,13 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.IdUtil.newId;
 import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 
 import java.io.IOException;
+
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.util.Identifiable;
@@ -35,10 +39,10 @@ public final class View implements Identifiable, Jsonifiable {
     private long lastLots;
     private long lastTime;
 
-    public View(Identifiable contr, int settlDay, int fixingDay, int expiryDay, Ladder ladder,
-            long lastTicks, long lastLots, long lastTime) {
+    public View(long key, Identifiable contr, int settlDay, int fixingDay, int expiryDay,
+            Ladder ladder, long lastTicks, long lastLots, long lastTime) {
         assert ladder != null;
-        this.key = composeId(contr.getId(), settlDay);
+        this.key = key;
         this.contr = contr;
         this.settlDay = settlDay;
         this.fixingDay = fixingDay;
@@ -49,11 +53,124 @@ public final class View implements Identifiable, Jsonifiable {
         this.lastTime = lastTime;
     }
 
+    public View(Identifiable contr, int settlDay, int fixingDay, int expiryDay, Ladder ladder,
+            long lastTicks, long lastLots, long lastTime) {
+        this(composeKey(contr.getId(), settlDay), contr, settlDay, fixingDay, expiryDay, ladder,
+                lastTicks, lastLots, lastTime);
+    }
+
+    public static void parse(JsonParser p, Ladder ladder, int col) throws IOException {
+        for (int row = 0; p.hasNext(); ++row) {
+            final Event event = p.next();
+            switch (event) {
+            case END_ARRAY:
+                return;
+            case VALUE_NULL:
+                ladder.setValue(row, col, 0);
+                break;
+            case VALUE_NUMBER:
+                ladder.setValue(row, col, p.getLong());
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of array not found");
+    }
+
+    public static void parseStartObject(JsonParser p) throws IOException {
+        if (!p.hasNext()) {
+            throw new IOException("start object not found");
+        }
+        final Event event = p.next();
+        if (event != Event.START_OBJECT) {
+            throw new IOException(String.format("unexpected json token '%s'", event));
+        }
+    }
+
+    public static View parse(JsonParser p) throws IOException {
+        long key = 0;
+        Identifiable contr = null;
+        int settlDay = 0;
+        int fixingDay = 0;
+        int expiryDay = 0;
+        final Ladder ladder = new Ladder();
+        long lastTicks = 0;
+        long lastLots = 0;
+        long lastTime = 0;
+
+        parseStartObject(p);
+        String name = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return new View(key, contr, settlDay, fixingDay, expiryDay, ladder, lastTicks,
+                        lastLots, lastTime);
+            case KEY_NAME:
+                name = p.getString();
+                break;
+            case START_ARRAY:
+                if ("bidTicks".equals(name)) {
+                    parse(p, ladder, Ladder.BID_TICKS);
+                } else if ("bidLots".equals(name)) {
+                    parse(p, ladder, Ladder.BID_LOTS);
+                } else if ("bidCount".equals(name)) {
+                    parse(p, ladder, Ladder.BID_COUNT);
+                } else if ("offerTicks".equals(name)) {
+                    parse(p, ladder, Ladder.OFFER_TICKS);
+                } else if ("offerLots".equals(name)) {
+                    parse(p, ladder, Ladder.OFFER_LOTS);
+                } else if ("offerCount".equals(name)) {
+                    parse(p, ladder, Ladder.OFFER_COUNT);
+                } else {
+                    throw new IOException(String.format("unexpected array field '%s'", name));
+                }
+                break;
+            case VALUE_NULL:
+                if ("lastTicks".equals(name)) {
+                    lastTicks = 0;
+                } else if ("lastLots".equals(name)) {
+                    lastLots = 0;
+                } else if ("lastTime".equals(name)) {
+                    lastTime = 0;
+                } else {
+                    throw new IOException(String.format("unexpected null field '%s'", name));
+                }
+                break;
+            case VALUE_NUMBER:
+                if ("id".equals(name)) {
+                    key = p.getLong();
+                } else if ("contr".equals(name)) {
+                    contr = newId(p.getLong());
+                } else if ("settlDate".equals(name)) {
+                    settlDay = JulianDay.isoToJd(p.getInt());
+                } else if ("fixingDate".equals(name)) {
+                    fixingDay = JulianDay.isoToJd(p.getInt());
+                } else if ("expiryDate".equals(name)) {
+                    expiryDay = JulianDay.isoToJd(p.getInt());
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = p.getLong();
+                } else if ("lastLots".equals(name)) {
+                    lastLots = p.getLong();
+                } else if ("lastTime".equals(name)) {
+                    lastTime = p.getLong();
+                } else {
+                    throw new IOException(String.format("unexpected number field '%s'", name));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
+    }
+
     /**
      * Synthetic view key.
      */
 
-    public static long composeId(long contrId, int settlDay) {
+    public static long composeKey(long contrId, int settlDay) {
         // 16 bit contr-id.
         final long CONTR_MASK = (1L << 16) - 1;
         // 16 bits is sufficient for truncated Julian day.

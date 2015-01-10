@@ -42,9 +42,6 @@ public final class LadderTest {
     @Test
     public final void testVwap() {
         final Ladder ladder = new Ladder();
-        ladder.setBidTicks(0, 12345);
-        ladder.setBidTicks(0, 12345);
-        ladder.setBidTicks(0, 12345);
 
         ladder.setOfferRung(2, 12348, 30, 3);
         ladder.setOfferRung(1, 12347, 20, 2);

@@ -18,7 +18,7 @@ public final class Side {
     private long lastTime = 0;
 
     private final Level getLazyLevel(Order order) {
-        final long key = Level.composeId(order.getAction(), order.getTicks());
+        final long key = Level.composeKey(order.getAction(), order.getTicks());
         final RbNode node = levels.pfind(key);
 
         Level level;

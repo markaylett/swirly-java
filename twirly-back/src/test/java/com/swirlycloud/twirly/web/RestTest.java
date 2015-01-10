@@ -196,7 +196,7 @@ public final class RestTest {
         Map<String, Asset> assets = null;
         Map<String, Contr> contrs = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            String key = null;
+            String name = null;
             while (p.hasNext()) {
                 final Event event = p.next();
                 switch (event) {
@@ -206,13 +206,13 @@ public final class RestTest {
                 case END_OBJECT:
                     break;
                 case KEY_NAME:
-                    key = p.getString();
+                    name = p.getString();
                     break;
                 case START_ARRAY:
-                    if ("assets".equals(key)) {
+                    if ("assets".equals(name)) {
                         assertNull(assets);
                         assets = parseAssets(p, new HashMap<String, Asset>());
-                    } else if ("contrs".equals(key)) {
+                    } else if ("contrs".equals(name)) {
                         assertNull(contrs);
                         contrs = parseContrs(p, new HashMap<String, Contr>());
                     } else {
@@ -220,7 +220,7 @@ public final class RestTest {
                     }
                     break;
                 case START_OBJECT:
-                    assertTrue(key == null);
+                    assertTrue(name == null);
                     break;
                 case VALUE_FALSE:
                     assertTrue(false);
@@ -255,7 +255,7 @@ public final class RestTest {
         Map<String, Contr> contrs = null;
         Map<String, Trader> traders = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            String key = null;
+            String name = null;
             while (p.hasNext()) {
                 final Event event = p.next();
                 switch (event) {
@@ -265,16 +265,16 @@ public final class RestTest {
                 case END_OBJECT:
                     break;
                 case KEY_NAME:
-                    key = p.getString();
+                    name = p.getString();
                     break;
                 case START_ARRAY:
-                    if ("assets".equals(key)) {
+                    if ("assets".equals(name)) {
                         assertNull(assets);
                         assets = parseAssets(p, new HashMap<String, Asset>());
-                    } else if ("contrs".equals(key)) {
+                    } else if ("contrs".equals(name)) {
                         assertNull(contrs);
                         contrs = parseContrs(p, new HashMap<String, Contr>());
-                    } else if ("traders".equals(key)) {
+                    } else if ("traders".equals(name)) {
                         assertNull(traders);
                         traders = parseTraders(p, new HashMap<String, Trader>());
                     } else {
@@ -282,7 +282,7 @@ public final class RestTest {
                     }
                     break;
                 case START_OBJECT:
-                    assertTrue(key == null);
+                    assertTrue(name == null);
                     break;
                 case VALUE_FALSE:
                     assertTrue(false);

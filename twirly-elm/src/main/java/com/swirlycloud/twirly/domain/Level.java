@@ -24,7 +24,7 @@ public final class Level extends BasicRbNode {
 
     public Level(Order order) {
         final long ticks = order.getTicks();
-        this.key = composeId(order.getAction(), ticks);
+        this.key = composeKey(order.getAction(), ticks);
         this.ticks = ticks;
         this.firstOrder = order;
         this.lots = order.getResd();
@@ -35,7 +35,7 @@ public final class Level extends BasicRbNode {
      * Synthetic level key.
      */
 
-    public static long composeId(Action action, long ticks) {
+    public static long composeKey(Action action, long ticks) {
         return action == Action.BUY ? -ticks : ticks;
     }
 
