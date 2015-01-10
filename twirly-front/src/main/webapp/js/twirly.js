@@ -321,16 +321,16 @@ function Posn(val, contrs) {
     self.trader = ko.observable(val.trader);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
-    self.buyLicks = ko.observable(val.buyLicks);
+    self.buyCost = ko.observable(val.buyCost);
     self.buyLots = ko.observable(val.buyLots);
-    self.sellLicks = ko.observable(val.sellLicks);
+    self.sellCost = ko.observable(val.sellCost);
     self.sellLots = ko.observable(val.sellLots);
 
     self.buyPrice = ko.computed(function() {
         var ticks = 0;
         var lots = self.buyLots();
         if (lots !== 0) {
-            ticks = fractToReal(self.buyLicks(), lots);
+            ticks = fractToReal(self.buyCost(), lots);
         }
         var contr = self.contr();
         // Extra decimal place.
@@ -341,7 +341,7 @@ function Posn(val, contrs) {
         var ticks = 0;
         var lots = self.sellLots();
         if (lots !== 0) {
-            ticks = fractToReal(self.sellLicks(), lots);
+            ticks = fractToReal(self.sellCost(), lots);
         }
         var contr = self.contr();
         // Extra decimal place.
@@ -350,10 +350,10 @@ function Posn(val, contrs) {
 
     self.netPrice = ko.computed(function() {
         var ticks = 0;
-        var licks = self.buyLicks() - self.sellLicks();
+        var cost = self.buyCost() - self.sellCost();
         var lots = self.buyLots() - self.sellLots();
         if (lots !== 0) {
-            ticks = fractToReal(licks, lots);
+            ticks = fractToReal(cost, lots);
         }
         var contr = self.contr();
         // Extra decimal place.
@@ -365,9 +365,9 @@ function Posn(val, contrs) {
     });
 
     self.update = function(val) {
-        self.buyLicks(val.buyLicks);
+        self.buyCost(val.buyCost);
         self.buyLots(val.buyLots);
-        self.sellLicks(val.sellLicks);
+        self.sellCost(val.sellCost);
         self.sellLots(val.sellLots);
     };
 }

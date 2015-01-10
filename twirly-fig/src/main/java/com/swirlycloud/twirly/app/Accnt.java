@@ -158,9 +158,9 @@ public final class Accnt extends BasicRbNode implements Identifiable {
             assert exist.getContr().equals(posn.getContr());
             assert exist.getSettlDay() == posn.getSettlDay();
 
-            exist.setBuyLicks(posn.getBuyLicks());
+            exist.setBuyCost(posn.getBuyCost());
             exist.setBuyLots(posn.getBuyLots());
-            exist.setSellLicks(posn.getSellLicks());
+            exist.setSellCost(posn.getSellCost());
             exist.setSellLots(posn.getSellLots());
 
             posn = exist;

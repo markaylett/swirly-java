@@ -16,12 +16,12 @@ public final class PosnTest {
     public final void testToString() {
         final Posn posn = new Posn(MockTrader.newTrader("MARAYL"), MockContr.newContr("EURUSD"),
                 ymdToJd(2014, 2, 14));
-        posn.setBuyLicks(1);
+        posn.setBuyCost(1);
         posn.setBuyLots(2);
-        posn.setSellLicks(3);
+        posn.setSellCost(3);
         posn.setSellLots(4);
         assertEquals(
-                "{\"id\":3449558818357249,\"trader\":1,\"contr\":12,\"settlDate\":20140314,\"buyLicks\":1,\"buyLots\":2,\"sellLicks\":3,\"sellLots\":4}",
+                "{\"id\":3449558818357249,\"trader\":1,\"contr\":12,\"settlDate\":20140314,\"buyCost\":1,\"buyLots\":2,\"sellCost\":3,\"sellLots\":4}",
                 posn.toString());
     }
 }

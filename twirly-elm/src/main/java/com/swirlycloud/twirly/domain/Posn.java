@@ -21,9 +21,9 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
     private Identifiable trader;
     private Identifiable contr;
     private final int settlDay;
-    private long buyLicks;
+    private long buyCost;
     private long buyLots;
-    private long sellLicks;
+    private long sellCost;
     private long sellLots;
 
     public Posn(Identifiable trader, Identifiable contr, int settlDay) {
@@ -46,16 +46,16 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         out.append(",\"contr\":").append(getIdOrMnem(contr, params));
         out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         if (buyLots != 0) {
-            out.append(",\"buyLicks\":").append(String.valueOf(buyLicks));
+            out.append(",\"buyCost\":").append(String.valueOf(buyCost));
             out.append(",\"buyLots\":").append(String.valueOf(buyLots));
         } else {
-            out.append(",\"buyLicks\":0,\"buyLots\":0");
+            out.append(",\"buyCost\":0,\"buyLots\":0");
         }
         if (sellLots != 0) {
-            out.append(",\"sellLicks\":").append(String.valueOf(sellLicks));
+            out.append(",\"sellCost\":").append(String.valueOf(sellCost));
             out.append(",\"sellLots\":").append(String.valueOf(sellLots));
         } else {
-            out.append(",\"sellLicks\":0,\"sellLots\":0");
+            out.append(",\"sellCost\":0,\"sellLots\":0");
         }
         out.append("}");
     }
@@ -85,13 +85,13 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
     }
 
     public final void applyTrade(Action action, long lastTicks, long lastLots) {
-        final double licks = lastLots * lastTicks;
+        final double cost = lastLots * lastTicks;
         if (action == Action.BUY) {
-            buyLicks += licks;
+            buyCost += cost;
             buyLots += lastLots;
         } else {
             assert action == Action.SELL;
-            sellLicks += licks;
+            sellCost += cost;
             sellLots += lastLots;
         }
     }
@@ -100,16 +100,16 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         applyTrade(trade.getAction(), trade.getLastTicks(), trade.getLastLots());
     }
 
-    public final void setBuyLicks(long buyLicks) {
-        this.buyLicks = buyLicks;
+    public final void setBuyCost(long buyCost) {
+        this.buyCost = buyCost;
     }
 
     public final void setBuyLots(long buyLots) {
         this.buyLots = buyLots;
     }
 
-    public final void setSellLicks(long sellLicks) {
-        this.sellLicks = sellLicks;
+    public final void setSellCost(long sellCost) {
+        this.sellCost = sellCost;
     }
 
     public final void setSellLots(long sellLots) {
@@ -146,16 +146,16 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         return settlDay;
     }
 
-    public final long getBuyLicks() {
-        return buyLicks;
+    public final long getBuyCost() {
+        return buyCost;
     }
 
     public final long getBuyLots() {
         return buyLots;
     }
 
-    public final long getSellLicks() {
-        return sellLicks;
+    public final long getSellCost() {
+        return sellCost;
     }
 
     public final long getSellLots() {
