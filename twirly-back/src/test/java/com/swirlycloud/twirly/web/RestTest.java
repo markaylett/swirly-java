@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_INTERNAL;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
@@ -396,7 +397,7 @@ public final class RestTest {
     @Test
     public final void testPostMarket() throws BadRequestException, NotFoundException, IOException {
         final Rest rest = new Rest(new MockModel());
-        final long now = 1394496000000L; // 2014-03-14
+        final long now = jdToMillis(ymdToJd(2014, 2, 11));
         final StringBuilder sb = new StringBuilder();
 
         final int settlDay = ymdToJd(2014, 2, 14);
