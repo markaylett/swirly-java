@@ -39,9 +39,4 @@ public final class DateUtil {
         cal.set(Calendar.MILLISECOND, 0);
         return GregDate.valueOf(cal);
     }
-
-    @NonNull
-    public static GregDate getBusDate() {
-        return getBusDate(System.currentTimeMillis());
-    }
 }

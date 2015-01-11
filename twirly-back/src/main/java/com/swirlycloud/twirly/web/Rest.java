@@ -3,12 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.isoToJd;
 
 import java.io.IOException;
 
 import com.swirlycloud.twirly.app.Accnt;
-import com.swirlycloud.twirly.app.DateUtil;
 import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Trans;
@@ -138,7 +138,7 @@ public final class Rest {
             throws IOException {
         int busDay = 0;
         if (getExpiredParam(params)) {
-            busDay = DateUtil.getBusDate().toJd();
+            busDay = getBusDate(now).toJd();
         }
         out.append('[');
         RbNode node = serv.getFirstMarket();
@@ -165,7 +165,7 @@ public final class Rest {
         }
         int busDay = 0;
         if (getExpiredParam(params)) {
-            busDay = DateUtil.getBusDate().toJd();
+            busDay = getBusDate(now).toJd();
         }
         out.append('[');
         RbNode node = serv.getFirstMarket();
@@ -195,7 +195,7 @@ public final class Rest {
         }
         int busDay = 0;
         if (getExpiredParam(params)) {
-            busDay = DateUtil.getBusDate().toJd();
+            busDay = getBusDate(now).toJd();
         }
         final int settlDay = isoToJd(settlDate);
         final Market market = serv.findMarket(contr, settlDay);
