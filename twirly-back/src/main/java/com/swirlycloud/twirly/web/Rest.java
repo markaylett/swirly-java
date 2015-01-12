@@ -136,15 +136,13 @@ public final class Rest {
 
     public final synchronized void getMarket(Params params, long now, Appendable out)
             throws IOException {
-        int busDay = 0;
-        if (getExpiredParam(params)) {
-            busDay = getBusDate(now).toJd();
-        }
+        final boolean withExpired = getExpiredParam(params); 
+        final int busDay = getBusDate(now).toJd();
         out.append('[');
         RbNode node = serv.getFirstMarket();
         for (int i = 0; node != null; node = node.rbNext()) {
             final Market market = (Market) node;
-            if (market.getExpiryDay() < busDay) {
+            if (!withExpired && market.getExpiryDay() < busDay) {
                 // Ignore expired contracts.
                 continue;
             }
@@ -159,13 +157,11 @@ public final class Rest {
 
     public final synchronized void getMarket(String cmnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
+        final boolean withExpired = getExpiredParam(params); 
+        final int busDay = getBusDate(now).toJd();
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
-        }
-        int busDay = 0;
-        if (getExpiredParam(params)) {
-            busDay = getBusDate(now).toJd();
         }
         out.append('[');
         RbNode node = serv.getFirstMarket();
@@ -174,7 +170,7 @@ public final class Rest {
             if (!market.getContr().getMnem().equals(cmnem)) {
                 continue;
             }
-            if (market.getExpiryDay() < busDay) {
+            if (!withExpired && market.getExpiryDay() < busDay) {
                 // Ignore expired contracts.
                 continue;
             }
@@ -189,13 +185,11 @@ public final class Rest {
 
     public final synchronized void getMarket(String cmnem, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
+        final boolean withExpired = getExpiredParam(params); 
+        final int busDay = getBusDate(now).toJd();
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
-        }
-        int busDay = 0;
-        if (getExpiredParam(params)) {
-            busDay = getBusDate(now).toJd();
         }
         final int settlDay = isoToJd(settlDate);
         final Market market = serv.findMarket(contr, settlDay);
@@ -203,7 +197,7 @@ public final class Rest {
             throw new NotFoundException(String.format("market for '%s' on '%d' does not exist",
                     cmnem, settlDate));
         }
-        if (market.getExpiryDay() < busDay) {
+        if (!withExpired && market.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", cmnem,
                     settlDate));
         }

@@ -15,6 +15,14 @@ public final class JsonUtil {
     private JsonUtil() {
     }
 
+    public static final Params PARAMS_EXPIRED_AND_INTERNAL = new Params() {
+        @SuppressWarnings("unchecked")
+        @Override
+        public final <T> T getParam(String name, Class<T> clazz) {
+            return "expired".equals(name) || "internal".equals(name) ? (T) Boolean.TRUE : null;
+        }
+    };
+
     public static final Params PARAMS_INTERNAL = new Params() {
         @SuppressWarnings("unchecked")
         @Override

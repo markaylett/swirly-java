@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.web;
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_EXPIRED_AND_INTERNAL;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_INTERNAL;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartArray;
@@ -109,21 +110,21 @@ public final class RestTest {
         throw new IOException("end-of array not found");
     }
 
-    public static void assertAsset(Asset asset) {
+    private static void assertAsset(Asset asset) {
         assertNotNull(asset);
         assertEquals("JPY", asset.getMnem());
         assertEquals("Japan, Yen", asset.getDisplay());
         assertEquals(AssetType.CURRENCY, asset.getAssetType());
     }
 
-    public static void assertAssets(Map<String, Asset> assets) {
+    private static void assertAssets(Map<String, Asset> assets) {
         assertNotNull(assets);
         assertEquals(25, assets.size());
         final Asset asset = assets.get("JPY");
         assertAsset(asset);
     }
 
-    public static void assertContr(Contr contr) {
+    private static void assertContr(Contr contr) {
         assertNotNull(contr);
         assertEquals("USDJPY", contr.getMnem());
         assertEquals("USDJPY", contr.getDisplay());
@@ -139,25 +140,48 @@ public final class RestTest {
         assertEquals(10, contr.getMaxLots());
     }
 
-    public static void assertContrs(Map<String, Contr> contrs) {
+    private static void assertContrs(Map<String, Contr> contrs) {
         assertNotNull(contrs);
         assertEquals(27, contrs.size());
         final Contr contr = contrs.get("USDJPY");
         assertContr(contr);
     }
 
-    public static void assertTrader(Trader trader) {
+    private static void assertTrader(Trader trader) {
         assertNotNull(trader);
         assertEquals("TOBAYL", trader.getMnem());
         assertEquals("Toby Aylett", trader.getDisplay());
         assertEquals("toby.aylett@gmail.com", trader.getEmail());
     }
 
-    public static void assertTraders(Map<String, Trader> traders) {
+    private static void assertTraders(Map<String, Trader> traders) {
         assertNotNull(traders);
         assertEquals(5, traders.size());
         final Trader trader = traders.get("TOBAYL");
         assertTrader(trader);
+    }
+
+    private static void assertView(View view, long contrId, int settlDay, int fixingDay,
+            int expiryDay) {
+
+        assertNotNull(view);
+
+        assertEquals(contrId, view.getContrId());
+        assertEquals(settlDay, view.getSettlDay());
+        assertEquals(fixingDay, view.getFixingDay());
+        assertEquals(expiryDay, view.getExpiryDay());
+
+        assertEquals(0, view.getOfferTicks(0));
+        assertEquals(0, view.getOfferLots(0));
+        assertEquals(0, view.getOfferCount(0));
+
+        assertEquals(0, view.getBidTicks(0));
+        assertEquals(0, view.getBidLots(0));
+        assertEquals(0, view.getOfferCount(0));
+
+        assertEquals(0, view.getLastTicks());
+        assertEquals(0, view.getLastLots());
+        assertEquals(0, view.getLastTime());
     }
 
     @Test
@@ -397,7 +421,7 @@ public final class RestTest {
     @Test
     public final void testPostMarket() throws BadRequestException, NotFoundException, IOException {
         final Rest rest = new Rest(new MockModel());
-        final long now = jdToMillis(ymdToJd(2014, 2, 11));
+        final long now = jdToMillis(ymdToJd(2014, 2, 10));
         final StringBuilder sb = new StringBuilder();
 
         final int settlDay = ymdToJd(2014, 2, 14);
@@ -406,44 +430,150 @@ public final class RestTest {
 
         rest.postMarket("EURUSD", jdToIso(settlDay), jdToIso(fixingDay), jdToIso(expiryDay),
                 PARAMS_INTERNAL, now, sb);
-        int i = 0;
-        do {
-            try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-                final View view = View.parse(p, true);
-
-                assertEquals(12, view.getContrId());
-                assertEquals(settlDay, view.getSettlDay());
-                assertEquals(fixingDay, view.getFixingDay());
-                assertEquals(expiryDay, view.getExpiryDay());
-
-                assertEquals(0, view.getOfferTicks(0));
-                assertEquals(0, view.getOfferLots(0));
-                assertEquals(0, view.getOfferCount(0));
-
-                assertEquals(0, view.getBidTicks(0));
-                assertEquals(0, view.getBidLots(0));
-                assertEquals(0, view.getOfferCount(0));
-
-                assertEquals(0, view.getLastTicks());
-                assertEquals(0, view.getLastLots());
-                assertEquals(0, view.getLastTime());
-            }
-            sb.setLength(0);
-            rest.getMarket("EURUSD", jdToIso(settlDay), PARAMS_INTERNAL, now, sb);
-        } while (i++ == 0);
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            final View view = View.parse(p, true);
+            assertView(view, 12, settlDay, fixingDay, expiryDay);
+        }
     }
 
     @Test
-    public final void testGetMarket() throws IOException {
+    public final void testGetMarket() throws BadRequestException, NotFoundException, IOException {
         final Rest rest = new Rest(new MockModel());
-        final long now = System.currentTimeMillis();
+        long now = jdToMillis(ymdToJd(2014, 2, 10));
         final StringBuilder sb = new StringBuilder();
-        rest.getMarket(PARAMS_INTERNAL, now, sb);
 
+        final int settlDay = ymdToJd(2014, 2, 14);
+        final int fixingDay = settlDay - 2;
+        final int expiryDay = settlDay - 3;
+
+        rest.postMarket("EURUSD", jdToIso(settlDay), jdToIso(fixingDay), jdToIso(expiryDay),
+                PARAMS_INTERNAL, now, sb);
+
+        sb.setLength(0);
+        rest.getMarket(PARAMS_INTERNAL, now, sb);
+        int i = 0;
+        do {
+            try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+
+                parseStartArray(p);
+                final Map<Long, View> views = parseViews(p, new HashMap<Long, View>());
+                assertEquals(1, views.size());
+
+                final View view = views.get(View.composeKey(12, settlDay));
+                assertView(view, 12, settlDay, fixingDay, expiryDay);
+            }
+            // Use now beyond expiry.
+            now = jdToMillis(expiryDay + 1);
+            sb.setLength(0);
+            rest.getMarket(PARAMS_EXPIRED_AND_INTERNAL, now, sb);
+        } while (i++ == 0);
+
+        sb.setLength(0);
+        rest.getMarket(PARAMS_INTERNAL, now, sb);
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartArray(p);
             final Map<Long, View> views = parseViews(p, new HashMap<Long, View>());
             assertTrue(views.isEmpty());
+        }
+    }
+
+    @Test
+    public final void testGetMarketMnem() throws BadRequestException, NotFoundException,
+            IOException {
+        final Rest rest = new Rest(new MockModel());
+        long now = jdToMillis(ymdToJd(2014, 2, 10));
+        final StringBuilder sb = new StringBuilder();
+
+        final int settlDay = ymdToJd(2014, 2, 14);
+        final int fixingDay = settlDay - 2;
+        final int expiryDay = settlDay - 3;
+
+        rest.postMarket("EURUSD", jdToIso(settlDay), jdToIso(fixingDay), jdToIso(expiryDay),
+                PARAMS_INTERNAL, now, sb);
+
+        sb.setLength(0);
+        rest.getMarket("USDJPY", PARAMS_INTERNAL, now, sb);
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            final Map<Long, View> views = parseViews(p, new HashMap<Long, View>());
+            assertTrue(views.isEmpty());
+        }
+
+        sb.setLength(0);
+        rest.getMarket("EURUSD", PARAMS_INTERNAL, now, sb);
+        int i = 0;
+        do {
+            try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+
+                parseStartArray(p);
+                final Map<Long, View> views = parseViews(p, new HashMap<Long, View>());
+                assertEquals(1, views.size());
+
+                final View view = views.get(View.composeKey(12, settlDay));
+                assertView(view, 12, settlDay, fixingDay, expiryDay);
+            }
+            // Use now beyond expiry.
+            now = jdToMillis(expiryDay + 1);
+            sb.setLength(0);
+            rest.getMarket("EURUSD", PARAMS_EXPIRED_AND_INTERNAL, now, sb);
+        } while (i++ == 0);
+
+        sb.setLength(0);
+        rest.getMarket("EURUSD", PARAMS_INTERNAL, now, sb);
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            final Map<Long, View> views = parseViews(p, new HashMap<Long, View>());
+            assertTrue(views.isEmpty());
+        }
+    }
+
+    @Test
+    public final void testGetMarketMnemSettl() throws BadRequestException, NotFoundException,
+            IOException {
+        final Rest rest = new Rest(new MockModel());
+        long now = jdToMillis(ymdToJd(2014, 2, 10));
+        final StringBuilder sb = new StringBuilder();
+
+        final int settlDay = ymdToJd(2014, 2, 14);
+        final int fixingDay = settlDay - 2;
+        final int expiryDay = settlDay - 3;
+
+        rest.postMarket("EURUSD", jdToIso(settlDay), jdToIso(fixingDay), jdToIso(expiryDay),
+                PARAMS_INTERNAL, now, sb);
+
+        sb.setLength(0);
+        try {
+            rest.getMarket("USDJPY", jdToIso(settlDay), PARAMS_INTERNAL, now, sb);
+            assertTrue(false);
+        } catch (final NotFoundException e) {
+        }
+
+        sb.setLength(0);
+        try {
+            rest.getMarket("EURUSD", jdToIso(settlDay + 1), PARAMS_INTERNAL, now, sb);
+            assertTrue(false);
+        } catch (final NotFoundException e) {
+        }
+
+        sb.setLength(0);
+        rest.getMarket("EURUSD", jdToIso(settlDay), PARAMS_INTERNAL, now, sb);
+        int i = 0;
+        do {
+            try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+                final View view = View.parse(p, true);
+                assertView(view, 12, settlDay, fixingDay, expiryDay);
+            }
+            // Use now beyond expiry.
+            now = jdToMillis(expiryDay + 1);
+            sb.setLength(0);
+            rest.getMarket("EURUSD", jdToIso(settlDay), PARAMS_EXPIRED_AND_INTERNAL, now, sb);
+        } while (i++ == 0);
+
+        sb.setLength(0);
+        try {
+            rest.getMarket("EURUSD", jdToIso(settlDay), PARAMS_INTERNAL, now, sb);
+            assertTrue(false);
+        } catch (final NotFoundException e) {
         }
     }
 }
