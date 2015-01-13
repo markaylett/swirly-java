@@ -4,9 +4,14 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.IdUtil.newId;
 import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
+import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
 import java.io.IOException;
+
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.collection.BasicRbSlNode;
 import com.swirlycloud.twirly.date.JulianDay;
@@ -108,14 +113,118 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         this.created = created;
     }
 
+    public static Exec parse(JsonParser p, boolean withStartObject) throws IOException {
+        long id = 0;
+        long orderId = 0;
+        Identifiable trader = null;
+        Identifiable contr = null;
+        int settlDay = 0;
+        String ref = null;
+        State state = null;
+        Action action = null;
+        long ticks = 0;
+        long lots = 0;
+        long resd = 0;
+        long exec = 0;
+        long lastTicks = 0;
+        long lastLots = 0;
+        long minLots = 0;
+        long matchId = 0;
+        Role role = null;
+        Identifiable cpty = null;
+        long created = 0;
+
+        if (withStartObject) {
+            parseStartObject(p);
+        }
+        String name = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return new Exec(id, orderId, trader, contr, settlDay, ref, state, action, ticks,
+                        lots, resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty,
+                        created);
+            case KEY_NAME:
+                name = p.getString();
+                break;
+            case VALUE_NULL:
+                if ("lastTicks".equals(name)) {
+                    lastTicks = 0;
+                } else if ("lastLots".equals(name)) {
+                    lastLots = 0;
+                } else if ("matchId".equals(name)) {
+                    matchId = 0;
+                } else if ("role".equals(name)) {
+                    role = null;
+                } else if ("cpty".equals(name)) {
+                    cpty = null;
+                } else {
+                    throw new IOException(String.format("unexpected null field '%s'", name));
+                }
+                break;
+            case VALUE_NUMBER:
+                if ("id".equals(name)) {
+                    id = p.getLong();
+                } else if ("orderId".equals(name)) {
+                    orderId = p.getLong();
+                } else if ("trader".equals(name)) {
+                    trader = newId(p.getLong());
+                } else if ("contr".equals(name)) {
+                    contr = newId(p.getLong());
+                } else if ("settlDate".equals(name)) {
+                    settlDay = JulianDay.isoToJd(p.getInt());
+                } else if ("ticks".equals(name)) {
+                    ticks = p.getLong();
+                } else if ("lots".equals(name)) {
+                    lots = p.getLong();
+                } else if ("resd".equals(name)) {
+                    resd = p.getLong();
+                } else if ("exec".equals(name)) {
+                    exec = p.getLong();
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = p.getLong();
+                } else if ("lastLots".equals(name)) {
+                    lastLots = p.getLong();
+                } else if ("minLots".equals(name)) {
+                    minLots = p.getLong();
+                } else if ("matchId".equals(name)) {
+                    matchId = p.getLong();
+                } else if ("cpty".equals(name)) {
+                    cpty = newId(p.getLong());
+                } else if ("created".equals(name)) {
+                    created = p.getLong();
+                } else {
+                    throw new IOException(String.format("unexpected number field '%s'", name));
+                }
+                break;
+            case VALUE_STRING:
+                if ("ref".equals(name)) {
+                    ref = p.getString();
+                } else if ("state".equals(name)) {
+                    state = State.valueOf(p.getString());
+                } else if ("action".equals(name)) {
+                    action = Action.valueOf(p.getString());
+                } else if ("role".equals(name)) {
+                    role = Role.valueOf(p.getString());
+                } else {
+                    throw new IOException(String.format("unexpected string field '%s'", name));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
+    }
+
     @Override
     public final String toString() {
         return JsonUtil.toJson(this);
     }
 
     @Override
-    public final void toJson(Params params, Appendable out)
-            throws IOException {
+    public final void toJson(Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));
         out.append(",\"trader\":").append(getIdOrMnem(trader, params));
@@ -128,13 +237,19 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         out.append(",\"lots\":").append(String.valueOf(lots));
         out.append(",\"resd\":").append(String.valueOf(resd));
         out.append(",\"exec\":").append(String.valueOf(exec));
-        out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
-        out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+        if (lastLots != 0) {
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+        } else {
+            out.append(",\"lastTicks\":null,\"lastLots\":null");
+        }
         out.append(",\"minLots\":").append(String.valueOf(minLots));
         if (state == State.TRADE) {
             out.append(",\"matchId\":").append(String.valueOf(matchId));
             out.append(",\"role\":\"").append(role.name());
             out.append("\",\"cpty\":").append(getIdOrMnem(cpty, params));
+        } else {
+            out.append(",\"matchId\":null,\"role\":null,\"cpty\":null");
         }
         out.append(",\"created\":").append(String.valueOf(created));
         out.append("}");

@@ -4,9 +4,14 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.IdUtil.newId;
 import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
+import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
 import java.io.IOException;
+
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.collection.BasicRbDlNode;
 import com.swirlycloud.twirly.collection.RbNode;
@@ -114,14 +119,102 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         this.modified = created;
     }
 
+    public static Order parse(JsonParser p, boolean withStartObject) throws IOException {
+        long id = 0;
+        Identifiable trader = null;
+        Identifiable contr = null;
+        int settlDay = 0;
+        String ref = null;
+        State state = null;
+        Action action = null;
+        long ticks = 0;
+        long lots = 0;
+        long resd = 0;
+        long exec = 0;
+        long lastTicks = 0;
+        long lastLots = 0;
+        long minLots = 0;
+        long created = 0;
+        long modified = 0;
+
+        if (withStartObject) {
+            parseStartObject(p);
+        }
+        String name = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return new Order(id, trader, contr, settlDay, ref, state, action, ticks, lots,
+                        resd, exec, lastTicks, lastLots, minLots, created, modified);
+            case KEY_NAME:
+                name = p.getString();
+                break;
+            case VALUE_NULL:
+                if ("lastTicks".equals(name)) {
+                    lastTicks = 0;
+                } else if ("lastLots".equals(name)) {
+                    lastLots = 0;
+                } else {
+                    throw new IOException(String.format("unexpected null field '%s'", name));
+                }
+                break;
+            case VALUE_NUMBER:
+                if ("id".equals(name)) {
+                    id = p.getLong();
+                } else if ("trader".equals(name)) {
+                    trader = newId(p.getLong());
+                } else if ("contr".equals(name)) {
+                    contr = newId(p.getLong());
+                } else if ("settlDate".equals(name)) {
+                    settlDay = JulianDay.isoToJd(p.getInt());
+                } else if ("ticks".equals(name)) {
+                    ticks = p.getLong();
+                } else if ("lots".equals(name)) {
+                    lots = p.getLong();
+                } else if ("resd".equals(name)) {
+                    resd = p.getLong();
+                } else if ("exec".equals(name)) {
+                    exec = p.getLong();
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = p.getLong();
+                } else if ("lastLots".equals(name)) {
+                    lastLots = p.getLong();
+                } else if ("minLots".equals(name)) {
+                    minLots = p.getLong();
+                } else if ("created".equals(name)) {
+                    created = p.getLong();
+                } else if ("modified".equals(name)) {
+                    modified = p.getLong();
+                } else {
+                    throw new IOException(String.format("unexpected number field '%s'", name));
+                }
+                break;
+            case VALUE_STRING:
+                if ("ref".equals(name)) {
+                    ref = p.getString();
+                } else if ("state".equals(name)) {
+                    state = State.valueOf(p.getString());
+                } else if ("action".equals(name)) {
+                    action = Action.valueOf(p.getString());
+                } else {
+                    throw new IOException(String.format("unexpected string field '%s'", name));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
+    }
+
     @Override
     public final String toString() {
         return JsonUtil.toJson(this);
     }
 
     @Override
-    public final void toJson(Params params, Appendable out)
-            throws IOException {
+    public final void toJson(Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"trader\":").append(getIdOrMnem(trader, params));
         out.append(",\"contr\":").append(getIdOrMnem(contr, params));

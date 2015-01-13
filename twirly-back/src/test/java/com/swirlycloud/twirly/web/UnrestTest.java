@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.domain.Contr;
@@ -29,6 +30,7 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.mock.MockModel;
 import com.swirlycloud.twirly.web.Unrest.RecStruct;
+import com.swirlycloud.twirly.web.Unrest.TransStruct;
 
 public final class UnrestTest {
 
@@ -334,5 +336,22 @@ public final class UnrestTest {
             assertTrue(false);
         } catch (final NotFoundException e) {
         }
+    }
+
+    @Test
+    public final void testPostOrder() throws BadRequestException, NotFoundException, IOException {
+        final Unrest unrest = new Unrest(new MockModel());
+        long now = jdToMillis(ymdToJd(2014, 2, 10));
+
+        final int settlDay = ymdToJd(2014, 2, 14);
+        final int fixingDay = settlDay - 2;
+        final int expiryDay = settlDay - 3;
+
+        unrest.postMarket("EURUSD", jdToIso(settlDay), jdToIso(fixingDay), jdToIso(expiryDay),
+                PARAMS_INTERNAL, now);
+
+        final TransStruct out = unrest.postOrder("mark.aylett@gmail.com", "EURUSD",
+                jdToIso(settlDay), "", Action.BUY, 12345, 5, 1, PARAMS_INTERNAL, now);
+        System.out.println(out.orders);
     }
 }

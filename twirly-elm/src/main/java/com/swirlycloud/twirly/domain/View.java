@@ -40,7 +40,7 @@ public final class View implements Identifiable, Jsonifiable {
     private long lastLots;
     private long lastTime;
 
-    public View(long key, Identifiable contr, int settlDay, int fixingDay, int expiryDay,
+    private View(long key, Identifiable contr, int settlDay, int fixingDay, int expiryDay,
             Ladder ladder, long lastTicks, long lastLots, long lastTime) {
         assert ladder != null;
         this.key = key;

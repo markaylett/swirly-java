@@ -4,9 +4,14 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.IdUtil.newId;
 import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
+import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
 import java.io.IOException;
+
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.collection.BasicRbNode;
 import com.swirlycloud.twirly.date.JulianDay;
@@ -26,11 +31,73 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
     private long sellCost;
     private long sellLots;
 
+    private Posn(long key, Identifiable trader, Identifiable contr, final int settlDay,
+            long buyCost, long buyLots, long sellCost, long sellLots) {
+        this.key = key;
+        this.trader = trader;
+        this.contr = contr;
+        this.settlDay = settlDay;
+        this.buyCost = buyCost;
+        this.buyLots = buyLots;
+        this.sellCost = sellCost;
+        this.sellLots = sellLots;
+    }
+
     public Posn(Identifiable trader, Identifiable contr, int settlDay) {
         this.key = composeKey(contr.getId(), settlDay, trader.getId());
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
+    }
+
+    public static Posn parse(JsonParser p, boolean withStartObject) throws IOException {
+        long key = 0;
+        Identifiable trader = null;
+        Identifiable contr = null;
+        int settlDay = 0;
+        long buyCost = 0;
+        long buyLots = 0;
+        long sellCost = 0;
+        long sellLots = 0;
+
+        if (withStartObject) {
+            parseStartObject(p);
+        }
+        String name = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return new Posn(key, trader, contr, settlDay, buyCost, buyLots, sellCost, sellLots);
+            case KEY_NAME:
+                name = p.getString();
+                break;
+            case VALUE_NUMBER:
+                if ("id".equals(name)) {
+                    key = p.getLong();
+                } else if ("trader".equals(name)) {
+                    trader = newId(p.getLong());
+                } else if ("contr".equals(name)) {
+                    contr = newId(p.getLong());
+                } else if ("settlDate".equals(name)) {
+                    settlDay = JulianDay.isoToJd(p.getInt());
+                } else if ("buyCost".equals(name)) {
+                    buyCost = p.getLong();
+                } else if ("buyLots".equals(name)) {
+                    buyLots = p.getLong();
+                } else if ("sellCost".equals(name)) {
+                    sellCost = p.getLong();
+                } else if ("sellLots".equals(name)) {
+                    sellLots = p.getLong();
+                } else {
+                    throw new IOException(String.format("unexpected number field '%s'", name));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
     }
 
     @Override
@@ -39,8 +106,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
     }
 
     @Override
-    public final void toJson(Params params, Appendable out)
-            throws IOException {
+    public final void toJson(Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(key));
         out.append(",\"trader\":").append(getIdOrMnem(trader, params));
         out.append(",\"contr\":").append(getIdOrMnem(contr, params));

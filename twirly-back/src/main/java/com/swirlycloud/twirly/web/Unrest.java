@@ -19,6 +19,9 @@ import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
+import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
@@ -103,10 +106,51 @@ public final class Unrest {
         throw new IOException("end-of array not found");
     }
 
+    private static void parseOrders(JsonParser p, Map<Long, ? super Order> out) throws IOException {
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_ARRAY:
+                return;
+            case START_OBJECT:
+                final Order order = Order.parse(p, false);
+                out.put(order.getId(), order);
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of array not found");
+    }
+
+    private static void parseExecs(JsonParser p, Map<Long, ? super Exec> out) throws IOException {
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_ARRAY:
+                return;
+            case START_OBJECT:
+                final Exec exec = Exec.parse(p, false);
+                out.put(exec.getId(), exec);
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of array not found");
+    }
+
     public static final class RecStruct {
         public final Map<String, Asset> assets = new HashMap<>();
         public final Map<String, Contr> contrs = new HashMap<>();
         public final Map<String, Trader> traders = new HashMap<>();
+    }
+
+    public static final class TransStruct {
+        public View market;
+        public final Map<Long, Order> orders = new HashMap<>();
+        public final Map<Long, Exec> execs = new HashMap<>();
+        public Posn posn;
     }
 
     public Unrest(Model model) {
@@ -145,7 +189,7 @@ public final class Unrest {
                 }
             }
         }
-        throw new IOException("end-of array not found");
+        throw new IOException("end-of object not found");
     }
 
     public final Map<String, Rec> getRec(RecType recType, Params params, long now)
@@ -277,10 +321,55 @@ public final class Unrest {
         return null;
     }
 
-    public final Object postOrder(String email, String cmnem, int settlDate, String ref,
+    public final TransStruct postOrder(String email, String cmnem, int settlDate, String ref,
             Action action, long ticks, long lots, long minLots, Params params, long now)
             throws BadRequestException, NotFoundException, IOException {
-        return null;
+        final StringBuilder sb = new StringBuilder();
+        rest.postOrder(email, cmnem, settlDate, ref, action, ticks, lots, minLots, params, now, sb);
+
+        final TransStruct out = new TransStruct();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            String name = null;
+            while (p.hasNext()) {
+                final Event event = p.next();
+                switch (event) {
+                case END_OBJECT:
+                    return out;
+                case KEY_NAME:
+                    name = p.getString();
+                    break;
+                case START_ARRAY:
+                    if ("orders".equals(name)) {
+                        parseOrders(p, out.orders);
+                    } else if ("execs".equals(name)) {
+                        parseExecs(p, out.execs);
+                    } else {
+                        throw new IOException(String.format("unexpected array field '%s'", name));
+                    }
+                    break;
+                case START_OBJECT:
+                    if ("market".equals(name)) {
+                        out.market = View.parse(p, false);
+                    } else if ("posn".equals(name)) {
+                        out.posn = Posn.parse(p, false);
+                    } else {
+                        throw new IOException(String.format("unexpected array field '%s'", name));
+                    }
+                    break;
+                case VALUE_NULL:
+                    if ("posn".equals(name)) {
+                        out.posn = null;
+                    } else {
+                        throw new IOException(String.format("unexpected null field '%s'", name));
+                    }
+                    break;
+                default:
+                    throw new IOException(String.format("unexpected json token '%s'", event));
+                }
+            }
+        }
+        throw new IOException("end-of object not found");
     }
 
     public final Object putOrder(String email, String cmnem, int settlDate, long id, long lots,
