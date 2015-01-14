@@ -77,7 +77,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ref = ref;
+        this.ref = ref != null ? ref : "";
         this.state = state;
         this.action = action;
         this.ticks = ticks;
@@ -147,7 +147,9 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
                 name = p.getString();
                 break;
             case VALUE_NULL:
-                if ("lastTicks".equals(name)) {
+                if ("ref".equals(name)) {
+                    ref = "";
+                } else if ("lastTicks".equals(name)) {
                     lastTicks = 0;
                 } else if ("lastLots".equals(name)) {
                     lastLots = 0;
@@ -215,8 +217,13 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         out.append(",\"trader\":").append(getIdOrMnem(trader, params));
         out.append(",\"contr\":").append(getIdOrMnem(contr, params));
         out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"ref\":\"").append(ref);
-        out.append("\",\"state\":\"").append(state.name());
+        out.append(",\"ref\":");
+        if (!ref.isEmpty()) { 
+            out.append('"').append(ref).append('"');
+        } else {
+            out.append("null");
+        }
+        out.append(",\"state\":\"").append(state.name());
         out.append("\",\"action\":\"").append(action.name());
         out.append("\",\"ticks\":").append(String.valueOf(ticks));
         out.append(",\"lots\":").append(String.valueOf(lots));
