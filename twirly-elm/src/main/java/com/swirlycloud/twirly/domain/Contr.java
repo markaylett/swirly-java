@@ -5,7 +5,6 @@ package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.domain.Conv.fractToReal;
 import static com.swirlycloud.twirly.domain.Conv.realToDp;
-import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
 import java.io.IOException;
 
@@ -54,7 +53,7 @@ public final class Contr extends Rec {
         this.maxLots = maxLots;
     }
 
-    public static Contr parse(JsonParser p, boolean withStartObject) throws IOException {
+    public static Contr parse(JsonParser p) throws IOException {
         long id = 0;
         String mnem = null;
         String display = null;
@@ -69,9 +68,6 @@ public final class Contr extends Rec {
         long minLots = 0;
         long maxLots = 0;
 
-        if (withStartObject) {
-            parseStartObject(p);
-        }
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();

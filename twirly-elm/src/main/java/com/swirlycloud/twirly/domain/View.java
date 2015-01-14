@@ -6,7 +6,6 @@ package com.swirlycloud.twirly.domain;
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 import static com.swirlycloud.twirly.util.IdUtil.newId;
 import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
-import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
 import java.io.IOException;
 
@@ -79,7 +78,7 @@ public final class View implements Identifiable, Jsonifiable {
         throw new IOException("end-of array not found");
     }
 
-    public static View parse(JsonParser p, boolean withStartObject) throws IOException {
+    public static View parse(JsonParser p) throws IOException {
         long key = 0;
         Identifiable contr = null;
         int settlDay = 0;
@@ -90,9 +89,6 @@ public final class View implements Identifiable, Jsonifiable {
         long lastLots = 0;
         long lastTime = 0;
 
-        if (withStartObject) {
-            parseStartObject(p);
-        }
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();

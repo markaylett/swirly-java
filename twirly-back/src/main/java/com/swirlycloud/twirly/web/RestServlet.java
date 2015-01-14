@@ -3,13 +3,18 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
+
 import java.io.IOException;
 
+import javax.json.Json;
+import javax.json.stream.JsonParser;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.api.utils.SystemProperty;
+import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.util.Params;
 
@@ -37,6 +42,17 @@ public abstract class RestServlet extends HttpServlet {
                 return (T) val;
             }
         };
+    }
+
+    protected Request parseRequest(HttpServletRequest req) throws BadRequestException {
+        try (JsonParser p = Json.createParser(req.getReader())) {
+            parseStartObject(p);
+            final Request r = new Request();
+            r.parse(p);
+            return r;
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
     }
 
     protected void sendJsonResponse(HttpServletResponse resp) {

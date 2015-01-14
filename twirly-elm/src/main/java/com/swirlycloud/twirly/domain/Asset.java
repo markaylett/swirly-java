@@ -3,8 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
-
 import java.io.IOException;
 
 import javax.json.stream.JsonParser;
@@ -21,15 +19,12 @@ public final class Asset extends Rec {
         this.type = type;
     }
 
-    public static Asset parse(JsonParser p, boolean withStartObject) throws IOException {
+    public static Asset parse(JsonParser p) throws IOException {
         long id = 0;
         String mnem = null;
         String display = null;
         AssetType type = null;
 
-        if (withStartObject) {
-            parseStartObject(p);
-        }
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();

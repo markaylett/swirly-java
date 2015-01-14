@@ -42,8 +42,8 @@ public final class Unrest {
             switch (event) {
             case END_ARRAY:
                 return;
-            case START_OBJECT:
-                final Asset asset = Asset.parse(p, false);
+            case START_OBJECT:                
+                final Asset asset = Asset.parse(p);
                 out.put(asset.getMnem(), asset);
                 break;
             default:
@@ -61,7 +61,7 @@ public final class Unrest {
             case END_ARRAY:
                 return;
             case START_OBJECT:
-                final Contr contr = Contr.parse(p, false);
+                final Contr contr = Contr.parse(p);
                 out.put(contr.getMnem(), contr);
                 break;
             default:
@@ -79,7 +79,7 @@ public final class Unrest {
             case END_ARRAY:
                 return;
             case START_OBJECT:
-                final Trader trader = Trader.parse(p, false);
+                final Trader trader = Trader.parse(p);
                 out.put(trader.getMnem(), trader);
                 break;
             default:
@@ -96,7 +96,7 @@ public final class Unrest {
             case END_ARRAY:
                 return;
             case START_OBJECT:
-                final View view = View.parse(p, false);
+                final View view = View.parse(p);
                 out.put(view.getId(), view);
                 break;
             default:
@@ -113,7 +113,7 @@ public final class Unrest {
             case END_ARRAY:
                 return;
             case START_OBJECT:
-                final Order order = Order.parse(p, false);
+                final Order order = Order.parse(p);
                 out.put(order.getId(), order);
                 break;
             default:
@@ -130,8 +130,25 @@ public final class Unrest {
             case END_ARRAY:
                 return;
             case START_OBJECT:
-                final Exec exec = Exec.parse(p, false);
+                final Exec exec = Exec.parse(p);
                 out.put(exec.getId(), exec);
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of array not found");
+    }
+
+    private static void parsePosns(JsonParser p, Map<Long, ? super Posn> out) throws IOException {
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_ARRAY:
+                return;
+            case START_OBJECT:
+                final Posn posn = Posn.parse(p);
+                out.put(posn.getId(), posn);
                 break;
             default:
                 throw new IOException(String.format("unexpected json token '%s'", event));
@@ -146,11 +163,118 @@ public final class Unrest {
         public final Map<String, Trader> traders = new HashMap<>();
     }
 
+    public static final class AccntStruct {
+        public final Map<Long, Order> orders = new HashMap<>();
+        public final Map<Long, Exec> trades = new HashMap<>();
+        public final Map<Long, Posn> posns = new HashMap<>();
+    }
+
     public static final class TransStruct {
         public View market;
         public final Map<Long, Order> orders = new HashMap<>();
         public final Map<Long, Exec> execs = new HashMap<>();
         public Posn posn;
+    }
+
+    private static final RecStruct parseRecStruct(JsonParser p) throws IOException {
+        final RecStruct out = new RecStruct();
+        String name = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return out;
+            case KEY_NAME:
+                name = p.getString();
+                break;
+            case START_ARRAY:
+                if ("assets".equals(name)) {
+                    parseAssets(p, out.assets);
+                } else if ("contrs".equals(name)) {
+                    parseContrs(p, out.contrs);
+                } else if ("traders".equals(name)) {
+                    parseTraders(p, out.traders);
+                } else {
+                    throw new IOException(String.format("unexpected array field '%s'", name));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
+    }
+
+    private static final AccntStruct parseAccntStruct(JsonParser p) throws IOException {
+        final AccntStruct out = new AccntStruct();
+        String name = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return out;
+            case KEY_NAME:
+                name = p.getString();
+                break;
+            case START_ARRAY:
+                if ("orders".equals(name)) {
+                    parseOrders(p, out.orders);
+                } else if ("trades".equals(name)) {
+                    parseExecs(p, out.trades);
+                } else if ("posns".equals(name)) {
+                    parsePosns(p, out.posns);
+                } else {
+                    throw new IOException(String.format("unexpected array field '%s'", name));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
+    }
+
+    private static final TransStruct parseTransStruct(JsonParser p) throws IOException {
+        final TransStruct out = new TransStruct();
+        String name = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return out;
+            case KEY_NAME:
+                name = p.getString();
+                break;
+            case START_ARRAY:
+                if ("orders".equals(name)) {
+                    parseOrders(p, out.orders);
+                } else if ("execs".equals(name)) {
+                    parseExecs(p, out.execs);
+                } else {
+                    throw new IOException(String.format("unexpected array field '%s'", name));
+                }
+                break;
+            case START_OBJECT:
+                if ("market".equals(name)) {
+                    out.market = View.parse(p);
+                } else if ("posn".equals(name)) {
+                    out.posn = Posn.parse(p);
+                } else {
+                    throw new IOException(String.format("unexpected array field '%s'", name));
+                }
+                break;
+            case VALUE_NULL:
+                if ("posn".equals(name)) {
+                    out.posn = null;
+                } else {
+                    throw new IOException(String.format("unexpected null field '%s'", name));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
     }
 
     public Unrest(Model model) {
@@ -161,35 +285,10 @@ public final class Unrest {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(withTraders, params, now, sb);
 
-        final RecStruct out = new RecStruct();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            String name = null;
-            while (p.hasNext()) {
-                final Event event = p.next();
-                switch (event) {
-                case END_OBJECT:
-                    return out;
-                case KEY_NAME:
-                    name = p.getString();
-                    break;
-                case START_ARRAY:
-                    if ("assets".equals(name)) {
-                        parseAssets(p, out.assets);
-                    } else if ("contrs".equals(name)) {
-                        parseContrs(p, out.contrs);
-                    } else if ("traders".equals(name)) {
-                        parseTraders(p, out.traders);
-                    } else {
-                        throw new IOException(String.format("unexpected array field '%s'", name));
-                    }
-                    break;
-                default:
-                    throw new IOException(String.format("unexpected json token '%s'", event));
-                }
-            }
+            return parseRecStruct(p);
         }
-        throw new IOException("end-of object not found");
     }
 
     public final Map<String, Rec> getRec(RecType recType, Params params, long now)
@@ -222,15 +321,16 @@ public final class Unrest {
 
         Rec rec = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
             switch (recType) {
-            case ASSET:
-                rec = Asset.parse(p, true);
+            case ASSET:                
+                rec = Asset.parse(p);
                 break;
             case CONTR:
-                rec = Contr.parse(p, true);
+                rec = Contr.parse(p);
                 break;
             case TRADER:
-                rec = Trader.parse(p, true);
+                rec = Trader.parse(p);
                 break;
             }
         }
@@ -243,7 +343,8 @@ public final class Unrest {
         rest.postTrader(mnem, display, email, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            return Trader.parse(p, true);
+            parseStartObject(p);
+            return Trader.parse(p);
         }
     }
 
@@ -278,7 +379,8 @@ public final class Unrest {
         rest.getMarket(cmnem, settlDate, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            return View.parse(p, true);
+            parseStartObject(p);
+            return View.parse(p);
         }
     }
 
@@ -288,17 +390,25 @@ public final class Unrest {
         rest.postMarket(cmnem, settlDate, fixingDate, expiryDate, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            return View.parse(p, true);
+            parseStartObject(p);
+            return View.parse(p);
         }
     }
 
-    public final Object getAccnt(String email, Params params, long now) throws NotFoundException,
-            IOException {
-        return null;
+    public final AccntStruct getAccnt(String email, Params params, long now)
+            throws NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getAccnt(email, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return parseAccntStruct(p);
+        }
     }
 
     public final void deleteOrder(String email, String cmnem, int settlDate, long id)
             throws BadRequestException, NotFoundException, IOException {
+        rest.deleteOrder(email, cmnem, settlDate, id);
     }
 
     public final Object getOrder(String email, Params params, long now) throws NotFoundException,
@@ -327,49 +437,10 @@ public final class Unrest {
         final StringBuilder sb = new StringBuilder();
         rest.postOrder(email, cmnem, settlDate, ref, action, ticks, lots, minLots, params, now, sb);
 
-        final TransStruct out = new TransStruct();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            String name = null;
-            while (p.hasNext()) {
-                final Event event = p.next();
-                switch (event) {
-                case END_OBJECT:
-                    return out;
-                case KEY_NAME:
-                    name = p.getString();
-                    break;
-                case START_ARRAY:
-                    if ("orders".equals(name)) {
-                        parseOrders(p, out.orders);
-                    } else if ("execs".equals(name)) {
-                        parseExecs(p, out.execs);
-                    } else {
-                        throw new IOException(String.format("unexpected array field '%s'", name));
-                    }
-                    break;
-                case START_OBJECT:
-                    if ("market".equals(name)) {
-                        out.market = View.parse(p, false);
-                    } else if ("posn".equals(name)) {
-                        out.posn = Posn.parse(p, false);
-                    } else {
-                        throw new IOException(String.format("unexpected array field '%s'", name));
-                    }
-                    break;
-                case VALUE_NULL:
-                    if ("posn".equals(name)) {
-                        out.posn = null;
-                    } else {
-                        throw new IOException(String.format("unexpected null field '%s'", name));
-                    }
-                    break;
-                default:
-                    throw new IOException(String.format("unexpected json token '%s'", event));
-                }
-            }
+            return parseTransStruct(p);
         }
-        throw new IOException("end-of object not found");
     }
 
     public final Object putOrder(String email, String cmnem, int settlDate, long id, long lots,

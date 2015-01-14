@@ -3,11 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import java.io.IOException;
+
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.domain.Action;
-import com.swirlycloud.twirly.exception.BadRequestException;
 
 public final class Request {
 
@@ -41,16 +42,6 @@ public final class Request {
     private long lots;
     private long minLots;
 
-    private static void parseStartObject(JsonParser p) throws BadRequestException {
-        if (!p.hasNext()) {
-            throw new BadRequestException("start object not found");
-        }
-        final Event event = p.next();
-        if (event != Event.START_OBJECT) {
-            throw new BadRequestException(String.format("unexpected json token '%s'", event));
-        }
-    }
-
     public final void clear() {
         fields = 0;
         id = 0;
@@ -68,10 +59,7 @@ public final class Request {
         minLots = 0;        
     }
 
-    public final void parse(JsonParser p, boolean withStartObject) throws BadRequestException {
-        if (withStartObject) {
-            parseStartObject(p);
-        }
+    public final void parse(JsonParser p) throws IOException {
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
@@ -101,7 +89,7 @@ public final class Request {
                     fields |= ACTION;
                     action = null;
                 } else {
-                    throw new BadRequestException(String.format("unexpected nullable field '%s'", name));
+                    throw new IOException(String.format("unexpected nullable field '%s'", name));
                 }
                 break;
             case VALUE_NUMBER:
@@ -127,7 +115,7 @@ public final class Request {
                     fields |= MIN_LOTS;
                     minLots = p.getLong();
                 } else {
-                    throw new BadRequestException(String.format("unexpected number field '%s'", name));
+                    throw new IOException(String.format("unexpected number field '%s'", name));
                 }
                 break;
             case VALUE_STRING:
@@ -150,11 +138,11 @@ public final class Request {
                     fields |= ACTION;
                     action = Action.valueOf(p.getString());
                 } else {
-                    throw new BadRequestException(String.format("unexpected string field '%s'", name));
+                    throw new IOException(String.format("unexpected string field '%s'", name));
                 }
                 break;
             default:
-                throw new BadRequestException(String.format("unexpected json token '%s'", event));
+                throw new IOException(String.format("unexpected json token '%s'", event));
             }
         }
     }

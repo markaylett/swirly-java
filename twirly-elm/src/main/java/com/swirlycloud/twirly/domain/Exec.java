@@ -6,7 +6,6 @@ package com.swirlycloud.twirly.domain;
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 import static com.swirlycloud.twirly.util.IdUtil.newId;
 import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
-import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
 import java.io.IOException;
 
@@ -113,7 +112,7 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         this.created = created;
     }
 
-    public static Exec parse(JsonParser p, boolean withStartObject) throws IOException {
+    public static Exec parse(JsonParser p) throws IOException {
         long id = 0;
         long orderId = 0;
         Identifiable trader = null;
@@ -134,9 +133,6 @@ public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiab
         Identifiable cpty = null;
         long created = 0;
 
-        if (withStartObject) {
-            parseStartObject(p);
-        }
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();

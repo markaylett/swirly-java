@@ -8,8 +8,6 @@ import static com.swirlycloud.twirly.util.StringUtil.splitPath;
 
 import java.io.IOException;
 
-import javax.json.Json;
-import javax.json.stream.JsonParser;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -122,10 +120,7 @@ public final class RecServlet extends RestServlet {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
             }
 
-            final Request r = new Request();
-            try (JsonParser p = Json.createParser(req.getReader())) {
-                r.parse(p, true);
-            }
+            final Request r = parseRequest(req);
             int fields = r.getFields();
             if ((fields & Request.EMAIL) != 0) {
                 if (!r.getEmail().equals(email) && !userService.isUserAdmin()) {

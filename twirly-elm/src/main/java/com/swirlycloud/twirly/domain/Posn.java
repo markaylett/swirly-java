@@ -6,7 +6,6 @@ package com.swirlycloud.twirly.domain;
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 import static com.swirlycloud.twirly.util.IdUtil.newId;
 import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
-import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
 import java.io.IOException;
 
@@ -50,7 +49,7 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         this.settlDay = settlDay;
     }
 
-    public static Posn parse(JsonParser p, boolean withStartObject) throws IOException {
+    public static Posn parse(JsonParser p) throws IOException {
         long key = 0;
         Identifiable trader = null;
         Identifiable contr = null;
@@ -60,9 +59,6 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         long sellCost = 0;
         long sellLots = 0;
 
-        if (withStartObject) {
-            parseStartObject(p);
-        }
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();

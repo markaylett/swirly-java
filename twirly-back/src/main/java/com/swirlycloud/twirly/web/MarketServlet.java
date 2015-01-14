@@ -8,8 +8,6 @@ import static com.swirlycloud.twirly.util.StringUtil.splitPath;
 
 import java.io.IOException;
 
-import javax.json.Json;
-import javax.json.stream.JsonParser;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -97,10 +95,7 @@ public final class MarketServlet extends RestServlet {
             }
             final String cmnem = parts[CMNEM_PART];
 
-            final Request r = new Request();
-            try (JsonParser p = Json.createParser(req.getReader())) {
-                r.parse(p, true);
-            }
+            final Request r = parseRequest(req);
             if (r.getFields() != (Request.SETTL_DATE | Request.FIXING_DATE | Request.EXPIRY_DATE)) {
                 throw new BadRequestException("request fields are invalid");
             }

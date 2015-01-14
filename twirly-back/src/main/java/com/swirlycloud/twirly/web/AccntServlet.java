@@ -8,8 +8,6 @@ import static com.swirlycloud.twirly.util.StringUtil.splitPath;
 
 import java.io.IOException;
 
-import javax.json.Json;
-import javax.json.stream.JsonParser;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -194,10 +192,7 @@ public final class AccntServlet extends RestServlet {
             final String cmnem = parts[CMNEM_PART];
             final int settlDate = Integer.parseInt(parts[SETTL_DATE_PART]);
 
-            final Request r = new Request();
-            try (JsonParser p = Json.createParser(req.getReader())) {
-                r.parse(p, true);
-            }
+            final Request r = parseRequest(req);
             if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
                 throw new BadRequestException("request fields are invalid");
             }
@@ -237,10 +232,7 @@ public final class AccntServlet extends RestServlet {
             final int settlDate = Integer.parseInt(parts[SETTL_DATE_PART]);
             final long id = Long.parseLong(parts[ID_PART]);
 
-            final Request r = new Request();
-            try (JsonParser p = Json.createParser(req.getReader())) {
-                r.parse(p, true);
-            }
+            final Request r = parseRequest(req);
             if (r.getFields() != Request.LOTS) {
                 throw new BadRequestException("request fields are invalid");
             }

@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -138,7 +139,8 @@ public final class ViewTest {
                 lastLots, lastTime);
 
         try (JsonParser p = Json.createParser(new StringReader(in.toString()))) {
-            final View out = View.parse(p, true);
+            parseStartObject(p);
+            final View out = View.parse(p);
 
             assertEquals(contr.getId(), out.getContrId());
             assertEquals(settlDay, out.getSettlDay());
