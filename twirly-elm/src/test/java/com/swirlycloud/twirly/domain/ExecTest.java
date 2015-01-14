@@ -19,7 +19,7 @@ public final class ExecTest {
                 1, 1414692516006L);
         final Exec exec = new Exec(2, order, 1414692516007L);
         assertEquals(
-                "{\"id\":2,\"orderId\":1,\"trader\":1,\"contr\":12,\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":3,\"exec\":0,\"lastTicks\":0,\"lastLots\":0,\"minLots\":1,\"created\":1414692516007}",
+                "{\"id\":2,\"orderId\":1,\"trader\":1,\"contr\":12,\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":3,\"exec\":0,\"lastTicks\":null,\"lastLots\":null,\"minLots\":1,\"matchId\":null,\"role\":null,\"cpty\":null,\"created\":1414692516007}",
                 exec.toString());
         exec.trade(12345, 1, 3, Role.MAKER, MockTrader.newTrader("GOSAYL"));
         assertEquals(

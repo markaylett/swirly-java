@@ -42,7 +42,7 @@ public final class Unrest {
             switch (event) {
             case END_ARRAY:
                 return;
-            case START_OBJECT:                
+            case START_OBJECT:
                 final Asset asset = Asset.parse(p);
                 out.put(asset.getMnem(), asset);
                 break;
@@ -323,7 +323,7 @@ public final class Unrest {
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
             switch (recType) {
-            case ASSET:                
+            case ASSET:
                 rec = Asset.parse(p);
                 break;
             case CONTR:
@@ -411,24 +411,54 @@ public final class Unrest {
         rest.deleteOrder(email, cmnem, settlDate, id);
     }
 
-    public final Object getOrder(String email, Params params, long now) throws NotFoundException,
-            IOException {
-        return null;
+    public final Map<Long, Order> getOrder(String email, Params params, long now)
+            throws NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getOrder(email, params, now, sb);
+
+        final Map<Long, Order> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseOrders(p, out);
+        }
+        return out;
     }
 
-    public final Object getOrder(String email, String cmnem, Params params, long now)
+    public final Map<Long, Order> getOrder(String email, String cmnem, Params params, long now)
             throws ForbiddenException, NotFoundException, IOException {
-        return null;
+        final StringBuilder sb = new StringBuilder();
+        rest.getOrder(email, cmnem, params, now, sb);
+
+        final Map<Long, Order> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseOrders(p, out);
+        }
+        return out;
     }
 
-    public final Object getOrder(String email, String cmnem, int settlDate, Params params, long now)
-            throws ForbiddenException, NotFoundException, IOException {
-        return null;
+    public final Map<Long, Order> getOrder(String email, String cmnem, int settlDate,
+            Params params, long now) throws ForbiddenException, NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getOrder(email, cmnem, settlDate, params, now, sb);
+
+        final Map<Long, Order> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseOrders(p, out);
+        }
+        return out;
     }
 
-    public final Object getOrder(String email, String cmnem, int settlDate, long id, Params params,
+    public final Order getOrder(String email, String cmnem, int settlDate, long id, Params params,
             long now) throws IOException, NotFoundException {
-        return null;
+        final StringBuilder sb = new StringBuilder();
+        rest.getOrder(email, cmnem, settlDate, id, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Order.parse(p);
+        }
     }
 
     public final TransStruct postOrder(String email, String cmnem, int settlDate, String ref,
@@ -443,50 +473,111 @@ public final class Unrest {
         }
     }
 
-    public final Object putOrder(String email, String cmnem, int settlDate, long id, long lots,
-            Params params, long now) throws BadRequestException, NotFoundException, IOException {
-        return null;
+    public final TransStruct putOrder(String email, String cmnem, int settlDate, long id,
+            long lots, Params params, long now) throws BadRequestException, NotFoundException,
+            IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.putOrder(email, cmnem, settlDate, id, lots, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return parseTransStruct(p);
+        }
     }
 
     public final void deleteTrade(String email, String cmnem, int settlDate, long id)
             throws BadRequestException, NotFoundException {
+        rest.deleteTrade(email, cmnem, settlDate, id);
     }
 
-    public final Object getTrade(String email, Params params, long now) throws NotFoundException,
-            IOException {
-        return null;
-    }
-
-    public final Object getTrade(String email, String cmnem, Params params, long now)
-            throws ForbiddenException, NotFoundException, IOException {
-        return null;
-    }
-
-    public final Object getTrade(String email, String cmnem, int settlDate, Params params, long now)
-            throws ForbiddenException, NotFoundException, IOException {
-        return null;
-    }
-
-    public final Object getTrade(String email, String cmnem, int settlDate, long id, Params params,
-            long now) throws NotFoundException, IOException {
-        return null;
-    }
-
-    public final Object getPosn(String email, Params params, long now) throws NotFoundException,
-            IOException {
-        return null;
-    }
-
-    public final Object getPosn(String email, String cmnem, Params params, long now)
-            throws ForbiddenException, NotFoundException, IOException {
-        return null;
-    }
-
-    public final Object getPosn(String email, String cmnem, int settlDate, Params params, long now)
+    public final Map<Long, Exec> getTrade(String email, Params params, long now)
             throws NotFoundException, IOException {
-        return null;
+        final StringBuilder sb = new StringBuilder();
+        rest.getTrade(email, params, now, sb);
+
+        final Map<Long, Exec> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseExecs(p, out);
+        }
+        return out;
+    }
+
+    public final Map<Long, Exec> getTrade(String email, String cmnem, Params params, long now)
+            throws ForbiddenException, NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getTrade(email, cmnem, params, now, sb);
+
+        final Map<Long, Exec> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseExecs(p, out);
+        }
+        return out;
+    }
+
+    public final Map<Long, Exec> getTrade(String email, String cmnem, int settlDate, Params params,
+            long now) throws ForbiddenException, NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getTrade(email, cmnem, settlDate, params, now, sb);
+
+        final Map<Long, Exec> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseExecs(p, out);
+        }
+        return out;
+    }
+
+    public final Exec getTrade(String email, String cmnem, int settlDate, long id, Params params,
+            long now) throws NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getOrder(email, cmnem, settlDate, id, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Exec.parse(p);
+        }
+    }
+
+    public final Map<Long, Posn> getPosn(String email, Params params, long now)
+            throws NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getPosn(email, params, now, sb);
+
+        final Map<Long, Posn> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parsePosns(p, out);
+        }
+        return out;
+    }
+
+    public final Map<Long, Posn> getPosn(String email, String cmnem, Params params, long now)
+            throws ForbiddenException, NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getPosn(email, cmnem, params, now, sb);
+
+        final Map<Long, Posn> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parsePosns(p, out);
+        }
+        return out;
+    }
+
+    public final Posn getPosn(String email, String cmnem, int settlDate, Params params, long now)
+            throws NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getPosn(email, cmnem, settlDate, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Posn.parse(p);
+        }
     }
 
     public final void getEndOfDay() throws NotFoundException {
+        rest.getEndOfDay();
     }
 }
