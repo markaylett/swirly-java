@@ -8,10 +8,10 @@ import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_EXPIRED_AND_INTERNAL;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_INTERNAL;
-import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Map;
@@ -109,92 +109,65 @@ public final class UnrestTest {
     }
 
     @Test
-    public final void testGetRecWithoutTraders() throws IOException {
+    public final void testGetRec() throws IOException {
         final Unrest unrest = new Unrest(new MockModel());
         final long now = System.currentTimeMillis();
-        final RecStruct st = unrest.getRec(false, PARAMS_NONE, now);
+
+        // With traders.
+        RecStruct st = unrest.getRec(true, PARAMS_INTERNAL, now);
+        assertAssets(st.assets);
+        assertContrs(st.contrs);
+        assertTraders(st.traders);
+
+        // Without traders.
+        st = unrest.getRec(false, PARAMS_INTERNAL, now);
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertTrue(st.traders.isEmpty());
     }
 
     @Test
-    public final void testGetRecWithTraders() throws IOException {
+    public final void testGetRecType() throws IOException {
         final Unrest unrest = new Unrest(new MockModel());
         final long now = System.currentTimeMillis();
-        final RecStruct st = unrest.getRec(true, PARAMS_NONE, now);
-        assertAssets(st.assets);
-        assertContrs(st.contrs);
-        assertTraders(st.traders);
+
+        Map<String, Rec> recs = unrest.getRec(RecType.ASSET, PARAMS_INTERNAL, now);
+        assertAssets(recs);
+
+        recs = unrest.getRec(RecType.CONTR, PARAMS_INTERNAL, now);
+        assertContrs(recs);
+
+        recs = unrest.getRec(RecType.TRADER, PARAMS_INTERNAL, now);
+        assertTraders(recs);
     }
 
     @Test
-    public final void testGetRecAsset() throws IOException {
+    public final void testGetRecTypeMnem() throws NotFoundException, IOException {
         final Unrest unrest = new Unrest(new MockModel());
         final long now = System.currentTimeMillis();
-        final Map<String, Rec> assets = unrest.getRec(RecType.ASSET, PARAMS_NONE, now);
-        assertAssets(assets);
-    }
 
-    @Test
-    public final void testGetRecContr() throws IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        final Map<String, Rec> contrs = unrest.getRec(RecType.CONTR, PARAMS_NONE, now);
-        assertContrs(contrs);
-    }
-
-    @Test
-    public final void testGetRecTrader() throws IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        final Map<String, Rec> traders = unrest.getRec(RecType.TRADER, PARAMS_NONE, now);
-        assertTraders(traders);
-    }
-
-    @Test
-    public final void testGetRecAssetMnem() throws NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        final Asset asset = (Asset) unrest.getRec(RecType.ASSET, "JPY", PARAMS_NONE, now);
+        final Asset asset = (Asset) unrest.getRec(RecType.ASSET, "JPY", PARAMS_INTERNAL, now);
         assertAsset(asset);
-    }
+        try {
+            unrest.getRec(RecType.ASSET, "JPYx", PARAMS_INTERNAL, now);
+            fail("Expected exception");
+        } catch (final NotFoundException e) {
+        }
 
-    @Test(expected = NotFoundException.class)
-    public final void testGetRecAssetNotFound() throws NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        unrest.getRec(RecType.ASSET, "JPYx", PARAMS_NONE, now);
-    }
-
-    @Test
-    public final void testGetRecContrMnem() throws NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        final Contr contr = (Contr) unrest.getRec(RecType.CONTR, "USDJPY", PARAMS_NONE, now);
+        final Contr contr = (Contr) unrest.getRec(RecType.CONTR, "USDJPY", PARAMS_INTERNAL, now);
         assertContr(contr);
-    }
+        try {
+            unrest.getRec(RecType.CONTR, "USDJPYx", PARAMS_INTERNAL, now);
+        } catch (final NotFoundException e) {
+        }
 
-    @Test(expected = NotFoundException.class)
-    public final void testGetRecContrNotFound() throws NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        unrest.getRec(RecType.CONTR, "USDJPYx", PARAMS_NONE, now);
-    }
-
-    @Test
-    public final void testGetRecTraderMnem() throws NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        final Trader trader = (Trader) unrest.getRec(RecType.TRADER, "TOBAYL", PARAMS_NONE, now);
+        final Trader trader = (Trader) unrest
+                .getRec(RecType.TRADER, "TOBAYL", PARAMS_INTERNAL, now);
         assertTrader(trader);
-    }
-
-    @Test(expected = NotFoundException.class)
-    public final void testGetRecTraderNotFound() throws NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        unrest.getRec(RecType.TRADER, "TOBAYLx", PARAMS_NONE, now);
+        try {
+            unrest.getRec(RecType.TRADER, "TOBAYLx", PARAMS_INTERNAL, now);
+        } catch (final NotFoundException e) {
+        }
     }
 
     @Test
@@ -202,44 +175,28 @@ public final class UnrestTest {
         final Unrest unrest = new Unrest(new MockModel());
         final long now = System.currentTimeMillis();
         Trader trader = unrest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com",
-                PARAMS_NONE, now);
+                PARAMS_INTERNAL, now);
         for (int i = 0; i < 2; ++i) {
             assertNotNull(trader);
             assertEquals("MARAYL2", trader.getMnem());
             assertEquals("Mark Aylett", trader.getDisplay());
             assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
-            trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL2", PARAMS_NONE, now);
+            trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL2", PARAMS_INTERNAL, now);
         }
-    }
 
-    @Test(expected = BadRequestException.class)
-    public final void testPostTraderDupMnem() throws BadRequestException, NotFoundException,
-            IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        unrest.postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com", PARAMS_NONE, now);
-    }
+        // Duplicate mnemonic.
+        try {
+            unrest.postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com",
+                    PARAMS_INTERNAL, now);
+        } catch (final BadRequestException e) {
+        }
 
-    @Test(expected = BadRequestException.class)
-    public final void testPostTraderDupEmail() throws BadRequestException, NotFoundException,
-            IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = System.currentTimeMillis();
-        unrest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@gmail.com", PARAMS_NONE, now);
-    }
-
-    @Test
-    public final void testPostMarket() throws BadRequestException, NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        final long now = jdToMillis(ymdToJd(2014, 2, 10));
-
-        final int settlDay = ymdToJd(2014, 2, 14);
-        final int fixingDay = settlDay - 2;
-        final int expiryDay = settlDay - 3;
-
-        final View view = unrest.postMarket("EURUSD", jdToIso(settlDay), jdToIso(fixingDay),
-                jdToIso(expiryDay), PARAMS_INTERNAL, now);
-        assertView(view, 12, settlDay, fixingDay, expiryDay);
+        // Duplicate email.
+        try {
+            unrest.postTrader("MARAYL3", "Mark Aylett", "mark.aylett@gmail.com", PARAMS_INTERNAL,
+                    now);
+        } catch (final BadRequestException e) {
+        }
     }
 
     @Test
@@ -269,7 +226,7 @@ public final class UnrestTest {
     }
 
     @Test
-    public final void testGetMarketMnem() throws BadRequestException, NotFoundException,
+    public final void testGetMarketContr() throws BadRequestException, NotFoundException,
             IOException {
         final Unrest unrest = new Unrest(new MockModel());
         long now = jdToMillis(ymdToJd(2014, 2, 10));
@@ -299,7 +256,7 @@ public final class UnrestTest {
     }
 
     @Test
-    public final void testGetMarketMnemSettl() throws BadRequestException, NotFoundException,
+    public final void testGetMarketContrSettl() throws BadRequestException, NotFoundException,
             IOException {
         final Unrest unrest = new Unrest(new MockModel());
         long now = jdToMillis(ymdToJd(2014, 2, 10));
@@ -313,13 +270,13 @@ public final class UnrestTest {
 
         try {
             unrest.getMarket("USDJPY", jdToIso(settlDay), PARAMS_INTERNAL, now);
-            assertTrue(false);
+            fail("Expected exception");
         } catch (final NotFoundException e) {
         }
 
         try {
             unrest.getMarket("EURUSD", jdToIso(settlDay + 1), PARAMS_INTERNAL, now);
-            assertTrue(false);
+            fail("Expected exception");
         } catch (final NotFoundException e) {
         }
 
@@ -333,9 +290,47 @@ public final class UnrestTest {
 
         try {
             unrest.getMarket("EURUSD", jdToIso(settlDay), PARAMS_INTERNAL, now);
-            assertTrue(false);
+            fail("Expected exception");
         } catch (final NotFoundException e) {
         }
+    }
+
+    @Test
+    public final void testPostMarket() throws BadRequestException, NotFoundException, IOException {
+        final Unrest unrest = new Unrest(new MockModel());
+        final long now = jdToMillis(ymdToJd(2014, 2, 10));
+
+        final int settlDay = ymdToJd(2014, 2, 14);
+        final int fixingDay = settlDay - 2;
+        final int expiryDay = settlDay - 3;
+
+        final View view = unrest.postMarket("EURUSD", jdToIso(settlDay), jdToIso(fixingDay),
+                jdToIso(expiryDay), PARAMS_INTERNAL, now);
+        assertView(view, 12, settlDay, fixingDay, expiryDay);
+    }
+
+    @Test
+    public final void testGetAccnt() {
+    }
+
+    @Test
+    public final void testDeleteOrder() {
+    }
+
+    @Test
+    public final void testGetOrder() {
+    }
+
+    @Test
+    public final void testGetOrderContr() {
+    }
+
+    @Test
+    public final void testGetOrderContrSettl() {
+    }
+
+    @Test
+    public final void testGetOrderContrSettlId() {
     }
 
     @Test
@@ -353,5 +348,45 @@ public final class UnrestTest {
         final TransStruct out = unrest.postOrder("mark.aylett@gmail.com", "EURUSD",
                 jdToIso(settlDay), "", Action.BUY, 12345, 5, 1, PARAMS_INTERNAL, now);
         System.out.println(out.orders);
+    }
+
+    @Test
+    public final void testPutOrder() {
+    }
+
+    @Test
+    public final void testDeleteTrade() {
+    }
+
+    @Test
+    public final void testGetTrade() {
+    }
+
+    @Test
+    public final void testGetTradeContr() {
+    }
+
+    @Test
+    public final void testGetTradeContrSettl() {
+    }
+
+    @Test
+    public final void testGetTradeContrSettlId() {
+    }
+
+    @Test
+    public final void testGetPosn() {
+    }
+
+    @Test
+    public final void testGetPosnContr() {
+    }
+
+    @Test
+    public final void testGetPosnContrSettl() {
+    }
+
+    @Test
+    public final void testGetEndOfDay() {
     }
 }
