@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import static com.swirlycloud.twirly.util.JsonUtil.isInternal;
+
 import java.io.IOException;
 
 import javax.json.stream.JsonParser;
@@ -64,6 +66,36 @@ public final class Trader extends Rec {
     }
 
     @Override
+    public final int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((email == null) ? 0 : email.hashCode());
+        return result;
+    }
+
+    @Override
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Trader other = (Trader) obj;
+        if (email == null) {
+            if (other.email != null) {
+                return false;
+            }
+        } else if (!email.equals(other.email)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public final String toString() {
         return JsonUtil.toJson(this);
     }
@@ -71,7 +103,11 @@ public final class Trader extends Rec {
     @Override
     public final void toJson(Params params, Appendable out)
             throws IOException {
-        out.append("{\"mnem\":\"").append(mnem);
+        out.append('{');
+        if (isInternal(params)) {
+            out.append("\"id\":").append(String.valueOf(id)).append(',');
+        }
+        out.append("\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"email\":\"").append(email);
         out.append("\"}");

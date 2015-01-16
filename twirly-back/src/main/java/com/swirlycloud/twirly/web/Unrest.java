@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartArray;
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
+import static com.swirlycloud.twirly.util.JsonUtil.withInternal;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -283,7 +284,7 @@ public final class Unrest {
 
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(withTraders, params, now, sb);
+        rest.getRec(withTraders, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -294,7 +295,7 @@ public final class Unrest {
     public final Map<String, Rec> getRec(RecType recType, Params params, long now)
             throws IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(recType, params, now, sb);
+        rest.getRec(recType, withInternal(params), now, sb);
 
         final Map<String, Rec> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -317,7 +318,7 @@ public final class Unrest {
     public final Rec getRec(RecType recType, String mnem, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(recType, mnem, params, now, sb);
+        rest.getRec(recType, mnem, withInternal(params), now, sb);
 
         Rec rec = null;
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -340,7 +341,7 @@ public final class Unrest {
     public final Trader postTrader(String mnem, String display, String email, Params params,
             long now) throws BadRequestException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postTrader(mnem, display, email, params, now, sb);
+        rest.postTrader(mnem, display, email, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -350,7 +351,7 @@ public final class Unrest {
 
     public final Map<Long, View> getMarket(Params params, long now) throws IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getMarket(params, now, sb);
+        rest.getMarket(withInternal(params), now, sb);
 
         final Map<Long, View> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -363,7 +364,7 @@ public final class Unrest {
     public final Map<Long, View> getMarket(String cmnem, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getMarket(cmnem, params, now, sb);
+        rest.getMarket(cmnem, withInternal(params), now, sb);
 
         final Map<Long, View> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -376,7 +377,7 @@ public final class Unrest {
     public final View getMarket(String cmnem, int settlDate, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getMarket(cmnem, settlDate, params, now, sb);
+        rest.getMarket(cmnem, settlDate, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -387,7 +388,7 @@ public final class Unrest {
     public final View postMarket(String cmnem, int settlDate, int fixingDate, int expiryDate,
             Params params, long now) throws BadRequestException, NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postMarket(cmnem, settlDate, fixingDate, expiryDate, params, now, sb);
+        rest.postMarket(cmnem, settlDate, fixingDate, expiryDate, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -398,7 +399,7 @@ public final class Unrest {
     public final AccntStruct getAccnt(String email, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getAccnt(email, params, now, sb);
+        rest.getAccnt(email, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -414,7 +415,7 @@ public final class Unrest {
     public final Map<Long, Order> getOrder(String email, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(email, params, now, sb);
+        rest.getOrder(email, withInternal(params), now, sb);
 
         final Map<Long, Order> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -427,7 +428,7 @@ public final class Unrest {
     public final Map<Long, Order> getOrder(String email, String cmnem, Params params, long now)
             throws ForbiddenException, NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(email, cmnem, params, now, sb);
+        rest.getOrder(email, cmnem, withInternal(params), now, sb);
 
         final Map<Long, Order> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -440,7 +441,7 @@ public final class Unrest {
     public final Map<Long, Order> getOrder(String email, String cmnem, int settlDate,
             Params params, long now) throws ForbiddenException, NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(email, cmnem, settlDate, params, now, sb);
+        rest.getOrder(email, cmnem, settlDate, withInternal(params), now, sb);
 
         final Map<Long, Order> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -453,7 +454,7 @@ public final class Unrest {
     public final Order getOrder(String email, String cmnem, int settlDate, long id, Params params,
             long now) throws IOException, NotFoundException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(email, cmnem, settlDate, id, params, now, sb);
+        rest.getOrder(email, cmnem, settlDate, id, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -465,7 +466,8 @@ public final class Unrest {
             Action action, long ticks, long lots, long minLots, Params params, long now)
             throws BadRequestException, NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postOrder(email, cmnem, settlDate, ref, action, ticks, lots, minLots, params, now, sb);
+        rest.postOrder(email, cmnem, settlDate, ref, action, ticks, lots, minLots,
+                withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -477,7 +479,7 @@ public final class Unrest {
             long lots, Params params, long now) throws BadRequestException, NotFoundException,
             IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.putOrder(email, cmnem, settlDate, id, lots, params, now, sb);
+        rest.putOrder(email, cmnem, settlDate, id, lots, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -493,7 +495,7 @@ public final class Unrest {
     public final Map<Long, Exec> getTrade(String email, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getTrade(email, params, now, sb);
+        rest.getTrade(email, withInternal(params), now, sb);
 
         final Map<Long, Exec> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -506,7 +508,7 @@ public final class Unrest {
     public final Map<Long, Exec> getTrade(String email, String cmnem, Params params, long now)
             throws ForbiddenException, NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getTrade(email, cmnem, params, now, sb);
+        rest.getTrade(email, cmnem, withInternal(params), now, sb);
 
         final Map<Long, Exec> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -519,7 +521,7 @@ public final class Unrest {
     public final Map<Long, Exec> getTrade(String email, String cmnem, int settlDate, Params params,
             long now) throws ForbiddenException, NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getTrade(email, cmnem, settlDate, params, now, sb);
+        rest.getTrade(email, cmnem, settlDate, withInternal(params), now, sb);
 
         final Map<Long, Exec> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -532,7 +534,7 @@ public final class Unrest {
     public final Exec getTrade(String email, String cmnem, int settlDate, long id, Params params,
             long now) throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(email, cmnem, settlDate, id, params, now, sb);
+        rest.getOrder(email, cmnem, settlDate, id, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -543,7 +545,7 @@ public final class Unrest {
     public final Map<Long, Posn> getPosn(String email, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getPosn(email, params, now, sb);
+        rest.getPosn(email, withInternal(params), now, sb);
 
         final Map<Long, Posn> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -556,7 +558,7 @@ public final class Unrest {
     public final Map<Long, Posn> getPosn(String email, String cmnem, Params params, long now)
             throws ForbiddenException, NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getPosn(email, cmnem, params, now, sb);
+        rest.getPosn(email, cmnem, withInternal(params), now, sb);
 
         final Map<Long, Posn> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -569,7 +571,7 @@ public final class Unrest {
     public final Posn getPosn(String email, String cmnem, int settlDate, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getPosn(email, cmnem, settlDate, params, now, sb);
+        rest.getPosn(email, cmnem, settlDate, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);

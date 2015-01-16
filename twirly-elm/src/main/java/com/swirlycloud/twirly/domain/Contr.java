@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.domain.Conv.fractToReal;
 import static com.swirlycloud.twirly.domain.Conv.realToDp;
+import static com.swirlycloud.twirly.util.JsonUtil.isInternal;
 
 import java.io.IOException;
 
@@ -122,6 +123,76 @@ public final class Contr extends Rec {
     }
 
     @Override
+    public final int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((assetType == null) ? 0 : assetType.hashCode());
+        result = prime * result + ((asset == null) ? 0 : asset.hashCode());
+        result = prime * result + ((ccy == null) ? 0 : ccy.hashCode());
+        result = prime * result + tickDenom;
+        result = prime * result + tickNumer;
+        result = prime * result + lotNumer;
+        result = prime * result + lotDenom;
+        result = prime * result + pipDp;
+        result = prime * result + (int) (minLots ^ (minLots >>> 32));
+        result = prime * result + (int) (maxLots ^ (maxLots >>> 32));
+        return result;
+    }
+
+    @Override
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Contr other = (Contr) obj;
+        if (assetType != other.assetType) {
+            return false;
+        }
+        if (asset == null) {
+            if (other.asset != null) {
+                return false;
+            }
+        } else if (!asset.equals(other.asset)) {
+            return false;
+        }
+        if (ccy == null) {
+            if (other.ccy != null) {
+                return false;
+            }
+        } else if (!ccy.equals(other.ccy)) {
+            return false;
+        }
+        if (tickNumer != other.tickNumer) {
+            return false;
+        }
+        if (tickDenom != other.tickDenom) {
+            return false;
+        }
+        if (lotNumer != other.lotNumer) {
+            return false;
+        }
+        if (lotDenom != other.lotDenom) {
+            return false;
+        }
+        if (minLots != other.minLots) {
+            return false;
+        }
+        if (maxLots != other.maxLots) {
+            return false;
+        }
+        if (pipDp != other.pipDp) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public final String toString() {
         return JsonUtil.toJson(this);
     }
@@ -129,7 +200,11 @@ public final class Contr extends Rec {
     @Override
     public final void toJson(Params params, Appendable out)
             throws IOException {
-        out.append("{\"mnem\":\"").append(mnem);
+        out.append('{');
+        if (isInternal(params)) {
+            out.append("\"id\":").append(String.valueOf(id)).append(',');
+        }
+        out.append("\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"assetType\":\"").append(assetType.name());
         out.append("\",\"asset\":\"").append(asset);

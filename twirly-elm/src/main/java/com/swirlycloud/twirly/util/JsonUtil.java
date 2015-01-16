@@ -15,11 +15,42 @@ public final class JsonUtil {
     private JsonUtil() {
     }
 
-    public static final Params PARAMS_EXPIRED_AND_INTERNAL = new Params() {
+    public static Params withExpired(final Params params) {
+        return new Params() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public final <T> T getParam(String name, Class<T> clazz) {
+                return "expired".equals(name) //
+                ? (T) Boolean.TRUE
+                        : params.getParam(name, clazz);
+            }
+        };
+    }
+
+    public static Params withInternal(final Params params) {
+        return new Params() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public final <T> T getParam(String name, Class<T> clazz) {
+                return "internal".equals(name) //
+                ? (T) Boolean.TRUE
+                        : params.getParam(name, clazz);
+            }
+        };
+    }
+
+    public static final Params PARAMS_NONE = new Params() {
+        @Override
+        public final <T> T getParam(String name, Class<T> clazz) {
+            return null;
+        }
+    };
+
+    public static final Params PARAMS_EXPIRED = new Params() {
         @SuppressWarnings("unchecked")
         @Override
         public final <T> T getParam(String name, Class<T> clazz) {
-            return "expired".equals(name) || "internal".equals(name) ? (T) Boolean.TRUE : null;
+            return "expired".equals(name) ? (T) Boolean.TRUE : null;
         }
     };
 
@@ -28,13 +59,6 @@ public final class JsonUtil {
         @Override
         public final <T> T getParam(String name, Class<T> clazz) {
             return "internal".equals(name) ? (T) Boolean.TRUE : null;
-        }
-    };
-
-    public static final Params PARAMS_NONE = new Params() {
-        @Override
-        public final <T> T getParam(String name, Class<T> clazz) {
-            return null;
         }
     };
 
@@ -48,9 +72,12 @@ public final class JsonUtil {
         return sb.toString();
     }
 
+    public static boolean isInternal(Params params) {
+        return params != null && params.getParam("internal", Boolean.class) == Boolean.TRUE;
+    }
+
     public static String getIdOrMnem(Identifiable iden, Params params) {
-        return params != null && params.getParam("internal", Boolean.class) == Boolean.TRUE //
-        ? String.valueOf(iden.getId()) //
+        return isInternal(params) ? String.valueOf(iden.getId()) //
                 : '"' + ((Memorable) iden).getMnem() + '"';
     }
 
