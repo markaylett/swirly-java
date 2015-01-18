@@ -24,7 +24,6 @@ import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
-import com.swirlycloud.twirly.exception.ForbiddenException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.util.Params;
 
@@ -136,7 +135,7 @@ public final class Rest {
 
     public final synchronized void getMarket(Params params, long now, Appendable out)
             throws IOException {
-        final boolean withExpired = getExpiredParam(params); 
+        final boolean withExpired = getExpiredParam(params);
         final int busDay = getBusDate(now).toJd();
         out.append('[');
         RbNode node = serv.getFirstMarket();
@@ -157,7 +156,7 @@ public final class Rest {
 
     public final synchronized void getMarket(String cmnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final boolean withExpired = getExpiredParam(params); 
+        final boolean withExpired = getExpiredParam(params);
         final int busDay = getBusDate(now).toJd();
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
@@ -185,7 +184,7 @@ public final class Rest {
 
     public final synchronized void getMarket(String cmnem, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final boolean withExpired = getExpiredParam(params); 
+        final boolean withExpired = getExpiredParam(params);
         final int busDay = getBusDate(now).toJd();
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
@@ -238,8 +237,8 @@ public final class Rest {
         out.append('}');
     }
 
-    public final synchronized void deleteOrder(String email, String cmnem, int settlDate, long id)
-            throws BadRequestException, NotFoundException, IOException {
+    public final synchronized void deleteOrder(String email, String cmnem, int settlDate, long id,
+            long now) throws BadRequestException, NotFoundException, IOException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             throw new NotFoundException(String.format("trader '%s' has no orders", email));
@@ -249,7 +248,6 @@ public final class Rest {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
         }
         final int settlDay = isoToJd(settlDate);
-        final long now = System.currentTimeMillis();
         serv.archiveOrder(accnt, contr.getId(), settlDay, id, now);
     }
 
@@ -260,7 +258,7 @@ public final class Rest {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
         }
         final Accnt accnt = serv.findAccnt(trader);
-        if (accnt != null) {
+        if (accnt == null) {
             out.append("[]");
             return;
         }
@@ -268,7 +266,7 @@ public final class Rest {
     }
 
     public final synchronized void getOrder(String email, String cmnem, Params params, long now,
-            Appendable out) throws ForbiddenException, NotFoundException, IOException {
+            Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -299,8 +297,7 @@ public final class Rest {
     }
 
     public final synchronized void getOrder(String email, String cmnem, int settlDate,
-            Params params, long now, Appendable out) throws ForbiddenException, NotFoundException,
-            IOException {
+            Params params, long now, Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -384,8 +381,8 @@ public final class Rest {
         trans.toJson(params, out);
     }
 
-    public final synchronized void deleteTrade(String email, String cmnem, int settlDate, long id)
-            throws BadRequestException, NotFoundException {
+    public final synchronized void deleteTrade(String email, String cmnem, int settlDate, long id,
+            long now) throws BadRequestException, NotFoundException {
         final Accnt accnt = serv.findAccntByEmail(email);
         if (accnt == null) {
             throw new NotFoundException(String.format("trader '%s' has no trades", email));
@@ -395,7 +392,6 @@ public final class Rest {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
         }
         final int settlDay = isoToJd(settlDate);
-        final long now = System.currentTimeMillis();
         serv.archiveTrade(accnt, contr.getId(), settlDay, id, now);
     }
 
@@ -414,7 +410,7 @@ public final class Rest {
     }
 
     public final synchronized void getTrade(String email, String cmnem, Params params, long now,
-            Appendable out) throws ForbiddenException, NotFoundException, IOException {
+            Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -445,8 +441,7 @@ public final class Rest {
     }
 
     public final synchronized void getTrade(String email, String cmnem, int settlDate,
-            Params params, long now, Appendable out) throws ForbiddenException, NotFoundException,
-            IOException {
+            Params params, long now, Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -510,7 +505,7 @@ public final class Rest {
     }
 
     public final synchronized void getPosn(String email, String cmnem, Params params, long now,
-            Appendable out) throws ForbiddenException, NotFoundException, IOException {
+            Appendable out) throws NotFoundException, IOException {
         final Trader trader = serv.findTraderByEmail(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -560,8 +555,7 @@ public final class Rest {
 
     // Cron jobs.
 
-    public final synchronized void getEndOfDay() throws NotFoundException {
-        final long now = System.currentTimeMillis();
+    public final synchronized void getEndOfDay(long now) throws NotFoundException {
         serv.expireMarkets(now);
         serv.settlMarkets(now);
     }

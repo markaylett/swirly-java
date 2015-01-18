@@ -28,7 +28,6 @@ import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.View;
 import com.swirlycloud.twirly.exception.BadRequestException;
-import com.swirlycloud.twirly.exception.ForbiddenException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.util.Params;
 
@@ -407,9 +406,9 @@ public final class Unrest {
         }
     }
 
-    public final void deleteOrder(String email, String cmnem, int settlDate, long id)
+    public final void deleteOrder(String email, String cmnem, int settlDate, long id, long now)
             throws BadRequestException, NotFoundException, IOException {
-        rest.deleteOrder(email, cmnem, settlDate, id);
+        rest.deleteOrder(email, cmnem, settlDate, id, now);
     }
 
     public final Map<Long, Order> getOrder(String email, Params params, long now)
@@ -426,7 +425,7 @@ public final class Unrest {
     }
 
     public final Map<Long, Order> getOrder(String email, String cmnem, Params params, long now)
-            throws ForbiddenException, NotFoundException, IOException {
+            throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getOrder(email, cmnem, withInternal(params), now, sb);
 
@@ -439,7 +438,7 @@ public final class Unrest {
     }
 
     public final Map<Long, Order> getOrder(String email, String cmnem, int settlDate,
-            Params params, long now) throws ForbiddenException, NotFoundException, IOException {
+            Params params, long now) throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getOrder(email, cmnem, settlDate, withInternal(params), now, sb);
 
@@ -487,9 +486,9 @@ public final class Unrest {
         }
     }
 
-    public final void deleteTrade(String email, String cmnem, int settlDate, long id)
+    public final void deleteTrade(String email, String cmnem, int settlDate, long id, long now)
             throws BadRequestException, NotFoundException {
-        rest.deleteTrade(email, cmnem, settlDate, id);
+        rest.deleteTrade(email, cmnem, settlDate, id, now);
     }
 
     public final Map<Long, Exec> getTrade(String email, Params params, long now)
@@ -506,7 +505,7 @@ public final class Unrest {
     }
 
     public final Map<Long, Exec> getTrade(String email, String cmnem, Params params, long now)
-            throws ForbiddenException, NotFoundException, IOException {
+            throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getTrade(email, cmnem, withInternal(params), now, sb);
 
@@ -519,7 +518,7 @@ public final class Unrest {
     }
 
     public final Map<Long, Exec> getTrade(String email, String cmnem, int settlDate, Params params,
-            long now) throws ForbiddenException, NotFoundException, IOException {
+            long now) throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getTrade(email, cmnem, settlDate, withInternal(params), now, sb);
 
@@ -534,7 +533,7 @@ public final class Unrest {
     public final Exec getTrade(String email, String cmnem, int settlDate, long id, Params params,
             long now) throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(email, cmnem, settlDate, id, withInternal(params), now, sb);
+        rest.getTrade(email, cmnem, settlDate, id, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -556,7 +555,7 @@ public final class Unrest {
     }
 
     public final Map<Long, Posn> getPosn(String email, String cmnem, Params params, long now)
-            throws ForbiddenException, NotFoundException, IOException {
+            throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getPosn(email, cmnem, withInternal(params), now, sb);
 
@@ -579,7 +578,7 @@ public final class Unrest {
         }
     }
 
-    public final void getEndOfDay() throws NotFoundException {
-        rest.getEndOfDay();
+    public final void getEndOfDay(long now) throws NotFoundException {
+        rest.getEndOfDay(now);
     }
 }

@@ -54,6 +54,7 @@ public final class AccntServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            final long now = System.currentTimeMillis();
 
             boolean match = false;
             if (parts.length > 0) {
@@ -61,14 +62,14 @@ public final class AccntServlet extends RestServlet {
                     if (parts.length == 4) {
                         rest.deleteOrder(email, parts[CMNEM_PART],
                                 Integer.parseInt(parts[SETTL_DATE_PART]),
-                                Long.parseLong(parts[ID_PART]));
+                                Long.parseLong(parts[ID_PART]), now);
                         match = true;
                     }
                 } else if ("trade".equals(parts[TYPE_PART])) {
                     if (parts.length == 4) {
                         rest.deleteTrade(email, parts[CMNEM_PART],
                                 Integer.parseInt(parts[SETTL_DATE_PART]),
-                                Long.parseLong(parts[ID_PART]));
+                                Long.parseLong(parts[ID_PART]), now);
                         match = true;
                     }
                 }

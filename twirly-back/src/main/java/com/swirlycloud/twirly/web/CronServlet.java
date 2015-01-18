@@ -36,12 +36,13 @@ public final class CronServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            final long now = System.currentTimeMillis();
 
             boolean match = false;
             if (parts.length > 0) {
                 if ("endofday".equals(parts[JOB_PART])) {
                     log("processing end-of-day");
-                    rest.getEndOfDay();
+                    rest.getEndOfDay(now);
                     match = true;
                 } else if ("ecbrates".equals(parts[JOB_PART])) {
                     log("processing ecb-rates");

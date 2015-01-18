@@ -16,6 +16,8 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.Action;
@@ -26,6 +28,7 @@ import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
+import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.View;
@@ -42,6 +45,7 @@ import com.swirlycloud.twirly.web.Unrest.TransStruct;
 
 public final class UnrestTest {
 
+    private static final String EMAIL = "mark.aylett@gmail.com";
     private static final int TODAY = ymdToJd(2014, 2, 11);
     private static final int EXPIRY_DAY = TODAY + 1;
     private static final int FIXING_DAY = TODAY + 2;
@@ -88,14 +92,8 @@ public final class UnrestTest {
         });
     }
 
-    private static View createMarket(Unrest unrest) throws BadRequestException, NotFoundException,
-            IOException {
-        return unrest.postMarket("EURUSD", jdToIso(SETTL_DAY), jdToIso(FIXING_DAY),
-                jdToIso(EXPIRY_DAY), PARAMS_NONE, NOW);
-    }
-
-    private static void assertView(String mnem, View view) throws NotFoundException, IOException {
-        assertEquals(MockContr.newContr(mnem).getId(), view.getContrId());
+    private static void assertView(String cmnem, View view) throws NotFoundException, IOException {
+        assertEquals(MockContr.newContr(cmnem).getId(), view.getContrId());
         assertEquals(SETTL_DAY, view.getSettlDay());
         assertEquals(FIXING_DAY, view.getFixingDay());
         assertEquals(EXPIRY_DAY, view.getExpiryDay());
@@ -113,58 +111,45 @@ public final class UnrestTest {
         assertEquals(0, view.getLastTime());
     }
 
-    private static TransStruct createOrder(Unrest unrest) throws BadRequestException,
-            NotFoundException, IOException {
-        return unrest.postOrder("mark.aylett@gmail.com", "EURUSD", jdToIso(SETTL_DAY), "foo",
-                Action.SELL, 12346, 10, 1, PARAMS_NONE, NOW);
-    }
-
-    private static void assertOrder(Order order) {
+    private static void assertOrder(String cmnem, State state, Action action, long ticks,
+            long lots, long resd, long exec, long lastTicks, long lastLots, Order order) {
         assertNotNull(order);
         assertEquals(1, order.getTraderId());
-        assertEquals(12, order.getContrId());
+        assertEquals(MockContr.newContr(cmnem).getId(), order.getContrId());
         assertEquals(SETTL_DAY, order.getSettlDay());
-        assertEquals("foo", order.getRef());
-        assertEquals(State.NEW, order.getState());
-        assertEquals(Action.SELL, order.getAction());
-        assertEquals(12346, order.getTicks());
-        assertEquals(10, order.getLots());
-        assertEquals(10, order.getResd());
-        assertEquals(0, order.getExec());
-        assertEquals(0, order.getLastTicks());
-        assertEquals(0, order.getLastLots());
+        assertEquals("", order.getRef());
+        assertEquals(state, order.getState());
+        assertEquals(action, order.getAction());
+        assertEquals(ticks, order.getTicks());
+        assertEquals(lots, order.getLots());
+        assertEquals(resd, order.getResd());
+        assertEquals(exec, order.getExec());
+        assertEquals(lastTicks, order.getLastTicks());
+        assertEquals(lastLots, order.getLastLots());
         assertEquals(1, order.getMinLots());
         assertEquals(NOW, order.getCreated());
         assertEquals(NOW, order.getModified());
     }
 
-    private static TransStruct createTrade(Unrest unrest) throws BadRequestException,
-            NotFoundException, IOException {
-        createOrder(unrest);
-        return unrest.postOrder("mark.aylett@gmail.com", "EURUSD", jdToIso(SETTL_DAY), "bar",
-                Action.BUY, 12344, 5, 1, PARAMS_NONE, NOW);
-    }
-
-    @SuppressWarnings("unused")
-    private static void assertTrade(Exec trade) {
-        assertNotNull(trade);
-        assertEquals(1, trade.getTraderId());
-        assertEquals(12, trade.getContrId());
-        assertEquals(SETTL_DAY, trade.getSettlDay());
-        assertEquals("foo", trade.getRef());
-        assertEquals(State.NEW, trade.getState());
-        assertEquals(Action.SELL, trade.getAction());
-        assertEquals(12346, trade.getTicks());
-        assertEquals(10, trade.getLots());
-        assertEquals(10, trade.getResd());
-        assertEquals(0, trade.getExec());
-        assertEquals(0, trade.getLastTicks());
-        assertEquals(0, trade.getLastLots());
-        assertEquals(1, trade.getMinLots());
-        assertEquals(1, trade.getMatchId());
-        assertEquals(1, trade.getRole());
-        assertEquals(1, trade.getCptyId());
-        assertEquals(NOW, trade.getCreated());
+    private static void assertExec(String cmnem, State state, Action action, long ticks, long lots,
+            long resd, long exc, long lastTicks, long lastLots, Role role, Exec exec) {
+        assertNotNull(exec);
+        assertEquals(1, exec.getTraderId());
+        assertEquals(12, exec.getContrId());
+        assertEquals(SETTL_DAY, exec.getSettlDay());
+        assertEquals("", exec.getRef());
+        assertEquals(state, exec.getState());
+        assertEquals(action, exec.getAction());
+        assertEquals(ticks, exec.getTicks());
+        assertEquals(lots, exec.getLots());
+        assertEquals(resd, exec.getResd());
+        assertEquals(exc, exec.getExec());
+        assertEquals(lastTicks, exec.getLastTicks());
+        assertEquals(lastLots, exec.getLastLots());
+        assertEquals(1, exec.getMinLots());
+        assertEquals(role, exec.getRole());
+        assertEquals(1, exec.getCptyId());
+        assertEquals(NOW, exec.getCreated());
     }
 
     @SuppressWarnings("unused")
@@ -172,9 +157,52 @@ public final class UnrestTest {
         assertNotNull(posn);
     }
 
+    private Unrest unrest;
+
+    private final Trader postTrader(String mnem, String display, String email)
+            throws BadRequestException, IOException {
+        return unrest.postTrader(mnem, display, email, PARAMS_NONE, NOW);
+    }
+
+    private final View postMarket(String cmnem) throws BadRequestException, NotFoundException,
+            IOException {
+        return unrest.postMarket(cmnem, jdToIso(SETTL_DAY), jdToIso(FIXING_DAY),
+                jdToIso(EXPIRY_DAY), PARAMS_NONE, NOW);
+    }
+
+    private final void deleteOrder(String cmnem, long id) throws BadRequestException,
+            NotFoundException, IOException {
+        unrest.deleteOrder(EMAIL, cmnem, jdToIso(SETTL_DAY), id, NOW);
+    }
+
+    private final TransStruct postOrder(String cmnem, Action action, long ticks, long lots)
+            throws BadRequestException, NotFoundException, IOException {
+        return unrest.postOrder(EMAIL, cmnem, jdToIso(SETTL_DAY), null, action, ticks, lots, 1,
+                PARAMS_NONE, NOW);
+    }
+
+    private final TransStruct putOrder(String cmnem, long id, long lots)
+            throws BadRequestException, NotFoundException, IOException {
+        return unrest.putOrder(EMAIL, cmnem, jdToIso(SETTL_DAY), id, lots, PARAMS_NONE, NOW);
+    }
+
+    private final void deleteTrade(String email, String cmnem, int settlDate, long id)
+            throws BadRequestException, NotFoundException {
+        unrest.deleteTrade(EMAIL, cmnem, jdToIso(SETTL_DAY), id, NOW);
+    }
+
+    @Before
+    public final void setUp() {
+        unrest = new Unrest(new MockModel());
+    }
+
+    @After
+    public final void tearDown() {
+        unrest = null;
+    }
+
     @Test
     public final void testGetRec() throws IOException {
-        final Unrest unrest = new Unrest(new MockModel());
 
         // With traders.
         RecStruct st = unrest.getRec(true, PARAMS_NONE, NOW);
@@ -191,7 +219,6 @@ public final class UnrestTest {
 
     @Test
     public final void testGetRecType() throws IOException {
-        final Unrest unrest = new Unrest(new MockModel());
 
         Map<String, Rec> recs = unrest.getRec(RecType.ASSET, PARAMS_NONE, NOW);
         assertAssets(recs);
@@ -205,7 +232,6 @@ public final class UnrestTest {
 
     @Test
     public final void testGetRecTypeMnem() throws NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
 
         final Asset asset = (Asset) unrest.getRec(RecType.ASSET, "JPY", PARAMS_NONE, NOW);
         assertAsset("JPY", asset);
@@ -219,24 +245,23 @@ public final class UnrestTest {
         assertContr("USDJPY", contr);
         try {
             unrest.getRec(RecType.CONTR, "USDJPYx", PARAMS_NONE, NOW);
+            fail("Expected exception");
         } catch (final NotFoundException e) {
         }
 
-        final Trader trader = (Trader) unrest
-                .getRec(RecType.TRADER, "MARAYL", PARAMS_NONE, NOW);
+        final Trader trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL", PARAMS_NONE, NOW);
         assertTrader("MARAYL", trader);
         try {
             unrest.getRec(RecType.TRADER, "MARAYLx", PARAMS_NONE, NOW);
+            fail("Expected exception");
         } catch (final NotFoundException e) {
         }
     }
 
     @Test
     public final void testPostTrader() throws BadRequestException, NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
 
-        Trader trader = unrest.postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com",
-                PARAMS_NONE, NOW);
+        Trader trader = postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com");
         for (int i = 0; i < 2; ++i) {
             assertNotNull(trader);
             assertEquals("MARAYL2", trader.getMnem());
@@ -247,25 +272,24 @@ public final class UnrestTest {
 
         // Duplicate mnemonic.
         try {
-            unrest.postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com",
-                    PARAMS_NONE, NOW);
+            postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com");
+            fail("Expected exception");
         } catch (final BadRequestException e) {
         }
 
         // Duplicate email.
         try {
-            unrest.postTrader("MARAYL3", "Mark Aylett", "mark.aylett@gmail.com", PARAMS_NONE,
-                    NOW);
+            postTrader("MARAYL3", "Mark Aylett", "mark.aylett@gmail.com");
+            fail("Expected exception");
         } catch (final BadRequestException e) {
         }
     }
 
     @Test
     public final void testGetMarket() throws BadRequestException, NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        long now = NOW;
 
-        createMarket(unrest);
+        long now = NOW;
+        postMarket("EURUSD");
 
         Map<Long, View> views = unrest.getMarket(PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
@@ -284,11 +308,9 @@ public final class UnrestTest {
     @Test
     public final void testGetMarketContr() throws BadRequestException, NotFoundException,
             IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        long now = NOW;
 
-        unrest.postMarket("EURUSD", jdToIso(SETTL_DAY), jdToIso(FIXING_DAY), jdToIso(EXPIRY_DAY),
-                PARAMS_NONE, now);
+        long now = NOW;
+        postMarket("EURUSD");
 
         Map<Long, View> views = unrest.getMarket("USDJPY", PARAMS_NONE, now);
         assertTrue(views.isEmpty());
@@ -310,11 +332,9 @@ public final class UnrestTest {
     @Test
     public final void testGetMarketContrSettl() throws BadRequestException, NotFoundException,
             IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        long now = NOW;
 
-        unrest.postMarket("EURUSD", jdToIso(SETTL_DAY), jdToIso(FIXING_DAY), jdToIso(EXPIRY_DAY),
-                PARAMS_NONE, now);
+        long now = NOW;
+        postMarket("EURUSD");
 
         try {
             unrest.getMarket("USDJPY", jdToIso(SETTL_DAY), PARAMS_NONE, now);
@@ -345,58 +365,121 @@ public final class UnrestTest {
 
     @Test
     public final void testPostMarket() throws BadRequestException, NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
 
-        final View view = unrest.postMarket("EURUSD", jdToIso(SETTL_DAY), jdToIso(FIXING_DAY),
-                jdToIso(EXPIRY_DAY), PARAMS_NONE, NOW);
+        final View view = postMarket("EURUSD");
         assertView("EURUSD", view);
     }
 
     @Test
     public final void testGetAccnt() throws BadRequestException, NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        createMarket(unrest);
-        createOrder(unrest);
-        createTrade(unrest);
-        AccntStruct out = unrest.getAccnt("mark.aylett@gmail.com", PARAMS_NONE, NOW);
-        assertOrder(out.orders.get(Long.valueOf(1)));
-        //assertTrade(out.trades.get(Long.valueOf(1)));
+        postMarket("EURUSD");
+        postOrder("EURUSD", Action.SELL, 12345, 10);
+        postOrder("EURUSD", Action.BUY, 12345, 10);
+        final AccntStruct out = unrest.getAccnt(EMAIL, PARAMS_NONE, NOW);
+        assertOrder("EURUSD", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10,
+                out.orders.get(Long.valueOf(1)));
+        assertOrder("EURUSD", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10,
+                out.orders.get(Long.valueOf(2)));
+        assertExec("EURUSD", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10, Role.MAKER,
+                out.trades.get(Long.valueOf(3)));
+        assertExec("EURUSD", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10, Role.TAKER,
+                out.trades.get(Long.valueOf(4)));
     }
 
     @Test
-    public final void testDeleteOrder() {
+    public final void testDeleteOrder() throws BadRequestException, NotFoundException, IOException {
+        postMarket("EURUSD");
+        postOrder("EURUSD", Action.SELL, 12345, 10);
+        putOrder("EURUSD", 1, 0);
+        deleteOrder("EURUSD", 1);
+        try {
+            deleteOrder("EURUSD", 1);
+            fail("Expected exception");
+        } catch (final NotFoundException e) {
+        }
     }
 
     @Test
-    public final void testGetOrder() {
+    public final void testGetOrder() throws BadRequestException, NotFoundException, IOException {
+        postMarket("EURUSD");
+        postOrder("EURUSD", Action.SELL, 12345, 10);
+        final Map<Long, Order> out = unrest.getOrder(EMAIL, PARAMS_NONE, NOW);
+        assertOrder("EURUSD", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+                out.get(Long.valueOf(1)));
     }
 
     @Test
-    public final void testGetOrderContr() {
+    public final void testGetOrderContr() throws BadRequestException, NotFoundException,
+            IOException {
+        postMarket("EURUSD");
+        postOrder("EURUSD", Action.SELL, 12345, 10);
+        final Map<Long, Order> out = unrest.getOrder(EMAIL, "EURUSD", PARAMS_NONE, NOW);
+        assertOrder("EURUSD", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+                out.get(Long.valueOf(1)));
+        assertTrue(unrest.getOrder(EMAIL, "USDJPY", PARAMS_NONE, NOW).isEmpty());
     }
 
     @Test
-    public final void testGetOrderContrSettl() {
+    public final void testGetOrderContrSettl() throws BadRequestException, NotFoundException,
+            IOException {
+        postMarket("EURUSD");
+        postOrder("EURUSD", Action.SELL, 12345, 10);
+        final Map<Long, Order> out = unrest.getOrder(EMAIL, "EURUSD", jdToIso(SETTL_DAY),
+                PARAMS_NONE, NOW);
+        assertOrder("EURUSD", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+                out.get(Long.valueOf(1)));
+        assertTrue(unrest.getOrder(EMAIL, "EURUSD", jdToIso(SETTL_DAY + 1), PARAMS_NONE, NOW)
+                .isEmpty());
     }
 
     @Test
-    public final void testGetOrderContrSettlId() {
+    public final void testGetOrderContrSettlId() throws BadRequestException, NotFoundException,
+            IOException {
+        postMarket("EURUSD");
+        postOrder("EURUSD", Action.SELL, 12345, 10);
+        final Order out = unrest.getOrder(EMAIL, "EURUSD", jdToIso(SETTL_DAY), 1, PARAMS_NONE, NOW);
+        assertOrder("EURUSD", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0, out);
+        try {
+            unrest.getOrder(EMAIL, "EURUSD", jdToIso(SETTL_DAY + 1), 2, PARAMS_NONE, NOW);
+            fail("Expected exception");
+        } catch (final NotFoundException e) {
+        }
     }
 
     @Test
     public final void testPostOrder() throws BadRequestException, NotFoundException, IOException {
-        final Unrest unrest = new Unrest(new MockModel());
-        createMarket(unrest);
-        final TransStruct out = createOrder(unrest);
-        assertOrder(out.orders.get(Long.valueOf(1)));
+        postMarket("EURUSD");
+        final TransStruct out = postOrder("EURUSD", Action.SELL, 12345, 10);
+        assertOrder("EURUSD", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+                out.orders.get(Long.valueOf(1)));
     }
 
     @Test
-    public final void testPutOrder() {
+    public final void testPutOrder() throws BadRequestException, NotFoundException, IOException {
+        postMarket("EURUSD");
+        TransStruct out = postOrder("EURUSD", Action.SELL, 12345, 10);
+        assertOrder("EURUSD", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+                out.orders.get(Long.valueOf(1)));
+        out = putOrder("EURUSD", 1, 5);
+        assertOrder("EURUSD", State.REVISE, Action.SELL, 12345, 5, 5, 0, 0, 0,
+                out.orders.get(Long.valueOf(1)));
     }
 
     @Test
-    public final void testDeleteTrade() {
+    public final void testDeleteTrade() throws BadRequestException, NotFoundException, IOException {
+        postMarket("EURUSD");
+        postOrder("EURUSD", Action.SELL, 12345, 10);
+        postOrder("EURUSD", Action.BUY, 12345, 10);
+        final Exec trade = unrest
+                .getTrade(EMAIL, "EURUSD", jdToIso(SETTL_DAY), 3, PARAMS_NONE, NOW);
+        assertExec("EURUSD", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10, Role.MAKER,
+                trade);
+        deleteTrade(EMAIL, "EURUSD", jdToIso(SETTL_DAY), 3);
+        try {
+            unrest.getTrade(EMAIL, "EURUSD", jdToIso(SETTL_DAY), 3, PARAMS_NONE, NOW);
+            fail("Expected exception");
+        } catch (final NotFoundException e) {
+        }
     }
 
     @Test

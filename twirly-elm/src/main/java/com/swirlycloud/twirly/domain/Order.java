@@ -104,7 +104,7 @@ public final class Order extends BasicRbDlNode implements Identifiable, Jsonifia
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ref = ref;
+        this.ref = ref != null ? ref : "";
         this.state = State.NEW;
         this.action = action;
         this.ticks = ticks;
