@@ -399,6 +399,8 @@ public final class UnrestTest {
                 out.trades.get(Long.valueOf(3)));
         assertExec("EURUSD", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10, Role.TAKER,
                 out.trades.get(Long.valueOf(4)));
+        assertPosn("EURUSD", 123450, 10, 123450, 10, out.posns.get(Long.valueOf(Posn.composeKey(
+                getContrId("EURUSD"), SETTL_DAY, getTraderId("MARAYL")))));
     }
 
     @Test
