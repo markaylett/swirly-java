@@ -13,7 +13,7 @@ import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.intrusive.BasicRbNode;
+import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;

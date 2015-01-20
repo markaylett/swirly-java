@@ -4,9 +4,9 @@
 package com.swirlycloud.twirly.domain;
 
 import com.swirlycloud.twirly.intrusive.DlList;
-import com.swirlycloud.twirly.intrusive.DlNode;
-import com.swirlycloud.twirly.intrusive.RbNode;
 import com.swirlycloud.twirly.intrusive.RbTree;
+import com.swirlycloud.twirly.node.DlNode;
+import com.swirlycloud.twirly.node.RbNode;
 
 public final class Side {
     private final RbTree levels = new RbTree();

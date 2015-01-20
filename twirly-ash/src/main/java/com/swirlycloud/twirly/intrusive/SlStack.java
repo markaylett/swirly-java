@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import com.swirlycloud.twirly.node.SlNode;
+
 public final class SlStack extends Stack<SlNode> {
 
     @Override

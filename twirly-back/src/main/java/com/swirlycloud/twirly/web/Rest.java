@@ -23,8 +23,8 @@ import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.intrusive.RbNode;
-import com.swirlycloud.twirly.intrusive.SlNode;
+import com.swirlycloud.twirly.node.RbNode;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Params;
 
 public final class Rest {

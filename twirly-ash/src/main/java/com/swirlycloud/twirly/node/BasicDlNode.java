@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.intrusive;
+package com.swirlycloud.twirly.node;
 
-public abstract class OrderNode extends BasicRbNode implements DlNode {
+public abstract class BasicDlNode implements DlNode {
 
     private transient DlNode prev;
     private transient DlNode next;

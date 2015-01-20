@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import com.swirlycloud.twirly.intrusive.BasicSlNode;
+import com.swirlycloud.twirly.node.BasicSlNode;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Jsonifiable;

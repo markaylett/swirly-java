@@ -12,6 +12,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.node.BasicRbNode;
+
 public final class RbTreeTest {
     private static final class Node extends BasicRbNode {
         private final long key;

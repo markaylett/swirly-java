@@ -5,8 +5,8 @@ package com.swirlycloud.twirly.app;
 
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
-import com.swirlycloud.twirly.intrusive.SlNode;
 import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.node.SlNode;
 
 public final class Cache {
     private static int ID = 0;

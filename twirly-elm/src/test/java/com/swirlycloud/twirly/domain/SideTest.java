@@ -8,10 +8,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.intrusive.DlNode;
-import com.swirlycloud.twirly.intrusive.RbNode;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockTrader;
+import com.swirlycloud.twirly.node.DlNode;
+import com.swirlycloud.twirly.node.RbNode;
 
 public final class SideTest {
     private static final int size(RbNode node) {

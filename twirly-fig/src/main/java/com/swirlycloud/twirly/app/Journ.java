@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.app;
 
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.intrusive.SlNode;
+import com.swirlycloud.twirly.node.SlNode;
 
 /**
  * Transaction journal.

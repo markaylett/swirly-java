@@ -6,7 +6,7 @@ package com.swirlycloud.twirly.app;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.intrusive.BasicSlNode;
+import com.swirlycloud.twirly.node.BasicSlNode;
 
 /**
  * A Match represents two orders from opposing sides of the market that may trade.

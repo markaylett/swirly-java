@@ -1,10 +1,9 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.intrusive;
+package com.swirlycloud.twirly.node;
 
-public abstract class ExecNode extends BasicRbNode implements SlNode {
-
+public abstract class BasicSlNode implements SlNode {
     private transient SlNode next;
 
     @Override

@@ -36,9 +36,9 @@ import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.SlNode;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Identifiable;
 
 public final class DatastoreModel implements Model {

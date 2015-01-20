@@ -9,8 +9,8 @@ import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 import java.io.IOException;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.intrusive.BasicRbNode;
-import com.swirlycloud.twirly.intrusive.RbNode;
+import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;

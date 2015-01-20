@@ -12,7 +12,7 @@ import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.SlNode;
+import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockModel implements Model {
     private long maxTraderId = 0L;
