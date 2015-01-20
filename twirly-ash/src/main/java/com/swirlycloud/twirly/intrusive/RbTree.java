@@ -3,7 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-import com.swirlycloud.twirly.collection.RbNode;
 
 public final class RbTree extends Tree<RbNode> {
 

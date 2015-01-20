@@ -12,15 +12,15 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.collection.BasicRbDlNode;
-import com.swirlycloud.twirly.collection.RbNode;
 import com.swirlycloud.twirly.date.JulianDay;
+import com.swirlycloud.twirly.intrusive.OrderNode;
+import com.swirlycloud.twirly.intrusive.RbNode;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Order extends BasicRbDlNode implements Identifiable, Jsonifiable, Instruct {
+public final class Order extends OrderNode implements Identifiable, Jsonifiable, Instruct {
 
     // Internals.
     // Singly-linked buckets.

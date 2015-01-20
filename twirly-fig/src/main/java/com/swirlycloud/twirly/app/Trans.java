@@ -5,11 +5,11 @@ package com.swirlycloud.twirly.app;
 
 import java.io.IOException;
 
-import com.swirlycloud.twirly.collection.SlNode;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.intrusive.SlNode;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;

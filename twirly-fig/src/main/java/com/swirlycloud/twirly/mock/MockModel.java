@@ -4,7 +4,6 @@
 package com.swirlycloud.twirly.mock;
 
 import com.swirlycloud.twirly.app.Model;
-import com.swirlycloud.twirly.collection.SlNode;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
@@ -13,6 +12,7 @@ import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.SlNode;
 
 public final class MockModel implements Model {
     private long maxTraderId = 0L;

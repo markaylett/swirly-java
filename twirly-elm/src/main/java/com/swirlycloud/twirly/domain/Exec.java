@@ -12,14 +12,14 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.collection.BasicRbSlNode;
 import com.swirlycloud.twirly.date.JulianDay;
+import com.swirlycloud.twirly.intrusive.ExecNode;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Exec extends BasicRbSlNode implements Identifiable, Jsonifiable, Instruct {
+public final class Exec extends ExecNode implements Identifiable, Jsonifiable, Instruct {
 
     private final transient long key;
     private final long id;

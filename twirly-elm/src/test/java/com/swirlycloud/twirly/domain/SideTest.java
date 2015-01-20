@@ -8,8 +8,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.collection.DlNode;
-import com.swirlycloud.twirly.collection.RbNode;
+import com.swirlycloud.twirly.intrusive.DlNode;
+import com.swirlycloud.twirly.intrusive.RbNode;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockTrader;
 

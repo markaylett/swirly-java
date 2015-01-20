@@ -1,9 +1,9 @@
 /*******************************************************************************
- * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+ * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import com.swirlycloud.twirly.collection.BasicSlNode;
+import com.swirlycloud.twirly.intrusive.BasicSlNode;
 import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Jsonifiable;

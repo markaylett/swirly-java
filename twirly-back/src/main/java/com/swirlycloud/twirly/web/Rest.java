@@ -12,8 +12,6 @@ import com.swirlycloud.twirly.app.Accnt;
 import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Trans;
-import com.swirlycloud.twirly.collection.RbNode;
-import com.swirlycloud.twirly.collection.SlNode;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
@@ -25,6 +23,8 @@ import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.intrusive.RbNode;
+import com.swirlycloud.twirly.intrusive.SlNode;
 import com.swirlycloud.twirly.util.Params;
 
 public final class Rest {

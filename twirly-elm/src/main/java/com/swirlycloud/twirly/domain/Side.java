@@ -3,9 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import com.swirlycloud.twirly.collection.DlNode;
-import com.swirlycloud.twirly.collection.RbNode;
 import com.swirlycloud.twirly.intrusive.DlList;
+import com.swirlycloud.twirly.intrusive.DlNode;
+import com.swirlycloud.twirly.intrusive.RbNode;
 import com.swirlycloud.twirly.intrusive.RbTree;
 
 public final class Side {

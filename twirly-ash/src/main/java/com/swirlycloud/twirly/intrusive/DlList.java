@@ -3,8 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-import com.swirlycloud.twirly.collection.BasicDlNode;
-import com.swirlycloud.twirly.collection.DlNode;
 
 public final class DlList extends List<DlNode> {
 

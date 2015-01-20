@@ -3,9 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import com.swirlycloud.twirly.collection.SlNode;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
+import com.swirlycloud.twirly.intrusive.SlNode;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 
 public final class Cache {
