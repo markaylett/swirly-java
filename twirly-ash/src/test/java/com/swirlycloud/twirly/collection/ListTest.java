@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.swirlycloud.twirly.collection.List;
 
+@SuppressWarnings("deprecation")
 public final class ListTest {
     @Test
     public final void test() {

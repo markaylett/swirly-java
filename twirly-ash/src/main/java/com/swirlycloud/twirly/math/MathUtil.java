@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.math;
 
-import static com.swirlycloud.twirly.collection.CollectionUtil.binsearch;
+import static com.swirlycloud.twirly.util.CollectionUtil.binsearch;
 
 public final class MathUtil {
 

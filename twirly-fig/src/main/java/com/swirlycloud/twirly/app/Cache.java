@@ -3,19 +3,19 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import com.swirlycloud.twirly.collection.Queue;
 import com.swirlycloud.twirly.collection.SlNode;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
+import com.swirlycloud.twirly.intrusive.SlQueue;
 
 public final class Cache {
     private static int ID = 0;
     private static int MNEM = 1;
     private static int COLS = 2;
     private final int nBuckets;
-    private final Queue assets;
-    private final Queue contrs;
-    private final Queue traders;
+    private final SlQueue assets;
+    private final SlQueue contrs;
+    private final SlQueue traders;
     private final Rec[][] buckets;
 
     private static int hashCode(long id) {
@@ -59,9 +59,9 @@ public final class Cache {
     public Cache(int nBuckets) {
         assert nBuckets > 0;
         this.nBuckets = nBuckets;
-        assets = new Queue();
-        contrs = new Queue();
-        traders = new Queue();
+        assets = new SlQueue();
+        contrs = new SlQueue();
+        traders = new SlQueue();
         buckets = new Rec[nBuckets][COLS];
     }
 

@@ -4,13 +4,13 @@
 package com.swirlycloud.twirly.domain;
 
 import com.swirlycloud.twirly.collection.DlNode;
-import com.swirlycloud.twirly.collection.List;
 import com.swirlycloud.twirly.collection.RbNode;
-import com.swirlycloud.twirly.collection.Tree;
+import com.swirlycloud.twirly.intrusive.DlList;
+import com.swirlycloud.twirly.intrusive.RbTree;
 
 public final class Side {
-    private final Tree levels = new Tree();
-    private final List orders = new List();
+    private final RbTree levels = new RbTree();
+    private final DlList orders = new DlList();
 
     // Last trade.
     private long lastTicks = 0;

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.collection;
+package com.swirlycloud.twirly.util;
 
 public final class CollectionUtil {
     private CollectionUtil() {

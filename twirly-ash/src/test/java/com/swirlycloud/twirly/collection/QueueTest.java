@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.swirlycloud.twirly.collection.Queue;
 
+@SuppressWarnings("deprecation")
 public final class QueueTest {
     @Test
     public final void test() {

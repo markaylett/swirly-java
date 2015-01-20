@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.collection;
 
+@Deprecated
 public final class Queue {
     private SlNode first;
     private SlNode last;

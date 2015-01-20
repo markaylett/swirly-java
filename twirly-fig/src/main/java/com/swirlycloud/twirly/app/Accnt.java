@@ -5,21 +5,21 @@ package com.swirlycloud.twirly.app;
 
 import com.swirlycloud.twirly.collection.BasicRbNode;
 import com.swirlycloud.twirly.collection.RbNode;
-import com.swirlycloud.twirly.collection.Tree;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.RefIdx;
 import com.swirlycloud.twirly.domain.Trader;
+import com.swirlycloud.twirly.intrusive.RbTree;
 import com.swirlycloud.twirly.util.Identifiable;
 
 public final class Accnt extends BasicRbNode implements Identifiable {
     private final Trader trader;
     private final RefIdx refIdx;
-    private final Tree orders = new Tree();
-    private final Tree trades = new Tree();
-    private final Tree posns = new Tree();
+    private final RbTree orders = new RbTree();
+    private final RbTree trades = new RbTree();
+    private final RbTree posns = new RbTree();
 
     public Accnt(Trader trader, RefIdx refIdx) {
         this.trader = trader;

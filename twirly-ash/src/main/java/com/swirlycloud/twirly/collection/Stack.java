@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.collection;
 
+@Deprecated
 public final class Stack {
     private SlNode first;
 

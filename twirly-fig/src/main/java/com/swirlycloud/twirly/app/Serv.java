@@ -14,7 +14,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.collection.DlNode;
 import com.swirlycloud.twirly.collection.RbNode;
 import com.swirlycloud.twirly.collection.SlNode;
-import com.swirlycloud.twirly.collection.Tree;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
@@ -35,6 +34,7 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.RbTree;
 
 public final class Serv {
     private static final int BUCKETS = 257;
@@ -44,8 +44,8 @@ public final class Serv {
     private final Cache cache = new Cache(BUCKETS);
     private final EmailIdx emailIdx = new EmailIdx(BUCKETS);
     private final RefIdx refIdx = new RefIdx(BUCKETS);
-    private final Tree markets = new Tree();
-    private final Tree accnts = new Tree();
+    private final RbTree markets = new RbTree();
+    private final RbTree accnts = new RbTree();
 
     private final void enrichMarket(Market market) {
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, market.getContrId());

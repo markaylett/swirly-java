@@ -13,7 +13,7 @@ public final class AssetTest {
     @Test
     public final void testToString() {
         assertEquals(
-                "{\"mnem\":\"GBP\",\"display\":\"United Kingdom, Pounds\",\"type\":\"CURRENCY\"}",
+                "{\"id\":7,\"mnem\":\"GBP\",\"display\":\"United Kingdom, Pounds\",\"type\":\"CURRENCY\"}",
                 MockAsset.newAsset("GBP").toString());
     }
 }

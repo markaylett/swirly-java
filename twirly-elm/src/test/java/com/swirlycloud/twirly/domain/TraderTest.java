@@ -13,7 +13,7 @@ public final class TraderTest {
     @Test
     public final void testToString() {
         assertEquals(
-                "{\"mnem\":\"MARAYL\",\"display\":\"Mark Aylett\",\"email\":\"mark.aylett@gmail.com\"}",
+                "{\"id\":1,\"mnem\":\"MARAYL\",\"display\":\"Mark Aylett\",\"email\":\"mark.aylett@gmail.com\"}",
                 MockTrader.newTrader("MARAYL").toString());
     }
 }

@@ -5,12 +5,12 @@ package com.swirlycloud.twirly.app;
 
 import java.io.IOException;
 
-import com.swirlycloud.twirly.collection.Queue;
 import com.swirlycloud.twirly.collection.SlNode;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
@@ -18,11 +18,11 @@ import com.swirlycloud.twirly.util.Params;
 public final class Trans implements Jsonifiable {
     private Market market;
     private Order order;
-    final Queue matches = new Queue();
+    final SlQueue matches = new SlQueue();
     /**
      * All executions referenced in matches.
      */
-    final Queue execs = new Queue();
+    final SlQueue execs = new SlQueue();
     /**
      * Optional taker position.
      */

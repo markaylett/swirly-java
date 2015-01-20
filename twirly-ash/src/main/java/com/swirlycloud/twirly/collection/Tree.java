@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.collection;
 
+@Deprecated
 public final class Tree {
     private static final int NONE = 0;
     private static final int BLACK = 1;

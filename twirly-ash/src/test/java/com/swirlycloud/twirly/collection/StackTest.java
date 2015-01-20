@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.swirlycloud.twirly.collection.Stack;
 
+@SuppressWarnings("deprecation")
 public final class StackTest {
     @Test
     public final void test() {

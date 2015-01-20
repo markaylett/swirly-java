@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.collection;
 
+@Deprecated
 public final class List {
     private final DlNode end = new BasicDlNode() {
         @Override

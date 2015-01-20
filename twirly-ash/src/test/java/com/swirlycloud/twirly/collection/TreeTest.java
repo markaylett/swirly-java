@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.swirlycloud.twirly.collection.BasicRbNode;
 import com.swirlycloud.twirly.collection.Tree;
 
+@SuppressWarnings("deprecation")
 public final class TreeTest {
     private static final class Node extends BasicRbNode {
         private final long key;
