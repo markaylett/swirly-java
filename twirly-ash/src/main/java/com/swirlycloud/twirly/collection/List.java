@@ -20,12 +20,12 @@ public final class List {
         end.setDlNext(end);
     }
 
-    public final void insertFront(BasicDlNode newNode) {
-        newNode.insertBefore(end.dlNext());
+    public final void insertFront(BasicDlNode node) {
+        node.insertBefore(end.dlNext());
     }
 
-    public final void insertBack(DlNode newNode) {
-        newNode.insertAfter(end.dlPrev());
+    public final void insertBack(DlNode node) {
+        node.insertAfter(end.dlPrev());
     }
 
     public final DlNode removeFirst() {
@@ -46,8 +46,8 @@ public final class List {
         return removeLast();
     }
 
-    public final void push(BasicDlNode newNode) {
-        insertFront(newNode);
+    public final void push(BasicDlNode node) {
+        insertFront(node);
     }
 
     public final DlNode getFirst() {

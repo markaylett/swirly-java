@@ -10,14 +10,9 @@ public final class Stack {
         first = null;
     }
 
-    public final void insertAfter(SlNode node, SlNode newNode) {
-        newNode.setSlNext(node.slNext());
-        node.setSlNext(newNode);
-    }
-
-    public final void insertFront(SlNode newNode) {
-        newNode.setSlNext(first);
-        first = newNode;
+    public final void insertFront(SlNode node) {
+        node.setSlNext(first);
+        first = node;
     }
 
     public final SlNode removeFirst() {
@@ -30,8 +25,8 @@ public final class Stack {
         return removeFirst();
     }
 
-    public final void push(SlNode newNode) {
-        insertFront(newNode);
+    public final void push(SlNode node) {
+        insertFront(node);
     }
 
     public final SlNode getFirst() {
