@@ -7,6 +7,25 @@ import static com.swirlycloud.twirly.util.CollectionUtil.binsearch;
 
 public final class MathUtil {
 
+    /**
+     * Round-up to the next power of two.
+     * 
+     * @param n
+     *            The number to round-up.
+     * @return the next power of two.
+     */
+    public static int nextPow2(int n) {
+        int r = Integer.highestOneBit(n);
+        if (r != 0) {
+            if (Integer.bitCount(n) > 1) {
+                r <<= 1;
+            }
+        } else {
+            r = 1;
+        }
+        return r;
+    }
+
     public static double[] derivative1(double[] x, double[] y) {
         final int n = x.length - 1;
         final double[] y2 = new double[x.length];

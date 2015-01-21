@@ -22,7 +22,7 @@ public abstract class List<T> {
 
     protected abstract T prev(T node);
 
-    public List(T end) {
+    protected List(T end) {
         this.end = end;
         clear();
     }
