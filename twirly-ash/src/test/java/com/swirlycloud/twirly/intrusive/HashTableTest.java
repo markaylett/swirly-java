@@ -53,21 +53,27 @@ public final class HashTableTest {
             super(12);
         }
 
-        @SuppressWarnings("unused")
         public final Entry remove(long id) {
-            final int bucket = indexFor(hashCode(id), this.buckets.length);
-            Entry it = buckets[bucket];
+            if (isEmpty()) {
+                return null;
+            }
+            final int i = indexFor(hashCode(id), this.buckets.length);
+            Entry it = getBucket(i);
             if (it == null) {
                 return null;
             }
+            // Check if the first element in the bucket has an equivalent key.
             if (it.id == id) {
-                buckets[bucket] = it.next;
+                buckets[i] = it.next;
+                --size;
                 return it;
             }
+            // Check if a subsequent element in the bucket has an equivalent key.
             for (; it.next != null; it = it.next) {
                 final Entry next = it.next;
                 if (next.id == id) {
                     it.next = next.next;
+                    --size;
                     return next;
                 }
             }
@@ -75,8 +81,11 @@ public final class HashTableTest {
         }
 
         public final Entry find(long id) {
-            final int bucket = indexFor(hashCode(id), buckets.length);
-            for (Entry it = buckets[bucket]; it != null; it = it.next) {
+            if (isEmpty()) {
+                return null;
+            }
+            final int i = indexFor(hashCode(id), buckets.length);
+            for (Entry it = getBucket(i); it != null; it = it.next) {
                 if (it.id == id) {
                     return it;
                 }
@@ -86,16 +95,79 @@ public final class HashTableTest {
     }
 
     @Test
-    public final void testInsert() {
+    public final void testEmpty() {
         final EntryHashTable t = new EntryHashTable();
+        assertNull(t.remove(1));
+        assertNull(t.find(1));
+        assertTrue(t.isEmpty());
+        assertEquals(0, t.size());
+    }
+
+    @Test
+    public final void testInsert() {
+
         final Entry marayl = new Entry(1, "Mark");
         final Entry gosayl = new Entry(2, "Goska");
         final Entry tobayl = new Entry(3, "Toby");
         final Entry emiayl = new Entry(4, "Emily");
+
+        final EntryHashTable t = new EntryHashTable();
+        assertNull(t.insert(marayl));
+        assertFalse(t.isEmpty());
+        assertEquals(1, t.size());
+        assertNull(t.insert(gosayl));
+        assertFalse(t.isEmpty());
+        assertEquals(2, t.size());
+        assertNull(t.insert(tobayl));
+        assertFalse(t.isEmpty());
+        assertEquals(3, t.size());
+        assertNull(t.insert(emiayl));
+        assertFalse(t.isEmpty());
+        assertEquals(4, t.size());
+    }
+
+    @Test
+    public final void testReplace() {
+
+        final Entry marayl = new Entry(1, "Mark");
+        final Entry gosayl = new Entry(2, "Goska");
+        final Entry tobayl = new Entry(3, "Toby");
+        final Entry emiayl = new Entry(4, "Emily");
+
+        final EntryHashTable t = new EntryHashTable();
+        t.insert(marayl);
+        t.insert(gosayl);
+        assertSame(marayl, t.insert(new Entry(1, "Mark")));
+        assertEquals(2, t.size());
+        assertSame(gosayl, t.insert(new Entry(2, "Goska")));
+        assertEquals(2, t.size());
+
+        t.insert(tobayl);
+        t.insert(emiayl);
+        assertSame(tobayl, t.insert(new Entry(3, "Toby")));
+        assertEquals(4, t.size());
+        assertSame(emiayl, t.insert(new Entry(4, "Emily")));
+        assertEquals(4, t.size());
+    }
+
+    @Test
+    public final void testFind() {
+
+        final Entry marayl = new Entry(1, "Mark");
+        final Entry gosayl = new Entry(2, "Goska");
+        final Entry tobayl = new Entry(3, "Toby");
+        final Entry emiayl = new Entry(4, "Emily");
+
+        final EntryHashTable t = new EntryHashTable();
         t.insert(marayl);
         t.insert(gosayl);
         t.insert(tobayl);
         t.insert(emiayl);
-        //assertSame(marayl, t.find(1));
+
+        assertSame(marayl, t.find(1));
+        assertSame(gosayl, t.find(2));
+        assertSame(tobayl, t.find(3));
+        assertSame(emiayl, t.find(4));
+        assertNull(t.find(5));
     }
 }

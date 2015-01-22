@@ -11,8 +11,8 @@ public abstract class HashTable<T> {
     private static final Object[] EMPTY = {};
     private static final int MIN_BUCKETS = 1 << 4;
 
-    protected T[] buckets;
-    private int size;
+    protected Object[] buckets;
+    protected int size;
     private int threshold;
 
     protected abstract void setNext(T node, T next);
@@ -31,6 +31,11 @@ public abstract class HashTable<T> {
         return h & (length - 1);
     }
 
+    @SuppressWarnings("unchecked")
+    protected final T getBucket(int i) {
+        return (T) buckets[i];
+    }
+
     /**
      * The threshold at which the hash-table will grow.
      * 
@@ -43,17 +48,17 @@ public abstract class HashTable<T> {
         return (capacity << 1) / 3;
     }
 
+    @SuppressWarnings("unchecked")
     private final void grow(int capacity) {
-        @SuppressWarnings("unchecked")
-        final T[] newBuckets = (T[]) new Object[capacity];
+        final Object[] newBuckets = new Object[capacity];
         for (int i = 0; i < buckets.length; ++i) {
             while (buckets[i] != null) {
                 // Pop.
-                final T node = buckets[i];
+                final T node = getBucket(i);
                 buckets[i] = next(node);
                 // Push.
                 final int j = indexFor(hashKey(node), newBuckets.length);
-                setNext(node, newBuckets[j]);
+                setNext(node, (T) newBuckets[j]);
                 newBuckets[j] = node;
             }
         }
@@ -61,10 +66,9 @@ public abstract class HashTable<T> {
         threshold = thresholdFor(capacity);
     }
 
-    @SuppressWarnings("unchecked")
     public HashTable(int capacity) {
         // Postpone allocation until first insert.
-        this.buckets = (T[]) EMPTY;
+        this.buckets = EMPTY;
         this.size = 0;
         // N.B. the threshold is used to store the desired capacity on construction. It is not used
         // for its intended purpose until grow() is called.
@@ -75,36 +79,68 @@ public abstract class HashTable<T> {
         }
     }
 
-    public final void print(PrintStream s) {
+    /**
+     * Insert new element into hash table or replace existing.
+     * 
+     * @param node
+     *            The node to be inserted.
+     * @return the node with an equivalent key that was replace, or null if no replacement took
+     *         place.
+     */
+    public final T insert(T node) {
+        if (buckets.length == 0) {
+            // First item.
+            grow(threshold);
+        }
+        int i = indexFor(hashKey(node), buckets.length);
+        T it = getBucket(i);
+        if (it != null) {
+            // Check if the first element in the bucket has an equivalent key.
+            if (equalKeys(it, node)) {
+                // Replace.
+                setNext(node, next(it));
+                buckets[i] = node;
+                return it;
+            }
+            // Check if a subsequent element in the bucket has an equivalent key.
+            for (T next; (next = next(it)) != null; it = next) {
+                if (equalKeys(next, node)) {
+                    // Replace.
+                    setNext(node, next(next));
+                    setNext(it, node);
+                    return next;
+                }
+            }
+        }
+        // This is a new element.
+        if (size >= threshold) {
+            grow(buckets.length << 1);
+            i = indexFor(hashKey(node), buckets.length);
+            it = getBucket(i);
+        }
+        setNext(node, it);
+        buckets[i] = node;
+        ++size;
+        return null;
+    }
+
+    public final boolean isEmpty() {
+        return size == 0;
+    }
+
+    public final int size() {
+        return size;
+    }
+
+    // Package-scope debugging.
+
+    final void print(PrintStream s) {
         for (int i = 0; i < buckets.length; ++i) {
             s.print('|');
-            for (T it = buckets[i]; it != null; it = next(it)) {
+            for (T it = getBucket(i); it != null; it = next(it)) {
                 s.print('*');
             }
             s.println();
         }
-    }
-
-    public final void insert(T node) {
-        if (buckets.length == 0) {
-            // First item.
-            grow(threshold);
-        } else if (size >= threshold) {
-            grow(buckets.length << 1);
-        }
-        final int i = indexFor(hashKey(node), buckets.length);
-        setNext(node, buckets[i]);
-        buckets[i] = node;
-        ++size;
-    }
-
-    public final boolean contains(T node) {
-        final int i = indexFor(hashKey(node), buckets.length);
-        for (T it = buckets[i]; it != null; it = next(it)) {
-            if (equalKeys(node, it)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
