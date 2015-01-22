@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 
 import com.swirlycloud.twirly.node.BasicSlNode;
 
-public final class HashTableTest {
+public final class HashTableLongTest {
 
     private static final class Entry extends BasicSlNode {
         transient Entry next;
@@ -23,11 +23,7 @@ public final class HashTableTest {
         }
     }
 
-    private static final class EntryHashTable extends HashTable<Entry> {
-
-        private static int hashCode(long id) {
-            return (int) (id ^ id >>> 32);
-        }
+    private static final class EntryHashTable extends HashTableLong<Entry> {
 
         @Override
         protected final void setNext(Entry node, Entry next) {
@@ -41,7 +37,7 @@ public final class HashTableTest {
 
         @Override
         protected final int hashKey(Entry node) {
-            return hashCode(node.id);
+            return hashKey(node.id);
         }
 
         @Override
@@ -49,48 +45,13 @@ public final class HashTableTest {
             return lhs.id == rhs.id;
         }
 
+        @Override
+        protected final boolean equalKeys(Entry lhs, long rhs) {
+            return lhs.id == rhs;
+        }
+
         public EntryHashTable() {
             super(12);
-        }
-
-        public final Entry remove(long id) {
-            if (isEmpty()) {
-                return null;
-            }
-            final int i = indexFor(hashCode(id), this.buckets.length);
-            Entry it = getBucket(i);
-            if (it == null) {
-                return null;
-            }
-            // Check if the first element in the bucket has an equivalent key.
-            if (it.id == id) {
-                buckets[i] = it.next;
-                --size;
-                return it;
-            }
-            // Check if a subsequent element in the bucket has an equivalent key.
-            for (; it.next != null; it = it.next) {
-                final Entry next = it.next;
-                if (next.id == id) {
-                    it.next = next.next;
-                    --size;
-                    return next;
-                }
-            }
-            return null;
-        }
-
-        public final Entry find(long id) {
-            if (isEmpty()) {
-                return null;
-            }
-            final int i = indexFor(hashCode(id), buckets.length);
-            for (Entry it = getBucket(i); it != null; it = it.next) {
-                if (it.id == id) {
-                    return it;
-                }
-            }
-            return null;
         }
     }
 
