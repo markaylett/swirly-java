@@ -15,42 +15,36 @@ import java.util.Random;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.node.BasicSlNode;
+import com.swirlycloud.twirly.node.SlNode;
 
-public final class LongHashTableTest {
+public final class SlLongHashTableTest {
 
     private static final class Entry extends BasicSlNode {
-        transient Entry next;
         final long id;
         public Entry(long id) {
             this.id = id;
         }
     }
 
-    private static final class EntryHashTable extends LongHashTable<Entry> {
+    private static long getId(SlNode node) {
+        return ((Entry) node).id;
+    }
+
+    private static final class EntryHashTable extends SlLongHashTable {
 
         @Override
-        protected final void setNext(Entry node, Entry next) {
-            node.next = next;
+        protected final int hashKey(SlNode node) {
+            return hashKey(getId(node));
         }
 
         @Override
-        protected final Entry next(Entry node) {
-            return node.next;
+        protected final boolean equalKey(SlNode lhs, SlNode rhs) {
+            return getId(lhs) == getId(rhs);
         }
 
         @Override
-        protected final int hashKey(Entry node) {
-            return hashKey(node.id);
-        }
-
-        @Override
-        protected final boolean equalKey(Entry lhs, Entry rhs) {
-            return lhs.id == rhs.id;
-        }
-
-        @Override
-        protected final boolean equalKey(Entry lhs, long rhs) {
-            return lhs.id == rhs;
+        protected final boolean equalKey(SlNode lhs, long rhs) {
+            return getId(lhs) == rhs;
         }
 
         public EntryHashTable() {
@@ -166,7 +160,7 @@ public final class LongHashTableTest {
     @Test
     public final void testLoad() {
         final Random r = new Random();
-        final EntryHashTable t = new EntryHashTable();        
+        final EntryHashTable t = new EntryHashTable();
         for (long i = 0; i < 100000; ++i) {
             final long l = r.nextLong();
             t.insert(new Entry(l));
