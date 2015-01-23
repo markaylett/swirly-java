@@ -5,8 +5,7 @@ package com.swirlycloud.twirly.intrusive;
 
 import com.swirlycloud.twirly.node.RbNode;
 
-
-public final class RbTree extends Tree<RbNode> {
+public final class RbTree extends LongTree<RbNode> {
 
     @Override
     protected final RbNode setLeft(RbNode node, RbNode left) {
@@ -39,11 +38,6 @@ public final class RbTree extends Tree<RbNode> {
     }
 
     @Override
-    protected final long getKey(RbNode node) {
-        return node.getKey();
-    }
-
-    @Override
     protected final RbNode getLeft(RbNode node) {
         return node.getLeft();
     }
@@ -61,5 +55,15 @@ public final class RbTree extends Tree<RbNode> {
     @Override
     protected final int getColor(RbNode node) {
         return node.getColor();
+    }
+
+    @Override
+    protected final int compareKey(RbNode lhs, RbNode rhs) {
+        return compareKey(lhs.getKey(), rhs.getKey());
+    }
+
+    @Override
+    protected final int compareKey(RbNode lhs, long rhs) {
+        return compareKey(lhs.getKey(), rhs);
     }
 }

@@ -8,7 +8,7 @@ public abstract class Tree<T> {
     private static final int BLACK = 1;
     private static final int RED = 2;
 
-    private T root;
+    protected T root;
 
     protected abstract T setLeft(T node, T left);
 
@@ -22,8 +22,6 @@ public abstract class Tree<T> {
 
     protected abstract T prev(T node);
 
-    protected abstract long getKey(T node);
-
     protected abstract T getLeft(T node);
 
     protected abstract T getRight(T node);
@@ -32,17 +30,7 @@ public abstract class Tree<T> {
 
     protected abstract int getColor(T node);
 
-    private static int cmp(long lhs, long rhs) {
-        int i;
-        if (lhs < rhs) {
-            i = -1;
-        } else if (lhs > rhs) {
-            i = 1;
-        } else {
-            i = 0;
-        }
-        return i;
-    }
+    protected abstract int compareKey(T lhs, T rhs);
 
     private final void set(T node, T parent) {
         setLeft(node, setRight(node, null));
@@ -224,10 +212,10 @@ public abstract class Tree<T> {
         tmp = root;
         while (tmp != null) {
             parent = tmp;
-            comp = cmp(getKey(node), getKey(parent));
-            if (comp < 0) {
+            comp = compareKey(parent, node);
+            if (comp > 0) {
                 tmp = getLeft(tmp);
-            } else if (comp > 0) {
+            } else if (comp < 0) {
                 tmp = getRight(tmp);
             } else {
                 return tmp;
@@ -251,8 +239,8 @@ public abstract class Tree<T> {
         assert getColor(node) == NONE;
         set(node, parent);
         if (parent != null) {
-            final int comp = cmp(getKey(node), getKey(parent));
-            if (comp < 0) {
+            final int comp = compareKey(parent, node);
+            if (comp > 0) {
                 setLeft(parent, node);
             } else {
                 setRight(parent, node);
@@ -343,71 +331,6 @@ public abstract class Tree<T> {
         setColor(old, NONE);
         return old;
     }
-
-    /**
-     * Finds the node with the same key as node.
-     */
-
-    public final T find(long key) {
-        T tmp = root;
-        int comp;
-        while (tmp != null) {
-            comp = cmp(key, getKey(tmp));
-            if (comp < 0) {
-                tmp = getLeft(tmp);
-            } else if (comp > 0) {
-                tmp = getRight(tmp);
-            } else {
-                return tmp;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds the first node greater than or equal to the search key.
-     */
-
-    public final T nfind(long key) {
-        T tmp = root;
-        T res = null;
-        int comp;
-        while (tmp != null) {
-            comp = cmp(key, getKey(tmp));
-            if (comp < 0) {
-                res = tmp;
-                tmp = getLeft(tmp);
-            } else if (comp > 0) {
-                tmp = getRight(tmp);
-            } else {
-                return tmp;
-            }
-        }
-        return res;
-    }
-
-    // Extensions.
-
-    /**
-     * Return match or parent.
-     */
-
-    public final T pfind(long key) {
-        T tmp = root, parent = null;
-        while (tmp != null) {
-            parent = tmp;
-            final int comp = cmp(key, getKey(tmp));
-            if (comp < 0) {
-                tmp = getLeft(tmp);
-            } else if (comp > 0) {
-                tmp = getRight(tmp);
-            } else {
-                return tmp;
-            }
-        }
-        return parent;
-    }
-
     /**
      * If you want fast access to any node, then root is your best choice.
      * 

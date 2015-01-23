@@ -15,7 +15,7 @@ public abstract class LongHashTable<T> extends HashTable<T> {
         return (int) (id ^ id >>> 32);
     }
 
-    protected abstract boolean equalKeys(T lhs, long rhs);
+    protected abstract boolean equalKey(T lhs, long rhs);
 
     public LongHashTable(int capacity) {
         super(capacity);
@@ -31,14 +31,14 @@ public abstract class LongHashTable<T> extends HashTable<T> {
             return null;
         }
         // Check if the first element in the bucket has an equivalent key.
-        if (equalKeys(it, key)) {
+        if (equalKey(it, key)) {
             buckets[i] = next(it);
             --size;
             return it;
         }
         // Check if a subsequent element in the bucket has an equivalent key.
         for (T next; (next = next(it)) != null; it = next) {
-            if (equalKeys(next, key)) {
+            if (equalKey(next, key)) {
                 setNext(it, next(next));
                 --size;
                 return next;
@@ -53,7 +53,7 @@ public abstract class LongHashTable<T> extends HashTable<T> {
         }
         final int i = indexFor(hashKey(key), buckets.length);
         for (T it = getBucket(i); it != null; it = next(it)) {
-            if (equalKeys(it, key)) {
+            if (equalKey(it, key)) {
                 return it;
             }
         }
