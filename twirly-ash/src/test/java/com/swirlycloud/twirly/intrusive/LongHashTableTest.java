@@ -3,27 +3,30 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
+import java.util.Random;
+
+import org.junit.Test;
 
 import com.swirlycloud.twirly.node.BasicSlNode;
 
-public final class HashTableLongTest {
+public final class LongHashTableTest {
 
     private static final class Entry extends BasicSlNode {
         transient Entry next;
         final long id;
-        @SuppressWarnings("unused")
-        final String name;
-
-        public Entry(long id, String name) {
+        public Entry(long id) {
             this.id = id;
-            this.name = name;
         }
     }
 
-    private static final class EntryHashTable extends HashTableLong<Entry> {
+    private static final class EntryHashTable extends LongHashTable<Entry> {
 
         @Override
         protected final void setNext(Entry node, Entry next) {
@@ -67,22 +70,22 @@ public final class HashTableLongTest {
     @Test
     public final void testInsert() {
 
-        final Entry marayl = new Entry(1, "Mark");
-        final Entry gosayl = new Entry(2, "Goska");
-        final Entry tobayl = new Entry(3, "Toby");
-        final Entry emiayl = new Entry(4, "Emily");
+        final Entry one = new Entry(1);
+        final Entry two = new Entry(2);
+        final Entry three = new Entry(3);
+        final Entry four = new Entry(4);
 
         final EntryHashTable t = new EntryHashTable();
-        assertNull(t.insert(marayl));
+        assertNull(t.insert(one));
         assertFalse(t.isEmpty());
         assertEquals(1, t.size());
-        assertNull(t.insert(gosayl));
+        assertNull(t.insert(two));
         assertFalse(t.isEmpty());
         assertEquals(2, t.size());
-        assertNull(t.insert(tobayl));
+        assertNull(t.insert(three));
         assertFalse(t.isEmpty());
         assertEquals(3, t.size());
-        assertNull(t.insert(emiayl));
+        assertNull(t.insert(four));
         assertFalse(t.isEmpty());
         assertEquals(4, t.size());
     }
@@ -90,48 +93,48 @@ public final class HashTableLongTest {
     @Test
     public final void testReplace() {
 
-        final Entry marayl = new Entry(1, "Mark");
-        final Entry gosayl = new Entry(2, "Goska");
-        final Entry tobayl = new Entry(3, "Toby");
-        final Entry emiayl = new Entry(4, "Emily");
+        final Entry one = new Entry(1);
+        final Entry two = new Entry(2);
+        final Entry three = new Entry(3);
+        final Entry four = new Entry(4);
 
         final EntryHashTable t = new EntryHashTable();
-        t.insert(marayl);
-        t.insert(gosayl);
-        assertSame(marayl, t.insert(new Entry(1, "Mark")));
+        t.insert(one);
+        t.insert(two);
+        assertSame(one, t.insert(new Entry(1)));
         assertEquals(2, t.size());
-        assertSame(gosayl, t.insert(new Entry(2, "Goska")));
+        assertSame(two, t.insert(new Entry(2)));
         assertEquals(2, t.size());
 
-        t.insert(tobayl);
-        t.insert(emiayl);
-        assertSame(tobayl, t.insert(new Entry(3, "Toby")));
+        t.insert(three);
+        t.insert(four);
+        assertSame(three, t.insert(new Entry(3)));
         assertEquals(4, t.size());
-        assertSame(emiayl, t.insert(new Entry(4, "Emily")));
+        assertSame(four, t.insert(new Entry(4)));
         assertEquals(4, t.size());
     }
 
     @Test
     public final void testRemove() {
 
-        final Entry marayl = new Entry(1, "Mark");
-        final Entry gosayl = new Entry(2, "Goska");
-        final Entry tobayl = new Entry(3, "Toby");
-        final Entry emiayl = new Entry(4, "Emily");
+        final Entry one = new Entry(1);
+        final Entry two = new Entry(2);
+        final Entry three = new Entry(3);
+        final Entry four = new Entry(4);
 
         final EntryHashTable t = new EntryHashTable();
-        t.insert(marayl);
-        t.insert(gosayl);
-        t.insert(tobayl);
-        t.insert(emiayl);
+        t.insert(one);
+        t.insert(two);
+        t.insert(three);
+        t.insert(four);
 
-        assertSame(marayl, t.remove(1));
+        assertSame(one, t.remove(1));
         assertEquals(3, t.size());
-        assertSame(gosayl, t.remove(2));
+        assertSame(two, t.remove(2));
         assertEquals(2, t.size());
-        assertSame(tobayl, t.remove(3));
+        assertSame(three, t.remove(3));
         assertEquals(1, t.size());
-        assertSame(emiayl, t.remove(4));
+        assertSame(four, t.remove(4));
         assertTrue(t.isEmpty());
         assertEquals(0, t.size());
         assertNull(t.remove(5));
@@ -142,21 +145,32 @@ public final class HashTableLongTest {
     @Test
     public final void testFind() {
 
-        final Entry marayl = new Entry(1, "Mark");
-        final Entry gosayl = new Entry(2, "Goska");
-        final Entry tobayl = new Entry(3, "Toby");
-        final Entry emiayl = new Entry(4, "Emily");
+        final Entry one = new Entry(1);
+        final Entry two = new Entry(2);
+        final Entry three = new Entry(3);
+        final Entry four = new Entry(4);
 
         final EntryHashTable t = new EntryHashTable();
-        t.insert(marayl);
-        t.insert(gosayl);
-        t.insert(tobayl);
-        t.insert(emiayl);
+        t.insert(one);
+        t.insert(two);
+        t.insert(three);
+        t.insert(four);
 
-        assertSame(marayl, t.find(1));
-        assertSame(gosayl, t.find(2));
-        assertSame(tobayl, t.find(3));
-        assertSame(emiayl, t.find(4));
+        assertSame(one, t.find(1));
+        assertSame(two, t.find(2));
+        assertSame(three, t.find(3));
+        assertSame(four, t.find(4));
         assertNull(t.find(5));
+    }
+
+    @Test
+    public final void testLoad() {
+        final Random r = new Random();
+        final EntryHashTable t = new EntryHashTable();        
+        for (long i = 0; i < 100000; ++i) {
+            final long l = r.nextLong();
+            t.insert(new Entry(l));
+            assertNotNull(t.find(l));
+        }
     }
 }

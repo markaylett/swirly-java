@@ -9,7 +9,7 @@ package com.swirlycloud.twirly.intrusive;
  * @param <T>
  *            The concrete element type.
  */
-public abstract class HashTableLong<T> extends HashTable<T> {
+public abstract class LongHashTable<T> extends HashTable<T> {
 
     protected static int hashKey(long id) {
         return (int) (id ^ id >>> 32);
@@ -17,7 +17,7 @@ public abstract class HashTableLong<T> extends HashTable<T> {
 
     protected abstract boolean equalKeys(T lhs, long rhs);
 
-    public HashTableLong(int capacity) {
+    public LongHashTable(int capacity) {
         super(capacity);
     }
 

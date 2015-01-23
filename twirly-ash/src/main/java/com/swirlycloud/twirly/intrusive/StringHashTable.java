@@ -9,11 +9,11 @@ package com.swirlycloud.twirly.intrusive;
  * @param <T>
  *            The concrete element type.
  */
-public abstract class HashTableString<T> extends HashTable<T> {
+public abstract class StringHashTable<T> extends HashTable<T> {
 
     protected abstract boolean equalKeys(T lhs, String rhs);
 
-    public HashTableString(int capacity) {
+    public StringHashTable(int capacity) {
         super(capacity);
     }
 

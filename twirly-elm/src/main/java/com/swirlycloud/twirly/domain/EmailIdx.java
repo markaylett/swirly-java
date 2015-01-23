@@ -3,41 +3,36 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-public final class EmailIdx {
+import com.swirlycloud.twirly.intrusive.StringHashTable;
 
-    private final Trader[] buckets;
+public final class EmailIdx extends StringHashTable<Trader> {
 
-    private static boolean equals(Trader trader, String email) {
-        assert email != null;
-        return trader.getEmail().equals(email);
+    @Override
+    protected final void setNext(Trader node, Trader next) {
+        node.emailNext = next;
     }
 
-    private static int indexFor(int hash, int length) {
-        return (hash & 0x7fffffff) % length;
+    @Override
+    protected final Trader next(Trader node) {
+        return node.emailNext;
     }
 
-    public EmailIdx(int nBuckets) {
-        assert nBuckets > 0;
-        this.buckets = new Trader[nBuckets];
+    @Override
+    protected final int hashKey(Trader node) {
+        return node.getEmail().hashCode();
     }
 
-    public final void insert(Trader trader) {
-        assert trader != null;
-        if (trader.getEmail() != null) {
-            final int bucket = indexFor(trader.getEmail().hashCode(), buckets.length);
-            trader.emailNext = buckets[bucket];
-            buckets[bucket] = trader;
-        }
+    @Override
+    protected final boolean equalKeys(Trader lhs, Trader rhs) {
+        return lhs.getEmail().equals(rhs.getEmail());
     }
 
-    public final Trader find(String email) {
-        assert email != null;
-        final int bucket = indexFor(email.hashCode(), buckets.length);
-        for (Trader it = buckets[bucket]; it != null; it = it.emailNext) {
-            if (equals(it, email)) {
-                return it;
-            }
-        }
-        return null;
+    @Override
+    protected final boolean equalKeys(Trader lhs, String rhs) {
+        return lhs.getEmail().equals(rhs);
+    }
+
+    public EmailIdx(int capacity) {
+        super(capacity);
     }
 }
