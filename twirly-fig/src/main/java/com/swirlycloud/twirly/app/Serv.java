@@ -121,7 +121,8 @@ public final class Serv {
             @Override
             public final void call(Market arg) {
                 enrichMarket(arg);
-                markets.insert(arg);
+                final RbNode node = markets.insert(arg);
+                assert node == null;
             }
         });
     }

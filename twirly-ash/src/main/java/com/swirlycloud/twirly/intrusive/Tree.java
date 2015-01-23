@@ -205,7 +205,6 @@ public abstract class Tree<T> {
      */
 
     public final T insert(T node) {
-        assert getColor(node) == NONE;
         T tmp;
         T parent = null;
         int comp = 0;
@@ -218,25 +217,18 @@ public abstract class Tree<T> {
             } else if (comp < 0) {
                 tmp = getRight(tmp);
             } else {
+                setLeft(node, getLeft(tmp));
+                setRight(node, getRight(tmp));
+                setParent(node, getParent(tmp));
+                setColor(node, getColor(tmp));
                 return tmp;
             }
         }
-        set(node, parent);
-        if (parent != null) {
-            if (comp < 0) {
-                setLeft(parent, node);
-            } else {
-                setRight(parent, node);
-            }
-        } else {
-            root = node;
-        }
-        insertColor(node);
-        return node;
+        pinsert(node, parent);
+        return null;
     }
 
     public final void pinsert(T node, T parent) {
-        assert getColor(node) == NONE;
         set(node, parent);
         if (parent != null) {
             final int comp = compareKey(parent, node);
@@ -251,28 +243,28 @@ public abstract class Tree<T> {
         insertColor(node);
     }
 
-    public final T remove(T node) {
+    public final void remove(final T node) {
         T child, parent;
-        final T old = node;
+        T tmp = node;
         int color;
-        if (getLeft(node) == null) {
-            child = getRight(node);
-        } else if (getRight(node) == null) {
-            child = getLeft(node);
+        if (getLeft(tmp) == null) {
+            child = getRight(tmp);
+        } else if (getRight(tmp) == null) {
+            child = getLeft(tmp);
         } else {
             T left;
-            node = getRight(node);
-            while ((left = getLeft(node)) != null) {
-                node = left;
+            tmp = getRight(tmp);
+            while ((left = getLeft(tmp)) != null) {
+                tmp = left;
             }
-            child = getRight(node);
-            parent = getParent(node);
-            color = getColor(node);
+            child = getRight(tmp);
+            parent = getParent(tmp);
+            color = getColor(tmp);
             if (child != null) {
                 setParent(child, parent);
             }
             if (parent != null) {
-                if (getLeft(parent) == node) {
+                if (getLeft(parent) == tmp) {
                     setLeft(parent, child);
                 } else {
                     setRight(parent, child);
@@ -280,27 +272,27 @@ public abstract class Tree<T> {
             } else {
                 root = child;
             }
-            if (getParent(node) == old) {
-                parent = node;
+            if (getParent(tmp) == node) {
+                parent = tmp;
             }
 
-            setLeft(node, getLeft(old));
-            setRight(node, getRight(old));
-            setParent(node, getParent(old));
-            setColor(node, getColor(old));
+            setLeft(tmp, getLeft(node));
+            setRight(tmp, getRight(node));
+            setParent(tmp, getParent(node));
+            setColor(tmp, getColor(node));
 
-            if (getParent(old) != null) {
-                if (getLeft(getParent(old)) == old) {
-                    setLeft(getParent(old), node);
+            if (getParent(node) != null) {
+                if (getLeft(getParent(node)) == node) {
+                    setLeft(getParent(node), tmp);
                 } else {
-                    setRight(getParent(old), node);
+                    setRight(getParent(node), tmp);
                 }
             } else {
-                root = node;
+                root = tmp;
             }
-            setParent(getLeft(old), node);
-            if (getRight(old) != null) {
-                setParent(getRight(old), node);
+            setParent(getLeft(node), tmp);
+            if (getRight(node) != null) {
+                setParent(getRight(node), tmp);
             }
             if (parent != null) {
                 left = parent;
@@ -308,16 +300,16 @@ public abstract class Tree<T> {
             if (color == BLACK) {
                 removeColor(parent, child);
             }
-            setColor(old, NONE);
-            return old;
+            setColor(node, NONE);
+            return;
         }
-        parent = getParent(node);
-        color = getColor(node);
+        parent = getParent(tmp);
+        color = getColor(tmp);
         if (child != null) {
             setParent(child, parent);
         }
         if (parent != null) {
-            if (getLeft(parent) == node) {
+            if (getLeft(parent) == tmp) {
                 setLeft(parent, child);
             } else {
                 setRight(parent, child);
@@ -328,8 +320,7 @@ public abstract class Tree<T> {
         if (color == BLACK) {
             removeColor(parent, child);
         }
-        setColor(old, NONE);
-        return old;
+        setColor(node, NONE);
     }
     /**
      * If you want fast access to any node, then root is your best choice.

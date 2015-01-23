@@ -84,7 +84,7 @@ public abstract class HashTable<T> {
      * 
      * @param node
      *            The node to be inserted.
-     * @return the node with an equivalent key that was replace, or null if no replacement took
+     * @return the node with an equivalent key that was replaced, or null if no replacement took
      *         place.
      */
     public final T insert(T node) {

@@ -42,7 +42,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
     final void insertOrder(Order order) {
         final RbNode node = orders.insert(order);
-        assert node == order;
+        assert node == null;
         if (!order.getRef().isEmpty()) {
             refIdx.insert(order);
         }
@@ -105,7 +105,7 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
     final void insertTrade(Exec trade) {
         final RbNode node = trades.insert(trade);
-        assert node == trade;
+        assert node == null;
     }
 
     final void removeTrade(Exec trade) {
@@ -117,7 +117,6 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         if (node == null) {
             return false;
         }
-
         trades.remove(node);
         return true;
     }
@@ -144,12 +143,13 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
     final void insertPosn(Posn posn) {
         final RbNode node = posns.insert(posn);
-        assert node == posn;
+        assert node == null;
     }
 
     final Posn updatePosn(Posn posn) {
-        final RbNode node = posns.insert(posn);
-        if (node != posn) {
+        final long key = posn.getKey();
+        final RbNode node = posns.pfind(key);
+        if (node != null && node.getKey() == key) {
             final Posn exist = (Posn) node;
 
             // Update existing position.
@@ -164,8 +164,11 @@ public final class Accnt extends BasicRbNode implements Identifiable {
             exist.setSellLots(posn.getSellLots());
 
             posn = exist;
+        } else {
+            final RbNode parent = node;
+            posns.pinsert(posn, parent);
         }
-        return (Posn) node;
+        return posn;
     }
 
     final Posn getLazyPosn(Contr contr, int settlDay) {
