@@ -44,7 +44,7 @@ public final class LongHashTableTest {
         }
 
         @Override
-        protected final boolean equalKeys(Entry lhs, Entry rhs) {
+        protected final boolean equalKey(Entry lhs, Entry rhs) {
             return lhs.id == rhs.id;
         }
 

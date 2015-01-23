@@ -23,7 +23,7 @@ public final class EmailIdx extends StringHashTable<Trader> {
     }
 
     @Override
-    protected final boolean equalKeys(Trader lhs, Trader rhs) {
+    protected final boolean equalKey(Trader lhs, Trader rhs) {
         return lhs.getEmail().equals(rhs.getEmail());
     }
 

@@ -21,7 +21,7 @@ public abstract class HashTable<T> {
 
     protected abstract int hashKey(T node);
 
-    protected abstract boolean equalKeys(T lhs, T rhs);
+    protected abstract boolean equalKey(T lhs, T rhs);
 
     protected static int indexFor(int h, int length) {
         // Doug Lea's supplemental secondaryHash function.
@@ -96,7 +96,7 @@ public abstract class HashTable<T> {
         T it = getBucket(i);
         if (it != null) {
             // Check if the first element in the bucket has an equivalent key.
-            if (equalKeys(it, node)) {
+            if (equalKey(it, node)) {
                 // Replace.
                 setNext(node, next(it));
                 buckets[i] = node;
@@ -104,7 +104,7 @@ public abstract class HashTable<T> {
             }
             // Check if a subsequent element in the bucket has an equivalent key.
             for (T next; (next = next(it)) != null; it = next) {
-                if (equalKeys(next, node)) {
+                if (equalKey(next, node)) {
                     // Replace.
                     setNext(node, next(next));
                     setNext(it, node);
