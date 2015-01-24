@@ -7,7 +7,7 @@ import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 
 import java.io.IOException;
 
-import com.swirlycloud.twirly.app.Accnt;
+import com.swirlycloud.twirly.app.Sess;
 import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Trans;
 import com.swirlycloud.twirly.domain.Action;
@@ -22,15 +22,15 @@ public final class Benchmark {
 
     private static void run(final Serv s) throws BadRequestException, NotFoundException,
             IOException {
-        final Accnt marayl = s.getLazyAccnt("MARAYL");
-        final Accnt gosayl = s.getLazyAccnt("GOSAYL");
-        final Accnt tobayl = s.getLazyAccnt("TOBAYL");
-        final Accnt emiayl = s.getLazyAccnt("EMIAYL");
+        final Sess marayl = s.getLazySess("MARAYL");
+        final Sess gosayl = s.getLazySess("GOSAYL");
+        final Sess tobayl = s.getLazySess("TOBAYL");
+        final Sess emiayl = s.getLazySess("EMIAYL");
 
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
-        final Market market = s.createMarket("EURUSD", settlDay, expiryDay,
-                System.currentTimeMillis());
+        final Market market = s.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", settlDay,
+                expiryDay, System.currentTimeMillis());
         assert market != null;
 
         final Trans trans = new Trans();

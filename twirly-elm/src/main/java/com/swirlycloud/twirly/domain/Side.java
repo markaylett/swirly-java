@@ -3,13 +3,31 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import static com.swirlycloud.twirly.node.RbUtil.compareLong;
 import com.swirlycloud.twirly.intrusive.DlList;
-import com.swirlycloud.twirly.intrusive.RbTree;
+import com.swirlycloud.twirly.intrusive.LongRbTree;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 
 public final class Side {
-    private final RbTree levels = new RbTree();
+    private static final class LevelTree extends LongRbTree {
+
+        private static long getKey(RbNode node) {
+            return ((Level) node).getKey();
+        }
+
+        @Override
+        protected final int compareKey(RbNode lhs, RbNode rhs) {
+            return compareLong(getKey(lhs), getKey(rhs));
+        }
+
+        @Override
+        protected final int compareKeyDirect(RbNode lhs, long rhs) {
+            return compareLong(getKey(lhs), rhs);
+        }
+    }
+
+    private final LongRbTree levels = new LevelTree();
     private final DlList orders = new DlList();
 
     // Last trade.
@@ -19,14 +37,12 @@ public final class Side {
 
     private final Level getLazyLevel(Order order) {
         final long key = Level.composeKey(order.getAction(), order.getTicks());
-        final RbNode node = levels.pfind(key);
-
-        Level level;
-        if (node == null || node.getKey() != key) {
+        Level level = (Level) levels.pfind(key);
+        if (level == null || level.getKey() != key) {
+            final RbNode parent = level;
             level = new Level(order);
-            levels.pinsert(level, node);
+            levels.pinsert(level, parent);
         } else {
-            level = (Level) node;
             level.addOrder(order);
         }
         order.level = level;

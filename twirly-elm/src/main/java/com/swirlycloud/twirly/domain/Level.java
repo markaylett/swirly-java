@@ -39,7 +39,6 @@ public final class Level extends BasicRbNode {
         return action == Action.BUY ? -ticks : ticks;
     }
 
-    @Override
     public final long getKey() {
         return key;
     }

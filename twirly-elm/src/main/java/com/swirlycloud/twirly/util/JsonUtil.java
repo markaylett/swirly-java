@@ -27,18 +27,6 @@ public final class JsonUtil {
         };
     }
 
-    public static Params withInternal(final Params params) {
-        return new Params() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public final <T> T getParam(String name, Class<T> clazz) {
-                return "internal".equals(name) //
-                ? (T) Boolean.TRUE
-                        : params.getParam(name, clazz);
-            }
-        };
-    }
-
     public static final Params PARAMS_NONE = new Params() {
         @Override
         public final <T> T getParam(String name, Class<T> clazz) {
@@ -54,31 +42,14 @@ public final class JsonUtil {
         }
     };
 
-    public static final Params PARAMS_INTERNAL = new Params() {
-        @SuppressWarnings("unchecked")
-        @Override
-        public final <T> T getParam(String name, Class<T> clazz) {
-            return "internal".equals(name) ? (T) Boolean.TRUE : null;
-        }
-    };
-
     public static String toJson(Jsonifiable j) {
         final StringBuilder sb = new StringBuilder();
         try {
-            j.toJson(PARAMS_INTERNAL, sb);
+            j.toJson(PARAMS_NONE, sb);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         return sb.toString();
-    }
-
-    public static boolean isInternal(Params params) {
-        return params != null && params.getParam("internal", Boolean.class) == Boolean.TRUE;
-    }
-
-    public static String getIdOrMnem(Identifiable iden, Params params) {
-        return isInternal(params) ? String.valueOf(iden.getId()) //
-                : '"' + ((Memorable) iden).getMnem() + '"';
     }
 
     public static void parseStartArray(JsonParser p) throws IOException {

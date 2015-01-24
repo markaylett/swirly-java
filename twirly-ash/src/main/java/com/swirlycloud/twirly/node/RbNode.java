@@ -5,6 +5,8 @@ package com.swirlycloud.twirly.node;
 
 public interface RbNode {
 
+    void setNode(RbNode left, RbNode right, RbNode parent, int color);
+
     RbNode setLeft(RbNode left);
 
     RbNode setRight(RbNode right);
@@ -16,8 +18,6 @@ public interface RbNode {
     RbNode rbNext();
 
     RbNode rbPrev();
-
-    long getKey();
 
     RbNode getLeft();
 

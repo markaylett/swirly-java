@@ -47,15 +47,15 @@ public final class Trans implements Jsonifiable {
 
     @Override
     public final void toJson(Params params, Appendable out) throws IOException {
-        final long traderId = order.getTraderId();
-        out.append("{\"market\":");
-        market.toJson(params, out);
+        final String trader = order.getTrader();
+        out.append("{\"view\":");
+        market.toJsonView(params, out);
         // Multiple orders may be updated if one trades with one's self.
         out.append(",\"orders\":[");
         order.toJson(params, out);
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
-            if (match.makerOrder.getTraderId() != traderId) {
+            if (match.makerOrder.getTrader().equals(trader)) {
                 continue;
             }
             out.append(',');
@@ -65,7 +65,7 @@ public final class Trans implements Jsonifiable {
         int i = 0;
         for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
-            if (exec.getTraderId() != traderId) {
+            if (exec.getTrader().equals(trader)) {
                 continue;
             }
             if (i > 0) {

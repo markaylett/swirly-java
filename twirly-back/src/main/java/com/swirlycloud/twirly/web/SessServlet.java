@@ -24,11 +24,10 @@ import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
-public final class AccntServlet extends RestServlet {
+public final class SessServlet extends RestServlet {
     private static final int TYPE_PART = 0;
-    private static final int CMNEM_PART = 1;
-    private static final int SETTL_DATE_PART = 2;
-    private static final int ID_PART = 3;
+    private static final int MARKET_PART = 1;
+    private static final int ID_PART = 2;
 
     @Override
     public final void init(ServletConfig config) throws ServletException {
@@ -59,17 +58,15 @@ public final class AccntServlet extends RestServlet {
             boolean match = false;
             if (parts.length > 0) {
                 if ("order".equals(parts[TYPE_PART])) {
-                    if (parts.length == 4) {
-                        rest.deleteOrder(email, parts[CMNEM_PART],
-                                Integer.parseInt(parts[SETTL_DATE_PART]),
-                                Long.parseLong(parts[ID_PART]), now);
+                    if (parts.length == 3) {
+                        rest.deleteOrder(email, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
+                                now);
                         match = true;
                     }
                 } else if ("trade".equals(parts[TYPE_PART])) {
-                    if (parts.length == 4) {
-                        rest.deleteTrade(email, parts[CMNEM_PART],
-                                Integer.parseInt(parts[SETTL_DATE_PART]),
-                                Long.parseLong(parts[ID_PART]), now);
+                    if (parts.length == 3) {
+                        rest.deleteTrade(email, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
+                                now);
                         match = true;
                     }
                 }
@@ -108,23 +105,18 @@ public final class AccntServlet extends RestServlet {
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getAccnt(email, params, now, resp.getWriter());
+                rest.getSess(email, params, now, resp.getWriter());
                 match = true;
             } else if ("order".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
                     rest.getOrder(email, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getOrder(email, parts[CMNEM_PART], params, now, resp.getWriter());
+                    rest.getOrder(email, parts[MARKET_PART], params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 3) {
-                    rest.getOrder(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 4) {
-                    rest.getOrder(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]),
-                            Long.parseLong(parts[ID_PART]), params, now, resp.getWriter());
+                    rest.getOrder(email, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
+                            params, now, resp.getWriter());
                     match = true;
                 }
             } else if ("trade".equals(parts[TYPE_PART])) {
@@ -132,16 +124,11 @@ public final class AccntServlet extends RestServlet {
                     rest.getTrade(email, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getTrade(email, parts[CMNEM_PART], params, now, resp.getWriter());
+                    rest.getTrade(email, parts[MARKET_PART], params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 3) {
-                    rest.getTrade(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 4) {
-                    rest.getTrade(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]),
-                            Long.parseLong(parts[ID_PART]), params, now, resp.getWriter());
+                    rest.getTrade(email, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
+                            params, now, resp.getWriter());
                     match = true;
                 }
             } else if ("posn".equals(parts[TYPE_PART])) {
@@ -149,11 +136,7 @@ public final class AccntServlet extends RestServlet {
                     rest.getPosn(email, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getPosn(email, parts[CMNEM_PART], params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 3) {
-                    rest.getPosn(email, parts[CMNEM_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
+                    rest.getPosn(email, parts[MARKET_PART], params, now, resp.getWriter());
                     match = true;
                 }
             }
@@ -187,19 +170,18 @@ public final class AccntServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
 
-            if (parts.length != 3 || !"order".equals(parts[TYPE_PART])) {
+            if (parts.length != 2 || !"order".equals(parts[TYPE_PART])) {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
             }
-            final String cmnem = parts[CMNEM_PART];
-            final int settlDate = Integer.parseInt(parts[SETTL_DATE_PART]);
+            final String market = parts[MARKET_PART];
 
             final Request r = parseRequest(req);
             if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
                 throw new BadRequestException("request fields are invalid");
             }
             final long now = System.currentTimeMillis();
-            rest.postOrder(email, cmnem, settlDate, r.getRef(), r.getAction(), r.getTicks(),
-                    r.getLots(), r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
+            rest.postOrder(email, market, r.getRef(), r.getAction(), r.getTicks(), r.getLots(),
+                    r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
@@ -226,11 +208,10 @@ public final class AccntServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
 
-            if (parts.length != 4 || !"order".equals(parts[TYPE_PART])) {
+            if (parts.length != 3 || !"order".equals(parts[TYPE_PART])) {
                 throw new MethodNotAllowedException("put is not allowed on this resource");
             }
-            final String cmnem = parts[CMNEM_PART];
-            final int settlDate = Integer.parseInt(parts[SETTL_DATE_PART]);
+            final String market = parts[MARKET_PART];
             final long id = Long.parseLong(parts[ID_PART]);
 
             final Request r = parseRequest(req);
@@ -238,8 +219,7 @@ public final class AccntServlet extends RestServlet {
                 throw new BadRequestException("request fields are invalid");
             }
             final long now = System.currentTimeMillis();
-            rest.putOrder(email, cmnem, settlDate, id, r.getLots(), PARAMS_NONE, now,
-                    resp.getWriter());
+            rest.putOrder(email, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

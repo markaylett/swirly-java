@@ -4,26 +4,25 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
+import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
 import java.io.IOException;
 
+import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
+
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.util.Identifiable;
-import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Market extends BasicRbNode implements Identifiable, Jsonifiable {
+public final class Market extends Rec implements Financial {
     /**
      * Maximum price levels in view.
      */
     private static final int DEPTH_MAX = 5;
 
-    private final transient long key;
-    private Identifiable contr;
+    private Memorable contr;
     private final int settlDay;
     private final int expiryDay;
     private final Side bidSide = new Side();
@@ -31,16 +30,16 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     private long lastTicks;
     private long lastLots;
     private long lastTime;
-    private long maxOrderId;
-    private long maxExecId;
+    private transient long maxOrderId;
+    private transient long maxExecId;
 
     private final Side getSide(Action action) {
         return action == Action.BUY ? bidSide : offerSide;
     }
 
-    public Market(Identifiable contr, int settlDay, int expiryDay, long lastTicks, long lastLots,
-            long lastTime, long maxOrderId, long maxExecId) {
-        this.key = composeKey(contr.getId(), settlDay);
+    public Market(String mnem, String display, Memorable contr, int settlDay, int expiryDay,
+            long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
+        super(mnem, display);
         this.contr = contr;
         this.settlDay = settlDay;
         this.expiryDay = expiryDay;
@@ -51,32 +50,64 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         this.maxExecId = maxExecId;
     }
 
-    public Market(Identifiable contr, int settlDay, int expiryDay) {
-        this(contr, settlDay, expiryDay, 0L, 0L, 0L, 0L, 0L);
+    public Market(String mnem, String display, Memorable contr, int settlDay, int expiryDay) {
+        this(mnem, display, contr, settlDay, expiryDay, 0L, 0L, 0L, 0L, 0L);
     }
 
-    /**
-     * Synthetic market key.
-     */
+    public static Market parse(JsonParser p) throws IOException {
+        String mnem = null;
+        String display = null;
+        Memorable contr = null;
+        int settlDay = 0;
+        int expiryDay = 0;
 
-    public static long composeKey(long contrId, int settlDay) {
-        // 16 bit contr-id.
-        final long CONTR_MASK = (1L << 16) - 1;
-        // 16 bits is sufficient for truncated Julian day.
-        final long TJD_MASK = (1L << 16) - 1;
-
-        // Truncated Julian Day (TJD).
-        final long tjd = JulianDay.jdToTjd(settlDay);
-        return ((contrId & CONTR_MASK) << 16) | (tjd & TJD_MASK);
-    }
-
-    @Override
-    public final String toString() {
-        return JsonUtil.toJson(this);
+        String name = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_OBJECT:
+                return new Market(mnem, display, contr, settlDay, expiryDay);
+            case KEY_NAME:
+                name = p.getString();
+                break;
+            case VALUE_NUMBER:
+                if ("settlDate".equals(name)) {
+                    settlDay = JulianDay.isoToJd(p.getInt());
+                } else if ("expiryDate".equals(name)) {
+                    expiryDay = JulianDay.isoToJd(p.getInt());
+                } else {
+                    throw new IOException(String.format("unexpected number field '%s'", name));
+                }
+                break;
+            case VALUE_STRING:
+                if ("mnem".equals(name)) {
+                    mnem = p.getString();
+                } else if ("display".equals(name)) {
+                    display = p.getString();
+                } else if ("contr".equals(name)) {
+                    contr = newMnem(p.getString());
+                } else {
+                    throw new IOException(String.format("unexpected string field '%s'", name));
+                }
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of object not found");
     }
 
     @Override
     public final void toJson(Params params, Appendable out) throws IOException {
+        out.append("{\"mnem\":\"").append(mnem);
+        out.append("\",\"display\":\"").append(display);
+        out.append("\",\"contr\":\"").append(contr.getMnem());
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
+        out.append('}');
+    }
+
+    public final void toJsonView(Params params, Appendable out) throws IOException {
         int depth = 3; // Default depth.
         if (params != null) {
             final Integer val = params.getParam("depth", Integer.class);
@@ -89,10 +120,9 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
         // Round-down to maximum.
         depth = Math.min(depth, DEPTH_MAX);
 
-        out.append("{\"id\":").append(String.valueOf(key));
-        out.append(",\"contr\":").append(getIdOrMnem(contr, params));
-        out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
+        out.append("{\"market\":\"").append(mnem);
+        out.append("\",\"contr\":\"").append(contr.getMnem());
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"bidTicks\":[");
 
         final RbNode firstBid = bidSide.getFirstLevel();
@@ -192,7 +222,7 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     }
 
     public final void enrich(Contr contr) {
-        assert this.contr.getId() == contr.getId();
+        assert this.contr.getMnem() == contr.getMnem();
         this.contr = contr;
     }
 
@@ -233,23 +263,25 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
     }
 
     @Override
-    public final long getKey() {
-        return key;
+    public final RecType getRecType() {
+        return RecType.MARKET;
     }
 
     @Override
-    public final long getId() {
-        return key;
+    public final String getMarket() {
+        return mnem;
     }
 
-    public final long getContrId() {
-        return contr.getId();
+    @Override
+    public final String getContr() {
+        return contr.getMnem();
     }
 
-    public final Contr getContr() {
+    public final Contr getContrRich() {
         return (Contr) contr;
     }
 
+    @Override
     public final int getSettlDay() {
         return settlDay;
     }
@@ -276,5 +308,13 @@ public final class Market extends BasicRbNode implements Identifiable, Jsonifiab
 
     public final long getLastTime() {
         return lastTime;
+    }
+
+    public final long getMaxOrderId() {
+        return maxOrderId;
+    }
+
+    public final long getMaxExecId() {
+        return maxExecId;
     }
 }

@@ -7,6 +7,9 @@ import static com.swirlycloud.twirly.util.CollectionUtil.binsearch;
 
 public final class MathUtil {
 
+    private MathUtil() {
+    }
+
     /**
      * Round-up to the next power of two.
      * 

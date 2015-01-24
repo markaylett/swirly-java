@@ -14,7 +14,7 @@ import com.swirlycloud.twirly.node.SlNode;
  */
 public interface Journ {
 
-    void insertExec(long contrId, int settlDay, Exec exec) throws NotFoundException;
+    void insertExec(Exec exec) throws NotFoundException;
 
-    void insertExecList(long contrId, int settlDay, SlNode first) throws NotFoundException;
+    void insertExecList(String market, SlNode first) throws NotFoundException;
 }

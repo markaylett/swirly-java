@@ -18,12 +18,8 @@
 
       <form class="form-inline" style="margin-bottom: 24px;">
         <div class="form-group">
-          <input id="contr" type="text" class="form-control" placeholder="Enter contract"
-                 data-bind="value: contrMnem, disable: isWorkingSelected"/>
-        </div>
-        <div class="form-group">
-          <input id="settlDate" type="date" class="form-control" placeholder="Enter settl date"
-                 data-bind="value: settlDate, disable: isWorkingSelected"/>
+          <input id="market" type="text" class="form-control" placeholder="Enter market"
+                 data-bind="value: market, disable: isWorkingSelected"/>
         </div>
         <div class="form-group">
           <input id="price" type="number" class="form-control" placeholder="Enter price"
@@ -49,10 +45,9 @@
         <thead>
           <tr>
             <th>
-              <input type="checkbox" data-bind="checked: allMarkets"/>
+              <input type="checkbox" data-bind="checked: allViews"/>
             </th>
-            <th>Contr</th>
-            <th>Settl Date</th>
+            <th>Market</th>
             <th style="text-align: right;">Bid Count</th>
             <th style="text-align: right;">Bid Lots</th>
             <th style="text-align: right;">Bid Price</th>
@@ -62,15 +57,12 @@
             <th style="text-align: right;">Offer Count</th>
           </tr>
         </thead>
-        <tbody data-bind="foreach: markets">
+        <tbody data-bind="foreach: views">
           <tr style="cursor: pointer; cursor: hand;">
             <td style="cursor: initial;">
               <input type="checkbox" data-bind="checked: isSelected"/>
             </td>
-            <td
-               data-bind="mnem: contr, click: $root.selectMarket"></td>
-            <td
-               data-bind="text: settlDate, click: $root.selectMarket"></td>
+            <td data-bind="text: market, click: $root.selectView"></td>
             <td style="text-align: right;"
                 data-bind="depth: bidCount, click: $root.selectBid"></td>
             <td style="text-align: right;"
@@ -152,8 +144,7 @@
                 <th>
                   <input type="checkbox" data-bind="checked: allWorking"/>
                 </th>
-                <th>Contr</th>
-                <th>Settl Date</th>
+                <th>Market</th>
                 <th>Id</th>
                 <th>State</th>
                 <th>Action</th>
@@ -173,8 +164,7 @@
                          data-bind="checked: isSelected, click: $root.selectOrder,
                                     clickBubble: false"/>
                 </td>
-                <td data-bind="mnem: contr"></td>
-                <td data-bind="text: settlDate"></td>
+                <td data-bind="text: market"></td>
                 <td data-bind="text: id"></td>
                 <td data-bind="text: state"></td>
                 <td data-bind="text: action"></td>
@@ -195,8 +185,7 @@
                 <th>
                   <input type="checkbox" data-bind="checked: allDone"/>
                 </th>
-                <th>Contr</th>
-                <th>Settl Date</th>
+                <th>Market</th>
                 <th>Id</th>
                 <th>State</th>
                 <th>Action</th>
@@ -216,8 +205,7 @@
                          data-bind="checked: isSelected, click: $root.selectOrder,
                                     clickBubble: false"/>
                 </td>
-                <td data-bind="mnem: contr"></td>
-                <td data-bind="text: settlDate"></td>
+                <td data-bind="text: market"></td>
                 <td data-bind="text: id"></td>
                 <td data-bind="text: state"></td>
                 <td data-bind="text: action"></td>
@@ -238,8 +226,7 @@
                 <th>
                   <input type="checkbox" data-bind="checked: allTrades"/>
                 </th>
-                <th>Contr</th>
-                <th>Settl Date</th>
+                <th>Market</th>
                 <th>Id</th>
                 <th>Order Id</th>
                 <th>Action</th>
@@ -259,8 +246,7 @@
                          data-bind="checked: isSelected, click: $root.selectTrade,
                                     clickBubble: false"/>
                 </td>
-                <td data-bind="mnem: contr"></td>
-                <td data-bind="text: settlDate"></td>
+                <td data-bind="text: market"></td>
                 <td data-bind="text: id"></td>
                 <td data-bind="text: orderId"></td>
                 <td data-bind="text: action"></td>
@@ -278,6 +264,7 @@
           <table class="table table-hover table-striped">
             <thead>
               <tr>
+                <th>Market</th>
                 <th>Contr</th>
                 <th>Settl Date</th>
                 <th style="text-align: right;">Sell Price</th>
@@ -290,8 +277,12 @@
             </thead>
             <tbody data-bind="foreach: posns">
               <tr>
-                <td data-bind="mnem: contr"></td>
-                <td data-bind="text: settlDate"></td>
+                <td style="cursor: pointer; cursor: hand;"
+                    data-bind="text: market, click: $root.selectPosn"></td>
+                <td style="cursor: pointer; cursor: hand;"
+                    data-bind="mnem: contr, click: $root.selectPosn"></td>
+                <td style="cursor: pointer; cursor: hand;"
+                    data-bind="text: settlDate, click: $root.selectPosn"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
                     data-bind="text: sellPrice, click: $root.selectSell"></td>
                 <td style="cursor: pointer; cursor: hand; text-align: right;"
@@ -322,8 +313,8 @@
     <script type="text/javascript" src="/js/bootstrap3-typeahead.min.js"></script>
     <script type="text/javascript" src="/js/knockout.min.js"></script>
 
-    <script type="text/javascript" src="/js/twirly.js"></script>
-    <script type="text/javascript" src="/js/trade.js"></script>
+    <script type="text/javascript" src="/app/twirly.js"></script>
+    <script type="text/javascript" src="/app/trade.js"></script>
     <script type="text/javascript">
       $(initApp);
     </script>

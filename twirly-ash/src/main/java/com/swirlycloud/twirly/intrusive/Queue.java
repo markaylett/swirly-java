@@ -3,20 +3,20 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-public abstract class Queue<T> {
-    private T first;
-    private T last;
+public abstract class Queue<V> {
+    private V first;
+    private V last;
 
-    protected abstract void setNext(T node, T next);
+    protected abstract void setNext(V node, V next);
 
-    protected abstract T next(T node);
+    protected abstract V next(V node);
 
     public final void clear() {
         first = null;
         last = null;
     }
 
-    public final void insertBack(T node) {
+    public final void insertBack(V node) {
         if (!isEmpty()) {
             setNext(last, node);
         } else {
@@ -26,11 +26,11 @@ public abstract class Queue<T> {
         setNext(node, null);
     }
 
-    public final T removeFirst() {
+    public final V removeFirst() {
         if (isEmpty()) {
             return null;
         }
-        final T node = first;
+        final V node = first;
         first = next(first);
         if (isEmpty()) {
             last = null;
@@ -38,7 +38,7 @@ public abstract class Queue<T> {
         return node;
     }
 
-    public final void join(Queue<T> rhs) {
+    public final void join(Queue<V> rhs) {
         if (!rhs.isEmpty()) {
             if (!isEmpty()) {
                 setNext(last, rhs.first);
@@ -49,11 +49,11 @@ public abstract class Queue<T> {
         }
     }
 
-    public final T getFirst() {
+    public final V getFirst() {
         return first;
     }
 
-    public final T getLast() {
+    public final V getLast() {
         return last;
     }
 

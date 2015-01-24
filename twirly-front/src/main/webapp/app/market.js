@@ -32,42 +32,27 @@ function ViewModel(contrs) {
     self.allMarkets = ko.observable(false);
     self.markets.extend({ rateLimit: 25 });
 
-    self.contrMnem = ko.observable();
+    self.mnem = ko.observable();
+    self.display = ko.observable();
+    self.contr = ko.observable();
     self.settlDate = ko.observable();
     self.expiryDate = ko.observable();
 
-    self.isMarketSelected = ko.computed(function() {
-        var markets = self.markets();
-        for (var i = 0; i < markets.length; ++i) {
-            if (markets[i].isSelected())
-                return true;
-        }
-        return false;
-    });
-
-    self.allMarkets.subscribe(function(val) {
-        var markets = self.markets();
-        for (var i = 0; i < markets.length; ++i) {
-            markets[i].isSelected(val);
-        }
-    });
-
-    self.findMarket = function(id) {
+    self.findMarket = function(mnem) {
         return ko.utils.arrayFirst(self.markets(), function(val) {
-            return val.id() === id;
+            return val.mnem() === mnem;
         });
     };
 
     self.refreshAll = function() {
 
-        $.getJSON('/api/market', function(raw) {
+        $.getJSON('/api/rec/market', function(raw) {
 
             var cooked = $.map(raw, function(val) {
-                market = self.findMarket(val.id);
+                market = self.findMarket(val.mnem);
                 if (market !== null) {
                     market.update(val);
                 } else {
-                    val.isSelected = false;
                     market = new Market(val, self.contrs);
                 }
                 return market;
@@ -79,20 +64,31 @@ function ViewModel(contrs) {
     };
 
     self.clearMarket = function() {
-        //self.contrMnem(undefined);
+        //self.mnem(undefined);
+        //self.display(undefined);
+        //self.contr(undefined);
         //self.settlDate(undefined);
         //self.expiryDate(undefined);
     };
 
     self.submitMarket = function() {
-        var contr = self.contrMnem();
+        var mnem = self.mnem();
+        if (!isSpecified(mnem)) {
+            self.showError(internalError('mnem not specified'));
+            return;
+        }
+        var display = self.display();
+        if (!isSpecified(display)) {
+            self.showError(internalError('display not specified'));
+            return;
+        }
+        var contr = self.contr();
         if (!isSpecified(contr)) {
             self.showError(internalError('contract not specified'));
             return;
         }
-        contr = self.contrs[contr];
-        if (contr === undefined) {
-            self.showError(internalError('invalid contract: ' + self.contrMnem()));
+        if (!(contr in self.contrs)) {
+            self.showError(internalError('invalid contract: ' + contr));
             return;
         }
         var settlDate = self.settlDate();
@@ -110,17 +106,19 @@ function ViewModel(contrs) {
 
         $.ajax({
             type: 'post',
-            url: '/api/market/' + contr.mnem,
+            url: '/api/rec/market/',
             data: JSON.stringify({
+                mnem: mnem,
+                display: display,
+                contr: contr,
                 settlDate: settlDate,
                 expiryDate: expiryDate
             })
         }).done(function(raw) {
-            market = self.findMarket(raw.id);
+            market = self.findMarket(raw.mnem);
             if (market !== null) {
                 market.update(raw);
             } else {
-                raw.isSelected = false;
                 self.markets.push(new Market(raw, self.contrs));
             }
         }).fail(function(xhr) {

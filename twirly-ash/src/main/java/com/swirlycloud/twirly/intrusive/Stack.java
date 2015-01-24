@@ -3,37 +3,37 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-public abstract class Stack<T> {
-    private T first;
+public abstract class Stack<V> {
+    private V first;
 
-    protected abstract void setNext(T node, T next);
+    protected abstract void setNext(V node, V next);
 
-    protected abstract T next(T node);
+    protected abstract V next(V node);
 
     public final void clear() {
         first = null;
     }
 
-    public final void insertFront(T node) {
+    public final void insertFront(V node) {
         setNext(node, first);
         first = node;
     }
 
-    public final T removeFirst() {
-        final T node = first;
+    public final V removeFirst() {
+        final V node = first;
         first = next(first);
         return node;
     }
 
-    public final T pop() {
+    public final V pop() {
         return removeFirst();
     }
 
-    public final void push(T node) {
+    public final void push(V node) {
         insertFront(node);
     }
 
-    public final T getFirst() {
+    public final V getFirst() {
         return first;
     }
 

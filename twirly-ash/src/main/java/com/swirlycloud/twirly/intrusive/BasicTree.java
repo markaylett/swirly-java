@@ -3,15 +3,24 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-public abstract class LongTree<V> extends Tree<V> {
+/**
+ * Tree with a single key derived from Object.
+ * 
+ * @param <K>
+ *            The key type.
+ * @param <V>
+ *            The element or value type.
+ */
 
-    protected abstract int compareKeyDirect(V lhs, long rhs);
+public abstract class BasicTree<K, V> extends Tree<V> {
+
+    protected abstract int compareKeyDirect(V lhs, K rhs);
 
     /**
      * Finds the node with the same key as node.
      */
 
-    public final V find(long key) {
+    public final V find(K key) {
         V tmp = root;
         int comp;
         while (tmp != null) {
@@ -31,7 +40,7 @@ public abstract class LongTree<V> extends Tree<V> {
      * Finds the first node greater than or equal to the search key.
      */
 
-    public final V nfind(long key) {
+    public final V nfind(K key) {
         V tmp = root;
         V res = null;
         int comp;
@@ -55,7 +64,7 @@ public abstract class LongTree<V> extends Tree<V> {
      * Return match or parent.
      */
 
-    public final V pfind(long key) {
+    public final V pfind(K key) {
         V tmp = root, parent = null;
         while (tmp != null) {
             parent = tmp;

@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import static com.swirlycloud.twirly.util.IdUtil.newId;
+import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -15,7 +15,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.KeyRange;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
@@ -36,10 +35,12 @@ import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
+import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.util.Identifiable;
+import com.swirlycloud.twirly.util.Memorable;
 
 public final class DatastoreModel implements Model {
 
@@ -71,17 +72,31 @@ public final class DatastoreModel implements Model {
     }
 
     private final Entity newTrader(Trader trader) {
-        final Entity entity = new Entity(TRADER_KIND, trader.getId());
-        entity.setProperty("mnem", trader.getMnem());
+        final Entity entity = new Entity(TRADER_KIND, trader.getMnem());
         entity.setUnindexedProperty("display", trader.getDisplay());
         entity.setProperty("email", trader.getEmail());
         return entity;
     }
 
+    private final Entity newMarket(Market market) {
+        final Entity entity = new Entity(MARKET_KIND, market.getMnem());
+        entity.setUnindexedProperty("display", market.getDisplay());
+        entity.setUnindexedProperty("contr", market.getContr());
+        entity.setUnindexedProperty("settlDay", Integer.valueOf(market.getSettlDay()));
+        entity.setUnindexedProperty("expiryDay", Integer.valueOf(market.getExpiryDay()));
+        entity.setUnindexedProperty("lastTicks", Long.valueOf(market.getLastTicks()));
+        entity.setUnindexedProperty("lastLots", Long.valueOf(market.getLastLots()));
+        entity.setUnindexedProperty("lastTime", Long.valueOf(market.getLastTime()));
+        entity.setUnindexedProperty("maxOrderId", Long.valueOf(market.getMaxOrderId()));
+        entity.setUnindexedProperty("maxExecId", Long.valueOf(market.getMaxExecId()));
+        return entity;
+    }
+
     private final Entity newOrder(Entity market, Exec exec) {
         final Entity entity = new Entity(ORDER_KIND, exec.getOrderId(), market.getKey());
-        entity.setUnindexedProperty("traderId", exec.getTraderId());
-        entity.setUnindexedProperty("contrId", exec.getContrId());
+        entity.setUnindexedProperty("trader", exec.getTrader());
+        entity.setUnindexedProperty("market", exec.getMarket());
+        entity.setUnindexedProperty("contr", exec.getContr());
         entity.setUnindexedProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
         entity.setUnindexedProperty("ref", exec.getRef());
         entity.setUnindexedProperty("state", exec.getState().name());
@@ -103,8 +118,9 @@ public final class DatastoreModel implements Model {
     private final Entity newExec(Entity market, Exec exec) {
         final Entity entity = new Entity(EXEC_KIND, exec.getId(), market.getKey());
         entity.setUnindexedProperty("orderId", exec.getOrderId());
-        entity.setUnindexedProperty("traderId", exec.getTraderId());
-        entity.setUnindexedProperty("contrId", exec.getContrId());
+        entity.setUnindexedProperty("trader", exec.getTrader());
+        entity.setUnindexedProperty("market", exec.getMarket());
+        entity.setUnindexedProperty("contr", exec.getContr());
         entity.setUnindexedProperty("settlDay", Integer.valueOf(exec.getSettlDay()));
         entity.setUnindexedProperty("ref", exec.getRef());
         entity.setProperty("state", exec.getState().name());
@@ -119,10 +135,7 @@ public final class DatastoreModel implements Model {
         if (exec.getState() == State.TRADE) {
             entity.setUnindexedProperty("matchId", exec.getMatchId());
             entity.setUnindexedProperty("role", exec.getRole().name());
-            entity.setUnindexedProperty("cptyId", exec.getCptyId());
-            market.setUnindexedProperty("lastTicks", exec.getLastTicks());
-            market.setUnindexedProperty("lastLots", exec.getLastLots());
-            market.setUnindexedProperty("lastTime", exec.getCreated());
+            entity.setUnindexedProperty("cpty", exec.getCpty());
         }
         entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
@@ -142,25 +155,14 @@ public final class DatastoreModel implements Model {
         return order;
     }
 
-    private final Entity getMarket(Transaction txn, long contrId, int settlDay) {
-        // Lazily for now, but we may want to explicitly create markets in the future.
-        final Key key = KeyFactory.createKey(MARKET_KIND, Market.composeKey(contrId, settlDay));
-        Entity entity;
+    private final Entity getMarket(Transaction txn, String market) throws NotFoundException {
+        final Key key = KeyFactory.createKey(MARKET_KIND, market);
         try {
-            entity = datastore.get(txn, key);
+            return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            entity = new Entity(key);
-            entity.setUnindexedProperty("contrId", contrId);
-            entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
-            entity.setUnindexedProperty("expiryDay", Integer.valueOf(settlDay));
-            entity.setUnindexedProperty("lastTicks", Long.valueOf(0L));
-            entity.setUnindexedProperty("lastLots", Long.valueOf(0L));
-            entity.setUnindexedProperty("lastTime", Long.valueOf(0L));
-            entity.setUnindexedProperty("maxOrderId", Long.valueOf(0L));
-            entity.setUnindexedProperty("maxExecId", Long.valueOf(0L));
-            datastore.put(txn, entity);
+            throw new NotFoundException(String.format("market '%s' does not exist in datastore",
+                    market));
         }
-        return entity;
     }
 
     private final Entity getOrder(Transaction txn, Key parent, long id) throws NotFoundException {
@@ -190,17 +192,17 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExec(long contrId, int settlDay, Exec exec) throws NotFoundException {
+    public final void insertExec(Exec exec) throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity market = getMarket(txn, contrId, settlDay);
+            final Entity market = getMarket(txn, exec.getMarket());
             if (exec.getState() == State.NEW) {
-                datastore.put(newOrder(market, exec));
+                datastore.put(txn, newOrder(market, exec));
             } else {
-                datastore.put(applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
+                datastore.put(txn, applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
             }
-            datastore.put(newExec(market, exec));
-            datastore.put(market);
+            datastore.put(txn, newExec(market, exec));
+            datastore.put(txn, market);
             txn.commit();
         } catch (ConcurrentModificationException e) {
             // FIXME: implement retry logic.
@@ -213,14 +215,13 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertExecList(long contrId, int settlDay, SlNode first)
-            throws NotFoundException {
+    public final void insertExecList(String marketMnem, SlNode first) throws NotFoundException {
         // N.B. the approach I used previously on a traditional RDMS was quite different, in that
         // order revisions were managed as triggers on the exec table.
         final Map<Long, Entity> orders = new HashMap<>();
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity market = getMarket(txn, contrId, settlDay);
+            final Entity market = getMarket(txn, marketMnem);
             for (SlNode node = first; node != null; node = node.slNext()) {
                 final Exec exec = (Exec) node;
                 if (exec.getState() == State.NEW) {
@@ -237,10 +238,10 @@ public final class DatastoreModel implements Model {
                     }
                     applyExec(order, exec);
                 }
-                datastore.put(newExec(market, exec));
+                datastore.put(txn, newExec(market, exec));
             }
-            datastore.put(orders.values());
-            datastore.put(market);
+            datastore.put(txn, orders.values());
+            datastore.put(txn, market);
             txn.commit();
         } catch (ConcurrentModificationException e) {
             // FIXME: implement retry logic.
@@ -250,12 +251,6 @@ public final class DatastoreModel implements Model {
                 txn.rollback();
             }
         }
-    }
-
-    @Override
-    public final long allocTraderId() {
-        final KeyRange range = datastore.allocateIds(TRADER_KIND, 1L);
-        return range.getStart().getId();
     }
 
     @Override
@@ -264,31 +259,6 @@ public final class DatastoreModel implements Model {
         try {
             // Trader entities have common ancestor for strong consistency.
             final Entity entity = newTrader(trader);
-            datastore.put(entity);
-            txn.commit();
-        } catch (ConcurrentModificationException e) {
-            // FIXME: implement retry logic.
-            throw e;
-        } finally {
-            if (txn.isActive()) {
-                txn.rollback();
-            }
-        }
-    }
-
-    @Override
-    public final void insertMarket(long contrId, int settlDay, int expiryDay) {
-        final Transaction txn = datastore.beginTransaction();
-        try {
-            final Entity entity = new Entity(MARKET_KIND, Market.composeKey(contrId, settlDay));
-            entity.setUnindexedProperty("contrId", contrId);
-            entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
-            entity.setUnindexedProperty("expiryDay", Integer.valueOf(expiryDay));
-            entity.setUnindexedProperty("lastTicks", Long.valueOf(0L));
-            entity.setUnindexedProperty("lastLots", Long.valueOf(0L));
-            entity.setUnindexedProperty("lastTime", Long.valueOf(0L));
-            entity.setUnindexedProperty("maxOrderId", Long.valueOf(0L));
-            entity.setUnindexedProperty("maxExecId", Long.valueOf(0L));
             datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
@@ -302,15 +272,11 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void archiveOrder(long contrId, int settlDay, long id, long modified)
-            throws NotFoundException {
+    public final void insertMarket(Market market) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity market = getMarket(txn, contrId, settlDay);
-            final Entity entity = getOrder(txn, market.getKey(), id);
-            entity.setProperty("archive", Boolean.TRUE);
-            entity.setUnindexedProperty("modified", modified);
-            datastore.put(entity);
+            final Entity entity = newMarket(market);
+            datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
             // FIXME: implement retry logic.
@@ -323,15 +289,36 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void archiveTrade(long contrId, int settlDay, long id, long modified)
+    public final void archiveOrder(String marketMnem, long id, long modified)
             throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity market = getMarket(txn, contrId, settlDay);
+            final Entity market = getMarket(txn, marketMnem);
+            final Entity entity = getOrder(txn, market.getKey(), id);
+            entity.setProperty("archive", Boolean.TRUE);
+            entity.setUnindexedProperty("modified", modified);
+            datastore.put(txn, entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void archiveTrade(String marketMnem, long id, long modified)
+            throws NotFoundException {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity market = getMarket(txn, marketMnem);
             final Entity entity = getExec(txn, market.getKey(), id);
             entity.setProperty("archive", Boolean.TRUE);
             entity.setUnindexedProperty("modified", modified);
-            datastore.put(entity);
+            datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
             // FIXME: implement retry logic.
@@ -360,11 +347,10 @@ public final class DatastoreModel implements Model {
         final Query q = new Query(TRADER_KIND);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
-            final long id = entity.getKey().getId();
-            final String mnem = (String) entity.getProperty("mnem");
+            final String mnem = entity.getKey().getName();
             final String display = (String) entity.getProperty("display");
             final String email = (String) entity.getProperty("email");
-            final Trader trader = new Trader(id, mnem, display, email);
+            final Trader trader = new Trader(mnem, display, email);
             cb.call(trader);
         }
     }
@@ -374,7 +360,9 @@ public final class DatastoreModel implements Model {
         final Query q = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(q);
         for (final Entity entity : pq.asIterable()) {
-            final Identifiable contr = newId((Long) entity.getProperty("contrId"));
+            final String mnem = entity.getKey().getName();
+            final String display = (String) entity.getProperty("display");
+            final Memorable contr = newMnem((String) entity.getProperty("contr"));
             final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
             final int expiryDay = ((Long) entity.getProperty("expiryDay")).intValue();
             final long lastTicks = (Long) entity.getProperty("lastTicks");
@@ -382,8 +370,8 @@ public final class DatastoreModel implements Model {
             final long lastTime = (Long) entity.getProperty("lastTime");
             final long maxOrderId = (Long) entity.getProperty("maxOrderId");
             final long maxExecId = (Long) entity.getProperty("maxExecId");
-            final Market market = new Market(contr, settlDay, expiryDay, lastTicks, lastLots,
-                    lastTime, maxOrderId, maxExecId);
+            final Market market = new Market(mnem, display, contr, settlDay, expiryDay, lastTicks,
+                    lastLots, lastTime, maxOrderId, maxExecId);
             cb.call(market);
         }
     }
@@ -398,8 +386,9 @@ public final class DatastoreModel implements Model {
                 final PreparedQuery pq = datastore.prepare(q);
                 for (final Entity entity : pq.asIterable()) {
                     final long id = entity.getKey().getId();
-                    final Identifiable trader = newId((Long) entity.getProperty("traderId"));
-                    final Identifiable contr = newId((Long) entity.getProperty("contrId"));
+                    final String trader = (String) entity.getProperty("trader");
+                    final String market = (String) entity.getProperty("market");
+                    final String contr = (String) entity.getProperty("contr");
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
                     final String ref = (String) entity.getProperty("ref");
                     final State state = State.valueOf((String) entity.getProperty("state"));
@@ -413,8 +402,8 @@ public final class DatastoreModel implements Model {
                     final long minLots = (Long) entity.getProperty("minLots");
                     final long created = (Long) entity.getProperty("created");
                     final long modified = (Long) entity.getProperty("modified");
-                    final Order order = new Order(id, trader, contr, settlDay, ref, state, action,
-                            ticks, lots, resd, exec, lastTicks, lastLots, minLots, created,
+                    final Order order = new Order(id, trader, market, contr, settlDay, ref, state,
+                            action, ticks, lots, resd, exec, lastTicks, lastLots, minLots, created,
                             modified);
                     cb.call(order);
                 }
@@ -437,8 +426,9 @@ public final class DatastoreModel implements Model {
                 for (final Entity entity : pq.asIterable()) {
                     final long id = entity.getKey().getId();
                     final long orderId = (Long) entity.getProperty("orderId");
-                    final Identifiable trader = newId((Long) entity.getProperty("traderId"));
-                    final Identifiable contr = newId((Long) entity.getProperty("contrId"));
+                    final String trader = (String) entity.getProperty("trader");
+                    final String market = (String) entity.getProperty("market");
+                    final String contr = (String) entity.getProperty("contr");
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
                     final String ref = (String) entity.getProperty("ref");
                     final State state = State.valueOf((String) entity.getProperty("state"));
@@ -452,20 +442,20 @@ public final class DatastoreModel implements Model {
                     final long minLots = (Long) entity.getProperty("minLots");
                     long matchId;
                     Role role;
-                    Identifiable cpty;
+                    String cpty;
                     if (state == State.TRADE) {
                         matchId = (Long) entity.getProperty("matchId");
                         role = Role.valueOf((String) entity.getProperty("role"));
-                        cpty = newId((Long) entity.getProperty("cptyId"));
+                        cpty = (String) entity.getProperty("cpty");
                     } else {
                         matchId = 0;
                         role = null;
                         cpty = null;
                     }
                     final long created = (Long) entity.getProperty("created");
-                    final Exec trade = new Exec(id, orderId, trader, contr, settlDay, ref, state,
-                            action, ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId,
-                            role, cpty, created);
+                    final Exec trade = new Exec(id, orderId, trader, market, contr, settlDay, ref,
+                            state, action, ticks, lots, resd, exec, lastTicks, lastLots, minLots,
+                            matchId, role, cpty, created);
                     cb.call(trade);
                 }
             }
@@ -474,7 +464,7 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void selectPosn(final UnaryCallback<Posn> cb) {
-        final Map<Long, Posn> m = new HashMap<>();
+        final PosnTree posns = new PosnTree();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
@@ -482,15 +472,17 @@ public final class DatastoreModel implements Model {
                 final Query q = new Query(EXEC_KIND).setFilter(filter);
                 final PreparedQuery pq = datastore.prepare(q);
                 for (final Entity entity : pq.asIterable()) {
-                    final long traderId = (Long) entity.getProperty("traderId");
-                    final long contrId = (Long) entity.getProperty("contrId");
+                    final String trader = (String) entity.getProperty("trader");
+                    final String market = (String) entity.getProperty("market");
+                    final String contr = (String) entity.getProperty("contr");
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-                    final Long posnId = Long.valueOf(Posn.composeKey(contrId, settlDay, traderId));
                     // Lazy position.
-                    Posn posn = m.get(posnId);
-                    if (posn == null) {
-                        posn = new Posn(newId(traderId), newId(contrId), settlDay);
-                        m.put(posnId, posn);
+                    Posn posn = (Posn) posns.pfind(trader, market);
+                    if (posn == null || !posn.getTrader().equals(trader)
+                            || !posn.getMarket().equals(market)) {
+                        final RbNode parent = posn;
+                        posn = new Posn(trader, market, contr, settlDay);
+                        posns.pinsert(posn, parent);
                     }
                     final Action action = Action.valueOf((String) entity.getProperty("action"));
                     final long lastTicks = (Long) entity.getProperty("lastTicks");
@@ -499,7 +491,12 @@ public final class DatastoreModel implements Model {
                 }
             }
         });
-        for (final Posn posn : m.values()) {
+        for (;;) {
+            final Posn posn = (Posn) posns.getRoot();
+            if (posn == null) {
+                break;
+            }
+            posns.remove(posn);
             cb.call(posn);
         }
     }

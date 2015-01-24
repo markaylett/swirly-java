@@ -129,7 +129,6 @@ function Contr(val) {
 
     self.mnem = ko.observable(val.mnem);
     self.display = ko.observable(val.display);
-    self.assetType = ko.observable(val.assetType);
     self.asset = ko.observable(val.asset);
     self.ccy = ko.observable(val.ccy);
     self.tickNumer = ko.observable(val.tickNumer);
@@ -163,6 +162,19 @@ function Contr(val) {
         var lotDenom = self.lotDenom();
         return fractToReal(lotNumer, lotDenom).toFixed(self.qtyDp());
     });
+
+    self.update = function(val) {
+        self.display(val.display);
+        self.asset(val.asset);
+        self.ccy(val.ccy);
+        self.tickNumer(val.tickNumer);
+        self.tickDenom(val.tickDenom);
+        self.lotNumer(val.lotNumer);
+        self.lotDenom(val.lotDenom);
+        self.pipDp(val.pipDp);
+        self.minLots(val.minLots);
+        self.maxLots(val.maxLots);
+    }
 }
 
 function Trader(val) {
@@ -171,18 +183,42 @@ function Trader(val) {
     self.mnem = ko.observable(val.mnem);
     self.display = ko.observable(val.display);
     self.email = ko.observable(val.email);
+
+    self.update = function(val) {
+        self.display(val.display);
+        self.email(val.email);
+    };
 }
 
 function Market(val, contrs) {
     var self = this;
 
     var contr = contrs[val.contr];
-
     self.isSelected = ko.observable(val.isSelected);
-    self.id = ko.observable(val.id);
+    self.mnem = ko.observable(val.mnem);
+    self.display = ko.observable(val.display);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.expiryDate = ko.observable(toDateStr(val.expiryDate));
+
+    self.update = function(val) {
+
+        var contr = contrs[val.contr];
+        self.display(val.display);
+        self.contr(contr);
+        self.settlDate(toDateStr(val.settlDate));
+        self.expiryDate(toDateStr(val.expiryDate));
+    };
+}
+
+function View(val, contrs) {
+    var self = this;
+
+    var contr = contrs[val.contr];
+    self.isSelected = ko.observable(val.isSelected);
+    self.market = ko.observable(val.market);
+    self.contr = ko.observable(contr);
+    self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.bidTicks = ko.observableArray(val.bidTicks);
     self.bidLots = ko.observableArray(val.bidLots);
     self.bidCount = ko.observableArray(val.bidCount);
@@ -213,7 +249,9 @@ function Market(val, contrs) {
     });
 
     self.update = function(val) {
-        self.expiryDate(toDateStr(val.expiryDate));
+        var contr = contrs[val.contr];
+        self.contr(contr);
+        self.settlDate(toDateStr(val.settlDate));
         self.bidTicks(val.bidTicks);
         self.bidLots(val.bidLots);
         self.bidCount(val.bidCount);
@@ -230,10 +268,10 @@ function Order(val, contrs) {
     var self = this;
 
     var contr = contrs[val.contr];
-
     self.isSelected = ko.observable(val.isSelected);
     self.id = ko.observable(val.id);
     self.trader = ko.observable(val.trader);
+    self.market = ko.observable(val.market);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.ref = ko.observable(val.ref);
@@ -263,12 +301,20 @@ function Order(val, contrs) {
     };
 
     self.update = function(val) {
+        var contr = contrs[val.contr];
+        self.contr(contr);
+        self.settlDate(toDateStr(val.settlDate));
+        self.ref(val.ref);
         self.state(val.state);
+        self.action(val.action);
+        self.ticks(val.ticks);
         self.lots(val.lots);
         self.resd(val.resd);
         self.exec(val.exec);
         self.lastTicks(val.lastTicks);
         self.lastLots(val.lastLots);
+        self.minLots(val.minLots);
+        self.created(val.created);
         self.modified(val.modified);
     };
 }
@@ -277,11 +323,11 @@ function Trade(val, contrs) {
     var self = this;
 
     var contr = contrs[val.contr];
-
     self.isSelected = ko.observable(val.isSelected);
     self.id = ko.observable(val.id);
     self.orderId = ko.observable(val.orderId);
     self.trader = ko.observable(val.trader);
+    self.market = ko.observable(val.market);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.ref = ko.observable(val.ref);
@@ -308,15 +354,36 @@ function Trade(val, contrs) {
     self.lastPrice = ko.computed(function() {
         return ticksToPrice(self.lastTicks(), self.contr());
     });
+
+    self.update = function(val) {
+        var contr = contrs[val.contr];
+        self.contr(contr);
+        self.settlDate(toDateStr(val.settlDate));
+        self.ref(val.ref);
+        self.state(val.state);
+        self.action(val.action);
+        self.ticks(val.ticks);
+        self.lots(val.lots);
+        self.resd(val.resd);
+        self.exec(val.exec);
+        self.lastTicks(val.lastTicks);
+        self.lastLots(val.lastLots);
+        self.minLots(val.minLots);
+
+        self.matchId(val.matchId);
+        self.role(val.role);
+        self.cpty(val.cpty);
+
+        self.created(val.created);
+    };
 }
 
 function Posn(val, contrs) {
     var self = this;
 
     var contr = contrs[val.contr];
-
-    self.id = ko.observable(val.id);
     self.trader = ko.observable(val.trader);
+    self.market = ko.observable(val.market);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.buyCost = ko.observable(val.buyCost);
@@ -363,6 +430,9 @@ function Posn(val, contrs) {
     });
 
     self.update = function(val) {
+        var contr = contrs[val.contr];
+        self.contr(contr);
+        self.settlDate(toDateStr(val.settlDate));
         self.buyCost(val.buyCost);
         self.buyLots(val.buyLots);
         self.sellCost(val.sellCost);
