@@ -28,9 +28,8 @@ public final class Benchmark {
         final Accnt emiayl = s.getLazyAccnt("EMIAYL");
 
         final int settlDay = ymdToJd(2014, 2, 14);
-        final int fixingDay = ymdToJd(2014, 2, 13);
         final int expiryDay = ymdToJd(2014, 2, 12);
-        final Market market = s.createMarket("EURUSD", settlDay, fixingDay, expiryDay,
+        final Market market = s.createMarket("EURUSD", settlDay, expiryDay,
                 System.currentTimeMillis());
         assert market != null;
 

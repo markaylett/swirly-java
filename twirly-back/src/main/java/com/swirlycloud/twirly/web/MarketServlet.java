@@ -96,12 +96,12 @@ public final class MarketServlet extends RestServlet {
             final String cmnem = parts[CMNEM_PART];
 
             final Request r = parseRequest(req);
-            if (r.getFields() != (Request.SETTL_DATE | Request.FIXING_DATE | Request.EXPIRY_DATE)) {
+            if (r.getFields() != (Request.SETTL_DATE | Request.EXPIRY_DATE)) {
                 throw new BadRequestException("request fields are invalid");
             }
             final long now = System.currentTimeMillis();
-            rest.postMarket(cmnem, r.getSettlDate(), r.getFixingDate(), r.getExpiryDate(),
-                    PARAMS_NONE, now, resp.getWriter());
+            rest.postMarket(cmnem, r.getSettlDate(), r.getExpiryDate(), PARAMS_NONE, now,
+                    resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

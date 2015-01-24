@@ -339,17 +339,14 @@ public final class Serv {
     }
 
     @NonNull
-    public final Market createMarket(Contr contr, int settlDay, int fixingDay, int expiryDay,
-            long now) throws BadRequestException {
-        // busDay <= expiryDay <= fixingDay <= settlDay.
+    public final Market createMarket(Contr contr, int settlDay, int expiryDay, long now)
+            throws BadRequestException {
+        // busDay <= expiryDay <= settlDay.
         final int busDay = getBusDate(now).toJd();
         if (busDay > expiryDay) {
             throw new BadRequestException("expiry-day before bus-day");
         }
-        if (expiryDay > fixingDay) {
-            throw new BadRequestException("fixing-day before expiry-day");
-        }
-        if (fixingDay > settlDay) {
+        if (expiryDay > settlDay) {
             throw new BadRequestException("settl-day before fixing-day");
         }
         final long key = Market.composeKey(contr.getId(), settlDay);
@@ -358,21 +355,21 @@ public final class Serv {
             throw new BadRequestException(String.format("market '%s' for '%d' already exists",
                     contr.getMnem(), jdToIso(settlDay)));
         }
-        final Market market = new Market(contr, settlDay, fixingDay, expiryDay);
-        model.insertMarket(contr.getId(), settlDay, fixingDay, expiryDay);
+        final Market market = new Market(contr, settlDay, expiryDay);
+        model.insertMarket(contr.getId(), settlDay, expiryDay);
         final RbNode parent = node;
         markets.pinsert(market, parent);
         return market;
     }
 
     @NonNull
-    public final Market createMarket(String mnem, int settlDay, int fixingDay, int expiryDay,
-            long now) throws BadRequestException, NotFoundException {
+    public final Market createMarket(String mnem, int settlDay, int expiryDay, long now)
+            throws BadRequestException, NotFoundException {
         final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
         }
-        return createMarket(contr, settlDay, fixingDay, expiryDay, now);
+        return createMarket(contr, settlDay, expiryDay, now);
     }
 
     public final void expireMarkets(long now) throws NotFoundException {
@@ -404,7 +401,7 @@ public final class Serv {
         final long key = Market.composeKey(contr.getId(), settlDay);
         final RbNode node = markets.pfind(key);
         if (node == null || node.getKey() != key) {
-            market = new Market(contr, settlDay, settlDay, settlDay);
+            market = new Market(contr, settlDay, settlDay);
             final RbNode parent = node;
             markets.pinsert(market, parent);
         } else {

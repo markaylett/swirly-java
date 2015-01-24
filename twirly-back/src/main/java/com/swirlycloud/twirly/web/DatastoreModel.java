@@ -152,7 +152,6 @@ public final class DatastoreModel implements Model {
             entity = new Entity(key);
             entity.setUnindexedProperty("contrId", contrId);
             entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
-            entity.setUnindexedProperty("fixingDay", Integer.valueOf(settlDay));
             entity.setUnindexedProperty("expiryDay", Integer.valueOf(settlDay));
             entity.setUnindexedProperty("lastTicks", Long.valueOf(0L));
             entity.setUnindexedProperty("lastLots", Long.valueOf(0L));
@@ -278,13 +277,12 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void insertMarket(long contrId, int settlDay, int fixingDay, int expiryDay) {
+    public final void insertMarket(long contrId, int settlDay, int expiryDay) {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity entity = new Entity(MARKET_KIND, Market.composeKey(contrId, settlDay));
             entity.setUnindexedProperty("contrId", contrId);
             entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
-            entity.setUnindexedProperty("fixingDay", Integer.valueOf(fixingDay));
             entity.setUnindexedProperty("expiryDay", Integer.valueOf(expiryDay));
             entity.setUnindexedProperty("lastTicks", Long.valueOf(0L));
             entity.setUnindexedProperty("lastLots", Long.valueOf(0L));
@@ -378,15 +376,14 @@ public final class DatastoreModel implements Model {
         for (final Entity entity : pq.asIterable()) {
             final Identifiable contr = newId((Long) entity.getProperty("contrId"));
             final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
-            final int fixingDay = ((Long) entity.getProperty("fixingDay")).intValue();
             final int expiryDay = ((Long) entity.getProperty("expiryDay")).intValue();
             final long lastTicks = (Long) entity.getProperty("lastTicks");
             final long lastLots = (Long) entity.getProperty("lastLots");
             final long lastTime = (Long) entity.getProperty("lastTime");
             final long maxOrderId = (Long) entity.getProperty("maxOrderId");
             final long maxExecId = (Long) entity.getProperty("maxExecId");
-            final Market market = new Market(contr, settlDay, fixingDay, expiryDay, lastTicks,
-                    lastLots, lastTime, maxOrderId, maxExecId);
+            final Market market = new Market(contr, settlDay, expiryDay, lastTicks, lastLots,
+                    lastTime, maxOrderId, maxExecId);
             cb.call(market);
         }
     }

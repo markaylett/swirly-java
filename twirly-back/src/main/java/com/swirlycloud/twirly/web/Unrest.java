@@ -384,10 +384,10 @@ public final class Unrest {
         }
     }
 
-    public final View postMarket(String cmnem, int settlDate, int fixingDate, int expiryDate,
-            Params params, long now) throws BadRequestException, NotFoundException, IOException {
+    public final View postMarket(String cmnem, int settlDate, int expiryDate, Params params,
+            long now) throws BadRequestException, NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postMarket(cmnem, settlDate, fixingDate, expiryDate, withInternal(params), now, sb);
+        rest.postMarket(cmnem, settlDate, expiryDate, withInternal(params), now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);

@@ -28,10 +28,9 @@ public final class ServTest {
         assertNotNull(accnt);
 
         final int settlDay = ymdToJd(2014, 2, 14);
-        final int fixingDay = ymdToJd(2014, 2, 13);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final long now = 1394625600000L;
-        final Market market = serv.createMarket("EURUSD", settlDay, fixingDay, expiryDay, now);
+        final Market market = serv.createMarket("EURUSD", settlDay, expiryDay, now);
         assertNotNull(market);
 
         final Trans trans = new Trans();

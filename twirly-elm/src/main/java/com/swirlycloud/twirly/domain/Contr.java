@@ -198,8 +198,7 @@ public final class Contr extends Rec {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out)
-            throws IOException {
+    public final void toJson(Params params, Appendable out) throws IOException {
         out.append('{');
         if (isInternal(params)) {
             out.append("\"id\":").append(String.valueOf(id)).append(',');

@@ -3,7 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
-
 public abstract class ExecNode extends BasicRbNode implements SlNode {
 
     private transient SlNode next;

@@ -218,7 +218,7 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
         out.append(",\"contr\":").append(getIdOrMnem(contr, params));
         out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"ref\":");
-        if (!ref.isEmpty()) { 
+        if (!ref.isEmpty()) {
             out.append('"').append(ref).append('"');
         } else {
             out.append("null");

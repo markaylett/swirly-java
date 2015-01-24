@@ -21,6 +21,7 @@ public final class SlLongHashTableTest {
 
     private static final class Entry extends BasicSlNode {
         final long id;
+
         public Entry(long id) {
             this.id = id;
         }

@@ -3,7 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
-
 public abstract class OrderNode extends BasicRbNode implements DlNode {
 
     private transient DlNode prev;

@@ -18,13 +18,12 @@ public final class Request {
     public static final int EMAIL = 1 << 3;
     public static final int CONTR = 1 << 4;
     public static final int SETTL_DATE = 1 << 5;
-    public static final int FIXING_DATE = 1 << 6;
-    public static final int EXPIRY_DATE = 1 << 7;
-    public static final int REF = 1 << 8;
-    public static final int ACTION = 1 << 9;
-    public static final int TICKS = 1 << 10;
-    public static final int LOTS = 1 << 11;
-    public static final int MIN_LOTS = 1 << 12;
+    public static final int EXPIRY_DATE = 1 << 6;
+    public static final int REF = 1 << 7;
+    public static final int ACTION = 1 << 8;
+    public static final int TICKS = 1 << 9;
+    public static final int LOTS = 1 << 10;
+    public static final int MIN_LOTS = 1 << 11;
 
     private int fields;
 
@@ -34,7 +33,6 @@ public final class Request {
     private String email;
     private String contr;
     private int settlDate;
-    private int fixingDate;
     private int expiryDate;
     private String ref;
     private Action action;
@@ -50,13 +48,12 @@ public final class Request {
         email = null;
         contr = null;
         settlDate = 0;
-        fixingDate = 0;
         expiryDate = 0;
         ref = null;
         action = null;
         ticks = 0;
         lots = 0;
-        minLots = 0;        
+        minLots = 0;
     }
 
     public final void parse(JsonParser p) throws IOException {
@@ -99,9 +96,6 @@ public final class Request {
                 } else if ("settlDate".equals(name)) {
                     fields |= SETTL_DATE;
                     settlDate = p.getInt();
-                } else if ("fixingDate".equals(name)) {
-                    fields |= FIXING_DATE;
-                    fixingDate = p.getInt();
                 } else if ("expiryDate".equals(name)) {
                     fields |= EXPIRY_DATE;
                     expiryDate = p.getInt();
@@ -173,10 +167,6 @@ public final class Request {
 
     public final int getSettlDate() {
         return settlDate;
-    }
-
-    public final int getFixingDate() {
-        return fixingDate;
     }
 
     public final int getExpiryDate() {

@@ -48,8 +48,7 @@ public final class UnrestTest {
     private static final String EMAIL = "mark.aylett@gmail.com";
     private static final int TODAY = ymdToJd(2014, 2, 11);
     private static final int EXPIRY_DAY = TODAY + 1;
-    private static final int FIXING_DAY = TODAY + 2;
-    private static final int SETTL_DAY = TODAY + 3;
+    private static final int SETTL_DAY = TODAY + 2;
 
     private static final long NOW = jdToMillis(TODAY);
 
@@ -103,7 +102,6 @@ public final class UnrestTest {
     private static void assertView(String cmnem, View view) throws NotFoundException, IOException {
         assertEquals(getContrId(cmnem), view.getContrId());
         assertEquals(SETTL_DAY, view.getSettlDay());
-        assertEquals(FIXING_DAY, view.getFixingDay());
         assertEquals(EXPIRY_DAY, view.getExpiryDay());
 
         assertEquals(0, view.getOfferTicks(0));
@@ -181,8 +179,7 @@ public final class UnrestTest {
 
     private final View postMarket(String cmnem) throws BadRequestException, NotFoundException,
             IOException {
-        return unrest.postMarket(cmnem, jdToIso(SETTL_DAY), jdToIso(FIXING_DAY),
-                jdToIso(EXPIRY_DAY), PARAMS_NONE, NOW);
+        return unrest.postMarket(cmnem, jdToIso(SETTL_DAY), jdToIso(EXPIRY_DAY), PARAMS_NONE, NOW);
     }
 
     private final void deleteOrder(String cmnem, long id) throws BadRequestException,

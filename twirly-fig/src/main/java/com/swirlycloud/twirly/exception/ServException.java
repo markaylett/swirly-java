@@ -25,8 +25,7 @@ public abstract class ServException extends Exception implements Jsonifiable {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out)
-            throws IOException {
+    public final void toJson(Params params, Appendable out) throws IOException {
         out.append("{\"num\":");
         out.append(String.valueOf(num));
         out.append(",\"msg\":\"");

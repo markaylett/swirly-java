@@ -322,6 +322,7 @@ public abstract class Tree<T> {
         }
         setColor(node, NONE);
     }
+
     /**
      * If you want fast access to any node, then root is your best choice.
      * 

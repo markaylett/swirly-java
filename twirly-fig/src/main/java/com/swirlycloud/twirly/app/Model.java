@@ -24,7 +24,7 @@ public interface Model extends Journ {
 
     void insertTrader(Trader trader);
 
-    void insertMarket(long contrId, int settlDay, int fixingDay, int expiryDay);
+    void insertMarket(long contrId, int settlDay, int expiryDay);
 
     void archiveOrder(long contrId, int settlDay, long id, long modified) throws NotFoundException;
 

@@ -35,7 +35,7 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void insertMarket(long contrId, int settlDay, int fixingDay, int expiryDay) {
+    public final void insertMarket(long contrId, int settlDay, int expiryDay) {
     }
 
     @Override

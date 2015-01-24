@@ -46,8 +46,7 @@ public final class Trans implements Jsonifiable {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out)
-            throws IOException {
+    public final void toJson(Params params, Appendable out) throws IOException {
         final long traderId = order.getTraderId();
         out.append("{\"market\":");
         market.toJson(params, out);

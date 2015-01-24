@@ -203,17 +203,16 @@ public final class Rest {
         market.toJson(params, out);
     }
 
-    public final synchronized void postMarket(String cmnem, int settlDate, int fixingDate,
-            int expiryDate, Params params, long now, Appendable out) throws BadRequestException,
-            NotFoundException, IOException {
+    public final synchronized void postMarket(String cmnem, int settlDate, int expiryDate,
+            Params params, long now, Appendable out) throws BadRequestException, NotFoundException,
+            IOException {
         final Contr contr = (Contr) serv.findRec(RecType.CONTR, cmnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contract '%s' does not exist", cmnem));
         }
         final int settlDay = isoToJd(settlDate);
-        final int fixingDay = isoToJd(fixingDate);
         final int expiryDay = isoToJd(expiryDate);
-        final Market market = serv.createMarket(contr, settlDay, fixingDay, expiryDay, now);
+        final Market market = serv.createMarket(contr, settlDay, expiryDay, now);
         market.toJson(params, out);
     }
 

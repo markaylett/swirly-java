@@ -182,7 +182,6 @@ function Market(val, contrs) {
     self.id = ko.observable(val.id);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
-    self.fixingDate = ko.observable(toDateStr(val.fixingDate));
     self.expiryDate = ko.observable(toDateStr(val.expiryDate));
     self.bidTicks = ko.observableArray(val.bidTicks);
     self.bidLots = ko.observableArray(val.bidLots);
@@ -214,7 +213,6 @@ function Market(val, contrs) {
     });
 
     self.update = function(val) {
-        self.fixingDate(toDateStr(val.fixingDate));
         self.expiryDate(toDateStr(val.expiryDate));
         self.bidTicks(val.bidTicks);
         self.bidLots(val.bidLots);

@@ -32,20 +32,18 @@ public final class View implements Identifiable, Jsonifiable {
     private final transient long key;
     private Identifiable contr;
     private final int settlDay;
-    private final int fixingDay;
     private final int expiryDay;
     private final Ladder ladder;
     private long lastTicks;
     private long lastLots;
     private long lastTime;
 
-    private View(long key, Identifiable contr, int settlDay, int fixingDay, int expiryDay,
-            Ladder ladder, long lastTicks, long lastLots, long lastTime) {
+    private View(long key, Identifiable contr, int settlDay, int expiryDay, Ladder ladder,
+            long lastTicks, long lastLots, long lastTime) {
         assert ladder != null;
         this.key = key;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.fixingDay = fixingDay;
         this.expiryDay = expiryDay;
         this.ladder = ladder;
         this.lastTicks = lastTicks;
@@ -53,10 +51,10 @@ public final class View implements Identifiable, Jsonifiable {
         this.lastTime = lastTime;
     }
 
-    public View(Identifiable contr, int settlDay, int fixingDay, int expiryDay, Ladder ladder,
-            long lastTicks, long lastLots, long lastTime) {
-        this(composeKey(contr.getId(), settlDay), contr, settlDay, fixingDay, expiryDay, ladder,
-                lastTicks, lastLots, lastTime);
+    public View(Identifiable contr, int settlDay, int expiryDay, Ladder ladder, long lastTicks,
+            long lastLots, long lastTime) {
+        this(composeKey(contr.getId(), settlDay), contr, settlDay, expiryDay, ladder, lastTicks,
+                lastLots, lastTime);
     }
 
     public static void parse(JsonParser p, Ladder ladder, int col) throws IOException {
@@ -82,7 +80,6 @@ public final class View implements Identifiable, Jsonifiable {
         long key = 0;
         Identifiable contr = null;
         int settlDay = 0;
-        int fixingDay = 0;
         int expiryDay = 0;
         final Ladder ladder = new Ladder();
         long lastTicks = 0;
@@ -94,8 +91,8 @@ public final class View implements Identifiable, Jsonifiable {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new View(key, contr, settlDay, fixingDay, expiryDay, ladder, lastTicks,
-                        lastLots, lastTime);
+                return new View(key, contr, settlDay, expiryDay, ladder, lastTicks, lastLots,
+                        lastTime);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -134,8 +131,6 @@ public final class View implements Identifiable, Jsonifiable {
                     contr = newId(p.getLong());
                 } else if ("settlDate".equals(name)) {
                     settlDay = JulianDay.isoToJd(p.getInt());
-                } else if ("fixingDate".equals(name)) {
-                    fixingDay = JulianDay.isoToJd(p.getInt());
                 } else if ("expiryDate".equals(name)) {
                     expiryDay = JulianDay.isoToJd(p.getInt());
                 } else if ("lastTicks".equals(name)) {
@@ -192,7 +187,6 @@ public final class View implements Identifiable, Jsonifiable {
         out.append("{\"id\":").append(String.valueOf(key));
         out.append(",\"contr\":").append(getIdOrMnem(contr, params));
         out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"fixingDate\":").append(String.valueOf(jdToIso(fixingDay)));
         out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
         out.append(",\"bidTicks\":[");
 
@@ -291,10 +285,6 @@ public final class View implements Identifiable, Jsonifiable {
 
     public final int getSettlDay() {
         return settlDay;
-    }
-
-    public final int getFixingDay() {
-        return fixingDay;
     }
 
     public final int getExpiryDay() {

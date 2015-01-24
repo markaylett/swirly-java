@@ -29,7 +29,6 @@
             </th>
             <th>Contr</th>
             <th>Settl Date</th>
-            <th>Fixing Date</th>
             <th>Expiry Date</th>
             <th style="text-align: right;">Bid Count</th>
             <th style="text-align: right;">Bid Lots</th>
@@ -47,7 +46,6 @@
             </td>
             <td data-bind="mnem: contr"></td>
             <td data-bind="text: settlDate"></td>
-            <td data-bind="text: fixingDate"></td>
             <td data-bind="text: expiryDate"></td>
             <td style="text-align: right;" data-bind="depth: bidCount"></td>
             <td style="text-align: right;" data-bind="depth: bidLots"></td>
@@ -80,11 +78,6 @@
                 <label for="settlDate">Settl Date:</label>
                 <input id="settlDate" type="date" class="form-control"
                        data-bind="value: settlDate"/>
-              </div>
-              <div class="form-group">
-                <label for="fixingDate">Fixing Date:</label>
-                <input id="fixingDate" type="date" class="form-control"
-                       data-bind="value: fixingDate"/>
               </div>
               <div class="form-group">
                 <label for="expiryDate">Expiry Date:</label>
