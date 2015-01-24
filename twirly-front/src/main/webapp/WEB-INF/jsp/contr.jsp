@@ -25,7 +25,6 @@
           <tr>
             <th>Mnem</th>
             <th>Display</th>
-            <th>Asset Type</th>
             <th>Asset</th>
             <th>Ccy</th>
             <th style="text-align: right;">Tick Numer</th>
@@ -43,7 +42,6 @@
           <tr>
             <td data-bind="text: mnem"></td>
             <td data-bind="text: display"></td>
-            <td data-bind="text: assetType"></td>
             <td data-bind="text: asset"></td>
             <td data-bind="text: ccy"></td>
             <td style="text-align: right;" data-bind="text: tickNumer"></td>
