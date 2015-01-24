@@ -3,9 +3,10 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.mock;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
@@ -13,16 +14,19 @@ import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
 
 public final class MockAsset {
-    private static final Map<String, NullaryFunction<Asset>> FACTORIES = new TreeMap<>();
+    private static final List<NullaryFunction<Asset>> LIST = new ArrayList<>();
+    private static final Map<String, NullaryFunction<Asset>> MAP = new HashMap<>();
 
     private static void put(final long id, final String mnem, final String display,
             final AssetType type) {
-        FACTORIES.put(mnem, new NullaryFunction<Asset>() {
+        final NullaryFunction<Asset> fn = new NullaryFunction<Asset>() {
             @Override
             public final Asset call() {
                 return new Asset(id, mnem, display, type);
             }
-        });
+        };
+        LIST.add(fn);
+        MAP.put(mnem, fn);
     }
 
     static {
@@ -49,21 +53,23 @@ public final class MockAsset {
         put(i++, "TRY", "Turkey, New Lira", AssetType.CURRENCY);
         put(i++, "USD", "United States of America, Dollars", AssetType.CURRENCY);
         put(i++, "ZAR", "South Africa, Rand", AssetType.CURRENCY);
-        put(i++, "ZC", "Corn", AssetType.COMMODITY);
-        put(i++, "ZS", "Soybeans", AssetType.COMMODITY);
-        put(i++, "ZW", "Wheat", AssetType.COMMODITY);
+        put(i++, "CAP", "Central Appalachia Coal", AssetType.COMMODITY);
+        put(i++, "NAP", "Northern Appalachia Coal", AssetType.COMMODITY);
+        put(i++, "ILB", "Illinois Basin Coal", AssetType.COMMODITY);
+        put(i++, "PRB", "Powder River Basin Coal", AssetType.COMMODITY);
+        put(i++, "UIB", "Uinta Basin Coal", AssetType.COMMODITY);
     }
 
     private MockAsset() {
     }
 
     public static Asset newAsset(String mnem) {
-        return FACTORIES.get(mnem).call();
+        return MAP.get(mnem).call();
     }
 
     public static void selectAsset(UnaryCallback<Asset> cb) {
-        for (final Entry<String, NullaryFunction<Asset>> entry : FACTORIES.entrySet()) {
-            cb.call(entry.getValue().call());
+        for (final NullaryFunction<Asset> entry : LIST) {
+            cb.call(entry.call());
         }
     }
 }

@@ -76,9 +76,9 @@ public final class CacheTest {
             }
         });
         assertFalse(c.isEmptyRec(RecType.TRADER));
-        assertEquals("EMIAYL", ((Rec) c.getFirstRec(RecType.TRADER)).getMnem());
+        assertEquals("MARAYL", ((Rec) c.getFirstRec(RecType.TRADER)).getMnem());
         assertEquals("GOSAYL", ((Rec) c.getFirstRec(RecType.TRADER).slNext()).getMnem());
-        assertEquals("MARAYL", c.findRec(RecType.TRADER, "MARAYL").getMnem());
-        assertEquals("TOBAYL", c.findRec(RecType.TRADER, 3).getMnem());
+        assertEquals("TOBAYL", c.findRec(RecType.TRADER, "TOBAYL").getMnem());
+        assertEquals("EMIAYL", c.findRec(RecType.TRADER, 4).getMnem());
     }
 }

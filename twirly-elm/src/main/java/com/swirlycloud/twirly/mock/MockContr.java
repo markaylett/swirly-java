@@ -3,9 +3,10 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.mock;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.domain.Contr;
@@ -14,19 +15,22 @@ import com.swirlycloud.twirly.function.UnaryCallback;
 
 public final class MockContr {
 
-    private static final Map<String, NullaryFunction<Contr>> FACTORIES = new TreeMap<>();
+    private static final List<NullaryFunction<Contr>> LIST = new ArrayList<>();
+    private static final Map<String, NullaryFunction<Contr>> MAP = new HashMap<>();
 
     private static void put(final long id, final String mnem, final String display,
             final AssetType assetType, final String asset, final String ccy, final int tickNumer,
             final int tickDenom, final int lotNumer, final int lotDenom, final int pipDp,
             final long minLots, final long maxLots) {
-        FACTORIES.put(mnem, new NullaryFunction<Contr>() {
+        final NullaryFunction<Contr> fn = new NullaryFunction<Contr>() {
             @Override
             public final Contr call() {
                 return new Contr(id, mnem, display, assetType, asset, ccy, tickNumer, tickDenom,
                         lotNumer, lotDenom, pipDp, minLots, maxLots);
             }
-        });
+        };
+        LIST.add(fn);
+        MAP.put(mnem, fn);
     }
 
     static {
@@ -74,21 +78,28 @@ public final class MockContr {
                 10);
         put(i++, "USDZAR", "USDZAR", AssetType.CURRENCY, "USD", "ZAR", 1, 1000, 1000000, 1, 3, 1,
                 10);
-        put(i++, "ZC", "ZC", AssetType.COMMODITY, "ZC", "USD", 1, 400, 5000, 1, 2, 1, 10);
-        put(i++, "ZS", "ZS", AssetType.COMMODITY, "ZS", "USD", 1, 400, 5000, 1, 2, 1, 10);
-        put(i++, "ZW", "ZW", AssetType.COMMODITY, "ZW", "USD", 1, 400, 5000, 1, 2, 1, 10);
+        put(i++, "CAP", "Central Appalachia Coal", AssetType.COMMODITY, "CAP", "USD", 1, 20, 1000,
+                1, 2, 1, 10);
+        put(i++, "NAP", "Northern Appalachia Coal", AssetType.COMMODITY, "NAP", "USD", 1, 20, 1000,
+                1, 2, 1, 10);
+        put(i++, "ILB", "Illinois Basin Coal", AssetType.COMMODITY, "ILB", "USD", 1, 20, 1000, 1,
+                2, 1, 10);
+        put(i++, "PRB", "Powder River Basin Coal", AssetType.COMMODITY, "PRB", "USD", 1, 20, 1000,
+                1, 2, 1, 10);
+        put(i++, "UIB", "Uinta Basin Coal", AssetType.COMMODITY, "UIB", "USD", 1, 20, 1000, 1, 2,
+                1, 10);
     }
 
     private MockContr() {
     }
 
     public static Contr newContr(String mnem) {
-        return FACTORIES.get(mnem).call();
+        return MAP.get(mnem).call();
     }
 
     public static void selectContr(UnaryCallback<Contr> cb) {
-        for (final Entry<String, NullaryFunction<Contr>> entry : FACTORIES.entrySet()) {
-            cb.call(entry.getValue().call());
+        for (final NullaryFunction<Contr> entry : LIST) {
+            cb.call(entry.call());
         }
     }
 }

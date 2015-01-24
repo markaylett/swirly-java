@@ -3,25 +3,29 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.mock;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
 
 public final class MockTrader {
-    private static final Map<String, NullaryFunction<Trader>> FACTORIES = new TreeMap<>();
+    private static final List<NullaryFunction<Trader>> LIST = new ArrayList<>();
+    private static final Map<String, NullaryFunction<Trader>> MAP = new HashMap<>();
 
     private static void put(final long id, final String mnem, final String display,
             final String email) {
-        FACTORIES.put(mnem, new NullaryFunction<Trader>() {
+        final NullaryFunction<Trader> fn = new NullaryFunction<Trader>() {
             @Override
             public final Trader call() {
                 return new Trader(id, mnem, display, email);
             }
-        });
+        };
+        LIST.add(fn);
+        MAP.put(mnem, fn);
     }
 
     static {
@@ -37,12 +41,12 @@ public final class MockTrader {
     }
 
     public static Trader newTrader(String mnem) {
-        return FACTORIES.get(mnem).call();
+        return MAP.get(mnem).call();
     }
 
     public static void selectTrader(UnaryCallback<Trader> cb) {
-        for (final Entry<String, NullaryFunction<Trader>> entry : FACTORIES.entrySet()) {
-            cb.call(entry.getValue().call());
+        for (final NullaryFunction<Trader> entry : LIST) {
+            cb.call(entry.call());
         }
     }
 }
