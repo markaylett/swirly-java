@@ -11,51 +11,69 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.mock.MockContr;
-import com.swirlycloud.twirly.mock.MockTrader;
 import com.swirlycloud.twirly.util.Params;
 
 public final class MarketTest {
     @Test
     public final void testToJson() throws IOException {
+        final String mnem = "EURUSD.MAR14";
+        final String display = "EURUSD March 14";
         final Contr contr = MockContr.newContr("EURUSD");
         final int settlDay = ymdToJd(2014, 2, 14);
-        final Market market = new Market(contr, settlDay, settlDay);
+        final int expiryDay = ymdToJd(2014, 2, 12);
+        final Market market = new Market(mnem, display, contr, settlDay, expiryDay);
 
-        final Trader trader = MockTrader.newTrader("MARAYL");
+        final StringBuilder sb = new StringBuilder();
+
+        market.toJson(null, sb);
+        assertEquals(
+                "{\"mnem\":\"EURUSD.MAR14\",\"display\":\"EURUSD March 14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140312}",
+                sb.toString());
+    }
+
+    @Test
+    public final void testToJsonView() throws IOException {
+        final String mnem = "EURUSD.MAR14";
+        final String display = "EURUSD March 14";
+        final Contr contr = MockContr.newContr("EURUSD");
+        final int settlDay = ymdToJd(2014, 2, 14);
+        final int expiryDay = ymdToJd(2014, 2, 12);
+        final Market market = new Market(mnem, display, contr, settlDay, expiryDay);
+
         final long now = 1414932078620L;
 
-        market.placeOrder(new Order(1, trader, contr, settlDay, "apple", Action.BUY, 12343, 10, 0,
-                now), now);
-        market.placeOrder(new Order(2, trader, contr, settlDay, "orange", Action.BUY, 12344, 5, 0,
-                now), now);
-        market.placeOrder(new Order(3, trader, contr, settlDay, "pear", Action.SELL, 12346, 5, 0,
-                now), now);
-        market.placeOrder(new Order(4, trader, contr, settlDay, "banana", Action.SELL, 12346, 2, 0,
-                now), now);
+        market.placeOrder(new Order(1, "MARAYL", market, "apple", Action.BUY, 12343, 10, 0, now),
+                now);
+        market.placeOrder(new Order(2, "MARAYL", market, "orange", Action.BUY, 12344, 5, 0, now),
+                now);
+        market.placeOrder(new Order(3, "MARAYL", market, "pear", Action.SELL, 12346, 5, 0, now),
+                now);
+        market.placeOrder(new Order(4, "MARAYL", market, "banana", Action.SELL, 12346, 2, 0, now),
+                now);
 
         final StringBuilder sb = new StringBuilder();
 
         // Null params.
-        market.toJson(null, sb);
+        market.toJsonView(null, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null],\"bidLots\":[5,10,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerLots\":[7,null,null],\"offerCount\":[2,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344,12343,null],\"bidLots\":[5,10,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerLots\":[7,null,null],\"offerCount\":[2,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Empty params.
         sb.setLength(0);
-        market.toJson(new Params() {
+        market.toJsonView(new Params() {
             @Override
             public final <T> T getParam(String name, Class<T> clazz) {
                 return null;
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null],\"bidLots\":[5,10,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerLots\":[7,null,null],\"offerCount\":[2,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344,12343,null],\"bidLots\":[5,10,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerLots\":[7,null,null],\"offerCount\":[2,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Explicit TOB.
         sb.setLength(0);
-        market.toJson(new Params() {
+        market.toJsonView(new Params() {
             @SuppressWarnings("unchecked")
             @Override
             public final <T> T getParam(String name, Class<T> clazz) {
@@ -63,12 +81,12 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344],\"bidLots\":[5],\"bidCount\":[1],\"offerTicks\":[12346],\"offerLots\":[7],\"offerCount\":[2],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344],\"bidLots\":[5],\"bidCount\":[1],\"offerTicks\":[12346],\"offerLots\":[7],\"offerCount\":[2],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Round-up to minimum.
         sb.setLength(0);
-        market.toJson(new Params() {
+        market.toJsonView(new Params() {
             @SuppressWarnings("unchecked")
             @Override
             public final <T> T getParam(String name, Class<T> clazz) {
@@ -76,12 +94,12 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344],\"bidLots\":[5],\"bidCount\":[1],\"offerTicks\":[12346],\"offerLots\":[7],\"offerCount\":[2],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344],\"bidLots\":[5],\"bidCount\":[1],\"offerTicks\":[12346],\"offerLots\":[7],\"offerCount\":[2],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Between minimum and maximum.
         sb.setLength(0);
-        market.toJson(new Params() {
+        market.toJsonView(new Params() {
             @SuppressWarnings("unchecked")
             @Override
             public final <T> T getParam(String name, Class<T> clazz) {
@@ -89,12 +107,12 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343],\"bidLots\":[5,10],\"bidCount\":[1,1],\"offerTicks\":[12346,null],\"offerLots\":[7,null],\"offerCount\":[2,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344,12343],\"bidLots\":[5,10],\"bidCount\":[1,1],\"offerTicks\":[12346,null],\"offerLots\":[7,null],\"offerCount\":[2,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
 
         // Round-down to maximum.
         sb.setLength(0);
-        market.toJson(new Params() {
+        market.toJsonView(new Params() {
             @SuppressWarnings("unchecked")
             @Override
             public final <T> T getParam(String name, Class<T> clazz) {
@@ -102,7 +120,7 @@ public final class MarketTest {
             }
         }, sb);
         assertEquals(
-                "{\"id\":803163,\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140314,\"bidTicks\":[12344,12343,null,null,null],\"bidLots\":[5,10,null,null,null],\"bidCount\":[1,1,null,null,null],\"offerTicks\":[12346,null,null,null,null],\"offerLots\":[7,null,null,null,null],\"offerCount\":[2,null,null,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"bidTicks\":[12344,12343,null,null,null],\"bidLots\":[5,10,null,null,null],\"bidCount\":[1,1,null,null,null],\"offerTicks\":[12346,null,null,null,null],\"offerLots\":[7,null,null,null,null],\"offerCount\":[2,null,null,null,null],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null}",
                 sb.toString());
     }
 }

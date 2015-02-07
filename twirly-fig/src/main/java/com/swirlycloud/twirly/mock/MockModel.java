@@ -15,19 +15,13 @@ import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockModel implements Model {
-    private long maxTraderId = 0L;
 
     @Override
-    public final void insertExec(long contrId, int settlDay, Exec exec) {
+    public final void insertExec(Exec exec) {
     }
 
     @Override
-    public final void insertExecList(long contrId, int settlDay, SlNode first) {
-    }
-
-    @Override
-    public final long allocTraderId() {
-        return ++maxTraderId;
+    public final void insertExecList(String market, SlNode first) {
     }
 
     @Override
@@ -35,15 +29,15 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void insertMarket(long contrId, int settlDay, int expiryDay) {
+    public final void insertMarket(Market market) {
     }
 
     @Override
-    public final void archiveOrder(long contrId, int settlDay, long id, long modified) {
+    public final void archiveOrder(String market, long id, long modified) {
     }
 
     @Override
-    public final void archiveTrade(long contrId, int settlDay, long id, long modified) {
+    public final void archiveTrade(String market, long id, long modified) {
     }
 
     @Override

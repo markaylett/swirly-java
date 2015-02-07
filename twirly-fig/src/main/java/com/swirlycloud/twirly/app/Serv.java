@@ -4,7 +4,6 @@
 package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
-import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 
 import java.util.regex.Pattern;
 
@@ -15,7 +14,6 @@ import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Direct;
-import com.swirlycloud.twirly.domain.EmailIdx;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Instruct;
 import com.swirlycloud.twirly.domain.Market;
@@ -23,7 +21,6 @@ import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
-import com.swirlycloud.twirly.domain.RefIdx;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
@@ -31,55 +28,69 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.RbTree;
+import com.swirlycloud.twirly.intrusive.BasicRbTree;
+import com.swirlycloud.twirly.intrusive.EmailHashTable;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RefHashTable;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class Serv {
-    private static final int BUCKETS = 257;
+
+    private static final int CAPACITY = 1 << 5; // 64
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z_]{3,16}$");
 
+    private static final class SessTree extends BasicRbTree<String> {
+
+        private static String getTraderMnem(RbNode node) {
+            return ((Sess) node).getTrader();
+        }
+
+        @Override
+        protected final int compareKey(RbNode lhs, RbNode rhs) {
+            return getTraderMnem(lhs).compareTo(getTraderMnem(rhs));
+        }
+
+        @Override
+        protected final int compareKeyDirect(RbNode lhs, String rhs) {
+            return getTraderMnem(lhs).compareTo(rhs);
+        }
+    }
+
     private final Model model;
-    private final Cache cache = new Cache(BUCKETS);
-    private final EmailIdx emailIdx = new EmailIdx(BUCKETS);
-    private final RefIdx refIdx = new RefIdx(BUCKETS);
-    private final RbTree markets = new RbTree();
-    private final RbTree accnts = new RbTree();
+    private final MnemRbTree assets = new MnemRbTree();
+    private final MnemRbTree contrs = new MnemRbTree();
+    private final MnemRbTree traders = new MnemRbTree();
+    private final MnemRbTree markets = new MnemRbTree();
+    private final SessTree sesss = new SessTree();
+    private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
+    private final RefHashTable refIdx = new RefHashTable(CAPACITY);
+
+    private final void enrichContr(Contr contr) {
+        final Asset asset = (Asset) assets.find(contr.getAsset());
+        assert asset != null;
+        final Asset ccy = (Asset) assets.find(contr.getCcy());
+        assert ccy != null;
+        contr.enrich(asset, ccy);
+    }
 
     private final void enrichMarket(Market market) {
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, market.getContrId());
+        final Contr contr = (Contr) contrs.find(market.getContr());
+        assert contr != null;
         market.enrich(contr);
     }
 
-    private final void enrichOrder(Order order) {
-        final Trader trader = (Trader) cache.findRec(RecType.TRADER, order.getTraderId());
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, order.getContrId());
-        order.enrich(trader, contr);
-    }
-
-    private final void enrichTrade(Exec trade) {
-        final Trader trader = (Trader) cache.findRec(RecType.TRADER, trade.getTraderId());
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, trade.getContrId());
-        final Trader cpty = (Trader) cache.findRec(RecType.TRADER, trade.getCptyId());
-        trade.enrich(trader, contr, cpty);
-    }
-
-    private final void enrichPosn(Posn posn) {
-        final Trader trader = (Trader) cache.findRec(RecType.TRADER, posn.getTraderId());
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, posn.getContrId());
-        posn.enrich(trader, contr);
-    }
-
     private final void insertOrder(Order order) {
-        enrichOrder(order);
-        final Market market = (Market) markets.find(Market.composeKey(order.getContrId(),
-                order.getSettlDay()));
+        final Trader trader = (Trader) traders.find(order.getTrader());
+        assert trader != null;
+        final Market market = (Market) markets.find(order.getMarket());
+        assert market != null;
         market.insertOrder(order);
         boolean success = false;
         try {
-            final Accnt accnt = getLazyAccnt(order.getTrader());
-            accnt.insertOrder(order);
+            final Sess sess = getLazySess(trader);
+            sess.insertOrder(order);
             success = true;
         } finally {
             if (!success) {
@@ -92,7 +103,8 @@ public final class Serv {
         model.selectAsset(new UnaryCallback<Asset>() {
             @Override
             public final void call(Asset arg) {
-                cache.insertRec(arg);
+                final RbNode node = assets.insert(arg);
+                assert node == null;
             }
         });
     }
@@ -101,7 +113,9 @@ public final class Serv {
         model.selectContr(new UnaryCallback<Contr>() {
             @Override
             public final void call(Contr arg) {
-                cache.insertRec(arg);
+                enrichContr(arg);
+                final RbNode node = contrs.insert(arg);
+                assert node == null;
             }
         });
     }
@@ -110,7 +124,8 @@ public final class Serv {
         model.selectTrader(new UnaryCallback<Trader>() {
             @Override
             public final void call(Trader arg) {
-                cache.insertRec(arg);
+                final RbNode node = traders.insert(arg);
+                assert node == null;
                 emailIdx.insert(arg);
             }
         });
@@ -140,9 +155,10 @@ public final class Serv {
         model.selectTrade(new UnaryCallback<Exec>() {
             @Override
             public final void call(Exec arg) {
-                enrichTrade(arg);
-                final Accnt accnt = getLazyAccnt(arg.getTrader());
-                accnt.insertTrade(arg);
+                final Trader trader = (Trader) traders.find(arg.getTrader());
+                assert trader != null;
+                final Sess sess = getLazySess(trader);
+                sess.insertTrade(arg);
             }
         });
     }
@@ -151,9 +167,10 @@ public final class Serv {
         model.selectPosn(new UnaryCallback<Posn>() {
             @Override
             public final void call(Posn arg) {
-                enrichPosn(arg);
-                final Accnt accnt = getLazyAccnt(arg.getTrader());
-                accnt.insertPosn(arg);
+                final Trader trader = (Trader) traders.find(arg.getTrader());
+                assert trader != null;
+                final Sess sess = getLazySess(trader);
+                sess.insertPosn(arg);
             }
         });
     }
@@ -164,13 +181,12 @@ public final class Serv {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
-        final long traderId = model.allocTraderId();
-        return new Trader(traderId, mnem, display, email);
+        return new Trader(mnem, display, email);
     }
 
     @NonNull
-    private final Exec newExec(long id, Instruct instruct, long now) {
-        return new Exec(id, instruct, now);
+    private final Exec newExec(Market market, Instruct instruct, long now) {
+        return new Exec(market.allocExecId(), instruct, now);
     }
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
@@ -181,17 +197,14 @@ public final class Serv {
                 : takerOrder.getTicks() - makerOrder.getTicks();
     }
 
-    private final void matchOrders(Market market, Order takerOrder, Side side, Direct direct,
-            Trans trans) {
+    private final void matchOrders(Sess takerSess, Market market, Order takerOrder, Side side,
+            Direct direct, Trans trans) {
 
         final long now = takerOrder.getCreated();
 
         long taken = 0;
         long lastTicks = 0;
         long lastLots = 0;
-
-        final Contr contr = market.getContr();
-        final int settlDay = market.getSettlDay();
 
         DlNode node = side.getFirstOrder();
         for (; taken < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
@@ -205,9 +218,9 @@ public final class Serv {
             final long makerId = market.allocExecId();
             final long takerId = market.allocExecId();
 
-            final Accnt makerAccnt = findAccnt(makerOrder.getTrader());
-            assert makerAccnt != null;
-            final Posn makerPosn = makerAccnt.getLazyPosn(contr, settlDay);
+            final Sess makerSess = findSess(makerOrder.getTrader());
+            assert makerSess != null;
+            final Posn makerPosn = makerSess.getLazyPosn(market);
 
             final Match match = new Match();
             match.makerOrder = makerOrder;
@@ -239,13 +252,12 @@ public final class Serv {
 
         if (!trans.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
-            final Accnt takerAccnt = getLazyAccnt(takerOrder.getTrader());
-            trans.posn = takerAccnt.getLazyPosn(contr, settlDay);
+            trans.posn = takerSess.getLazyPosn(market);
             takerOrder.trade(taken, lastTicks, lastLots, now);
         }
     }
 
-    private final void matchOrders(Market market, Order order, Trans trans) {
+    private final void matchOrders(Sess sess, Market market, Order order, Trans trans) {
         Side side;
         Direct direct;
         if (order.getAction() == Action.BUY) {
@@ -258,19 +270,19 @@ public final class Serv {
             side = market.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(market, order, side, direct, trans);
+        matchOrders(sess, market, order, side, direct, trans);
     }
 
     // Assumes that maker lots have not been reduced since matching took place.
 
-    private final void commitMatches(Accnt taker, Market market, long now, Trans trans) {
+    private final void commitMatches(Sess taker, Market market, long now, Trans trans) {
         for (SlNode node = trans.matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
             // Reduce maker.
             market.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
-            final Accnt maker = findAccnt(makerOrder.getTrader());
+            final Sess maker = findSess(makerOrder.getTrader());
             assert maker != null;
             // Maker updated first because this is consistent with last-look semantics.
             // Update maker.
@@ -291,17 +303,12 @@ public final class Serv {
         insertOrders();
         insertTrades();
         insertPosns();
-        // Build email index.
-        for (SlNode node = cache.getFirstRec(RecType.TRADER); node != null; node = node.slNext()) {
-            final Trader trader = (Trader) node;
-            emailIdx.insert(trader);
-        }
     }
 
     @NonNull
     public final Trader createTrader(String mnem, String display, String email)
             throws BadRequestException {
-        if (cache.findRec(RecType.TRADER, mnem) != null) {
+        if (traders.find(mnem) != null) {
             throw new BadRequestException(String.format("trader '%s' already exists", mnem));
         }
         if (emailIdx.find(email) != null) {
@@ -309,38 +316,118 @@ public final class Serv {
         }
         final Trader trader = newTrader(mnem, display, email);
         model.insertTrader(trader);
-        cache.insertRec(trader);
+        traders.insert(trader);
         emailIdx.insert(trader);
         return trader;
     }
 
     @Nullable
-    public final Rec findRec(RecType recType, long id) {
-        return cache.findRec(recType, id);
-    }
-
-    @Nullable
     public final Rec findRec(RecType recType, String mnem) {
-        return cache.findRec(recType, mnem);
+        Rec ret = null;
+        switch (recType) {
+        case ASSET:
+            ret = (Rec) assets.find(mnem);
+            break;
+        case CONTR:
+            ret = (Rec) contrs.find(mnem);
+            break;
+        case MARKET:
+            ret = (Rec) markets.find(mnem);
+            break;
+        case TRADER:
+            ret = (Rec) traders.find(mnem);
+            break;
+        }
+        return ret;
     }
 
     @Nullable
-    public final SlNode getFirstRec(RecType recType) {
-        return cache.getFirstRec(recType);
+    public final RbNode getRootRec(RecType recType) {
+        RbNode ret = null;
+        switch (recType) {
+        case ASSET:
+            ret = assets.getRoot();
+            break;
+        case CONTR:
+            ret = contrs.getRoot();
+            break;
+        case MARKET:
+            ret = markets.getRoot();
+            break;
+        case TRADER:
+            ret = traders.getRoot();
+            break;
+        }
+        return ret;
+    }
+
+    @Nullable
+    public final RbNode getFirstRec(RecType recType) {
+        RbNode ret = null;
+        switch (recType) {
+        case ASSET:
+            ret = assets.getFirst();
+            break;
+        case CONTR:
+            ret = contrs.getFirst();
+            break;
+        case MARKET:
+            ret = markets.getFirst();
+            break;
+        case TRADER:
+            ret = traders.getFirst();
+            break;
+        }
+        return ret;
+    }
+
+    @Nullable
+    public final RbNode getLastRec(RecType recType) {
+        RbNode ret = null;
+        switch (recType) {
+        case ASSET:
+            ret = assets.getLast();
+            break;
+        case CONTR:
+            ret = contrs.getLast();
+            break;
+        case MARKET:
+            ret = markets.getLast();
+            break;
+        case TRADER:
+            ret = traders.getLast();
+            break;
+        }
+        return ret;
     }
 
     public final boolean isEmptyRec(RecType recType) {
-        return cache.isEmptyRec(recType);
+        boolean ret = true;
+        switch (recType) {
+        case ASSET:
+            ret = assets.isEmpty();
+            break;
+        case CONTR:
+            ret = contrs.isEmpty();
+            break;
+        case MARKET:
+            ret = markets.isEmpty();
+            break;
+        case TRADER:
+            ret = traders.isEmpty();
+            break;
+        }
+        return ret;
     }
 
     @Nullable
     public final Trader findTraderByEmail(String email) {
-        return emailIdx.find(email);
+        return (Trader) emailIdx.find(email);
     }
 
     @NonNull
-    public final Market createMarket(Contr contr, int settlDay, int expiryDay, long now)
-            throws BadRequestException {
+    public final Market createMarket(String mnem, String display, Contr contr, int settlDay,
+            int expiryDay, long now) throws BadRequestException {
         // busDay <= expiryDay <= settlDay.
         final int busDay = getBusDate(now).toJd();
         if (busDay > expiryDay) {
@@ -349,27 +436,25 @@ public final class Serv {
         if (expiryDay > settlDay) {
             throw new BadRequestException("settl-day before fixing-day");
         }
-        final long key = Market.composeKey(contr.getId(), settlDay);
-        final RbNode node = markets.pfind(key);
-        if (node != null && node.getKey() == key) {
-            throw new BadRequestException(String.format("market '%s' for '%d' already exists",
-                    contr.getMnem(), jdToIso(settlDay)));
+        Market market = (Market) markets.pfind(mnem);
+        if (market != null && market.getMnem().equals(mnem)) {
+            throw new BadRequestException(String.format("market '%s' already exists", mnem));
         }
-        final Market market = new Market(contr, settlDay, expiryDay);
-        model.insertMarket(contr.getId(), settlDay, expiryDay);
-        final RbNode parent = node;
+        final RbNode parent = market;
+        market = new Market(mnem, display, contr, settlDay, expiryDay);
+        model.insertMarket(market);
         markets.pinsert(market, parent);
         return market;
     }
 
     @NonNull
-    public final Market createMarket(String mnem, int settlDay, int expiryDay, long now)
-            throws BadRequestException, NotFoundException {
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
+    public final Market createMarket(String mnem, String display, String contr, int settlDay,
+            int expiryDay, long now) throws BadRequestException, NotFoundException {
+        final Contr crec = (Contr) contrs.find(contr);
         if (contr == null) {
-            throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
+            throw new NotFoundException(String.format("contr '%s' does not exist", contr));
         }
-        return createMarket(contr, settlDay, expiryDay, now);
+        return createMarket(mnem, display, crec, settlDay, expiryDay, now);
     }
 
     public final void expireMarkets(long now) throws NotFoundException {
@@ -394,143 +479,76 @@ public final class Serv {
         }
     }
 
-    @Deprecated
     @NonNull
-    public final Market getLazyMarket(Contr contr, int settlDay) {
-        Market market;
-        final long key = Market.composeKey(contr.getId(), settlDay);
-        final RbNode node = markets.pfind(key);
-        if (node == null || node.getKey() != key) {
-            market = new Market(contr, settlDay, settlDay);
-            final RbNode parent = node;
-            markets.pinsert(market, parent);
-        } else {
-            market = (Market) node;
+    public final Sess getLazySess(Trader trader) {
+        Sess sess = (Sess) sesss.pfind(trader.getMnem());
+        if (sess == null || !sess.getTrader().equals(trader.getMnem())) {
+            final RbNode parent = sess;
+            sess = new Sess(trader, refIdx);
+            sesss.pinsert(sess, parent);
         }
-        return market;
-    }
-
-    @Deprecated
-    @NonNull
-    public final Market getLazyMarket(String mnem, int settlDay) throws NotFoundException {
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
-        if (contr == null) {
-            throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
-        }
-        return getLazyMarket(contr, settlDay);
-    }
-
-    @Nullable
-    public final Market findMarket(Contr contr, int settlDay) {
-        return (Market) markets.find(Market.composeKey(contr.getId(), settlDay));
-    }
-
-    @Nullable
-    public final Market findMarket(String mnem, int settlDay) throws NotFoundException {
-        final Contr contr = (Contr) cache.findRec(RecType.CONTR, mnem);
-        if (contr == null) {
-            throw new NotFoundException(String.format("contr '%s' does not exist", mnem));
-        }
-        return findMarket(contr, settlDay);
-    }
-
-    @Nullable
-    public final RbNode getRootMarket() {
-        return markets.getRoot();
-    }
-
-    @Nullable
-    public final RbNode getFirstMarket() {
-        return markets.getFirst();
-    }
-
-    @Nullable
-    public final RbNode getLastMarket() {
-        return markets.getLast();
-    }
-
-    public final boolean isEmptyMarket() {
-        return markets.isEmpty();
+        return sess;
     }
 
     @NonNull
-    public final Accnt getLazyAccnt(Trader trader) {
-        Accnt accnt;
-        final long key = trader.getId();
-        final RbNode node = accnts.pfind(key);
-        if (node == null || node.getKey() != key) {
-            accnt = new Accnt(trader, refIdx);
-            final RbNode parent = node;
-            accnts.pinsert(accnt, parent);
-        } else {
-            accnt = (Accnt) node;
+    public final Sess getLazySess(String mnem) throws NotFoundException {
+        Sess sess = (Sess) sesss.pfind(mnem);
+        if (sess == null || !sess.getTrader().equals(mnem)) {
+            final Trader trader = (Trader) traders.find(mnem);
+            if (trader == null) {
+                throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
+            }
+            final RbNode parent = sess;
+            sess = new Sess(trader, refIdx);
+            sesss.pinsert(sess, parent);
         }
-        return accnt;
+        return sess;
     }
 
     @NonNull
-    public final Accnt getLazyAccnt(String mnem) throws NotFoundException {
-        final Trader trader = (Trader) cache.findRec(RecType.TRADER, mnem);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
-        }
-        return getLazyAccnt(trader);
-    }
-
-    @NonNull
-    public final Accnt getLazyAccntByEmail(String email) throws NotFoundException {
-        final Trader trader = emailIdx.find(email);
+    public final Sess getLazySessByEmail(String email) throws NotFoundException {
+        final Trader trader = (Trader) emailIdx.find(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
         }
-        return getLazyAccnt(trader);
+        return getLazySess(trader);
     }
 
     @Nullable
-    public final Accnt findAccnt(Trader trader) {
-        return (Accnt) accnts.find(trader.getId());
+    public final Sess findSess(String mnem) {
+        return (Sess) sesss.find(mnem);
     }
 
     @Nullable
-    public final Accnt findAccnt(String mnem) throws NotFoundException {
-        final Trader trader = (Trader) cache.findRec(RecType.TRADER, mnem);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
-        }
-        return findAccnt(trader);
-    }
-
-    @Nullable
-    public final Accnt findAccntByEmail(String email) throws NotFoundException {
-        final Trader trader = emailIdx.find(email);
+    public final Sess findSessByEmail(String email) throws NotFoundException {
+        final Trader trader = (Trader) emailIdx.find(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
         }
-        return findAccnt(trader);
+        return findSess(trader.getMnem());
     }
 
     @NonNull
-    public final Trans placeOrder(Accnt accnt, Market market, String ref, Action action,
-            long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
+    public final Trans placeOrder(Sess sess, Market market, String ref, Action action, long ticks,
+            long lots, long minLots, long now, Trans trans) throws BadRequestException,
             NotFoundException {
+        final Trader trader = sess.getTraderRich();
         final int busDay = DateUtil.getBusDate(now).toJd();
         if (market.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
-                    .getContr().getMnem(), market.getSettlDay()));
+                    .getContrRich().getMnem(), market.getSettlDay()));
         }
         if (lots == 0 || lots < minLots) {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = market.allocOrderId();
-        final Contr contr = market.getContr();
-        final int settlDay = market.getSettlDay();
-        final Order order = new Order(orderId, accnt.getTrader(), contr, settlDay, ref, action,
-                ticks, lots, minLots, now);
-        final Exec exec = newExec(market.allocExecId(), order, now);
+        final Order order = new Order(orderId, trader.getMnem(), market, ref, action, ticks, lots,
+                minLots, now);
+        final Exec exec = newExec(market, order, now);
 
         trans.init(market, order, exec);
         // Order fields are updated on match.
-        matchOrders(market, order, trans);
+        matchOrders(sess, market, order, trans);
         // Place incomplete order in market.
         if (!order.isDone()) {
             // This may fail if level cannot be allocated.
@@ -540,7 +558,7 @@ public final class Serv {
         // any unfilled quantity.
         boolean success = false;
         try {
-            model.insertExecList(contr.getId(), settlDay, trans.execs.getFirst());
+            model.insertExecList(market.getMnem(), trans.execs.getFirst());
             success = true;
         } finally {
             if (!success && !order.isDone()) {
@@ -549,14 +567,14 @@ public final class Serv {
             }
         }
         // Final commit phase cannot fail.
-        accnt.insertOrder(order);
+        sess.insertOrder(order);
         // Commit trans to cycle and free matches.
-        commitMatches(accnt, market, now, trans);
+        commitMatches(sess, market, now, trans);
         return trans;
     }
 
     @NonNull
-    public final Trans reviseOrder(Accnt accnt, Market market, Order order, long lots, long now,
+    public final Trans reviseOrder(Sess sess, Market market, Order order, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
@@ -570,9 +588,9 @@ public final class Serv {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
 
-        final Exec exec = newExec(market.allocExecId(), order, now);
+        final Exec exec = newExec(market, order, now);
         exec.revise(lots);
-        model.insertExec(market.getContrId(), market.getSettlDay(), exec);
+        model.insertExec(exec);
 
         // Final commit phase cannot fail.
         market.reviseOrder(order, lots, now);
@@ -582,38 +600,34 @@ public final class Serv {
     }
 
     @NonNull
-    public final Trans reviseOrder(Accnt accnt, Market market, long id, long lots, long now,
+    public final Trans reviseOrder(Sess sess, Market market, long id, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException {
-        final Contr contr = market.getContr();
-        final int settlDay = market.getSettlDay();
-        final Order order = accnt.findOrder(contr.getId(), settlDay, id);
+        final Order order = sess.findOrder(market.getMnem(), id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        return reviseOrder(accnt, market, order, lots, now, trans);
+        return reviseOrder(sess, market, order, lots, now, trans);
     }
 
     @NonNull
-    public final Trans reviseOrder(Accnt accnt, Market market, String ref, long lots, long now,
+    public final Trans reviseOrder(Sess sess, Market market, String ref, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException {
-        final Contr contr = market.getContr();
-        final int settlDay = market.getSettlDay();
-        final Order order = accnt.findOrder(contr.getId(), settlDay, ref);
+        final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
         }
-        return reviseOrder(accnt, market, order, lots, now, trans);
+        return reviseOrder(sess, market, order, lots, now, trans);
     }
 
     @NonNull
-    public final Trans cancelOrder(Accnt accnt, Market market, Order order, long now, Trans trans)
+    public final Trans cancelOrder(Sess sess, Market market, Order order, long now, Trans trans)
             throws BadRequestException, NotFoundException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
-        final Exec exec = newExec(market.allocExecId(), order, now);
+        final Exec exec = newExec(market, order, now);
         exec.cancel();
-        model.insertExec(market.getContrId(), market.getSettlDay(), exec);
+        model.insertExec(exec);
 
         // Final commit phase cannot fail.
         market.cancelOrder(order, now);
@@ -623,27 +637,23 @@ public final class Serv {
     }
 
     @NonNull
-    public final Trans cancelOrder(Accnt accnt, Market market, long id, long now, Trans trans)
+    public final Trans cancelOrder(Sess sess, Market market, long id, long now, Trans trans)
             throws BadRequestException, NotFoundException {
-        final Contr contr = market.getContr();
-        final int settlDay = market.getSettlDay();
-        final Order order = accnt.findOrder(contr.getId(), settlDay, id);
+        final Order order = sess.findOrder(market.getMnem(), id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        return cancelOrder(accnt, market, order, now, trans);
+        return cancelOrder(sess, market, order, now, trans);
     }
 
     @NonNull
-    public final Trans cancelOrder(Accnt accnt, Market market, String ref, long now, Trans trans)
+    public final Trans cancelOrder(Sess sess, Market market, String ref, long now, Trans trans)
             throws BadRequestException, NotFoundException {
-        final Contr contr = market.getContr();
-        final int settlDay = market.getSettlDay();
-        final Order order = accnt.findOrder(contr.getId(), settlDay, ref);
+        final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
         }
-        return cancelOrder(accnt, market, order, now, trans);
+        return cancelOrder(sess, market, order, now, trans);
     }
 
     /**
@@ -651,25 +661,24 @@ public final class Serv {
      * 
      * This method is not executed atomically, so it may partially fail.
      * 
-     * @param accnt
-     *            The account.
+     * @param sess
+     *            The session.
      * @param now
      *            The current time.
      * @throws NotFoundException
      */
-    public final void cancelOrders(Accnt accnt, long now) throws NotFoundException {
+    public final void cancelOrders(Sess sess, long now) throws NotFoundException {
         for (;;) {
-            final Order order = (Order) accnt.getRootOrder();
+            final Order order = (Order) sess.getRootOrder();
             if (order == null) {
                 break;
             }
-            final Market market = (Market) markets.find(Market.composeKey(order.getContrId(),
-                    order.getSettlDay()));
+            final Market market = (Market) markets.find(order.getMarket());
             assert market != null;
 
-            final Exec exec = newExec(market.allocExecId(), order, now);
+            final Exec exec = newExec(market, order, now);
             exec.cancel();
-            model.insertExec(market.getContrId(), market.getSettlDay(), exec);
+            model.insertExec(exec);
 
             // Final commit phase cannot fail.
             market.cancelOrder(order, now);
@@ -683,19 +692,19 @@ public final class Serv {
         SlNode first = null;
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
-            final Exec exec = newExec(market.allocExecId(), order, now);
+            final Exec exec = newExec(market, order, now);
             exec.cancel();
             exec.setSlNext(first);
             first = exec;
         }
         for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
-            final Exec exec = newExec(market.allocExecId(), order, now);
+            final Exec exec = newExec(market, order, now);
             exec.cancel();
             exec.setSlNext(first);
             first = exec;
         }
-        model.insertExecList(market.getContrId(), market.getSettlDay(), first);
+        model.insertExecList(market.getMnem(), first);
         // Commit phase.
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd();) {
             final Order order = (Order) node;
@@ -709,24 +718,24 @@ public final class Serv {
         }
     }
 
-    public final void archiveOrder(Accnt accnt, Order order, long now) throws BadRequestException,
+    public final void archiveOrder(Sess sess, Order order, long now) throws BadRequestException,
             NotFoundException {
         if (!order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is not done", order.getId()));
         }
-        model.archiveOrder(order.getContrId(), order.getSettlDay(), order.getId(), now);
+        model.archiveOrder(order.getMarket(), order.getId(), now);
 
         // No need to update timestamps on order because it is immediately freed.
-        accnt.removeOrder(order);
+        sess.removeOrder(order);
     }
 
-    public final void archiveOrder(Accnt accnt, long contrId, int settlDay, long id, long now)
+    public final void archiveOrder(Sess sess, String market, long id, long now)
             throws BadRequestException, NotFoundException {
-        final Order order = accnt.findOrder(contrId, settlDay, id);
+        final Order order = sess.findOrder(market, id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        archiveOrder(accnt, order, now);
+        archiveOrder(sess, order, now);
     }
 
     /**
@@ -734,14 +743,14 @@ public final class Serv {
      * 
      * This method is not updated atomically, so it may partially fail.
      * 
-     * @param accnt
-     *            The account.
+     * @param sess
+     *            The session.
      * @param now
      *            The current time.
      * @throws NotFoundException
      */
-    public final void archiveOrders(Accnt accnt, long now) throws NotFoundException {
-        RbNode node = accnt.getFirstOrder();
+    public final void archiveOrders(Sess sess, long now) throws NotFoundException {
+        RbNode node = sess.getFirstOrder();
         while (node != null) {
             final Order order = (Order) node;
             // Move to next node before this order is unlinked.
@@ -750,31 +759,31 @@ public final class Serv {
                 continue;
             }
 
-            model.archiveOrder(order.getContrId(), order.getSettlDay(), order.getId(), now);
+            model.archiveOrder(order.getMarket(), order.getId(), now);
 
             // No need to update timestamps on order because it is immediately freed.
-            accnt.removeOrder(order);
+            sess.removeOrder(order);
         }
     }
 
-    public final void archiveTrade(Accnt accnt, Exec trade, long now) throws BadRequestException,
+    public final void archiveTrade(Sess sess, Exec trade, long now) throws BadRequestException,
             NotFoundException {
         if (trade.getState() != State.TRADE) {
             throw new BadRequestException(String.format("exec '%d' is not a trade", trade.getId()));
         }
-        model.archiveTrade(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
+        model.archiveTrade(trade.getMarket(), trade.getId(), now);
 
         // No need to update timestamps on trade because it is immediately freed.
-        accnt.removeTrade(trade);
+        sess.removeTrade(trade);
     }
 
-    public final void archiveTrade(Accnt accnt, long contrId, int settlDay, long id, long now)
+    public final void archiveTrade(Sess sess, String market, long id, long now)
             throws BadRequestException, NotFoundException {
-        final Exec trade = accnt.findTrade(contrId, settlDay, id);
+        final Exec trade = sess.findTrade(market, id);
         if (trade == null) {
             throw new NotFoundException(String.format("trade '%d' does not exist", id));
         }
-        archiveTrade(accnt, trade, now);
+        archiveTrade(sess, trade, now);
     }
 
     /**
@@ -782,27 +791,27 @@ public final class Serv {
      * 
      * This method is not executed atomically, so it may partially fail.
      * 
-     * @param accnt
-     *            The account.
+     * @param sess
+     *            The session.
      * @param now
      *            The current time.
      * @throws NotFoundException
      */
-    public final void archiveTrades(Accnt accnt, long now) throws NotFoundException {
+    public final void archiveTrades(Sess sess, long now) throws NotFoundException {
         for (;;) {
-            final Exec trade = (Exec) accnt.getRootTrade();
+            final Exec trade = (Exec) sess.getRootTrade();
             if (trade == null) {
                 break;
             }
-            model.archiveTrade(trade.getContrId(), trade.getSettlDay(), trade.getId(), now);
+            model.archiveTrade(trade.getMarket(), trade.getId(), now);
 
             // No need to update timestamps on trade because it is immediately freed.
-            accnt.removeTrade(trade);
+            sess.removeTrade(trade);
         }
     }
 
-    public final void archiveAll(Accnt accnt, long now) throws NotFoundException {
-        archiveOrders(accnt, now);
-        archiveTrades(accnt, now);
+    public final void archiveAll(Sess sess, long now) throws NotFoundException {
+        archiveOrders(sess, now);
+        archiveTrades(sess, now);
     }
 }

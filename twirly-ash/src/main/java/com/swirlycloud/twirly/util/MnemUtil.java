@@ -3,18 +3,16 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.util;
 
-public final class IdUtil {
-    private IdUtil() {
+public final class MnemUtil {
+    private MnemUtil() {
     }
 
-    public static Identifiable newId(final long id) {
-        return new Identifiable() {
+    public static Memorable newMnem(final String mnem) {
+        return new Memorable() {
             @Override
-            public final long getId() {
-                return id;
+            public final String getMnem() {
+                return mnem;
             }
         };
     }
-
-    public static final Identifiable ZERO_ID = newId(0);
 }

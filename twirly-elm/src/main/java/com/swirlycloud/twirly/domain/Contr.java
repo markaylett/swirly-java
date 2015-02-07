@@ -5,20 +5,19 @@ package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.domain.Conv.fractToReal;
 import static com.swirlycloud.twirly.domain.Conv.realToDp;
-import static com.swirlycloud.twirly.util.JsonUtil.isInternal;
+import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
 import java.io.IOException;
 
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.util.JsonUtil;
+import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
 public final class Contr extends Rec {
-    private final AssetType assetType;
-    private final String asset;
-    private final String ccy;
+    private Memorable asset;
+    private Memorable ccy;
     private final int tickNumer;
     private final int tickDenom;
     private final transient double priceInc;
@@ -31,14 +30,9 @@ public final class Contr extends Rec {
     private final long minLots;
     private final long maxLots;
 
-    public Contr(long id, String mnem, String display, AssetType assetType, String asset,
-            String ccy, int tickNumer, int tickDenom, int lotNumer, int lotDenom, int pipDp,
-            long minLots, long maxLots) {
-        super(RecType.CONTR, id, mnem, display);
-        if (id >= (1L << 16)) {
-            throw new IllegalArgumentException("contr-id exceeds max-value");
-        }
-        this.assetType = assetType;
+    public Contr(String mnem, String display, Memorable asset, Memorable ccy, int tickNumer,
+            int tickDenom, int lotNumer, int lotDenom, int pipDp, long minLots, long maxLots) {
+        super(mnem, display);
         this.asset = asset;
         this.ccy = ccy;
         this.tickNumer = tickNumer;
@@ -55,12 +49,10 @@ public final class Contr extends Rec {
     }
 
     public static Contr parse(JsonParser p) throws IOException {
-        long id = 0;
         String mnem = null;
         String display = null;
-        AssetType assetType = null;
-        String asset = null;
-        String ccy = null;
+        Memorable asset = null;
+        Memorable ccy = null;
         int tickNumer = 0;
         int tickDenom = 0;
         int lotNumer = 0;
@@ -74,15 +66,13 @@ public final class Contr extends Rec {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new Contr(id, mnem, display, assetType, asset, ccy, tickNumer, tickDenom,
-                        lotNumer, lotDenom, pipDp, minLots, maxLots);
+                return new Contr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer,
+                        lotDenom, pipDp, minLots, maxLots);
             case KEY_NAME:
                 name = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
-                    id = p.getLong();
-                } else if ("tickNumer".equals(name)) {
+                if ("tickNumer".equals(name)) {
                     tickNumer = p.getInt();
                 } else if ("tickDenom".equals(name)) {
                     tickDenom = p.getInt();
@@ -105,12 +95,10 @@ public final class Contr extends Rec {
                     mnem = p.getString();
                 } else if ("display".equals(name)) {
                     display = p.getString();
-                } else if ("assetType".equals(name)) {
-                    assetType = AssetType.valueOf(p.getString());
                 } else if ("asset".equals(name)) {
-                    asset = p.getString();
+                    asset = newMnem(p.getString());
                 } else if ("ccy".equals(name)) {
-                    ccy = p.getString();
+                    ccy = newMnem(p.getString());
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -123,91 +111,11 @@ public final class Contr extends Rec {
     }
 
     @Override
-    public final int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((assetType == null) ? 0 : assetType.hashCode());
-        result = prime * result + ((asset == null) ? 0 : asset.hashCode());
-        result = prime * result + ((ccy == null) ? 0 : ccy.hashCode());
-        result = prime * result + tickDenom;
-        result = prime * result + tickNumer;
-        result = prime * result + lotNumer;
-        result = prime * result + lotDenom;
-        result = prime * result + pipDp;
-        result = prime * result + (int) (minLots ^ (minLots >>> 32));
-        result = prime * result + (int) (maxLots ^ (maxLots >>> 32));
-        return result;
-    }
-
-    @Override
-    public final boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Contr other = (Contr) obj;
-        if (assetType != other.assetType) {
-            return false;
-        }
-        if (asset == null) {
-            if (other.asset != null) {
-                return false;
-            }
-        } else if (!asset.equals(other.asset)) {
-            return false;
-        }
-        if (ccy == null) {
-            if (other.ccy != null) {
-                return false;
-            }
-        } else if (!ccy.equals(other.ccy)) {
-            return false;
-        }
-        if (tickNumer != other.tickNumer) {
-            return false;
-        }
-        if (tickDenom != other.tickDenom) {
-            return false;
-        }
-        if (lotNumer != other.lotNumer) {
-            return false;
-        }
-        if (lotDenom != other.lotDenom) {
-            return false;
-        }
-        if (minLots != other.minLots) {
-            return false;
-        }
-        if (maxLots != other.maxLots) {
-            return false;
-        }
-        if (pipDp != other.pipDp) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public final String toString() {
-        return JsonUtil.toJson(this);
-    }
-
-    @Override
     public final void toJson(Params params, Appendable out) throws IOException {
-        out.append('{');
-        if (isInternal(params)) {
-            out.append("\"id\":").append(String.valueOf(id)).append(',');
-        }
-        out.append("\"mnem\":\"").append(mnem);
+        out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
-        out.append("\",\"assetType\":\"").append(assetType.name());
-        out.append("\",\"asset\":\"").append(asset);
-        out.append("\",\"ccy\":\"").append(ccy);
+        out.append("\",\"asset\":\"").append(asset.getMnem());
+        out.append("\",\"ccy\":\"").append(ccy.getMnem());
         out.append("\",\"tickNumer\":").append(String.valueOf(tickNumer));
         out.append(",\"tickDenom\":").append(String.valueOf(tickDenom));
         out.append(",\"lotNumer\":").append(String.valueOf(lotNumer));
@@ -218,16 +126,32 @@ public final class Contr extends Rec {
         out.append("}");
     }
 
-    public final AssetType getAssetType() {
-        return assetType;
+    public final void enrich(Asset asset, Asset ccy) {
+        assert this.asset.getMnem() == asset.getMnem();
+        assert this.ccy.getMnem() == ccy.getMnem();
+        this.asset = asset;
+        this.ccy = ccy;
+    }
+
+    @Override
+    public final RecType getRecType() {
+        return RecType.CONTR;
     }
 
     public final String getAsset() {
-        return asset;
+        return asset.getMnem();
+    }
+
+    public final Asset getAssetRich() {
+        return (Asset) asset;
     }
 
     public final String getCcy() {
-        return ccy;
+        return ccy.getMnem();
+    }
+
+    public final Asset getCcyRich() {
+        return (Asset) ccy;
     }
 
     public final int getTickNumer() {

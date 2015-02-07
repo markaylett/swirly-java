@@ -4,37 +4,39 @@
 package com.swirlycloud.twirly.intrusive;
 
 /**
- * Hashtable with key of type String.
+ * Hashtable with a single key derived from Object.
  * 
- * @param <T>
- *            The concrete element type.
+ * @param <K>
+ *            The key type.
+ * @param <V>
+ *            The element or value type.
  */
-public abstract class StringHashTable<T> extends HashTable<T> {
+public abstract class BasicHashTable<K, V> extends HashTable<V> {
 
-    protected abstract boolean equalKeys(T lhs, String rhs);
+    protected abstract boolean equalKeyDirect(V lhs, K rhs);
 
-    public StringHashTable(int capacity) {
+    public BasicHashTable(int capacity) {
         super(capacity);
     }
 
-    public final T remove(String key) {
+    public final V remove(K key) {
         if (isEmpty()) {
             return null;
         }
         int i = indexFor(key.hashCode(), buckets.length);
-        T it = getBucket(i);
+        V it = getBucket(i);
         if (it == null) {
             return null;
         }
         // Check if the first element in the bucket has an equivalent key.
-        if (equalKeys(it, key)) {
+        if (equalKeyDirect(it, key)) {
             buckets[i] = next(it);
             --size;
             return it;
         }
         // Check if a subsequent element in the bucket has an equivalent key.
-        for (T next; (next = next(it)) != null; it = next) {
-            if (equalKeys(next, key)) {
+        for (V next; (next = next(it)) != null; it = next) {
+            if (equalKeyDirect(next, key)) {
                 setNext(it, next(next));
                 --size;
                 return next;
@@ -43,13 +45,13 @@ public abstract class StringHashTable<T> extends HashTable<T> {
         return null;
     }
 
-    public final T find(String key) {
+    public final V find(K key) {
         if (isEmpty()) {
             return null;
         }
         final int i = indexFor(key.hashCode(), buckets.length);
-        for (T it = getBucket(i); it != null; it = next(it)) {
-            if (equalKeys(it, key)) {
+        for (V it = getBucket(i); it != null; it = next(it)) {
+            if (equalKeyDirect(it, key)) {
                 return it;
             }
         }

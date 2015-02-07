@@ -7,7 +7,7 @@ import static com.swirlycloud.twirly.math.MathUtil.nextPow2;
 
 import java.io.PrintStream;
 
-public abstract class HashTable<T> {
+public abstract class HashTable<V> {
     private static final Object[] EMPTY = {};
     private static final int MIN_BUCKETS = 1 << 4;
 
@@ -15,13 +15,13 @@ public abstract class HashTable<T> {
     protected int size;
     private int threshold;
 
-    protected abstract void setNext(T node, T next);
+    protected abstract void setNext(V node, V next);
 
-    protected abstract T next(T node);
+    protected abstract V next(V node);
 
-    protected abstract int hashKey(T node);
+    protected abstract int hashKey(V node);
 
-    protected abstract boolean equalKey(T lhs, T rhs);
+    protected abstract boolean equalKey(V lhs, V rhs);
 
     protected static int indexFor(int h, int length) {
         // Doug Lea's supplemental secondaryHash function.
@@ -32,8 +32,8 @@ public abstract class HashTable<T> {
     }
 
     @SuppressWarnings("unchecked")
-    protected final T getBucket(int i) {
-        return (T) buckets[i];
+    protected final V getBucket(int i) {
+        return (V) buckets[i];
     }
 
     /**
@@ -54,11 +54,11 @@ public abstract class HashTable<T> {
         for (int i = 0; i < buckets.length; ++i) {
             while (buckets[i] != null) {
                 // Pop.
-                final T node = getBucket(i);
+                final V node = getBucket(i);
                 buckets[i] = next(node);
                 // Push.
                 final int j = indexFor(hashKey(node), newBuckets.length);
-                setNext(node, (T) newBuckets[j]);
+                setNext(node, (V) newBuckets[j]);
                 newBuckets[j] = node;
             }
         }
@@ -80,34 +80,39 @@ public abstract class HashTable<T> {
     }
 
     /**
-     * Insert new element into hash table or replace existing.
+     * Insert new element into hash table or optionally replace existing.
      * 
      * @param node
      *            The node to be inserted.
-     * @return the node with an equivalent key that was replaced, or null if no replacement took
-     *         place.
+     * @param replace
+     *            Flag indicating whether existing node should be replaced.
+     * @return existing (and possibly replaced) node with matching key or null if no replacement
+     *         took place.
      */
-    public final T insert(T node) {
+    public final V insert(V node, boolean replace) {
         if (buckets.length == 0) {
             // First item.
             grow(threshold);
         }
         int i = indexFor(hashKey(node), buckets.length);
-        T it = getBucket(i);
+        V it = getBucket(i);
         if (it != null) {
             // Check if the first element in the bucket has an equivalent key.
             if (equalKey(it, node)) {
-                // Replace.
-                setNext(node, next(it));
-                buckets[i] = node;
+                if (replace) {
+                    setNext(node, next(it));
+                    buckets[i] = node;
+                }
                 return it;
             }
             // Check if a subsequent element in the bucket has an equivalent key.
-            for (T next; (next = next(it)) != null; it = next) {
+            for (V next; (next = next(it)) != null; it = next) {
                 if (equalKey(next, node)) {
-                    // Replace.
-                    setNext(node, next(next));
-                    setNext(it, node);
+                    if (replace) {
+                        // Replace.
+                        setNext(node, next(next));
+                        setNext(it, node);
+                    }
                     return next;
                 }
             }
@@ -124,6 +129,11 @@ public abstract class HashTable<T> {
         return null;
     }
 
+    public final V insert(V node) {
+        // Replace existing by default.
+        return insert(node, true);
+    }
+
     public final boolean isEmpty() {
         return size == 0;
     }
@@ -137,7 +147,7 @@ public abstract class HashTable<T> {
     final void print(PrintStream s) {
         for (int i = 0; i < buckets.length; ++i) {
             s.print('|');
-            for (T it = getBucket(i); it != null; it = next(it)) {
+            for (V it = getBucket(i); it != null; it = next(it)) {
                 s.print('*');
             }
             s.println();

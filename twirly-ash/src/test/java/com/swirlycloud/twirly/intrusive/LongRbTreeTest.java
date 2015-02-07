@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import static com.swirlycloud.twirly.node.RbUtil.compareLong;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -13,34 +15,41 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.RbNode;
 
-public final class RbTreeTest {
+public final class LongRbTreeTest {
+
     private static final class Node extends BasicRbNode {
         private final long key;
-        private final String name;
 
-        Node(long key, String name) {
+        public Node(long key) {
             this.key = key;
-            this.name = name;
+        }
+    }
+
+    private static final class NodeTree extends LongRbTree {
+
+        private static long getKey(RbNode node) {
+            return ((Node) node).key;
         }
 
         @Override
-        public final long getKey() {
-            return key;
+        protected final int compareKey(RbNode lhs, RbNode rhs) {
+            return compareLong(getKey(lhs), getKey(rhs));
         }
 
         @Override
-        public final String toString() {
-            return name;
+        protected final int compareKeyDirect(RbNode lhs, long rhs) {
+            return compareLong(getKey(lhs), rhs);
         }
     }
 
     @Test
     public final void test() {
-        final RbTree t = new RbTree();
-        final Node first = new Node(101, "first");
-        final Node second = new Node(102, "second");
-        final Node third = new Node(103, "third");
+        final LongRbTree t = new NodeTree();
+        final Node first = new Node(101);
+        final Node second = new Node(102);
+        final Node third = new Node(103);
         assertTrue(t.isEmpty());
         assertNull(t.getFirst());
         assertNull(t.getLast());

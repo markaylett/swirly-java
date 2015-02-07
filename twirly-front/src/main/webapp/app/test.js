@@ -55,7 +55,6 @@ asyncTest('get single contract', function() {
     }).done(function(v) {
         equal(v.mnem, 'EURJPY', 'mnem');
         equal(v.display, 'EURJPY', 'display');
-        equal(v.assetType, 'CURRENCY', 'assetType');
         equal(v.asset, 'EUR', 'asset');
         equal(v.ccy, 'JPY', 'ccy');
         equal(v.tickNumer, 1, 'tickNumer');

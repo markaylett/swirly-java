@@ -3,40 +3,52 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.domain.RefIdx;
 import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.intrusive.RbTree;
+import com.swirlycloud.twirly.intrusive.BasicRbTree;
+import com.swirlycloud.twirly.intrusive.InstructTree;
+import com.swirlycloud.twirly.intrusive.RefHashTable;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.util.Identifiable;
 
-public final class Accnt extends BasicRbNode implements Identifiable {
+public final class Sess extends BasicRbNode {
+
+    private static final class PosnTree extends BasicRbTree<String> {
+
+        private static String getMarket(RbNode node) {
+            return ((Posn) node).getMarket();
+        }
+
+        @Override
+        protected final int compareKey(RbNode lhs, RbNode rhs) {
+            return getMarket(lhs).compareTo(getMarket(rhs));
+        }
+
+        @Override
+        protected final int compareKeyDirect(RbNode lhs, String rhs) {
+            return getMarket(lhs).compareTo(rhs);
+        }
+    }
+
     private final Trader trader;
-    private final RefIdx refIdx;
-    private final RbTree orders = new RbTree();
-    private final RbTree trades = new RbTree();
-    private final RbTree posns = new RbTree();
+    private final RefHashTable refIdx;
+    private final InstructTree orders = new InstructTree();
+    private final InstructTree trades = new InstructTree();
+    private final PosnTree posns = new PosnTree();
 
-    public Accnt(Trader trader, RefIdx refIdx) {
+    public Sess(Trader trader, RefHashTable refIdx) {
         this.trader = trader;
         this.refIdx = refIdx;
     }
 
-    @Override
-    public final long getKey() {
-        return trader.getId();
+    public final String getTrader() {
+        return trader.getMnem();
     }
 
-    @Override
-    public final long getId() {
-        return trader.getId();
-    }
-
-    public final Trader getTrader() {
+    public final Trader getTraderRich() {
         return trader;
     }
 
@@ -49,15 +61,15 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     final void removeOrder(Order order) {
-        assert trader.getId() == order.getTraderId();
+        assert order.getTrader().equals(trader.getMnem());
         orders.remove(order);
         if (!order.getRef().isEmpty()) {
-            refIdx.remove(trader.getId(), order.getRef());
+            refIdx.remove(trader.getMnem(), order.getRef());
         }
     }
 
-    final Order removeOrder(long contrId, int settlDay, long id) {
-        final RbNode node = orders.find(Order.composeKey(contrId, settlDay, id));
+    final Order removeOrder(String market, long id) {
+        final RbNode node = orders.find(market, id);
         if (node == null) {
             return null;
         }
@@ -67,24 +79,20 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     final Order removeOrder(String ref) {
-        final Order order = refIdx.remove(trader.getId(), ref);
+        final Order order = (Order) refIdx.remove(trader.getMnem(), ref);
         if (order != null) {
             orders.remove(order);
         }
         return order;
     }
 
-    public final Order findOrder(long contrId, int settlDay, long id) {
-        return (Order) orders.find(Order.composeKey(contrId, settlDay, id));
+    public final Order findOrder(String market, long id) {
+        return (Order) orders.find(market, id);
     }
 
-    /**
-     * Returns order directly because hash lookup is not a node-based container.
-     */
-
-    public final Order findOrder(long contrId, int settlDay, String ref) {
+    public final Order findOrder(String ref) {
         assert ref != null && !ref.isEmpty();
-        return refIdx.find(trader.getId(), ref);
+        return (Order) refIdx.find(trader.getMnem(), ref);
     }
 
     public final RbNode getRootOrder() {
@@ -112,8 +120,8 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         trades.remove(trade);
     }
 
-    final boolean removeTrade(long contrId, int settlDay, long id) {
-        final RbNode node = trades.find(Exec.composeKey(contrId, settlDay, id));
+    final boolean removeTrade(String market, long id) {
+        final RbNode node = trades.find(market, id);
         if (node == null) {
             return false;
         }
@@ -121,8 +129,8 @@ public final class Accnt extends BasicRbNode implements Identifiable {
         return true;
     }
 
-    public final Exec findTrade(long contrId, int settlDay, long id) {
-        return (Exec) trades.find(Exec.composeKey(contrId, settlDay, id));
+    public final Exec findTrade(String market, long id) {
+        return (Exec) trades.find(market, id);
     }
 
     public final RbNode getRootTrade() {
@@ -147,16 +155,13 @@ public final class Accnt extends BasicRbNode implements Identifiable {
     }
 
     final Posn updatePosn(Posn posn) {
-        final long key = posn.getKey();
-        final RbNode node = posns.pfind(key);
-        if (node != null && node.getKey() == key) {
-            final Posn exist = (Posn) node;
+        final String market = posn.getMarket();
+        final Posn exist = (Posn) posns.pfind(market);
+        if (exist != null && exist.getMarket().equals(market)) {
 
             // Update existing position.
 
             assert exist.getTrader().equals(posn.getTrader());
-            assert exist.getContr().equals(posn.getContr());
-            assert exist.getSettlDay() == posn.getSettlDay();
 
             exist.setBuyCost(posn.getBuyCost());
             exist.setBuyLots(posn.getBuyLots());
@@ -165,29 +170,24 @@ public final class Accnt extends BasicRbNode implements Identifiable {
 
             posn = exist;
         } else {
-            final RbNode parent = node;
+            final RbNode parent = exist;
             posns.pinsert(posn, parent);
         }
         return posn;
     }
 
-    final Posn getLazyPosn(Contr contr, int settlDay) {
-        Posn posn;
-        final long key = Posn.composeKey(contr.getId(), settlDay, trader.getId());
-        final RbNode node = posns.pfind(key);
-        if (node == null || node.getKey() != key) {
-            posn = new Posn(trader, contr, settlDay);
-            final RbNode parent = node;
+    final Posn getLazyPosn(Market market) {
+        Posn posn = (Posn) posns.pfind(market.getMnem());
+        if (posn == null || !posn.getMarket().equals(market.getMnem())) {
+            final RbNode parent = posn;
+            posn = new Posn(trader.getMnem(), market);
             posns.pinsert(posn, parent);
-        } else {
-            posn = (Posn) node;
         }
         return posn;
     }
 
-    public final Posn findPosn(Contr contr, int settlDay) {
-        final long key = Posn.composeKey(contr.getId(), settlDay, trader.getId());
-        return (Posn) posns.find(key);
+    public final Posn findPosn(String market) {
+        return (Posn) posns.find(market);
     }
 
     public final RbNode getRootPosn() {

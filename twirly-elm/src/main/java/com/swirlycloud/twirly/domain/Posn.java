@@ -4,8 +4,6 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.IdUtil.newId;
-import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 
 import java.io.IOException;
 
@@ -14,26 +12,25 @@ import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
-import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable {
+public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
 
-    private final transient long key;
-    private Identifiable trader;
-    private Identifiable contr;
+    private final String trader;
+    private final String market;
+    private final String contr;
     private final int settlDay;
     private long buyCost;
     private long buyLots;
     private long sellCost;
     private long sellLots;
 
-    private Posn(long key, Identifiable trader, Identifiable contr, final int settlDay,
-            long buyCost, long buyLots, long sellCost, long sellLots) {
-        this.key = key;
+    private Posn(String trader, String market, String contr, int settlDay, long buyCost,
+            long buyLots, long sellCost, long sellLots) {
         this.trader = trader;
+        this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
         this.buyCost = buyCost;
@@ -42,17 +39,24 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         this.sellLots = sellLots;
     }
 
-    public Posn(Identifiable trader, Identifiable contr, int settlDay) {
-        this.key = composeKey(contr.getId(), settlDay, trader.getId());
+    public Posn(String trader, String market, String contr, int settlDay) {
         this.trader = trader;
+        this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
     }
 
+    public Posn(String trader, Financial fin) {
+        this.trader = trader;
+        this.market = fin.getMarket();
+        this.contr = fin.getContr();
+        this.settlDay = fin.getSettlDay();
+    }
+
     public static Posn parse(JsonParser p) throws IOException {
-        long key = 0;
-        Identifiable trader = null;
-        Identifiable contr = null;
+        String trader = null;
+        String market = null;
+        String contr = null;
         int settlDay = 0;
         long buyCost = 0;
         long buyLots = 0;
@@ -64,18 +68,13 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new Posn(key, trader, contr, settlDay, buyCost, buyLots, sellCost, sellLots);
+                return new Posn(trader, market, contr, settlDay, buyCost, buyLots, sellCost,
+                        sellLots);
             case KEY_NAME:
                 name = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
-                    key = p.getLong();
-                } else if ("trader".equals(name)) {
-                    trader = newId(p.getLong());
-                } else if ("contr".equals(name)) {
-                    contr = newId(p.getLong());
-                } else if ("settlDate".equals(name)) {
+                if ("settlDate".equals(name)) {
                     settlDay = JulianDay.isoToJd(p.getInt());
                 } else if ("buyCost".equals(name)) {
                     buyCost = p.getLong();
@@ -89,11 +88,52 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
                     throw new IOException(String.format("unexpected number field '%s'", name));
                 }
                 break;
+            case VALUE_STRING:
+                if ("trader".equals(name)) {
+                    trader = p.getString();
+                } else if ("market".equals(name)) {
+                    market = p.getString();
+                } else if ("contr".equals(name)) {
+                    contr = p.getString();
+                } else {
+                    throw new IOException(String.format("unexpected string field '%s'", name));
+                }
+                break;
             default:
                 throw new IOException(String.format("unexpected json token '%s'", event));
             }
         }
         throw new IOException("end-of object not found");
+    }
+
+    @Override
+    public final int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + trader.hashCode();
+        result = prime * result + market.hashCode();
+        return result;
+    }
+
+    @Override
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Posn other = (Posn) obj;
+        if (!trader.equals(other.trader)) {
+            return false;
+        }
+        if (!market.equals(other.market)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -103,10 +143,10 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
 
     @Override
     public final void toJson(Params params, Appendable out) throws IOException {
-        out.append("{\"id\":").append(String.valueOf(key));
-        out.append(",\"trader\":").append(getIdOrMnem(trader, params));
-        out.append(",\"contr\":").append(getIdOrMnem(contr, params));
-        out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append("{\"trader\":\"").append(trader);
+        out.append("\",\"market\":\"").append(market);
+        out.append("\",\"contr\":\"").append(contr);
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         if (buyLots != 0) {
             out.append(",\"buyCost\":").append(String.valueOf(buyCost));
             out.append(",\"buyLots\":").append(String.valueOf(buyLots));
@@ -120,30 +160,6 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
             out.append(",\"sellCost\":0,\"sellLots\":0");
         }
         out.append("}");
-    }
-
-    public final void enrich(Trader trader, Contr contr) {
-        assert this.trader.getId() == trader.getId();
-        assert this.contr.getId() == contr.getId();
-        this.trader = trader;
-        this.contr = contr;
-    }
-
-    /**
-     * Synthetic position key.
-     */
-
-    public static long composeKey(long contrId, int settlDay, long traderId) {
-        // 16 bit contr-id.
-        final long CONTR_MASK = (1L << 16) - 1;
-        // 16 bits is sufficient for truncated Julian day.
-        final long TJD_MASK = (1L << 16) - 1;
-        // 32 bit trader-id.
-        final long TRADER_MASK = (1L << 32) - 1;
-
-        // Truncated Julian Day (TJD).
-        final long tjd = JulianDay.jdToTjd(settlDay);
-        return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (traderId & TRADER_MASK);
     }
 
     public final void applyTrade(Action action, long lastTicks, long lastLots) {
@@ -178,32 +194,21 @@ public final class Posn extends BasicRbNode implements Identifiable, Jsonifiable
         this.sellLots = sellLots;
     }
 
-    @Override
-    public final long getKey() {
-        return key;
+    public final String getTrader() {
+        return trader;
     }
 
     @Override
-    public final long getId() {
-        return key;
+    public final String getMarket() {
+        return market;
     }
 
-    public final long getTraderId() {
-        return trader.getId();
+    @Override
+    public final String getContr() {
+        return contr;
     }
 
-    public final Trader getTrader() {
-        return (Trader) trader;
-    }
-
-    public final long getContrId() {
-        return contr.getId();
-    }
-
-    public final Contr getContr() {
-        return (Contr) contr;
-    }
-
+    @Override
     public final int getSettlDay() {
         return settlDay;
     }

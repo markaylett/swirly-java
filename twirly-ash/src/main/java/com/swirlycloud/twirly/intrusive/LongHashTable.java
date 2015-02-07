@@ -6,39 +6,39 @@ package com.swirlycloud.twirly.intrusive;
 /**
  * Hashtable with key of type long.
  * 
- * @param <T>
+ * @param <V>
  *            The concrete element type.
  */
-public abstract class LongHashTable<T> extends HashTable<T> {
+public abstract class LongHashTable<V> extends HashTable<V> {
 
-    protected static int hashKey(long id) {
+    protected static int hashLong(long id) {
         return (int) (id ^ id >>> 32);
     }
 
-    protected abstract boolean equalKey(T lhs, long rhs);
+    protected abstract boolean equalKeyDirect(V lhs, long rhs);
 
     public LongHashTable(int capacity) {
         super(capacity);
     }
 
-    public final T remove(long key) {
+    public final V remove(long key) {
         if (isEmpty()) {
             return null;
         }
-        int i = indexFor(hashKey(key), buckets.length);
-        T it = getBucket(i);
+        int i = indexFor(hashLong(key), buckets.length);
+        V it = getBucket(i);
         if (it == null) {
             return null;
         }
         // Check if the first element in the bucket has an equivalent key.
-        if (equalKey(it, key)) {
+        if (equalKeyDirect(it, key)) {
             buckets[i] = next(it);
             --size;
             return it;
         }
         // Check if a subsequent element in the bucket has an equivalent key.
-        for (T next; (next = next(it)) != null; it = next) {
-            if (equalKey(next, key)) {
+        for (V next; (next = next(it)) != null; it = next) {
+            if (equalKeyDirect(next, key)) {
                 setNext(it, next(next));
                 --size;
                 return next;
@@ -47,13 +47,13 @@ public abstract class LongHashTable<T> extends HashTable<T> {
         return null;
     }
 
-    public final T find(long key) {
+    public final V find(long key) {
         if (isEmpty()) {
             return null;
         }
-        final int i = indexFor(hashKey(key), buckets.length);
-        for (T it = getBucket(i); it != null; it = next(it)) {
-            if (equalKey(it, key)) {
+        final int i = indexFor(hashLong(key), buckets.length);
+        for (V it = getBucket(i); it != null; it = next(it)) {
+            if (equalKeyDirect(it, key)) {
                 return it;
             }
         }

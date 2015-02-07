@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.intrusive;
 
 import com.swirlycloud.twirly.node.SlNode;
 
-public abstract class SlLongHashTable extends LongHashTable<SlNode> {
+public abstract class BasicSlHashTable<K> extends BasicHashTable<K, SlNode> {
 
     @Override
     protected final void setNext(SlNode node, SlNode next) {
@@ -17,7 +17,7 @@ public abstract class SlLongHashTable extends LongHashTable<SlNode> {
         return node.slNext();
     }
 
-    public SlLongHashTable(int capacity) {
+    public BasicSlHashTable(int capacity) {
         super(capacity);
     }
 }

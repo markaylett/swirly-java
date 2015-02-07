@@ -82,8 +82,8 @@
     <script type="text/javascript" src="/js/bootstrap3-typeahead.min.js"></script>
     <script type="text/javascript" src="/js/knockout.min.js"></script>
 
-    <script type="text/javascript" src="/js/twirly.js"></script>
-    <script type="text/javascript" src="/js/trader.js"></script>
+    <script type="text/javascript" src="/app/twirly.js"></script>
+    <script type="text/javascript" src="/app/trader.js"></script>
     <script type="text/javascript">
       $(initApp);
     </script>

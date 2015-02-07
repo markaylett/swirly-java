@@ -15,15 +15,15 @@ import java.util.LinkedList;
  * {@link java.util.List} or {@link java.util.Set}, neither interface is currently implemented.
  *
  * @author Mark Aylett
- * @param <T>
+ * @param <V>
  *            The element type.
  */
-public final class SortedList<T> implements Collection<T> {
+public final class SortedList<V> implements Collection<V> {
 
-    private final LinkedList<T> list;
-    private final Comparator<? super T> comp;
+    private final LinkedList<V> list;
+    private final Comparator<? super V> comp;
 
-    public SortedList(Comparator<? super T> comp) {
+    public SortedList(Comparator<? super V> comp) {
         this.comp = comp;
         this.list = new LinkedList<>();
     }
@@ -31,14 +31,14 @@ public final class SortedList<T> implements Collection<T> {
     // Collection.
 
     @Override
-    public final boolean add(T element) {
+    public final boolean add(V element) {
         addElement(element);
         return true;
     }
 
     @Override
-    public final boolean addAll(Collection<? extends T> c) {
-        for (final T node : c) {
+    public final boolean addAll(Collection<? extends V> c) {
+        for (final V node : c) {
             add(node);
         }
         return true;
@@ -52,14 +52,14 @@ public final class SortedList<T> implements Collection<T> {
     @Override
     @SuppressWarnings("unchecked")
     public final boolean contains(Object o) {
-        return 0 <= containsElement((T) o);
+        return 0 <= containsElement((V) o);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public final boolean containsAll(Collection<?> c) {
         for (final Object o : c) {
-            if (containsElement((T) o) < 0) {
+            if (containsElement((V) o) < 0) {
                 return false;
             }
         }
@@ -72,14 +72,14 @@ public final class SortedList<T> implements Collection<T> {
     }
 
     @Override
-    public final Iterator<T> iterator() {
+    public final Iterator<V> iterator() {
         return list.iterator();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public final boolean remove(Object o) {
-        return 0 <= removeElement((T) o);
+        return 0 <= removeElement((V) o);
     }
 
     @Override
@@ -115,7 +115,7 @@ public final class SortedList<T> implements Collection<T> {
 
     // This.
 
-    public final int addElement(T element) {
+    public final int addElement(V element) {
 
         // Index of the search key, if it is contained in the list; otherwise,
         // (-(insertion point) - 1).
@@ -131,11 +131,11 @@ public final class SortedList<T> implements Collection<T> {
         return i;
     }
 
-    public final int containsElement(T element) {
+    public final int containsElement(V element) {
         return binarySearch(list, element, comp);
     }
 
-    public final int removeElement(T element) {
+    public final int removeElement(V element) {
         final int i = binarySearch(list, element, comp);
         if (0 <= i) {
             list.remove(i);
@@ -143,23 +143,23 @@ public final class SortedList<T> implements Collection<T> {
         return i;
     }
 
-    public final T removeFirst() {
+    public final V removeFirst() {
         return list.removeFirst();
     }
 
-    public final T removeLast() {
+    public final V removeLast() {
         return list.removeLast();
     }
 
-    public final T get(int i) {
+    public final V get(int i) {
         return list.get(i);
     }
 
-    public final T getFirst() {
+    public final V getFirst() {
         return list.getFirst();
     }
 
-    public final T getLast() {
+    public final V getLast() {
         return list.getLast();
     }
 }

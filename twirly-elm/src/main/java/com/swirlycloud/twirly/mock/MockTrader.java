@@ -16,12 +16,11 @@ public final class MockTrader {
     private static final List<NullaryFunction<Trader>> LIST = new ArrayList<>();
     private static final Map<String, NullaryFunction<Trader>> MAP = new HashMap<>();
 
-    private static void put(final long id, final String mnem, final String display,
-            final String email) {
+    private static void put(final String mnem, final String display, final String email) {
         final NullaryFunction<Trader> fn = new NullaryFunction<Trader>() {
             @Override
             public final Trader call() {
-                return new Trader(id, mnem, display, email);
+                return new Trader(mnem, display, email);
             }
         };
         LIST.add(fn);
@@ -29,12 +28,11 @@ public final class MockTrader {
     }
 
     static {
-        int i = 1;
-        put(i++, "MARAYL", "Mark Aylett", "mark.aylett@gmail.com");
-        put(i++, "GOSAYL", "Goska Aylett", "goska.aylett@gmail.com");
-        put(i++, "TOBAYL", "Toby Aylett", "toby.aylett@gmail.com");
-        put(i++, "EMIAYL", "Emily Aylett", "emily.aylett@gmail.com");
-        put(i++, "SWIRLY", "Swirly Cloud", "info@swirlycloud.com");
+        put("MARAYL", "Mark Aylett", "mark.aylett@gmail.com");
+        put("GOSAYL", "Goska Aylett", "goska.aylett@gmail.com");
+        put("TOBAYL", "Toby Aylett", "toby.aylett@gmail.com");
+        put("EMIAYL", "Emily Aylett", "emily.aylett@gmail.com");
+        put("SWIRLY", "Swirly Cloud", "info@swirlycloud.com");
     }
 
     private MockTrader() {

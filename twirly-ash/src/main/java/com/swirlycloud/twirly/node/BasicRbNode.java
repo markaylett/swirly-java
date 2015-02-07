@@ -11,6 +11,14 @@ public abstract class BasicRbNode implements RbNode {
     private transient int color;
 
     @Override
+    public final void setNode(RbNode left, RbNode right, RbNode parent, int color) {
+        this.left = left;
+        this.right = right;
+        this.parent = parent;
+        this.color = color;
+    }
+
+    @Override
     public final RbNode setLeft(RbNode left) {
         this.left = left;
         return left;
@@ -35,44 +43,12 @@ public abstract class BasicRbNode implements RbNode {
 
     @Override
     public final RbNode rbNext() {
-        RbNode node = this;
-        if (node.getRight() != null) {
-            node = node.getRight();
-            while (node.getLeft() != null) {
-                node = node.getLeft();
-            }
-        } else {
-            if (node.getParent() != null && node == node.getParent().getLeft()) {
-                node = node.getParent();
-            } else {
-                while (node.getParent() != null && node == node.getParent().getRight()) {
-                    node = node.getParent();
-                }
-                node = node.getParent();
-            }
-        }
-        return node;
+        return RbUtil.rbNext(this);
     }
 
     @Override
     public final RbNode rbPrev() {
-        RbNode node = this;
-        if (node.getLeft() != null) {
-            node = node.getLeft();
-            while (node.getRight() != null) {
-                node = node.getRight();
-            }
-        } else {
-            if (node.getParent() != null && node == node.getParent().getRight()) {
-                node = node.getParent();
-            } else {
-                while (node.getParent() != null && node == node.getParent().getLeft()) {
-                    node = node.getParent();
-                }
-                node = node.getParent();
-            }
-        }
-        return node;
+        return RbUtil.rbPrev(this);
     }
 
     @Override

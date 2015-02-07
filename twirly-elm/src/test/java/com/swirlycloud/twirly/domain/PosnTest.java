@@ -3,25 +3,22 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.mock.MockContr;
-import com.swirlycloud.twirly.mock.MockTrader;
+import com.swirlycloud.twirly.date.JulianDay;
 
 public final class PosnTest {
     @Test
     public final void testToString() {
-        final Posn posn = new Posn(MockTrader.newTrader("MARAYL"), MockContr.newContr("EURUSD"),
-                ymdToJd(2014, 2, 14));
+        final Posn posn = new Posn("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314));
         posn.setBuyCost(1);
         posn.setBuyLots(2);
         posn.setSellCost(3);
         posn.setSellLots(4);
         assertEquals(
-                "{\"id\":3449558818357249,\"trader\":1,\"contr\":12,\"settlDate\":20140314,\"buyCost\":1,\"buyLots\":2,\"sellCost\":3,\"sellLots\":4}",
+                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyCost\":1,\"buyLots\":2,\"sellCost\":3,\"sellLots\":4}",
                 posn.toString());
     }
 }

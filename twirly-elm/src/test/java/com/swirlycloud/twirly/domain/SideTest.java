@@ -3,13 +3,11 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.mock.MockContr;
-import com.swirlycloud.twirly.mock.MockTrader;
+import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 
@@ -33,13 +31,11 @@ public final class SideTest {
     @Test
     public final void testOrders() {
         long now = System.currentTimeMillis();
-        final Contr contr = MockContr.newContr("EURUSD");
-        final Trader trader = MockTrader.newTrader("MARAYL");
         // Two orders at the same price level.
-        final Order apple = new Order(1, trader, contr, ymdToJd(2014, 2, 14), "apple", Action.BUY,
-                12345, 10, 0, now);
-        final Order orange = new Order(2, trader, contr, ymdToJd(2014, 2, 14), "orange",
-                Action.BUY, 12345, 20, 0, now);
+        final Order apple = new Order(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
+                JulianDay.isoToJd(20140314), "apple", Action.BUY, 12345, 10, 0, now);
+        final Order orange = new Order(2, "MARAYL", "EURUSD.MAR14", "EURUSD",
+                JulianDay.isoToJd(20140314), "orange", Action.BUY, 12345, 20, 0, now);
         final Side side = new Side();
 
         apple.state = null;
@@ -132,16 +128,14 @@ public final class SideTest {
     @Test
     public final void testLevels() {
         final long now = System.currentTimeMillis();
-        final Contr contr = MockContr.newContr("EURUSD");
-        final Trader trader = MockTrader.newTrader("MARAYL");
         // Two orders at the same price level.
-        final Order apple = new Order(1, trader, contr, ymdToJd(2014, 2, 14), "apple", Action.BUY,
-                12345, 10, 0, now);
-        final Order orange = new Order(2, trader, contr, ymdToJd(2014, 2, 14), "orange",
-                Action.BUY, 12345, 20, 0, now);
+        final Order apple = new Order(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
+                JulianDay.isoToJd(20140314), "apple", Action.BUY, 12345, 10, 0, now);
+        final Order orange = new Order(2, "MARAYL", "EURUSD.MAR14", "EURUSD",
+                JulianDay.isoToJd(20140314), "orange", Action.BUY, 12345, 20, 0, now);
         // Best inserted last.
-        final Order pear = new Order(3, trader, contr, ymdToJd(2014, 2, 14), "pear", Action.BUY,
-                12346, 25, 0, now);
+        final Order pear = new Order(3, "MARAYL", "EURUSD.MAR14", "EURUSD",
+                JulianDay.isoToJd(20140314), "pear", Action.BUY, 12346, 25, 0, now);
         final Side side = new Side();
 
         side.placeOrder(apple, now);

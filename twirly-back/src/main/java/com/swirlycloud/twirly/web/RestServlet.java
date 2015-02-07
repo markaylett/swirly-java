@@ -21,7 +21,7 @@ import com.swirlycloud.twirly.util.Params;
 @SuppressWarnings("serial")
 public abstract class RestServlet extends HttpServlet {
 
-    protected Params newParams(final HttpServletRequest req) {
+    protected final Params newParams(final HttpServletRequest req) {
         return new Params() {
             @SuppressWarnings("unchecked")
             @Override
@@ -44,7 +44,7 @@ public abstract class RestServlet extends HttpServlet {
         };
     }
 
-    protected Request parseRequest(HttpServletRequest req) throws BadRequestException {
+    protected final Request parseRequest(HttpServletRequest req) throws BadRequestException {
         try (JsonParser p = Json.createParser(req.getReader())) {
             parseStartObject(p);
             final Request r = new Request();
@@ -55,14 +55,15 @@ public abstract class RestServlet extends HttpServlet {
         }
     }
 
-    protected void sendJsonResponse(HttpServletResponse resp) {
+    protected final void sendJsonResponse(HttpServletResponse resp) {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
-    protected void sendJsonResponse(HttpServletResponse resp, ServException e) throws IOException {
+    protected final void sendJsonResponse(HttpServletResponse resp, ServException e)
+            throws IOException {
         e.toJson(null, resp.getWriter());
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
@@ -70,7 +71,7 @@ public abstract class RestServlet extends HttpServlet {
         resp.setStatus(e.getNum());
     }
 
-    protected boolean isDevEnv() {
+    protected final boolean isDevEnv() {
         return SystemProperty.environment.value() == SystemProperty.Environment.Value.Development;
     }
 

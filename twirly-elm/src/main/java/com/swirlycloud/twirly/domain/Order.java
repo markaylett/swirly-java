@@ -4,8 +4,6 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.IdUtil.newId;
-import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 
 import java.io.IOException;
 
@@ -13,27 +11,31 @@ import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.OrderNode;
+import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.util.Identifiable;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Order extends OrderNode implements Identifiable, Jsonifiable, Instruct {
+public final class Order extends BasicRbNode implements DlNode, SlNode, Jsonifiable, Instruct {
+
+    private transient DlNode dlPrev;
+    private transient DlNode dlNext;
+
+    private transient SlNode slNext;
 
     // Internals.
-    // Singly-linked buckets.
-    transient Order refNext;
     transient RbNode level;
 
-    private final transient long key;
     private final long id;
     /**
      * The executing trader.
      */
-    private Identifiable trader;
-    private Identifiable contr;
+    private final String trader;
+    private final String market;
+    private final String contr;
     private final int settlDay;
     /**
      * Ref is optional.
@@ -63,18 +65,15 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
     long created;
     long modified;
 
-    public Order(long id, Identifiable trader, Identifiable contr, int settlDay, String ref,
+    public Order(long id, String trader, String market, String contr, int settlDay, String ref,
             State state, Action action, long ticks, long lots, long resd, long exec,
             long lastTicks, long lastLots, long minLots, long created, long modified) {
         assert trader != null;
-        assert contr != null;
+        assert market != null;
         assert lots > 0 && lots >= minLots;
-        if (id >= (1L << 32)) {
-            throw new IllegalArgumentException("order-id exceeds max-value");
-        }
-        this.key = composeKey(contr.getId(), settlDay, id);
         this.id = id;
         this.trader = trader;
+        this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
         this.ref = ref != null ? ref : "";
@@ -91,17 +90,38 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
         this.modified = modified;
     }
 
-    public Order(long id, Identifiable trader, Identifiable contr, int settlDay, String ref,
-            Action action, long ticks, long lots, long minLots, long created) {
+    public Order(long id, String trader, Financial fin, String ref, State state, Action action,
+            long ticks, long lots, long resd, long exec, long lastTicks, long lastLots,
+            long minLots, long created, long modified) {
         assert trader != null;
-        assert contr != null;
         assert lots > 0 && lots >= minLots;
-        if (id >= (1L << 32)) {
-            throw new IllegalArgumentException("order-id exceeds max-value");
-        }
-        this.key = composeKey(contr.getId(), settlDay, id);
         this.id = id;
         this.trader = trader;
+        this.market = fin.getMarket();
+        this.contr = fin.getContr();
+        this.settlDay = fin.getSettlDay();
+        this.ref = ref != null ? ref : "";
+        this.state = state;
+        this.action = action;
+        this.ticks = ticks;
+        this.lots = lots;
+        this.resd = resd;
+        this.exec = exec;
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.minLots = minLots;
+        this.created = created;
+        this.modified = modified;
+    }
+
+    public Order(long id, String trader, String market, String contr, int settlDay, String ref,
+            Action action, long ticks, long lots, long minLots, long created) {
+        assert trader != null;
+        assert market != null;
+        assert lots > 0 && lots >= minLots;
+        this.id = id;
+        this.trader = trader;
+        this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
         this.ref = ref != null ? ref : "";
@@ -118,10 +138,34 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
         this.modified = created;
     }
 
+    public Order(long id, String trader, Financial fin, String ref, Action action, long ticks,
+            long lots, long minLots, long created) {
+        assert trader != null;
+        assert lots > 0 && lots >= minLots;
+        this.id = id;
+        this.trader = trader;
+        this.market = fin.getMarket();
+        this.contr = fin.getContr();
+        this.settlDay = fin.getSettlDay();
+        this.ref = ref != null ? ref : "";
+        this.state = State.NEW;
+        this.action = action;
+        this.ticks = ticks;
+        this.lots = lots;
+        this.resd = lots;
+        this.exec = 0;
+        this.lastTicks = 0;
+        this.lastLots = 0;
+        this.minLots = minLots;
+        this.created = created;
+        this.modified = created;
+    }
+
     public static Order parse(JsonParser p) throws IOException {
         long id = 0;
-        Identifiable trader = null;
-        Identifiable contr = null;
+        String trader = null;
+        String market = null;
+        String contr = null;
         int settlDay = 0;
         String ref = null;
         State state = null;
@@ -141,8 +185,8 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new Order(id, trader, contr, settlDay, ref, state, action, ticks, lots,
-                        resd, exec, lastTicks, lastLots, minLots, created, modified);
+                return new Order(id, trader, market, contr, settlDay, ref, state, action, ticks,
+                        lots, resd, exec, lastTicks, lastLots, minLots, created, modified);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -160,10 +204,6 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
             case VALUE_NUMBER:
                 if ("id".equals(name)) {
                     id = p.getLong();
-                } else if ("trader".equals(name)) {
-                    trader = newId(p.getLong());
-                } else if ("contr".equals(name)) {
-                    contr = newId(p.getLong());
                 } else if ("settlDate".equals(name)) {
                     settlDay = JulianDay.isoToJd(p.getInt());
                 } else if ("ticks".equals(name)) {
@@ -189,7 +229,13 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
                 }
                 break;
             case VALUE_STRING:
-                if ("ref".equals(name)) {
+                if ("trader".equals(name)) {
+                    trader = p.getString();
+                } else if ("market".equals(name)) {
+                    market = p.getString();
+                } else if ("contr".equals(name)) {
+                    contr = p.getString();
+                } else if ("ref".equals(name)) {
                     ref = p.getString();
                 } else if ("state".equals(name)) {
                     state = State.valueOf(p.getString());
@@ -207,6 +253,36 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
     }
 
     @Override
+    public final int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + market.hashCode();
+        result = prime * result + (int) (id ^ (id >>> 32));
+        return result;
+    }
+
+    @Override
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Order other = (Order) obj;
+        if (!market.equals(other.market)) {
+            return false;
+        }
+        if (id != other.id) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public final String toString() {
         return JsonUtil.toJson(this);
     }
@@ -214,9 +290,10 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
     @Override
     public final void toJson(Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
-        out.append(",\"trader\":").append(getIdOrMnem(trader, params));
-        out.append(",\"contr\":").append(getIdOrMnem(contr, params));
-        out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"trader\":\"").append(trader);
+        out.append("\",\"market\":\"").append(market);
+        out.append("\",\"contr\":\"").append(contr);
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"ref\":");
         if (!ref.isEmpty()) {
             out.append('"').append(ref).append('"');
@@ -241,28 +318,72 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
         out.append("}");
     }
 
-    public final void enrich(Trader trader, Contr contr) {
-        assert this.trader.getId() == trader.getId();
-        assert this.contr.getId() == contr.getId();
-        this.trader = trader;
-        this.contr = contr;
+    @Override
+    public final void insert(DlNode prev, DlNode next) {
+
+        assert prev != null;
+        assert next != null;
+
+        prev.setDlNext(this);
+        this.setDlPrev(prev);
+
+        next.setDlPrev(this);
+        this.setDlNext(next);
     }
 
-    /**
-     * Synthetic order key.
-     */
+    @Override
+    public final void insertBefore(DlNode next) {
+        assert next != null;
+        insert(next.dlPrev(), next);
+    }
 
-    public static long composeKey(long contrId, int settlDay, long orderId) {
-        // 16 bit contr-id.
-        final long CONTR_MASK = (1L << 16) - 1;
-        // 16 bits is sufficient for truncated Julian day.
-        final long TJD_MASK = (1L << 16) - 1;
-        // 32 bit order-id.
-        final long ORDER_MASK = (1L << 32) - 1;
+    @Override
+    public final void insertAfter(DlNode prev) {
+        assert prev != null;
+        insert(prev, prev.dlNext());
+    }
 
-        // Truncated Julian Day (TJD).
-        final long tjd = JulianDay.jdToTjd(settlDay);
-        return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (orderId & ORDER_MASK);
+    @Override
+    public final void remove() {
+        dlNext().setDlPrev(dlPrev);
+        dlPrev().setDlNext(dlNext);
+        setDlPrev(null);
+        setDlNext(null);
+    }
+
+    @Override
+    public void setDlPrev(DlNode prev) {
+        this.dlPrev = prev;
+    }
+
+    @Override
+    public void setDlNext(DlNode next) {
+        this.dlNext = next;
+    }
+
+    @Override
+    public final DlNode dlNext() {
+        return this.dlNext;
+    }
+
+    @Override
+    public final DlNode dlPrev() {
+        return this.dlPrev;
+    }
+
+    @Override
+    public boolean isEnd() {
+        return false;
+    }
+
+    @Override
+    public final void setSlNext(SlNode next) {
+        this.slNext = next;
+    }
+
+    @Override
+    public final SlNode slNext() {
+        return slNext;
     }
 
     public final void place(long now) {
@@ -301,11 +422,6 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
     }
 
     @Override
-    public final long getKey() {
-        return key;
-    }
-
-    @Override
     public final long getId() {
         return id;
     }
@@ -316,23 +432,18 @@ public final class Order extends OrderNode implements Identifiable, Jsonifiable,
     }
 
     @Override
-    public final long getTraderId() {
-        return trader.getId();
+    public final String getTrader() {
+        return trader;
     }
 
     @Override
-    public final Trader getTrader() {
-        return (Trader) trader;
+    public final String getMarket() {
+        return market;
     }
 
     @Override
-    public final long getContrId() {
-        return contr.getId();
-    }
-
-    @Override
-    public final Contr getContr() {
-        return (Contr) contr;
+    public final String getContr() {
+        return contr;
     }
 
     @Override

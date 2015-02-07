@@ -12,13 +12,13 @@
   </servlet>
 
   <servlet>
-    <servlet-name>market</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.MarketServlet</servlet-class>
+    <servlet-name>view</servlet-name>
+    <servlet-class>com.swirlycloud.twirly.web.ViewServlet</servlet-class>
   </servlet>
 
   <servlet>
-    <servlet-name>accnt</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.AccntServlet</servlet-class>
+    <servlet-name>sess</servlet-name>
+    <servlet-class>com.swirlycloud.twirly.web.SessServlet</servlet-class>
   </servlet>
 
   <servlet>
@@ -32,13 +32,13 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>market</servlet-name>
-    <url-pattern>/api/market/*</url-pattern>
+    <servlet-name>view</servlet-name>
+    <url-pattern>/api/view/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>accnt</servlet-name>
-    <url-pattern>/api/accnt/*</url-pattern>
+    <servlet-name>sess</servlet-name>
+    <url-pattern>/api/sess/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

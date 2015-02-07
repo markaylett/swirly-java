@@ -4,8 +4,6 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.IdUtil.newId;
-import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 
 import java.io.IOException;
 
@@ -13,22 +11,24 @@ import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.ExecNode;
-import com.swirlycloud.twirly.util.Identifiable;
+import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Exec extends ExecNode implements Identifiable, Jsonifiable, Instruct {
+public final class Exec extends BasicRbNode implements SlNode, Jsonifiable, Instruct {
 
-    private final transient long key;
+    private transient SlNode next;
+
     private final long id;
     private final long orderId;
     /**
      * The executing trader.
      */
-    private Identifiable trader;
-    private Identifiable contr;
+    private final String trader;
+    private final String market;
+    private final String contr;
     private final int settlDay;
     /**
      * Ref is optional.
@@ -57,20 +57,17 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
     private final long minLots;
     private long matchId;
     private Role role;
-    private Identifiable cpty;
+    private String cpty;
     private final long created;
 
-    public Exec(long id, long orderId, Identifiable trader, Identifiable contr, int settlDay,
+    public Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
             String ref, State state, Action action, long ticks, long lots, long resd, long exec,
-            long lastTicks, long lastLots, long minLots, long matchId, Role role,
-            Identifiable cpty, long created) {
-        if (id >= (1L << 32)) {
-            throw new IllegalArgumentException("exec-id exceeds max-value");
-        }
-        this.key = composeKey(contr.getId(), settlDay, id);
+            long lastTicks, long lastLots, long minLots, long matchId, Role role, String cpty,
+            long created) {
         this.id = id;
         this.orderId = orderId;
         this.trader = trader;
+        this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
         this.ref = ref != null ? ref : "";
@@ -89,14 +86,36 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
         this.created = created;
     }
 
+    public Exec(long id, long orderId, String trader, Financial fin, String ref, State state,
+            Action action, long ticks, long lots, long resd, long exec, long lastTicks,
+            long lastLots, long minLots, long matchId, Role role, String cpty, long created) {
+        this.id = id;
+        this.orderId = orderId;
+        this.trader = trader;
+        this.market = fin.getMarket();
+        this.contr = fin.getContr();
+        this.settlDay = fin.getSettlDay();
+        this.ref = ref != null ? ref : "";
+        this.state = state;
+        this.action = action;
+        this.ticks = ticks;
+        this.lots = lots;
+        this.resd = resd;
+        this.exec = exec;
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.minLots = minLots;
+        this.matchId = matchId;
+        this.role = role;
+        this.cpty = cpty;
+        this.created = created;
+    }
+
     public Exec(long id, Instruct instruct, long created) {
-        if (id >= (1L << 32)) {
-            throw new IllegalArgumentException("exec-id exceeds max-value");
-        }
-        this.key = composeKey(instruct.getContrId(), instruct.getSettlDay(), id);
         this.id = id;
         this.orderId = instruct.getOrderId();
         this.trader = instruct.getTrader();
+        this.market = instruct.getMarket();
         this.contr = instruct.getContr();
         this.settlDay = instruct.getSettlDay();
         this.ref = instruct.getRef();
@@ -115,8 +134,9 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
     public static Exec parse(JsonParser p) throws IOException {
         long id = 0;
         long orderId = 0;
-        Identifiable trader = null;
-        Identifiable contr = null;
+        String trader = null;
+        String market = null;
+        String contr = null;
         int settlDay = 0;
         String ref = null;
         State state = null;
@@ -130,7 +150,7 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
         long minLots = 0;
         long matchId = 0;
         Role role = null;
-        Identifiable cpty = null;
+        String cpty = null;
         long created = 0;
 
         String name = null;
@@ -138,8 +158,8 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new Exec(id, orderId, trader, contr, settlDay, ref, state, action, ticks,
-                        lots, resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty,
+                return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action,
+                        ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty,
                         created);
             case KEY_NAME:
                 name = p.getString();
@@ -166,10 +186,6 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
                     id = p.getLong();
                 } else if ("orderId".equals(name)) {
                     orderId = p.getLong();
-                } else if ("trader".equals(name)) {
-                    trader = newId(p.getLong());
-                } else if ("contr".equals(name)) {
-                    contr = newId(p.getLong());
                 } else if ("settlDate".equals(name)) {
                     settlDay = JulianDay.isoToJd(p.getInt());
                 } else if ("ticks".equals(name)) {
@@ -188,8 +204,6 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
                     minLots = p.getLong();
                 } else if ("matchId".equals(name)) {
                     matchId = p.getLong();
-                } else if ("cpty".equals(name)) {
-                    cpty = newId(p.getLong());
                 } else if ("created".equals(name)) {
                     created = p.getLong();
                 } else {
@@ -197,7 +211,13 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
                 }
                 break;
             case VALUE_STRING:
-                if ("ref".equals(name)) {
+                if ("trader".equals(name)) {
+                    trader = p.getString();
+                } else if ("market".equals(name)) {
+                    market = p.getString();
+                } else if ("contr".equals(name)) {
+                    contr = p.getString();
+                } else if ("ref".equals(name)) {
                     ref = p.getString();
                 } else if ("state".equals(name)) {
                     state = State.valueOf(p.getString());
@@ -205,6 +225,8 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
                     action = Action.valueOf(p.getString());
                 } else if ("role".equals(name)) {
                     role = Role.valueOf(p.getString());
+                } else if ("cpty".equals(name)) {
+                    cpty = p.getString();
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -217,6 +239,36 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
     }
 
     @Override
+    public final int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + market.hashCode();
+        result = prime * result + (int) (id ^ (id >>> 32));
+        return result;
+    }
+
+    @Override
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Exec other = (Exec) obj;
+        if (!market.equals(other.market)) {
+            return false;
+        }
+        if (id != other.id) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public final String toString() {
         return JsonUtil.toJson(this);
     }
@@ -225,9 +277,10 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
     public final void toJson(Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));
-        out.append(",\"trader\":").append(getIdOrMnem(trader, params));
-        out.append(",\"contr\":").append(getIdOrMnem(contr, params));
-        out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append(",\"trader\":\"").append(trader);
+        out.append("\",\"market\":\"").append(market);
+        out.append("\",\"contr\":\"").append(contr);
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"ref\":");
         if (!ref.isEmpty()) {
             out.append('"').append(ref).append('"');
@@ -250,7 +303,7 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
         if (state == State.TRADE) {
             out.append(",\"matchId\":").append(String.valueOf(matchId));
             out.append(",\"role\":\"").append(role.name());
-            out.append("\",\"cpty\":").append(getIdOrMnem(cpty, params));
+            out.append("\",\"cpty\":\"").append(cpty).append('"');
         } else {
             out.append(",\"matchId\":null,\"role\":null,\"cpty\":null");
         }
@@ -258,32 +311,14 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
         out.append("}");
     }
 
-    public final void enrich(Trader trader, Contr contr, Trader cpty) {
-        assert this.trader.getId() == trader.getId();
-        assert this.contr.getId() == contr.getId();
-        this.trader = trader;
-        this.contr = contr;
-        if (state == State.TRADE) {
-            assert this.cpty.getId() == cpty.getId();
-            this.cpty = cpty;
-        }
+    @Override
+    public final void setSlNext(SlNode next) {
+        this.next = next;
     }
 
-    /**
-     * Synthetic exec key.
-     */
-
-    public static long composeKey(long contrId, int settlDay, long execId) {
-        // 16 bit contr-id.
-        final long CONTR_MASK = (1L << 16) - 1;
-        // 16 bits is sufficient for truncated Julian day.
-        final long TJD_MASK = (1L << 16) - 1;
-        // 32 bit exec-id.
-        final long EXEC_MASK = (1L << 32) - 1;
-
-        // Truncated Julian Day (TJD).
-        final long tjd = JulianDay.jdToTjd(settlDay);
-        return ((contrId & CONTR_MASK) << 48) | ((tjd & TJD_MASK) << 32) | (execId & EXEC_MASK);
+    @Override
+    public final SlNode slNext() {
+        return next;
     }
 
     public final void revise(long lots) {
@@ -300,7 +335,7 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
     }
 
     public final void trade(long lots, long lastTicks, long lastLots, long matchId, Role role,
-            Trader cpty) {
+            String cpty) {
         state = State.TRADE;
         resd -= lots;
         exec += lots;
@@ -311,13 +346,8 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
         this.cpty = cpty;
     }
 
-    public final void trade(long lastTicks, long lastLots, long matchId, Role role, Trader cpty) {
+    public final void trade(long lastTicks, long lastLots, long matchId, Role role, String cpty) {
         trade(lastLots, lastTicks, lastLots, matchId, role, cpty);
-    }
-
-    @Override
-    public final long getKey() {
-        return key;
     }
 
     @Override
@@ -331,23 +361,18 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
     }
 
     @Override
-    public final long getTraderId() {
-        return trader.getId();
+    public final String getTrader() {
+        return trader;
     }
 
     @Override
-    public final Trader getTrader() {
-        return (Trader) trader;
+    public final String getMarket() {
+        return market;
     }
 
     @Override
-    public final long getContrId() {
-        return contr.getId();
-    }
-
-    @Override
-    public final Contr getContr() {
-        return (Contr) contr;
+    public final String getContr() {
+        return contr;
     }
 
     @Override
@@ -418,12 +443,8 @@ public final class Exec extends ExecNode implements Identifiable, Jsonifiable, I
         return role;
     }
 
-    public final long getCptyId() {
-        return cpty != null ? cpty.getId() : 0;
-    }
-
-    public final Trader getCpty() {
-        return (Trader) cpty;
+    public final String getCpty() {
+        return cpty;
     }
 
     public final long getCreated() {

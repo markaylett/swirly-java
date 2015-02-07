@@ -3,26 +3,26 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-public abstract class List<T> {
-    private final T end;
+public abstract class List<V> {
+    private final V end;
 
-    protected abstract void insert(T node, T prev, T next);
+    protected abstract void insert(V node, V prev, V next);
 
-    protected abstract void insertBefore(T node, T next);
+    protected abstract void insertBefore(V node, V next);
 
-    protected abstract void insertAfter(T node, T prev);
+    protected abstract void insertAfter(V node, V prev);
 
-    protected abstract void remove(T node);
+    protected abstract void remove(V node);
 
-    protected abstract void setPrev(T node, T prev);
+    protected abstract void setPrev(V node, V prev);
 
-    protected abstract void setNext(T node, T next);
+    protected abstract void setNext(V node, V next);
 
-    protected abstract T next(T node);
+    protected abstract V next(V node);
 
-    protected abstract T prev(T node);
+    protected abstract V prev(V node);
 
-    protected List(T end) {
+    protected List(V end) {
         this.end = end;
         clear();
     }
@@ -32,41 +32,41 @@ public abstract class List<T> {
         setNext(end, end);
     }
 
-    public final void insertFront(T node) {
+    public final void insertFront(V node) {
         insertBefore(node, next(end));
     }
 
-    public final void insertBack(T node) {
+    public final void insertBack(V node) {
         insertAfter(node, prev(end));
     }
 
-    public final T removeFirst() {
+    public final V removeFirst() {
         assert !isEmpty();
-        final T node = next(end);
+        final V node = next(end);
         remove(node);
         return node;
     }
 
-    public final T removeLast() {
+    public final V removeLast() {
         assert !isEmpty();
-        final T node = prev(end);
+        final V node = prev(end);
         remove(node);
         return node;
     }
 
-    public final T pop() {
+    public final V pop() {
         return removeLast();
     }
 
-    public final void push(T node) {
+    public final void push(V node) {
         insertFront(node);
     }
 
-    public final T getFirst() {
+    public final V getFirst() {
         return next(end);
     }
 
-    public final T getLast() {
+    public final V getLast() {
         return prev(end);
     }
 

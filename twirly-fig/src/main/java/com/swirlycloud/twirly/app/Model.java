@@ -15,20 +15,13 @@ import com.swirlycloud.twirly.function.UnaryCallback;
 
 public interface Model extends Journ {
 
-    /**
-     * Allocate a "global" trader-id.
-     * 
-     * @return the newly allocated id.
-     */
-    long allocTraderId();
-
     void insertTrader(Trader trader);
 
-    void insertMarket(long contrId, int settlDay, int expiryDay);
+    void insertMarket(Market market);
 
-    void archiveOrder(long contrId, int settlDay, long id, long modified) throws NotFoundException;
+    void archiveOrder(String market, long id, long modified) throws NotFoundException;
 
-    void archiveTrade(long contrId, int settlDay, long id, long modified) throws NotFoundException;
+    void archiveTrade(String market, long id, long modified) throws NotFoundException;
 
     void selectAsset(UnaryCallback<Asset> cb);
 

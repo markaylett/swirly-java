@@ -3,22 +3,26 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import com.swirlycloud.twirly.node.RbNode;
+import com.swirlycloud.twirly.util.Identifiable;
+
 /**
  * Fields common to both Order and Exec.
  */
 
-public interface Instruct {
+public interface Instruct extends RbNode, Identifiable, Financial {
 
     long getOrderId();
 
-    long getTraderId();
+    String getTrader();
 
-    Trader getTrader();
+    @Override
+    String getMarket();
 
-    long getContrId();
+    @Override
+    String getContr();
 
-    Contr getContr();
-
+    @Override
     int getSettlDay();
 
     String getRef();

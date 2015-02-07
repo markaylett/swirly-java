@@ -27,24 +27,24 @@ function ViewModel(contrs) {
     };
 
     self.contrs = contrs;
+    self.markets = [];
 
-    self.markets = ko.observableArray([]);
+    self.views = ko.observableArray([]);
     self.orders = ko.observableArray([]);
     self.trades = ko.observableArray([]);
     self.posns = ko.observableArray([]);
 
     self.selectedTab = ko.observable();
-    self.allMarkets = ko.observable(false);
+    self.allViews = ko.observable(false);
     self.allWorking = ko.observable(false);
     self.allDone = ko.observable(false);
     self.allTrades = ko.observable(false);
 
-    self.contrMnem = ko.observable();
-    self.settlDate = ko.observable();
+    self.market = ko.observable();
     self.price = ko.observable();
     self.lots = ko.observable();
 
-    self.markets.extend({ rateLimit: 25 });
+    self.views.extend({ rateLimit: 25 });
     self.orders.extend({ rateLimit: 25 });
     self.trades.extend({ rateLimit: 25 });
     self.posns.extend({ rateLimit: 25 });
@@ -61,10 +61,10 @@ function ViewModel(contrs) {
         });
     });
 
-    self.isMarketSelected = ko.computed(function() {
-        var markets = self.markets();
-        for (var i = 0; i < markets.length; ++i) {
-            if (markets[i].isSelected())
+    self.isViewSelected = ko.computed(function() {
+        var views = self.views();
+        for (var i = 0; i < views.length; ++i) {
+            if (views[i].isSelected())
                 return true;
         }
         return false;
@@ -114,10 +114,10 @@ function ViewModel(contrs) {
         return self.isDoneSelected() || self.isTradeSelected();
     });
 
-    self.allMarkets.subscribe(function(val) {
-        var markets = self.markets();
-        for (var i = 0; i < markets.length; ++i) {
-            markets[i].isSelected(val);
+    self.allViews.subscribe(function(val) {
+        var views = self.views();
+        for (var i = 0; i < views.length; ++i) {
+            views[i].isSelected(val);
         }
     });
 
@@ -142,9 +142,9 @@ function ViewModel(contrs) {
         }
     });
 
-    self.contrMnem.subscribe(function(val) {
-        if (val in self.contrs) {
-            var contr = self.contrs[val];
+    self.market.subscribe(function(val) {
+        var contr = self.markets[val];
+        if (contr !== undefined) {
             $('#price').attr('step', contr.priceInc);
             $('#lots').attr('min', contr.minLots);
             $('#reviseLots').attr('min', contr.minLots);
@@ -155,127 +155,131 @@ function ViewModel(contrs) {
         self.selectedTab(event.target.id);
     };
 
-    self.selectMarket = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+    self.selectView = function(val) {
+        self.market(val.market());
+        self.price(0);
         return true;
     };
 
     self.selectBid = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+        self.market(val.market());
         var price = val.bidPrice()[0];
         if (price !== null) {
             self.price(price);
+        } else {
+            self.price(0);
         }
         return true;
     };
 
     self.selectOffer = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+        self.market(val.market());
         var price = val.offerPrice()[0];
         if (price !== null) {
             self.price(price);
+        } else {
+            self.price(0);
         }
         return true;
     };
 
     self.selectLast = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+        self.market(val.market());
         var price = val.lastPrice();
         if (price !== null) {
             self.price(price);
+        } else {
+            self.price(0);
         }
         return true;
     };
 
     self.selectOrder = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+        self.market(val.market());
         self.price(val.price());
         self.lots(val.resd());
         return true;
     };
 
     self.selectTrade = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+        self.market(val.market());
         self.price(val.price());
         self.lots(val.resd());
         return true;
     };
 
     self.selectBuy = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+        self.market(val.market());
         self.price(val.buyPrice());
         return true;
     };
 
+    self.selectPosn = function(val) {
+        self.market(val.market());
+        self.price(0);
+        return true;
+    };
+
     self.selectSell = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+        self.market(val.market());
         self.price(val.sellPrice());
         return true;
     };
 
     self.selectNet = function(val) {
-        self.contrMnem(val.contr().mnem);
-        self.settlDate(val.settlDate());
+        self.market(val.market());
         self.price(val.netPrice());
         return true;
     };
 
-    self.findMarket = function(id) {
-        return ko.utils.arrayFirst(self.markets(), function(val) {
-            return val.id() === id;
+    self.findView = function(market) {
+        return ko.utils.arrayFirst(self.views(), function(val) {
+            return val.market() === market;
         });
     };
 
-    self.findOrder = function(id) {
+    self.findOrder = function(market, id) {
         return ko.utils.arrayFirst(self.orders(), function(val) {
-            return val.id() === id;
+            return val.market() === market && val.id() === id;
         });
     };
 
-    self.removeOrder = function(id) {
+    self.removeOrder = function(market, id) {
         self.orders.remove(function(val) {
-            return val.id() === id;
+            return val.market() === market && val.id() === id;
         });
     };
 
-    self.findTrade = function(id) {
+    self.findTrade = function(market, id) {
         return ko.utils.arrayFirst(self.trades(), function(val) {
-            return val.id() === id;
+            return val.market() === market && val.id() === id;
         });
     };
 
-    self.removeTrade = function(id) {
+    self.removeTrade = function(market, id) {
         self.trades.remove(function(val) {
-            return val.id() === id;
+            return val.market() === market && val.id() === id;
         });
     };
 
-    self.findPosn = function(id) {
+    self.findPosn = function(market) {
         return ko.utils.arrayFirst(self.posns(), function(val) {
-            return val.id() === id;
+            return val.market() === market;
         });
     };
 
     self.applyTrans = function(raw) {
-        if (raw.market !== null) {
-            market = self.findMarket(raw.market.id);
-            if (market !== null) {
-                market.update(raw.market);
+        if (raw.view !== null) {
+            view = self.findView(raw.view.market);
+            if (view !== null) {
+                view.update(raw.view);
             } else {
-                raw.market.isSelected = false;
-                self.markets.push(new Market(raw.market, self.contrs));
+                raw.view.isSelected = false;
+                self.views.push(new View(raw.view, self.contrs));
             }
         }
         $.each(raw.orders, function(key, val) {
-            order = self.findOrder(val.id);
+            order = self.findOrder(val.market, val.id);
             if (order !== null) {
                 order.update(val);
             } else {
@@ -290,7 +294,7 @@ function ViewModel(contrs) {
             }
         });
         if (raw.posn !== null) {
-            posn = self.findPosn(raw.posn.id);
+            posn = self.findPosn(raw.posn.market);
             if (posn !== null) {
                 posn.update(raw.posn);
             } else {
@@ -301,27 +305,35 @@ function ViewModel(contrs) {
 
     self.refreshAll = function() {
 
-        $.getJSON('/api/market', function(raw) {
+        $.getJSON('/api/view', function(raw) {
 
+            var markets = [];
             var cooked = $.map(raw, function(val) {
-                market = self.findMarket(val.id);
-                if (market !== null) {
-                    market.update(val);
+                view = self.findView(val.market);
+                if (view !== null) {
+                    view.update(val);
                 } else {
                     val.isSelected = false;
-                    market = new Market(val, self.contrs);
+                    view = new View(val, self.contrs);
                 }
-                return market;
+                markets[val.market] = view.contr();
+                return view;
             });
-            self.markets(cooked);
+            self.markets = markets;
+            self.views(cooked);
+
+            $('#market').typeahead({
+                items: 4,
+                source: Object.keys(markets)
+            });
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });
 
-        $.getJSON('/api/accnt', function(raw) {
+        $.getJSON('/api/sess', function(raw) {
 
             var cooked = $.map(raw.orders, function(val) {
-                order = self.findOrder(val.id);
+                order = self.findOrder(val.market, val.id);
                 if (order !== null) {
                     order.update(val);
                 } else {
@@ -333,7 +345,7 @@ function ViewModel(contrs) {
             self.orders(cooked);
 
             cooked = $.map(raw.trades, function(val) {
-                trade = self.findTrade(val.id);
+                trade = self.findTrade(val.market, val.id);
                 if (trade === null) {
                     val.isSelected = false;
                     trade = new Trade(val, self.contrs);
@@ -343,7 +355,7 @@ function ViewModel(contrs) {
             self.trades(cooked);
 
             cooked = $.map(raw.posns, function(val) {
-                posn = self.findPosn(val.id);
+                posn = self.findPosn(val.market);
                 if (posn !== null) {
                     posn.update(val);
                 } else {
@@ -359,22 +371,16 @@ function ViewModel(contrs) {
     };
 
     self.submitOrder = function(action) {
-        var contr = self.contrMnem();
-        if (!isSpecified(contr)) {
-            self.showError(internalError('contract not specified'));
+        var market = self.market();
+        if (!isSpecified(market)) {
+            self.showError(internalError('market not specified'));
             return;
         }
-        contr = self.contrs[contr];
+        var contr = self.markets[market];
         if (contr === undefined) {
-            self.showError(internalError('invalid contract: ' + self.contrMnem()));
+            self.showError(internalError('invalid market: ' + market));
             return;
         }
-        var settlDate = self.settlDate();
-        if (!isSpecified(settlDate)) {
-            self.showError(internalError('settl-date not specified'));
-            return;
-        }
-        settlDate = toDateInt(settlDate);
         var price = self.price();
         if (!isSpecified(price)) {
             self.showError(internalError('price not specified'));
@@ -390,7 +396,7 @@ function ViewModel(contrs) {
 
         $.ajax({
             type: 'post',
-            url: '/api/accnt/order/' + contr.mnem + '/' + settlDate,
+            url: '/api/sess/order/' + market,
             data: JSON.stringify({
                 ref: '',
                 action: action,
@@ -414,8 +420,7 @@ function ViewModel(contrs) {
     };
 
     self.reviseOrder = function(order) {
-        var contr = order.contr().mnem;
-        var settlDate = toDateInt(order.settlDate());
+        var market = order.market();
         var id = order.id();
         var lots = self.lots();
         if (!isSpecified(lots)) {
@@ -426,7 +431,7 @@ function ViewModel(contrs) {
 
         $.ajax({
             type: 'put',
-            url: '/api/accnt/order/' + contr + '/' + settlDate + '/' + id,
+            url: '/api/sess/order/' + market + '/' + id,
             data: JSON.stringify({
                 lots: lots
             })
@@ -448,13 +453,11 @@ function ViewModel(contrs) {
     };
 
     self.cancelOrder = function(order) {
-        var contr = order.contr().mnem;
-        var settlDate = toDateInt(order.settlDate());
+        var market = order.market();
         var id = order.id();
-
         $.ajax({
             type: 'put',
-            url: '/api/accnt/order/' + contr + '/' + settlDate + '/' + id,
+            url: '/api/sess/order/' + market + '/' + id,
             data: '{"lots":0}'
         }).done(function(raw) {
             self.applyTrans(raw);
@@ -474,28 +477,26 @@ function ViewModel(contrs) {
     };
 
     self.archiveOrder = function(order) {
-        var contr = order.contr().mnem;
-        var settlDate = toDateInt(order.settlDate());
+        var market = order.market();
         var id = order.id();
         $.ajax({
             type: 'delete',
-            url: '/api/accnt/order/' + contr + '/' + settlDate + '/' + id
+            url: '/api/sess/order/' + market + '/' + id
         }).done(function(raw) {
-            self.removeOrder(id);
+            self.removeOrder(market, id);
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });
     };
 
     self.archiveTrade = function(trade) {
-        var contr = trade.contr().mnem;
-        var settlDate = toDateInt(trade.settlDate());
+        var market = trade.market();
         var id = trade.id();
         $.ajax({
             type: 'delete',
-            url: '/api/accnt/trade/' + contr + '/' + settlDate + '/' + id
+            url: '/api/sess/trade/' + market + '/' + id
         }).done(function(raw) {
-            self.removeTrade(id);
+            self.removeTrade(market, id);
         }).fail(function(xhr) {
             self.showError(new Error(xhr));
         });
@@ -546,10 +547,6 @@ function initApp() {
         });
         var model = new ViewModel(contrs);
         ko.applyBindings(model);
-        $('#contr').typeahead({
-            items: 4,
-            source: Object.keys(contrs)
-        });
         $('#tabs').tab();
         $('#workingTab').click();
         model.refreshAll();

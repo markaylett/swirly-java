@@ -4,8 +4,6 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.IdUtil.newId;
-import static com.swirlycloud.twirly.util.JsonUtil.getIdOrMnem;
 
 import java.io.IOException;
 
@@ -13,7 +11,6 @@ import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.util.Identifiable;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
@@ -23,38 +20,42 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final class View implements Identifiable, Jsonifiable {
+public final class View implements Jsonifiable, Financial {
     /**
      * Maximum price levels in view.
      */
     private static final int DEPTH_MAX = 5;
 
-    private final transient long key;
-    private Identifiable contr;
+    private final String market;
+    private final String contr;
     private final int settlDay;
-    private final int expiryDay;
     private final Ladder ladder;
     private long lastTicks;
     private long lastLots;
     private long lastTime;
 
-    private View(long key, Identifiable contr, int settlDay, int expiryDay, Ladder ladder,
-            long lastTicks, long lastLots, long lastTime) {
+    public View(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
+            long lastLots, long lastTime) {
+        assert market != null;
         assert ladder != null;
-        this.key = key;
+        this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.expiryDay = expiryDay;
         this.ladder = ladder;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
     }
 
-    public View(Identifiable contr, int settlDay, int expiryDay, Ladder ladder, long lastTicks,
-            long lastLots, long lastTime) {
-        this(composeKey(contr.getId(), settlDay), contr, settlDay, expiryDay, ladder, lastTicks,
-                lastLots, lastTime);
+    public View(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
+        assert ladder != null;
+        this.market = fin.getMarket();
+        this.contr = fin.getContr();
+        this.settlDay = fin.getSettlDay();
+        this.ladder = ladder;
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.lastTime = lastTime;
     }
 
     public static void parse(JsonParser p, Ladder ladder, int col) throws IOException {
@@ -77,10 +78,9 @@ public final class View implements Identifiable, Jsonifiable {
     }
 
     public static View parse(JsonParser p) throws IOException {
-        long key = 0;
-        Identifiable contr = null;
+        String market = null;
+        String contr = null;
         int settlDay = 0;
-        int expiryDay = 0;
         final Ladder ladder = new Ladder();
         long lastTicks = 0;
         long lastLots = 0;
@@ -91,8 +91,7 @@ public final class View implements Identifiable, Jsonifiable {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new View(key, contr, settlDay, expiryDay, ladder, lastTicks, lastLots,
-                        lastTime);
+                return new View(market, contr, settlDay, ladder, lastTicks, lastLots, lastTime);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -125,14 +124,8 @@ public final class View implements Identifiable, Jsonifiable {
                 }
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
-                    key = p.getLong();
-                } else if ("contr".equals(name)) {
-                    contr = newId(p.getLong());
-                } else if ("settlDate".equals(name)) {
+                if ("settlDate".equals(name)) {
                     settlDay = JulianDay.isoToJd(p.getInt());
-                } else if ("expiryDate".equals(name)) {
-                    expiryDay = JulianDay.isoToJd(p.getInt());
                 } else if ("lastTicks".equals(name)) {
                     lastTicks = p.getLong();
                 } else if ("lastLots".equals(name)) {
@@ -143,6 +136,15 @@ public final class View implements Identifiable, Jsonifiable {
                     throw new IOException(String.format("unexpected number field '%s'", name));
                 }
                 break;
+            case VALUE_STRING:
+                if ("market".equals(name)) {
+                    market = p.getString();
+                } else if ("contr".equals(name)) {
+                    contr = p.getString();
+                } else {
+                    throw new IOException(String.format("unexpected string field '%s'", name));
+                }
+                break;
             default:
                 throw new IOException(String.format("unexpected json token '%s'", event));
             }
@@ -150,19 +152,27 @@ public final class View implements Identifiable, Jsonifiable {
         throw new IOException("end-of object not found");
     }
 
-    /**
-     * Synthetic view key.
-     */
+    @Override
+    public final int hashCode() {
+        return market.hashCode();
+    }
 
-    public static long composeKey(long contrId, int settlDay) {
-        // 16 bit contr-id.
-        final long CONTR_MASK = (1L << 16) - 1;
-        // 16 bits is sufficient for truncated Julian day.
-        final long TJD_MASK = (1L << 16) - 1;
-
-        // Truncated Julian Day (TJD).
-        final long tjd = JulianDay.jdToTjd(settlDay);
-        return ((contrId & CONTR_MASK) << 16) | (tjd & TJD_MASK);
+    @Override
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final View other = (View) obj;
+        if (!market.equals(other.market)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -184,10 +194,9 @@ public final class View implements Identifiable, Jsonifiable {
         // Round-down to maximum.
         depth = Math.min(depth, DEPTH_MAX);
 
-        out.append("{\"id\":").append(String.valueOf(key));
-        out.append(",\"contr\":").append(getIdOrMnem(contr, params));
-        out.append(",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
+        out.append("{\"market\":\"").append(market);
+        out.append("\",\"contr\":\"").append(contr);
+        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"bidTicks\":[");
 
         for (int i = 0; i < depth; ++i) {
@@ -265,30 +274,19 @@ public final class View implements Identifiable, Jsonifiable {
         out.append('}');
     }
 
-    public final void enrich(Contr contr) {
-        assert this.contr.getId() == contr.getId();
-        this.contr = contr;
+    @Override
+    public final String getMarket() {
+        return market;
     }
 
     @Override
-    public final long getId() {
-        return key;
+    public final String getContr() {
+        return contr;
     }
 
-    public final long getContrId() {
-        return contr.getId();
-    }
-
-    public final Contr getContr() {
-        return (Contr) contr;
-    }
-
+    @Override
     public final int getSettlDay() {
         return settlDay;
-    }
-
-    public final int getExpiryDay() {
-        return expiryDay;
     }
 
     public final boolean isValidBid(int row) {

@@ -3,47 +3,49 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-public abstract class Tree<T> {
+public abstract class Tree<V> {
     private static final int NONE = 0;
     private static final int BLACK = 1;
     private static final int RED = 2;
 
-    protected T root;
+    protected V root;
 
-    protected abstract T setLeft(T node, T left);
+    protected abstract void setNode(V node, V left, V right, V parent, int color);
 
-    protected abstract T setRight(T node, T right);
+    protected abstract V setLeft(V node, V left);
 
-    protected abstract T setParent(T node, T parent);
+    protected abstract V setRight(V node, V right);
 
-    protected abstract void setColor(T node, int color);
+    protected abstract V setParent(V node, V parent);
 
-    protected abstract T next(T node);
+    protected abstract void setColor(V node, int color);
 
-    protected abstract T prev(T node);
+    protected abstract V next(V node);
 
-    protected abstract T getLeft(T node);
+    protected abstract V prev(V node);
 
-    protected abstract T getRight(T node);
+    protected abstract V getLeft(V node);
 
-    protected abstract T getParent(T node);
+    protected abstract V getRight(V node);
 
-    protected abstract int getColor(T node);
+    protected abstract V getParent(V node);
 
-    protected abstract int compareKey(T lhs, T rhs);
+    protected abstract int getColor(V node);
 
-    private final void set(T node, T parent) {
+    protected abstract int compareKey(V lhs, V rhs);
+
+    private final void set(V node, V parent) {
         setLeft(node, setRight(node, null));
         setParent(node, parent);
         setColor(node, RED);
     }
 
-    private final void setBlackRed(T black, T red) {
+    private final void setBlackRed(V black, V red) {
         setColor(black, BLACK);
         setColor(red, RED);
     }
 
-    private final void rotateLeft(T node, T tmp) {
+    private final void rotateLeft(V node, V tmp) {
         tmp = getRight(node);
         if ((setRight(node, getLeft(tmp))) != null) {
             setParent(getLeft(tmp), node);
@@ -61,7 +63,7 @@ public abstract class Tree<T> {
         setParent(node, tmp);
     }
 
-    private final void rotateRight(T node, T tmp) {
+    private final void rotateRight(V node, V tmp) {
         tmp = getLeft(node);
         if ((setLeft(node, getRight(tmp))) != null) {
             setParent(getRight(tmp), node);
@@ -79,8 +81,8 @@ public abstract class Tree<T> {
         setParent(node, tmp);
     }
 
-    private final void insertColor(T node) {
-        T parent, gparent, tmp;
+    private final void insertColor(V node) {
+        V parent, gparent, tmp;
         while ((parent = getParent(node)) != null && getColor(parent) == RED) {
             gparent = getParent(parent);
             if (parent == getLeft(gparent)) {
@@ -120,8 +122,8 @@ public abstract class Tree<T> {
         setColor(root, BLACK);
     }
 
-    private final void removeColor(T parent, T node) {
-        T tmp;
+    private final void removeColor(V parent, V node) {
+        V tmp;
         while ((node == null || getColor(node) == BLACK) && node != root) {
             if (getLeft(parent) == node) {
                 tmp = getRight(parent);
@@ -137,7 +139,7 @@ public abstract class Tree<T> {
                     parent = getParent(node);
                 } else {
                     if (getRight(tmp) == null || getColor(getRight(tmp)) == BLACK) {
-                        T oleft;
+                        V oleft;
                         if ((oleft = getLeft(tmp)) != null) {
                             setColor(oleft, BLACK);
                         }
@@ -168,7 +170,7 @@ public abstract class Tree<T> {
                     parent = getParent(node);
                 } else {
                     if (getLeft(tmp) == null || getColor(getLeft(tmp)) == BLACK) {
-                        T oright;
+                        V oright;
                         if ((oright = getRight(tmp)) != null) {
                             setColor(oright, BLACK);
                         }
@@ -204,9 +206,9 @@ public abstract class Tree<T> {
      * Inserts a node into the RB tree.
      */
 
-    public final T insert(T node) {
-        T tmp;
-        T parent = null;
+    public final V insert(V node) {
+        V tmp;
+        V parent = null;
         int comp = 0;
         tmp = root;
         while (tmp != null) {
@@ -217,10 +219,7 @@ public abstract class Tree<T> {
             } else if (comp < 0) {
                 tmp = getRight(tmp);
             } else {
-                setLeft(node, getLeft(tmp));
-                setRight(node, getRight(tmp));
-                setParent(node, getParent(tmp));
-                setColor(node, getColor(tmp));
+                setNode(node, getLeft(tmp), getRight(tmp), getParent(tmp), getColor(tmp));
                 return tmp;
             }
         }
@@ -228,7 +227,7 @@ public abstract class Tree<T> {
         return null;
     }
 
-    public final void pinsert(T node, T parent) {
+    public final void pinsert(V node, V parent) {
         set(node, parent);
         if (parent != null) {
             final int comp = compareKey(parent, node);
@@ -243,16 +242,16 @@ public abstract class Tree<T> {
         insertColor(node);
     }
 
-    public final void remove(final T node) {
-        T child, parent;
-        T tmp = node;
+    public final V remove(final V node) {
+        V child, parent;
+        V tmp = node;
         int color;
         if (getLeft(tmp) == null) {
             child = getRight(tmp);
         } else if (getRight(tmp) == null) {
             child = getLeft(tmp);
         } else {
-            T left;
+            V left;
             tmp = getRight(tmp);
             while ((left = getLeft(tmp)) != null) {
                 tmp = left;
@@ -276,10 +275,7 @@ public abstract class Tree<T> {
                 parent = tmp;
             }
 
-            setLeft(tmp, getLeft(node));
-            setRight(tmp, getRight(node));
-            setParent(tmp, getParent(node));
-            setColor(tmp, getColor(node));
+            setNode(tmp, getLeft(node), getRight(node), getParent(node), getColor(node));
 
             if (getParent(node) != null) {
                 if (getLeft(getParent(node)) == node) {
@@ -301,7 +297,7 @@ public abstract class Tree<T> {
                 removeColor(parent, child);
             }
             setColor(node, NONE);
-            return;
+            return node;
         }
         parent = getParent(tmp);
         color = getColor(tmp);
@@ -321,6 +317,7 @@ public abstract class Tree<T> {
             removeColor(parent, child);
         }
         setColor(node, NONE);
+        return node;
     }
 
     /**
@@ -328,13 +325,13 @@ public abstract class Tree<T> {
      * 
      * @return the root node.
      */
-    public final T getRoot() {
+    public final V getRoot() {
         return root;
     }
 
-    public final T getFirst() {
-        T tmp = root;
-        T parent = null;
+    public final V getFirst() {
+        V tmp = root;
+        V parent = null;
         while (tmp != null) {
             parent = tmp;
             tmp = getLeft(tmp);
@@ -342,9 +339,9 @@ public abstract class Tree<T> {
         return parent;
     }
 
-    public final T getLast() {
-        T tmp = root;
-        T parent = null;
+    public final V getLast() {
+        V tmp = root;
+        V parent = null;
         while (tmp != null) {
             parent = tmp;
             tmp = getRight(tmp);
