@@ -166,6 +166,7 @@ function ViewModel(contrs) {
         var price = val.bidPrice()[0];
         if (price !== null) {
             self.price(price);
+            self.lots(val.bidLots()[0]);
         } else {
             self.price(0);
         }
@@ -177,6 +178,7 @@ function ViewModel(contrs) {
         var price = val.offerPrice()[0];
         if (price !== null) {
             self.price(price);
+            self.lots(val.offerLots()[0]);
         } else {
             self.price(0);
         }
@@ -197,14 +199,14 @@ function ViewModel(contrs) {
     self.selectOrder = function(val) {
         self.market(val.market());
         self.price(val.price());
-        self.lots(val.resd());
+        self.lots(val.resd() > 0 ? val.resd() : val.lots());
         return true;
     };
 
     self.selectTrade = function(val) {
         self.market(val.market());
         self.price(val.price());
-        self.lots(val.resd());
+        self.lots(val.resd() > 0 ? val.resd() : val.lots());
         return true;
     };
 
