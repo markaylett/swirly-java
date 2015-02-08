@@ -73,7 +73,7 @@ public abstract class RestServlet extends HttpServlet {
     @Override
     public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (Context.isDevEnv()) {
+        if (GaeContext.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
             resp.setHeader("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, POST, PUT");
             resp.setHeader("Access-Control-Allow-Headers", "Content-Type");

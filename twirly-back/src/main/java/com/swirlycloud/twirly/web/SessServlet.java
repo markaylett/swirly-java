@@ -13,9 +13,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -37,19 +34,15 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (Context.isDevEnv()) {
+        if (GaeContext.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            final UserService userService = UserServiceFactory.getUserService();
-            if (!userService.isUserLoggedIn()) {
+            if (!GaeContext.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final User user = userService.getCurrentUser();
-            assert user != null;
-
-            final String email = user.getEmail();
-            final Rest rest = Context.getRest();
+            final String email = GaeContext.getUserEmail();
+            final Rest rest = GaeContext.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -84,19 +77,15 @@ public final class SessServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (Context.isDevEnv()) {
+        if (GaeContext.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            final UserService userService = UserServiceFactory.getUserService();
-            if (!userService.isUserLoggedIn()) {
+            if (!GaeContext.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final User user = userService.getCurrentUser();
-            assert user != null;
-
-            final String email = user.getEmail();
-            final Rest rest = Context.getRest();
+            final String email = GaeContext.getUserEmail();
+            final Rest rest = GaeContext.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -153,19 +142,15 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (Context.isDevEnv()) {
+        if (GaeContext.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            final UserService userService = UserServiceFactory.getUserService();
-            if (!userService.isUserLoggedIn()) {
+            if (!GaeContext.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final User user = userService.getCurrentUser();
-            assert user != null;
-
-            final String email = user.getEmail();
-            final Rest rest = Context.getRest();
+            final String email = GaeContext.getUserEmail();
+            final Rest rest = GaeContext.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -191,19 +176,15 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (Context.isDevEnv()) {
+        if (GaeContext.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            final UserService userService = UserServiceFactory.getUserService();
-            if (!userService.isUserLoggedIn()) {
+            if (!GaeContext.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final User user = userService.getCurrentUser();
-            assert user != null;
-
-            final String email = user.getEmail();
-            final Rest rest = Context.getRest();
+            final String email = GaeContext.getUserEmail();
+            final Rest rest = GaeContext.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);

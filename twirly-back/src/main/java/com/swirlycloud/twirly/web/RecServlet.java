@@ -13,9 +13,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ForbiddenException;
@@ -38,16 +35,15 @@ public final class RecServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (Context.isDevEnv()) {
+        if (GaeContext.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            final UserService userService = UserServiceFactory.getUserService();
-            if (!userService.isUserLoggedIn()) {
+            if (!GaeContext.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
 
-            final Rest rest = Context.getRest();
+            final Rest rest = GaeContext.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -56,7 +52,7 @@ public final class RecServlet extends RestServlet {
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getRec(userService.isUserAdmin(), params, now, resp.getWriter());
+                rest.getRec(GaeContext.isUserAdmin(), params, now, resp.getWriter());
                 match = true;
             } else if ("asset".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
@@ -83,7 +79,7 @@ public final class RecServlet extends RestServlet {
                     match = true;
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
-                if (!userService.isUserAdmin()) {
+                if (!GaeContext.isUserAdmin()) {
                     throw new BadRequestException("user is not an admin");
                 }
                 if (parts.length == 1) {
@@ -107,16 +103,15 @@ public final class RecServlet extends RestServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (Context.isDevEnv()) {
+        if (GaeContext.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            final UserService userService = UserServiceFactory.getUserService();
-            if (!userService.isUserLoggedIn()) {
+            if (!GaeContext.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
 
-            final Rest rest = Context.getRest();
+            final Rest rest = GaeContext.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -128,7 +123,7 @@ public final class RecServlet extends RestServlet {
             final Request r = parseRequest(req);
             if ("market".equals(parts[TYPE_PART])) {
 
-                if (!userService.isUserAdmin()) {
+                if (!GaeContext.isUserAdmin()) {
                     throw new BadRequestException("user is not an admin");
                 }
 
@@ -142,13 +137,11 @@ public final class RecServlet extends RestServlet {
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                final User user = userService.getCurrentUser();
-                assert user != null;
-                String email = user.getEmail();
+                String email = GaeContext.getUserEmail();
 
                 int fields = r.getFields();
                 if ((fields & Request.EMAIL) != 0) {
-                    if (!r.getEmail().equals(email) && !userService.isUserAdmin()) {
+                    if (!r.getEmail().equals(email) && !GaeContext.isUserAdmin()) {
                         throw new ForbiddenException("user is not an admin");
                     }
                     fields &= ~Request.EMAIL;
