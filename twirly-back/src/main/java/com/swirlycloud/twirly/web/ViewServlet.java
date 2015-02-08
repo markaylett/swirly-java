@@ -31,7 +31,7 @@ public final class ViewServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (isDevEnv()) {
+        if (Context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {

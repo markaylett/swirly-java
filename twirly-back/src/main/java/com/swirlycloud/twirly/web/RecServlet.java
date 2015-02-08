@@ -38,7 +38,7 @@ public final class RecServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (isDevEnv()) {
+        if (Context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
@@ -107,7 +107,7 @@ public final class RecServlet extends RestServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (isDevEnv()) {
+        if (Context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {

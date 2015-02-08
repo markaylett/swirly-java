@@ -37,7 +37,7 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (isDevEnv()) {
+        if (Context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
@@ -84,7 +84,7 @@ public final class SessServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (isDevEnv()) {
+        if (Context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
@@ -153,7 +153,7 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (isDevEnv()) {
+        if (Context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
@@ -191,7 +191,7 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (isDevEnv()) {
+        if (Context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {

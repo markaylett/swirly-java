@@ -6,6 +6,8 @@ package com.swirlycloud.twirly.web;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import com.google.appengine.api.utils.SystemProperty;
+
 public final class Context implements ServletContextListener {
     private static final class Holder {
         private static final Rest rest = new Rest(new DatastoreModel());
@@ -26,5 +28,9 @@ public final class Context implements ServletContextListener {
 
     public static Rest getRest() {
         return Holder.rest;
+    }
+
+    public static boolean isDevEnv() {
+        return SystemProperty.environment.value() == SystemProperty.Environment.Value.Development;
     }
 }
