@@ -11,7 +11,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
 
-public final class GaeContext implements ServletContextListener {
+public final class GaeContext implements ServletContextListener, Context {
     private static final class Holder {
         private static final Rest rest = new Rest(new GaeModel());
         private static final UserService userService = UserServiceFactory.getUserService();
@@ -23,32 +23,41 @@ public final class GaeContext implements ServletContextListener {
 
     @Override
     public final void contextInitialized(ServletContextEvent event) {
+        // This will be invoked as part of a warmup request, or the first user request if no warmup
+        // request was invoked.
         Holder.init();
+        RestServlet.setContext(this);
     }
 
     @Override
     public final void contextDestroyed(ServletContextEvent event) {
+        // App Engine does not currently invoke this method.
     }
 
-    public static Rest getRest() {
+    @Override
+    public final Rest getRest() {
         return Holder.rest;
     }
 
-    public static boolean isDevEnv() {
-        return SystemProperty.environment.value() == SystemProperty.Environment.Value.Development;
-    }
-
-    public static boolean isUserLoggedIn() {
-        return Holder.userService.isUserLoggedIn();
-    }
-
-    public static boolean isUserAdmin() {
-        return Holder.userService.isUserAdmin();
-    }
-
-    public static String getUserEmail() {
+    @Override
+    public final String getUserEmail() {
         final User user = Holder.userService.getCurrentUser();
         assert user != null;
         return user.getEmail();
+    }
+
+    @Override
+    public final boolean isDevEnv() {
+        return SystemProperty.environment.value() == SystemProperty.Environment.Value.Development;
+    }
+
+    @Override
+    public final boolean isUserLoggedIn() {
+        return Holder.userService.isUserLoggedIn();
+    }
+
+    @Override
+    public final boolean isUserAdmin() {
+        return Holder.userService.isUserAdmin();
     }
 }

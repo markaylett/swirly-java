@@ -35,15 +35,15 @@ public final class RecServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (GaeContext.isDevEnv()) {
+        if (context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!GaeContext.isUserLoggedIn()) {
+            if (!context.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
 
-            final Rest rest = GaeContext.getRest();
+            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -52,7 +52,7 @@ public final class RecServlet extends RestServlet {
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getRec(GaeContext.isUserAdmin(), params, now, resp.getWriter());
+                rest.getRec(context.isUserAdmin(), params, now, resp.getWriter());
                 match = true;
             } else if ("asset".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
@@ -79,7 +79,7 @@ public final class RecServlet extends RestServlet {
                     match = true;
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
-                if (!GaeContext.isUserAdmin()) {
+                if (!context.isUserAdmin()) {
                     throw new BadRequestException("user is not an admin");
                 }
                 if (parts.length == 1) {
@@ -103,15 +103,15 @@ public final class RecServlet extends RestServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (GaeContext.isDevEnv()) {
+        if (context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!GaeContext.isUserLoggedIn()) {
+            if (!context.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
 
-            final Rest rest = GaeContext.getRest();
+            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -123,7 +123,7 @@ public final class RecServlet extends RestServlet {
             final Request r = parseRequest(req);
             if ("market".equals(parts[TYPE_PART])) {
 
-                if (!GaeContext.isUserAdmin()) {
+                if (!context.isUserAdmin()) {
                     throw new BadRequestException("user is not an admin");
                 }
 
@@ -137,11 +137,11 @@ public final class RecServlet extends RestServlet {
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                String email = GaeContext.getUserEmail();
+                String email = context.getUserEmail();
 
                 int fields = r.getFields();
                 if ((fields & Request.EMAIL) != 0) {
-                    if (!r.getEmail().equals(email) && !GaeContext.isUserAdmin()) {
+                    if (!r.getEmail().equals(email) && !context.isUserAdmin()) {
                         throw new ForbiddenException("user is not an admin");
                     }
                     fields &= ~Request.EMAIL;

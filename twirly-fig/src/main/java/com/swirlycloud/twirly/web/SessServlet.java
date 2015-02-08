@@ -34,15 +34,15 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (GaeContext.isDevEnv()) {
+        if (context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!GaeContext.isUserLoggedIn()) {
+            if (!context.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = GaeContext.getUserEmail();
-            final Rest rest = GaeContext.getRest();
+            final String email = context.getUserEmail();
+            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -77,15 +77,15 @@ public final class SessServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (GaeContext.isDevEnv()) {
+        if (context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!GaeContext.isUserLoggedIn()) {
+            if (!context.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = GaeContext.getUserEmail();
-            final Rest rest = GaeContext.getRest();
+            final String email = context.getUserEmail();
+            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -142,15 +142,15 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (GaeContext.isDevEnv()) {
+        if (context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!GaeContext.isUserLoggedIn()) {
+            if (!context.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = GaeContext.getUserEmail();
-            final Rest rest = GaeContext.getRest();
+            final String email = context.getUserEmail();
+            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -176,15 +176,15 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (GaeContext.isDevEnv()) {
+        if (context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!GaeContext.isUserLoggedIn()) {
+            if (!context.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = GaeContext.getUserEmail();
-            final Rest rest = GaeContext.getRest();
+            final String email = context.getUserEmail();
+            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);

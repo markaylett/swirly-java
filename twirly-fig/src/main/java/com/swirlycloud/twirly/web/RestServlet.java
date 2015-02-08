@@ -20,6 +20,8 @@ import com.swirlycloud.twirly.util.Params;
 @SuppressWarnings("serial")
 public abstract class RestServlet extends HttpServlet {
 
+    protected static Context context;
+
     protected final Params newParams(final HttpServletRequest req) {
         return new Params() {
             @SuppressWarnings("unchecked")
@@ -73,11 +75,15 @@ public abstract class RestServlet extends HttpServlet {
     @Override
     public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (GaeContext.isDevEnv()) {
+        if (context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
             resp.setHeader("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, POST, PUT");
             resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
             resp.setHeader("Access-Control-Max-Age", "86400");
         }
+    }
+
+    public static void setContext(Context context) {
+        RestServlet.context = context;
     }
 }
