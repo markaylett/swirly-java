@@ -14,12 +14,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
-import com.swirlycloud.twirly.fx.EcbRates;
+import com.swirlycloud.twirly.exception.UnauthorizedException;
+import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
-public final class CronServlet extends RestServlet {
+public final class ViewServlet extends RestServlet {
 
-    private static final int JOB_PART = 0;
+    private static final int MNEM_PART = 0;
 
     @Override
     public final void init(ServletConfig config) throws ServletException {
@@ -28,40 +29,29 @@ public final class CronServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (isDevEnv()) {
+        if (context.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            final Rest rest = Context.getRest();
+            if (!context.isUserLoggedIn()) {
+                throw new UnauthorizedException("user is not logged-in");
+            }
+
+            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+            final Params params = newParams(req);
             final long now = System.currentTimeMillis();
 
-            boolean match = false;
-            if (parts.length > 0) {
-                if ("endofday".equals(parts[JOB_PART])) {
-                    log("processing end-of-day");
-                    rest.getEndOfDay(now);
-                    match = true;
-                } else if ("ecbrates".equals(parts[JOB_PART])) {
-                    log("processing ecb-rates");
-                    final EcbRates ecbRates = new EcbRates();
-                    try {
-                        ecbRates.parse();
-                        log("EURUSD: " + ecbRates.getRate("EUR", "USD"));
-                    } catch (Throwable t) {
-                        log("error: " + t.getLocalizedMessage());
-                    }
-                    match = true;
-                }
-            }
-
-            if (!match) {
+            if (parts.length == 0) {
+                rest.getView(params, now, resp.getWriter());
+            } else if (parts.length == 1) {
+                rest.getView(parts[MNEM_PART], params, now, resp.getWriter());
+            } else {
                 throw new NotFoundException("resource does not exist");
             }
-            resp.setHeader("Cache-Control", "no-cache");
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

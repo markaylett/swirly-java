@@ -42,7 +42,7 @@ import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;
 
-public final class DatastoreModel implements Model {
+public final class GaeModel implements Model {
 
     @SuppressWarnings("unused")
     private static final String ASSET_KIND = "Asset";
