@@ -39,7 +39,7 @@ import com.swirlycloud.twirly.node.SlNode;
 public final class Serv {
 
     private static final int CAPACITY = 1 << 5; // 64
-    private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z_]{3,16}$");
+    private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
     private static final class SessTree extends BasicRbTree<String> {
 
@@ -182,6 +182,15 @@ public final class Serv {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
         return new Trader(mnem, display, email);
+    }
+
+    @NonNull
+    private final Market newMarket(String mnem, String display, Contr contr, int settlDay,
+            int expiryDay) throws BadRequestException {
+        if (!MNEM_PATTERN.matcher(mnem).matches()) {
+            throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
+        }
+        return new Market(mnem, display, contr, settlDay, expiryDay);
     }
 
     @NonNull
@@ -441,7 +450,7 @@ public final class Serv {
             throw new BadRequestException(String.format("market '%s' already exists", mnem));
         }
         final RbNode parent = market;
-        market = new Market(mnem, display, contr, settlDay, expiryDay);
+        market = newMarket(mnem, display, contr, settlDay, expiryDay);
         model.insertMarket(market);
         markets.pinsert(market, parent);
         return market;

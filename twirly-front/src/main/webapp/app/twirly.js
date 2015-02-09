@@ -296,9 +296,9 @@ function Order(val, contrs) {
         return ticks !== null ? ticksToPrice(ticks, self.contr()) : null;
     });
 
-    self.isDone = function() {
+    self.isDone = ko.computed(function() {
         return self.resd() === 0;
-    };
+    });
 
     self.update = function(val) {
         var contr = contrs[val.contr];
