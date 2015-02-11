@@ -7,6 +7,7 @@ import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 
 import java.io.IOException;
 
+import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.app.Sess;
 import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Trans;
@@ -73,8 +74,9 @@ public final class Benchmark {
         }
     }
 
-    public static void main(String[] args) throws BadRequestException, NotFoundException,
-            IOException {
-        run(new Serv(new MockModel()));
+    public static void main(String[] args) throws Exception {
+        try (final Model model = new MockModel()) {
+            run(new Serv(model));
+        }
     }
 }

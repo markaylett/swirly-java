@@ -20,6 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
@@ -206,6 +207,7 @@ public final class UnrestTest {
         assertEquals(sellLots, actual.getSellLots());
     }
 
+    private Model model;
     private Unrest unrest;
 
     private final Trader postTrader(String mnem, String display, String email)
@@ -241,13 +243,16 @@ public final class UnrestTest {
 
     @Before
     public final void setUp() throws BadRequestException, NotFoundException, IOException {
-        unrest = new Unrest(new MockModel());
+        model = new MockModel();
+        unrest = new Unrest(model);
         postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD");
     }
 
     @After
-    public final void tearDown() {
+    public final void tearDown() throws Exception {
+        model.close();
         unrest = null;
+        model = null;
     }
 
     @Test

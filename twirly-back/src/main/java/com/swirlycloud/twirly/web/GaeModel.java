@@ -48,8 +48,8 @@ public final class GaeModel implements Model {
     private static final String ASSET_KIND = "Asset";
     @SuppressWarnings("unused")
     private static final String CONTR_KIND = "Contr";
-    private static final String TRADER_KIND = "Trader";
     private static final String MARKET_KIND = "Market";
+    private static final String TRADER_KIND = "Trader";
     private static final String ORDER_KIND = "Order";
     private static final String EXEC_KIND = "Exec";
 
@@ -192,6 +192,10 @@ public final class GaeModel implements Model {
     }
 
     @Override
+    public final void close() {
+    }
+
+    @Override
     public final void insertExec(Exec exec) throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -199,7 +203,8 @@ public final class GaeModel implements Model {
             if (exec.getState() == State.NEW) {
                 datastore.put(txn, newOrder(market, exec));
             } else {
-                datastore.put(txn, applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
+                datastore.put(txn,
+                        applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
             }
             datastore.put(txn, newExec(market, exec));
             datastore.put(txn, market);
@@ -254,11 +259,10 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void insertTrader(Trader trader) {
+    public final void insertMarket(Market market) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            // Trader entities have common ancestor for strong consistency.
-            final Entity entity = newTrader(trader);
+            final Entity entity = newMarket(market);
             datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
@@ -272,10 +276,11 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void insertMarket(Market market) {
+    public final void insertTrader(Trader trader) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity entity = newMarket(market);
+            // Trader entities have common ancestor for strong consistency.
+            final Entity entity = newTrader(trader);
             datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
@@ -343,19 +348,6 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void selectTrader(UnaryCallback<Trader> cb) {
-        final Query q = new Query(TRADER_KIND);
-        final PreparedQuery pq = datastore.prepare(q);
-        for (final Entity entity : pq.asIterable()) {
-            final String mnem = entity.getKey().getName();
-            final String display = (String) entity.getProperty("display");
-            final String email = (String) entity.getProperty("email");
-            final Trader trader = new Trader(mnem, display, email);
-            cb.call(trader);
-        }
-    }
-
-    @Override
     public final void selectMarket(final UnaryCallback<Market> cb) {
         final Query q = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(q);
@@ -373,6 +365,19 @@ public final class GaeModel implements Model {
             final Market market = new Market(mnem, display, contr, settlDay, expiryDay, lastTicks,
                     lastLots, lastTime, maxOrderId, maxExecId);
             cb.call(market);
+        }
+    }
+
+    @Override
+    public final void selectTrader(UnaryCallback<Trader> cb) {
+        final Query q = new Query(TRADER_KIND);
+        final PreparedQuery pq = datastore.prepare(q);
+        for (final Entity entity : pq.asIterable()) {
+            final String mnem = entity.getKey().getName();
+            final String display = (String) entity.getProperty("display");
+            final String email = (String) entity.getProperty("email");
+            final Trader trader = new Trader(mnem, display, email);
+            cb.call(trader);
         }
     }
 

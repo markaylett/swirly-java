@@ -12,7 +12,7 @@ import com.swirlycloud.twirly.node.SlNode;
  * 
  * @author Mark Aylett
  */
-public interface Journ {
+public interface Journ extends AutoCloseable {
 
     void insertExec(Exec exec) throws NotFoundException;
 

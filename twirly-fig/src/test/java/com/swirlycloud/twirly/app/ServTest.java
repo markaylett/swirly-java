@@ -7,11 +7,10 @@ import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.app.Sess;
-import com.swirlycloud.twirly.app.Serv;
-import com.swirlycloud.twirly.app.Trans;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
@@ -21,9 +20,23 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.mock.MockModel;
 
 public final class ServTest {
+
+    private Model model;
+
+    @Before
+    public final void setUp() {
+        model = new MockModel();
+    }
+
+    @After
+    public final void tearDown() throws Exception {
+        model.close();
+        model = null;
+    }
+
     @Test
     public final void test() throws BadRequestException, NotFoundException {
-        final Serv serv = new Serv(new MockModel());
+        final Serv serv = new Serv(model);
         final Sess sess = serv.getLazySess("MARAYL");
         assertNotNull(sess);
 

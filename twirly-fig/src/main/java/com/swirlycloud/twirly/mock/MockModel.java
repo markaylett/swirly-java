@@ -15,6 +15,10 @@ import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockModel implements Model {
+    
+    @Override
+    public final void close() {
+    }
 
     @Override
     public final void insertExec(Exec exec) {
@@ -25,11 +29,11 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void insertTrader(Trader trader) {
+    public final void insertMarket(Market market) {
     }
 
     @Override
-    public final void insertMarket(Market market) {
+    public final void insertTrader(Trader trader) {
     }
 
     @Override
@@ -51,12 +55,12 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void selectTrader(UnaryCallback<Trader> cb) {
-        MockTrader.selectTrader(cb);
+    public final void selectMarket(UnaryCallback<Market> cb) {
     }
 
     @Override
-    public final void selectMarket(UnaryCallback<Market> cb) {
+    public final void selectTrader(UnaryCallback<Trader> cb) {
+        MockTrader.selectTrader(cb);
     }
 
     @Override
