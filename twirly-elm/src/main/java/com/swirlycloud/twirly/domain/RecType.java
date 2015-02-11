@@ -20,13 +20,34 @@ public enum RecType {
      * Trader.
      */
     TRADER(4);
-    private final int value;
+    private final int id;
 
-    private RecType(int value) {
-        this.value = value;
+    private RecType(int id) {
+        this.id = id;
+    }
+
+    public static RecType valueOf(int id) {
+        RecType val;
+        switch (id) {
+        case 1:
+            val = RecType.ASSET;
+            break;
+        case 2:
+            val = RecType.CONTR;
+            break;
+        case 3:
+            val = RecType.MARKET;
+            break;
+        case 4:
+            val = RecType.TRADER;
+            break;
+        default:
+            throw new IllegalArgumentException("invalid rec-type");
+        }
+        return val;
     }
 
     public final int intValue() {
-        return this.value;
+        return this.id;
     }
 }
