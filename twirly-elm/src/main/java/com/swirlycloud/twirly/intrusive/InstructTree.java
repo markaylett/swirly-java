@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-import static com.swirlycloud.twirly.node.RbUtil.compareLong;
+import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 
 import com.swirlycloud.twirly.domain.Instruct;
 import com.swirlycloud.twirly.node.RbNode;

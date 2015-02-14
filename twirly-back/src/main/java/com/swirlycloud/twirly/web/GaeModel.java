@@ -478,15 +478,14 @@ public final class GaeModel implements Model {
                 final PreparedQuery pq = datastore.prepare(q);
                 for (final Entity entity : pq.asIterable()) {
                     final String trader = (String) entity.getProperty("trader");
-                    final String market = (String) entity.getProperty("market");
                     final String contr = (String) entity.getProperty("contr");
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
                     // Lazy position.
-                    Posn posn = (Posn) posns.pfind(trader, market);
+                    Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
                     if (posn == null || !posn.getTrader().equals(trader)
-                            || !posn.getMarket().equals(market)) {
+                            || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
                         final RbNode parent = posn;
-                        posn = new Posn(trader, market, contr, settlDay);
+                        posn = new Posn(trader, contr, settlDay);
                         posns.pinsert(posn, parent);
                     }
                     final Action action = Action.valueOf((String) entity.getProperty("action"));

@@ -383,7 +383,6 @@ function Posn(val, contrs) {
 
     var contr = contrs[val.contr];
     self.trader = ko.observable(val.trader);
-    self.market = ko.observable(val.market);
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.buyCost = ko.observable(val.buyCost);

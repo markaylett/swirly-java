@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import static com.swirlycloud.twirly.util.CollectionUtil.hashLong;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

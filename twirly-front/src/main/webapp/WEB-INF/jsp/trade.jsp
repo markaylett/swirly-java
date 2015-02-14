@@ -264,7 +264,6 @@
           <table class="table table-hover table-striped">
             <thead>
               <tr>
-                <th>Market</th>
                 <th>Contr</th>
                 <th>Settl Date</th>
                 <th style="text-align: right;">Sell Price</th>
@@ -277,24 +276,14 @@
             </thead>
             <tbody data-bind="foreach: posns">
               <tr>
-                <td style="cursor: pointer; cursor: hand;"
-                    data-bind="text: market, click: $root.selectPosn"></td>
-                <td style="cursor: pointer; cursor: hand;"
-                    data-bind="mnem: contr, click: $root.selectPosn"></td>
-                <td style="cursor: pointer; cursor: hand;"
-                    data-bind="text: settlDate, click: $root.selectPosn"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="text: sellPrice, click: $root.selectSell"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="text: sellLots, click: $root.selectSell"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="text: buyLots, click: $root.selectBuy"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="text: buyPrice, click: $root.selectBuy"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="text: netPrice, click: $root.selectNet"></td>
-                <td style="cursor: pointer; cursor: hand; text-align: right;"
-                    data-bind="text: netLots, click: $root.selectNet"></td>
+                <td data-bind="mnem: contr"></td>
+                <td data-bind="text: settlDate"></td>
+                <td style="text-align: right;" data-bind="text: sellPrice"></td>
+                <td style="text-align: right;" data-bind="text: sellLots"></td>
+                <td style="text-align: right;" data-bind="text: buyLots"></td>
+                <td style="text-align: right;" data-bind="text: buyPrice"></td>
+                <td style="text-align: right;" data-bind="text: netPrice"></td>
+                <td style="text-align: right;" data-bind="text: netLots"></td>
               </tr>
             </tbody>
           </table>

@@ -25,6 +25,8 @@ public final class SessServlet extends RestServlet {
     private static final int TYPE_PART = 0;
     private static final int MARKET_PART = 1;
     private static final int ID_PART = 2;
+    private static final int CONTR_PART = 1;
+    private static final int SETTL_DATE_PART = 2;
 
     @Override
     public final void init(ServletConfig config) throws ServletException {
@@ -124,8 +126,9 @@ public final class SessServlet extends RestServlet {
                 if (parts.length == 1) {
                     rest.getPosn(email, params, now, resp.getWriter());
                     match = true;
-                } else if (parts.length == 2) {
-                    rest.getPosn(email, parts[MARKET_PART], params, now, resp.getWriter());
+                } else if (parts.length == 3) {
+                    rest.getPosn(email, parts[CONTR_PART],
+                            Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
                     match = true;
                 }
             }

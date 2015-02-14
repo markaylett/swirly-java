@@ -41,6 +41,7 @@ import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockModel;
 import com.swirlycloud.twirly.mock.MockTrader;
+import com.swirlycloud.twirly.web.Unrest.PosnKey;
 import com.swirlycloud.twirly.web.Unrest.RecStruct;
 import com.swirlycloud.twirly.web.Unrest.SessStruct;
 import com.swirlycloud.twirly.web.Unrest.TransStruct;
@@ -198,7 +199,6 @@ public final class UnrestTest {
             long sellCost, long sellLots, Posn actual) {
         assertNotNull(actual);
         assertEquals("MARAYL", actual.getTrader());
-        assertEquals(market, actual.getMarket());
         assertEquals(contr, actual.getContr());
         assertEquals(SETTL_DAY, actual.getSettlDay());
         assertEquals(buyCost, actual.getBuyCost());
@@ -416,7 +416,8 @@ public final class UnrestTest {
                 Role.MAKER, out.trades.get(Long.valueOf(3)));
         assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10, "EURUSD",
                 Role.TAKER, out.trades.get(Long.valueOf(4)));
-        assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10, out.posns.get("EURUSD.MAR14"));
+        assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10,
+                out.posns.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
     @Test
@@ -550,8 +551,9 @@ public final class UnrestTest {
     public final void testGetPosn() throws BadRequestException, NotFoundException, IOException {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
-        final Map<String, Posn> out = unrest.getPosn(EMAIL, PARAMS_NONE, NOW);
-        assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10, out.get("EURUSD.MAR14"));
+        final Map<PosnKey, Posn> out = unrest.getPosn(EMAIL, PARAMS_NONE, NOW);
+        assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10,
+                out.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
     @Test
@@ -559,10 +561,10 @@ public final class UnrestTest {
             IOException {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
-        final Posn posn = unrest.getPosn(EMAIL, "EURUSD.MAR14", PARAMS_NONE, NOW);
+        final Posn posn = unrest.getPosn(EMAIL, "EURUSD", SETTL_DAY, PARAMS_NONE, NOW);
         assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10, posn);
         try {
-            unrest.getPosn(EMAIL, "USDJPY.MAR14", PARAMS_NONE, NOW);
+            unrest.getPosn(EMAIL, "USDJPY", SETTL_DAY, PARAMS_NONE, NOW);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
