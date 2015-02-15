@@ -25,6 +25,16 @@ public final class LifeCycle implements ServletContextListener {
         if (url == null || url.equals("datastore:")) {
             // Default.
             model = new GaeModel();
+        } else if (url.startsWith("jdbc:mysql:")) {
+            final String user = sc.getInitParameter("user");
+            final String password = sc.getInitParameter("password");
+            //  Locate, load, and link the MySql Jdbc driver.
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("mysql jdbc driver not found", e);
+            }
+            model = new JdbcModel(url, user, password);
         } else if (url.equals("mock:")) {
             model = new MockModel();
         } else {

@@ -2,6 +2,22 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+  <context-param>
+    <param-name>url</param-name>
+    <!--param-value>datastore:</param-value-->
+    <param-value>jdbc:mysql://localhost/twirly?sessionVariables=foreign_key_checks=1</param-value>
+  </context-param>
+
+  <context-param>
+  	<param-name>user</param-name>
+  	<param-value>root</param-value>
+  </context-param>
+
+  <context-param>
+  	<param-name>password</param-name>
+  	<param-value></param-value>
+  </context-param>
+
   <listener>
     <listener-class>com.swirlycloud.twirly.web.LifeCycle</listener-class>
   </listener>
