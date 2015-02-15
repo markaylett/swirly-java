@@ -71,13 +71,6 @@ public final class GaeModel implements Model {
         }
     }
 
-    private final Entity newTrader(Trader trader) {
-        final Entity entity = new Entity(TRADER_KIND, trader.getMnem());
-        entity.setUnindexedProperty("display", trader.getDisplay());
-        entity.setProperty("email", trader.getEmail());
-        return entity;
-    }
-
     private final Entity newMarket(Market market) {
         final Entity entity = new Entity(MARKET_KIND, market.getMnem());
         entity.setUnindexedProperty("display", market.getDisplay());
@@ -89,6 +82,13 @@ public final class GaeModel implements Model {
         entity.setUnindexedProperty("lastTime", Long.valueOf(market.getLastTime()));
         entity.setUnindexedProperty("maxOrderId", Long.valueOf(market.getMaxOrderId()));
         entity.setUnindexedProperty("maxExecId", Long.valueOf(market.getMaxExecId()));
+        return entity;
+    }
+
+    private final Entity newTrader(Trader trader) {
+        final Entity entity = new Entity(TRADER_KIND, trader.getMnem());
+        entity.setUnindexedProperty("display", trader.getDisplay());
+        entity.setProperty("email", trader.getEmail());
         return entity;
     }
 
@@ -147,7 +147,7 @@ public final class GaeModel implements Model {
     private final Entity applyExec(Entity order, Exec exec) {
         order.setProperty("state", exec.getState().name());
         order.setUnindexedProperty("lots", exec.getLots());
-        order.setUnindexedProperty("resd", exec.getResd());
+        order.setProperty("resd", exec.getResd());
         order.setUnindexedProperty("exec", exec.getExec());
         order.setUnindexedProperty("lastTicks", exec.getLastTicks());
         order.setUnindexedProperty("lastLots", exec.getLastLots());
