@@ -487,17 +487,18 @@ public final class Rest {
         }
     }
 
-    public final void getPosn(String email, String market, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+    public final void getPosn(String email, String contr, int settlDate, Params params, long now,
+            Appendable out) throws NotFoundException, IOException {
         acquireRead();
         try {
             final Sess sess = serv.findSessByEmail(email);
             if (sess == null) {
                 throw new NotFoundException(String.format("trader '%s' has no posns", email));
             }
-            final Posn posn = sess.findPosn(market);
+            final Posn posn = sess.findPosn(contr, isoToJd(settlDate));
             if (posn == null) {
-                throw new NotFoundException(String.format("posn for '%s' does not exist", market));
+                throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",
+                        contr, settlDate));
             }
             posn.toJson(params, out);
         } finally {

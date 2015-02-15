@@ -210,30 +210,6 @@ function ViewModel(contrs) {
         return true;
     };
 
-    self.selectBuy = function(val) {
-        self.market(val.market());
-        self.price(val.buyPrice());
-        return true;
-    };
-
-    self.selectPosn = function(val) {
-        self.market(val.market());
-        self.price(0);
-        return true;
-    };
-
-    self.selectSell = function(val) {
-        self.market(val.market());
-        self.price(val.sellPrice());
-        return true;
-    };
-
-    self.selectNet = function(val) {
-        self.market(val.market());
-        self.price(val.netPrice());
-        return true;
-    };
-
     self.findView = function(market) {
         return ko.utils.arrayFirst(self.views(), function(val) {
             return val.market() === market;
@@ -264,9 +240,9 @@ function ViewModel(contrs) {
         });
     };
 
-    self.findPosn = function(market) {
+    self.findPosn = function(contr, settlDate) {
         return ko.utils.arrayFirst(self.posns(), function(val) {
-            return val.market() === market;
+            return val.contr().mnem === contr && toDateInt(val.settlDate()) === settlDate;
         });
     };
 
@@ -296,7 +272,7 @@ function ViewModel(contrs) {
             }
         });
         if (raw.posn !== null) {
-            posn = self.findPosn(raw.posn.market);
+            posn = self.findPosn(raw.posn.contr, raw.posn.settlDate);
             if (posn !== null) {
                 posn.update(raw.posn);
             } else {
@@ -357,7 +333,7 @@ function ViewModel(contrs) {
             self.trades(cooked);
 
             cooked = $.map(raw.posns, function(val) {
-                posn = self.findPosn(val.market);
+                posn = self.findPosn(val.contr, val.settlDate);
                 if (posn !== null) {
                     posn.update(val);
                 } else {

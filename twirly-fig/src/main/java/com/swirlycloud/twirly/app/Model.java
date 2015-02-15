@@ -15,9 +15,9 @@ import com.swirlycloud.twirly.function.UnaryCallback;
 
 public interface Model extends Journ {
 
-    void insertTrader(Trader trader);
-
     void insertMarket(Market market);
+
+    void insertTrader(Trader trader);
 
     void archiveOrder(String market, long id, long modified) throws NotFoundException;
 
@@ -27,9 +27,9 @@ public interface Model extends Journ {
 
     void selectContr(UnaryCallback<Contr> cb);
 
-    void selectTrader(UnaryCallback<Trader> cb);
-
     void selectMarket(UnaryCallback<Market> cb);
+
+    void selectTrader(UnaryCallback<Trader> cb);
 
     void selectOrder(UnaryCallback<Order> cb);
 

@@ -7,18 +7,6 @@ public final class RbUtil {
     private RbUtil() {
     }
 
-    public static int compareLong(long lhs, long rhs) {
-        int i;
-        if (lhs < rhs) {
-            i = -1;
-        } else if (lhs > rhs) {
-            i = 1;
-        } else {
-            i = 0;
-        }
-        return i;
-    }
-
     public static RbNode rbNext(RbNode node) {
         if (node.getRight() != null) {
             node = node.getRight();

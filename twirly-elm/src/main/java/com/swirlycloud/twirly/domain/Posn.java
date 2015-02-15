@@ -16,10 +16,9 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
+public final class Posn extends BasicRbNode implements Jsonifiable {
 
     private final String trader;
-    private final String market;
     private final String contr;
     private final int settlDay;
     private long buyCost;
@@ -27,10 +26,9 @@ public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
     private long sellCost;
     private long sellLots;
 
-    private Posn(String trader, String market, String contr, int settlDay, long buyCost,
+    private Posn(String trader, String contr, int settlDay, long buyCost,
             long buyLots, long sellCost, long sellLots) {
         this.trader = trader;
-        this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
         this.buyCost = buyCost;
@@ -39,23 +37,14 @@ public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
         this.sellLots = sellLots;
     }
 
-    public Posn(String trader, String market, String contr, int settlDay) {
+    public Posn(String trader, String contr, int settlDay) {
         this.trader = trader;
-        this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
     }
 
-    public Posn(String trader, Financial fin) {
-        this.trader = trader;
-        this.market = fin.getMarket();
-        this.contr = fin.getContr();
-        this.settlDay = fin.getSettlDay();
-    }
-
     public static Posn parse(JsonParser p) throws IOException {
         String trader = null;
-        String market = null;
         String contr = null;
         int settlDay = 0;
         long buyCost = 0;
@@ -68,7 +57,7 @@ public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new Posn(trader, market, contr, settlDay, buyCost, buyLots, sellCost,
+                return new Posn(trader, contr, settlDay, buyCost, buyLots, sellCost,
                         sellLots);
             case KEY_NAME:
                 name = p.getString();
@@ -91,8 +80,6 @@ public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
             case VALUE_STRING:
                 if ("trader".equals(name)) {
                     trader = p.getString();
-                } else if ("market".equals(name)) {
-                    market = p.getString();
                 } else if ("contr".equals(name)) {
                     contr = p.getString();
                 } else {
@@ -111,7 +98,8 @@ public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
         final int prime = 31;
         int result = 1;
         result = prime * result + trader.hashCode();
-        result = prime * result + market.hashCode();
+        result = prime * result + contr.hashCode();
+        result = prime * result + settlDay;
         return result;
     }
 
@@ -130,7 +118,10 @@ public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
         if (!trader.equals(other.trader)) {
             return false;
         }
-        if (!market.equals(other.market)) {
+        if (!contr.equals(other.contr)) {
+            return false;
+        }
+        if (settlDay == other.settlDay) {
             return false;
         }
         return true;
@@ -144,7 +135,6 @@ public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
     @Override
     public final void toJson(Params params, Appendable out) throws IOException {
         out.append("{\"trader\":\"").append(trader);
-        out.append("\",\"market\":\"").append(market);
         out.append("\",\"contr\":\"").append(contr);
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         if (buyLots != 0) {
@@ -198,17 +188,10 @@ public final class Posn extends BasicRbNode implements Jsonifiable, Financial {
         return trader;
     }
 
-    @Override
-    public final String getMarket() {
-        return market;
-    }
-
-    @Override
     public final String getContr() {
         return contr;
     }
 
-    @Override
     public final int getSettlDay() {
         return settlDay;
     }

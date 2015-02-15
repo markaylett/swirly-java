@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import static com.swirlycloud.twirly.util.CollectionUtil.hashLong;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Identifiable;
 

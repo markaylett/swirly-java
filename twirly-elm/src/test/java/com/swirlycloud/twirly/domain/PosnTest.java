@@ -12,13 +12,13 @@ import com.swirlycloud.twirly.date.JulianDay;
 public final class PosnTest {
     @Test
     public final void testToString() {
-        final Posn posn = new Posn("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314));
+        final Posn posn = new Posn("MARAYL", "EURUSD", JulianDay.isoToJd(20140314));
         posn.setBuyCost(1);
         posn.setBuyLots(2);
         posn.setSellCost(3);
         posn.setSellLots(4);
         assertEquals(
-                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyCost\":1,\"buyLots\":2,\"sellCost\":3,\"sellLots\":4}",
+                "{\"trader\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyCost\":1,\"buyLots\":2,\"sellCost\":3,\"sellLots\":4}",
                 posn.toString());
     }
 }

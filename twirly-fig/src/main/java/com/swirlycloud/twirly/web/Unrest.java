@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartArray;
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
@@ -32,6 +33,54 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.util.Params;
 
 public final class Unrest {
+    public static final class PosnKey {
+        private final String contr;
+        private final int settlDay;
+
+        public PosnKey(String contr, int settlDay) {
+            super();
+            this.contr = contr;
+            this.settlDay = settlDay;
+        }
+
+        @Override
+        public final int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + contr.hashCode();
+            result = prime * result + settlDay;
+            return result;
+        }
+
+        @Override
+        public final boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final PosnKey other = (PosnKey) obj;
+            if (!contr.equals(other.contr)) {
+                return false;
+            }
+            if (settlDay != other.settlDay) {
+                return false;
+            }
+            return true;
+        }
+
+        public final String getContr() {
+            return contr;
+        }
+
+        public final int getSettlDay() {
+            return settlDay;
+        }
+    }
 
     private final Rest rest;
 
@@ -158,7 +207,7 @@ public final class Unrest {
         throw new IOException("end-of array not found");
     }
 
-    private static void parsePosns(JsonParser p, Map<String, ? super Posn> out) throws IOException {
+    private static void parsePosns(JsonParser p, Map<PosnKey, ? super Posn> out) throws IOException {
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
@@ -166,7 +215,7 @@ public final class Unrest {
                 return;
             case START_OBJECT:
                 final Posn posn = Posn.parse(p);
-                out.put(posn.getMarket(), posn);
+                out.put(new PosnKey(posn.getContr(), posn.getSettlDay()), posn);
                 break;
             default:
                 throw new IOException(String.format("unexpected json token '%s'", event));
@@ -185,7 +234,7 @@ public final class Unrest {
     public static final class SessStruct {
         public final Map<Long, Order> orders = new HashMap<>();
         public final Map<Long, Exec> trades = new HashMap<>();
-        public final Map<String, Posn> posns = new HashMap<>();
+        public final Map<PosnKey, Posn> posns = new HashMap<>();
     }
 
     public static final class TransStruct {
@@ -528,12 +577,12 @@ public final class Unrest {
         }
     }
 
-    public final Map<String, Posn> getPosn(String email, Params params, long now)
+    public final Map<PosnKey, Posn> getPosn(String email, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getPosn(email, params, now, sb);
 
-        final Map<String, Posn> out = new HashMap<>();
+        final Map<PosnKey, Posn> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartArray(p);
             parsePosns(p, out);
@@ -541,10 +590,10 @@ public final class Unrest {
         return out;
     }
 
-    public final Posn getPosn(String email, String market, Params params, long now)
+    public final Posn getPosn(String email, String contr, int settlDay, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getPosn(email, market, params, now, sb);
+        rest.getPosn(email, contr, jdToIso(settlDay), params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);

@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import static com.swirlycloud.twirly.util.CollectionUtil.hashLong;
+
 /**
  * Hashtable with key of type long.
  * 
@@ -10,10 +12,6 @@ package com.swirlycloud.twirly.intrusive;
  *            The concrete element type.
  */
 public abstract class LongHashTable<V> extends HashTable<V> {
-
-    protected static int hashLong(long id) {
-        return (int) (id ^ id >>> 32);
-    }
 
     protected abstract boolean equalKeyDirect(V lhs, long rhs);
 

@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-import static com.swirlycloud.twirly.node.RbUtil.compareLong;
+import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

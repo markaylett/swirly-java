@@ -12,13 +12,28 @@ public enum Direct {
      * Aggressor sells.
      */
     GIVEN(-1);
-    private final int value;
+    private final int id;
 
-    private Direct(int value) {
-        this.value = value;
+    private Direct(int id) {
+        this.id = id;
+    }
+
+    public static Direct valueOf(int id) {
+        Direct val;
+        switch (id) {
+        case 1:
+            val = Direct.PAID;
+            break;
+        case -1:
+            val = Direct.GIVEN;
+            break;
+        default:
+            throw new IllegalArgumentException("invalid direction");
+        }
+        return val;
     }
 
     public final int intValue() {
-        return this.value;
+        return this.id;
     }
 }

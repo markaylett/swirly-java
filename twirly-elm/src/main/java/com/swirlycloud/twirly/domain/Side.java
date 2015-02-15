@@ -3,7 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import static com.swirlycloud.twirly.node.RbUtil.compareLong;
+import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
+
 import com.swirlycloud.twirly.intrusive.DlList;
 import com.swirlycloud.twirly.intrusive.LongRbTree;
 import com.swirlycloud.twirly.node.DlNode;

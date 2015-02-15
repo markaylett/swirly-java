@@ -3,33 +3,152 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
+import static com.swirlycloud.twirly.util.CollectionUtil.compareInt;
+
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.intrusive.BasicRbTree;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.RefHashTable;
+import com.swirlycloud.twirly.intrusive.Tree;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.RbNode;
 
 public final class Sess extends BasicRbNode {
 
-    private static final class PosnTree extends BasicRbTree<String> {
-
-        private static String getMarket(RbNode node) {
-            return ((Posn) node).getMarket();
-        }
+    public final class PosnTree extends Tree<RbNode> {
 
         @Override
         protected final int compareKey(RbNode lhs, RbNode rhs) {
-            return getMarket(lhs).compareTo(getMarket(rhs));
+            final Posn r = (Posn) rhs;
+            return compareKey(lhs, r.getContr(), r.getSettlDay());
+        }
+
+        protected final int compareKey(RbNode lhs, String contr, int settlDay) {
+            final Posn l = (Posn) lhs;
+            int n = l.getContr().compareTo(contr);
+            if (n == 0) {
+                n = compareInt(l.getSettlDay(), settlDay);
+            }
+            return n;
+        }
+
+        public final RbNode find(String contr, int settlDay) {
+            RbNode tmp = root;
+            int comp;
+            while (tmp != null) {
+                comp = compareKey(tmp, contr, settlDay);
+                if (comp > 0) {
+                    tmp = getLeft(tmp);
+                } else if (comp < 0) {
+                    tmp = getRight(tmp);
+                } else {
+                    return tmp;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Finds the first node greater than or equal to the search key.
+         */
+
+        public final RbNode nfind(String contr, int settlDay) {
+            RbNode tmp = root;
+            RbNode res = null;
+            int comp;
+            while (tmp != null) {
+                comp = compareKey(tmp, contr, settlDay);
+                if (comp > 0) {
+                    res = tmp;
+                    tmp = getLeft(tmp);
+                } else if (comp < 0) {
+                    tmp = getRight(tmp);
+                } else {
+                    return tmp;
+                }
+            }
+            return res;
+        }
+
+        // Extensions.
+
+        /**
+         * Return match or parent.
+         */
+
+        public final RbNode pfind(String contr, int settlDay) {
+            RbNode tmp = root, parent = null;
+            while (tmp != null) {
+                parent = tmp;
+                final int comp = compareKey(tmp, contr, settlDay);
+                if (comp > 0) {
+                    tmp = getLeft(tmp);
+                } else if (comp < 0) {
+                    tmp = getRight(tmp);
+                } else {
+                    return tmp;
+                }
+            }
+            return parent;
         }
 
         @Override
-        protected final int compareKeyDirect(RbNode lhs, String rhs) {
-            return getMarket(lhs).compareTo(rhs);
+        protected final void setNode(RbNode node, RbNode left, RbNode right, RbNode parent,
+                int color) {
+            node.setNode(left, right, parent, color);
+        }
+
+        @Override
+        protected final RbNode setLeft(RbNode node, RbNode left) {
+            return node.setLeft(left);
+        }
+
+        @Override
+        protected final RbNode setRight(RbNode node, RbNode right) {
+            return node.setRight(right);
+        }
+
+        @Override
+        protected final RbNode setParent(RbNode node, RbNode parent) {
+            return node.setParent(parent);
+        }
+
+        @Override
+        protected final void setColor(RbNode node, int color) {
+            node.setColor(color);
+        }
+
+        @Override
+        protected final RbNode next(RbNode node) {
+            return node.rbNext();
+        }
+
+        @Override
+        protected final RbNode prev(RbNode node) {
+            return node.rbPrev();
+        }
+
+        @Override
+        protected final RbNode getLeft(RbNode node) {
+            return node.getLeft();
+        }
+
+        @Override
+        protected final RbNode getRight(RbNode node) {
+            return node.getRight();
+        }
+
+        @Override
+        protected final RbNode getParent(RbNode node) {
+            return node.getParent();
+        }
+
+        @Override
+        protected final int getColor(RbNode node) {
+            return node.getColor();
         }
     }
 
@@ -155,13 +274,12 @@ public final class Sess extends BasicRbNode {
     }
 
     final Posn updatePosn(Posn posn) {
-        final String market = posn.getMarket();
-        final Posn exist = (Posn) posns.pfind(market);
-        if (exist != null && exist.getMarket().equals(market)) {
+        final String contr = posn.getContr();
+        final int settlDay = posn.getSettlDay();
+        final Posn exist = (Posn) posns.pfind(contr, settlDay);
+        if (exist != null && exist.getContr().equals(contr) && exist.getSettlDay() == settlDay) {
 
             // Update existing position.
-
-            assert exist.getTrader().equals(posn.getTrader());
 
             exist.setBuyCost(posn.getBuyCost());
             exist.setBuyLots(posn.getBuyLots());
@@ -177,17 +295,18 @@ public final class Sess extends BasicRbNode {
     }
 
     final Posn getLazyPosn(Market market) {
-        Posn posn = (Posn) posns.pfind(market.getMnem());
-        if (posn == null || !posn.getMarket().equals(market.getMnem())) {
+        Posn posn = (Posn) posns.pfind(market.getContr(), market.getSettlDay());
+        if (posn == null || !posn.getContr().equals(market.getContr())
+                || posn.getSettlDay() != market.getSettlDay()) {
             final RbNode parent = posn;
-            posn = new Posn(trader.getMnem(), market);
+            posn = new Posn(trader.getMnem(), market.getContr(), market.getSettlDay());
             posns.pinsert(posn, parent);
         }
         return posn;
     }
 
-    public final Posn findPosn(String market) {
-        return (Posn) posns.find(market);
+    public final Posn findPosn(String contr, int settlDay) {
+        return (Posn) posns.find(contr, settlDay);
     }
 
     public final RbNode getRootPosn() {

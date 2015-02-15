@@ -48,8 +48,8 @@ public final class GaeModel implements Model {
     private static final String ASSET_KIND = "Asset";
     @SuppressWarnings("unused")
     private static final String CONTR_KIND = "Contr";
-    private static final String TRADER_KIND = "Trader";
     private static final String MARKET_KIND = "Market";
+    private static final String TRADER_KIND = "Trader";
     private static final String ORDER_KIND = "Order";
     private static final String EXEC_KIND = "Exec";
 
@@ -71,13 +71,6 @@ public final class GaeModel implements Model {
         }
     }
 
-    private final Entity newTrader(Trader trader) {
-        final Entity entity = new Entity(TRADER_KIND, trader.getMnem());
-        entity.setUnindexedProperty("display", trader.getDisplay());
-        entity.setProperty("email", trader.getEmail());
-        return entity;
-    }
-
     private final Entity newMarket(Market market) {
         final Entity entity = new Entity(MARKET_KIND, market.getMnem());
         entity.setUnindexedProperty("display", market.getDisplay());
@@ -89,6 +82,13 @@ public final class GaeModel implements Model {
         entity.setUnindexedProperty("lastTime", Long.valueOf(market.getLastTime()));
         entity.setUnindexedProperty("maxOrderId", Long.valueOf(market.getMaxOrderId()));
         entity.setUnindexedProperty("maxExecId", Long.valueOf(market.getMaxExecId()));
+        return entity;
+    }
+
+    private final Entity newTrader(Trader trader) {
+        final Entity entity = new Entity(TRADER_KIND, trader.getMnem());
+        entity.setUnindexedProperty("display", trader.getDisplay());
+        entity.setProperty("email", trader.getEmail());
         return entity;
     }
 
@@ -147,7 +147,7 @@ public final class GaeModel implements Model {
     private final Entity applyExec(Entity order, Exec exec) {
         order.setProperty("state", exec.getState().name());
         order.setUnindexedProperty("lots", exec.getLots());
-        order.setUnindexedProperty("resd", exec.getResd());
+        order.setProperty("resd", exec.getResd());
         order.setUnindexedProperty("exec", exec.getExec());
         order.setUnindexedProperty("lastTicks", exec.getLastTicks());
         order.setUnindexedProperty("lastLots", exec.getLastLots());
@@ -192,6 +192,10 @@ public final class GaeModel implements Model {
     }
 
     @Override
+    public final void close() {
+    }
+
+    @Override
     public final void insertExec(Exec exec) throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -199,7 +203,8 @@ public final class GaeModel implements Model {
             if (exec.getState() == State.NEW) {
                 datastore.put(txn, newOrder(market, exec));
             } else {
-                datastore.put(txn, applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
+                datastore.put(txn,
+                        applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
             }
             datastore.put(txn, newExec(market, exec));
             datastore.put(txn, market);
@@ -254,11 +259,10 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void insertTrader(Trader trader) {
+    public final void insertMarket(Market market) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            // Trader entities have common ancestor for strong consistency.
-            final Entity entity = newTrader(trader);
+            final Entity entity = newMarket(market);
             datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
@@ -272,10 +276,11 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void insertMarket(Market market) {
+    public final void insertTrader(Trader trader) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity entity = newMarket(market);
+            // Trader entities have common ancestor for strong consistency.
+            final Entity entity = newTrader(trader);
             datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
@@ -343,19 +348,6 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void selectTrader(UnaryCallback<Trader> cb) {
-        final Query q = new Query(TRADER_KIND);
-        final PreparedQuery pq = datastore.prepare(q);
-        for (final Entity entity : pq.asIterable()) {
-            final String mnem = entity.getKey().getName();
-            final String display = (String) entity.getProperty("display");
-            final String email = (String) entity.getProperty("email");
-            final Trader trader = new Trader(mnem, display, email);
-            cb.call(trader);
-        }
-    }
-
-    @Override
     public final void selectMarket(final UnaryCallback<Market> cb) {
         final Query q = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(q);
@@ -373,6 +365,19 @@ public final class GaeModel implements Model {
             final Market market = new Market(mnem, display, contr, settlDay, expiryDay, lastTicks,
                     lastLots, lastTime, maxOrderId, maxExecId);
             cb.call(market);
+        }
+    }
+
+    @Override
+    public final void selectTrader(UnaryCallback<Trader> cb) {
+        final Query q = new Query(TRADER_KIND);
+        final PreparedQuery pq = datastore.prepare(q);
+        for (final Entity entity : pq.asIterable()) {
+            final String mnem = entity.getKey().getName();
+            final String display = (String) entity.getProperty("display");
+            final String email = (String) entity.getProperty("email");
+            final Trader trader = new Trader(mnem, display, email);
+            cb.call(trader);
         }
     }
 
@@ -473,15 +478,14 @@ public final class GaeModel implements Model {
                 final PreparedQuery pq = datastore.prepare(q);
                 for (final Entity entity : pq.asIterable()) {
                     final String trader = (String) entity.getProperty("trader");
-                    final String market = (String) entity.getProperty("market");
                     final String contr = (String) entity.getProperty("contr");
                     final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
                     // Lazy position.
-                    Posn posn = (Posn) posns.pfind(trader, market);
+                    Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
                     if (posn == null || !posn.getTrader().equals(trader)
-                            || !posn.getMarket().equals(market)) {
+                            || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
                         final RbNode parent = posn;
-                        posn = new Posn(trader, market, contr, settlDay);
+                        posn = new Posn(trader, contr, settlDay);
                         posns.pinsert(posn, parent);
                     }
                     final Action action = Action.valueOf((String) entity.getProperty("action"));
