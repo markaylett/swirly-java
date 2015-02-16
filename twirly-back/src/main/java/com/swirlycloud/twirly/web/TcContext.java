@@ -3,10 +3,14 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import com.swirlycloud.twirly.mock.MockModel;
+import com.swirlycloud.twirly.app.Model;
 
 public final class TcContext implements Context {
-    private final Rest rest = new Rest(new MockModel());
+    private final Rest rest;
+
+    public TcContext(Model model) {
+        rest = new Rest(model);
+    }
 
     @Override
     public final Rest getRest() {
