@@ -3,11 +3,14 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import java.util.concurrent.ExecutionException;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import com.swirlycloud.twirly.app.Model;
+import com.swirlycloud.twirly.concurrent.AsyncModelService;
 import com.swirlycloud.twirly.mock.MockModel;
 
 public final class LifeCycle implements ServletContextListener {
@@ -28,7 +31,11 @@ public final class LifeCycle implements ServletContextListener {
             throw new RuntimeException("invalid model url: " + url);
         }
         if (sc.getServerInfo().startsWith("Apache Tomcat")) {
-            RestServlet.setContext(new TcContext(model));
+            try {
+                RestServlet.setContext(new TcContext(new AsyncModelService(model)));
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException("failed to create async model", e);
+            }
         } else {
             RestServlet.setContext(new GaeContext(model));
         }

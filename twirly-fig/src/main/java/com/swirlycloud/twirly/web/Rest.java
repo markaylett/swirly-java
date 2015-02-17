@@ -7,12 +7,14 @@ import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.isoToJd;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 
 import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Sess;
 import com.swirlycloud.twirly.app.Trans;
+import com.swirlycloud.twirly.concurrent.AsyncModel;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
@@ -24,6 +26,7 @@ import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
 
@@ -114,6 +117,10 @@ public final class Rest {
         out.append(']');
     }
 
+    public Rest(AsyncModel model) throws InterruptedException, ExecutionException {
+        serv = new Serv(model);
+    }
+
     public Rest(Model model) {
         serv = new Serv(model);
     }
@@ -163,7 +170,8 @@ public final class Rest {
     }
 
     public final void postTrader(String mnem, String display, String email, Params params,
-            long now, Appendable out) throws BadRequestException, IOException {
+            long now, Appendable out) throws BadRequestException, ServiceUnavailableException,
+            IOException {
         acquireWrite();
         try {
             final Trader trader = serv.createTrader(mnem, display, email);
@@ -175,7 +183,7 @@ public final class Rest {
 
     public final void postMarket(String mnem, String display, String contrMnem, int settlDate,
             int expiryDate, Params params, long now, Appendable out) throws BadRequestException,
-            NotFoundException, IOException {
+            NotFoundException, ServiceUnavailableException, IOException {
         acquireWrite();
         try {
             final Contr contr = (Contr) serv.findRec(RecType.CONTR, contrMnem);
@@ -261,7 +269,7 @@ public final class Rest {
     }
 
     public final void deleteOrder(String email, String market, long id, long now)
-            throws BadRequestException, NotFoundException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         acquireWrite();
         try {
             final Sess sess = serv.findSessByEmail(email);
@@ -345,7 +353,7 @@ public final class Rest {
 
     public final void postOrder(String email, String marketMnem, String ref, Action action,
             long ticks, long lots, long minLots, Params params, long now, Appendable out)
-            throws BadRequestException, NotFoundException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         acquireWrite();
         try {
             final Sess sess = serv.getLazySessByEmail(email);
@@ -362,7 +370,8 @@ public final class Rest {
     }
 
     public final void putOrder(String email, String marketMnem, long id, long lots, Params params,
-            long now, Appendable out) throws BadRequestException, NotFoundException, IOException {
+            long now, Appendable out) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
         acquireWrite();
         try {
             final Sess sess = serv.findSessByEmail(email);
@@ -386,7 +395,7 @@ public final class Rest {
     }
 
     public final void deleteTrade(String email, String market, long id, long now)
-            throws BadRequestException, NotFoundException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         acquireWrite();
         try {
             final Sess sess = serv.findSessByEmail(email);
@@ -508,7 +517,7 @@ public final class Rest {
 
     // Cron jobs.
 
-    public final void getEndOfDay(long now) throws NotFoundException {
+    public final void getEndOfDay(long now) throws NotFoundException, ServiceUnavailableException {
         acquireWrite();
         try {
             serv.expireMarkets(now);

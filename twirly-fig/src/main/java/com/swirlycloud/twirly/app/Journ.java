@@ -24,5 +24,5 @@ public interface Journ extends AutoCloseable {
 
     void archiveOrder(String market, long id, long modified) throws NotFoundException;
 
-    void archiveTrade(String market, long id, long modified) throws NotFoundException;    
+    void archiveTrade(String market, long id, long modified) throws NotFoundException;
 }

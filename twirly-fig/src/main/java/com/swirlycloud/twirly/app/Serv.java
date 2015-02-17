@@ -5,11 +5,15 @@ package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.concurrent.AsyncModel;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
@@ -27,6 +31,7 @@ import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.intrusive.BasicRbTree;
 import com.swirlycloud.twirly.intrusive.EmailHashTable;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
@@ -57,7 +62,7 @@ public final class Serv {
         }
     }
 
-    private final Model model;
+    private final Journ journ;
     private final MnemRbTree assets = new MnemRbTree();
     private final MnemRbTree contrs = new MnemRbTree();
     private final MnemRbTree traders = new MnemRbTree();
@@ -98,16 +103,16 @@ public final class Serv {
         }
     }
 
-    private final void insertAssets() {
-        for (SlNode node = model.selectAsset(); node != null; node = node.slNext()) {
+    private final void insertAssets(SlNode first) {
+        for (SlNode node = first; node != null; node = node.slNext()) {
             final Asset asset = (Asset) node;
             final RbNode unused = assets.insert(asset);
             assert unused == null;
         }
     }
 
-    private final void insertContrs() {
-        for (SlNode node = model.selectContr(); node != null; node = node.slNext()) {
+    private final void insertContrs(SlNode first) {
+        for (SlNode node = first; node != null; node = node.slNext()) {
             final Contr contr = (Contr) node;
             enrichContr(contr);
             final RbNode unused = contrs.insert(contr);
@@ -115,8 +120,8 @@ public final class Serv {
         }
     }
 
-    private final void insertTraders() {
-        for (SlNode node = model.selectTrader(); node != null;) {
+    private final void insertTraders(SlNode first) {
+        for (SlNode node = first; node != null;) {
             final Trader trader = (Trader) node;
             final RbNode unused = traders.insert(trader);
             assert unused == null;
@@ -126,8 +131,8 @@ public final class Serv {
         }
     }
 
-    private final void insertMarkets() {
-        for (SlNode node = model.selectMarket(); node != null; node = node.slNext()) {
+    private final void insertMarkets(SlNode first) {
+        for (SlNode node = first; node != null; node = node.slNext()) {
             final Market market = (Market) node;
             enrichMarket(market);
             final RbNode unused = markets.insert(market);
@@ -135,15 +140,15 @@ public final class Serv {
         }
     }
 
-    private final void insertOrders() {
-        for (SlNode node = model.selectOrder(); node != null; node = node.slNext()) {
+    private final void insertOrders(SlNode first) {
+        for (SlNode node = first; node != null; node = node.slNext()) {
             final Order order = (Order) node;
             insertOrder(order);
         }
     }
 
-    private final void insertTrades() {
-        for (SlNode node = model.selectTrade(); node != null; node = node.slNext()) {
+    private final void insertTrades(SlNode first) {
+        for (SlNode node = first; node != null; node = node.slNext()) {
             final Exec trade = (Exec) node;
             final Trader trader = (Trader) traders.find(trade.getTrader());
             assert trader != null;
@@ -152,8 +157,8 @@ public final class Serv {
         }
     }
 
-    private final void insertPosns() {
-        for (SlNode node = model.selectPosn(); node != null; node = node.slNext()) {
+    private final void insertPosns(SlNode first) {
+        for (SlNode node = first; node != null; node = node.slNext()) {
             final Posn posn = (Posn) node;
             final Trader trader = (Trader) traders.find(posn.getTrader());
             assert trader != null;
@@ -290,20 +295,38 @@ public final class Serv {
         }
     }
 
+    public Serv(AsyncModel model) throws InterruptedException, ExecutionException {
+        this.journ = model;
+        final Future<SlNode> assets = model.selectAsset();
+        final Future<SlNode> contrs = model.selectContr();
+        final Future<SlNode> traders = model.selectTrader();
+        final Future<SlNode> markets = model.selectMarket();
+        final Future<SlNode> orders = model.selectOrder();
+        final Future<SlNode> trades = model.selectTrade();
+        final Future<SlNode> posns = model.selectPosn();
+        insertAssets(assets.get());
+        insertContrs(contrs.get());
+        insertTraders(traders.get());
+        insertMarkets(markets.get());
+        insertOrders(orders.get());
+        insertTrades(trades.get());
+        insertPosns(posns.get());
+    }
+
     public Serv(Model model) {
-        this.model = model;
-        insertAssets();
-        insertContrs();
-        insertTraders();
-        insertMarkets();
-        insertOrders();
-        insertTrades();
-        insertPosns();
+        this.journ = model;
+        insertAssets(model.selectAsset());
+        insertContrs(model.selectContr());
+        insertTraders(model.selectTrader());
+        insertMarkets(model.selectMarket());
+        insertOrders(model.selectOrder());
+        insertTrades(model.selectTrade());
+        insertPosns(model.selectPosn());
     }
 
     @NonNull
     public final Trader createTrader(String mnem, String display, String email)
-            throws BadRequestException {
+            throws BadRequestException, ServiceUnavailableException {
         if (traders.find(mnem) != null) {
             throw new BadRequestException(String.format("trader '%s' already exists", mnem));
         }
@@ -311,7 +334,12 @@ public final class Serv {
             throw new BadRequestException(String.format("email '%s' is already in use", email));
         }
         final Trader trader = newTrader(mnem, display, email);
-        model.insertTrader(trader.getMnem(), trader.getDisplay(), trader.getEmail());
+        try {
+            journ.insertTrader(trader.getMnem(), trader.getDisplay(), trader.getEmail());
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
         traders.insert(trader);
         emailIdx.insert(trader);
         return trader;
@@ -423,7 +451,7 @@ public final class Serv {
 
     @NonNull
     public final Market createMarket(String mnem, String display, Contr contr, int settlDay,
-            int expiryDay, long now) throws BadRequestException {
+            int expiryDay, long now) throws BadRequestException, ServiceUnavailableException {
         // busDay <= expiryDay <= settlDay.
         final int busDay = getBusDate(now).toJd();
         if (busDay > expiryDay) {
@@ -438,14 +466,20 @@ public final class Serv {
         }
         final RbNode parent = market;
         market = newMarket(mnem, display, contr, settlDay, expiryDay);
-        model.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay);
+        try {
+            journ.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
         markets.pinsert(market, parent);
         return market;
     }
 
     @NonNull
     public final Market createMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay, long now) throws BadRequestException, NotFoundException {
+            int expiryDay, long now) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException {
         final Contr crec = (Contr) contrs.find(contr);
         if (contr == null) {
             throw new NotFoundException(String.format("contr '%s' does not exist", contr));
@@ -453,7 +487,7 @@ public final class Serv {
         return createMarket(mnem, display, crec, settlDay, expiryDay, now);
     }
 
-    public final void expireMarkets(long now) throws NotFoundException {
+    public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
         final int busDay = DateUtil.getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final Market market = (Market) node;
@@ -527,7 +561,7 @@ public final class Serv {
     @NonNull
     public final Trans placeOrder(Sess sess, Market market, String ref, Action action, long ticks,
             long lots, long minLots, long now, Trans trans) throws BadRequestException,
-            NotFoundException {
+            NotFoundException, ServiceUnavailableException {
         final Trader trader = sess.getTraderRich();
         final int busDay = DateUtil.getBusDate(now).toJd();
         if (market.getExpiryDay() < busDay) {
@@ -554,8 +588,10 @@ public final class Serv {
         // any unfilled quantity.
         boolean success = false;
         try {
-            model.insertExecList(market.getMnem(), trans.execs.getFirst());
+            journ.insertExecList(market.getMnem(), trans.execs.getFirst());
             success = true;
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
         } finally {
             if (!success && !order.isDone()) {
                 // Undo market insertion.
@@ -571,7 +607,7 @@ public final class Serv {
 
     @NonNull
     public final Trans reviseOrder(Sess sess, Market market, Order order, long lots, long now,
-            Trans trans) throws BadRequestException, NotFoundException {
+            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
@@ -586,7 +622,11 @@ public final class Serv {
 
         final Exec exec = newExec(market, order, now);
         exec.revise(lots);
-        model.insertExec(exec);
+        try {
+            journ.insertExec(exec);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
 
         // Final commit phase cannot fail.
         market.reviseOrder(order, lots, now);
@@ -597,7 +637,7 @@ public final class Serv {
 
     @NonNull
     public final Trans reviseOrder(Sess sess, Market market, long id, long lots, long now,
-            Trans trans) throws BadRequestException, NotFoundException {
+            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(market.getMnem(), id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
@@ -607,7 +647,7 @@ public final class Serv {
 
     @NonNull
     public final Trans reviseOrder(Sess sess, Market market, String ref, long lots, long now,
-            Trans trans) throws BadRequestException, NotFoundException {
+            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
@@ -617,13 +657,17 @@ public final class Serv {
 
     @NonNull
     public final Trans cancelOrder(Sess sess, Market market, Order order, long now, Trans trans)
-            throws BadRequestException, NotFoundException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
         final Exec exec = newExec(market, order, now);
         exec.cancel();
-        model.insertExec(exec);
+        try {
+            journ.insertExec(exec);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
 
         // Final commit phase cannot fail.
         market.cancelOrder(order, now);
@@ -634,7 +678,7 @@ public final class Serv {
 
     @NonNull
     public final Trans cancelOrder(Sess sess, Market market, long id, long now, Trans trans)
-            throws BadRequestException, NotFoundException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(market.getMnem(), id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
@@ -644,7 +688,7 @@ public final class Serv {
 
     @NonNull
     public final Trans cancelOrder(Sess sess, Market market, String ref, long now, Trans trans)
-            throws BadRequestException, NotFoundException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
@@ -662,8 +706,10 @@ public final class Serv {
      * @param now
      *            The current time.
      * @throws NotFoundException
+     * @throws ServiceUnavailableException
      */
-    public final void cancelOrders(Sess sess, long now) throws NotFoundException {
+    public final void cancelOrders(Sess sess, long now) throws NotFoundException,
+            ServiceUnavailableException {
         for (;;) {
             final Order order = (Order) sess.getRootOrder();
             if (order == null) {
@@ -674,14 +720,19 @@ public final class Serv {
 
             final Exec exec = newExec(market, order, now);
             exec.cancel();
-            model.insertExec(exec);
+            try {
+                journ.insertExec(exec);
+            } catch (RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
 
             // Final commit phase cannot fail.
             market.cancelOrder(order, now);
         }
     }
 
-    public final void cancelOrders(Market market, long now) throws NotFoundException {
+    public final void cancelOrders(Market market, long now) throws NotFoundException,
+            ServiceUnavailableException {
         final Side bidSide = market.getBidSide();
         final Side offerSide = market.getOfferSide();
 
@@ -700,7 +751,11 @@ public final class Serv {
             exec.setSlNext(first);
             first = exec;
         }
-        model.insertExecList(market.getMnem(), first);
+        try {
+            journ.insertExecList(market.getMnem(), first);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
         // Commit phase.
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd();) {
             final Order order = (Order) node;
@@ -715,18 +770,22 @@ public final class Serv {
     }
 
     public final void archiveOrder(Sess sess, Order order, long now) throws BadRequestException,
-            NotFoundException {
+            NotFoundException, ServiceUnavailableException {
         if (!order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is not done", order.getId()));
         }
-        model.archiveOrder(order.getMarket(), order.getId(), now);
+        try {
+            journ.archiveOrder(order.getMarket(), order.getId(), now);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
 
         // No need to update timestamps on order because it is immediately freed.
         sess.removeOrder(order);
     }
 
     public final void archiveOrder(Sess sess, String market, long id, long now)
-            throws BadRequestException, NotFoundException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(market, id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
@@ -744,8 +803,10 @@ public final class Serv {
      * @param now
      *            The current time.
      * @throws NotFoundException
+     * @throws ServiceUnavailableException
      */
-    public final void archiveOrders(Sess sess, long now) throws NotFoundException {
+    public final void archiveOrders(Sess sess, long now) throws NotFoundException,
+            ServiceUnavailableException {
         RbNode node = sess.getFirstOrder();
         while (node != null) {
             final Order order = (Order) node;
@@ -754,8 +815,11 @@ public final class Serv {
             if (!order.isDone()) {
                 continue;
             }
-
-            model.archiveOrder(order.getMarket(), order.getId(), now);
+            try {
+                journ.archiveOrder(order.getMarket(), order.getId(), now);
+            } catch (RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
 
             // No need to update timestamps on order because it is immediately freed.
             sess.removeOrder(order);
@@ -763,18 +827,22 @@ public final class Serv {
     }
 
     public final void archiveTrade(Sess sess, Exec trade, long now) throws BadRequestException,
-            NotFoundException {
+            NotFoundException, ServiceUnavailableException {
         if (trade.getState() != State.TRADE) {
             throw new BadRequestException(String.format("exec '%d' is not a trade", trade.getId()));
         }
-        model.archiveTrade(trade.getMarket(), trade.getId(), now);
+        try {
+            journ.archiveTrade(trade.getMarket(), trade.getId(), now);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
 
         // No need to update timestamps on trade because it is immediately freed.
         sess.removeTrade(trade);
     }
 
     public final void archiveTrade(Sess sess, String market, long id, long now)
-            throws BadRequestException, NotFoundException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Exec trade = sess.findTrade(market, id);
         if (trade == null) {
             throw new NotFoundException(String.format("trade '%d' does not exist", id));
@@ -792,21 +860,28 @@ public final class Serv {
      * @param now
      *            The current time.
      * @throws NotFoundException
+     * @throws ServiceUnavailableException
      */
-    public final void archiveTrades(Sess sess, long now) throws NotFoundException {
+    public final void archiveTrades(Sess sess, long now) throws NotFoundException,
+            ServiceUnavailableException {
         for (;;) {
             final Exec trade = (Exec) sess.getRootTrade();
             if (trade == null) {
                 break;
             }
-            model.archiveTrade(trade.getMarket(), trade.getId(), now);
+            try {
+                journ.archiveTrade(trade.getMarket(), trade.getId(), now);
+            } catch (RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
 
             // No need to update timestamps on trade because it is immediately freed.
             sess.removeTrade(trade);
         }
     }
 
-    public final void archiveAll(Sess sess, long now) throws NotFoundException {
+    public final void archiveAll(Sess sess, long now) throws NotFoundException,
+            ServiceUnavailableException {
         archiveOrders(sess, now);
         archiveTrades(sess, now);
     }

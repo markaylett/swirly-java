@@ -17,6 +17,7 @@ import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.mock.MockModel;
 
 public final class ServTest {
@@ -35,7 +36,8 @@ public final class ServTest {
     }
 
     @Test
-    public final void test() throws BadRequestException, NotFoundException {
+    public final void test() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException {
         final Serv serv = new Serv(model);
         final Sess sess = serv.getLazySess("MARAYL");
         assertNotNull(sess);

@@ -1,29 +1,44 @@
+/*******************************************************************************
+ * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
+ *******************************************************************************/
 package com.swirlycloud.twirly.concurrent;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.swirlycloud.twirly.app.Model;
+import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.node.SlNode;
+
 public final class AsyncModelService implements AsyncModel {
+    /**
+     * Bounded queue capacity.
+     */
+    private static int CAPACITY = 1000;
     private static final Logger log = Logger.getLogger(AsyncModelService.class.getName());
     private final Model model;
-    private final ExecutorService service = Executors.newFixedThreadPool(1);
+    private final ExecutorService service;
 
     public AsyncModelService(Model model) {
         this.model = model;
+        service = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<Runnable>(CAPACITY));
     }
 
     @Override
     public final void close() throws Exception {
-        service.submit(new Runnable() {
-            @Override
-            public final void run() {
-                try {
-                    model.close();
-                } catch (Exception e) {
-                    log.log(Level.SEVERE, "failed to close model", e);
-                    e.printStackTrace();
-                }
-            }
-        });
         service.shutdown();
-        if (!service.awaitTermination(10, TimeUnit.SECONDS))
+        if (!service.awaitTermination(30, TimeUnit.SECONDS)) {
             service.shutdownNow();
+        }
+        model.close();
     }
 
     @Override

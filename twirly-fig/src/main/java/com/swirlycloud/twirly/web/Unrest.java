@@ -30,6 +30,7 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.View;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.util.Params;
 
 public final class Unrest {
@@ -414,7 +415,7 @@ public final class Unrest {
     }
 
     public final Trader postTrader(String mnem, String display, String email, Params params,
-            long now) throws BadRequestException, IOException {
+            long now) throws BadRequestException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postTrader(mnem, display, email, params, now, sb);
 
@@ -426,7 +427,7 @@ public final class Unrest {
 
     public final Market postMarket(String mnem, String display, String contr, int settlDate,
             int expiryDate, Params params, long now) throws BadRequestException, NotFoundException,
-            IOException {
+            ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postMarket(mnem, display, contr, settlDate, expiryDate, params, now, sb);
 
@@ -471,7 +472,7 @@ public final class Unrest {
     }
 
     public final void deleteOrder(String email, String market, long id, long now)
-            throws BadRequestException, NotFoundException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         rest.deleteOrder(email, market, id, now);
     }
 
@@ -514,7 +515,7 @@ public final class Unrest {
 
     public final TransStruct postOrder(String email, String market, String ref, Action action,
             long ticks, long lots, long minLots, Params params, long now)
-            throws BadRequestException, NotFoundException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postOrder(email, market, ref, action, ticks, lots, minLots, params, now, sb);
 
@@ -525,7 +526,8 @@ public final class Unrest {
     }
 
     public final TransStruct putOrder(String email, String market, long id, long lots,
-            Params params, long now) throws BadRequestException, NotFoundException, IOException {
+            Params params, long now) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.putOrder(email, market, id, lots, params, now, sb);
 
@@ -536,7 +538,7 @@ public final class Unrest {
     }
 
     public final void deleteTrade(String email, String market, long id, long now)
-            throws BadRequestException, NotFoundException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         rest.deleteTrade(email, market, id, now);
     }
 
@@ -601,7 +603,7 @@ public final class Unrest {
         }
     }
 
-    public final void getEndOfDay(long now) throws NotFoundException {
+    public final void getEndOfDay(long now) throws NotFoundException, ServiceUnavailableException {
         rest.getEndOfDay(now);
     }
 }
