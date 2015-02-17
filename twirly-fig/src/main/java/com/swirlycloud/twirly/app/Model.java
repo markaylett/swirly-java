@@ -3,15 +3,10 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import com.swirlycloud.twirly.domain.Asset;
-import com.swirlycloud.twirly.domain.Contr;
-import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.node.SlNode;
 
 public interface Model extends Journ {
 
@@ -23,17 +18,17 @@ public interface Model extends Journ {
 
     void archiveTrade(String market, long id, long modified) throws NotFoundException;
 
-    void selectAsset(UnaryCallback<Asset> cb);
+    SlNode selectAsset();
 
-    void selectContr(UnaryCallback<Contr> cb);
+    SlNode selectContr();
 
-    void selectMarket(UnaryCallback<Market> cb);
+    SlNode selectMarket();
 
-    void selectTrader(UnaryCallback<Trader> cb);
+    SlNode selectTrader();
 
-    void selectOrder(UnaryCallback<Order> cb);
+    SlNode selectOrder();
 
-    void selectTrade(UnaryCallback<Exec> cb);
+    SlNode selectTrade();
 
-    void selectPosn(UnaryCallback<Posn> cb);
+    SlNode selectPosn();
 }

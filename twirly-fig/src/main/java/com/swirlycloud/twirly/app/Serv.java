@@ -27,7 +27,6 @@ import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.intrusive.BasicRbTree;
 import com.swirlycloud.twirly.intrusive.EmailHashTable;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
@@ -100,79 +99,67 @@ public final class Serv {
     }
 
     private final void insertAssets() {
-        model.selectAsset(new UnaryCallback<Asset>() {
-            @Override
-            public final void call(Asset arg) {
-                final RbNode node = assets.insert(arg);
-                assert node == null;
-            }
-        });
+        for (SlNode node = model.selectAsset(); node != null; node = node.slNext()) {
+            final Asset asset = (Asset) node;
+            final RbNode unused = assets.insert(asset);
+            assert unused == null;
+        }
     }
 
     private final void insertContrs() {
-        model.selectContr(new UnaryCallback<Contr>() {
-            @Override
-            public final void call(Contr arg) {
-                enrichContr(arg);
-                final RbNode node = contrs.insert(arg);
-                assert node == null;
-            }
-        });
+        for (SlNode node = model.selectContr(); node != null; node = node.slNext()) {
+            final Contr contr = (Contr) node;
+            enrichContr(contr);
+            final RbNode unused = contrs.insert(contr);
+            assert unused == null;
+        }
     }
 
     private final void insertTraders() {
-        model.selectTrader(new UnaryCallback<Trader>() {
-            @Override
-            public final void call(Trader arg) {
-                final RbNode node = traders.insert(arg);
-                assert node == null;
-                emailIdx.insert(arg);
-            }
-        });
+        for (SlNode node = model.selectTrader(); node != null;) {
+            final Trader trader = (Trader) node;
+            final RbNode unused = traders.insert(trader);
+            assert unused == null;
+            // Move to next node before this node is resused by mailIdx.
+            node = node.slNext();
+            emailIdx.insert(trader);
+        }
     }
 
     private final void insertMarkets() {
-        model.selectMarket(new UnaryCallback<Market>() {
-            @Override
-            public final void call(Market arg) {
-                enrichMarket(arg);
-                final RbNode node = markets.insert(arg);
-                assert node == null;
-            }
-        });
+        for (SlNode node = model.selectMarket(); node != null; node = node.slNext()) {
+            final Market market = (Market) node;
+            enrichMarket(market);
+            final RbNode unused = markets.insert(market);
+            assert unused == null;
+        }
     }
 
     private final void insertOrders() {
-        model.selectOrder(new UnaryCallback<Order>() {
-            @Override
-            public final void call(Order arg) {
-                insertOrder(arg);
-            }
-        });
+        for (SlNode node = model.selectOrder(); node != null; node = node.slNext()) {
+            final Order order = (Order) node;
+            insertOrder(order);
+        }
     }
 
     private final void insertTrades() {
-        model.selectTrade(new UnaryCallback<Exec>() {
-            @Override
-            public final void call(Exec arg) {
-                final Trader trader = (Trader) traders.find(arg.getTrader());
-                assert trader != null;
-                final Sess sess = getLazySess(trader);
-                sess.insertTrade(arg);
-            }
-        });
+        for (SlNode node = model.selectTrade(); node != null; node = node.slNext()) {
+            final Exec trade = (Exec) node;
+            final Trader trader = (Trader) traders.find(trade.getTrader());
+            assert trader != null;
+            final Sess sess = getLazySess(trader);
+            sess.insertTrade(trade);
+        }
     }
 
     private final void insertPosns() {
-        model.selectPosn(new UnaryCallback<Posn>() {
-            @Override
-            public final void call(Posn arg) {
-                final Trader trader = (Trader) traders.find(arg.getTrader());
-                assert trader != null;
-                final Sess sess = getLazySess(trader);
-                sess.insertPosn(arg);
-            }
-        });
+        for (SlNode node = model.selectPosn(); node != null; node = node.slNext()) {
+            final Posn posn = (Posn) node;
+            final Trader trader = (Trader) traders.find(posn.getTrader());
+            assert trader != null;
+            final Sess sess = getLazySess(trader);
+            sess.insertPosn(posn);
+        }
     }
 
     @NonNull

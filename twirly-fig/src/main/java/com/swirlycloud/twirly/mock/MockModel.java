@@ -4,14 +4,9 @@
 package com.swirlycloud.twirly.mock;
 
 import com.swirlycloud.twirly.app.Model;
-import com.swirlycloud.twirly.domain.Asset;
-import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockModel implements Model {
@@ -45,33 +40,37 @@ public final class MockModel implements Model {
     }
 
     @Override
-    public final void selectAsset(UnaryCallback<Asset> cb) {
-        MockAsset.selectAsset(cb);
+    public final SlNode selectAsset() {
+        return MockAsset.selectAsset();
     }
 
     @Override
-    public final void selectContr(UnaryCallback<Contr> cb) {
-        MockContr.selectContr(cb);
+    public final SlNode selectContr() {
+        return MockContr.selectContr();
     }
 
     @Override
-    public final void selectMarket(UnaryCallback<Market> cb) {
+    public final SlNode selectMarket() {
+        return null;
     }
 
     @Override
-    public final void selectTrader(UnaryCallback<Trader> cb) {
-        MockTrader.selectTrader(cb);
+    public final SlNode selectTrader() {
+        return MockTrader.selectTrader();
     }
 
     @Override
-    public final void selectOrder(UnaryCallback<Order> cb) {
+    public final SlNode selectOrder() {
+        return null;
     }
 
     @Override
-    public final void selectTrade(UnaryCallback<Exec> cb) {
+    public final SlNode selectTrade() {
+        return null;
     }
 
     @Override
-    public final void selectPosn(UnaryCallback<Posn> cb) {
+    public final SlNode selectPosn() {
+        return null;
     }
 }

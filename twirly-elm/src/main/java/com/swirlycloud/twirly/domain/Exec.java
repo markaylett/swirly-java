@@ -17,7 +17,7 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Exec extends BasicRbNode implements SlNode, Jsonifiable, Instruct {
+public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Instruct {
 
     private transient SlNode next;
 

@@ -12,11 +12,14 @@ import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Posn extends BasicRbNode implements Jsonifiable {
+public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
+
+    private transient SlNode next;
 
     private final String trader;
     private final String contr;
@@ -150,6 +153,16 @@ public final class Posn extends BasicRbNode implements Jsonifiable {
             out.append(",\"sellCost\":0,\"sellLots\":0");
         }
         out.append("}");
+    }
+
+    @Override
+    public final void setSlNext(SlNode next) {
+        this.next = next;
+    }
+
+    @Override
+    public final SlNode slNext() {
+        return next;
     }
 
     public final void applyTrade(Action action, long lastTicks, long lastLots) {
