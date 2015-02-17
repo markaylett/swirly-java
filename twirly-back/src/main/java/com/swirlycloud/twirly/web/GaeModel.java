@@ -70,24 +70,25 @@ public final class GaeModel implements Model {
         }
     }
 
-    private final Entity newMarket(Market market) {
-        final Entity entity = new Entity(MARKET_KIND, market.getMnem());
-        entity.setUnindexedProperty("display", market.getDisplay());
-        entity.setUnindexedProperty("contr", market.getContr());
-        entity.setUnindexedProperty("settlDay", Integer.valueOf(market.getSettlDay()));
-        entity.setUnindexedProperty("expiryDay", Integer.valueOf(market.getExpiryDay()));
-        entity.setUnindexedProperty("lastTicks", Long.valueOf(market.getLastTicks()));
-        entity.setUnindexedProperty("lastLots", Long.valueOf(market.getLastLots()));
-        entity.setUnindexedProperty("lastTime", Long.valueOf(market.getLastTime()));
-        entity.setUnindexedProperty("maxOrderId", Long.valueOf(market.getMaxOrderId()));
-        entity.setUnindexedProperty("maxExecId", Long.valueOf(market.getMaxExecId()));
+    private final Entity newMarket(String mnem, String display, String contr, int settlDay, int expiryDay) {
+        final Long zero = Long.valueOf(0);
+        final Entity entity = new Entity(MARKET_KIND, mnem);
+        entity.setUnindexedProperty("display", display);
+        entity.setUnindexedProperty("contr", contr);
+        entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
+        entity.setUnindexedProperty("expiryDay", Integer.valueOf(expiryDay));
+        entity.setUnindexedProperty("lastTicks", zero);
+        entity.setUnindexedProperty("lastLots", zero);
+        entity.setUnindexedProperty("lastTime", zero);
+        entity.setUnindexedProperty("maxOrderId", zero);
+        entity.setUnindexedProperty("maxExecId", zero);
         return entity;
     }
 
-    private final Entity newTrader(Trader trader) {
-        final Entity entity = new Entity(TRADER_KIND, trader.getMnem());
-        entity.setUnindexedProperty("display", trader.getDisplay());
-        entity.setProperty("email", trader.getEmail());
+    private final Entity newTrader(String mnem, String display, String email) {
+        final Entity entity = new Entity(TRADER_KIND, mnem);
+        entity.setUnindexedProperty("display", display);
+        entity.setProperty("email", email);
         return entity;
     }
 
@@ -195,6 +196,41 @@ public final class GaeModel implements Model {
     }
 
     @Override
+    public final void insertMarket(String mnem, String display, String contr, int settlDay, int expiryDay) {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity entity = newMarket(mnem, display, contr, settlDay, expiryDay);
+            datastore.put(txn, entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void insertTrader(String mnem, String display, String email) {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            // Trader entities have common ancestor for strong consistency.
+            final Entity entity = newTrader(mnem, display, email);
+            datastore.put(txn, entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
     public final void insertExec(Exec exec) throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -246,41 +282,6 @@ public final class GaeModel implements Model {
             }
             datastore.put(txn, orders.values());
             datastore.put(txn, market);
-            txn.commit();
-        } catch (ConcurrentModificationException e) {
-            // FIXME: implement retry logic.
-            throw e;
-        } finally {
-            if (txn.isActive()) {
-                txn.rollback();
-            }
-        }
-    }
-
-    @Override
-    public final void insertMarket(Market market) {
-        final Transaction txn = datastore.beginTransaction();
-        try {
-            final Entity entity = newMarket(market);
-            datastore.put(txn, entity);
-            txn.commit();
-        } catch (ConcurrentModificationException e) {
-            // FIXME: implement retry logic.
-            throw e;
-        } finally {
-            if (txn.isActive()) {
-                txn.rollback();
-            }
-        }
-    }
-
-    @Override
-    public final void insertTrader(Trader trader) {
-        final Transaction txn = datastore.beginTransaction();
-        try {
-            // Trader entities have common ancestor for strong consistency.
-            final Entity entity = newTrader(trader);
-            datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
             // FIXME: implement retry logic.

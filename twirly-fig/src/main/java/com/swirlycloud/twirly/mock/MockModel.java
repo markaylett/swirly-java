@@ -5,14 +5,21 @@ package com.swirlycloud.twirly.mock;
 
 import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockModel implements Model {
-    
+
     @Override
     public final void close() {
+    }
+
+    @Override
+    public final void insertMarket(String mnem, String display, String contr, int settlDay,
+            int expiryDay) {
+    }
+
+    @Override
+    public final void insertTrader(String mnem, String display, String email) {
     }
 
     @Override
@@ -21,14 +28,6 @@ public final class MockModel implements Model {
 
     @Override
     public final void insertExecList(String market, SlNode first) {
-    }
-
-    @Override
-    public final void insertMarket(Market market) {
-    }
-
-    @Override
-    public final void insertTrader(Trader trader) {
     }
 
     @Override

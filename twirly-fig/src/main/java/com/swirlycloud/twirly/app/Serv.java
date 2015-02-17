@@ -311,7 +311,7 @@ public final class Serv {
             throw new BadRequestException(String.format("email '%s' is already in use", email));
         }
         final Trader trader = newTrader(mnem, display, email);
-        model.insertTrader(trader);
+        model.insertTrader(trader.getMnem(), trader.getDisplay(), trader.getEmail());
         traders.insert(trader);
         emailIdx.insert(trader);
         return trader;
@@ -438,7 +438,7 @@ public final class Serv {
         }
         final RbNode parent = market;
         market = newMarket(mnem, display, contr, settlDay, expiryDay);
-        model.insertMarket(market);
+        model.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay);
         markets.pinsert(market, parent);
         return market;
     }

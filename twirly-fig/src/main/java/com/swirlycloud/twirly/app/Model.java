@@ -3,20 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.SlNode;
 
 public interface Model extends Journ {
-
-    void insertMarket(Market market);
-
-    void insertTrader(Trader trader);
-
-    void archiveOrder(String market, long id, long modified) throws NotFoundException;
-
-    void archiveTrade(String market, long id, long modified) throws NotFoundException;
 
     SlNode selectAsset();
 
