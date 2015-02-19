@@ -3,6 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
+/**
+ * The requested resource could not be found but may be available again in the future. Subsequent
+ * requests by the client are permissible.
+ * 
+ * @author Mark Aylett
+ */
 public final class NotFoundException extends ServException {
 
     private static final long serialVersionUID = 1L;

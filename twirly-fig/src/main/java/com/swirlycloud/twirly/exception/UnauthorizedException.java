@@ -3,6 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
+/**
+ * Similar to 403 Forbidden, but specifically for use when authentication is required and has failed
+ * or has not yet been provided.
+ * 
+ * @author Mark Aylett
+ */
 public final class UnauthorizedException extends ServException {
 
     private static final long serialVersionUID = 1L;

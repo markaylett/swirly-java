@@ -3,6 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
+/**
+ * The request was a valid request, but the server is refusing to respond to it. Unlike a 401
+ * Unauthorized response, authenticating will make no difference.
+ * 
+ * @author Mark Aylett
+ */
 public final class ForbiddenException extends ServException {
 
     private static final long serialVersionUID = 1L;
