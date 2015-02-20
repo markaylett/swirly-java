@@ -3,10 +3,21 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import com.swirlycloud.twirly.mock.MockModel;
+import java.util.concurrent.ExecutionException;
+
+import com.swirlycloud.twirly.app.Model;
+import com.swirlycloud.twirly.concurrent.AsyncModel;
 
 public final class TcContext implements Context {
-    private final Rest rest = new Rest(new MockModel());
+    private final Rest rest;
+
+    public TcContext(AsyncModel model) throws InterruptedException, ExecutionException {
+        rest = new Rest(model);
+    }
+
+    public TcContext(Model model) {
+        rest = new Rest(model);
+    }
 
     @Override
     public final Rest getRest() {

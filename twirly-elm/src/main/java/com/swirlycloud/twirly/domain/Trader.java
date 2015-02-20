@@ -8,13 +8,9 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Trader extends Rec implements SlNode {
-    // Internals.
-    // Singly-linked buckets.
-    private transient SlNode next;
+public final class Trader extends Rec {
 
     private final String email;
 
@@ -61,16 +57,6 @@ public final class Trader extends Rec implements SlNode {
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"email\":\"").append(email);
         out.append("\"}");
-    }
-
-    @Override
-    public final void setSlNext(SlNode next) {
-        this.next = next;
-    }
-
-    @Override
-    public final SlNode slNext() {
-        return next;
     }
 
     @Override

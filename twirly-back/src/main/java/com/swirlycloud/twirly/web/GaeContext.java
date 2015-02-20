@@ -7,10 +7,16 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
+import com.swirlycloud.twirly.app.Model;
 
 public final class GaeContext implements Context {
-    private final Rest rest = new Rest(new GaeModel());
-    private final UserService userService = UserServiceFactory.getUserService();
+    private final Rest rest;
+    private final UserService userService;
+
+    public GaeContext(Model model) {
+        rest = new Rest(model);
+        userService = UserServiceFactory.getUserService();
+    }
 
     @Override
     public final Rest getRest() {

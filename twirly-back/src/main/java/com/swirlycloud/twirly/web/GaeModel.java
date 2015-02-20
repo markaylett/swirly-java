@@ -24,8 +24,6 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Transaction;
 import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.domain.Action;
-import com.swirlycloud.twirly.domain.Asset;
-import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
@@ -36,6 +34,7 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.intrusive.PosnTree;
+import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.node.RbNode;
@@ -71,24 +70,25 @@ public final class GaeModel implements Model {
         }
     }
 
-    private final Entity newMarket(Market market) {
-        final Entity entity = new Entity(MARKET_KIND, market.getMnem());
-        entity.setUnindexedProperty("display", market.getDisplay());
-        entity.setUnindexedProperty("contr", market.getContr());
-        entity.setUnindexedProperty("settlDay", Integer.valueOf(market.getSettlDay()));
-        entity.setUnindexedProperty("expiryDay", Integer.valueOf(market.getExpiryDay()));
-        entity.setUnindexedProperty("lastTicks", Long.valueOf(market.getLastTicks()));
-        entity.setUnindexedProperty("lastLots", Long.valueOf(market.getLastLots()));
-        entity.setUnindexedProperty("lastTime", Long.valueOf(market.getLastTime()));
-        entity.setUnindexedProperty("maxOrderId", Long.valueOf(market.getMaxOrderId()));
-        entity.setUnindexedProperty("maxExecId", Long.valueOf(market.getMaxExecId()));
+    private final Entity newMarket(String mnem, String display, String contr, int settlDay, int expiryDay) {
+        final Long zero = Long.valueOf(0);
+        final Entity entity = new Entity(MARKET_KIND, mnem);
+        entity.setUnindexedProperty("display", display);
+        entity.setUnindexedProperty("contr", contr);
+        entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
+        entity.setUnindexedProperty("expiryDay", Integer.valueOf(expiryDay));
+        entity.setUnindexedProperty("lastTicks", zero);
+        entity.setUnindexedProperty("lastLots", zero);
+        entity.setUnindexedProperty("lastTime", zero);
+        entity.setUnindexedProperty("maxOrderId", zero);
+        entity.setUnindexedProperty("maxExecId", zero);
         return entity;
     }
 
-    private final Entity newTrader(Trader trader) {
-        final Entity entity = new Entity(TRADER_KIND, trader.getMnem());
-        entity.setUnindexedProperty("display", trader.getDisplay());
-        entity.setProperty("email", trader.getEmail());
+    private final Entity newTrader(String mnem, String display, String email) {
+        final Entity entity = new Entity(TRADER_KIND, mnem);
+        entity.setUnindexedProperty("display", display);
+        entity.setProperty("email", email);
         return entity;
     }
 
@@ -184,8 +184,8 @@ public final class GaeModel implements Model {
     }
 
     private final void foreachMarket(UnaryCallback<Entity> cb) {
-        final Query q = new Query(MARKET_KIND);
-        final PreparedQuery pq = datastore.prepare(q);
+        final Query query = new Query(MARKET_KIND);
+        final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
             cb.call(entity);
         }
@@ -193,6 +193,41 @@ public final class GaeModel implements Model {
 
     @Override
     public final void close() {
+    }
+
+    @Override
+    public final void insertMarket(String mnem, String display, String contr, int settlDay, int expiryDay) {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity entity = newMarket(mnem, display, contr, settlDay, expiryDay);
+            datastore.put(txn, entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void insertTrader(String mnem, String display, String email) {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            // Trader entities have common ancestor for strong consistency.
+            final Entity entity = newTrader(mnem, display, email);
+            datastore.put(txn, entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
     }
 
     @Override
@@ -259,41 +294,6 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void insertMarket(Market market) {
-        final Transaction txn = datastore.beginTransaction();
-        try {
-            final Entity entity = newMarket(market);
-            datastore.put(txn, entity);
-            txn.commit();
-        } catch (ConcurrentModificationException e) {
-            // FIXME: implement retry logic.
-            throw e;
-        } finally {
-            if (txn.isActive()) {
-                txn.rollback();
-            }
-        }
-    }
-
-    @Override
-    public final void insertTrader(Trader trader) {
-        final Transaction txn = datastore.beginTransaction();
-        try {
-            // Trader entities have common ancestor for strong consistency.
-            final Entity entity = newTrader(trader);
-            datastore.put(txn, entity);
-            txn.commit();
-        } catch (ConcurrentModificationException e) {
-            // FIXME: implement retry logic.
-            throw e;
-        } finally {
-            if (txn.isActive()) {
-                txn.rollback();
-            }
-        }
-    }
-
-    @Override
     public final void archiveOrder(String marketMnem, long id, long modified)
             throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
@@ -336,21 +336,22 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void selectAsset(UnaryCallback<Asset> cb) {
+    public final SlNode selectAsset() {
         // TODO: migrate to datastore.
-        MockAsset.selectAsset(cb);
+        return MockAsset.selectAsset();
     }
 
     @Override
-    public final void selectContr(UnaryCallback<Contr> cb) {
+    public final SlNode selectContr() {
         // TODO: migrate to datastore.
-        MockContr.selectContr(cb);
+        return MockContr.selectContr();
     }
 
     @Override
-    public final void selectMarket(final UnaryCallback<Market> cb) {
-        final Query q = new Query(MARKET_KIND);
-        final PreparedQuery pq = datastore.prepare(q);
+    public final SlNode selectMarket() {
+        final SlQueue q = new SlQueue();
+        final Query query = new Query(MARKET_KIND);
+        final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
             final String mnem = entity.getKey().getName();
             final String display = (String) entity.getProperty("display");
@@ -364,31 +365,35 @@ public final class GaeModel implements Model {
             final long maxExecId = (Long) entity.getProperty("maxExecId");
             final Market market = new Market(mnem, display, contr, settlDay, expiryDay, lastTicks,
                     lastLots, lastTime, maxOrderId, maxExecId);
-            cb.call(market);
+            q.insertBack(market);
         }
+        return q.getFirst();
     }
 
     @Override
-    public final void selectTrader(UnaryCallback<Trader> cb) {
-        final Query q = new Query(TRADER_KIND);
-        final PreparedQuery pq = datastore.prepare(q);
+    public final SlNode selectTrader() {
+        final SlQueue q = new SlQueue();
+        final Query query = new Query(TRADER_KIND);
+        final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
             final String mnem = entity.getKey().getName();
             final String display = (String) entity.getProperty("display");
             final String email = (String) entity.getProperty("email");
             final Trader trader = new Trader(mnem, display, email);
-            cb.call(trader);
+            q.insertBack(trader);
         }
+        return q.getFirst();
     }
 
     @Override
-    public final void selectOrder(final UnaryCallback<Order> cb) {
+    public final SlNode selectOrder() {
+        final SlQueue q = new SlQueue();
         final Filter filter = new FilterPredicate("archive", FilterOperator.EQUAL, Boolean.FALSE);
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
-                final Query q = new Query(ORDER_KIND, arg.getKey()).setFilter(filter);
-                final PreparedQuery pq = datastore.prepare(q);
+                final Query query = new Query(ORDER_KIND, arg.getKey()).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(query);
                 for (final Entity entity : pq.asIterable()) {
                     final long id = entity.getKey().getId();
                     final String trader = (String) entity.getProperty("trader");
@@ -410,14 +415,16 @@ public final class GaeModel implements Model {
                     final Order order = new Order(id, trader, market, contr, settlDay, ref, state,
                             action, ticks, lots, resd, exec, lastTicks, lastLots, minLots, created,
                             modified);
-                    cb.call(order);
+                    q.insertBack(order);
                 }
             }
         });
+        return q.getFirst();
     }
 
     @Override
-    public final void selectTrade(final UnaryCallback<Exec> cb) {
+    public final SlNode selectTrade() {
+        final SlQueue q = new SlQueue();
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
@@ -426,8 +433,8 @@ public final class GaeModel implements Model {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
-                final Query q = new Query(EXEC_KIND, arg.getKey()).setFilter(filter);
-                final PreparedQuery pq = datastore.prepare(q);
+                final Query query = new Query(EXEC_KIND, arg.getKey()).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(query);
                 for (final Entity entity : pq.asIterable()) {
                     final long id = entity.getKey().getId();
                     final long orderId = (Long) entity.getProperty("orderId");
@@ -461,21 +468,22 @@ public final class GaeModel implements Model {
                     final Exec trade = new Exec(id, orderId, trader, market, contr, settlDay, ref,
                             state, action, ticks, lots, resd, exec, lastTicks, lastLots, minLots,
                             matchId, role, cpty, created);
-                    cb.call(trade);
+                    q.insertBack(trade);
                 }
             }
         });
+        return q.getFirst();
     }
 
     @Override
-    public final void selectPosn(final UnaryCallback<Posn> cb) {
+    public final SlNode selectPosn() {
         final PosnTree posns = new PosnTree();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
-                final Query q = new Query(EXEC_KIND).setFilter(filter);
-                final PreparedQuery pq = datastore.prepare(q);
+                final Query query = new Query(EXEC_KIND).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(query);
                 for (final Entity entity : pq.asIterable()) {
                     final String trader = (String) entity.getProperty("trader");
                     final String contr = (String) entity.getProperty("contr");
@@ -495,13 +503,15 @@ public final class GaeModel implements Model {
                 }
             }
         });
+        final SlQueue q = new SlQueue();
         for (;;) {
             final Posn posn = (Posn) posns.getRoot();
             if (posn == null) {
                 break;
             }
             posns.remove(posn);
-            cb.call(posn);
+            q.insertBack(posn);
         }
+        return q.getFirst();
     }
 }

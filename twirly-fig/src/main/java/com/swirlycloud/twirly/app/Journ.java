@@ -14,7 +14,15 @@ import com.swirlycloud.twirly.node.SlNode;
  */
 public interface Journ extends AutoCloseable {
 
+    void insertMarket(String mnem, String display, String contr, int settlDay, int expiryDay);
+
+    void insertTrader(String mnem, String display, String email);
+
     void insertExec(Exec exec) throws NotFoundException;
 
     void insertExecList(String market, SlNode first) throws NotFoundException;
+
+    void archiveOrder(String market, long id, long modified) throws NotFoundException;
+
+    void archiveTrade(String market, long id, long modified) throws NotFoundException;
 }

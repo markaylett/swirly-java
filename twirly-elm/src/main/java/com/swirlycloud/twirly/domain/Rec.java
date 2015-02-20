@@ -4,11 +4,14 @@
 package com.swirlycloud.twirly.domain;
 
 import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Memorable;
 
-public abstract class Rec extends BasicRbNode implements Memorable, Jsonifiable {
+public abstract class Rec extends BasicRbNode implements Jsonifiable, SlNode, Memorable {
+
+    private transient SlNode next;
 
     protected final String mnem;
     protected final String display;
@@ -45,6 +48,16 @@ public abstract class Rec extends BasicRbNode implements Memorable, Jsonifiable 
     @Override
     public final String toString() {
         return JsonUtil.toJson(this);
+    }
+
+    @Override
+    public final void setSlNext(SlNode next) {
+        this.next = next;
+    }
+
+    @Override
+    public final SlNode slNext() {
+        return next;
     }
 
     public abstract RecType getRecType();

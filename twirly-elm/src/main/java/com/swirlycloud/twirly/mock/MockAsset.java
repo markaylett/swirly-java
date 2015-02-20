@@ -12,6 +12,8 @@ import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockAsset {
     private static final List<NullaryFunction<Asset>> LIST = new ArrayList<>();
@@ -63,6 +65,14 @@ public final class MockAsset {
 
     public static Asset newAsset(String mnem) {
         return MAP.get(mnem).call();
+    }
+
+    public static SlNode selectAsset() {
+        final SlQueue q = new SlQueue();
+        for (final NullaryFunction<Asset> entry : LIST) {
+            q.insertBack(entry.call());
+        }
+        return q.getFirst();
     }
 
     public static void selectAsset(UnaryCallback<Asset> cb) {

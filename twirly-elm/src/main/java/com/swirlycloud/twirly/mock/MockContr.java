@@ -11,6 +11,8 @@ import java.util.Map;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockContr {
 
@@ -68,6 +70,14 @@ public final class MockContr {
 
     public static Contr newContr(String mnem) {
         return MAP.get(mnem).call();
+    }
+
+    public static SlNode selectContr() {
+        final SlQueue q = new SlQueue();
+        for (final NullaryFunction<Contr> entry : LIST) {
+            q.insertBack(entry.call());
+        }
+        return q.getFirst();
     }
 
     public static void selectContr(UnaryCallback<Contr> cb) {

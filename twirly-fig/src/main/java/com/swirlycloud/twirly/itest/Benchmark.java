@@ -15,6 +15,7 @@ import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.mock.MockModel;
 
 // -server -verbose:gc -Xprof
@@ -22,7 +23,7 @@ import com.swirlycloud.twirly.mock.MockModel;
 public final class Benchmark {
 
     private static void run(final Serv s) throws BadRequestException, NotFoundException,
-            IOException {
+            ServiceUnavailableException, IOException {
         final Sess marayl = s.getLazySess("MARAYL");
         final Sess gosayl = s.getLazySess("GOSAYL");
         final Sess tobayl = s.getLazySess("TOBAYL");

@@ -3,37 +3,21 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import com.swirlycloud.twirly.domain.Asset;
-import com.swirlycloud.twirly.domain.Contr;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.node.SlNode;
 
 public interface Model extends Journ {
 
-    void insertMarket(Market market);
+    SlNode selectAsset();
 
-    void insertTrader(Trader trader);
+    SlNode selectContr();
 
-    void archiveOrder(String market, long id, long modified) throws NotFoundException;
+    SlNode selectMarket();
 
-    void archiveTrade(String market, long id, long modified) throws NotFoundException;
+    SlNode selectTrader();
 
-    void selectAsset(UnaryCallback<Asset> cb);
+    SlNode selectOrder();
 
-    void selectContr(UnaryCallback<Contr> cb);
+    SlNode selectTrade();
 
-    void selectMarket(UnaryCallback<Market> cb);
-
-    void selectTrader(UnaryCallback<Trader> cb);
-
-    void selectOrder(UnaryCallback<Order> cb);
-
-    void selectTrade(UnaryCallback<Exec> cb);
-
-    void selectPosn(UnaryCallback<Posn> cb);
+    SlNode selectPosn();
 }

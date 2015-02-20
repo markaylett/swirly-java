@@ -11,6 +11,8 @@ import java.util.Map;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockTrader {
     private static final List<NullaryFunction<Trader>> LIST = new ArrayList<>();
@@ -40,6 +42,14 @@ public final class MockTrader {
 
     public static Trader newTrader(String mnem) {
         return MAP.get(mnem).call();
+    }
+
+    public static SlNode selectTrader() {
+        final SlQueue q = new SlQueue();
+        for (final NullaryFunction<Trader> entry : LIST) {
+            q.insertBack(entry.call());
+        }
+        return q.getFirst();
     }
 
     public static void selectTrader(UnaryCallback<Trader> cb) {

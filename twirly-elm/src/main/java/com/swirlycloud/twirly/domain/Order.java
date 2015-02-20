@@ -19,7 +19,7 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Order extends BasicRbNode implements DlNode, SlNode, Jsonifiable, Instruct {
+public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlNode, Instruct {
 
     private transient DlNode dlPrev;
     private transient DlNode dlNext;
