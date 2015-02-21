@@ -10,6 +10,15 @@ public final class MathUtil {
     private MathUtil() {
     }
 
+    public static double roundHalfAway(double d) {
+        if (d < 0) {
+            d = Math.ceil(d - 0.5);
+        } else if (d > 0) {
+            d = Math.floor(d + 0.5);
+        }
+        return d;
+    }
+
     /**
      * Round-up to the next power of two.
      * 

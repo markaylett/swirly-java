@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import com.swirlycloud.twirly.math.MathUtil;
+
 public final class Conv {
     private Conv() {
     }
@@ -12,7 +14,7 @@ public final class Conv {
     }
 
     public static long realToIncs(double real, double incSize) {
-        return Math.round(real / incSize);
+        return (long) MathUtil.roundHalfAway(real / incSize);
     }
 
     public static double incsToReal(long incs, double incSize) {

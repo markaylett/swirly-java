@@ -4,12 +4,21 @@
  * All rights reserved.
  **************************************************************************************************/
 
+function roundHalfAway(d) {
+    if (d < 0) {
+        d = Math.ceil(d - 0.5);
+    } else if (d > 0) {
+        d = Math.floor(d + 0.5);
+    }
+    return d;
+}
+
 function fractToReal(numer, denom) {
     return numer / denom;
 }
 
 function realToIncs(real, incSize) {
-    return Math.round(real / incSize);
+    return roundHalfAway(real / incSize);
 }
 
 function incsToReal(incs, incSize) {
