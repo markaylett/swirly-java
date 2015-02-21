@@ -55,7 +55,7 @@ public final class Trans implements Jsonifiable {
         order.toJson(params, out);
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
-            if (match.makerOrder.getTrader().equals(trader)) {
+            if (!match.makerOrder.getTrader().equals(trader)) {
                 continue;
             }
             out.append(',');
@@ -65,7 +65,7 @@ public final class Trans implements Jsonifiable {
         int i = 0;
         for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
-            if (exec.getTrader().equals(trader)) {
+            if (!exec.getTrader().equals(trader)) {
                 continue;
             }
             if (i > 0) {
