@@ -126,6 +126,9 @@ public final class SessServlet extends RestServlet {
                 if (parts.length == 1) {
                     rest.getPosn(email, params, now, resp.getWriter());
                     match = true;
+                } else if (parts.length == 2) {
+                    rest.getPosn(email, parts[CONTR_PART], params, now, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 3) {
                     rest.getPosn(email, parts[CONTR_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
