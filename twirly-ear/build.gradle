@@ -7,12 +7,12 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.15'
+        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.17'
     }
 }
 
 dependencies {
-    appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.15'
+    appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.17'
     deploy project(path: ':twirly-front', configuration: 'archives')
     deploy project(path: ':twirly-back', configuration: 'archives')
 }
