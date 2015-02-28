@@ -117,6 +117,24 @@ public final class Rest {
         out.append(']');
     }
 
+    private final void doGetPosn(Sess sess, String contr, Params params, long now, Appendable out)
+            throws IOException {
+        out.append('[');
+        RbNode node = sess.getFirstPosn();
+        for (int i = 0; node != null; node = node.rbNext()) {
+            final Posn posn = (Posn) node;
+            if (!posn.getContr().equals(contr)) {
+                continue;
+            }
+            if (i > 0) {
+                out.append(',');
+            }
+            posn.toJson(params, out);
+            ++i;
+        }
+        out.append(']');
+    }
+
     public Rest(AsyncModel model) throws InterruptedException, ExecutionException {
         serv = new Serv(model);
     }
@@ -491,6 +509,25 @@ public final class Rest {
                 return;
             }
             doGetPosn(sess, params, now, out);
+        } finally {
+            releaseRead();
+        }
+    }
+
+    public final void getPosn(String email, String contr, Params params, long now, Appendable out)
+            throws NotFoundException, IOException {
+        acquireRead();
+        try {
+            final Trader trader = serv.findTraderByEmail(email);
+            if (trader == null) {
+                throw new NotFoundException(String.format("trader '%s' does not exist", email));
+            }
+            final Sess sess = serv.findSess(trader.getMnem());
+            if (sess == null) {
+                out.append("[]");
+                return;
+            }
+            doGetPosn(sess, contr, params, now, out);
         } finally {
             releaseRead();
         }

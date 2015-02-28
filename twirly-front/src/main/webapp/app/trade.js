@@ -71,25 +71,27 @@ function ViewModel(contrs) {
     });
 
     self.isWorkingSelected = ko.computed(function() {
-        if (self.selectedTab() != 'workingTab') {
+        if (self.selectedTab() !== 'workingTab') {
             return false;
         }
         var orders = self.working();
         for (var i = 0; i < orders.length; ++i) {
-            if (orders[i].isSelected())
+            if (orders[i].isSelected()) {
                 return true;
+            }
         }
         return false;
     });
 
     self.isDoneSelected = ko.computed(function() {
-        if (self.selectedTab() != 'doneTab') {
+        if (self.selectedTab() !== 'doneTab') {
             return false;
         }
         var orders = self.done();
         for (var i = 0; i < orders.length; ++i) {
-            if (orders[i].isSelected())
+            if (orders[i].isSelected()) {
                 return true;
+            }
         }
         return false;
     });
@@ -99,7 +101,7 @@ function ViewModel(contrs) {
     });
 
     self.isTradeSelected = ko.computed(function() {
-        if (self.selectedTab() != 'tradeTab') {
+        if (self.selectedTab() !== 'tradeTab') {
             return false;
         }
         var trades = self.trades();
@@ -266,7 +268,7 @@ function ViewModel(contrs) {
             }
         });
         $.each(raw.execs, function(key, val) {
-            if (val.state == 'TRADE') {
+            if (val.state === 'TRADE') {
                 val.isSelected = false;
                 self.trades.push(new Trade(val, self.contrs));
             }
@@ -366,7 +368,7 @@ function ViewModel(contrs) {
         }
         var ticks = priceToTicks(price, contr);
         var lots = self.lots();
-        if (!isSpecified(lots) || lots == 0) {
+        if (!isSpecified(lots) || lots === 0) {
             self.showError(internalError('lots not specified'));
             return;
         }
