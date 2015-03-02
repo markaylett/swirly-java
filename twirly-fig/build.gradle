@@ -1,3 +1,5 @@
+apply plugin: 'eclipse'
+
 dependencies {
     compile project(':twirly-elm')
     compile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
