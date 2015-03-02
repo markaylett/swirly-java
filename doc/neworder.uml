@@ -1,0 +1,8 @@
+@startsalt
+{
+  Market   | "EURUSD.MAR15"
+  Price    | "1.1346      "
+  Lots     | "10          "
+  [ Buy  ] | [ Sell ]
+}
+@endsalt

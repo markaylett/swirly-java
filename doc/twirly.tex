@@ -1,0 +1,731 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{hyperref}
+\hypersetup{
+  bookmarks=true,
+  pdftitle={The Twirly Manual},
+  pdfauthor={Mark Aylett},
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  filecolor=blue,
+  urlcolor=blue
+}
+
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage[titletoc,title,toc]{appendix}
+\usepackage[acronym,toc,xindy]{glossaries}
+\makeglossaries
+
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+
+\newcommand{\scltd}{Swirly Cloud Limited\cite{swirlycloud:www}}
+\newcommand{\scorg}{Swirly Cloud\cite{swirlycloud:github}}
+\newcommand{\twirly}{Twirly\cite{twirly}}
+
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{bbo}{BBO}{Best Bid and Offer}
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym{ecn}{ECN}{Electronic Communication Network}
+\newacronym{json}{JSON}{Java-Script Object Notation}
+\newacronym{hft}{HFT}{High-Frequency Trading}
+\newacronym{http}{HTTP}{Hyper-Text Transfer Protocol}
+\newacronym{ip}{IP}{Intellectual Property} 
+\newacronym{mtm}{MTM}{Mark To Market}
+\newacronym{poc}{POC}{Proof Of Concept}
+\newacronym{rest}{Rest}{Representational State Transfer}
+\newacronym{tco}{TCO}{Total Cost of Ownership}
+\newacronym{tob}{TOB}{Top Of Book}
+\newacronym{ui}{UI}{User Interface}
+\newacronym{vwap}{VWAP}{Volume Weighted Average Price}
+\newacronym{www}{WWW}{World Wide Web}
+
+\newglossaryentry{appengine}{name={App Engine}, description={application services running on
+    Google's Cloud platform}}
+
+\newglossaryentry{arbitrage}{name={arbitrage}, description={the simultaneous purchase and sale on
+    different markets, of the same or equivalent financial instruments to profit from price or
+    currency differentials}}
+
+\newglossaryentry{asset}{name={asset}, description={an item of value}}
+
+\newglossaryentry{auction}{name={auction}, description={a market where goods or services are sold to
+    the highest bidder}}
+
+\newglossaryentry{bid}{name={bid}, description={the price and quantity at which a market participant
+    is willing to buy}}
+
+\newglossaryentry{bitcoin}{name={bitcoin}, description={an electronic currency that allows users to
+    transact online without a financial intermediary}}
+
+\newglossaryentry{cloud}{name={Cloud}, description={a network of remote servers hosted on the
+    Internet to store, manage, and process data}}
+
+\newglossaryentry{contract}{name={contract}, description={a specification that stipulates the terms
+    and conditions of sale}}
+
+\newglossaryentry{exchange}{name={exchange}, description={a place where buyers and sellers meet to
+    exchange goods or services}}
+
+\newglossaryentry{execution}{name={execution}, description={a transaction that occurs as an order
+    transitions through a workflow}}
+
+\newglossaryentry{expiry date}{name={expiry date}, description={the last date that a contract can be
+    traded on a specific market}}
+
+\newglossaryentry{given}{name={given}, description={when the taker hits the bid}}
+
+\newglossaryentry{price-level}{name={price-level}, description={a price level is the sum of all
+    orders in the book with the same price}}
+
+\newglossaryentry{liquid market}{name={liquid market}, description={the ability of a market to
+    accept large transactions with minimal impact on price stability}}
+
+\newglossaryentry{liquidity}{name={liquidity}, description={refers the bids and offers available in
+    a market}}
+
+\newglossaryentry{lot}{name={lot}, description={a unit of measure that represents the smallest
+    amount that can be bought or sold}}
+
+\newglossaryentry{maker}{name={maker}, description={passive buyer or seller that receives the spread}}
+
+\newglossaryentry{market}{name={market}, description={a place where buyers and sellers come together
+    to exchange goods or services}}
+
+\newglossaryentry{market-maker}{name={market-maker}, description={a market-maker quotes both bids
+    and offers, aiming to profit from the bid-offer spread}}
+
+\newglossaryentry{market order}{name={market order}, description={an order to buy or sell at the
+    current market price}}
+
+\newglossaryentry{market-place}{name={market-place}, description={a venue comprising many markets}}
+
+\newglossaryentry{matching engine}{name={matching engine}, description={the software component in a
+    trading application responsible for matching buy and sell orders to form a trade}}
+
+\newglossaryentry{microservice}{name={microservice}, description={a small, independent and
+    language-agnostic service that does one thing and does it well}}
+
+\newglossaryentry{order-book}{name={order-book}, description={the software component in a trading
+    application responsible for managing resting orders in a two-sided market}}
+
+\newglossaryentry{offer}{name={offer}, description={the price and quantity at which a market
+    partipant is willing to sell}}
+
+\newglossaryentry{order}{name={order}, description={an instruction to buy or sell goods or
+    services}}
+
+\newglossaryentry{paid}{name={paid}, description={when the taker lifts the offer}}
+
+\newglossaryentry{servlet}{name={servlet}, description={a software component in a Web server that
+    responds to client requests}}
+
+\newglossaryentry{restful}{name={restful}, description={a software architecture for building
+    scalable web services}}
+
+\newglossaryentry{resting-order}{name={resting-order}, description={an order that is sitting in the
+    order-book waiting to be matched}}
+
+\newglossaryentry{settlement date}{name={settlement date}, description={the date on which a trade is
+    settled between counter-parties}}
+
+\newglossaryentry{spread}{name={spread}, description={the difference between the best bid and
+    offer}}
+
+\newglossaryentry{taker}{name={taker}, description={aggressive buyer or seller that pays the spread}}
+
+\newglossaryentry{tick}{name={tick}, description={a unit of measure that represents the smallest
+    price movement}}
+
+\newglossaryentry{trade}{name={trade}, description={the exchange of goods or services between
+    counter-parties}}
+
+\newglossaryentry{trade date}{name={trade date}, description={the date on which a trade takes place}}
+
+\newglossaryentry{unzip}{name={unzip}, description={a program used to extract compressed files in a
+    ZIP archive}}
+
+\newglossaryentry{web}{name={Web}, description={the World Wide Web}}
+
+\glsaddall
+
+\begin{document}
+
+\title{The Twirly Manual}
+\author{Mark Aylett}
+\date{\today\\Version 0.1}
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+\Glspl{order-book} form the backbone of many trading applications used by \glspl{exchange},
+\glspl{ecn}, hedge funds and investment banks. They are used by several classes of trading
+application within these organisations, including, but not limited to, the following:
+
+\begin{itemize}
+\item order management systems;
+\item liquidity aggregators;
+\item internalisation engines;
+\item dark pools.
+\end{itemize}
+
+The \glspl{order-book} themselves are often specific to an \gls{asset}-class, and tightly coupled
+with surrounding componentry and business logic. I have personally worked on several such systems,
+and I was often dissapointed by the lack of generality and missed opportunity for reuse, especially
+after repeatedly solving the same problem for many organisations.
+
+Some, of course, will claim that their particular \gls{order-book} is superior to the rest, and that
+its implementation must remain a closely guarded secret to protect their \gls{ip} and maintain a
+competitive edge. While there may be some truth to this argument -- there are good and bad ways to
+implement an \gls{order-book} -- a trading application's \gls{ip} is likely to be dominated by other
+domain-specific technological and business innovations, and it makes more sense to focus one's
+investment in these areas.
+
+\Glspl{order-book} are by no means the reserve of large financial organisations. We shall see in the
+following section that, given the right level of abstraction, they can be deployed with great effect
+to solve broad range of applications from online \glspl{auction}, to price comparison websites, and
+even \gls{bitcoin} \glspl{exchange}.
+
+\section{Key Concepts}
+
+By way of introduction, I will attempt to explain how an \gls{order-book} works in terms of more
+familiar concepts. If you already know what an \gls{order-book} is, and you familiar with the
+nomenclature, then feel free to skim this section and move on to the next.
+
+We'll start with something that we're all familiar with: purchasing some goods from a
+retailer. Let's say that an online retailer is offering to sell milk at $49$ pence per pint, and
+they only have 10 pints in stock. This can be depicted as follows:
+
+\vspace{5mm}
+\begin{tabular}{rr}
+\multicolumn{2}{c}{Milk price per pint}\\
+Offer Price&Offer Lots\\
+\hline
+\texttt{0.49}&\texttt{10}\\
+\end{tabular}
+\vspace{5mm}
+
+(In this introduction, we'll assume that \glspl{lot} means quantity, so 10 \glspl{lot} equals 10
+pints in this example.)
+
+If we decide to buy 3 of the 10 pints on \gls{offer}, then only 7 will remain. The online retailer
+may, rather unscrupulously, decide to raise the price if they believe that supply outstrips demand:
+
+\vspace{5mm}
+\begin{tabular}{rr}
+\multicolumn{2}{c}{Milk price per pint}\\
+Offer Price&Offer Lots\\
+\hline
+\texttt{0.51}&\texttt{7}\\
+\end{tabular}
+\vspace{5mm}
+
+This price is presumably non-negotiable, so we have to either ``take'' it or leave it. But what if
+we could negotiate, or ``\gls{bid}'' for the remaining \glspl{lot}? You would then have a system
+similar to an online ``\gls{auction}'', such as eBay\cite{ebay}, where the \gls{offer} of $51$ pence
+is effectively the ``Buy Now'' price. Let's say we place a \gls{bid} to buy 3 more pints of milk at
+$48$ pence:
+
+\vspace{5mm}
+\begin{tabular}{rrrrr}
+\multicolumn{5}{c}{Milk price per pint}\\
+Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{3}&\texttt{0.48}&\texttt{0.03}&\texttt{0.51}&\texttt{7}\\
+\end{tabular}
+\vspace{5mm}
+
+The difference between the \gls{bid} and \gls{offer} price is $3$ pence, which is known as the
+``\gls{spread}''. In an online \gls{auction}, another buyer may compete by raising the ``best''
+\gls{bid} to ``buy 2 \glspl{lot} at $49$'':
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{Milk price per pint}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{2}&\texttt{0.49}&\texttt{0.02}&\texttt{0.51}&\texttt{7}\\
+\texttt{2}&\texttt{3}&\texttt{0.48}&\texttt{-}&\texttt{-}&\texttt{-}\\
+\end{tabular}
+\vspace{5mm}
+
+There are now two ``\glspl{price-level}'' on the \gls{bid}-side of the ``\gls{order-book}''. Our
+order is said to be ``resting'' at the second \gls{price-level}, beneath the \gls{tob}. The
+\gls{spread} on the first \gls{price-level} has now been reduced to $2$ pence. (There is no
+\gls{spread} on the second level, because there is no \gls{offer} at this level.)
+
+Note also at this point that the average price the seller can expect to receive for 5 of the 7
+\glspl{lot} they are offering is $48.4$ pence:
+
+\[
+\frac{1}{n}\sum_{i=1}^{n}p_iq_i = \frac{2\times0.49+3\times0.48}{5} = 48.4 \enskip\mbox{pence}
+\]
+
+Where $p$ is price, $q$ is \glspl{lot}, and $n$ is total \glspl{lot} (or ``volume''). This is known
+as the \gls{vwap}.
+
+If this new buyer then decides to ``revise'' their \gls{bid} to $51$ pence, then the \gls{bid} will
+``cross the \gls{spread}'' and match the \gls{offer} to create a trade, which will further reduce
+the supply down to 5 \glspl{lot}. The \gls{offer} of $48$ pence will once again be the \gls{tob}:
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{Milk price per pint}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{3}&\texttt{0.48}&\texttt{0.03}&\texttt{0.51}&\texttt{5}\\
+\texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{-}\\
+\end{tabular}
+\vspace{5mm}
+
+All manner of goods can be sold in an online \gls{auction}. Oftentimes, the items on sale are one of
+a kind. If would be difficult, for example, to \gls{offer} many second-hand bicycles of the exact
+same specification, so each has to be sold separately.
+
+It is interesting to contrast this idea of an online \gls{auction} with a price-comparison
+website. Perhaps, as prospective buyers, we're interested in comparing prices for the latest smart
+phone, offered by many suppliers:
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{Smart phone prices}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{419.99}&\texttt{5}\\
+\texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{429.99}&\texttt{12}\\
+\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{449.99}&\texttt{20}\\
+\end{tabular}
+\vspace{5mm}
+
+Here there are 3 \glspl{price-level} in the \gls{order-book}, and we can see that there is a greater
+quantity on \gls{offer} if we're willing to pay more. (This is unsurprising given that Traders like
+to secure a profit by buying low and selling high!)  We could also compare milk prices from many
+suppliers in the same way, but we'd first need to define exactly what kind of milk we were selling,
+in what quantity, and when it would be delivered. This information would form the basis of a
+``\gls{contract}'':
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{UK Farmgate Milk prices per litre}\\
+\multicolumn{6}{c}{December 2014}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{27.85}&\texttt{50}\\
+\texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{27.86}&\texttt{120}\\
+\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{27.88}&\texttt{200}\\
+\end{tabular}
+\vspace{5mm}
+
+What if we were now to combine the online \gls{auction} with the price comparison website? We would
+then have something much more reminiscent of a wholesale \gls{market} in an ``\gls{exchange}'',
+where there are many buyers and sellers:
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{UK Farmgate Milk prices per litre}\\
+\multicolumn{6}{c}{December 2014}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{45}&\texttt{27.83}&\texttt{0.02}&\texttt{27.85}&\texttt{50}\\
+\texttt{2}&\texttt{135}&\texttt{27.81}&\texttt{0.05}&\texttt{27.86}&\texttt{120}\\
+\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{27.88}&\texttt{200}\\
+\end{tabular}
+\vspace{5mm}
+
+Market participants would typically enter orders electronically via \gls{ui} similar to the
+following:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{milkorder.eps}
+\caption{Placing a milk order}
+\end{figure}
+
+A larger number of \gls{market} participants generally helps to improve the \gls{market}'s
+efficiency and stability. This is known as a ``\gls{liquid market}''.
+
+In this section, we've seen how the concept of an \gls{order-book} can be used to express different
+kinds of \gls{market-place}, including online \glspl{auction}, price comparison websites, and
+wholesale \glspl{market}. \Glspl{order-book} are prevalent in financial organisations, where they
+are used to trade financial products across many different \gls{asset}-classes, including
+commodities, corporate and government bonds, currencies, equities and indexes.
+
+\section{Architecture}
+
+\twirly{} is a \gls{microservice} that provides a \gls{restful} \gls{order-book} \gls{api} to for
+querying reference-data, market-data, and managing \glspl{order}. Twirly's\cite{twirly} software
+architecture is designed to achieve the following goals:
+
+\begin{itemize}
+\item clean and simple user experience;
+\item mobile, \gls{web} and desktop equality;
+\item language- and platform-agnostic \gls{api};
+\item scalable \gls{microservice} architecture;
+\item elastic storage and compute;
+\item efficient resource consumption;
+\item highly available, reliable and secure;
+\item low maintenance and low \gls{tco};
+\item use of open standards and technologies.
+\end{itemize}
+
+A \Gls{restful} \gls{web} architecture was chosen because it is scalable and equally well suited to
+mobile, \gls{web} and desktop clients. Its generality makes it suitable for retail and wholesale
+trading applications, across \gls{asset}-class and product-type. It can be deployed to the
+\gls{cloud} or on dedicated infrastructure.
+
+The following diagram shows how the facets of the \gls{restful} \gls{api} map to internal
+\glspl{servlet}, along with the \gls{http} methods and resources supported by those \glspl{servlet}:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{serv.eps}
+\caption{Restful API}
+\end{figure}
+
+The project was originally started as a \gls{poc} for a low-latency \gls{matching engine}. \scltd{}
+was formed to take ownership of the project and put the company on a commercial footing. The current
+development phase is being funded by revenue generated from consultancy by \scltd{}.
+
+\subsection{Reference Data}
+
+The following table summarises the \gls{restful} \gls{api} for querying reference-data:
+
+\vspace{5mm}
+\begin{tabular}{ll}
+\multicolumn{2}{c}{Synopsis}\\
+Method&Resource\\
+\hline
+GET&\texttt{/api/rec/}\\
+GET&\texttt{/api/rec/asset/[mnem]}\\
+GET&\texttt{/api/rec/contr/[mnem]}\\
+GET&\texttt{/api/rec/market/[mnem]}\\
+GET&\texttt{/api/rec/trader/[mnem]}\\
+\end{tabular}
+\vspace{5mm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{rec.eps}
+\caption{Record Structures}
+\end{figure}
+
+\subsection{Market Data}
+
+The following table summarises the \gls{restful} \gls{api} for querying market-data:
+
+\vspace{5mm}
+\begin{tabular}{ll}
+\multicolumn{2}{c}{Synopsis}\\
+Method&Resource\\
+\hline
+GET&\texttt{/api/view/[market]}\\
+\end{tabular}
+\vspace{5mm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{view.eps}
+\caption{View Structures}
+\end{figure}
+
+\subsection{Order Management}
+
+\vspace{5mm}
+\begin{tabular}{ll|l}
+\multicolumn{2}{c}{Rest API}&\multicolumn{1}{c}{Fix API}\\
+Method&Resource&Message\\
+\hline
+GET&\texttt{/api/sess/}\\
+GET&\texttt{/api/sess/order/[market]/[id]}\\
+GET&\texttt{/api/sess/trade/[market]/[id]}\\
+GET&\texttt{/api/sess/posn/[contr]/[settlDate]}\\
+DELETE&\texttt{/api/sess/order/<market>/<id>}\\
+DELETE&\texttt{/api/sess/trade/<market>/<id>}\\
+POST&\texttt{/api/sess/order/<market>/}&NewOrderSingle\\
+PUT&\texttt{/api/sess/order/<market>/<id>}\\
+\end{tabular}
+\vspace{5mm}
+
+\subsubsection{Executions}
+
+\vspace{5mm}
+\begin{tabular}{ll|ll|ll}
+\multicolumn{2}{c}{Rest API}&\multicolumn{2}{c}{Fix API}\\
+Name&Type&Tag&Field&Req'd&Description\\
+\hline
+Id&Long&17&ExecId&Y&-\\
+OrderId&Long&37&OrderId&Y&-\\
+Trader&String&1&Account&Y&-\\
+Market&String&55&Symbol&Y&-\\
+Contr&String&20000&Contract&Y&-\\
+SettlDay&Int&64&FutSettDate&Y&-\\
+Ref&String&11&ClOrdId&Y&-\\
+State&State&150&ExecType&Y&-\\
+-&-&39&OrdStatus&Y&-\\
+Action&Enum&54&Side&Y&``Buy'' or ``Sell''\\
+-&-&40&OrdType&Y&Always ``LIMIT''\\
+Ticks&Long&44&Price&Y&Price in ticks\\
+Lots&Long&38&OrderQty&Y&Quantity in lots\\
+Resd&Long&151&LeavesQty&Y&-\\
+Exec&Long&14&CumQty&Y&-\\
+Cost&Long&20001&Cost&Y&-\\
+-&-&6&AvgPx&Y&-\\
+LastTicks&Long&31&LastPx&C&-\\
+LastLots&Long&32&LastQty&C&-\\
+MinLots&Long&110&MinQty&Y&-\\
+MatchId&Long&20002&MatchId&C&-\\
+Role&Role&851&LastLiquidityInd&C&-\\
+Cpty&String&375&ContraBroker&C&-\\
+Created&Long&60&TransactTime&Y&-\\
+\end{tabular}
+\vspace{5mm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{instruct.eps}
+\caption{Order Structures}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{state.eps}
+\caption{Order Workflow}
+\end{figure}
+
+\subsubsection{Order Placement}
+
+\vspace{5mm}
+\begin{tabular}{ll|ll|ll}
+\multicolumn{2}{c}{Rest API}&\multicolumn{2}{c}{Fix API}\\
+Name&Type&Tag&Field&Req'd&Description\\
+\hline
+Market&String&55&Symbol&Y&Market mnemonic\\
+Ref&String&11&ClOrdId&Y&Client reference\\
+Action&Enum&54&Side&Y&``Buy'' or ``Sell''\\
+-&-&40&OrdType&Y&Always ``LIMIT''\\
+Ticks&Long&44&Price&Y&Price in ticks\\
+Lots&Long&38&OrderQty&Y&Quantity in lots\\
+MinLots&Long&110&MinQty&Y&Minimum quantity in lots\\
+-&-&60&TransactTime&Y&Current time\\
+\end{tabular}
+\vspace{5mm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{neworder.eps}
+\caption{New Order Dialog}
+\end{figure}
+
+\subsubsection{Order Revision}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{reviseorder.eps}
+\caption{Revise Order Dialog}
+\end{figure}
+
+\subsection{Administration}
+
+\vspace{5mm}
+\begin{tabular}{ll}
+\multicolumn{2}{c}{Synopsis}\\
+Method&Resource\\
+\hline
+POST&\texttt{/api/rec/market/}\\
+POST&\texttt{/api/rec/trader/}\\
+\end{tabular}
+\vspace{5mm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{newmarket.eps}
+\caption{New Market Dialog}
+\end{figure}
+
+To create a new \gls{market}, submit an \gls{http} post request to the \texttt{/api/rec/market/}
+resource with the following \gls{json} content:
+
+{\tt\small
+\begin{verbatim}
+{"mnem":"EURUSD.MAR15","display":"EURUSD March 15","contr":"EURUSD",
+ "settlDate":20150320,"expiryDate":20150318}
+\end{verbatim}
+}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{newtrader.eps}
+\caption{New Trader Dialog}
+\end{figure}
+
+To create a new trader, submit an \gls{http} post request to the \texttt{/api/rec/trader/} resource
+with the following \gls{json} content:
+
+{\tt\small
+\begin{verbatim}
+{"mnem":"EURUSD.MAR15","display":"EURUSD March 15",
+ "email":"mark.aylett@swirlycloud.com"}
+\end{verbatim}
+}
+
+\section{Swirly Cloud Demo}
+
+\subsection{Cloud Computing}
+
+We believe that cost-cutting by financial organisations will lead to new software architectures that
+can dynamically grow or shrink to meet demand.
+
+Large online retailers and tech companies have invested heavily in technologies, such as
+Google's\cite{google} BigTable\cite{bigtable}, that can cope with Internet-scale workloads, and they
+are providing access to their global storage and compute as a managed service (the \gls{cloud}). The
+landscape of modern software development has fundamentally changed as a consequence.
+
+The beauty of \gls{cloud} computing is that we only pay for what we use, so we don't need to invest
+our capital on infrastructure and additional capacity for future growth. The \gls{cloud} also
+simplifies maintenance, operations, disaster recovery and security, so that we can focus our efforts
+on writing great software.
+
+\twirly{} has been designed from the ground-up to run efficiently in the \gls{cloud} with limited
+resources.  It draws on lessons learned from years spent building front-office trading applications,
+and adapts their best ideas for the \gls{cloud}. The \gls{order-book} at the heart of our
+application has been developed using \gls{hft} techniques, so that we can achieve microsecond
+latencies.
+
+We deliberately develop and test our system with very limited resource quotas, so that we remain
+focused on our bottom line. We have also taken care to avoid vendor lock-in, by ensuring that our
+core application only uses open standards and technologies. This gives us the option to target
+different application containers, run on dedicated infrastructure, or to open-source the software.
+
+\subsection{User Experience}
+
+When I download a software package for the first time, I \gls{unzip} it and attempt to compile it
+using familiar commands, without even a fleeting glimpse at the ``INSTALL'' or ``README''
+documents. If the build fails, then I discard it and move onto the next, mentally branding it as
+``broken'' or ``too complex''. Similarly, when I try a new website for the first time and I'm
+presented with a complex, lengthy and intrusive sign-up processes, or I find the site cluttered and
+confusing, or awash with advertising, then I throw my hands up in despair and begin my search anew
+for an alternative.
+
+Am I being unfair? Probably, but then I'm not the only one. If the Internet generation is guilty of
+a short attention span, then the Facebook\cite{facebook} generation is even more so. Often for good
+reason. There simply isn't enough time in the day. Most of us are overloaded and stressed-out trying
+to manage our busy lives. We mine and sift through mountains of information every day. We have to
+make every second of every minute count. Human cycles are precious and most certainly more so than
+\gls{cpu} cycles!
+
+We were acutely aware of these factors when designing our \twirly{} \gls{ui}. We could not afford to
+drop the ball when privileged with those few valuable moments in which to attract a new user. Our
+barrier to entry had to be kept low.
+
+We put new users on a fast track that allows them to get started quickly. They can sign-in using
+their Google\cite{google} account, so there is no need to create and maintain yet another set of
+online credentials. Any non-essential information has been removed from the sign-up process and
+deferred to a preferences screen. The \gls{ui} is free of clutter and unnecessary
+distractions. There are no gimmicks, pop-ups or excessive use of colour. The layout and workflows
+follow the principle of least surprise, so that they feel familiar and intuitive to professional
+traders. We work hard to retain a simple, consistent and functional interface that works well on a
+range of devices from mobile to desktop.
+
+\begin{appendices}
+
+\section{Contributing}
+
+The \twirly{} project is available on GitHub\cite{github} for members of the \scorg{} organisation.
+
+\subsection{Getting Started}
+
+\scorg{} members can clone the \twirly{} repository as follows:
+
+\lstset{language=sh}
+\begin{lstlisting}
+$ git clone git@github.com:swirlycloud/twirlyj.git 
+\end{lstlisting}
+
+Developers should, however, work on their own fork of the repository and submit pull requests to
+have their patches reviewed and possibly merged onto the \texttt{master} branch.
+
+Once you have a local copy of the repository checked-out, add a remote upstream repository so that
+you can keep your fork in sync:
+
+\lstset{language=sh}
+\begin{lstlisting}
+$ git remote add upstream git@github.com:swirlycloud/twirlyj.git
+\end{lstlisting}
+
+You can build the source code and run the unit tests using Gradle\cite{gradle} as follows:
+
+\lstset{language=sh}
+\begin{lstlisting}
+$ gradle build
+\end{lstlisting}
+
+The application can then be tested locally by running the following command and browsing to
+\url{http://localhost:8080/}:
+
+\lstset{language=sh}
+\begin{lstlisting}
+$ gradle appengineRun
+\end{lstlisting}
+
+Eclipse\cite{eclipse} project files can also be generated using the following command:
+
+\lstset{language=sh}
+\begin{lstlisting}
+$ gradle eclipse
+\end{lstlisting}
+
+\subsection{Syncing Your Fork}
+
+You'll first need to fetch branches and their commits from the upstream repository:
+
+\lstset{language=sh}
+\begin{lstlisting}
+$ git fetch upstream
+\end{lstlisting}
+
+Commits from the upstream's \texttt{master} branch will now be stored in a local branch called
+\texttt{upstream/master}. Check out your fork's local \texttt{master} branch and rebase from the
+\texttt{upstream/master} branch:
+
+\lstset{language=sh}
+\begin{lstlisting}
+$ git checkout master
+$ git rebase upstream/master
+\end{lstlisting}
+
+Your local fork's \texttt{master} branch should now be in sync with the upstream
+repository. Finally, you can push your local \texttt{master} branch to origin \texttt{master}, so
+that origin \texttt{master} is also in sync with the upstream repository:
+
+\lstset{language=sh}
+\begin{lstlisting}
+$ git push origin master
+\end{lstlisting}
+
+\section{Conversions}
+
+\subsection{Rounding}
+
+The \texttt{roundHalfAway} function is defined as follows:
+
+\[r(x) = \left\{\begin{array}{ll}
+  0 & \mbox{if $x = 0$};\\
+  \ceil{x-0.5} & \mbox{if $x < 0$};\\
+  \floor{x+0.5} & \mbox{if $x > 0$}.\\
+\end{array}\right.
+\]
+
+\end{appendices}
+
+\newpage
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{plain}
+\bibliography{twirly}
+\printglossaries
+
+\end{document}

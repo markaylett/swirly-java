@@ -1,0 +1,45 @@
+@startuml
+
+skinparam monochrome true
+
+interface Identifiable {
+  id: long
+}
+
+abstract class Instruct {
+  orderId: long
+  trader: String
+  market: String
+  contr: String
+  settlDay: int
+  ref: String
+  state: State
+  action: Action
+  ticks: long
+  lots: long
+  resd: long
+  exec: long
+  lastTicks: long
+  lastLots: long
+  minLots: long
+}
+
+Identifiable <|-- Instruct
+
+class Order {
+  created: long
+  modified: long
+}
+
+Instruct <|-- Order
+
+class Exec {
+  matchId: long
+  role: Role
+  cpty: String
+  created: long
+}
+
+Instruct <|-- Exec
+
+@enduml
