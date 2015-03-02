@@ -1,6 +1,20 @@
 Getting Started
 ===============
 
+Add remote upstream to fork:
+
+    $ git remote add upstream git@github.com:swirlycloud/twirlyj.git
+
+Sync local fork:
+
+    $ git fetch upstream
+    $ git checkout master
+    $ git rebase upstream/master
+
+Generate Eclipse project files:
+
+    $ gradle eclipse
+
 Build and test the application:
 
     $ gradle build
