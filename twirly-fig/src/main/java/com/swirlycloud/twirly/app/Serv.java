@@ -40,7 +40,7 @@ import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 
-public final class Serv {
+public class Serv {
 
     private static final int CAPACITY = 1 << 5; // 64
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
