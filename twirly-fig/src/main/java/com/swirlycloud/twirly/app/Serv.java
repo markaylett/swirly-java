@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
+import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -477,14 +478,14 @@ public class Serv {
     }
 
     @NonNull
-    public final Market createMarket(String mnem, String display, String contr, int settlDay,
+    public final Market createMarket(String mnem, String display, String contrMnem, int settlDay,
             int expiryDay, long now) throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Contr crec = (Contr) contrs.find(contr);
+        final Contr contr = (Contr) contrs.find(contrMnem);
         if (contr == null) {
-            throw new NotFoundException(String.format("contr '%s' does not exist", contr));
+            throw new NotFoundException(String.format("contr '%s' does not exist", contrMnem));
         }
-        return createMarket(mnem, display, crec, settlDay, expiryDay, now);
+        return createMarket(mnem, display, contr, settlDay, expiryDay, now);
     }
 
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
@@ -566,7 +567,7 @@ public class Serv {
         final int busDay = DateUtil.getBusDate(now).toJd();
         if (market.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
-                    .getContrRich().getMnem(), market.getSettlDay()));
+                    .getContrRich().getMnem(), jdToIso(market.getSettlDay())));
         }
         if (lots == 0 || lots < minLots) {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));

@@ -191,7 +191,7 @@ public final class Rest {
         try {
             final Contr contr = (Contr) serv.findRec(RecType.CONTR, contrMnem);
             if (contr == null) {
-                throw new NotFoundException(String.format("contract '%s' does not exist", contr));
+                throw new NotFoundException(String.format("contract '%s' does not exist", contrMnem));
             }
             final int settlDay = isoToJd(settlDate);
             final int expiryDay = isoToJd(expiryDate);
@@ -235,10 +235,10 @@ public final class Rest {
             final int busDay = getBusDate(now).toJd();
             final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
             if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", market));
+                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
             if (!withExpired && market.getExpiryDay() < busDay) {
-                throw new NotFoundException(String.format("market '%s' has expired", market));
+                throw new NotFoundException(String.format("market '%s' has expired", marketMnem));
             }
             market.toJsonView(params, out);
         } finally {
@@ -337,7 +337,7 @@ public final class Rest {
     }
 
     public final void getOrder(String email, String market, long id, Params params, long now,
-            Appendable out) throws IOException, NotFoundException {
+            Appendable out) throws NotFoundException, IOException {
         serv.acquireRead();
         try {
             final Sess sess = serv.findSessByEmail(email);
@@ -362,7 +362,7 @@ public final class Rest {
             final Sess sess = serv.getLazySessByEmail(email);
             final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
             if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", market));
+                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
             final Trans trans = serv.placeOrder(sess, market, ref, action, ticks, lots, minLots,
                     now, new Trans());
@@ -383,7 +383,7 @@ public final class Rest {
             }
             final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
             if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", market));
+                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
             final Trans trans = new Trans();
             if (lots > 0) {
