@@ -56,6 +56,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
      * Must not be greater that lots.
      */
     long exec;
+    long cost;
     long lastTicks;
     long lastLots;
     /**
@@ -66,7 +67,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     long modified;
 
     public Order(long id, String trader, String market, String contr, int settlDay, String ref,
-            State state, Action action, long ticks, long lots, long resd, long exec,
+            State state, Action action, long ticks, long lots, long resd, long exec, long cost,
             long lastTicks, long lastLots, long minLots, long created, long modified) {
         assert trader != null;
         assert market != null;
@@ -83,6 +84,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.lots = lots;
         this.resd = resd;
         this.exec = exec;
+        this.cost = cost;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.minLots = minLots;
@@ -91,8 +93,8 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     }
 
     public Order(long id, String trader, Financial fin, String ref, State state, Action action,
-            long ticks, long lots, long resd, long exec, long lastTicks, long lastLots,
-            long minLots, long created, long modified) {
+            long ticks, long lots, long resd, long exec, long cost, long lastTicks,
+            long lastLots, long minLots, long created, long modified) {
         assert trader != null;
         assert lots > 0 && lots >= minLots;
         this.id = id;
@@ -107,6 +109,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.lots = lots;
         this.resd = resd;
         this.exec = exec;
+        this.cost = cost;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.minLots = minLots;
@@ -131,6 +134,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.lots = lots;
         this.resd = lots;
         this.exec = 0;
+        this.cost = 0;
         this.lastTicks = 0;
         this.lastLots = 0;
         this.minLots = minLots;
@@ -154,6 +158,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.lots = lots;
         this.resd = lots;
         this.exec = 0;
+        this.cost = 0;
         this.lastTicks = 0;
         this.lastLots = 0;
         this.minLots = minLots;
@@ -174,6 +179,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         long lots = 0;
         long resd = 0;
         long exec = 0;
+        long cost = 0;
         long lastTicks = 0;
         long lastLots = 0;
         long minLots = 0;
@@ -186,7 +192,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
             switch (event) {
             case END_OBJECT:
                 return new Order(id, trader, market, contr, settlDay, ref, state, action, ticks,
-                        lots, resd, exec, lastTicks, lastLots, minLots, created, modified);
+                        lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -214,6 +220,8 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
                     resd = p.getLong();
                 } else if ("exec".equals(name)) {
                     exec = p.getLong();
+                } else if ("cost".equals(name)) {
+                    cost = p.getLong();
                 } else if ("lastTicks".equals(name)) {
                     lastTicks = p.getLong();
                 } else if ("lastLots".equals(name)) {
@@ -306,6 +314,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         out.append(",\"lots\":").append(String.valueOf(lots));
         out.append(",\"resd\":").append(String.valueOf(resd));
         out.append(",\"exec\":").append(String.valueOf(exec));
+        out.append(",\"cost\":").append(String.valueOf(cost));
         if (lastLots != 0) {
             out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
             out.append(",\"lastLots\":").append(String.valueOf(lastLots));
@@ -391,12 +400,13 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         state = State.NEW;
         resd = lots;
         exec = 0;
+        cost = 0;
         modified = now;
     }
 
     public final void revise(long lots, long now) {
         assert lots > 0;
-        assert lots >= exec && lots >= minLots && lots <= lots;
+        assert lots >= exec && lots >= minLots && lots <= this.lots;
         final long delta = this.lots - lots;
         assert delta >= 0;
         state = State.REVISE;
@@ -412,13 +422,18 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         modified = now;
     }
 
-    public final void trade(long lots, long lastTicks, long lastLots, long now) {
+    public final void trade(long takenLots, long takenCost, long lastTicks, long lastLots, long now) {
         state = State.TRADE;
-        resd -= lots;
-        this.exec += lots;
+        resd -= takenLots;
+        this.exec += takenLots;
+        this.cost += takenCost;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         modified = now;
+    }
+
+    public final void trade(long lastTicks, long lastLots, long now) {
+        trade(lastLots, lastLots * lastTicks, lastTicks, lastLots, now);
     }
 
     @Override
@@ -484,6 +499,16 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     @Override
     public final long getExec() {
         return exec;
+    }
+
+    @Override
+    public final long getCost() {
+        return cost;
+    }
+
+    @Override
+    public final double getAvgTicks() {
+        return exec != 0 ? (double) cost / exec : 0;
     }
 
     @Override

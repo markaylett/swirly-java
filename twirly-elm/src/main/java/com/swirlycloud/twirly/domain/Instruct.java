@@ -39,6 +39,10 @@ public interface Instruct extends RbNode, Identifiable, Financial {
 
     long getExec();
 
+    long getCost();
+
+    double getAvgTicks();
+
     long getLastTicks();
 
     long getLastLots();

@@ -49,6 +49,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
      * Must not be greater that lots.
      */
     private long exec;
+    private long cost;
     private long lastTicks;
     private long lastLots;
     /**
@@ -62,8 +63,8 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
 
     public Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
             String ref, State state, Action action, long ticks, long lots, long resd, long exec,
-            long lastTicks, long lastLots, long minLots, long matchId, Role role, String cpty,
-            long created) {
+            long cost, long lastTicks, long lastLots, long minLots, long matchId, Role role,
+            String cpty, long created) {
         this.id = id;
         this.orderId = orderId;
         this.trader = trader;
@@ -77,6 +78,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         this.lots = lots;
         this.resd = resd;
         this.exec = exec;
+        this.cost = cost;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.minLots = minLots;
@@ -87,7 +89,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
     }
 
     public Exec(long id, long orderId, String trader, Financial fin, String ref, State state,
-            Action action, long ticks, long lots, long resd, long exec, long lastTicks,
+            Action action, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
             long lastLots, long minLots, long matchId, Role role, String cpty, long created) {
         this.id = id;
         this.orderId = orderId;
@@ -102,6 +104,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         this.lots = lots;
         this.resd = resd;
         this.exec = exec;
+        this.cost = cost;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.minLots = minLots;
@@ -125,6 +128,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         this.lots = instruct.getLots();
         this.resd = instruct.getResd();
         this.exec = instruct.getExec();
+        this.cost = instruct.getCost();
         this.lastTicks = instruct.getLastTicks();
         this.lastLots = instruct.getLastLots();
         this.minLots = instruct.getMinLots();
@@ -145,6 +149,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         long lots = 0;
         long resd = 0;
         long exec = 0;
+        long cost = 0;
         long lastTicks = 0;
         long lastLots = 0;
         long minLots = 0;
@@ -159,8 +164,8 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
             switch (event) {
             case END_OBJECT:
                 return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action,
-                        ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty,
-                        created);
+                        ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role,
+                        cpty, created);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -196,6 +201,8 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
                     resd = p.getLong();
                 } else if ("exec".equals(name)) {
                     exec = p.getLong();
+                } else if ("cost".equals(name)) {
+                    cost = p.getLong();
                 } else if ("lastTicks".equals(name)) {
                     lastTicks = p.getLong();
                 } else if ("lastLots".equals(name)) {
@@ -293,6 +300,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         out.append(",\"lots\":").append(String.valueOf(lots));
         out.append(",\"resd\":").append(String.valueOf(resd));
         out.append(",\"exec\":").append(String.valueOf(exec));
+        out.append(",\"cost\":").append(String.valueOf(cost));
         if (lastLots != 0) {
             out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
             out.append(",\"lastLots\":").append(String.valueOf(lastLots));
@@ -334,11 +342,12 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         resd = 0;
     }
 
-    public final void trade(long lots, long lastTicks, long lastLots, long matchId, Role role,
-            String cpty) {
+    public final void trade(long takenLots, long takenCost, long lastTicks, long lastLots,
+            long matchId, Role role, String cpty) {
         state = State.TRADE;
-        resd -= lots;
-        exec += lots;
+        resd -= takenLots;
+        exec += takenLots;
+        cost += takenCost;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.matchId = matchId;
@@ -347,7 +356,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
     }
 
     public final void trade(long lastTicks, long lastLots, long matchId, Role role, String cpty) {
-        trade(lastLots, lastTicks, lastLots, matchId, role, cpty);
+        trade(lastLots, lastLots * lastTicks, lastTicks, lastLots, matchId, role, cpty);
     }
 
     @Override
@@ -413,6 +422,16 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
     @Override
     public final long getExec() {
         return exec;
+    }
+
+    @Override
+    public final long getCost() {
+        return cost;
+    }
+
+    @Override
+    public final double getAvgTicks() {
+        return exec != 0 ? (double) cost / exec : 0;
     }
 
     @Override

@@ -204,12 +204,13 @@ public class Serv {
 
         final long now = takerOrder.getCreated();
 
-        long taken = 0;
+        long takenLots = 0;
+        long takenCost = 0;
         long lastTicks = 0;
         long lastLots = 0;
 
         DlNode node = side.getFirstOrder();
-        for (; taken < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
+        for (; takenLots < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
             final Order makerOrder = (Order) node;
 
             // Only consider orders while prices cross.
@@ -228,19 +229,19 @@ public class Serv {
             match.makerOrder = makerOrder;
             match.makerPosn = makerPosn;
             match.ticks = makerOrder.getTicks();
-            match.lots = Math.min(takerOrder.getResd() - taken, makerOrder.getResd());
+            match.lots = Math.min(takerOrder.getResd() - takenLots, makerOrder.getResd());
 
-            taken += match.lots;
+            takenLots += match.lots;
+            takenCost += match.lots * match.ticks;
             lastTicks = match.ticks;
             lastLots = match.lots;
 
             final Exec makerTrade = new Exec(makerId, makerOrder, now);
-            makerTrade.trade(match.lots, match.ticks, match.lots, takerId, Role.MAKER,
-                    takerOrder.getTrader());
+            makerTrade.trade(match.ticks, match.lots, takerId, Role.MAKER, takerOrder.getTrader());
             match.makerTrade = makerTrade;
 
             final Exec takerTrade = new Exec(takerId, takerOrder, now);
-            takerTrade.trade(taken, match.ticks, match.lots, makerId, Role.TAKER,
+            takerTrade.trade(takenLots, takenCost, match.ticks, match.lots, makerId, Role.TAKER,
                     makerOrder.getTrader());
             match.takerTrade = takerTrade;
 
@@ -255,7 +256,7 @@ public class Serv {
         if (!trans.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
             trans.posn = takerSess.getLazyPosn(market);
-            takerOrder.trade(taken, lastTicks, lastLots, now);
+            takerOrder.trade(takenLots, takenCost, lastTicks, lastLots, now);
         }
     }
 
