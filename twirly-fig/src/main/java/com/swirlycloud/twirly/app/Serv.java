@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
+import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -40,7 +41,7 @@ import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 
-public final class Serv {
+public class Serv {
 
     private static final int CAPACITY = 1 << 5; // 64
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
@@ -203,12 +204,13 @@ public final class Serv {
 
         final long now = takerOrder.getCreated();
 
-        long taken = 0;
+        long takenLots = 0;
+        long takenCost = 0;
         long lastTicks = 0;
         long lastLots = 0;
 
         DlNode node = side.getFirstOrder();
-        for (; taken < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
+        for (; takenLots < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
             final Order makerOrder = (Order) node;
 
             // Only consider orders while prices cross.
@@ -227,19 +229,19 @@ public final class Serv {
             match.makerOrder = makerOrder;
             match.makerPosn = makerPosn;
             match.ticks = makerOrder.getTicks();
-            match.lots = Math.min(takerOrder.getResd() - taken, makerOrder.getResd());
+            match.lots = Math.min(takerOrder.getResd() - takenLots, makerOrder.getResd());
 
-            taken += match.lots;
+            takenLots += match.lots;
+            takenCost += match.lots * match.ticks;
             lastTicks = match.ticks;
             lastLots = match.lots;
 
             final Exec makerTrade = new Exec(makerId, makerOrder, now);
-            makerTrade.trade(match.lots, match.ticks, match.lots, takerId, Role.MAKER,
-                    takerOrder.getTrader());
+            makerTrade.trade(match.ticks, match.lots, takerId, Role.MAKER, takerOrder.getTrader());
             match.makerTrade = makerTrade;
 
             final Exec takerTrade = new Exec(takerId, takerOrder, now);
-            takerTrade.trade(taken, match.ticks, match.lots, makerId, Role.TAKER,
+            takerTrade.trade(takenLots, takenCost, match.ticks, match.lots, makerId, Role.TAKER,
                     makerOrder.getTrader());
             match.takerTrade = takerTrade;
 
@@ -254,7 +256,7 @@ public final class Serv {
         if (!trans.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
             trans.posn = takerSess.getLazyPosn(market);
-            takerOrder.trade(taken, lastTicks, lastLots, now);
+            takerOrder.trade(takenLots, takenCost, lastTicks, lastLots, now);
         }
     }
 
@@ -477,14 +479,14 @@ public final class Serv {
     }
 
     @NonNull
-    public final Market createMarket(String mnem, String display, String contr, int settlDay,
+    public final Market createMarket(String mnem, String display, String contrMnem, int settlDay,
             int expiryDay, long now) throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Contr crec = (Contr) contrs.find(contr);
+        final Contr contr = (Contr) contrs.find(contrMnem);
         if (contr == null) {
-            throw new NotFoundException(String.format("contr '%s' does not exist", contr));
+            throw new NotFoundException(String.format("contr '%s' does not exist", contrMnem));
         }
-        return createMarket(mnem, display, crec, settlDay, expiryDay, now);
+        return createMarket(mnem, display, contr, settlDay, expiryDay, now);
     }
 
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
@@ -566,7 +568,7 @@ public final class Serv {
         final int busDay = DateUtil.getBusDate(now).toJd();
         if (market.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
-                    .getContrRich().getMnem(), market.getSettlDay()));
+                    .getContrRich().getMnem(), jdToIso(market.getSettlDay())));
         }
         if (lots == 0 || lots < minLots) {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));

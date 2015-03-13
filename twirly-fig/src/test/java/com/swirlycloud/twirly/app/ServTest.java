@@ -61,6 +61,7 @@ public final class ServTest {
         assertEquals(5, order.getLots());
         assertEquals(5, order.getResd());
         assertEquals(0, order.getExec());
+        assertEquals(0, order.getCost());
         assertEquals(0, order.getLastTicks());
         assertEquals(0, order.getLastLots());
         assertEquals(1, order.getMinLots());
@@ -77,6 +78,7 @@ public final class ServTest {
         assertEquals(4, order.getLots());
         assertEquals(4, order.getResd());
         assertEquals(0, order.getExec());
+        assertEquals(0, order.getCost());
         assertEquals(0, order.getLastTicks());
         assertEquals(0, order.getLastLots());
         assertEquals(1, order.getMinLots());

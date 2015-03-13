@@ -1,0 +1,22 @@
+@startuml
+
+skinparam monochrome true
+
+[*] --> NEW
+
+NEW --> REVISE
+NEW --> CANCEL
+NEW --> TRADE
+
+REVISE --> REVISE
+REVISE --> CANCEL
+REVISE --> TRADE
+
+TRADE --> REVISE
+TRADE --> CANCEL
+TRADE --> TRADE
+
+CANCEL --> [*]
+TRADE --> [*]
+
+@enduml

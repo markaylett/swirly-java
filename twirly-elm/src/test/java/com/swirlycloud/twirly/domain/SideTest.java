@@ -41,12 +41,14 @@ public final class SideTest {
         apple.state = null;
         apple.resd = -1;
         apple.exec = -1;
+        apple.cost = -1;
         apple.lastTicks = -1;
         apple.lastLots = -1;
 
         orange.state = null;
         orange.resd = -1;
         orange.exec = -1;
+        orange.cost = -1;
         orange.lastTicks = -1;
         orange.lastLots = -1;
 
@@ -58,6 +60,7 @@ public final class SideTest {
         assertEquals(State.NEW, apple.getState());
         assertEquals(10, apple.getResd());
         assertEquals(0, apple.getExec());
+        assertEquals(0, apple.getCost());
         assertEquals(-1, apple.getLastTicks());
         assertEquals(-1, apple.getLastLots());
         assertEquals(now - 1, apple.getCreated());
@@ -83,6 +86,7 @@ public final class SideTest {
         assertEquals(State.REVISE, apple.getState());
         assertEquals(5, apple.getResd());
         assertEquals(0, apple.getExec());
+        assertEquals(0, apple.getCost());
         assertEquals(-1, apple.getLastTicks());
         assertEquals(-1, apple.getLastLots());
         assertEquals(now - 2, apple.getCreated());
@@ -108,6 +112,7 @@ public final class SideTest {
         assertEquals(State.CANCEL, orange.getState());
         assertEquals(0, orange.getResd());
         assertEquals(0, orange.getExec());
+        assertEquals(0, orange.getCost());
         assertEquals(-1, orange.getLastTicks());
         assertEquals(-1, orange.getLastLots());
         assertEquals(now - 3, orange.getCreated());

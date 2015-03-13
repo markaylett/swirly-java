@@ -104,13 +104,14 @@ public final class JdbcModel implements Model {
         final long lots = rs.getLong("lots");
         final long resd = rs.getLong("resd");
         final long exec = rs.getLong("exec");
+        final long cost = rs.getLong("cost");
         final long lastTicks = rs.getLong("lastTicks");
         final long lastLots = rs.getLong("lastLots");
         final long minLots = rs.getLong("minLots");
         final long created = rs.getLong("created");
         final long modified = rs.getLong("modified");
         return new Order(id, trader, market, contr, settlDay, ref, state, action, ticks, lots,
-                resd, exec, lastTicks, lastLots, minLots, created, modified);
+                resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
     }
 
     private static Exec getTrade(ResultSet rs) throws SQLException {
@@ -127,6 +128,7 @@ public final class JdbcModel implements Model {
         final long lots = rs.getLong("lots");
         final long resd = rs.getLong("resd");
         final long exec = rs.getLong("exec");
+        final long cost = rs.getLong("cost");
         final long lastTicks = rs.getLong("lastTicks");
         final long lastLots = rs.getLong("lastLots");
         final long minLots = rs.getLong("minLots");
@@ -144,7 +146,8 @@ public final class JdbcModel implements Model {
         }
         final long created = rs.getLong("created");
         return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action, ticks,
-                lots, resd, exec, lastTicks, lastLots, minLots, matchId, role, cpty, created);
+                lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty,
+                created);
     }
 
     public JdbcModel(String url, String user, String password) {
@@ -182,7 +185,7 @@ public final class JdbcModel implements Model {
                 insertTraderStmt = conn
                         .prepareStatement("INSERT INTO Trader (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn
-                        .prepareStatement("INSERT INTO Exec (id, orderId, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO Exec (id, orderId, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 updateOrderStmt = conn
                         .prepareStatement("UPDATE Order_ SET archive = 1, modified = ? WHERE market = ?, id = ?");
                 updateExecStmt = conn
@@ -317,6 +320,7 @@ public final class JdbcModel implements Model {
             insertExecStmt.setLong(i++, exec.getLots());
             insertExecStmt.setLong(i++, exec.getResd());
             insertExecStmt.setLong(i++, exec.getExec());
+            insertExecStmt.setLong(i++, exec.getCost());
             if (exec.getLastLots() > 0) {
                 insertExecStmt.setLong(i++, exec.getLastTicks());
                 insertExecStmt.setLong(i++, exec.getLastLots());

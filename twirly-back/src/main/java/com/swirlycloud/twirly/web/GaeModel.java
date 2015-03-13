@@ -70,7 +70,8 @@ public final class GaeModel implements Model {
         }
     }
 
-    private final Entity newMarket(String mnem, String display, String contr, int settlDay, int expiryDay) {
+    private final Entity newMarket(String mnem, String display, String contr, int settlDay,
+            int expiryDay) {
         final Long zero = Long.valueOf(0);
         final Entity entity = new Entity(MARKET_KIND, mnem);
         entity.setUnindexedProperty("display", display);
@@ -105,6 +106,7 @@ public final class GaeModel implements Model {
         entity.setUnindexedProperty("lots", exec.getLots());
         entity.setProperty("resd", exec.getResd());
         entity.setUnindexedProperty("exec", exec.getExec());
+        entity.setUnindexedProperty("cost", exec.getCost());
         entity.setUnindexedProperty("lastTicks", exec.getLastTicks());
         entity.setUnindexedProperty("lastLots", exec.getLastLots());
         entity.setUnindexedProperty("minLots", exec.getMinLots());
@@ -129,6 +131,7 @@ public final class GaeModel implements Model {
         entity.setUnindexedProperty("lots", exec.getLots());
         entity.setUnindexedProperty("resd", exec.getResd());
         entity.setUnindexedProperty("exec", exec.getExec());
+        entity.setUnindexedProperty("cost", exec.getCost());
         entity.setUnindexedProperty("lastTicks", exec.getLastTicks());
         entity.setUnindexedProperty("lastLots", exec.getLastLots());
         entity.setUnindexedProperty("minLots", exec.getMinLots());
@@ -149,6 +152,7 @@ public final class GaeModel implements Model {
         order.setUnindexedProperty("lots", exec.getLots());
         order.setProperty("resd", exec.getResd());
         order.setUnindexedProperty("exec", exec.getExec());
+        order.setUnindexedProperty("cost", exec.getCost());
         order.setUnindexedProperty("lastTicks", exec.getLastTicks());
         order.setUnindexedProperty("lastLots", exec.getLastLots());
         order.setUnindexedProperty("modified", exec.getCreated());
@@ -196,7 +200,8 @@ public final class GaeModel implements Model {
     }
 
     @Override
-    public final void insertMarket(String mnem, String display, String contr, int settlDay, int expiryDay) {
+    public final void insertMarket(String mnem, String display, String contr, int settlDay,
+            int expiryDay) {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity entity = newMarket(mnem, display, contr, settlDay, expiryDay);
@@ -407,14 +412,15 @@ public final class GaeModel implements Model {
                     final long lots = (Long) entity.getProperty("lots");
                     final long resd = (Long) entity.getProperty("resd");
                     final long exec = (Long) entity.getProperty("exec");
+                    final long cost = (Long) entity.getProperty("cost");
                     final long lastTicks = (Long) entity.getProperty("lastTicks");
                     final long lastLots = (Long) entity.getProperty("lastLots");
                     final long minLots = (Long) entity.getProperty("minLots");
                     final long created = (Long) entity.getProperty("created");
                     final long modified = (Long) entity.getProperty("modified");
                     final Order order = new Order(id, trader, market, contr, settlDay, ref, state,
-                            action, ticks, lots, resd, exec, lastTicks, lastLots, minLots, created,
-                            modified);
+                            action, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots,
+                            created, modified);
                     q.insertBack(order);
                 }
             }
@@ -449,6 +455,7 @@ public final class GaeModel implements Model {
                     final long lots = (Long) entity.getProperty("lots");
                     final long resd = (Long) entity.getProperty("resd");
                     final long exec = (Long) entity.getProperty("exec");
+                    final long cost = (Long) entity.getProperty("cost");
                     final long lastTicks = (Long) entity.getProperty("lastTicks");
                     final long lastLots = (Long) entity.getProperty("lastLots");
                     final long minLots = (Long) entity.getProperty("minLots");
@@ -466,8 +473,8 @@ public final class GaeModel implements Model {
                     }
                     final long created = (Long) entity.getProperty("created");
                     final Exec trade = new Exec(id, orderId, trader, market, contr, settlDay, ref,
-                            state, action, ticks, lots, resd, exec, lastTicks, lastLots, minLots,
-                            matchId, role, cpty, created);
+                            state, action, ticks, lots, resd, exec, cost, lastTicks, lastLots,
+                            minLots, matchId, role, cpty, created);
                     q.insertBack(trade);
                 }
             }

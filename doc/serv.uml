@@ -1,0 +1,37 @@
+@startuml
+
+skinparam monochrome true
+
+abstract class RestServlet {
+}
+
+class RecServlet <<Reference Data>> {
+  GET(): /api/rec/
+  GET(): /api/rec/asset/[mnem]
+  GET(): /api/rec/contr/[mnem]
+  GET(): /api/rec/market/[mnem]
+  GET(): /api/rec/trader/[mnem]
+  POST(): /api/rec/market/
+  POST(): /api/rec/trader/
+}
+
+class ViewServlet <<Market Data>> {
+  GET(): /api/view/[market]
+}
+
+class SessServlet <<Order Management>> {
+  GET(): /api/sess/
+  GET(): /api/sess/order/[market]/[id]
+  GET(): /api/sess/trade/[market]/[id]
+  GET(): /api/sess/posn/[contr]/[settlDate]
+  DELETE(): /api/sess/order/<market>/<id>
+  DELETE(): /api/sess/trade/<market>/<id>
+  POST(): /api/sess/order/<market>/
+  PUT(): /api/sess/order/<market>/<id>
+}
+
+RestServlet <|-- RecServlet
+RestServlet <|-- ViewServlet
+RestServlet <|-- SessServlet
+
+@enduml

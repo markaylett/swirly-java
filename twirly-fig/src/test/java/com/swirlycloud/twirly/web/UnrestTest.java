@@ -155,7 +155,7 @@ public final class UnrestTest {
     }
 
     private static void assertOrder(String market, State state, Action action, long ticks,
-            long lots, long resd, long exec, long lastTicks, long lastLots, Order actual) {
+            long lots, long resd, long exec, long cost, long lastTicks, long lastLots, Order actual) {
         assertNotNull(actual);
         assertEquals("MARAYL", actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -166,6 +166,7 @@ public final class UnrestTest {
         assertEquals(lots, actual.getLots());
         assertEquals(resd, actual.getResd());
         assertEquals(exec, actual.getExec());
+        assertEquals(cost, actual.getCost());
         assertEquals(lastTicks, actual.getLastTicks());
         assertEquals(lastLots, actual.getLastLots());
         assertEquals(1, actual.getMinLots());
@@ -174,8 +175,8 @@ public final class UnrestTest {
     }
 
     private static void assertExec(String market, State state, Action action, long ticks,
-            long lots, long resd, long exc, long lastTicks, long lastLots, String contr, Role role,
-            Exec actual) {
+            long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
+            String contr, Role role, Exec actual) {
         assertNotNull(actual);
         assertEquals("MARAYL", actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -185,7 +186,8 @@ public final class UnrestTest {
         assertEquals(ticks, actual.getTicks());
         assertEquals(lots, actual.getLots());
         assertEquals(resd, actual.getResd());
-        assertEquals(exc, actual.getExec());
+        assertEquals(exec, actual.getExec());
+        assertEquals(cost, actual.getCost());
         assertEquals(lastTicks, actual.getLastTicks());
         assertEquals(lastLots, actual.getLastLots());
         assertEquals(1, actual.getMinLots());
@@ -413,14 +415,14 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final SessStruct out = unrest.getSess(EMAIL, PARAMS_NONE, NOW);
-        assertOrder("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10,
+        assertOrder("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
                 out.orders.get(Long.valueOf(1)));
-        assertOrder("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10,
+        assertOrder("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
                 out.orders.get(Long.valueOf(2)));
-        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.MAKER, out.trades.get(Long.valueOf(3)));
-        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.TAKER, out.trades.get(Long.valueOf(4)));
+        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.MAKER, out.trades.get(Long.valueOf(3)));
+        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.TAKER, out.trades.get(Long.valueOf(4)));
         assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10,
                 out.posns.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
@@ -449,7 +451,7 @@ public final class UnrestTest {
             ServiceUnavailableException, IOException {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         final Map<Long, Order> out = unrest.getOrder(EMAIL, PARAMS_NONE, NOW);
-        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0, 0,
                 out.get(Long.valueOf(1)));
     }
 
@@ -458,7 +460,7 @@ public final class UnrestTest {
             ServiceUnavailableException, IOException {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         final Map<Long, Order> out = unrest.getOrder(EMAIL, "EURUSD.MAR14", PARAMS_NONE, NOW);
-        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0, 0,
                 out.get(Long.valueOf(1)));
         assertTrue(unrest.getOrder(EMAIL, "USDJPY.MAR14", PARAMS_NONE, NOW).isEmpty());
     }
@@ -468,7 +470,7 @@ public final class UnrestTest {
             ServiceUnavailableException, IOException {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         final Order out = unrest.getOrder(EMAIL, "EURUSD.MAR14", 1, PARAMS_NONE, NOW);
-        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0, out);
+        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0, 0, out);
         try {
             unrest.getOrder(EMAIL, "EURUSD.MAR14", 2, PARAMS_NONE, NOW);
             fail("Expected exception");
@@ -480,7 +482,7 @@ public final class UnrestTest {
     public final void testPostOrder() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         final TransStruct out = postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
-        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
     }
 
@@ -488,10 +490,10 @@ public final class UnrestTest {
     public final void testPutOrder() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         TransStruct out = postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
-        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0,
+        assertOrder("EURUSD.MAR14", State.NEW, Action.SELL, 12345, 10, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         out = putOrder("EURUSD.MAR14", 1, 5);
-        assertOrder("EURUSD.MAR14", State.REVISE, Action.SELL, 12345, 5, 5, 0, 0, 0,
+        assertOrder("EURUSD.MAR14", State.REVISE, Action.SELL, 12345, 5, 5, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
     }
 
@@ -501,8 +503,8 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Exec trade = unrest.getTrade(EMAIL, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.MAKER, trade);
+        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.MAKER, trade);
         deleteTrade(EMAIL, "EURUSD.MAR14", 3);
         try {
             unrest.getTrade(EMAIL, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
@@ -517,10 +519,10 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Map<Long, Exec> out = unrest.getTrade(EMAIL, PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.MAKER, out.get(Long.valueOf(3)));
-        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.TAKER, out.get(Long.valueOf(4)));
+        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.MAKER, out.get(Long.valueOf(3)));
+        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.TAKER, out.get(Long.valueOf(4)));
     }
 
     @Test
@@ -529,10 +531,10 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Map<Long, Exec> out = unrest.getTrade(EMAIL, "EURUSD.MAR14", PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.MAKER, out.get(Long.valueOf(3)));
-        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.TAKER, out.get(Long.valueOf(4)));
+        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.MAKER, out.get(Long.valueOf(3)));
+        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.TAKER, out.get(Long.valueOf(4)));
         assertTrue(unrest.getTrade(EMAIL, "USDJPY.MAR14", PARAMS_NONE, NOW).isEmpty());
     }
 
@@ -542,10 +544,10 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Map<Long, Exec> out = unrest.getTrade(EMAIL, "EURUSD.MAR14", PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.MAKER, out.get(Long.valueOf(3)));
-        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 12345, 10, "EURUSD",
-                Role.TAKER, out.get(Long.valueOf(4)));
+        assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.MAKER, out.get(Long.valueOf(3)));
+        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.TAKER, out.get(Long.valueOf(4)));
         try {
             unrest.getOrder(EMAIL, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
             fail("Expected exception");

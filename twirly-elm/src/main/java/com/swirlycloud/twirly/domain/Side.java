@@ -160,7 +160,8 @@ public final class Side {
         lastTime = now;
 
         order.state = State.TRADE;
-        order.exec += lots;
+        order.exec += lastLots;
+        order.cost += lastLots * lastTicks;
         order.lastTicks = lastTicks;
         order.lastLots = lastLots;
         order.modified = now;

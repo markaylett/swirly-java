@@ -8,10 +8,9 @@ import static com.swirlycloud.twirly.date.JulianDay.isoToJd;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Semaphore;
 
+import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.app.Model;
-import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Sess;
 import com.swirlycloud.twirly.app.Trans;
 import com.swirlycloud.twirly.concurrent.AsyncModel;
@@ -32,25 +31,7 @@ import com.swirlycloud.twirly.util.Params;
 
 public final class Rest {
 
-    private static final int PERMITS = Runtime.getRuntime().availableProcessors();
-    private final Semaphore sem = new Semaphore(PERMITS);
-    private final Serv serv;
-
-    private final void acquireRead() {
-        sem.acquireUninterruptibly(1);
-    }
-
-    private final void releaseRead() {
-        sem.release(1);
-    }
-
-    private final void acquireWrite() {
-        sem.acquireUninterruptibly(PERMITS);
-    }
-
-    private final void releaseWrite() {
-        sem.release(PERMITS);
-    }
+    private final LockableServ serv;
 
     private final boolean getExpiredParam(Params params) {
         final Boolean val = params.getParam("expired", Boolean.class);
@@ -135,17 +116,21 @@ public final class Rest {
         out.append(']');
     }
 
+    public Rest(LockableServ serv) {
+        this.serv = serv;
+    }
+
     public Rest(AsyncModel model) throws InterruptedException, ExecutionException {
-        serv = new Serv(model);
+        this(new LockableServ(model));
     }
 
     public Rest(Model model) {
-        serv = new Serv(model);
+        this(new LockableServ(model));
     }
 
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             out.append("{\"assets\":");
             doGetRec(RecType.ASSET, params, now, out);
@@ -159,23 +144,23 @@ public final class Rest {
             }
             out.append('}');
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getRec(RecType recType, Params params, long now, Appendable out)
             throws IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             doGetRec(recType, params, now, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Rec rec = serv.findRec(recType, mnem);
             if (rec == null) {
@@ -183,42 +168,42 @@ public final class Rest {
             }
             rec.toJson(params, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void postTrader(String mnem, String display, String email, Params params,
             long now, Appendable out) throws BadRequestException, ServiceUnavailableException,
             IOException {
-        acquireWrite();
+        serv.acquireWrite();
         try {
             final Trader trader = serv.createTrader(mnem, display, email);
             trader.toJson(params, out);
         } finally {
-            releaseWrite();
+            serv.releaseWrite();
         }
     }
 
     public final void postMarket(String mnem, String display, String contrMnem, int settlDate,
             int expiryDate, Params params, long now, Appendable out) throws BadRequestException,
             NotFoundException, ServiceUnavailableException, IOException {
-        acquireWrite();
+        serv.acquireWrite();
         try {
             final Contr contr = (Contr) serv.findRec(RecType.CONTR, contrMnem);
             if (contr == null) {
-                throw new NotFoundException(String.format("contract '%s' does not exist", contr));
+                throw new NotFoundException(String.format("contract '%s' does not exist", contrMnem));
             }
             final int settlDay = isoToJd(settlDate);
             final int expiryDay = isoToJd(expiryDate);
             final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay, now);
             market.toJson(params, out);
         } finally {
-            releaseWrite();
+            serv.releaseWrite();
         }
     }
 
     public final void getView(Params params, long now, Appendable out) throws IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final boolean withExpired = getExpiredParam(params);
             final int busDay = getBusDate(now).toJd();
@@ -238,32 +223,32 @@ public final class Rest {
             }
             out.append(']');
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getView(String marketMnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final boolean withExpired = getExpiredParam(params);
             final int busDay = getBusDate(now).toJd();
             final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
             if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", market));
+                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
             if (!withExpired && market.getExpiryDay() < busDay) {
-                throw new NotFoundException(String.format("market '%s' has expired", market));
+                throw new NotFoundException(String.format("market '%s' has expired", marketMnem));
             }
             market.toJsonView(params, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getSess(String email, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Trader trader = serv.findTraderByEmail(email);
             if (trader == null) {
@@ -282,13 +267,13 @@ public final class Rest {
             doGetPosn(sess, params, now, out);
             out.append('}');
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void deleteOrder(String email, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        acquireWrite();
+        serv.acquireWrite();
         try {
             final Sess sess = serv.findSessByEmail(email);
             if (sess == null) {
@@ -296,13 +281,13 @@ public final class Rest {
             }
             serv.archiveOrder(sess, market, id, now);
         } finally {
-            releaseWrite();
+            serv.releaseWrite();
         }
     }
 
     public final void getOrder(String email, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Trader trader = serv.findTraderByEmail(email);
             if (trader == null) {
@@ -315,13 +300,13 @@ public final class Rest {
             }
             doGetOrder(sess, params, now, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getOrder(String email, String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Trader trader = serv.findTraderByEmail(email);
             if (trader == null) {
@@ -347,13 +332,13 @@ public final class Rest {
             }
             out.append(']');
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getOrder(String email, String market, long id, Params params, long now,
-            Appendable out) throws IOException, NotFoundException {
-        acquireRead();
+            Appendable out) throws NotFoundException, IOException {
+        serv.acquireRead();
         try {
             final Sess sess = serv.findSessByEmail(email);
             if (sess == null) {
@@ -365,32 +350,32 @@ public final class Rest {
             }
             order.toJson(params, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void postOrder(String email, String marketMnem, String ref, Action action,
             long ticks, long lots, long minLots, Params params, long now, Appendable out)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        acquireWrite();
+        serv.acquireWrite();
         try {
             final Sess sess = serv.getLazySessByEmail(email);
             final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
             if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", market));
+                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
             final Trans trans = serv.placeOrder(sess, market, ref, action, ticks, lots, minLots,
                     now, new Trans());
             trans.toJson(params, out);
         } finally {
-            releaseWrite();
+            serv.releaseWrite();
         }
     }
 
     public final void putOrder(String email, String marketMnem, long id, long lots, Params params,
             long now, Appendable out) throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        acquireWrite();
+        serv.acquireWrite();
         try {
             final Sess sess = serv.findSessByEmail(email);
             if (sess == null) {
@@ -398,7 +383,7 @@ public final class Rest {
             }
             final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
             if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", market));
+                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
             final Trans trans = new Trans();
             if (lots > 0) {
@@ -408,13 +393,13 @@ public final class Rest {
             }
             trans.toJson(params, out);
         } finally {
-            releaseWrite();
+            serv.releaseWrite();
         }
     }
 
     public final void deleteTrade(String email, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        acquireWrite();
+        serv.acquireWrite();
         try {
             final Sess sess = serv.findSessByEmail(email);
             if (sess == null) {
@@ -422,13 +407,13 @@ public final class Rest {
             }
             serv.archiveTrade(sess, market, id, now);
         } finally {
-            releaseWrite();
+            serv.releaseWrite();
         }
     }
 
     public final void getTrade(String email, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Trader trader = serv.findTraderByEmail(email);
             if (trader == null) {
@@ -441,13 +426,13 @@ public final class Rest {
             }
             doGetTrade(sess, params, now, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getTrade(String email, String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Trader trader = serv.findTraderByEmail(email);
             if (trader == null) {
@@ -473,13 +458,13 @@ public final class Rest {
             }
             out.append(']');
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getTrade(String email, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Sess sess = serv.findSessByEmail(email);
             if (sess == null) {
@@ -491,13 +476,13 @@ public final class Rest {
             }
             trade.toJson(params, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getPosn(String email, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Trader trader = serv.findTraderByEmail(email);
             if (trader == null) {
@@ -510,13 +495,13 @@ public final class Rest {
             }
             doGetPosn(sess, params, now, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getPosn(String email, String contr, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Trader trader = serv.findTraderByEmail(email);
             if (trader == null) {
@@ -529,13 +514,13 @@ public final class Rest {
             }
             doGetPosn(sess, contr, params, now, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     public final void getPosn(String email, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        acquireRead();
+        serv.acquireRead();
         try {
             final Sess sess = serv.findSessByEmail(email);
             if (sess == null) {
@@ -548,19 +533,19 @@ public final class Rest {
             }
             posn.toJson(params, out);
         } finally {
-            releaseRead();
+            serv.releaseRead();
         }
     }
 
     // Cron jobs.
 
     public final void getEndOfDay(long now) throws NotFoundException, ServiceUnavailableException {
-        acquireWrite();
+        serv.acquireWrite();
         try {
             serv.expireMarkets(now);
             serv.settlMarkets(now);
         } finally {
-            releaseWrite();
+            serv.releaseWrite();
         }
     }
 }

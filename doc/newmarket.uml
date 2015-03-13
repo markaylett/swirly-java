@@ -1,0 +1,10 @@
+@startsalt
+{
+  Mnem        | "EURUSD.MAR15   "
+  Display     | "EURUSD March 15"
+  Contract    | ^EURUSD        ^
+  Settl Date  | "20/03/2015"
+  Expiry Date | "18/03/2015"
+  [ Cancel ]  | [  Save  ]
+}
+@endsalt
