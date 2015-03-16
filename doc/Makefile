@@ -11,6 +11,7 @@ UML=\
 	newmarket.uml \
 	neworder.uml \
 	newtrader.uml \
+	project.uml \
 	rec.uml \
 	reviseorder.uml \
 	serv.uml \
@@ -41,6 +42,9 @@ twirly.pdf: twirly.bib twirly.tex $(EPS)
 
 %.eps: %.uml
 	$(JAVA) -jar plantuml.jar -graphvizdot $(DOT) -teps $<
+
+%.png: %.uml
+	$(JAVA) -jar plantuml.jar -graphvizdot $(DOT) -tpng $<
 
 %.svg: %.uml
 	$(JAVA) -jar plantuml.jar -graphvizdot $(DOT) -tsvg $<
