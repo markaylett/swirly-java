@@ -463,12 +463,7 @@ public final class FixBuilder {
     }
 
     public final void setOrderCancelRequest(String market, String ref, String orderRef, long now) {
-        setSymbol(market);
-        setClOrdId(ref);
-        setOrigClOrdId(orderRef);
-        message.setChar(Side.FIELD, Side.UNDISCLOSED);
-        setOrderQty(0);
-        setTransactTime(now);
+        setOrderCancelReplaceRequest(market, ref, orderRef, 0, now);
     }
 
     public final void setOrderCancelRequest(String market, String ref, long orderId, long now) {
