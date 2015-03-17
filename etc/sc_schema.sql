@@ -11,7 +11,7 @@ SET foreign_key_checks = 1
 ;
 
 CREATE TABLE State (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -26,7 +26,7 @@ INSERT INTO State (id, mnem) VALUES (4, 'TRADE')
 ;
 
 CREATE TABLE Action (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -37,7 +37,7 @@ INSERT INTO Action (id, mnem) VALUES (-1, 'SELL')
 ;
 
 CREATE TABLE Direct (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -48,7 +48,7 @@ INSERT INTO Direct (id, mnem) VALUES (-1, 'GIVEN')
 ;
 
 CREATE TABLE Role (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -59,7 +59,7 @@ INSERT INTO Role (id, mnem) VALUES (2, 'TAKER')
 ;
 
 CREATE TABLE AssetType (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -78,7 +78,7 @@ INSERT INTO AssetType (id, mnem) VALUES (6, 'INDEX')
 ;
 
 CREATE TABLE Asset (
-  mnem CHAR(16) PRIMARY KEY,
+  mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL UNIQUE,
   typeId INT NOT NULL,
 
@@ -87,7 +87,7 @@ CREATE TABLE Asset (
 ENGINE = InnoDB;
 
 CREATE TABLE Contr (
-  mnem CHAR(16) PRIMARY KEY,
+  mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL,
   asset CHAR(16) NOT NULL,
   ccy CHAR(16) NOT NULL,
@@ -105,7 +105,7 @@ CREATE TABLE Contr (
 ENGINE = InnoDB;
 
 CREATE TABLE Market (
-  mnem CHAR(16) PRIMARY KEY,
+  mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE Market (
 ENGINE = InnoDB;
 
 CREATE TABLE Trader (
-  mnem CHAR(16) PRIMARY KEY,
+  mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL,
   email VARCHAR(64) NOT NULL UNIQUE
 )
