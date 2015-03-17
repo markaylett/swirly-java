@@ -195,6 +195,40 @@ INSERT INTO Market (mnem, display, contr, settlDay, expiryDay)
        VALUES ('EURUSD.MAR14', 'EURUSD March 14', 'EURUSD',
               TO_DAYS('2014-03-14') + 1721060, TO_DAYS('2014-03-12') + 1721060);
 
+INSERT INTO RealmUser (email, pass)
+       VALUES ('mark.aylett@gmail.com', 'test')
+;
+
+INSERT INTO RealmUser (email, pass)
+       VALUES ('goska.aylett@gmail.com', 'test')
+;
+
+INSERT INTO RealmUser (email, pass)
+       VALUES ('toby.aylett@gmail.com', 'test')
+;
+
+INSERT INTO RealmUser (email, pass)
+       VALUES ('emily.aylett@gmail.com', 'test')
+;
+
+INSERT INTO RealmUser (email, pass)
+       VALUES ('info@swirlycloud.com', 'test')
+;
+
+INSERT INTO RealmUserRole (user, role)
+       VALUES (
+          (SELECT id FROM RealmUser WHERE email = 'mark.aylett@gmail.com'),
+          (SELECT id FROM RealmRole WHERE mnem = 'admin')
+       )
+;
+
+INSERT INTO RealmUserRole (user, role)
+       VALUES (
+          (SELECT id FROM RealmUser WHERE email = 'mark.aylett@gmail.com'),
+          (SELECT id FROM RealmRole WHERE mnem = 'tomcat')
+       )
+;
+
 INSERT INTO Trader (mnem, display, email)
        VALUES ('MARAYL', 'Mark Aylett', 'mark.aylett@gmail.com')
 ;

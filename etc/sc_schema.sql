@@ -10,6 +10,48 @@ USE twirly
 SET foreign_key_checks = 1
 ;
 
+CREATE TABLE RealmUser (
+  id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  email VARCHAR(64) NOT NULL UNIQUE,
+  pass VARCHAR(32) NULL
+)
+ENGINE = InnoDB;
+
+CREATE TABLE RealmRole (
+  id INT NOT NULL PRIMARY KEY,
+  mnem CHAR(16) NOT NULL UNIQUE
+)
+ENGINE = InnoDB;
+
+INSERT INTO RealmRole (id, mnem) VALUES (1, 'admin')
+;
+
+INSERT INTO RealmRole (id, mnem) VALUES (2, 'trader')
+;
+
+INSERT INTO RealmRole (id, mnem) VALUES (3, 'tomcat')
+;
+
+CREATE TABLE RealmUserRole (
+  user INT NOT NULL,
+  role INT NOT NULL,
+  PRIMARY KEY (user, role),
+  FOREIGN KEY (user) REFERENCES RealmUser (id),
+  FOREIGN KEY (role) REFERENCES RealmRole (id)
+)
+ENGINE = InnoDB;
+
+CREATE VIEW RealmUserRoleV AS
+  SELECT
+    u.email email,
+    r.mnem role
+  FROM RealmUserRole ur
+  INNER JOIN RealmUser u
+  ON ur.user = u.id
+  INNER JOIN RealmRole r
+  ON ur.role = r.id
+;
+
 CREATE TABLE State (
   id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
@@ -121,11 +163,36 @@ ENGINE = InnoDB;
 CREATE TABLE Trader (
   mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL,
-  email VARCHAR(64) NOT NULL UNIQUE
+  email VARCHAR(64) NOT NULL,
+  FOREIGN KEY (email) REFERENCES RealmUser (email)
 )
 ENGINE = InnoDB;
 
-CREATE INDEX traderEmailIdx ON Trader (email);
+DELIMITER //
+CREATE TRIGGER beforeInsertOnTrader
+  BEFORE INSERT ON Trader
+  FOR EACH ROW
+  BEGIN
+    INSERT INTO RealmUserRole (
+      user,
+      role
+    ) VALUES (
+      (SELECT id FROM RealmUser WHERE email = NEW.email),
+      2
+    );
+  END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER afterDeleteOnTrader
+  AFTER DELETE on Trader
+  FOR EACH ROW
+  BEGIN
+    DELETE FROM RealmUserRole
+    WHERE user = (SELECT id FROM RealmUser WHERE email = OLD.email)
+    AND role = 2;
+  END //
+DELIMITER ;
 
 CREATE TABLE Order_ (
   id BIGINT NOT NULL,
@@ -204,8 +271,9 @@ CREATE INDEX execArchiveIdx ON Exec (archive);
 
 DELIMITER //
 CREATE TRIGGER beforeInsertOnExec
-  BEFORE INSERT ON exec
-  FOR EACH ROW BEGIN
+  BEFORE INSERT ON Exec
+  FOR EACH ROW
+  BEGIN
     IF NEW.stateId = 1 THEN
       INSERT INTO Order_ (
         id,
