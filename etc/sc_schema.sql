@@ -79,7 +79,7 @@ INSERT INTO AssetType (id, mnem) VALUES (6, 'INDEX')
 
 CREATE TABLE Asset (
   mnem CHAR(16) PRIMARY KEY,
-  display CHAR(64) NOT NULL UNIQUE,
+  display VARCHAR(64) NOT NULL UNIQUE,
   typeId INT NOT NULL,
 
   FOREIGN KEY (typeId) REFERENCES AssetType (id)
@@ -88,7 +88,7 @@ ENGINE = InnoDB;
 
 CREATE TABLE Contr (
   mnem CHAR(16) PRIMARY KEY,
-  display CHAR(64) NOT NULL,
+  display VARCHAR(64) NOT NULL,
   asset CHAR(16) NOT NULL,
   ccy CHAR(16) NOT NULL,
   tickNumer INT NOT NULL,
@@ -106,7 +106,7 @@ ENGINE = InnoDB;
 
 CREATE TABLE Market (
   mnem CHAR(16) PRIMARY KEY,
-  display CHAR(64) NOT NULL,
+  display VARCHAR(64) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NOT NULL,
   expiryDay INT NOT NULL,
@@ -120,8 +120,8 @@ ENGINE = InnoDB;
 
 CREATE TABLE Trader (
   mnem CHAR(16) PRIMARY KEY,
-  display CHAR(64) NOT NULL,
-  email CHAR(64) NOT NULL UNIQUE
+  display VARCHAR(64) NOT NULL,
+  email VARCHAR(64) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
 
@@ -133,7 +133,7 @@ CREATE TABLE Order_ (
   market CHAR(16) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NOT NULL,
-  ref CHAR(64) NULL,
+  ref VARCHAR(64) NULL,
   stateId INT NOT NULL,
   actionId INT NOT NULL,
   ticks BIGINT NOT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE Exec (
   market CHAR(16) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NOT NULL,
-  ref CHAR(64) NULL,
+  ref VARCHAR(64) NULL,
   stateId INT NOT NULL,
   actionId INT NOT NULL,
   ticks BIGINT NOT NULL,
