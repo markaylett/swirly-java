@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
@@ -41,7 +41,7 @@ import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;
 
-public final class GaeModel implements Model {
+public final class DatastoreModel implements Model {
 
     @SuppressWarnings("unused")
     private static final String ASSET_KIND = "Asset";

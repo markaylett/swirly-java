@@ -3,6 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -17,20 +20,19 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
 import com.swirlycloud.twirly.web.Realm;
 
-public final class PageState implements Realm {
+public final class AppEngineRealm implements Realm {
     private final UserService userService;
-    private final User user;
-    private Page page;
-    private int traderCount = -1;
+    // Cache of all traders.
+    private final Map<String, Boolean> traderCache = new ConcurrentHashMap<>();
 
-    public PageState() {
+    public AppEngineRealm() {
         userService = UserServiceFactory.getUserService();
-        user = userService.getCurrentUser();
     }
 
     @Override
     public final String getUserEmail() {
-        return isUserLoggedIn() ? user.getEmail() : null;
+        final User user = userService.getCurrentUser();
+        return user != null ? user.getEmail() : null;
     }
 
     @Override
@@ -50,7 +52,7 @@ public final class PageState implements Realm {
 
     @Override
     public final boolean isUserLoggedIn() {
-        return user != null;
+        return userService.isUserLoggedIn();
     }
 
     @Override
@@ -60,62 +62,25 @@ public final class PageState implements Realm {
 
     @Override
     public final boolean isUserTrader() {
-        if (!isUserLoggedIn()) {
+        final User user = userService.getCurrentUser();
+        if (user == null) {
             return false;
         }
-        if (traderCount < 0) {
-            // Lazy.
+        Boolean cached = traderCache.get(user.getEmail());
+        if (cached == null) {
             final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL,
-                    user.getEmail());
+            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL, user.getEmail());
             final Query q = new Query("Trader").setFilter(filter).setKeysOnly();
             final PreparedQuery pq = datastore.prepare(q);
-            traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));
+            final int traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));
+            if (traderCount == 1) {
+                // Assumption: once a trader, always a trader.
+                cached = Boolean.TRUE;
+                traderCache.put(user.getEmail(), cached);
+            } else {
+                cached = Boolean.FALSE;
+            }
         }
-        return traderCount == 1;
-    }
-
-    public final void setPage(Page page) {
-        this.page = page;
-    }
-
-    public final String getLoginURL() {
-        return getLoginUrl(page.getPath());
-    }
-
-    public final String getLogoutURL() {
-        return getLoginUrl(Page.HOME.getPath());
-    }
-
-    public final boolean isHomePage() {
-        return page == Page.HOME;
-    }
-
-    public final boolean isTradePage() {
-        return page == Page.TRADE;
-    }
-
-    public final boolean isContrPage() {
-        return page == Page.CONTR;
-    }
-
-    public final boolean isAdminPage() {
-        return page == Page.MARKET || page == Page.TRADER;
-    }
-
-    public final boolean isMarketPage() {
-        return page == Page.MARKET;
-    }
-
-    public final boolean isTraderPage() {
-        return page == Page.TRADER;
-    }
-
-    public final boolean isAboutPage() {
-        return page == Page.ABOUT;
-    }
-
-    public final boolean isContactPage() {
-        return page == Page.CONTACT;
+        return cached.booleanValue();
     }
 }

@@ -36,15 +36,14 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (context.isDevEnv()) {
+        if (realm.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!context.isUserLoggedIn()) {
+            if (!realm.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = context.getUserEmail();
-            final Rest rest = context.getRest();
+            final String email = realm.getUserEmail();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -79,15 +78,14 @@ public final class SessServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (context.isDevEnv()) {
+        if (realm.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!context.isUserLoggedIn()) {
+            if (!realm.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = context.getUserEmail();
-            final Rest rest = context.getRest();
+            final String email = realm.getUserEmail();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -148,15 +146,14 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (context.isDevEnv()) {
+        if (realm.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!context.isUserLoggedIn()) {
+            if (!realm.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = context.getUserEmail();
-            final Rest rest = context.getRest();
+            final String email = realm.getUserEmail();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -182,15 +179,14 @@ public final class SessServlet extends RestServlet {
     @Override
     protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (context.isDevEnv()) {
+        if (realm.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!context.isUserLoggedIn()) {
+            if (!realm.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = context.getUserEmail();
-            final Rest rest = context.getRest();
+            final String email = realm.getUserEmail();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);

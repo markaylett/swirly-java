@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 

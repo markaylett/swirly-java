@@ -29,15 +29,13 @@ public final class ViewServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (context.isDevEnv()) {
+        if (realm.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!context.isUserLoggedIn()) {
+            if (!realm.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-
-            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
