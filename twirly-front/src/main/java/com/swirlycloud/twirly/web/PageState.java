@@ -3,76 +3,47 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.appengine.api.utils.SystemProperty;
-import com.swirlycloud.twirly.web.Realm;
-
 public final class PageState implements Realm {
-    private final UserService userService;
-    private final User user;
+    private final Realm realm;
     private Page page;
-    private int traderCount = -1;
 
-    public PageState() {
-        userService = UserServiceFactory.getUserService();
-        user = userService.getCurrentUser();
+    public PageState(Realm realm) {
+        this.realm = realm;
     }
 
     @Override
     public final String getUserEmail() {
-        return isUserLoggedIn() ? user.getEmail() : null;
+        return realm.getUserEmail();
     }
 
     @Override
     public final String getLoginUrl(String targetUrl) {
-        return userService.createLoginURL(targetUrl);
+        return realm.getLoginUrl(targetUrl);
     }
 
     @Override
     public final String getLogoutUrl(String targetUrl) {
-        return userService.createLogoutURL(targetUrl);
+        return realm.getLogoutUrl(targetUrl);
     }
 
     @Override
     public final boolean isDevEnv() {
-        return SystemProperty.environment.value() == SystemProperty.Environment.Value.Development;
+        return realm.isDevEnv();
     }
 
     @Override
     public final boolean isUserLoggedIn() {
-        return user != null;
+        return realm.isUserLoggedIn();
     }
 
     @Override
     public final boolean isUserAdmin() {
-        return isUserLoggedIn() && userService.isUserAdmin();
+        return realm.isUserAdmin();
     }
 
     @Override
     public final boolean isUserTrader() {
-        if (!isUserLoggedIn()) {
-            return false;
-        }
-        if (traderCount < 0) {
-            // Lazy.
-            final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL,
-                    user.getEmail());
-            final Query q = new Query("Trader").setFilter(filter).setKeysOnly();
-            final PreparedQuery pq = datastore.prepare(q);
-            traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));
-        }
-        return traderCount == 1;
+        return realm.isUserTrader();
     }
 
     public final void setPage(Page page) {

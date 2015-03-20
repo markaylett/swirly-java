@@ -19,9 +19,11 @@ public final class PageServlet extends HttpServlet {
     private static final ThreadLocal<PageState> stateTls = new ThreadLocal<PageState>() {
         @Override
         protected final PageState initialValue() {
-            return new PageState();
+            return new PageState(realm);
         }
     };
+
+    protected static Realm realm;
 
     @Override
     protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -68,5 +70,9 @@ public final class PageServlet extends HttpServlet {
         final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(
                 page.getJspPage());
         dispatcher.forward(req, resp);
+    }
+
+    public static void setRealm(Realm realm) {
+        PageServlet.realm = realm;
     }
 }

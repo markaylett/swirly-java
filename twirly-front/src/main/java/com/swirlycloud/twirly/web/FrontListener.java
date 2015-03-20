@@ -15,9 +15,9 @@ public final class FrontListener implements ServletContextListener {
         // request was invoked.
         final ServletContext sc = event.getServletContext();
         if (sc.getServerInfo().startsWith("Apache Tomcat")) {
-            // TODO: CatalinaRealm
+            PageServlet.setRealm(new CatalinaRealm());
         } else {
-            // TODO: AppEngineRealm
+            PageServlet.setRealm(new AppEngineRealm());
         }
     }
 
