@@ -14,18 +14,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.swirlycloud.twirly.app.Model;
-import com.swirlycloud.twirly.concurrent.AsyncModel;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ServException;
+import com.swirlycloud.twirly.io.AsyncModel;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.util.Params;
-import com.swirlycloud.twirly.web.Realm;
 
 @SuppressWarnings("serial")
 public abstract class RestServlet extends HttpServlet {
 
-    protected static Rest rest;
     protected static Realm realm;
+    protected static Rest rest;
 
     protected final Params newParams(final HttpServletRequest req) {
         return new Params() {
@@ -88,15 +87,15 @@ public abstract class RestServlet extends HttpServlet {
         }
     }
 
+    public static void setRealm(Realm realm) {
+        RestServlet.realm = realm;
+    }
+
     public static void setModel(AsyncModel model) throws InterruptedException, ExecutionException {
         RestServlet.rest = new Rest(model);
     }
 
     public static void setModel(Model model) {
         RestServlet.rest = new Rest(model);
-    }
-
-    public static void setRealm(Realm realm) {
-        RestServlet.realm = realm;
     }
 }

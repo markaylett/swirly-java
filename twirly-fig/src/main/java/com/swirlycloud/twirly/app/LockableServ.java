@@ -6,7 +6,8 @@ package com.swirlycloud.twirly.app;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 
-import com.swirlycloud.twirly.concurrent.AsyncModel;
+import com.swirlycloud.twirly.io.AsyncModel;
+import com.swirlycloud.twirly.io.Model;
 
 /**
  * Serv with methods for acquiring read-write locks.

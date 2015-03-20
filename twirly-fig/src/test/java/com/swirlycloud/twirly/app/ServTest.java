@@ -18,6 +18,7 @@ import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.mock.MockModel;
 
 public final class ServTest {

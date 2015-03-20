@@ -9,13 +9,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import com.swirlycloud.twirly.app.DatastoreModel;
-import com.swirlycloud.twirly.app.JdbcModel;
-import com.swirlycloud.twirly.app.Model;
-import com.swirlycloud.twirly.concurrent.AsyncModelService;
+import com.swirlycloud.twirly.io.AsyncModelService;
+import com.swirlycloud.twirly.io.DatastoreModel;
+import com.swirlycloud.twirly.io.JdbcModel;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.mock.MockModel;
 
-public final class LifeCycle implements ServletContextListener {
+public final class BackListener implements ServletContextListener {
     private Model model;
 
     private static Model getModel(ServletContext sc) {
@@ -51,13 +51,13 @@ public final class LifeCycle implements ServletContextListener {
         if (sc.getServerInfo().startsWith("Apache Tomcat")) {
             try {
                 RestServlet.setModel(new AsyncModelService(model));
-                RestServlet.setRealm(new CatalinaRealm());
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException("failed to create async model", e);
             }
+            RestServlet.setRealm(new CatalinaRealm());
         } else {
-            RestServlet.setModel(model);
             RestServlet.setRealm(new AppEngineRealm());
+            RestServlet.setModel(model);
         }
     }
 

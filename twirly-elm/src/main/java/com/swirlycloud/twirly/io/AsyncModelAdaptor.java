@@ -1,11 +1,11 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.concurrent;
+package com.swirlycloud.twirly.io;
 
 import java.util.concurrent.Future;
 
-import com.swirlycloud.twirly.app.Model;
+import com.swirlycloud.twirly.concurrent.FutureAdapter;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.SlNode;

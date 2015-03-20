@@ -1,11 +1,10 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.concurrent;
+package com.swirlycloud.twirly.io;
 
 import java.util.concurrent.Future;
 
-import com.swirlycloud.twirly.app.Journ;
 import com.swirlycloud.twirly.node.SlNode;
 
 public interface AsyncModel extends Journ {

@@ -10,10 +10,8 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.app.Sess;
 import com.swirlycloud.twirly.app.Trans;
-import com.swirlycloud.twirly.concurrent.AsyncModel;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
@@ -26,6 +24,8 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.AsyncModel;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
 
