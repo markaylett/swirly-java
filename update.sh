@@ -1,5 +1,7 @@
 #!/bin/sh
 set -e
+cd $(dirname $0)
+wd=$PWD
 appid=${1:-'twirly-prd'}
 gradle build
 patch -p1 <<EOF
@@ -24,5 +26,5 @@ patch -p1 <<EOF
      <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
    </system-properties>
 EOF
-./appcfg.sh -A $appid update twirly-ear/build/exploded-app
-./appcfg.sh -A $appid update_dispatch twirly-front/src/main/webapp
+$wd/appcfg.sh -A $appid update twirly-ear/build/exploded-app
+$wd/appcfg.sh -A $appid update_dispatch twirly-front/src/main/webapp

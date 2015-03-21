@@ -10,8 +10,50 @@ USE twirly
 SET foreign_key_checks = 1
 ;
 
+CREATE TABLE RealmUser (
+  id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  email VARCHAR(64) NOT NULL UNIQUE,
+  pass VARCHAR(32) NULL
+)
+ENGINE = InnoDB;
+
+CREATE TABLE RealmRole (
+  id INT NOT NULL PRIMARY KEY,
+  mnem CHAR(16) NOT NULL UNIQUE
+)
+ENGINE = InnoDB;
+
+INSERT INTO RealmRole (id, mnem) VALUES (1, 'admin')
+;
+
+INSERT INTO RealmRole (id, mnem) VALUES (2, 'trader')
+;
+
+INSERT INTO RealmRole (id, mnem) VALUES (3, 'tomcat')
+;
+
+CREATE TABLE RealmUserRole (
+  user INT NOT NULL,
+  role INT NOT NULL,
+  PRIMARY KEY (user, role),
+  FOREIGN KEY (user) REFERENCES RealmUser (id),
+  FOREIGN KEY (role) REFERENCES RealmRole (id)
+)
+ENGINE = InnoDB;
+
+CREATE VIEW RealmUserRoleV AS
+  SELECT
+    u.email email,
+    r.mnem role
+  FROM RealmUserRole ur
+  INNER JOIN RealmUser u
+  ON ur.user = u.id
+  INNER JOIN RealmRole r
+  ON ur.role = r.id
+;
+
 CREATE TABLE State (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -26,7 +68,7 @@ INSERT INTO State (id, mnem) VALUES (4, 'TRADE')
 ;
 
 CREATE TABLE Action (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -37,7 +79,7 @@ INSERT INTO Action (id, mnem) VALUES (-1, 'SELL')
 ;
 
 CREATE TABLE Direct (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -48,7 +90,7 @@ INSERT INTO Direct (id, mnem) VALUES (-1, 'GIVEN')
 ;
 
 CREATE TABLE Role (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -59,7 +101,7 @@ INSERT INTO Role (id, mnem) VALUES (2, 'TAKER')
 ;
 
 CREATE TABLE AssetType (
-  id INT PRIMARY KEY,
+  id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
@@ -78,8 +120,8 @@ INSERT INTO AssetType (id, mnem) VALUES (6, 'INDEX')
 ;
 
 CREATE TABLE Asset (
-  mnem CHAR(16) PRIMARY KEY,
-  display CHAR(64) NOT NULL UNIQUE,
+  mnem CHAR(16) NOT NULL PRIMARY KEY,
+  display VARCHAR(64) NOT NULL UNIQUE,
   typeId INT NOT NULL,
 
   FOREIGN KEY (typeId) REFERENCES AssetType (id)
@@ -87,8 +129,8 @@ CREATE TABLE Asset (
 ENGINE = InnoDB;
 
 CREATE TABLE Contr (
-  mnem CHAR(16) PRIMARY KEY,
-  display CHAR(64) NOT NULL,
+  mnem CHAR(16) NOT NULL PRIMARY KEY,
+  display VARCHAR(64) NOT NULL,
   asset CHAR(16) NOT NULL,
   ccy CHAR(16) NOT NULL,
   tickNumer INT NOT NULL,
@@ -105,8 +147,8 @@ CREATE TABLE Contr (
 ENGINE = InnoDB;
 
 CREATE TABLE Market (
-  mnem CHAR(16) PRIMARY KEY,
-  display CHAR(64) NOT NULL,
+  mnem CHAR(16) NOT NULL PRIMARY KEY,
+  display VARCHAR(64) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NOT NULL,
   expiryDay INT NOT NULL,
@@ -119,13 +161,38 @@ CREATE TABLE Market (
 ENGINE = InnoDB;
 
 CREATE TABLE Trader (
-  mnem CHAR(16) PRIMARY KEY,
-  display CHAR(64) NOT NULL,
-  email CHAR(64) NOT NULL UNIQUE
+  mnem CHAR(16) NOT NULL PRIMARY KEY,
+  display VARCHAR(64) NOT NULL,
+  email VARCHAR(64) NOT NULL,
+  FOREIGN KEY (email) REFERENCES RealmUser (email)
 )
 ENGINE = InnoDB;
 
-CREATE INDEX traderEmailIdx ON Trader (email);
+DELIMITER //
+CREATE TRIGGER beforeInsertOnTrader
+  BEFORE INSERT ON Trader
+  FOR EACH ROW
+  BEGIN
+    INSERT INTO RealmUserRole (
+      user,
+      role
+    ) VALUES (
+      (SELECT id FROM RealmUser WHERE email = NEW.email),
+      2
+    );
+  END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER afterDeleteOnTrader
+  AFTER DELETE on Trader
+  FOR EACH ROW
+  BEGIN
+    DELETE FROM RealmUserRole
+    WHERE user = (SELECT id FROM RealmUser WHERE email = OLD.email)
+    AND role = 2;
+  END //
+DELIMITER ;
 
 CREATE TABLE Order_ (
   id BIGINT NOT NULL,
@@ -133,7 +200,7 @@ CREATE TABLE Order_ (
   market CHAR(16) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NOT NULL,
-  ref CHAR(64) NULL,
+  ref VARCHAR(64) NULL,
   stateId INT NOT NULL,
   actionId INT NOT NULL,
   ticks BIGINT NOT NULL,
@@ -169,7 +236,7 @@ CREATE TABLE Exec (
   market CHAR(16) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NOT NULL,
-  ref CHAR(64) NULL,
+  ref VARCHAR(64) NULL,
   stateId INT NOT NULL,
   actionId INT NOT NULL,
   ticks BIGINT NOT NULL,
@@ -204,8 +271,9 @@ CREATE INDEX execArchiveIdx ON Exec (archive);
 
 DELIMITER //
 CREATE TRIGGER beforeInsertOnExec
-  BEFORE INSERT ON exec
-  FOR EACH ROW BEGIN
+  BEFORE INSERT ON Exec
+  FOR EACH ROW
+  BEGIN
     IF NEW.stateId = 1 THEN
       INSERT INTO Order_ (
         id,

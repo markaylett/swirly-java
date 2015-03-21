@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.io;
 
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
@@ -22,7 +22,6 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Transaction;
-import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
@@ -35,13 +34,14 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;
 
-public final class GaeModel implements Model {
+public final class DatastoreModel implements Model {
 
     @SuppressWarnings("unused")
     private static final String ASSET_KIND = "Asset";

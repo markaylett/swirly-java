@@ -19,7 +19,7 @@
   </context-param>
 
   <listener>
-    <listener-class>com.swirlycloud.twirly.web.LifeCycle</listener-class>
+    <listener-class>com.swirlycloud.twirly.web.BackListener</listener-class>
   </listener>
 
   <servlet>

@@ -35,15 +35,13 @@ public final class RecServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (context.isDevEnv()) {
+        if (realm.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!context.isUserLoggedIn()) {
+            if (!realm.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-
-            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -52,7 +50,7 @@ public final class RecServlet extends RestServlet {
 
             boolean match = false;
             if (parts.length == 0) {
-                rest.getRec(context.isUserAdmin(), params, now, resp.getWriter());
+                rest.getRec(realm.isUserAdmin(), params, now, resp.getWriter());
                 match = true;
             } else if ("asset".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
@@ -79,7 +77,7 @@ public final class RecServlet extends RestServlet {
                     match = true;
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
-                if (!context.isUserAdmin()) {
+                if (!realm.isUserAdmin()) {
                     throw new BadRequestException("user is not an admin");
                 }
                 if (parts.length == 1) {
@@ -103,15 +101,13 @@ public final class RecServlet extends RestServlet {
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (context.isDevEnv()) {
+        if (realm.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!context.isUserLoggedIn()) {
+            if (!realm.isUserLoggedIn()) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-
-            final Rest rest = context.getRest();
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -123,7 +119,7 @@ public final class RecServlet extends RestServlet {
             final Request r = parseRequest(req);
             if ("market".equals(parts[TYPE_PART])) {
 
-                if (!context.isUserAdmin()) {
+                if (!realm.isUserAdmin()) {
                     throw new BadRequestException("user is not an admin");
                 }
 
@@ -137,11 +133,11 @@ public final class RecServlet extends RestServlet {
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                String email = context.getUserEmail();
+                String email = realm.getUserEmail();
 
                 int fields = r.getFields();
                 if ((fields & Request.EMAIL) != 0) {
-                    if (!r.getEmail().equals(email) && !context.isUserAdmin()) {
+                    if (!r.getEmail().equals(email) && !realm.isUserAdmin()) {
                         throw new ForbiddenException("user is not an admin");
                     }
                     fields &= ~Request.EMAIL;

@@ -16,6 +16,15 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public final class PageServlet extends HttpServlet {
 
+    private static final ThreadLocal<PageState> stateTls = new ThreadLocal<PageState>() {
+        @Override
+        protected final PageState initialValue() {
+            return new PageState(realm);
+        }
+    };
+
+    protected static Realm realm;
+
     @Override
     protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -46,19 +55,24 @@ public final class PageServlet extends HttpServlet {
             return;
         }
         // Expose state to JSP page.
-        final PageState state = new PageState(page);
+        final PageState state = stateTls.get();
+        state.setPage(page);
         if (page.isRestricted()) {
             if (!state.isUserLoggedIn()) {
                 resp.sendRedirect(state.getLoginURL());
                 return;
             }
         }
-        if (page == Page.TRADE && !state.isTrader()) {
+        if (page == Page.TRADE && !state.isUserTrader()) {
             page = Page.SIGNUP;
         }
         req.setAttribute("state", state);
         final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(
                 page.getJspPage());
         dispatcher.forward(req, resp);
+    }
+
+    public static void setRealm(Realm realm) {
+        PageServlet.realm = realm;
     }
 }

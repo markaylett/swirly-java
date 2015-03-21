@@ -30,6 +30,7 @@ import quickfix.fix44.OrderCancelRequest;
 
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.mock.MockModel;
 import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 import com.swirlycloud.twirly.quickfix.Slf4jLogFactory;

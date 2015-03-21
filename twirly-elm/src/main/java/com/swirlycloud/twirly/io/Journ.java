@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.io;
 
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;

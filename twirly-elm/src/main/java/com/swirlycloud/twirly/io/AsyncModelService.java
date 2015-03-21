@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.concurrent;
+package com.swirlycloud.twirly.io;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.SlNode;

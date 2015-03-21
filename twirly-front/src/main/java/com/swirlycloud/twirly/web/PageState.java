@@ -3,28 +3,59 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
+public final class PageState implements Realm {
+    private final Realm realm;
+    private Page page;
 
-public final class PageState {
-    private final Page page;
-    private final UserService userService;
-    private final User user;
-    private int traderCount = -1;
+    public PageState(Realm realm) {
+        this.realm = realm;
+    }
 
-    public PageState(Page page) {
+    @Override
+    public final String getUserEmail() {
+        return realm.getUserEmail();
+    }
+
+    @Override
+    public final String getLoginUrl(String targetUrl) {
+        return realm.getLoginUrl(targetUrl);
+    }
+
+    @Override
+    public final String getLogoutUrl(String targetUrl) {
+        return realm.getLogoutUrl(targetUrl);
+    }
+
+    @Override
+    public final boolean isDevEnv() {
+        return realm.isDevEnv();
+    }
+
+    @Override
+    public final boolean isUserLoggedIn() {
+        return realm.isUserLoggedIn();
+    }
+
+    @Override
+    public final boolean isUserAdmin() {
+        return realm.isUserAdmin();
+    }
+
+    @Override
+    public final boolean isUserTrader() {
+        return realm.isUserTrader();
+    }
+
+    public final void setPage(Page page) {
         this.page = page;
-        userService = UserServiceFactory.getUserService();
-        user = userService.getCurrentUser();
+    }
+
+    public final String getLoginURL() {
+        return getLoginUrl(page.getPath());
+    }
+
+    public final String getLogoutURL() {
+        return getLoginUrl(Page.HOME.getPath());
     }
 
     public final boolean isHomePage() {
@@ -57,41 +88,5 @@ public final class PageState {
 
     public final boolean isContactPage() {
         return page == Page.CONTACT;
-    }
-
-    public final boolean isUserLoggedIn() {
-        return user != null;
-    }
-
-    public final boolean isUserAdmin() {
-        return isUserLoggedIn() && userService.isUserAdmin();
-    }
-
-    public final boolean isTrader() {
-        if (!isUserLoggedIn()) {
-            return false;
-        }
-        if (traderCount < 0) {
-            // Lazy.
-            final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL,
-                    user.getEmail());
-            final Query q = new Query("Trader").setFilter(filter).setKeysOnly();
-            final PreparedQuery pq = datastore.prepare(q);
-            traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));
-        }
-        return traderCount == 1;
-    }
-
-    public final String getUserName() {
-        return user.getEmail();
-    }
-
-    public final String getLoginURL() {
-        return userService.createLoginURL(page.getPath());
-    }
-
-    public final String getLogoutURL() {
-        return userService.createLogoutURL(Page.HOME.getPath());
     }
 }

@@ -44,7 +44,6 @@ import quickfix.fix44.OrderCancelReject;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
-import com.swirlycloud.twirly.concurrent.AsyncModel;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
@@ -55,6 +54,8 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.FixRejectException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.AsyncModel;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class FixServer extends MessageCracker implements Application {

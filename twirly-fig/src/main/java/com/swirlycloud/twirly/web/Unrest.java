@@ -16,7 +16,7 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.app.Model;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.io;
 
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
@@ -12,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
@@ -27,6 +26,7 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;

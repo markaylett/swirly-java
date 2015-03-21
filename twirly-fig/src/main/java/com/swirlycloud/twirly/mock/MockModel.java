@@ -3,8 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.mock;
 
-import com.swirlycloud.twirly.app.Model;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class MockModel implements Model {

@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.web;
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -15,12 +16,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ServException;
+import com.swirlycloud.twirly.io.AsyncModel;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
 public abstract class RestServlet extends HttpServlet {
 
-    protected static Context context;
+    protected static Realm realm;
+    protected static Rest rest;
 
     protected final Params newParams(final HttpServletRequest req) {
         return new Params() {
@@ -75,7 +79,7 @@ public abstract class RestServlet extends HttpServlet {
     @Override
     public final void doOptions(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        if (context.isDevEnv()) {
+        if (realm.isDevEnv()) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
             resp.setHeader("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, POST, PUT");
             resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -83,7 +87,15 @@ public abstract class RestServlet extends HttpServlet {
         }
     }
 
-    public static void setContext(Context context) {
-        RestServlet.context = context;
+    public static void setRealm(Realm realm) {
+        RestServlet.realm = realm;
+    }
+
+    public static void setModel(AsyncModel model) throws InterruptedException, ExecutionException {
+        RestServlet.rest = new Rest(model);
+    }
+
+    public static void setModel(Model model) {
+        RestServlet.rest = new Rest(model);
     }
 }

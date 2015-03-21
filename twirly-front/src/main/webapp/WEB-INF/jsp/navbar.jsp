@@ -36,7 +36,7 @@
       <ul class="nav navbar-nav navbar-right">
         <c:choose>
           <c:when test="${state.userLoggedIn}">
-            <li><a>Hello, ${fn:escapeXml(state.userName)}</a></li>
+            <li><a>Hello, ${fn:escapeXml(state.userEmail)}</a></li>
             <li>
               <a href="${state.logoutURL}">Sign Out</a>
             </li>
