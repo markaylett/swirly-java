@@ -29,11 +29,11 @@ public final class ViewServlet extends RestServlet {
 
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (realm.isDevEnv()) {
+        if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!realm.isUserLoggedIn()) {
+            if (!realm.isUserLoggedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
 

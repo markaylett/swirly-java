@@ -56,10 +56,10 @@ public final class PageServlet extends HttpServlet {
         }
         // Expose state to JSP page.
         final PageState state = stateTls.get();
-        state.setPage(page);
+        state.setState(req, resp, page);
         if (page.isRestricted()) {
             if (!state.isUserLoggedIn()) {
-                resp.sendRedirect(state.getLoginURL());
+                resp.sendRedirect(state.getLoginUrl());
                 return;
             }
         }

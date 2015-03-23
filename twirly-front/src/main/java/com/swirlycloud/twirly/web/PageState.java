@@ -3,59 +3,51 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-public final class PageState implements Realm {
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public final class PageState {
     private final Realm realm;
+    private HttpServletRequest req;
+    private HttpServletResponse resp;
     private Page page;
 
     public PageState(Realm realm) {
         this.realm = realm;
     }
 
-    @Override
-    public final String getUserEmail() {
-        return realm.getUserEmail();
-    }
-
-    @Override
-    public final String getLoginUrl(String targetUrl) {
-        return realm.getLoginUrl(targetUrl);
-    }
-
-    @Override
-    public final String getLogoutUrl(String targetUrl) {
-        return realm.getLogoutUrl(targetUrl);
-    }
-
-    @Override
-    public final boolean isDevEnv() {
-        return realm.isDevEnv();
-    }
-
-    @Override
-    public final boolean isUserLoggedIn() {
-        return realm.isUserLoggedIn();
-    }
-
-    @Override
-    public final boolean isUserAdmin() {
-        return realm.isUserAdmin();
-    }
-
-    @Override
-    public final boolean isUserTrader() {
-        return realm.isUserTrader();
-    }
-
-    public final void setPage(Page page) {
+    public final void setState(HttpServletRequest req, HttpServletResponse resp, Page page) {
+        this.req = req;
+        this.resp = resp;
         this.page = page;
     }
 
-    public final String getLoginURL() {
-        return getLoginUrl(page.getPath());
+    public final String getLoginUrl() {
+        return realm.getLoginUrl(resp, page.getPath());
     }
 
-    public final String getLogoutURL() {
-        return getLoginUrl(Page.HOME.getPath());
+    public final String getLogoutUrl() {
+        return realm.getLogoutUrl(resp, Page.HOME.getPath());
+    }
+
+    public final String getUserEmail() {
+        return realm.getUserEmail(req);
+    }
+
+    public final boolean isDevServer() {
+        return realm.isDevServer(req);
+    }
+
+    public final boolean isUserLoggedIn() {
+        return realm.isUserLoggedIn(req);
+    }
+
+    public final boolean isUserAdmin() {
+        return realm.isUserAdmin(req);
+    }
+
+    public final boolean isUserTrader() {
+        return realm.isUserTrader(req);
     }
 
     public final boolean isHomePage() {

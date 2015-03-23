@@ -23,13 +23,16 @@ CREATE TABLE RealmRole (
 )
 ENGINE = InnoDB;
 
-INSERT INTO RealmRole (id, mnem) VALUES (1, 'admin')
+INSERT INTO RealmRole (id, mnem) VALUES (0, 'tomcat')
+;
+
+INSERT INTO RealmRole (id, mnem) VALUES (1, 'user')
 ;
 
 INSERT INTO RealmRole (id, mnem) VALUES (2, 'trader')
 ;
 
-INSERT INTO RealmRole (id, mnem) VALUES (3, 'tomcat')
+INSERT INTO RealmRole (id, mnem) VALUES (3, 'admin')
 ;
 
 CREATE TABLE RealmUserRole (

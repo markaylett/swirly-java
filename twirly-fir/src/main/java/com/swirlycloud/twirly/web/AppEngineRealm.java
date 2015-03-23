@@ -6,6 +6,9 @@ package com.swirlycloud.twirly.web;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -18,7 +21,6 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
-import com.swirlycloud.twirly.web.Realm;
 
 public final class AppEngineRealm implements Realm {
     private final UserService userService;
@@ -30,38 +32,38 @@ public final class AppEngineRealm implements Realm {
     }
 
     @Override
-    public final String getUserEmail() {
+    public final String getLoginUrl(HttpServletResponse resp, String targetUrl) {
+        return userService.createLoginURL(targetUrl);
+    }
+
+    @Override
+    public final String getLogoutUrl(HttpServletResponse resp, String targetUrl) {
+        return userService.createLogoutURL(targetUrl);
+    }
+
+    @Override
+    public final String getUserEmail(HttpServletRequest req) {
         final User user = userService.getCurrentUser();
         return user != null ? user.getEmail() : null;
     }
 
     @Override
-    public final String getLoginUrl(String targetUrl) {
-        return userService.createLoginURL(targetUrl);
-    }
-
-    @Override
-    public final String getLogoutUrl(String targetUrl) {
-        return userService.createLogoutURL(targetUrl);
-    }
-
-    @Override
-    public final boolean isDevEnv() {
+    public final boolean isDevServer(HttpServletRequest req) {
         return SystemProperty.environment.value() == SystemProperty.Environment.Value.Development;
     }
 
     @Override
-    public final boolean isUserLoggedIn() {
+    public final boolean isUserLoggedIn(HttpServletRequest req) {
         return userService.isUserLoggedIn();
     }
 
     @Override
-    public final boolean isUserAdmin() {
-        return isUserLoggedIn() && userService.isUserAdmin();
+    public final boolean isUserAdmin(HttpServletRequest req) {
+        return isUserLoggedIn(req) && userService.isUserAdmin();
     }
 
     @Override
-    public final boolean isUserTrader() {
+    public final boolean isUserTrader(HttpServletRequest req) {
         final User user = userService.getCurrentUser();
         if (user == null) {
             return false;
