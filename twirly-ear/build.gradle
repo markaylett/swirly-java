@@ -1,5 +1,5 @@
-apply plugin: 'ear'
 apply plugin: 'appengine'
+apply plugin: 'ear'
 
 buildscript {
     repositories {

@@ -1,4 +1,4 @@
-apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
 
 dependencies {
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.+'
