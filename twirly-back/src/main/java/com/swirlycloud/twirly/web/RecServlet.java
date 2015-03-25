@@ -39,7 +39,7 @@ public final class RecServlet extends RestServlet {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!realm.isUserLoggedIn(req)) {
+            if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
 
@@ -105,7 +105,7 @@ public final class RecServlet extends RestServlet {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         try {
-            if (!realm.isUserLoggedIn(req)) {
+            if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
 

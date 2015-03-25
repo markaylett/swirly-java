@@ -3,22 +3,30 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface Realm {
 
-    String getLoginUrl(HttpServletResponse resp, String targetUrl);
+    // Return false if authentication is incomplete.
 
-    String getLogoutUrl(HttpServletResponse resp, String targetUrl);
+    boolean authenticate(HttpServletRequest req, HttpServletResponse resp, String targetUrl)
+            throws IOException, ServletException;
+
+    String getSignInUrl(HttpServletResponse resp, String targetUrl);
+
+    String getSignOutUrl(HttpServletResponse resp, String targetUrl);
 
     String getUserEmail(HttpServletRequest req);
 
     boolean isDevServer(HttpServletRequest req);
 
-    boolean isUserLoggedIn(HttpServletRequest req);
+    boolean isUserSignedIn(HttpServletRequest req);
 
     boolean isUserAdmin(HttpServletRequest req);
-    
+
     boolean isUserTrader(HttpServletRequest req);
 }

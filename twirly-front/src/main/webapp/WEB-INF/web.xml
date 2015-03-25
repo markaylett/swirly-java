@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
   <listener>
-    <listener-class>com.swirlycloud.twirly.web.FrontListener</listener-class>
+    <listener-class>com.swirlycloud.twirly.web.FrontLifeCycle</listener-class>
   </listener>
 
   <!-- The proxy servlet is only used by the development server. -->
@@ -39,6 +39,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>user</web-resource-name>
+      <url-pattern>/page/auth</url-pattern>
       <url-pattern>/page/trade</url-pattern>
       <url-pattern>/page/contr</url-pattern>
     </web-resource-collection>
@@ -57,4 +58,25 @@
       <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
+
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <realm-name>twirly</realm-name>
+    <form-login-config>
+      <form-login-page>/page/signin</form-login-page>
+      <form-error-page>/page/error</form-error-page>
+    </form-login-config>
+  </login-config>
+
+  <!-- Security roles referenced by this web application. -->
+  <security-role>
+    <role-name>user</role-name>
+  </security-role>
+  <security-role>
+    <role-name>trader</role-name>
+  </security-role>
+    <security-role>
+    <role-name>admin</role-name>
+  </security-role>
+
 </web-app>

@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,12 +33,22 @@ public final class AppEngineRealm implements Realm {
     }
 
     @Override
-    public final String getLoginUrl(HttpServletResponse resp, String targetUrl) {
+    public final boolean authenticate(HttpServletRequest req, HttpServletResponse resp,
+            String targetUrl) throws IOException {
+        if (isUserSignedIn(req)) {
+            return true;
+        }
+        resp.sendRedirect(getSignInUrl(resp, targetUrl));
+        return false;
+    }
+
+    @Override
+    public final String getSignInUrl(HttpServletResponse resp, String targetUrl) {
         return userService.createLoginURL(targetUrl);
     }
 
     @Override
-    public final String getLogoutUrl(HttpServletResponse resp, String targetUrl) {
+    public final String getSignOutUrl(HttpServletResponse resp, String targetUrl) {
         return userService.createLogoutURL(targetUrl);
     }
 
@@ -53,13 +64,13 @@ public final class AppEngineRealm implements Realm {
     }
 
     @Override
-    public final boolean isUserLoggedIn(HttpServletRequest req) {
+    public final boolean isUserSignedIn(HttpServletRequest req) {
         return userService.isUserLoggedIn();
     }
 
     @Override
     public final boolean isUserAdmin(HttpServletRequest req) {
-        return isUserLoggedIn(req) && userService.isUserAdmin();
+        return isUserSignedIn(req) && userService.isUserAdmin();
     }
 
     @Override
@@ -71,7 +82,8 @@ public final class AppEngineRealm implements Realm {
         Boolean cached = traderCache.get(user.getEmail());
         if (cached == null) {
             final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL, user.getEmail());
+            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL,
+                    user.getEmail());
             final Query q = new Query("Trader").setFilter(filter).setKeysOnly();
             final PreparedQuery pq = datastore.prepare(q);
             final int traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));

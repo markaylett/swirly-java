@@ -38,13 +38,13 @@
           <c:when test="${state.userLoggedIn}">
             <li><a>Hello, ${fn:escapeXml(state.userEmail)}</a></li>
             <li>
-              <a href="${state.logoutUrl}">Sign Out</a>
+              <a href="${state.signOutUrl}">Sign Out</a>
             </li>
           </c:when>
           <c:otherwise>
             <li><a>Welcome</a></li>
             <li>
-              <a href="${state.loginUrl}">Sign In</a>
+              <a href="${state.signInUrl}">Sign In</a>
             </li>
           </c:otherwise>
         </c:choose>

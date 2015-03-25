@@ -3,6 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,12 +25,18 @@ public final class PageState {
         this.page = page;
     }
 
-    public final String getLoginUrl() {
-        return realm.getLoginUrl(resp, page.getPath());
+    public final boolean authenticate() throws IOException, ServletException {
+        return realm.authenticate(req, resp, page.getPath());
     }
 
-    public final String getLogoutUrl() {
-        return realm.getLogoutUrl(resp, Page.HOME.getPath());
+    public final String getSignInUrl() {
+        final Page target = page.isInternal() ? Page.HOME : page;
+        return realm.getSignInUrl(resp, target.getPath());
+    }
+
+    public final String getSignOutUrl() {
+        final Page target = page.isInternal() || page.isRestricted() ? Page.HOME : page;
+        return realm.getSignOutUrl(resp, target.getPath());
     }
 
     public final String getUserEmail() {
@@ -39,7 +48,7 @@ public final class PageState {
     }
 
     public final boolean isUserLoggedIn() {
-        return realm.isUserLoggedIn(req);
+        return realm.isUserSignedIn(req);
     }
 
     public final boolean isUserAdmin() {
@@ -80,5 +89,17 @@ public final class PageState {
 
     public final boolean isContactPage() {
         return page == Page.CONTACT;
+    }
+
+    public final boolean isErrorPage() {
+        return page == Page.ERROR;
+    }
+
+    public final boolean isLoginPage() {
+        return page == Page.SIGNIN;
+    }
+
+    public final boolean isSignUpPage() {
+        return page == Page.SIGNUP;
     }
 }

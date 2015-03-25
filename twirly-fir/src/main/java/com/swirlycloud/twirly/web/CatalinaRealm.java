@@ -3,21 +3,29 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import java.io.IOException;
 import java.security.Principal;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public final class CatalinaRealm implements Realm {
 
     @Override
-    public final String getLoginUrl(HttpServletResponse resp, String targetUrl) {
-        return resp.encodeURL("login.jsp");
+    public final boolean authenticate(HttpServletRequest req, HttpServletResponse resp,
+            String targetUrl) throws IOException, ServletException {
+        return req.authenticate(resp);
     }
 
     @Override
-    public final String getLogoutUrl(HttpServletResponse resp, String targetUrl) {
-        return resp.encodeURL("logout.jsp");
+    public final String getSignInUrl(HttpServletResponse resp, String targetUrl) {
+        return resp.encodeURL("/page/auth");
+    }
+
+    @Override
+    public final String getSignOutUrl(HttpServletResponse resp, String targetUrl) {
+        return resp.encodeURL("/page/signout");
     }
 
     @Override
@@ -32,17 +40,17 @@ public final class CatalinaRealm implements Realm {
     }
 
     @Override
-    public final boolean isUserLoggedIn(HttpServletRequest req) {
+    public final boolean isUserSignedIn(HttpServletRequest req) {
         return req.getUserPrincipal() != null;
     }
 
     @Override
     public final boolean isUserAdmin(HttpServletRequest req) {
-        return isUserLoggedIn(req) && req.isUserInRole("admin");
+        return isUserSignedIn(req) && req.isUserInRole("admin");
     }
 
     @Override
     public final boolean isUserTrader(HttpServletRequest req) {
-        return isUserLoggedIn(req) && req.isUserInRole("trader");
+        return isUserSignedIn(req) && req.isUserInRole("trader");
     }
 }

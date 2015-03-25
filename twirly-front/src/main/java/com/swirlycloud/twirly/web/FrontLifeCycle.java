@@ -7,7 +7,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-public final class FrontListener implements ServletContextListener {
+public final class FrontLifeCycle implements ServletContextListener {
 
     @Override
     public final void contextInitialized(ServletContextEvent event) {
