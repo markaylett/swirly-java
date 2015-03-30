@@ -1,3 +1,5 @@
+// -*- conf -*-
+
 apply plugin: 'eclipse-wtp'
 
 dependencies {

@@ -1,0 +1,36 @@
+// -*- conf -*-
+
+appengine {
+    version = '1.9.18'
+    email = 'mark.aylett@swirlycloud.com'
+}
+
+front {
+    webinf = 'src/config/appengine'
+}
+
+back {
+    webinf = 'src/config/appengine'
+}
+
+environments {
+    tomcat {
+        front {
+            webinf = 'src/config/catalina'
+        }
+        back {
+            webinf = 'src/config/catalina'
+        }
+    }
+    local {
+        back {
+            webinf = 'src/config/devengine'
+        }
+    }
+    dev {
+    }
+    uat {
+    }
+    prd {
+    }
+}

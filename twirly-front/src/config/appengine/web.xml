@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+  <listener>
+    <listener-class>com.swirlycloud.twirly.web.FrontLifeCycle</listener-class>
+  </listener>
+
+  <!-- The proxy servlet is only used by the development server. -->
+  <servlet>
+    <servlet-name>proxy</servlet-name>
+    <servlet-class>com.swirlycloud.twirly.web.ProxyServlet</servlet-class>
+    <init-param>
+	  <param-name>module</param-name>
+	  <param-value>backend</param-value>
+	</init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>page</servlet-name>
+    <servlet-class>com.swirlycloud.twirly.web.PageServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>proxy</servlet-name>
+    <url-pattern>/api/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>page</servlet-name>
+    <url-pattern>/page/*</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>page/home</welcome-file>
+  </welcome-file-list>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>user</web-resource-name>
+      <url-pattern>/page/trade</url-pattern>
+      <url-pattern>/page/contr</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>admin</web-resource-name>
+      <url-pattern>/page/market</url-pattern>
+      <url-pattern>/page/trader</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
+</web-app>
