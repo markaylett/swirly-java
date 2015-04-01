@@ -192,8 +192,14 @@ INSERT INTO Contr (mnem, display, asset, ccy, tickNumer,
 ;
 
 INSERT INTO Market (mnem, display, contr, settlDay, expiryDay)
-       VALUES ('EURUSD.MAR14', 'EURUSD March 14', 'EURUSD',
-              TO_DAYS('2014-03-14') + 1721060, TO_DAYS('2014-03-12') + 1721060);
+       VALUES ('EURUSD.JUN15', 'EURUSD June 15', 'EURUSD',
+              TO_DAYS('2015-06-19') + 1721060, TO_DAYS('2015-06-18') + 1721060)
+;
+
+INSERT INTO Market (mnem, display, contr, settlDay, expiryDay)
+       VALUES ('GBPUSD.JUN15', 'GBPUSD June 15', 'GBPUSD',
+              TO_DAYS('2015-06-19') + 1721060, TO_DAYS('2015-06-18') + 1721060)
+;
 
 INSERT INTO RealmUser (email, pass)
        VALUES ('mark.aylett@gmail.com', 'test')
