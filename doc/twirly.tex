@@ -156,7 +156,7 @@
 
 \title{The Twirly Manual}
 \author{Mark Aylett}
-\date{\today\\Version 0.1}
+\date{\today\\Version 0.2}
 \maketitle
 
 \tableofcontents
@@ -523,11 +523,44 @@ MinLots&Long&110&MinQty&Y&Minimum quantity in lots\\
 
 \subsubsection{Order Revision}
 
+\vspace{5mm}
+\begin{tabular}{ll|ll|ll}
+\multicolumn{2}{c}{Rest API}&\multicolumn{2}{c}{Fix API}\\
+Name&Type&Tag&Field&Req'd&Description\\
+\hline
+Market&String&55&Symbol&Y&Market mnemonic\\
+-&-&11&ClOrdId&Y&Client reference\\
+Id&Long&37&OrderId&Y&Order identifier\\
+-&-&41&OrigClOrdId&Y&Original client reference\\
+-&-&54&Side&Y&Always ``Undisclosed''\\
+-&-&40&OrdType&Y&Always ``LIMIT''\\
+Lots&Long&38&OrderQty&Y&Quantity in lots\\
+-&-&60&TransactTime&Y&Current time\\
+\end{tabular}
+\vspace{5mm}
+
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.6]{reviseorder.eps}
 \caption{Revise Order Dialog}
 \end{figure}
+
+\subsubsection{Order Cancellation}
+
+\vspace{5mm}
+\begin{tabular}{ll|ll|ll}
+\multicolumn{2}{c}{Rest API}&\multicolumn{2}{c}{Fix API}\\
+Name&Type&Tag&Field&Req'd&Description\\
+\hline
+Market&String&55&Symbol&Y&Market mnemonic\\
+-&-&11&ClOrdId&Y&Client reference\\
+Id&Long&37&OrderId&Y&Order identifier\\
+-&-&41&OrigClOrdId&Y&Original client reference\\
+-&-&54&Side&Y&Always ``Undisclosed''\\
+-&-&38&OrderQty&Y&Always zero. Ignored by server-side\\
+-&-&60&TransactTime&Y&Current time\\
+\end{tabular}
+\vspace{5mm}
 
 \subsection{Administration}
 
@@ -601,7 +634,7 @@ focused on our bottom line. We have also taken care to avoid vendor lock-in, by 
 core application only uses open standards and technologies. This gives us the option to target
 different application containers, run on dedicated infrastructure, or to open-source the software.
 
-\subsection{User Experience}
+\subsection{Barrier to Entry}
 
 When I download a software package for the first time, I \gls{unzip} it and attempt to compile it
 using familiar commands, without even a fleeting glimpse at the ``INSTALL'' or ``README''

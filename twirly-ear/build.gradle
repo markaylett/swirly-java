@@ -1,5 +1,7 @@
-apply plugin: 'ear'
+// -*- conf -*-
+
 apply plugin: 'appengine'
+apply plugin: 'ear'
 
 buildscript {
     repositories {
@@ -7,12 +9,12 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.17'
+        classpath "com.google.appengine:gradle-appengine-plugin:$config.appengine.version"
     }
 }
 
 dependencies {
-    appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.17'
+    appengineSdk "com.google.appengine:appengine-java-sdk:$config.appengine.version"
     deploy project(path: ':twirly-front', configuration: 'archives')
     deploy project(path: ':twirly-back', configuration: 'archives')
 }
@@ -21,11 +23,11 @@ appengine {
     downloadSdk = true
     jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000']
     appcfg {
-        email = 'mark.aylett@swirlycloud.com'
+        email = config.appengine.email
         oauth2 = true
 
         app {
-            id = 'twirly-prd'
+            id = 'twirly'
         }
     }
 }

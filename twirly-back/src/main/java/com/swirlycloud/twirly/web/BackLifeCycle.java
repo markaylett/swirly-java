@@ -9,14 +9,28 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import com.swirlycloud.twirly.io.AsyncModel;
 import com.swirlycloud.twirly.io.AsyncModelService;
 import com.swirlycloud.twirly.io.DatastoreModel;
 import com.swirlycloud.twirly.io.JdbcModel;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.mock.MockModel;
 
-public final class BackListener implements ServletContextListener {
-    private Model model;
+public final class BackLifeCycle implements ServletContextListener {
+    private AutoCloseable closeable;
+
+    private final void close(final ServletContext sc) {
+        try {
+            // We have to check for null here because contextDestroyed may be called even when
+            // contextInitialized fails.
+            if (closeable != null) {
+                closeable.close();
+                closeable = null;
+            }
+        } catch (Exception e) {
+            sc.log("failed to close model", e);
+        }
+    }
 
     private static Model getModel(ServletContext sc) {
         Model model;
@@ -47,30 +61,35 @@ public final class BackListener implements ServletContextListener {
         // This will be invoked as part of a warmup request, or the first user request if no warmup
         // request was invoked.
         final ServletContext sc = event.getServletContext();
-        model = getModel(sc);
-        if (sc.getServerInfo().startsWith("Apache Tomcat")) {
-            try {
-                RestServlet.setModel(new AsyncModelService(model));
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException("failed to create async model", e);
+        final Model model = getModel(sc);
+        this.closeable = model;
+        boolean success = false;
+        try {
+            if (sc.getServerInfo().startsWith("Apache Tomcat")) {
+                RestServlet.setRealm(new CatalinaRealm());
+                final AsyncModel asyncModel = new AsyncModelService(model);
+                this.closeable = asyncModel;
+                try {
+                    RestServlet.setModel(asyncModel);
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException("failed to create async model", e);
+                }
+            } else {
+                RestServlet.setRealm(new AppEngineRealm());
+                RestServlet.setModel(model);
             }
-            RestServlet.setRealm(new CatalinaRealm());
-        } else {
-            RestServlet.setRealm(new AppEngineRealm());
-            RestServlet.setModel(model);
+            success = true;
+        } finally {
+            if (!success) {
+                close(sc);
+            }
         }
     }
 
     @Override
     public final void contextDestroyed(ServletContextEvent event) {
         // App Engine does not currently invoke this method.
-        try {
-            if (model != null) {
-                model.close();
-            }
-        } catch (Exception e) {
-            final ServletContext sc = event.getServletContext();
-            sc.log("failed to close model", e);
-        }
+        final ServletContext sc = event.getServletContext();
+        close(sc);
     }
 }

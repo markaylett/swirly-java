@@ -17,7 +17,7 @@
       <jsp:include page="alert.jsp"/>
 
       <form class="form-signup">
-        <h2>Trader sign-up</h2>
+        <h3>Sign up for a trading account</h3>
         <div class="form-group">
           <label for="mnem">Trader name:</label>
           <input id="mnem" type="text" class="form-control" data-bind="value: mnem"/>

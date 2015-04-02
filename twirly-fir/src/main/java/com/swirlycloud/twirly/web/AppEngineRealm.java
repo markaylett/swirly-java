@@ -3,8 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -18,7 +22,6 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
-import com.swirlycloud.twirly.web.Realm;
 
 public final class AppEngineRealm implements Realm {
     private final UserService userService;
@@ -30,38 +33,48 @@ public final class AppEngineRealm implements Realm {
     }
 
     @Override
-    public final String getUserEmail() {
+    public final boolean authenticate(HttpServletRequest req, HttpServletResponse resp,
+            String targetUrl) throws IOException {
+        if (isUserSignedIn(req)) {
+            return true;
+        }
+        resp.sendRedirect(getSignInUrl(resp, targetUrl));
+        return false;
+    }
+
+    @Override
+    public final String getSignInUrl(HttpServletResponse resp, String targetUrl) {
+        return userService.createLoginURL(targetUrl);
+    }
+
+    @Override
+    public final String getSignOutUrl(HttpServletResponse resp, String targetUrl) {
+        return userService.createLogoutURL(targetUrl);
+    }
+
+    @Override
+    public final String getUserEmail(HttpServletRequest req) {
         final User user = userService.getCurrentUser();
         return user != null ? user.getEmail() : null;
     }
 
     @Override
-    public final String getLoginUrl(String targetUrl) {
-        return userService.createLoginURL(targetUrl);
-    }
-
-    @Override
-    public final String getLogoutUrl(String targetUrl) {
-        return userService.createLogoutURL(targetUrl);
-    }
-
-    @Override
-    public final boolean isDevEnv() {
+    public final boolean isDevServer(HttpServletRequest req) {
         return SystemProperty.environment.value() == SystemProperty.Environment.Value.Development;
     }
 
     @Override
-    public final boolean isUserLoggedIn() {
+    public final boolean isUserSignedIn(HttpServletRequest req) {
         return userService.isUserLoggedIn();
     }
 
     @Override
-    public final boolean isUserAdmin() {
-        return isUserLoggedIn() && userService.isUserAdmin();
+    public final boolean isUserAdmin(HttpServletRequest req) {
+        return isUserSignedIn(req) && userService.isUserAdmin();
     }
 
     @Override
-    public final boolean isUserTrader() {
+    public final boolean isUserTrader(HttpServletRequest req) {
         final User user = userService.getCurrentUser();
         if (user == null) {
             return false;
@@ -69,7 +82,8 @@ public final class AppEngineRealm implements Realm {
         Boolean cached = traderCache.get(user.getEmail());
         if (cached == null) {
             final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL, user.getEmail());
+            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL,
+                    user.getEmail());
             final Query q = new Query("Trader").setFilter(filter).setKeysOnly();
             final PreparedQuery pq = datastore.prepare(q);
             final int traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));

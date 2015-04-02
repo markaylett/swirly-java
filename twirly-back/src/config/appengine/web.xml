@@ -4,19 +4,8 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
   <context-param>
     <param-name>url</param-name>
-    <!--param-value>datastore:</param-value-->
-    <!--param-value>jdbc:mysql://localhost/twirly?sessionVariables=foreign_key_checks=1</param-value-->
-    <param-value>mock:</param-value>
-  </context-param>
-
-  <context-param>
-  	<param-name>user</param-name>
-  	<param-value>root</param-value>
-  </context-param>
-
-  <context-param>
-  	<param-name>password</param-name>
-  	<param-value></param-value>
+    <param-value>datastore:</param-value>
+    <!--param-value>mock:</param-value-->
   </context-param>
 
   <listener>
@@ -45,22 +34,22 @@
 
   <servlet-mapping>
     <servlet-name>rec</servlet-name>
-    <url-pattern>/rec/*</url-pattern>
+    <url-pattern>/api/rec/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>view</servlet-name>
-    <url-pattern>/view/*</url-pattern>
+    <url-pattern>/api/view/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>sess</servlet-name>
-    <url-pattern>/sess/*</url-pattern>
+    <url-pattern>/api/sess/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>cron</servlet-name>
-    <url-pattern>/cron/*</url-pattern>
+    <url-pattern>/api/cron/*</url-pattern>
   </servlet-mapping>
 
   <error-page>
@@ -96,22 +85,11 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>cron</web-resource-name>
-      <url-pattern>/cron/*</url-pattern>
+      <url-pattern>/api/cron/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
-
-  <!-- Security roles referenced by this web application. -->
-  <security-role>
-    <role-name>user</role-name>
-  </security-role>
-  <security-role>
-    <role-name>trader</role-name>
-  </security-role>
-  <security-role>
-    <role-name>admin</role-name>
-  </security-role>
 
 </web-app>

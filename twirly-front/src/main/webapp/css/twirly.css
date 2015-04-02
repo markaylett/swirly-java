@@ -43,6 +43,13 @@ code {
   font-size: 80%;
 }
 
+/* Sign-in form. */
+
+.form-signin {
+  max-width: 350px;
+  margin: 0 auto;
+}
+
 /* Sign-up form. */
 
 .form-signup {

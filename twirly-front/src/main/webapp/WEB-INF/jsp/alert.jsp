@@ -7,9 +7,10 @@
   <button type="button" class="close" data-bind="click: clearErrors">
     &times;
   </button>
-  <ul data-bind="foreach: errors">
-    <li>
-      <strong data-bind="text: num"></strong>:&nbsp;<span data-bind="text: msg"></span>
-    </li>
-  </ul>
+  <!-- ko foreach: errors -->
+    <span class="glyphicon glyphicon-warning-sign"></span>
+    <strong>error <span data-bind="text: num"></span>:</strong>
+    <span data-bind="text: msg"></span>
+    <br/>
+  <!-- /ko -->  
 </div>

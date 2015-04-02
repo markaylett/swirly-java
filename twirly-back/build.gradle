@@ -1,15 +1,30 @@
-apply plugin: 'eclipse'
+// -*- conf -*-
+
+apply plugin: 'eclipse-wtp'
 apply plugin: 'war'
 
 dependencies {
     compile project(':twirly-fig')
     compile project(':twirly-fir')
-    compile group: 'com.google.appengine', name: 'appengine-api-1.0-sdk', version: '1.9.17'
-    compile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
+    compile group: 'com.google.appengine', name: 'appengine-api-1.0-sdk', version: config.appengine.version
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.+'
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.+'
     compile group: 'org.eclipse.jdt', name: 'org.eclipse.jdt.annotation', version: '1.1.+'
 
-    testCompile group: 'com.google.appengine', name: 'appengine-testing', version: '1.9.17'
-    testCompile group: 'com.google.appengine', name: 'appengine-api-stubs', version: '1.9.17'
+    testCompile group: 'com.google.appengine', name: 'appengine-testing', version: config.appengine.version
+    testCompile group: 'com.google.appengine', name: 'appengine-api-stubs', version: config.appengine.version
     testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+eclipse {
+    wtp {
+        component {
+            contextPath = '/api'
+        }
+    }
+}
+
+war {
+    duplicatesStrategy = 'EXCLUDE'
+    webInf { from config.back.webinf }
 }

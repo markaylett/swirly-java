@@ -1,4 +1,25 @@
-allprojects  {
+// -*- conf -*-
+
+def loadConfig() {
+    def file = file('config.gradle')
+    def config = new ConfigSlurper(env).parse(file.toURL())
+    ext.set('config', config)
+}
+
+loadConfig()
+
+// Example: $ gradle -q -Penv=prd printConfig
+
+task printConfig << {
+    env = getProperty('env')
+    println "env:               $env"
+    println "appengine.version: $config.appengine.version"
+    println "appengine.email:   $config.appengine.email"
+    println "front.webinf:      $config.front.webinf"
+    println "back.webinf:       $config.back.webinf"
+}
+
+allprojects {
     group = 'com.swirlycloud.twirly'
     version = '0.1'
 }
