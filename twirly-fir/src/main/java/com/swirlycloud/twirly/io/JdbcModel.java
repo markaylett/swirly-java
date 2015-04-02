@@ -175,9 +175,9 @@ public final class JdbcModel implements Model {
                         .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM MarketV");
                 selectTraderStmt = conn.prepareStatement("SELECT mnem, display, email FROM Trader");
                 selectOrderStmt = conn
-                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, lastTicks, lastLots, minLots, created, modified FROM Order_ WHERE archive = 0 AND resd > 0");
+                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_ WHERE archive = 0 AND resd > 0");
                 selectTradeStmt = conn
-                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, actionId, ticks, lots, resd, exec, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec WHERE archive = 0 AND stateId = 4");
+                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec WHERE archive = 0 AND stateId = 4");
                 selectPosnStmt = conn
                         .prepareStatement("SELECT trader, contr, settlDay, actionId, cost, lots FROM PosnV");
                 insertMarketStmt = conn
