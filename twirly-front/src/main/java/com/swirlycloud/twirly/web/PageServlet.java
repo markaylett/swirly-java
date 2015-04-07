@@ -16,13 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public final class PageServlet extends HttpServlet {
 
-    private static final ThreadLocal<PageState> stateTls = new ThreadLocal<PageState>() {
-        @Override
-        protected final PageState initialValue() {
-            return new PageState(realm);
-        }
-    };
-
     private static Page getPage(HttpServletRequest req) {
         final String pathInfo = req.getPathInfo();
         final String[] parts = splitPath(pathInfo);
@@ -75,8 +68,7 @@ public final class PageServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        final PageState state = stateTls.get();
-        state.setState(req, resp, page);
+        final PageState state = new PageState(realm, req, resp, page);
 
         // Expose state to JSP page.
         if (page.isRestricted() && !state.authenticate()) {
@@ -105,8 +97,7 @@ public final class PageServlet extends HttpServlet {
             super.doPost(req, resp);
             return;
         }
-        final PageState state = stateTls.get();
-        state.setState(req, resp, page);
+        final PageState state = new PageState(realm, req, resp, page);
         req.setAttribute("state", state);
         final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(
                 page.getJspPage());

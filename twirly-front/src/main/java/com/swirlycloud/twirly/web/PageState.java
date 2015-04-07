@@ -15,11 +15,8 @@ public final class PageState {
     private HttpServletResponse resp;
     private Page page;
 
-    public PageState(Realm realm) {
+    public PageState(Realm realm, HttpServletRequest req, HttpServletResponse resp, Page page) {
         this.realm = realm;
-    }
-
-    public final void setState(HttpServletRequest req, HttpServletResponse resp, Page page) {
         this.req = req;
         this.resp = resp;
         this.page = page;
