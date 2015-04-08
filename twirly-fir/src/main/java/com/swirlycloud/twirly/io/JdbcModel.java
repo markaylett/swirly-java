@@ -170,7 +170,7 @@ public final class JdbcModel implements Model {
                 conn = DriverManager.getConnection(url, user, password);
                 selectAssetStmt = conn.prepareStatement("SELECT mnem, display, typeId FROM Asset");
                 selectContrStmt = conn
-                        .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM Contr");
+                        .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM ContrV");
                 selectMarketStmt = conn
                         .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM MarketV");
                 selectTraderStmt = conn.prepareStatement("SELECT mnem, display, email FROM Trader");

@@ -353,6 +353,25 @@ CREATE VIEW AssetV AS
   ON a.typeId = t.id
 ;
 
+CREATE VIEW ContrV AS
+  SELECT
+    c.mnem,
+    c.display,
+    a.type,
+    c.asset,
+    c.ccy,
+    c.tickNumer,
+    c.tickDenom,
+    c.lotNumer,
+    c.lotDenom,
+    c.pipDp,
+    c.minLots,
+    c.maxLots
+  FROM Contr c
+  LEFT OUTER JOIN AssetV a
+  ON c.asset = a.mnem
+;
+
 CREATE VIEW MarketV AS
   SELECT
     m.mnem,
