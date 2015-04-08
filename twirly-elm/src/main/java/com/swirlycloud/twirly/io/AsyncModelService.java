@@ -46,7 +46,11 @@ public final class AsyncModelService implements AsyncModel {
         service.submit(new Runnable() {
             @Override
             public final void run() {
-                model.insertMarket(mnem, display, contr, settlDay, expiryDay);
+                try {
+                    model.insertMarket(mnem, display, contr, settlDay, expiryDay);
+                } catch (Throwable t) {
+                    log.log(Level.SEVERE, "failed to insert market", t);
+                }
             }
         });
     }
@@ -56,7 +60,11 @@ public final class AsyncModelService implements AsyncModel {
         service.submit(new Runnable() {
             @Override
             public final void run() {
-                model.insertTrader(mnem, display, email);
+                try {
+                    model.insertTrader(mnem, display, email);
+                } catch (Throwable t) {
+                    log.log(Level.SEVERE, "failed to insert trader", t);
+                }
             }
         });
     }
@@ -68,8 +76,8 @@ public final class AsyncModelService implements AsyncModel {
             public final void run() {
                 try {
                     model.insertExec(exec);
-                } catch (NotFoundException e) {
-                    log.log(Level.SEVERE, "failed to insert exec", e);
+                } catch (Throwable t) {
+                    log.log(Level.SEVERE, "failed to insert exec", t);
                 }
             }
         });
@@ -83,8 +91,8 @@ public final class AsyncModelService implements AsyncModel {
             public final void run() {
                 try {
                     model.insertExecList(market, first);
-                } catch (NotFoundException e) {
-                    log.log(Level.SEVERE, "failed to insert exec-list", e);
+                } catch (Throwable t) {
+                    log.log(Level.SEVERE, "failed to insert exec-list", t);
                 }
             }
         });
@@ -98,8 +106,8 @@ public final class AsyncModelService implements AsyncModel {
             public final void run() {
                 try {
                     model.archiveOrder(market, id, modified);
-                } catch (NotFoundException e) {
-                    log.log(Level.SEVERE, "failed to archive order", e);
+                } catch (Throwable t) {
+                    log.log(Level.SEVERE, "failed to archive order", t);
                 }
             }
         });
@@ -113,8 +121,8 @@ public final class AsyncModelService implements AsyncModel {
             public final void run() {
                 try {
                     model.archiveTrade(market, id, modified);
-                } catch (NotFoundException e) {
-                    log.log(Level.SEVERE, "failed to archive trade", e);
+                } catch (Throwable t) {
+                    log.log(Level.SEVERE, "failed to archive trade", t);
                 }
             }
         });
