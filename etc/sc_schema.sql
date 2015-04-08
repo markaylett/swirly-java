@@ -176,6 +176,14 @@ CREATE TRIGGER beforeInsertOnTrader
   BEFORE INSERT ON Trader
   FOR EACH ROW
   BEGIN
+    -- FIXME: allow user to specify password.
+    INSERT IGNORE INTO RealmUser (
+      email,
+      pass
+    ) VALUES (
+      NEW.email,
+      'test'
+    );
     INSERT INTO RealmUserRole (
       user,
       role
@@ -351,6 +359,25 @@ CREATE VIEW AssetV AS
   FROM Asset a
   LEFT OUTER JOIN AssetType t
   ON a.typeId = t.id
+;
+
+CREATE VIEW ContrV AS
+  SELECT
+    c.mnem,
+    c.display,
+    a.type,
+    c.asset,
+    c.ccy,
+    c.tickNumer,
+    c.tickDenom,
+    c.lotNumer,
+    c.lotDenom,
+    c.pipDp,
+    c.minLots,
+    c.maxLots
+  FROM Contr c
+  LEFT OUTER JOIN AssetV a
+  ON c.asset = a.mnem
 ;
 
 CREATE VIEW MarketV AS

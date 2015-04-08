@@ -170,7 +170,7 @@ public final class JdbcModel implements Model {
                 conn = DriverManager.getConnection(url, user, password);
                 selectAssetStmt = conn.prepareStatement("SELECT mnem, display, typeId FROM Asset");
                 selectContrStmt = conn
-                        .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM Contr");
+                        .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM ContrV");
                 selectMarketStmt = conn
                         .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM MarketV");
                 selectTraderStmt = conn.prepareStatement("SELECT mnem, display, email FROM Trader");
@@ -187,9 +187,9 @@ public final class JdbcModel implements Model {
                 insertExecStmt = conn
                         .prepareStatement("INSERT INTO Exec (id, orderId, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 updateOrderStmt = conn
-                        .prepareStatement("UPDATE Order_ SET archive = 1, modified = ? WHERE market = ?, id = ?");
+                        .prepareStatement("UPDATE Order_ SET archive = 1, modified = ? WHERE market = ? AND id = ?");
                 updateExecStmt = conn
-                        .prepareStatement("UPDATE Exec SET archive = 1, modified = ? WHERE market = ?, id = ?");
+                        .prepareStatement("UPDATE Exec SET archive = 1, modified = ? WHERE market = ? AND id = ?");
                 // Success.
                 this.conn = conn;
                 this.selectAssetStmt = selectAssetStmt;
@@ -376,6 +376,7 @@ public final class JdbcModel implements Model {
             updateOrderStmt.setLong(i++, modified);
             updateOrderStmt.setString(i++, market);
             updateOrderStmt.setLong(i++, id);
+            updateOrderStmt.executeUpdate();
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
@@ -388,6 +389,7 @@ public final class JdbcModel implements Model {
             updateExecStmt.setLong(i++, modified);
             updateExecStmt.setString(i++, market);
             updateExecStmt.setLong(i++, id);
+            updateExecStmt.executeUpdate();
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }

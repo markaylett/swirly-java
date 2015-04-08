@@ -35,6 +35,7 @@ public final class MockTrader {
         put("TOBAYL", "Toby Aylett", "toby.aylett@gmail.com");
         put("EMIAYL", "Emily Aylett", "emily.aylett@gmail.com");
         put("SWIRLY", "Swirly Cloud", "info@swirlycloud.com");
+        put("RAMMAC", "Ram Macharaj", "ram.mac@gmail.com");
     }
 
     private MockTrader() {
