@@ -176,6 +176,14 @@ CREATE TRIGGER beforeInsertOnTrader
   BEFORE INSERT ON Trader
   FOR EACH ROW
   BEGIN
+    -- FIXME: allow user to specify password.
+    INSERT IGNORE INTO RealmUser (
+      email,
+      pass
+    ) VALUES (
+      NEW.email,
+      'test'
+    );
     INSERT INTO RealmUserRole (
       user,
       role
