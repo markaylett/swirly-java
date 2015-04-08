@@ -237,6 +237,10 @@ INSERT INTO RealmUser (email, pass)
        VALUES ('info@swirlycloud.com', 'test')
 ;
 
+INSERT INTO RealmUser (email, pass)
+       VALUES ('ram.mac@gmail.com', 'test')
+;
+
 INSERT INTO RealmUserRole (user, role)
        VALUES (
           (SELECT id FROM RealmUser WHERE email = 'mark.aylett@gmail.com'),
@@ -247,6 +251,20 @@ INSERT INTO RealmUserRole (user, role)
 INSERT INTO RealmUserRole (user, role)
        VALUES (
           (SELECT id FROM RealmUser WHERE email = 'mark.aylett@gmail.com'),
+          (SELECT id FROM RealmRole WHERE mnem = 'tomcat')
+       )
+;
+
+INSERT INTO RealmUserRole (user, role)
+       VALUES (
+          (SELECT id FROM RealmUser WHERE email = 'ram.mac@gmail.com'),
+          (SELECT id FROM RealmRole WHERE mnem = 'admin')
+       )
+;
+
+INSERT INTO RealmUserRole (user, role)
+       VALUES (
+          (SELECT id FROM RealmUser WHERE email = 'ram.mac@gmail.com'),
           (SELECT id FROM RealmRole WHERE mnem = 'tomcat')
        )
 ;
@@ -269,6 +287,10 @@ INSERT INTO Trader (mnem, display, email)
 
 INSERT INTO Trader (mnem, display, email)
        VALUES ('SWIRLY', 'Swirly Cloud', 'info@swirlycloud.com')
+;
+
+INSERT INTO Trader (mnem, display, email)
+       VALUES ('RAMMAC', 'Ram Macharaj', 'ram.mac@gmail.com')
 ;
 
 COMMIT
