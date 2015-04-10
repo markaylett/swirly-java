@@ -42,12 +42,12 @@ public final class AsyncModelService implements AsyncModel {
 
     @Override
     public final void insertMarket(final String mnem, final String display, final String contr,
-            final int settlDay, final int expiryDay) {
+            final int settlDay, final int expiryDay, final int state) {
         service.submit(new Runnable() {
             @Override
             public final void run() {
                 try {
-                    model.insertMarket(mnem, display, contr, settlDay, expiryDay);
+                    model.insertMarket(mnem, display, contr, settlDay, expiryDay, state);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to insert market", t);
                 }

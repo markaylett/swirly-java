@@ -37,6 +37,7 @@ function ViewModel(contrs) {
     self.contr = ko.observable();
     self.settlDate = ko.observable();
     self.expiryDate = ko.observable();
+    self.state = ko.observable();
 
     self.findMarket = function(mnem) {
         return ko.utils.arrayFirst(self.markets(), function(val) {
@@ -69,6 +70,7 @@ function ViewModel(contrs) {
         //self.contr(undefined);
         //self.settlDate(undefined);
         //self.expiryDate(undefined);
+        //self.state(undefined);
     };
 
     self.submitMarket = function() {
@@ -103,6 +105,12 @@ function ViewModel(contrs) {
             return;
         }
         expiryDate = toDateInt(expiryDate);
+        var state = self.state();
+        if (!isSpecified(state)) {
+            self.showError(internalError('state not specified'));
+            return;
+        }
+        state = parseInt(state);
 
         $.ajax({
             type: 'post',
@@ -112,7 +120,8 @@ function ViewModel(contrs) {
                 display: display,
                 contr: contr,
                 settlDate: settlDate,
-                expiryDate: expiryDate
+                expiryDate: expiryDate,
+                state: state
             })
         }).done(function(raw) {
             market = self.findMarket(raw.mnem);

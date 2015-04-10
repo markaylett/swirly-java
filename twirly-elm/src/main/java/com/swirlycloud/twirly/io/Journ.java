@@ -14,7 +14,8 @@ import com.swirlycloud.twirly.node.SlNode;
  */
 public interface Journ extends AutoCloseable {
 
-    void insertMarket(String mnem, String display, String contr, int settlDay, int expiryDay);
+    void insertMarket(String mnem, String display, String contr, int settlDay, int expiryDay,
+            int state);
 
     void insertTrader(String mnem, String display, String email);
 

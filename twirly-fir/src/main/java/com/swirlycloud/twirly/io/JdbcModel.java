@@ -75,13 +75,14 @@ public final class JdbcModel implements Model {
         final Memorable contr = newMnem(rs.getString("contr"));
         final int settlDay = rs.getInt("settlDay");
         final int expiryDay = rs.getInt("expiryDay");
+        final int state = rs.getInt("state");
         final long lastTicks = rs.getLong("lastTicks");
         final long lastLots = rs.getLong("lastLots");
         final long lastTime = rs.getLong("lastTime");
         final long maxOrderId = rs.getLong("maxOrderId");
         final long maxExecId = rs.getLong("maxExecId");
-        return new Market(mnem, display, contr, settlDay, expiryDay, lastTicks, lastLots, lastTime,
-                maxOrderId, maxExecId);
+        return new Market(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots,
+                lastTime, maxOrderId, maxExecId);
     }
 
     private static Trader getTrader(ResultSet rs) throws SQLException {
@@ -146,8 +147,7 @@ public final class JdbcModel implements Model {
         }
         final long created = rs.getLong("created");
         return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action, ticks,
-                lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty,
-                created);
+                lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
     }
 
     public JdbcModel(String url, String user, String password) {
@@ -172,7 +172,7 @@ public final class JdbcModel implements Model {
                 selectContrStmt = conn
                         .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM ContrV");
                 selectMarketStmt = conn
-                        .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM MarketV");
+                        .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM MarketV");
                 selectTraderStmt = conn.prepareStatement("SELECT mnem, display, email FROM Trader");
                 selectOrderStmt = conn
                         .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_ WHERE archive = 0 AND resd > 0");
@@ -181,7 +181,7 @@ public final class JdbcModel implements Model {
                 selectPosnStmt = conn
                         .prepareStatement("SELECT trader, contr, settlDay, actionId, cost, lots FROM PosnV");
                 insertMarketStmt = conn
-                        .prepareStatement("INSERT INTO Market (mnem, display, contr, settlDay, expiryDay) VALUES (?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO Market (mnem, display, contr, settlDay, expiryDay, state) VALUES (?, ?, ?, ?, ?, ?)");
                 insertTraderStmt = conn
                         .prepareStatement("INSERT INTO Trader (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn
@@ -272,7 +272,7 @@ public final class JdbcModel implements Model {
 
     @Override
     public final void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay) {
+            int expiryDay, int state) {
         try {
             int i = 1;
             insertMarketStmt.setString(i++, mnem);
@@ -280,6 +280,7 @@ public final class JdbcModel implements Model {
             insertMarketStmt.setString(i++, contr);
             insertMarketStmt.setInt(i++, settlDay);
             insertMarketStmt.setInt(i++, expiryDay);
+            insertMarketStmt.setInt(i++, state);
             insertMarketStmt.executeUpdate();
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);

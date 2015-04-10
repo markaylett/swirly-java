@@ -24,8 +24,8 @@ public final class AsyncModelAdaptor implements AsyncModel {
 
     @Override
     public final void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay) {
-        model.insertMarket(mnem, display, contr, settlDay, expiryDay);
+            int expiryDay, int state) {
+        model.insertMarket(mnem, display, contr, settlDay, expiryDay, state);
     }
 
     @Override

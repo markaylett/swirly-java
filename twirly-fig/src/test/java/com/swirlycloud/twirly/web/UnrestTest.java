@@ -51,8 +51,9 @@ public final class UnrestTest {
 
     private static final String EMAIL = "mark.aylett@gmail.com";
     private static final int TODAY = ymdToJd(2014, 2, 11);
-    private static final int EXPIRY_DAY = TODAY + 1;
     private static final int SETTL_DAY = TODAY + 2;
+    private static final int EXPIRY_DAY = TODAY + 1;
+    private static final int STATE = 0x01;
 
     private static final long NOW = jdToMillis(TODAY);
 
@@ -111,6 +112,7 @@ public final class UnrestTest {
         assertEquals(contr, actual.getContr());
         assertEquals(SETTL_DAY, actual.getSettlDay());
         assertEquals(EXPIRY_DAY, actual.getExpiryDay());
+        assertEquals(STATE, actual.getState());
     }
 
     private static void assertTrader(Trader expected, Trader actual) {
@@ -221,7 +223,7 @@ public final class UnrestTest {
     private final Market postMarket(String mnem, String display, String contr)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         return unrest.postMarket(mnem, display, contr, jdToIso(SETTL_DAY), jdToIso(EXPIRY_DAY),
-                PARAMS_NONE, NOW);
+                STATE, PARAMS_NONE, NOW);
     }
 
     private final void deleteOrder(String market, long id) throws BadRequestException,

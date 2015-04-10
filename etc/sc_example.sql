@@ -202,19 +202,19 @@ INSERT INTO Contr (mnem, display, asset, ccy, tickNumer,
        VALUES ('UIB', 'Uinta Basin Coal', 'UIB', 'USD', 1, 20, 1000, 1, 2, 1, 10);
 ;
 
-INSERT INTO Market (mnem, display, contr, settlDay, expiryDay)
+INSERT INTO Market (mnem, display, contr, settlDay, expiryDay, state)
        VALUES ('EURUSD.JUN15', 'EURUSD June 15', 'EURUSD',
-              TO_DAYS('2015-06-19') + 1721060, TO_DAYS('2015-06-18') + 1721060)
+              TO_DAYS('2015-06-19') + 1721060, TO_DAYS('2015-06-18') + 1721060, 0)
 ;
 
-INSERT INTO Market (mnem, display, contr, settlDay, expiryDay)
+INSERT INTO Market (mnem, display, contr, settlDay, expiryDay, state)
        VALUES ('EURUSD.SEP15', 'EURUSD Sept 15', 'EURUSD',
-              TO_DAYS('2015-09-18') + 1721060, TO_DAYS('2015-09-17') + 1721060)
+              TO_DAYS('2015-09-18') + 1721060, TO_DAYS('2015-09-17') + 1721060, 0)
 ;
 
-INSERT INTO Market (mnem, display, contr, settlDay, expiryDay)
+INSERT INTO Market (mnem, display, contr, settlDay, expiryDay, state)
        VALUES ('GBPUSD.JUN15', 'GBPUSD June 15', 'GBPUSD',
-              TO_DAYS('2015-06-19') + 1721060, TO_DAYS('2015-06-18') + 1721060)
+              TO_DAYS('2015-06-19') + 1721060, TO_DAYS('2015-06-18') + 1721060, 0)
 ;
 
 INSERT INTO RealmUser (email, pass)

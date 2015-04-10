@@ -71,13 +71,14 @@ public final class DatastoreModel implements Model {
     }
 
     private final Entity newMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay) {
+            int expiryDay, int state) {
         final Long zero = Long.valueOf(0);
         final Entity entity = new Entity(MARKET_KIND, mnem);
         entity.setUnindexedProperty("display", display);
         entity.setUnindexedProperty("contr", contr);
         entity.setUnindexedProperty("settlDay", Integer.valueOf(settlDay));
         entity.setUnindexedProperty("expiryDay", Integer.valueOf(expiryDay));
+        entity.setUnindexedProperty("state", Integer.valueOf(state));
         entity.setUnindexedProperty("lastTicks", zero);
         entity.setUnindexedProperty("lastLots", zero);
         entity.setUnindexedProperty("lastTime", zero);
@@ -201,10 +202,10 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay) {
+            int expiryDay, int state) {
         final Transaction txn = datastore.beginTransaction();
         try {
-            final Entity entity = newMarket(mnem, display, contr, settlDay, expiryDay);
+            final Entity entity = newMarket(mnem, display, contr, settlDay, expiryDay, state);
             datastore.put(txn, entity);
             txn.commit();
         } catch (ConcurrentModificationException e) {
@@ -363,13 +364,14 @@ public final class DatastoreModel implements Model {
             final Memorable contr = newMnem((String) entity.getProperty("contr"));
             final int settlDay = ((Long) entity.getProperty("settlDay")).intValue();
             final int expiryDay = ((Long) entity.getProperty("expiryDay")).intValue();
+            final int state = ((Long) entity.getProperty("state")).intValue();
             final long lastTicks = (Long) entity.getProperty("lastTicks");
             final long lastLots = (Long) entity.getProperty("lastLots");
             final long lastTime = (Long) entity.getProperty("lastTime");
             final long maxOrderId = (Long) entity.getProperty("maxOrderId");
             final long maxExecId = (Long) entity.getProperty("maxExecId");
-            final Market market = new Market(mnem, display, contr, settlDay, expiryDay, lastTicks,
-                    lastLots, lastTime, maxOrderId, maxExecId);
+            final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state,
+                    lastTicks, lastLots, lastTime, maxOrderId, maxExecId);
             q.insertBack(market);
         }
         return q.getFirst();
