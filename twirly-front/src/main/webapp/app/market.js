@@ -39,6 +39,13 @@ function ViewModel(contrs) {
     self.expiryDate = ko.observable();
     self.state = ko.observable();
 
+    self.settlDate.subscribe(function(val) {
+        var expiryDate = self.expiryDate();
+        if (!isSpecified(expiryDate)) {
+            self.expiryDate(val);
+        }
+    });
+
     self.findMarket = function(mnem) {
         return ko.utils.arrayFirst(self.markets(), function(val) {
             return val.mnem() === mnem;
