@@ -10,128 +10,128 @@ USE twirly
 SET foreign_key_checks = 1
 ;
 
-CREATE TABLE RealmUser (
+CREATE TABLE User_t (
   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   email VARCHAR(64) NOT NULL UNIQUE,
   pass VARCHAR(32) NULL
 )
 ENGINE = InnoDB;
 
-CREATE TABLE RealmRole (
+CREATE TABLE Group_t (
   id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
 
-INSERT INTO RealmRole (id, mnem) VALUES (0, 'tomcat')
+INSERT INTO Group_t (id, mnem) VALUES (0, 'tomcat')
 ;
 
-INSERT INTO RealmRole (id, mnem) VALUES (1, 'user')
+INSERT INTO Group_t (id, mnem) VALUES (1, 'user')
 ;
 
-INSERT INTO RealmRole (id, mnem) VALUES (2, 'trader')
+INSERT INTO Group_t (id, mnem) VALUES (2, 'trader')
 ;
 
-INSERT INTO RealmRole (id, mnem) VALUES (3, 'admin')
+INSERT INTO Group_t (id, mnem) VALUES (3, 'admin')
 ;
 
-CREATE TABLE RealmUserRole (
-  user INT NOT NULL,
-  role INT NOT NULL,
-  PRIMARY KEY (user, role),
-  FOREIGN KEY (user) REFERENCES RealmUser (id),
-  FOREIGN KEY (role) REFERENCES RealmRole (id)
+CREATE TABLE UserGroup_t (
+  userId INT NOT NULL,
+  groupId INT NOT NULL,
+  PRIMARY KEY (userId, groupId),
+  FOREIGN KEY (userId) REFERENCES User_t (id),
+  FOREIGN KEY (groupId) REFERENCES Group_t (id)
 )
 ENGINE = InnoDB;
 
-CREATE VIEW RealmUserRoleV AS
+CREATE VIEW UserGroup_v AS
   SELECT
     u.email email,
-    r.mnem role
-  FROM RealmUserRole ur
-  INNER JOIN RealmUser u
-  ON ur.user = u.id
-  INNER JOIN RealmRole r
-  ON ur.role = r.id
+    g.mnem group_
+  FROM UserGroup_t ug
+  INNER JOIN User_t u
+  ON ug.userId = u.id
+  INNER JOIN Group_t g
+  ON ug.groupId = g.id
 ;
 
-CREATE TABLE State (
+CREATE TABLE State_t (
   id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
 
-INSERT INTO State (id, mnem) VALUES (1, 'NEW')
+INSERT INTO State_t (id, mnem) VALUES (1, 'NEW')
 ;
-INSERT INTO State (id, mnem) VALUES (2, 'REVISE')
+INSERT INTO State_t (id, mnem) VALUES (2, 'REVISE')
 ;
-INSERT INTO State (id, mnem) VALUES (3, 'CANCEL')
+INSERT INTO State_t (id, mnem) VALUES (3, 'CANCEL')
 ;
-INSERT INTO State (id, mnem) VALUES (4, 'TRADE')
+INSERT INTO State_t (id, mnem) VALUES (4, 'TRADE')
 ;
 
-CREATE TABLE Action (
+CREATE TABLE Action_t (
   id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
 
-INSERT INTO Action (id, mnem) VALUES (1, 'BUY')
+INSERT INTO Action_t (id, mnem) VALUES (1, 'BUY')
 ;
-INSERT INTO Action (id, mnem) VALUES (-1, 'SELL')
+INSERT INTO Action_t (id, mnem) VALUES (-1, 'SELL')
 ;
 
-CREATE TABLE Direct (
+CREATE TABLE Direct_t (
   id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
 
-INSERT INTO Direct (id, mnem) VALUES (1, 'PAID')
+INSERT INTO Direct_t (id, mnem) VALUES (1, 'PAID')
 ;
-INSERT INTO Direct (id, mnem) VALUES (-1, 'GIVEN')
+INSERT INTO Direct_t (id, mnem) VALUES (-1, 'GIVEN')
 ;
 
-CREATE TABLE Role (
+CREATE TABLE Role_t (
   id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
 
-INSERT INTO Role (id, mnem) VALUES (1, 'MAKER')
+INSERT INTO Role_t (id, mnem) VALUES (1, 'MAKER')
 ;
-INSERT INTO Role (id, mnem) VALUES (2, 'TAKER')
+INSERT INTO Role_t (id, mnem) VALUES (2, 'TAKER')
 ;
 
-CREATE TABLE AssetType (
+CREATE TABLE AssetType_t (
   id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
 
-INSERT INTO AssetType (id, mnem) VALUES (1, 'COMMODITY')
+INSERT INTO AssetType_t (id, mnem) VALUES (1, 'COMMODITY')
 ;
-INSERT INTO AssetType (id, mnem) VALUES (2, 'CORPORATE')
+INSERT INTO AssetType_t (id, mnem) VALUES (2, 'CORPORATE')
 ;
-INSERT INTO AssetType (id, mnem) VALUES (3, 'CURRENCY')
+INSERT INTO AssetType_t (id, mnem) VALUES (3, 'CURRENCY')
 ;
-INSERT INTO AssetType (id, mnem) VALUES (4, 'EQUITY')
+INSERT INTO AssetType_t (id, mnem) VALUES (4, 'EQUITY')
 ;
-INSERT INTO AssetType (id, mnem) VALUES (5, 'GOVERNMENT')
+INSERT INTO AssetType_t (id, mnem) VALUES (5, 'GOVERNMENT')
 ;
-INSERT INTO AssetType (id, mnem) VALUES (6, 'INDEX')
+INSERT INTO AssetType_t (id, mnem) VALUES (6, 'INDEX')
 ;
 
-CREATE TABLE Asset (
+CREATE TABLE Asset_t (
   mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL UNIQUE,
   typeId INT NOT NULL,
 
-  FOREIGN KEY (typeId) REFERENCES AssetType (id)
+  FOREIGN KEY (typeId) REFERENCES AssetType_t (id)
 )
 ENGINE = InnoDB;
 
-CREATE TABLE Contr (
+CREATE TABLE Contr_t (
   mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL,
   asset CHAR(16) NOT NULL,
@@ -144,12 +144,12 @@ CREATE TABLE Contr (
   minLots BIGINT NOT NULL,
   maxLots BIGINT NOT NULL,
 
-  FOREIGN KEY (asset) REFERENCES Asset (mnem),
-  FOREIGN KEY (ccy) REFERENCES Asset (mnem)
+  FOREIGN KEY (asset) REFERENCES Asset_t (mnem),
+  FOREIGN KEY (ccy) REFERENCES Asset_t (mnem)
 )
 ENGINE = InnoDB;
 
-CREATE TABLE Market (
+CREATE TABLE Market_t (
   mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL,
   contr CHAR(16) NOT NULL,
@@ -160,36 +160,36 @@ CREATE TABLE Market (
   lastLots BIGINT NULL DEFAULT NULL,
   lastTime BIGINT NULL DEFAULT NULL,
 
-  FOREIGN KEY (contr) REFERENCES Contr (mnem)
+  FOREIGN KEY (contr) REFERENCES Contr_t (mnem)
 )
 ENGINE = InnoDB;
 
-CREATE TABLE Trader (
+CREATE TABLE Trader_t (
   mnem CHAR(16) NOT NULL PRIMARY KEY,
   display VARCHAR(64) NOT NULL,
   email VARCHAR(64) NOT NULL,
-  FOREIGN KEY (email) REFERENCES RealmUser (email)
+  FOREIGN KEY (email) REFERENCES User_t (email)
 )
 ENGINE = InnoDB;
 
 DELIMITER //
 CREATE TRIGGER beforeInsertOnTrader
-  BEFORE INSERT ON Trader
+  BEFORE INSERT ON Trader_t
   FOR EACH ROW
   BEGIN
     -- FIXME: allow user to specify password.
-    INSERT IGNORE INTO RealmUser (
+    INSERT IGNORE INTO User_t (
       email,
       pass
     ) VALUES (
       NEW.email,
       'test'
     );
-    INSERT INTO RealmUserRole (
-      user,
-      role
+    INSERT INTO UserGroup_t (
+      userId,
+      groupId
     ) VALUES (
-      (SELECT id FROM RealmUser WHERE email = NEW.email),
+      (SELECT id FROM User_t WHERE email = NEW.email),
       2
     );
   END //
@@ -197,16 +197,16 @@ DELIMITER ;
 
 DELIMITER //
 CREATE TRIGGER afterDeleteOnTrader
-  AFTER DELETE on Trader
+  AFTER DELETE on Trader_t
   FOR EACH ROW
   BEGIN
-    DELETE FROM RealmUserRole
-    WHERE user = (SELECT id FROM RealmUser WHERE email = OLD.email)
-    AND role = 2;
+    DELETE FROM UserGroup_t
+    WHERE userId = (SELECT id FROM User_t WHERE email = OLD.email)
+    AND groupId = 2;
   END //
 DELIMITER ;
 
-CREATE TABLE Order_ (
+CREATE TABLE Order_t (
   id BIGINT NOT NULL,
   trader CHAR(16) NOT NULL,
   market CHAR(16) NOT NULL,
@@ -230,18 +230,18 @@ CREATE TABLE Order_ (
   PRIMARY KEY (market, id),
   CONSTRAINT orderTraderRefUnq UNIQUE (Trader, ref),
 
-  FOREIGN KEY (trader) REFERENCES Trader (mnem),
-  FOREIGN KEY (market) REFERENCES Market (mnem),
-  FOREIGN KEY (contr) REFERENCES Contr (mnem),
-  FOREIGN KEY (stateId) REFERENCES State (id),
-  FOREIGN KEY (actionId) REFERENCES Action (id)
+  FOREIGN KEY (trader) REFERENCES Trader_t (mnem),
+  FOREIGN KEY (market) REFERENCES Market_t (mnem),
+  FOREIGN KEY (contr) REFERENCES Contr_t (mnem),
+  FOREIGN KEY (stateId) REFERENCES State_t (id),
+  FOREIGN KEY (actionId) REFERENCES Action_t (id)
 )
 ENGINE = InnoDB;
 
-CREATE INDEX orderResdIdx ON Order_ (resd);
-CREATE INDEX orderArchiveIdx ON Order_ (archive);
+CREATE INDEX orderResdIdx ON Order_t (resd);
+CREATE INDEX orderArchiveIdx ON Order_t (archive);
 
-CREATE TABLE Exec (
+CREATE TABLE Exec_t (
   id BIGINT NOT NULL,
   orderId BIGINT NOT NULL,
   trader CHAR(16) NOT NULL,
@@ -268,26 +268,26 @@ CREATE TABLE Exec (
 
   PRIMARY KEY (market, id),
 
-  FOREIGN KEY (market, orderId) REFERENCES Order_ (market, id),
-  FOREIGN KEY (trader) REFERENCES Trader (mnem),
-  FOREIGN KEY (contr) REFERENCES Contr (mnem),
-  FOREIGN KEY (stateId) REFERENCES State (id),
-  FOREIGN KEY (actionId) REFERENCES Action (id),
-  FOREIGN KEY (roleId) REFERENCES Role (id),
-  FOREIGN KEY (cpty) REFERENCES Trader (mnem)
+  FOREIGN KEY (market, orderId) REFERENCES Order_t (market, id),
+  FOREIGN KEY (trader) REFERENCES Trader_t (mnem),
+  FOREIGN KEY (contr) REFERENCES Contr_t (mnem),
+  FOREIGN KEY (stateId) REFERENCES State_t (id),
+  FOREIGN KEY (actionId) REFERENCES Action_t (id),
+  FOREIGN KEY (roleId) REFERENCES Role_t (id),
+  FOREIGN KEY (cpty) REFERENCES Trader_t (mnem)
 )
 ENGINE = InnoDB;
 
-CREATE INDEX execStateIdx ON Exec (stateId);
-CREATE INDEX execArchiveIdx ON Exec (archive);
+CREATE INDEX execStateIdx ON Exec_t (stateId);
+CREATE INDEX execArchiveIdx ON Exec_t (archive);
 
 DELIMITER //
 CREATE TRIGGER beforeInsertOnExec
-  BEFORE INSERT ON Exec
+  BEFORE INSERT ON Exec_t
   FOR EACH ROW
   BEGIN
     IF NEW.stateId = 1 THEN
-      INSERT INTO Order_ (
+      INSERT INTO Order_t (
         id,
         trader,
         market,
@@ -329,7 +329,7 @@ CREATE TRIGGER beforeInsertOnExec
         NEW.modified
       );
     ELSE
-      UPDATE Order_
+      UPDATE Order_t
       SET
         stateId = NEW.stateId,
         lots = NEW.lots,
@@ -342,7 +342,7 @@ CREATE TRIGGER beforeInsertOnExec
       WHERE id = NEW.orderId;
     END IF;
     IF NEW.stateId = 4 THEN
-      UPDATE Market
+      UPDATE Market_t
       SET
         lastTicks = NEW.lastTicks,
         lastLots = NEW.lastLots,
@@ -352,17 +352,17 @@ CREATE TRIGGER beforeInsertOnExec
   END //
 DELIMITER ;
 
-CREATE VIEW AssetV AS
+CREATE VIEW Asset_v AS
   SELECT
     a.mnem,
     a.display,
     t.mnem type
-  FROM Asset a
-  LEFT OUTER JOIN AssetType t
+  FROM Asset_t a
+  LEFT OUTER JOIN AssetType_t t
   ON a.typeId = t.id
 ;
 
-CREATE VIEW ContrV AS
+CREATE VIEW Contr_v AS
   SELECT
     c.mnem,
     c.display,
@@ -376,12 +376,12 @@ CREATE VIEW ContrV AS
     c.pipDp,
     c.minLots,
     c.maxLots
-  FROM Contr c
-  LEFT OUTER JOIN AssetV a
+  FROM Contr_t c
+  LEFT OUTER JOIN Asset_v a
   ON c.asset = a.mnem
 ;
 
-CREATE VIEW MarketV AS
+CREATE VIEW Market_v AS
   SELECT
     m.mnem,
     m.display,
@@ -394,13 +394,13 @@ CREATE VIEW MarketV AS
     m.lastTime,
     MAX(e.orderId) maxOrderId,
     MAX(e.id) maxExecId
-  FROM Market m
-  LEFT OUTER JOIN Exec e
+  FROM Market_t m
+  LEFT OUTER JOIN Exec_t e
   ON m.mnem = e.market
   GROUP BY m.mnem
 ;
 
-CREATE VIEW OrderV AS
+CREATE VIEW Order_v AS
   SELECT
     o.id,
     o.trader,
@@ -420,14 +420,14 @@ CREATE VIEW OrderV AS
     o.minLots,
     o.created,
     o.modified
-  FROM Order_ o
-  LEFT OUTER JOIN State s
+  FROM Order_t o
+  LEFT OUTER JOIN State_t s
   ON o.stateId = s.id
-  LEFT OUTER JOIN Action a
+  LEFT OUTER JOIN Action_t a
   ON o.actionId = a.id
 ;
 
-CREATE VIEW ExecV AS
+CREATE VIEW Exec_v AS
   SELECT
     e.id,
     e.orderId,
@@ -451,16 +451,16 @@ CREATE VIEW ExecV AS
     e.archive,
     e.created,
     e.modified
-  FROM Exec e
-  LEFT OUTER JOIN State s
+  FROM Exec_t e
+  LEFT OUTER JOIN State_t s
   ON e.stateId = s.id
-  LEFT OUTER JOIN Action a
+  LEFT OUTER JOIN Action_t a
   ON e.actionId = a.id
-  LEFT OUTER JOIN Role r
+  LEFT OUTER JOIN Role_t r
   ON e.roleId = r.id
 ;
 
-CREATE VIEW PosnV AS
+CREATE VIEW Posn_v AS
   SELECT
     e.trader,
     e.contr,
@@ -468,7 +468,7 @@ CREATE VIEW PosnV AS
     e.actionId,
     SUM(e.lastLots * e.lastTicks) cost,
     SUM(e.lastLots) lots
-  FROM Exec e
+  FROM Exec_t e
   WHERE e.stateId = 4
   GROUP BY e.trader, e.contr, e.settlDay, e.actionId
 ;

@@ -168,28 +168,28 @@ public final class JdbcModel implements Model {
         try {
             try {
                 conn = DriverManager.getConnection(url, user, password);
-                selectAssetStmt = conn.prepareStatement("SELECT mnem, display, typeId FROM Asset");
+                selectAssetStmt = conn.prepareStatement("SELECT mnem, display, typeId FROM Asset_t");
                 selectContrStmt = conn
-                        .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM ContrV");
+                        .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM Contr_v");
                 selectMarketStmt = conn
-                        .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM MarketV");
-                selectTraderStmt = conn.prepareStatement("SELECT mnem, display, email FROM Trader");
+                        .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM Market_v");
+                selectTraderStmt = conn.prepareStatement("SELECT mnem, display, email FROM Trader_t");
                 selectOrderStmt = conn
-                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_ WHERE archive = 0 AND resd > 0");
+                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
                 selectTradeStmt = conn
-                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec WHERE archive = 0 AND stateId = 4");
+                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
                 selectPosnStmt = conn
-                        .prepareStatement("SELECT trader, contr, settlDay, actionId, cost, lots FROM PosnV");
+                        .prepareStatement("SELECT trader, contr, settlDay, actionId, cost, lots FROM Posn_v");
                 insertMarketStmt = conn
-                        .prepareStatement("INSERT INTO Market (mnem, display, contr, settlDay, expiryDay, state) VALUES (?, ?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO Market_t (mnem, display, contr, settlDay, expiryDay, state) VALUES (?, ?, ?, ?, ?, ?)");
                 insertTraderStmt = conn
-                        .prepareStatement("INSERT INTO Trader (mnem, display, email) VALUES (?, ?, ?)");
+                        .prepareStatement("INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn
-                        .prepareStatement("INSERT INTO Exec (id, orderId, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO Exec_t (id, orderId, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 updateOrderStmt = conn
-                        .prepareStatement("UPDATE Order_ SET archive = 1, modified = ? WHERE market = ? AND id = ?");
+                        .prepareStatement("UPDATE Order_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
                 updateExecStmt = conn
-                        .prepareStatement("UPDATE Exec SET archive = 1, modified = ? WHERE market = ? AND id = ?");
+                        .prepareStatement("UPDATE Exec_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
                 // Success.
                 this.conn = conn;
                 this.selectAssetStmt = selectAssetStmt;
