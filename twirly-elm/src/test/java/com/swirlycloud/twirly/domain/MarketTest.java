@@ -21,13 +21,14 @@ public final class MarketTest {
         final Contr contr = MockContr.newContr("EURUSD");
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
-        final Market market = new Market(mnem, display, contr, settlDay, expiryDay);
+        final int state = 0x01;
+        final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state);
 
         final StringBuilder sb = new StringBuilder();
 
         market.toJson(null, sb);
         assertEquals(
-                "{\"mnem\":\"EURUSD.MAR14\",\"display\":\"EURUSD March 14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140312}",
+                "{\"mnem\":\"EURUSD.MAR14\",\"display\":\"EURUSD March 14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140312,\"state\":1}",
                 sb.toString());
     }
 
@@ -38,7 +39,8 @@ public final class MarketTest {
         final Contr contr = MockContr.newContr("EURUSD");
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
-        final Market market = new Market(mnem, display, contr, settlDay, expiryDay);
+        final int state = 0x01;
+        final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state);
 
         final long now = 1414932078620L;
 

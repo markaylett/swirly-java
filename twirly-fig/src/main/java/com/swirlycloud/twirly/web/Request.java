@@ -19,11 +19,12 @@ public final class Request {
     public static final int CONTR = 1 << 4;
     public static final int SETTL_DATE = 1 << 5;
     public static final int EXPIRY_DATE = 1 << 6;
-    public static final int REF = 1 << 7;
-    public static final int ACTION = 1 << 8;
-    public static final int TICKS = 1 << 9;
-    public static final int LOTS = 1 << 10;
-    public static final int MIN_LOTS = 1 << 11;
+    public static final int STATE = 1 << 7;
+    public static final int REF = 1 << 8;
+    public static final int ACTION = 1 << 9;
+    public static final int TICKS = 1 << 10;
+    public static final int LOTS = 1 << 11;
+    public static final int MIN_LOTS = 1 << 12;
 
     private int fields;
 
@@ -34,6 +35,7 @@ public final class Request {
     private String contr;
     private int settlDate;
     private int expiryDate;
+    private int state;
     private String ref;
     private Action action;
     private long ticks;
@@ -49,6 +51,7 @@ public final class Request {
         contr = null;
         settlDate = 0;
         expiryDate = 0;
+        state = 0;
         ref = null;
         action = null;
         ticks = 0;
@@ -99,6 +102,9 @@ public final class Request {
                 } else if ("expiryDate".equals(name)) {
                     fields |= EXPIRY_DATE;
                     expiryDate = p.getInt();
+                } else if ("state".equals(name)) {
+                    fields |= STATE;
+                    state = p.getInt();
                 } else if ("ticks".equals(name)) {
                     fields |= TICKS;
                     ticks = p.getLong();
@@ -171,6 +177,10 @@ public final class Request {
 
     public final int getExpiryDate() {
         return expiryDate;
+    }
+
+    public final int getState() {
+        return state;
     }
 
     public final String getRef() {

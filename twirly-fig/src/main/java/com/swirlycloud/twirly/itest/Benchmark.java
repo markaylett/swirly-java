@@ -31,8 +31,9 @@ public final class Benchmark {
 
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
+        final int state = 0x01;
         final Market market = s.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", settlDay,
-                expiryDay, System.currentTimeMillis());
+                expiryDay, state, System.currentTimeMillis());
         assert market != null;
 
         final Trans trans = new Trans();

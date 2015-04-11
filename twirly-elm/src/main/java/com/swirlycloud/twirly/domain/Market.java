@@ -25,6 +25,7 @@ public final class Market extends Rec implements Financial {
     private Memorable contr;
     private final int settlDay;
     private final int expiryDay;
+    private final int state;
     private final Side bidSide = new Side();
     private final Side offerSide = new Side();
     private long lastTicks;
@@ -38,11 +39,13 @@ public final class Market extends Rec implements Financial {
     }
 
     public Market(String mnem, String display, Memorable contr, int settlDay, int expiryDay,
-            long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
+            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId,
+            long maxExecId) {
         super(mnem, display);
         this.contr = contr;
         this.settlDay = settlDay;
         this.expiryDay = expiryDay;
+        this.state = state;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
@@ -50,8 +53,9 @@ public final class Market extends Rec implements Financial {
         this.maxExecId = maxExecId;
     }
 
-    public Market(String mnem, String display, Memorable contr, int settlDay, int expiryDay) {
-        this(mnem, display, contr, settlDay, expiryDay, 0L, 0L, 0L, 0L, 0L);
+    public Market(String mnem, String display, Memorable contr, int settlDay, int expiryDay,
+            int state) {
+        this(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L);
     }
 
     public static Market parse(JsonParser p) throws IOException {
@@ -60,13 +64,14 @@ public final class Market extends Rec implements Financial {
         Memorable contr = null;
         int settlDay = 0;
         int expiryDay = 0;
+        int state = 0;
 
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new Market(mnem, display, contr, settlDay, expiryDay);
+                return new Market(mnem, display, contr, settlDay, expiryDay, state);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -75,6 +80,8 @@ public final class Market extends Rec implements Financial {
                     settlDay = JulianDay.isoToJd(p.getInt());
                 } else if ("expiryDate".equals(name)) {
                     expiryDay = JulianDay.isoToJd(p.getInt());
+                } else if ("state".equals(name)) {
+                    state = p.getInt();
                 } else {
                     throw new IOException(String.format("unexpected number field '%s'", name));
                 }
@@ -104,6 +111,7 @@ public final class Market extends Rec implements Financial {
         out.append("\",\"contr\":\"").append(contr.getMnem());
         out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
         out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
+        out.append(",\"state\":").append(String.valueOf(state));
         out.append('}');
     }
 
@@ -288,6 +296,10 @@ public final class Market extends Rec implements Financial {
 
     public final int getExpiryDay() {
         return expiryDay;
+    }
+
+    public final int getState() {
+        return state;
     }
 
     public final Side getBidSide() {

@@ -15,7 +15,7 @@ public final class MockModel implements Model {
 
     @Override
     public final void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay) {
+            int expiryDay, int state) {
     }
 
     @Override

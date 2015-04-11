@@ -185,17 +185,18 @@ public final class Rest {
     }
 
     public final void postMarket(String mnem, String display, String contrMnem, int settlDate,
-            int expiryDate, Params params, long now, Appendable out) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException, IOException {
+            int expiryDate, int state, Params params, long now, Appendable out)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         serv.acquireWrite();
         try {
             final Contr contr = (Contr) serv.findRec(RecType.CONTR, contrMnem);
             if (contr == null) {
-                throw new NotFoundException(String.format("contract '%s' does not exist", contrMnem));
+                throw new NotFoundException(
+                        String.format("contract '%s' does not exist", contrMnem));
             }
             final int settlDay = isoToJd(settlDate);
             final int expiryDay = isoToJd(expiryDate);
-            final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay, now);
+            final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
             market.toJson(params, out);
         } finally {
             serv.releaseWrite();

@@ -115,5 +115,5 @@ You can configure the `JDBCRealm` instead of the `UserDatabaseRealm` as follows:
     <Realm className="org.apache.catalina.realm.JDBCRealm"
            driverName="org.gjt.mm.mysql.Driver"
            connectionURL="jdbc:mysql://localhost/twirly?user=root&amp;password="
-           userTable="RealmUser" userNameCol="email" userCredCol="pass"
-           userRoleTable="RealmUserRoleV" roleNameCol="role" />
+           userTable="User_t" userNameCol="email" userCredCol="pass"
+           userRoleTable="UserGroup_v" roleNameCol="group_" />

@@ -181,11 +181,11 @@ public class Serv {
 
     @NonNull
     private final Market newMarket(String mnem, String display, Contr contr, int settlDay,
-            int expiryDay) throws BadRequestException {
+            int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
-        return new Market(mnem, display, contr, settlDay, expiryDay);
+        return new Market(mnem, display, contr, settlDay, expiryDay, state);
     }
 
     @NonNull
@@ -455,7 +455,8 @@ public class Serv {
 
     @NonNull
     public final Market createMarket(String mnem, String display, Contr contr, int settlDay,
-            int expiryDay, long now) throws BadRequestException, ServiceUnavailableException {
+            int expiryDay, int state, long now) throws BadRequestException,
+            ServiceUnavailableException {
         // busDay <= expiryDay <= settlDay.
         final int busDay = getBusDate(now).toJd();
         if (busDay > expiryDay) {
@@ -469,9 +470,9 @@ public class Serv {
             throw new BadRequestException(String.format("market '%s' already exists", mnem));
         }
         final RbNode parent = market;
-        market = newMarket(mnem, display, contr, settlDay, expiryDay);
+        market = newMarket(mnem, display, contr, settlDay, expiryDay, state);
         try {
-            journ.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay);
+            journ.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
         } catch (RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -482,13 +483,13 @@ public class Serv {
 
     @NonNull
     public final Market createMarket(String mnem, String display, String contrMnem, int settlDay,
-            int expiryDay, long now) throws BadRequestException, NotFoundException,
+            int expiryDay, int state, long now) throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
         final Contr contr = (Contr) contrs.find(contrMnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contr '%s' does not exist", contrMnem));
         }
-        return createMarket(mnem, display, contr, settlDay, expiryDay, now);
+        return createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
     }
 
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {

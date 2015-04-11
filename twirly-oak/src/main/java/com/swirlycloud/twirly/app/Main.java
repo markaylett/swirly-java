@@ -123,11 +123,12 @@ public final class Main {
             final int today = ymdToJd(2014, 2, 11);
             final int settlDay = today + 2;
             final int expiryDay = today + 1;
+            final int state = 0x01;
             final long now = jdToMillis(today);
 
             serv.acquireWrite();
             try {
-                serv.createMarket(mnem, display, contr, settlDay, expiryDay, now);
+                serv.createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
             } finally {
                 serv.releaseWrite();
             }

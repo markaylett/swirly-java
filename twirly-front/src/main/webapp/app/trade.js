@@ -423,7 +423,7 @@ function ViewModel(contrs) {
     };
 
     self.reviseAll = function() {
-        var orders = self.orders();
+        var orders = self.working();
         for (var i = 0; i < orders.length; ++i) {
             var order = orders[i];
             if (order.isSelected()) {
@@ -447,7 +447,7 @@ function ViewModel(contrs) {
     };
 
     self.cancelAll = function() {
-        var orders = self.orders();
+        var orders = self.working();
         for (var i = 0; i < orders.length; ++i) {
             var order = orders[i];
             if (order.isSelected()) {

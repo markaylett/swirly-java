@@ -209,6 +209,7 @@ function Market(val, contrs) {
     self.contr = ko.observable(contr);
     self.settlDate = ko.observable(toDateStr(val.settlDate));
     self.expiryDate = ko.observable(toDateStr(val.expiryDate));
+    self.state = ko.observable(val.state);
 
     self.update = function(val) {
 
@@ -217,6 +218,7 @@ function Market(val, contrs) {
         self.contr(contr);
         self.settlDate(toDateStr(val.settlDate));
         self.expiryDate(toDateStr(val.expiryDate));
+        self.state(val.state);
     };
 }
 

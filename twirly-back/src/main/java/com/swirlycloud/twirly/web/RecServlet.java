@@ -124,12 +124,12 @@ public final class RecServlet extends RestServlet {
                 }
 
                 if (r.getFields() != (Request.MNEM | Request.DISPLAY | Request.CONTR
-                        | Request.SETTL_DATE | Request.EXPIRY_DATE)) {
+                        | Request.SETTL_DATE | Request.EXPIRY_DATE | Request.STATE)) {
                     throw new BadRequestException("request fields are invalid");
                 }
                 final long now = System.currentTimeMillis();
                 rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(), r.getSettlDate(),
-                        r.getExpiryDate(), PARAMS_NONE, now, resp.getWriter());
+                        r.getExpiryDate(), r.getState(), PARAMS_NONE, now, resp.getWriter());
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 

@@ -29,6 +29,7 @@
             <th>Contr</th>
             <th>Settl Date</th>
             <th>Expiry Date</th>
+            <th>State</th>
           </tr>
         </thead>
         <tbody data-bind="foreach: markets">
@@ -38,6 +39,7 @@
             <td data-bind="mnem: contr"></td>
             <td data-bind="text: settlDate"></td>
             <td data-bind="text: expiryDate"></td>
+            <td data-bind="text: state"></td>
           </tr>
         </tbody>
       </table>
@@ -75,6 +77,11 @@
                 <label for="expiryDate">Expiry Date:</label>
                 <input id="expiryDate" type="date" class="form-control"
                        data-bind="value: expiryDate"/>
+              </div>
+              <div class="form-group">
+                <label for="state">State:</label>
+                <input id="state" type="number" class="form-control"
+                       data-bind="value: state"/>
               </div>
             </form>
           </div>
