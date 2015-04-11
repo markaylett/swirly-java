@@ -29,8 +29,18 @@ public final class AsyncModelAdaptor implements AsyncModel {
     }
 
     @Override
+    public final void updateMarket(String mnem, String display, int state) {
+        model.updateMarket(mnem, display, state);
+    }
+
+    @Override
     public final void insertTrader(String mnem, String display, String email) {
         model.insertTrader(mnem, display, email);
+    }
+
+    @Override
+    public final void updateTrader(String mnem, String display) {
+        model.updateTrader(mnem, display);
     }
 
     @Override

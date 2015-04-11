@@ -17,7 +17,11 @@ public interface Journ extends AutoCloseable {
     void insertMarket(String mnem, String display, String contr, int settlDay, int expiryDay,
             int state);
 
+    void updateMarket(String mnem, String display, int state);
+
     void insertTrader(String mnem, String display, String email);
+
+    void updateTrader(String mnem, String display);
 
     void insertExec(Exec exec) throws NotFoundException;
 

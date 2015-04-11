@@ -219,6 +219,11 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
+    public final void updateMarket(String mnem, String display, int state) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public final void insertTrader(String mnem, String display, String email) {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -234,6 +239,11 @@ public final class DatastoreModel implements Model {
                 txn.rollback();
             }
         }
+    }
+
+    @Override
+    public final void updateTrader(String mnem, String display) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
