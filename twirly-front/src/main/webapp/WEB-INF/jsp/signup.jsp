@@ -1,6 +1,6 @@
 <%-- -*- html -*- --%>
 <%--
-   Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+   Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
 --%>
 <%@ page contentType="text/html;charset=utf-8" language="java"%>
 <!DOCTYPE html>
@@ -11,26 +11,8 @@
   <body>
 
     <jsp:include page="navbar.jsp"/>
-
-    <div class="container" style="padding-top: 88px;">
-
-      <jsp:include page="alert.jsp"/>
-
-      <form class="form-signup">
-        <h3>Sign up for a trading account</h3>
-        <div class="form-group">
-          <label for="mnem">Trader name:</label>
-          <input id="mnem" type="text" class="form-control" data-bind="value: mnem"/>
-        </div>
-        <div class="form-group">
-          <label for="display">Full name:</label>
-          <input id="display" type="text" class="form-control" data-bind="value: display"/>
-        </div>
-        <button type="button" class="btn btn-lg btn-primary btn-block" data-bind="click: signup">Sign up</button>
-      </form>
-
+    <div id="module" class="container" style="padding-top: 88px;">
     </div>
-
     <jsp:include page="footer.jsp"/>
 
     <!-- Bootstrap core JavaScript
@@ -39,12 +21,14 @@
     <script type="text/javascript" src="/js/jquery.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap3-typeahead.min.js"></script>
-    <script type="text/javascript" src="/js/knockout.min.js"></script>
+    <script type="text/javascript" src="/js/react.min.js"></script>
 
-    <script type="text/javascript" src="/src/twirly.js"></script>
-    <script type="text/javascript" src="/src/signup.js"></script>
+    <script type="text/javascript" src="/js/twirly.min.js"></script>
     <script type="text/javascript">
-      $(initApp);
+      React.render(
+          React.createElement(SignupModule),
+          document.getElementById('module')
+      );
     </script>
   </body>
 </html>

@@ -3,6 +3,55 @@
 apply plugin: 'eclipse-wtp'
 apply plugin: 'war'
 
+apply plugin: "com.eriwen.gradle.js"
+apply plugin: 'net.eikehirsch.react'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.eriwen:gradle-js-plugin:1.12.1"
+        classpath 'net.eikehirsch.react:gradle-react-plugin:0.3.1'
+    }
+}
+
+task twirlyJsx(type: JSXTask) {
+    sourcesDir = "${projectDir}/src/main/react"
+    destDir = "${buildDir}/react"
+}
+
+combineJs {
+    source = [
+        "${buildDir}/react/util.js",
+        "${buildDir}/react/error.js",
+        "${buildDir}/react/conv.js",
+        "${buildDir}/react/domain.js",
+        "${buildDir}/react/table.js",
+        "${buildDir}/react/form.js",
+        "${buildDir}/react/dialog.js",
+        "${buildDir}/react/widget.js",
+        "${buildDir}/react/contr.js",
+        "${buildDir}/react/market.js",
+        "${buildDir}/react/signup.js",
+        "${buildDir}/react/trade.js",
+        "${buildDir}/react/trader.js"
+    ]
+    dest = file("${buildDir}/js/twirly.js")
+}
+combineJs.dependsOn twirlyJsx
+
+minifyJs {
+    source = combineJs
+    dest = file("${buildDir}/js/twirly.min.js")
+    sourceMap = file("${buildDir}/js/twirly.sourcemap.json")
+    closure {
+        warningLevel = 'QUIET'
+    }
+}
+processResources.dependsOn minifyJs
+
 dependencies {
     compile project(':twirly-fir')
     compile group: 'com.google.appengine', name: 'appengine-api-1.0-sdk', version: config.appengine.version
@@ -20,6 +69,8 @@ eclipse {
     wtp {
         component {
             contextPath = '/'
+            resource sourcePath: "${buildDir}/js", deployPath: "/js"
+            resource sourcePath: "${webAppDirName}", deployPath: "/"
         }
     }
 }
@@ -27,4 +78,7 @@ eclipse {
 war {
     duplicatesStrategy = 'EXCLUDE'
     webInf { from config.front.webinf }
+    from("${buildDir}/js", {
+        into 'js'
+    })
 }
