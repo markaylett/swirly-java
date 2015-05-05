@@ -45,14 +45,14 @@ code {
 
 /* Sign-in form. */
 
-.form-signin {
+.signinForm {
   max-width: 350px;
   margin: 0 auto;
 }
 
 /* Sign-up form. */
 
-.form-signup {
+.signupForm {
   max-width: 350px;
   margin: 0 auto;
 }

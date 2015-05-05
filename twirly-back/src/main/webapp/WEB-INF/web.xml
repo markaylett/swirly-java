@@ -5,8 +5,8 @@
   <context-param>
     <param-name>url</param-name>
     <!--param-value>datastore:</param-value-->
-    <!--param-value>jdbc:mysql://localhost/twirly?sessionVariables=foreign_key_checks=1</param-value-->
-    <param-value>mock:</param-value>
+    <param-value>jdbc:mysql://localhost/twirly?sessionVariables=foreign_key_checks=1</param-value>
+    <!--param-value>mock:</param-value-->
   </context-param>
 
   <context-param>

@@ -274,22 +274,6 @@ INSERT INTO Trader_t (mnem, display, email)
 ;
 
 INSERT INTO Trader_t (mnem, display, email)
-       VALUES ('GOSAYL', 'Goska Aylett', 'goska.aylett@gmail.com')
-;
-
-INSERT INTO Trader_t (mnem, display, email)
-       VALUES ('TOBAYL', 'Toby Aylett', 'toby.aylett@gmail.com')
-;
-
-INSERT INTO Trader_t (mnem, display, email)
-       VALUES ('EMIAYL', 'Emily Aylett', 'emily.aylett@gmail.com')
-;
-
-INSERT INTO Trader_t (mnem, display, email)
-       VALUES ('SWIRLY', 'Swirly Cloud', 'info@swirlycloud.com')
-;
-
-INSERT INTO Trader_t (mnem, display, email)
        VALUES ('RAMMAC', 'Ram Macharaj', 'ram.mac@gmail.com')
 ;
 

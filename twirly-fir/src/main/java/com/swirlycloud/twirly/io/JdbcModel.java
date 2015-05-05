@@ -288,6 +288,11 @@ public final class JdbcModel implements Model {
     }
 
     @Override
+    public final void updateMarket(String mnem, String display,int state) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public final void insertTrader(String mnem, String display, String email) {
         try {
             int i = 1;
@@ -298,6 +303,11 @@ public final class JdbcModel implements Model {
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @Override
+    public final void updateTrader(String mnem, String display) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

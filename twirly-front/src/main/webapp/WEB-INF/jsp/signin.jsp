@@ -25,7 +25,7 @@
         </div>
       </c:if>
 
-      <form class="form-signin"
+      <form class="signinForm"
             action='<%= response.encodeURL("j_security_check") %>'
             method="POST">
         <h3>Sign in to your account</h3>

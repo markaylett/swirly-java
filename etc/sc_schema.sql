@@ -173,6 +173,33 @@ CREATE TABLE Trader_t (
 ENGINE = InnoDB;
 
 DELIMITER //
+CREATE TRIGGER afterInsertOnUser
+  AFTER INSERT ON User_t
+  FOR EACH ROW
+  BEGIN
+    INSERT INTO UserGroup_t (
+      userId,
+      groupId
+    ) VALUES (
+      NEW.id,
+      1
+    );
+  END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER beforeDeleteOnUser
+  BEFORE DELETE on User_t
+  FOR EACH ROW
+  BEGIN
+    DELETE FROM Trader_t
+    WHERE email = OLD.email;
+    DELETE FROM UserGroup_t
+    WHERE userId = OLD.id;
+  END //
+DELIMITER ;
+
+DELIMITER //
 CREATE TRIGGER beforeInsertOnTrader
   BEFORE INSERT ON Trader_t
   FOR EACH ROW

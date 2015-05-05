@@ -19,7 +19,15 @@ public final class MockModel implements Model {
     }
 
     @Override
+    public final void updateMarket(String mnem, String display, int state) {
+    }
+
+    @Override
     public final void insertTrader(String mnem, String display, String email) {
+    }
+
+    @Override
+    public final void updateTrader(String mnem, String display) {
     }
 
     @Override

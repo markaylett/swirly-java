@@ -56,6 +56,20 @@ public final class AsyncModelService implements AsyncModel {
     }
 
     @Override
+    public final void updateMarket(final String mnem, final String display, final int state) {
+        service.submit(new Runnable() {
+            @Override
+            public final void run() {
+                try {
+                    model.updateMarket(mnem, display, state);
+                } catch (Throwable t) {
+                    log.log(Level.SEVERE, "failed to update market", t);
+                }
+            }
+        });
+    }
+
+    @Override
     public final void insertTrader(final String mnem, final String display, final String email) {
         service.submit(new Runnable() {
             @Override
@@ -64,6 +78,20 @@ public final class AsyncModelService implements AsyncModel {
                     model.insertTrader(mnem, display, email);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to insert trader", t);
+                }
+            }
+        });
+    }
+
+    @Override
+    public final void updateTrader(final String mnem, final String display) {
+        service.submit(new Runnable() {
+            @Override
+            public final void run() {
+                try {
+                    model.updateTrader(mnem, display);
+                } catch (Throwable t) {
+                    log.log(Level.SEVERE, "failed to update trader", t);
                 }
             }
         });
