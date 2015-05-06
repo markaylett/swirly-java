@@ -13,7 +13,7 @@
 
     <jsp:include page="navbar.jsp"/>
 
-    <div class="container">
+    <div class="container" style="margin-top: 32px; margin-bottom: 80px">
 
       <c:if test="${state.errorPage}">
         <div class="alert alert-warning alert-dismissible" role="alert">
