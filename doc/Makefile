@@ -7,10 +7,10 @@ PLANTUML=plantuml.jar
 
 UML=\
 	instruct.uml \
-	milkorder.uml \
 	newmarket.uml \
 	neworder.uml \
 	newtrader.uml \
+	orderentry.uml \
 	project.uml \
 	rec.uml \
 	reviseorder.uml \
