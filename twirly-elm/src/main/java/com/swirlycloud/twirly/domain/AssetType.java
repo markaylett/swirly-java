@@ -11,9 +11,19 @@ public enum AssetType {
         this.id = id;
     }
 
+    /**
+     * @param id
+     *            Numeric identifier.
+     * @return asset-type or null if {@code id} is zero.
+     * @throws IllegalArgumentException
+     *             if {@code id} is invalid.
+     */
     public static AssetType valueOf(int id) {
         AssetType val;
         switch (id) {
+        case 0:
+            val = null;
+            break;
         case 1:
             val = AssetType.COMMODITY;
             break;

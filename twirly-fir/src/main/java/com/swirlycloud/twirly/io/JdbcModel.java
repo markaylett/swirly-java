@@ -117,6 +117,7 @@ public final class JdbcModel implements Model {
 
     private static Exec getTrade(ResultSet rs) throws SQLException {
         final long id = rs.getLong("id");
+        // getLong() returns zero if orderId is null.
         final long orderId = rs.getLong("orderId");
         final String trader = rs.getString("trader");
         final String market = rs.getString("market");
@@ -133,18 +134,11 @@ public final class JdbcModel implements Model {
         final long lastTicks = rs.getLong("lastTicks");
         final long lastLots = rs.getLong("lastLots");
         final long minLots = rs.getLong("minLots");
-        long matchId;
-        Role role;
-        String cpty;
-        if (state == State.TRADE) {
-            matchId = rs.getLong("matchId");
-            role = Role.valueOf(rs.getInt("roleId"));
-            cpty = rs.getString("cpty");
-        } else {
-            matchId = 0;
-            role = null;
-            cpty = null;
-        }
+        final long matchId = rs.getLong("matchId");
+        // If roleId is null in the database, then getInt() will return zero, and valueOf() will
+        // return null.
+        final Role role = Role.valueOf(rs.getInt("roleId"));
+        final String cpty = rs.getString("cpty");
         final long created = rs.getLong("created");
         return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action, ticks,
                 lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
@@ -168,12 +162,14 @@ public final class JdbcModel implements Model {
         try {
             try {
                 conn = DriverManager.getConnection(url, user, password);
-                selectAssetStmt = conn.prepareStatement("SELECT mnem, display, typeId FROM Asset_t");
+                selectAssetStmt = conn
+                        .prepareStatement("SELECT mnem, display, typeId FROM Asset_t");
                 selectContrStmt = conn
                         .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM Contr_v");
                 selectMarketStmt = conn
                         .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM Market_v");
-                selectTraderStmt = conn.prepareStatement("SELECT mnem, display, email FROM Trader_t");
+                selectTraderStmt = conn
+                        .prepareStatement("SELECT mnem, display, email FROM Trader_t");
                 selectOrderStmt = conn
                         .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
                 selectTradeStmt = conn
@@ -288,7 +284,7 @@ public final class JdbcModel implements Model {
     }
 
     @Override
-    public final void updateMarket(String mnem, String display,int state) {
+    public final void updateMarket(String mnem, String display, int state) {
         throw new UnsupportedOperationException();
     }
 
@@ -315,7 +311,11 @@ public final class JdbcModel implements Model {
         try {
             int i = 1;
             insertExecStmt.setLong(i++, exec.getId());
-            insertExecStmt.setLong(i++, exec.getOrderId());
+            if (exec.getOrderId() != 0) {
+                insertExecStmt.setLong(i++, exec.getOrderId());
+            } else {
+                insertExecStmt.setNull(i++, Types.INTEGER);
+            }
             insertExecStmt.setString(i++, exec.getTrader());
             insertExecStmt.setString(i++, exec.getMarket());
             insertExecStmt.setString(i++, exec.getContr());
@@ -340,13 +340,15 @@ public final class JdbcModel implements Model {
                 insertExecStmt.setNull(i++, Types.INTEGER);
             }
             insertExecStmt.setLong(i++, exec.getMinLots());
-            if (exec.getState() == State.TRADE) {
-                insertExecStmt.setLong(i++, exec.getMatchId());
+            insertExecStmt.setLong(i++, exec.getMatchId());
+            if (exec.getRole() != null) {
                 insertExecStmt.setInt(i++, exec.getRole().intValue());
-                insertExecStmt.setString(i++, exec.getCpty());
             } else {
                 insertExecStmt.setNull(i++, Types.INTEGER);
-                insertExecStmt.setNull(i++, Types.INTEGER);
+            }
+            if (exec.getCpty() != null) {
+                insertExecStmt.setString(i++, exec.getCpty());
+            } else {
                 insertExecStmt.setNull(i++, Types.CHAR);
             }
             insertExecStmt.setBoolean(i++, false);

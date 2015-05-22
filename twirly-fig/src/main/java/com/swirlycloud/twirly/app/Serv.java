@@ -831,6 +831,41 @@ public class Serv {
         }
     }
 
+    @NonNull
+    public final Exec createTrade(Sess sess, Market market, String ref, Action action, long ticks,
+            long lots, Role role, String cpty, long created) throws NotFoundException,
+            ServiceUnavailableException {
+        final Posn posn = sess.getLazyPosn(market);
+        final Exec trade = Exec.manual(market.allocExecId(), sess.getTrader(), market.getMnem(),
+                market.getContr(), market.getSettlDay(), ref, action, ticks, lots, role, cpty,
+                created);
+        if (cpty != null) {
+            // Create back-to-back trade if counter-party is specified.
+            final Sess cptySess = getLazySess(cpty);
+            final Posn cptyPosn = cptySess.getLazyPosn(market);
+            final Exec cptyTrade = trade.inverse(market.allocExecId());
+            trade.setSlNext(cptyTrade);
+            try {
+                journ.insertExecList(market.getMnem(), trade);
+            } catch (RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
+            sess.insertTrade(trade);
+            posn.applyTrade(trade);
+            cptySess.insertTrade(cptyTrade);
+            cptyPosn.applyTrade(cptyTrade);
+        } else {
+            try {
+                journ.insertExec(trade);
+            } catch (RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
+            sess.insertTrade(trade);
+            posn.applyTrade(trade);
+        }
+        return trade;
+    }
+
     public final void archiveTrade(Sess sess, Exec trade, long now) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
         if (trade.getState() != State.TRADE) {

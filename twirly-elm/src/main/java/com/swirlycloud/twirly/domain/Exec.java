@@ -10,6 +10,8 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.SlNode;
@@ -33,6 +35,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
     /**
      * Ref is optional.
      */
+    @NonNull
     private final String ref;
     private State state;
     private final Action action;
@@ -135,6 +138,25 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         this.created = created;
     }
 
+    /**
+     * Special factory method for manual adjustments.
+     */
+    @NonNull
+    public static Exec manual(long id, String trader, String market, String contr, int settlDay,
+            String ref, Action action, long ticks, long lots, Role role, String cpty, long created) {
+        final long orderId = 0;
+        final State state = State.TRADE;
+        final long resd = 0;
+        final long exec = lots;
+        final long cost = ticks * lots;
+        final long lastTicks = ticks;
+        final long lastLots = lots;
+        final long minLots = 1;
+        final long matchId = 0;
+        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action, ticks,
+                lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
+    }
+
     public static Exec parse(JsonParser p) throws IOException {
         long id = 0;
         long orderId = 0;
@@ -176,8 +198,6 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
                     lastTicks = 0;
                 } else if ("lastLots".equals(name)) {
                     lastLots = 0;
-                } else if ("matchId".equals(name)) {
-                    matchId = 0;
                 } else if ("role".equals(name)) {
                     role = null;
                 } else if ("cpty".equals(name)) {
@@ -245,6 +265,12 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         throw new IOException("end-of object not found");
     }
 
+    public final Exec inverse(long id) {
+        return new Exec(id, orderId, cpty, market, contr, settlDay, ref, state, action.inverse(),
+                ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId,
+                role.inverse(), trader, created);
+    }
+
     @Override
     public final int hashCode() {
         final int prime = 31;
@@ -308,12 +334,18 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
             out.append(",\"lastTicks\":null,\"lastLots\":null");
         }
         out.append(",\"minLots\":").append(String.valueOf(minLots));
-        if (state == State.TRADE) {
-            out.append(",\"matchId\":").append(String.valueOf(matchId));
-            out.append(",\"role\":\"").append(role.name());
-            out.append("\",\"cpty\":\"").append(cpty).append('"');
+        out.append(",\"matchId\":").append(String.valueOf(matchId));
+        out.append(",\"role\":");
+        if (role != null) {
+            out.append('"').append(role.name()).append('"');
         } else {
-            out.append(",\"matchId\":null,\"role\":null,\"cpty\":null");
+            out.append("null");
+        }
+        out.append(",\"cpty\":");
+        if (cpty != null) {
+            out.append('"').append(cpty).append('"');
+        } else {
+            out.append("null");
         }
         out.append(",\"created\":").append(String.valueOf(created));
         out.append("}");
@@ -342,12 +374,12 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         resd = 0;
     }
 
-    public final void trade(long takenLots, long takenCost, long lastTicks, long lastLots,
+    public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots,
             long matchId, Role role, String cpty) {
         state = State.TRADE;
-        resd -= takenLots;
-        exec += takenLots;
-        cost += takenCost;
+        resd -= sumLots;
+        exec += sumLots;
+        cost += sumCost;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.matchId = matchId;
@@ -389,6 +421,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
         return settlDay;
     }
 
+    @NonNull
     @Override
     public final String getRef() {
         return ref;
@@ -452,6 +485,10 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
     @Override
     public final boolean isDone() {
         return resd == 0;
+    }
+
+    public final boolean isManual() {
+        return orderId == 0;
     }
 
     public final long getMatchId() {

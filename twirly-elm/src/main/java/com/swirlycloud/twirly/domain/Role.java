@@ -3,7 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-public enum Role {
+import com.swirlycloud.twirly.util.Invertible;
+
+public enum Role implements Invertible<Role> {
     MAKER(1), TAKER(2);
     private final int id;
 
@@ -11,9 +13,18 @@ public enum Role {
         this.id = id;
     }
 
+    /**
+     * @param id
+     *            Numeric identifier.
+     * @return role or null if {@code id} is zero.
+     * @throws IllegalArgumentException
+     *             if {@code id} is invalid.
+     */
     public static Role valueOf(int id) {
         Role val;
         switch (id) {
+        case 0:
+            val = null;
         case 1:
             val = Role.MAKER;
             break;
@@ -24,6 +35,11 @@ public enum Role {
             throw new IllegalArgumentException("invalid role");
         }
         return val;
+    }
+
+    @Override
+    public final Role inverse() {
+        return this == Role.MAKER ? Role.TAKER : Role.MAKER; 
     }
 
     public final int intValue() {

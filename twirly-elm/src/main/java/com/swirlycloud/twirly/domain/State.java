@@ -11,9 +11,19 @@ public enum State {
         this.id = id;
     }
 
+    /**
+     * @param id
+     *            Numeric identifier.
+     * @return state or null if {@code id} is zero.
+     * @throws IllegalArgumentException
+     *             if {@code id} is invalid.
+     */
     public static State valueOf(int id) {
         State val;
         switch (id) {
+        case 0:
+            val = null;
+            break;
         case 1:
             val = State.NEW;
             break;

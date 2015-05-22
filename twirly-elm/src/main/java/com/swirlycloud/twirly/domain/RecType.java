@@ -26,9 +26,19 @@ public enum RecType {
         this.id = id;
     }
 
+    /**
+     * @param id
+     *            Numeric identifier.
+     * @return rec-type or null if {@code id} is zero.
+     * @throws IllegalArgumentException
+     *             if {@code id} is invalid.
+     */
     public static RecType valueOf(int id) {
         RecType val;
         switch (id) {
+        case 0:
+            val = null;
+            break;
         case 1:
             val = RecType.ASSET;
             break;

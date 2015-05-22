@@ -20,6 +20,7 @@ import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
+import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -196,7 +197,8 @@ public final class Rest {
             }
             final int settlDay = isoToJd(settlDate);
             final int expiryDay = isoToJd(expiryDate);
-            final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
+            final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay,
+                    state, now);
             market.toJson(params, out);
         } finally {
             serv.releaseWrite();
@@ -478,6 +480,24 @@ public final class Rest {
             trade.toJson(params, out);
         } finally {
             serv.releaseRead();
+        }
+    }
+
+    public final void postTrade(String trader, String marketMnem, String ref, Action action,
+            long ticks, long lots, Role role, String cpty, Params params, long now, Appendable out)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        serv.acquireWrite();
+        try {
+            final Sess sess = serv.getLazySess(trader);
+            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
+            if (market == null) {
+                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
+            }
+            final Exec trade = serv.createTrade(sess, market, ref, action, ticks, lots, role, cpty,
+                    now);
+            trade.toJson(params, out);
+        } finally {
+            serv.releaseWrite();
         }
     }
 

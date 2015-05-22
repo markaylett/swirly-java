@@ -136,11 +136,9 @@ public final class DatastoreModel implements Model {
         entity.setUnindexedProperty("lastTicks", exec.getLastTicks());
         entity.setUnindexedProperty("lastLots", exec.getLastLots());
         entity.setUnindexedProperty("minLots", exec.getMinLots());
-        if (exec.getState() == State.TRADE) {
-            entity.setUnindexedProperty("matchId", exec.getMatchId());
-            entity.setUnindexedProperty("role", exec.getRole().name());
-            entity.setUnindexedProperty("cpty", exec.getCpty());
-        }
+        entity.setUnindexedProperty("matchId", exec.getMatchId());
+        entity.setUnindexedProperty("role", exec.getRole() != null ? exec.getRole().name() : null);
+        entity.setUnindexedProperty("cpty", exec.getCpty());
         entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
@@ -280,23 +278,27 @@ public final class DatastoreModel implements Model {
             final Entity market = getMarket(txn, marketMnem);
             for (SlNode node = first; node != null; node = node.slNext()) {
                 final Exec exec = (Exec) node;
-                if (exec.getState() == State.NEW) {
-                    // Defer actual datastore put.
-                    orders.put(exec.getOrderId(), newOrder(market, exec));
-                } else {
-                    final long id = exec.getOrderId();
-                    // This exec may apply to a cached order.
-                    Entity order = orders.get(id);
-                    if (order == null) {
-                        // Otherwise fetch the order from the datastore.
-                        order = getOrder(txn, market.getKey(), id);
-                        orders.put(id, order);
+                final long orderId = exec.getOrderId();
+                if (orderId != 0) {
+                    if (exec.getState() == State.NEW) {
+                        // Defer actual datastore put.
+                        orders.put(exec.getOrderId(), newOrder(market, exec));
+                    } else {
+                        // This exec may apply to a cached order.
+                        Entity order = orders.get(orderId);
+                        if (order == null) {
+                            // Otherwise fetch the order from the datastore.
+                            order = getOrder(txn, market.getKey(), orderId);
+                            orders.put(orderId, order);
+                        }
+                        applyExec(order, exec);
                     }
-                    applyExec(order, exec);
                 }
                 datastore.put(txn, newExec(market, exec));
             }
-            datastore.put(txn, orders.values());
+            if (!orders.isEmpty()) {
+                datastore.put(txn, orders.values());
+            }
             datastore.put(txn, market);
             txn.commit();
         } catch (ConcurrentModificationException e) {
@@ -471,18 +473,10 @@ public final class DatastoreModel implements Model {
                     final long lastTicks = (Long) entity.getProperty("lastTicks");
                     final long lastLots = (Long) entity.getProperty("lastLots");
                     final long minLots = (Long) entity.getProperty("minLots");
-                    long matchId;
-                    Role role;
-                    String cpty;
-                    if (state == State.TRADE) {
-                        matchId = (Long) entity.getProperty("matchId");
-                        role = Role.valueOf((String) entity.getProperty("role"));
-                        cpty = (String) entity.getProperty("cpty");
-                    } else {
-                        matchId = 0;
-                        role = null;
-                        cpty = null;
-                    }
+                    final long matchId = (Long) entity.getProperty("matchId");
+                    final String s = (String) entity.getProperty("role");
+                    final Role role = s != null ? Role.valueOf(s) : null;
+                    final String cpty = (String) entity.getProperty("cpty");
                     final long created = (Long) entity.getProperty("created");
                     final Exec trade = new Exec(id, orderId, trader, market, contr, settlDay, ref,
                             state, action, ticks, lots, resd, exec, cost, lastTicks, lastLots,

@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Identifiable;
 
@@ -10,6 +12,10 @@ import com.swirlycloud.twirly.util.Identifiable;
  * Fields common to both Order and Exec.
  */
 
+/**
+ * @author Mark Aylett
+ *
+ */
 public interface Instruct extends RbNode, Identifiable, Financial {
 
     long getOrderId();
@@ -25,6 +31,7 @@ public interface Instruct extends RbNode, Identifiable, Financial {
     @Override
     int getSettlDay();
 
+    @NonNull
     String getRef();
 
     State getState();
@@ -37,17 +44,35 @@ public interface Instruct extends RbNode, Identifiable, Financial {
 
     long getResd();
 
+    /**
+     * @return sum of lots traded.
+     */
     long getExec();
 
+    /**
+     * @return sum of lastLots*lastTicks for each trade.
+     */
     long getCost();
 
+    /**
+     * @return cost/exec or zero if exec is zero.
+     */
     double getAvgTicks();
 
+    /**
+     * @return last traded ticks.
+     */
     long getLastTicks();
 
+    /**
+     * @return last traded lots.
+     */
     long getLastLots();
 
     long getMinLots();
 
+    /**
+     * @return true if resd equals zero.
+     */
     boolean isDone();
 }
