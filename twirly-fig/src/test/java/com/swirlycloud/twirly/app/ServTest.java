@@ -51,40 +51,41 @@ public final class ServTest {
                 settlDay, expiryDay, state, now);
         assertNotNull(market);
 
-        final Trans trans = new Trans();
-        final Order order = serv.placeOrder(sess, market, "", Action.BUY, 12345, 5, 1, now, trans)
-                .getOrder();
-        assertEquals(sess.getTrader(), order.getTrader());
-        assertEquals(market.getMnem(), order.getMarket());
-        assertEquals("", order.getRef());
-        assertEquals(State.NEW, order.getState());
-        assertEquals(Action.BUY, order.getAction());
-        assertEquals(12345, order.getTicks());
-        assertEquals(5, order.getLots());
-        assertEquals(5, order.getResd());
-        assertEquals(0, order.getExec());
-        assertEquals(0, order.getCost());
-        assertEquals(0, order.getLastTicks());
-        assertEquals(0, order.getLastLots());
-        assertEquals(1, order.getMinLots());
-        assertEquals(now, order.getCreated());
-        assertEquals(now, order.getModified());
+        try (final Trans trans = new Trans()) {
+            serv.placeOrder(sess, market, "", Action.BUY, 12345, 5, 1, now, trans);
+            final Order order = trans.getOrder();
+            assertEquals(sess.getTrader(), order.getTrader());
+            assertEquals(market.getMnem(), order.getMarket());
+            assertEquals("", order.getRef());
+            assertEquals(State.NEW, order.getState());
+            assertEquals(Action.BUY, order.getAction());
+            assertEquals(12345, order.getTicks());
+            assertEquals(5, order.getLots());
+            assertEquals(5, order.getResd());
+            assertEquals(0, order.getExec());
+            assertEquals(0, order.getCost());
+            assertEquals(0, order.getLastTicks());
+            assertEquals(0, order.getLastLots());
+            assertEquals(1, order.getMinLots());
+            assertEquals(now, order.getCreated());
+            assertEquals(now, order.getModified());
 
-        serv.reviseOrder(sess, market, order, 4, now + 1, trans);
-        assertEquals(sess.getTrader(), order.getTrader());
-        assertEquals(market.getMnem(), order.getMarket());
-        assertEquals("", order.getRef());
-        assertEquals(State.REVISE, order.getState());
-        assertEquals(Action.BUY, order.getAction());
-        assertEquals(12345, order.getTicks());
-        assertEquals(4, order.getLots());
-        assertEquals(4, order.getResd());
-        assertEquals(0, order.getExec());
-        assertEquals(0, order.getCost());
-        assertEquals(0, order.getLastTicks());
-        assertEquals(0, order.getLastLots());
-        assertEquals(1, order.getMinLots());
-        assertEquals(now, order.getCreated());
-        assertEquals(now + 1, order.getModified());
+            serv.reviseOrder(sess, market, order, 4, now + 1, trans);
+            assertEquals(sess.getTrader(), order.getTrader());
+            assertEquals(market.getMnem(), order.getMarket());
+            assertEquals("", order.getRef());
+            assertEquals(State.REVISE, order.getState());
+            assertEquals(Action.BUY, order.getAction());
+            assertEquals(12345, order.getTicks());
+            assertEquals(4, order.getLots());
+            assertEquals(4, order.getResd());
+            assertEquals(0, order.getExec());
+            assertEquals(0, order.getCost());
+            assertEquals(0, order.getLastTicks());
+            assertEquals(0, order.getLastLots());
+            assertEquals(1, order.getMinLots());
+            assertEquals(now, order.getCreated());
+            assertEquals(now + 1, order.getModified());
+        }
     }
 }

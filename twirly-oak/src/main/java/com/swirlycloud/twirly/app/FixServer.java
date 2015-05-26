@@ -56,7 +56,7 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.io.AsyncModel;
 import com.swirlycloud.twirly.io.Model;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.TransNode;
 
 public final class FixServer extends MessageCracker implements Application {
 
@@ -128,7 +128,7 @@ public final class FixServer extends MessageCracker implements Application {
         final FixBuilder builder = getBuilder(new ExecutionReport());
         String targetTrader = sess.getTrader();
         SessionID targetSessionId = sessionId;
-        for (SlNode node = trans.execs.getFirst(); node != null; node = node.slNext()) {
+        for (TransNode node = trans.execs.getFirst(); node != null; node = node.transNext()) {
             final Exec exec = (Exec) node;
             if (!exec.getTrader().equals(targetTrader)) {
                 targetTrader = exec.getTrader();
@@ -205,11 +205,11 @@ public final class FixServer extends MessageCracker implements Application {
                 throw new FixRejectException(
                         String.format("market '%s' does not exist", marketMnem));
             }
-            final Trans trans = serv.placeOrder(sess, market, ref, action, ticks, lots, minLots,
-                    now, new Trans());
-            log.info(sessionId + ": " + trans);
-            sendTransLocked(sess, trans, sessionId);
-
+            try (final Trans trans = new Trans()) {
+                serv.placeOrder(sess, market, ref, action, ticks, lots, minLots, now, trans);
+                log.info(sessionId + ": " + trans);
+                sendTransLocked(sess, trans, sessionId);
+            }
         } catch (FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());
             sendBusinessReject(message, ref, e.getMessage(), sessionId);
@@ -264,10 +264,11 @@ public final class FixServer extends MessageCracker implements Application {
                             orderRef));
                 }
             }
-            final Trans trans = serv.reviseOrder(sess, market, order, lots, now, new Trans());
-            log.info(sessionId + ": " + trans);
-            sendTransLocked(sess, trans, sessionId);
-
+            try (final Trans trans = new Trans()) {
+                serv.reviseOrder(sess, market, order, lots, now, trans);
+                log.info(sessionId + ": " + trans);
+                sendTransLocked(sess, trans, sessionId);
+            }
         } catch (FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());
             sendCancelReject(ref, orderRef, orderId, e.getMessage(), sessionId);
@@ -323,10 +324,11 @@ public final class FixServer extends MessageCracker implements Application {
                             orderRef));
                 }
             }
-            final Trans trans = serv.cancelOrder(sess, market, order, now, new Trans());
-            log.info(sessionId + ": " + trans);
-            sendTransLocked(sess, trans, sessionId);
-
+            try (final Trans trans = new Trans()) {
+                serv.cancelOrder(sess, market, order, now, trans);
+                log.info(sessionId + ": " + trans);
+                sendTransLocked(sess, trans, sessionId);
+            }
         } catch (FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());
             sendCancelReject(ref, orderRef, orderId, e.getMessage(), sessionId);

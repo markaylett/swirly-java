@@ -15,13 +15,15 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.TransNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Instruct {
+public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, Instruct {
 
-    private transient SlNode next;
+    private transient SlNode slNext;
+    private transient TransNode transNext;
 
     private final long id;
     private final long orderId;
@@ -353,12 +355,22 @@ public final class Exec extends BasicRbNode implements Jsonifiable, SlNode, Inst
 
     @Override
     public final void setSlNext(SlNode next) {
-        this.next = next;
+        this.slNext = next;
     }
 
     @Override
     public final SlNode slNext() {
-        return next;
+        return slNext;
+    }
+
+    @Override
+    public final void setTransNext(TransNode next) {
+        this.transNext = next;
+    }
+
+    @Override
+    public final TransNode transNext() {
+        return transNext;
     }
 
     public final void revise(long lots) {

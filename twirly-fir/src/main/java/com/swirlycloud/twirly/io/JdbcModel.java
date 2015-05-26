@@ -362,12 +362,17 @@ public final class JdbcModel implements Model {
 
     @Override
     public final void insertExecList(String market, SlNode first) {
+        SlNode node = first;
         try {
             conn.setAutoCommit(false);
             boolean success = false;
             try {
-                for (SlNode node = first; node != null; node = node.slNext()) {
-                    insertExec((Exec) node);
+                while (node != null) {
+                    final Exec exec = (Exec) node;
+                    node = node.slNext();
+                    exec.setSlNext(null);
+
+                    insertExec(exec);
                 }
                 conn.commit();
                 success = true;
@@ -379,6 +384,13 @@ public final class JdbcModel implements Model {
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            // Clear nodes to ensure no unwanted retention.
+            while (node != null) {
+                final Exec exec = (Exec) node;
+                node = node.slNext();
+                exec.setSlNext(null);
+            }
         }
     }
 

@@ -10,39 +10,58 @@ import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.intrusive.TransQueue;
 import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.TransNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Trans implements Jsonifiable {
+public final class Trans implements AutoCloseable, Jsonifiable {
     private Market market;
     private Order order;
     final SlQueue matches = new SlQueue();
     /**
      * All executions referenced in matches.
      */
-    final SlQueue execs = new SlQueue();
+    final TransQueue execs = new TransQueue();
     /**
      * Optional taker position.
      */
     Posn posn;
 
-    final void init(Market market, Order order, Exec exec) {
+    final void reset(Market market, Order order, Exec exec) {
         assert market != null;
         assert order != null;
         assert exec != null;
         this.market = market;
         this.order = order;
-        matches.clear();
-        execs.clear();
+        clear();
         execs.insertBack(exec);
         posn = null;
+    }
+
+    /**
+     * Prepare execs by cloning the slNode list from the transNode list.
+     * 
+     * @return the cloned slNode list.
+     */
+    final SlNode prepareExecList() {
+        final TransNode first = execs.getFirst();
+        for (TransNode node = first; node != null;) {
+            node.setSlNext(node = node.transNext());
+        }
+        return first;
     }
 
     @Override
     public final String toString() {
         return JsonUtil.toJson(this);
+    }
+
+    @Override
+    public final void close() {
+        clear();
     }
 
     @Override
@@ -63,7 +82,7 @@ public final class Trans implements Jsonifiable {
         }
         out.append("],\"execs\":[");
         int i = 0;
-        for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
+        for (TransNode node = execs.getFirst(); node != null; node = node.transNext()) {
             final Exec exec = (Exec) node;
             if (!exec.getTrader().equals(trader)) {
                 continue;
@@ -83,11 +102,22 @@ public final class Trans implements Jsonifiable {
         out.append('}');
     }
 
+    public final void clear() {
+        TransNode node = execs.getFirst();
+        while (node != null) {
+            final TransNode tmp = node;
+            node = node.transNext();
+            tmp.setTransNext(null);
+        }
+        matches.clear();
+        execs.clear();
+    }
+
     public final Order getOrder() {
         return order;
     }
 
-    public final SlNode getFirstExec() {
+    public final TransNode getFirstExec() {
         return execs.getFirst();
     }
 

@@ -270,43 +270,56 @@ public final class DatastoreModel implements Model {
 
     @Override
     public final void insertExecList(String marketMnem, SlNode first) throws NotFoundException {
-        // N.B. the approach I used previously on a traditional RDMS was quite different, in that
-        // order revisions were managed as triggers on the exec table.
-        final Map<Long, Entity> orders = new HashMap<>();
-        final Transaction txn = datastore.beginTransaction();
+        SlNode node = first;
         try {
-            final Entity market = getMarket(txn, marketMnem);
-            for (SlNode node = first; node != null; node = node.slNext()) {
-                final Exec exec = (Exec) node;
-                final long orderId = exec.getOrderId();
-                if (orderId != 0) {
-                    if (exec.getState() == State.NEW) {
-                        // Defer actual datastore put.
-                        orders.put(exec.getOrderId(), newOrder(market, exec));
-                    } else {
-                        // This exec may apply to a cached order.
-                        Entity order = orders.get(orderId);
-                        if (order == null) {
-                            // Otherwise fetch the order from the datastore.
-                            order = getOrder(txn, market.getKey(), orderId);
-                            orders.put(orderId, order);
+            // N.B. the approach I used previously on a traditional RDMS was quite different, in
+            // that order revisions were managed as triggers on the exec table.
+            final Map<Long, Entity> orders = new HashMap<>();
+            final Transaction txn = datastore.beginTransaction();
+            try {
+                final Entity market = getMarket(txn, marketMnem);
+                while (node != null) {
+                    final Exec exec = (Exec) node;
+                    node = node.slNext();
+                    exec.setSlNext(null);
+
+                    final long orderId = exec.getOrderId();
+                    if (orderId != 0) {
+                        if (exec.getState() == State.NEW) {
+                            // Defer actual datastore put.
+                            orders.put(exec.getOrderId(), newOrder(market, exec));
+                        } else {
+                            // This exec may apply to a cached order.
+                            Entity order = orders.get(orderId);
+                            if (order == null) {
+                                // Otherwise fetch the order from the datastore.
+                                order = getOrder(txn, market.getKey(), orderId);
+                                orders.put(orderId, order);
+                            }
+                            applyExec(order, exec);
                         }
-                        applyExec(order, exec);
                     }
+                    datastore.put(txn, newExec(market, exec));
                 }
-                datastore.put(txn, newExec(market, exec));
+                if (!orders.isEmpty()) {
+                    datastore.put(txn, orders.values());
+                }
+                datastore.put(txn, market);
+                txn.commit();
+            } catch (ConcurrentModificationException e) {
+                // FIXME: implement retry logic.
+                throw e;
+            } finally {
+                if (txn.isActive()) {
+                    txn.rollback();
+                }
             }
-            if (!orders.isEmpty()) {
-                datastore.put(txn, orders.values());
-            }
-            datastore.put(txn, market);
-            txn.commit();
-        } catch (ConcurrentModificationException e) {
-            // FIXME: implement retry logic.
-            throw e;
         } finally {
-            if (txn.isActive()) {
-                txn.rollback();
+            // Clear nodes to ensure no unwanted retention.
+            while (node != null) {
+                final Exec exec = (Exec) node;
+                node = node.slNext();
+                exec.setSlNext(null);
             }
         }
     }

@@ -367,9 +367,10 @@ public final class Rest {
             if (market == null) {
                 throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
-            final Trans trans = serv.placeOrder(sess, market, ref, action, ticks, lots, minLots,
-                    now, new Trans());
-            trans.toJson(params, out);
+            try (final Trans trans = new Trans()) {
+                serv.placeOrder(sess, market, ref, action, ticks, lots, minLots, now, trans);
+                trans.toJson(params, out);
+            }
         } finally {
             serv.releaseWrite();
         }
@@ -388,13 +389,14 @@ public final class Rest {
             if (market == null) {
                 throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
-            final Trans trans = new Trans();
-            if (lots > 0) {
-                serv.reviseOrder(sess, market, id, lots, now, trans);
-            } else {
-                serv.cancelOrder(sess, market, id, now, trans);
+            try (final Trans trans = new Trans()) {
+                if (lots > 0) {
+                    serv.reviseOrder(sess, market, id, lots, now, trans);
+                } else {
+                    serv.cancelOrder(sess, market, id, now, trans);
+                }
+                trans.toJson(params, out);
             }
-            trans.toJson(params, out);
         } finally {
             serv.releaseWrite();
         }
