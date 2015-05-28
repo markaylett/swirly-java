@@ -13,8 +13,8 @@ var TradeModuleImpl = React.createClass({
             staging.views.clear();
             views.forEach(function(view) {
                 enrichView(contrMap, view);
-                staging.views.set(view.key, view);
                 marketMap[view.market] = view.contr;
+                staging.views.set(view.key, view);
             });
 
             this.setState({

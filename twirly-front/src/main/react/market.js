@@ -8,14 +8,17 @@ var MarketModuleImpl = React.createClass({
         $.getJSON('/api/rec/market', function(markets) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
+            var marketMap = {};
 
             staging.markets.clear();
             markets.forEach(function(market) {
                 enrichMarket(contrMap, market);
+                marketMap[market.key] = market.contr;
                 staging.markets.set(market.key, market);
             });
 
             this.setState({
+                marketMap: marketMap,
                 markets: staging.markets.toSortedArray()
             });
         }.bind(this)).fail(function(xhr) {
@@ -71,11 +74,71 @@ var MarketModuleImpl = React.createClass({
             var staging = this.staging;
 
             enrichMarket(contrMap, market);
+            marketMap[market.key] = market.contr;
             staging.markets.set(market.key, market);
 
             this.setState({
+                marketMap: marketMap,
                 markets: staging.markets.toSortedArray()
             });
+        }.bind(this)).fail(function(xhr) {
+            this.onReportError(parseError(xhr));
+        }.bind(this));
+    },
+    newTrade: function(trader, market, ref, action, price, lots, role, cpty) {
+        console.debug('newTrade: trader=' + trader + ', market=' + market
+                      + ', ref=' + ref + ', action=' + action + ', price=' + price
+                      + ', lots=' + lots + ', role=' + role + ', cpty=' + cpty);
+        if (!isSpecified(trader)) {
+            this.onReportError(internalError('trader not specified'));
+            return;
+        }
+        if (!isSpecified(market)) {
+            this.onReportError(internalError('market not specified'));
+            return;
+        }
+        var contr = this.state.marketMap[market];
+        if (contr === undefined) {
+            this.onReportError(internalError('invalid market: ' + market));
+            return;
+        }
+        if (!isSpecified(action)) {
+            this.onReportError(internalError('action not specified'));
+            return;
+        }
+        if (!isSpecified(price)) {
+            this.onReportError(internalError('price not specified'));
+            return;
+        }
+        var ticks = priceToTicks(price, contr);
+        if (!isSpecified(lots) || lots === 0) {
+            this.onReportError(internalError('lots not specified'));
+            return;
+        }
+        lots = parseInt(lots);
+
+        if (ref === undefined) {
+            ref = null;
+        }
+        if (role === undefined) {
+            role = null;
+        }
+        if (cpty === undefined) {
+            cpty = null;
+        }
+        $.ajax({
+            type: 'post',
+            url: '/api/sess/trade/' + market,
+            data: JSON.stringify({
+                trader: trader,
+                ref: ref,
+                action: action,
+                ticks: ticks,
+                lots: lots,
+                role: role,
+                cpty: cpty
+            })
+        }).done(function(market) {
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
         }.bind(this));
@@ -100,15 +163,20 @@ var MarketModuleImpl = React.createClass({
     onClickNewMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
         this.newMarket(mnem, display, contr, settlDate, expiryDate, state);
     },
+    onClickNewTrade: function(trader, market, ref, action, price, lots, role, cpty) {
+        this.newTrade(trader, market, ref, action, price, lots, role, cpty);
+    },
     // Lifecycle.
     getInitialState: function() {
         return {
             module: {
                 onClearErrors: this.onClearErrors,
                 onReportError: this.onReportError,
-                onClickNewMarket: this.onClickNewMarket
+                onClickNewMarket: this.onClickNewMarket,
+                onClickNewTrade: this.onClickNewTrade
             },
             errors: [],
+            marketMap: {},
             markets: []
         };
     },
@@ -121,6 +189,7 @@ var MarketModuleImpl = React.createClass({
         var state = this.state;
         var module = state.module;
         var errors = state.errors;
+        var marketMap = state.marketMap;
         var markets = state.markets;
 
         var marginBottom = {
@@ -136,7 +205,12 @@ var MarketModuleImpl = React.createClass({
                       data-toggle="modal" data-target="#newMarketDialog">
                 New Market
               </button>
+              <button type="button" className="btn btn-default"
+                      data-toggle="modal" data-target="#newTradeDialog">
+                New Trade
+              </button>
               <NewMarketDialog module={module} contrMap={contrMap}/>
+              <NewTradeDialog module={module} marketMap={marketMap}/>
               <MarketTable markets={markets}/>
             </div>
         );
