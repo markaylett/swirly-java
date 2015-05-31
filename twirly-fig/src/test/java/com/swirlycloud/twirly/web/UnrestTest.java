@@ -50,6 +50,7 @@ import com.swirlycloud.twirly.web.Unrest.TransStruct;
 public final class UnrestTest {
 
     private static final String EMAIL = "mark.aylett@gmail.com";
+    private static final String TRADER = "MARAYL";
     private static final int TODAY = ymdToJd(2014, 2, 11);
     private static final int SETTL_DAY = TODAY + 2;
     private static final int EXPIRY_DAY = TODAY + 1;
@@ -159,7 +160,7 @@ public final class UnrestTest {
     private static void assertOrder(String market, State state, Action action, long ticks,
             long lots, long resd, long exec, long cost, long lastTicks, long lastLots, Order actual) {
         assertNotNull(actual);
-        assertEquals("MARAYL", actual.getTrader());
+        assertEquals(TRADER, actual.getTrader());
         assertEquals(market, actual.getMarket());
         assertEquals("", actual.getRef());
         assertEquals(state, actual.getState());
@@ -180,7 +181,7 @@ public final class UnrestTest {
             long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
             String contr, Role role, Exec actual) {
         assertNotNull(actual);
-        assertEquals("MARAYL", actual.getTrader());
+        assertEquals(TRADER, actual.getTrader());
         assertEquals(market, actual.getMarket());
         assertEquals("", actual.getRef());
         assertEquals(state, actual.getState());
@@ -196,14 +197,14 @@ public final class UnrestTest {
         assertEquals(contr, actual.getContr());
         assertEquals(SETTL_DAY, actual.getSettlDay());
         assertEquals(role, actual.getRole());
-        assertEquals("MARAYL", actual.getCpty());
+        assertEquals(TRADER, actual.getCpty());
         assertEquals(NOW, actual.getCreated());
     }
 
     private static void assertPosn(String market, String contr, long buyCost, long buyLots,
             long sellCost, long sellLots, Posn actual) {
         assertNotNull(actual);
-        assertEquals("MARAYL", actual.getTrader());
+        assertEquals(TRADER, actual.getTrader());
         assertEquals(contr, actual.getContr());
         assertEquals(SETTL_DAY, actual.getSettlDay());
         assertEquals(buyCost, actual.getBuyCost());
@@ -326,8 +327,8 @@ public final class UnrestTest {
         } catch (final NotFoundException e) {
         }
 
-        final Trader trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL", PARAMS_NONE, NOW);
-        assertTrader("MARAYL", trader);
+        final Trader trader = (Trader) unrest.getRec(RecType.TRADER, TRADER, PARAMS_NONE, NOW);
+        assertTrader(TRADER, trader);
         try {
             unrest.getRec(RecType.TRADER, "MARAYLx", PARAMS_NONE, NOW);
             fail("Expected exception");
@@ -350,7 +351,7 @@ public final class UnrestTest {
 
         // Duplicate mnemonic.
         try {
-            postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com");
+            postTrader(TRADER, "Mark Aylett", "mark.aylett@swirlycloud.com");
             fail("Expected exception");
         } catch (final BadRequestException e) {
         }
@@ -560,6 +561,15 @@ public final class UnrestTest {
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
+    }
+
+    @Test
+    public final void testPostTrade() throws NotFoundException, ServiceUnavailableException,
+            IOException {
+        final Exec exec = unrest.postTrade(TRADER, "EURUSD.MAR14", "", Action.BUY, 12345, 10,
+                Role.MAKER, TRADER, PARAMS_NONE, NOW);
+        assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", Role.MAKER, exec);
     }
 
     @Test

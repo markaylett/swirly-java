@@ -270,7 +270,7 @@ CREATE INDEX orderArchiveIdx ON Order_t (archive);
 
 CREATE TABLE Exec_t (
   id BIGINT NOT NULL,
-  orderId BIGINT NOT NULL,
+  orderId BIGINT NULL DEFAULT NULL,
   trader CHAR(16) NOT NULL,
   market CHAR(16) NOT NULL,
   contr CHAR(16) NOT NULL,
@@ -313,68 +313,70 @@ CREATE TRIGGER beforeInsertOnExec
   BEFORE INSERT ON Exec_t
   FOR EACH ROW
   BEGIN
-    IF NEW.stateId = 1 THEN
-      INSERT INTO Order_t (
-        id,
-        trader,
-        market,
-        contr,
-        settlDay,
-        ref,
-        stateId,
-        actionId,
-        ticks,
-        lots,
-        resd,
-        exec,
-        cost,
-        lastTicks,
-        lastLots,
-        minLots,
-        archive,
-        created,
-        modified
-      ) VALUES (
-        NEW.orderId,
-        NEW.trader,
-        NEW.market,
-        NEW.contr,
-        NEW.settlDay,
-        NEW.ref,
-        NEW.stateId,
-        NEW.actionId,
-        NEW.ticks,
-        NEW.lots,
-        NEW.resd,
-        NEW.exec,
-        NEW.cost,
-        NEW.lastTicks,
-        NEW.lastLots,
-        NEW.minLots,
-        NEW.archive,
-        NEW.created,
-        NEW.modified
-      );
-    ELSE
-      UPDATE Order_t
-      SET
-        stateId = NEW.stateId,
-        lots = NEW.lots,
-        resd = NEW.resd,
-        exec = NEW.exec,
-        cost = NEW.cost,
-        lastTicks = NEW.lastTicks,
-        lastLots = NEW.lastLots,
-        modified = NEW.modified
-      WHERE id = NEW.orderId;
-    END IF;
-    IF NEW.stateId = 4 THEN
-      UPDATE Market_t
-      SET
-        lastTicks = NEW.lastTicks,
-        lastLots = NEW.lastLots,
-        lastTime = NEW.created
-      WHERE mnem = NEW.market;
+    IF NEW.orderId IS NOT NULL THEN
+      IF NEW.stateId = 1 THEN
+        INSERT INTO Order_t (
+          id,
+          trader,
+          market,
+          contr,
+          settlDay,
+          ref,
+          stateId,
+          actionId,
+          ticks,
+          lots,
+          resd,
+          exec,
+          cost,
+          lastTicks,
+          lastLots,
+          minLots,
+          archive,
+          created,
+          modified
+        ) VALUES (
+          NEW.orderId,
+          NEW.trader,
+          NEW.market,
+          NEW.contr,
+          NEW.settlDay,
+          NEW.ref,
+          NEW.stateId,
+          NEW.actionId,
+          NEW.ticks,
+          NEW.lots,
+          NEW.resd,
+          NEW.exec,
+          NEW.cost,
+          NEW.lastTicks,
+          NEW.lastLots,
+          NEW.minLots,
+          NEW.archive,
+          NEW.created,
+          NEW.modified
+        );
+      ELSE
+        UPDATE Order_t
+        SET
+          stateId = NEW.stateId,
+          lots = NEW.lots,
+          resd = NEW.resd,
+          exec = NEW.exec,
+          cost = NEW.cost,
+          lastTicks = NEW.lastTicks,
+          lastLots = NEW.lastLots,
+          modified = NEW.modified
+        WHERE id = NEW.orderId;
+      END IF;
+      IF NEW.stateId = 4 THEN
+        UPDATE Market_t
+        SET
+          lastTicks = NEW.lastTicks,
+          lastLots = NEW.lastLots,
+          lastTime = NEW.created
+        WHERE mnem = NEW.market;
+      END IF;
     END IF;
   END //
 DELIMITER ;

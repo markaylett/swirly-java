@@ -9,6 +9,7 @@ import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
 import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Role;
 
 public final class Request {
 
@@ -16,15 +17,18 @@ public final class Request {
     public static final int MNEM = 1 << 1;
     public static final int DISPLAY = 1 << 2;
     public static final int EMAIL = 1 << 3;
-    public static final int CONTR = 1 << 4;
-    public static final int SETTL_DATE = 1 << 5;
-    public static final int EXPIRY_DATE = 1 << 6;
-    public static final int STATE = 1 << 7;
-    public static final int REF = 1 << 8;
-    public static final int ACTION = 1 << 9;
-    public static final int TICKS = 1 << 10;
-    public static final int LOTS = 1 << 11;
-    public static final int MIN_LOTS = 1 << 12;
+    public static final int TRADER = 1 << 4;
+    public static final int CONTR = 1 << 5;
+    public static final int SETTL_DATE = 1 << 6;
+    public static final int EXPIRY_DATE = 1 << 7;
+    public static final int STATE = 1 << 8;
+    public static final int REF = 1 << 9;
+    public static final int ACTION = 1 << 10;
+    public static final int TICKS = 1 << 11;
+    public static final int LOTS = 1 << 12;
+    public static final int MIN_LOTS = 1 << 13;
+    public static final int ROLE = 1 << 14;
+    public static final int CPTY = 1 << 15;
 
     private int fields;
 
@@ -32,6 +36,7 @@ public final class Request {
     private String mnem;
     private String display;
     private String email;
+    private String trader;
     private String contr;
     private int settlDate;
     private int expiryDate;
@@ -41,6 +46,8 @@ public final class Request {
     private long ticks;
     private long lots;
     private long minLots;
+    private Role role;
+    private String cpty;
 
     public final void clear() {
         fields = 0;
@@ -48,6 +55,7 @@ public final class Request {
         mnem = null;
         display = null;
         email = null;
+        trader = null;
         contr = null;
         settlDate = 0;
         expiryDate = 0;
@@ -57,6 +65,8 @@ public final class Request {
         ticks = 0;
         lots = 0;
         minLots = 0;
+        role = null;
+        cpty = null;
     }
 
     public final void parse(JsonParser p) throws IOException {
@@ -79,6 +89,9 @@ public final class Request {
                 } else if ("email".equals(name)) {
                     fields |= EMAIL;
                     email = null;
+                } else if ("trader".equals(name)) {
+                    fields |= TRADER;
+                    trader = null;
                 } else if ("contr".equals(name)) {
                     fields |= CONTR;
                     contr = null;
@@ -88,6 +101,12 @@ public final class Request {
                 } else if ("action".equals(name)) {
                     fields |= ACTION;
                     action = null;
+                } else if ("role".equals(name)) {
+                    fields |= ROLE;
+                    role = null;
+                } else if ("cpty".equals(name)) {
+                    fields |= CPTY;
+                    cpty = null;
                 } else {
                     throw new IOException(String.format("unexpected nullable field '%s'", name));
                 }
@@ -128,6 +147,9 @@ public final class Request {
                 } else if ("email".equals(name)) {
                     fields |= EMAIL;
                     email = p.getString();
+                } else if ("trader".equals(name)) {
+                    fields |= TRADER;
+                    trader = p.getString();
                 } else if ("contr".equals(name)) {
                     fields |= CONTR;
                     contr = p.getString();
@@ -137,6 +159,12 @@ public final class Request {
                 } else if ("action".equals(name)) {
                     fields |= ACTION;
                     action = Action.valueOf(p.getString());
+                } else if ("role".equals(name)) {
+                    fields |= ROLE;
+                    role = Role.valueOf(p.getString());
+                } else if ("cpty".equals(name)) {
+                    fields |= CPTY;
+                    cpty = p.getString();
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -165,6 +193,10 @@ public final class Request {
 
     public final String getEmail() {
         return email;
+    }
+
+    public final String getTrader() {
+        return trader;
     }
 
     public final String getContr() {
@@ -201,5 +233,13 @@ public final class Request {
 
     public final long getMinLots() {
         return minLots;
+    }
+
+    public final Role getRole() {
+        return role;
+    }
+
+    public final String getCpty() {
+        return cpty;
     }
 }

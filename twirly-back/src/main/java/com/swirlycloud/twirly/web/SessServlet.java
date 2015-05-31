@@ -158,18 +158,34 @@ public final class SessServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
 
-            if (parts.length != 2 || !"order".equals(parts[TYPE_PART])) {
+            if (parts.length != 2) {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
             }
             final String market = parts[MARKET_PART];
+            final long now = System.currentTimeMillis();
 
             final Request r = parseRequest(req);
-            if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS | Request.LOTS | Request.MIN_LOTS)) {
-                throw new BadRequestException("request fields are invalid");
+            if ("order".equals(parts[TYPE_PART])) {
+                if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS //
+                        | Request.LOTS | Request.MIN_LOTS)) {
+                    throw new BadRequestException("request fields are invalid");
+                }
+                rest.postOrder(email, market, r.getRef(), r.getAction(), r.getTicks(), r.getLots(),
+                        r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
+            } else if ("trade".equals(parts[TYPE_PART])) {
+
+                if (!realm.isUserAdmin(req)) {
+                    throw new BadRequestException("user is not an admin");
+                }
+                if (r.getFields() != (Request.TRADER | Request.REF | Request.ACTION //
+                        | Request.TICKS | Request.LOTS | Request.ROLE | Request.CPTY)) {
+                    throw new BadRequestException("request fields are invalid");
+                }
+                rest.postTrade(r.getTrader(), market, r.getRef(), r.getAction(), r.getTicks(),
+                        r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
+            } else {
+                throw new NotFoundException("resource does not exist");
             }
-            final long now = System.currentTimeMillis();
-            rest.postOrder(email, market, r.getRef(), r.getAction(), r.getTicks(), r.getLots(),
-                    r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

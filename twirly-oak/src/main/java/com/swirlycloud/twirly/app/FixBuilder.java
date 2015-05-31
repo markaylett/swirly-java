@@ -425,9 +425,13 @@ public final class FixBuilder {
 
     public final void setExec(Exec exec) {
         setInstruct(exec);
-        if (exec.getState() == State.TRADE) {
+        if (exec.getMatchId() != 0) {
             setMatchId(exec.getMatchId());
+        }
+        if (exec.getRole() != null) {
             setLastLiquidityInd(exec.getRole());
+        }
+        if (exec.getCpty() != null) {
             setContraBroker(exec.getCpty());
         }
         setTransactTime(exec.getCreated());

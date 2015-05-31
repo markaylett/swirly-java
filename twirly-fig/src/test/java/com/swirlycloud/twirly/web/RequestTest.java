@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -24,6 +25,13 @@ public final class RequestTest {
             r.parse(p);
         }
         return r;
+    }
+
+    @Test
+    public final void testNull() throws IOException {
+        final Request r = parse("{\"mnem\":null}");
+        assertEquals(Request.MNEM, r.getFields());
+        assertNull(r.getMnem());
     }
 
     @Test
@@ -55,9 +63,16 @@ public final class RequestTest {
         assertEquals(20140314, r.getSettlDate());
     }
 
-    @Test(expected = IOException.class)
     public final void testDuplicate() throws IOException {
-        parse("{\"trader\":\"MARAYL\",\"trader\":\"MARAYL\"}");
+        final Request r = parse("{\"trader\":\"MARAYL1\",\"trader\":\"MARAYL2\"}");
+        assertEquals(Request.TRADER, r.getFields());
+        // First value is overwritten with second.
+        assertEquals("MARAYL2", r.getTrader());
+    }
+
+    @Test(expected = IOException.class)
+    public final void testBadField() throws IOException {
+        parse("{\"foo\":null}");
     }
 
     @Test(expected = IOException.class)

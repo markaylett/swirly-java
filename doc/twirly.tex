@@ -25,6 +25,7 @@
 \newcommand{\scltd}{Swirly Cloud Limited\cite{swirlycloud:www}}
 \newcommand{\scorg}{Swirly Cloud\cite{swirlycloud:github}}
 \newcommand{\twirly}{Twirly\cite{twirly}}
+\newcommand{\s}{\textsterling}
 
 \newacronym{api}{API}{Application Programming Interface}
 \newacronym{bbo}{BBO}{Best Bid and Offer}
@@ -34,15 +35,18 @@
 \newacronym{hft}{HFT}{High-Frequency Trading}
 \newacronym{http}{HTTP}{Hyper-Text Transfer Protocol}
 \newacronym{ip}{IP}{Intellectual Property}
-\newacronym{mis}{MIS}{Management Information System}
+\newacronym{mis}{MIS}{Market Information Services}
 \newacronym{mtm}{MTM}{Mark To Market}
 \newacronym{poc}{POC}{Proof Of Concept}
 \newacronym{rest}{Rest}{Representational State Transfer}
 \newacronym{tco}{TCO}{Total Cost of Ownership}
+\newacronym{tvm}{TVM}{Time Value of Money}
 \newacronym{tob}{TOB}{Top Of Book}
 \newacronym{ui}{UI}{User Interface}
 \newacronym{vwap}{VWAP}{Volume Weighted Average Price}
 \newacronym{www}{WWW}{World Wide Web}
+
+\newacronym{kg}{KG}{Kilogram}
 
 \newglossaryentry{appengine}{name={App Engine}, description={application services running on
     Google's Cloud platform}}
@@ -76,6 +80,9 @@
 
 \newglossaryentry{expiry date}{name={expiry date}, description={the last date that a contract can be
     traded on a specific market}}
+
+\newglossaryentry{farm gate price}{name={farm gate price}, description={the net price of an
+    agricultural product when it leaves the farm, after marketing costs have been deducted}}
 
 \newglossaryentry{given}{name={given}, description={when the taker hits the bid}}
 
@@ -149,6 +156,15 @@
 \newglossaryentry{unzip}{name={unzip}, description={a program used to extract compressed files in a
     ZIP archive}}
 
+\newglossaryentry{volume}{name={volume}, description={total quantity}}
+
+\newglossaryentry{warehouse}{name={warehouse}, description={a secure facility that
+    safeguards the quality and quantity of stored commodities}}
+
+\newglossaryentry{warehouse receipt}{name={warehouse receipt}, description={a receipt that
+    guarantees the existence and availability of a commodity of a particular type, quality, and
+    quantity in a storage facility}}
+
 \newglossaryentry{web}{name={Web}, description={the World Wide Web}}
 
 \glsaddall
@@ -157,144 +173,182 @@
 
 \title{The Twirly Manual}
 \author{Mark Aylett}
-\date{\today\\Version 0.3}
+\date{\today\\Version 0.4}
 \maketitle
 
 \tableofcontents
 
-\section{Introduction}
+\section{Smallholders}
 
-\Glspl{order-book} form the backbone of many trading applications used by \glspl{exchange},
-\glspl{ecn}, hedge funds and investment banks. They are used by several classes of trading
-application within these organisations, including, but not limited to, the following:
+A smallholding is a small farm. There are an estimated 500 million smallholder farms in the world,
+supporting almost 2 billion people. These farms produce a range of commodities that pass through
+complex value-chains to prepare them for international \glspl{market}.
+
+Smallholder farms sit at the base of a pyramidal structure that culminates with a commodities
+``\gls{exchange}'' at its apex. Commodity \glspl{exchange} are highly efficient wholesale
+\glspl{market} where buyers and sellers meet. There are at least ten such \glspl{exchange} in Africa
+alone. Traditional export commodities in Africa, such as cocoa, coffee and cotton, are projected to
+increase from \$8 billion in 2000 to \$10.5 billion in 2030 (in constant US dollars).
+
+\subsection{Banks and Warehouses}
+
+A ``bank'' can be defined as, ``a stock of something available for use when required.'' A
+traditional high-street bank, for example, is a place where customers can store their money for
+safekeeping. Most banks offer online banking services that allow customers to view their
+transactions, make payments, and transfer money between accounts. Interest may be payed on these
+deposits due to the \gls{tvm}.
+
+Banks need not be restricted to money. Some high-street banks also offer safety deposit boxes, in
+which customers can store their valuables such as documents and jewellery. This can be extended
+further to other kinds of assets.
+
+If we think of a bank as a secure storage facility, then similarities between banks and
+\glspl{warehouse} start to emerge. Smallholders, for example, can either sell their produce at the
+``farm gate'' or store it in a \gls{warehouse}, in the same way that we can either spend our money
+immediately or save it in a bank.
+
+\Glspl{warehouse} issue \glspl{warehouse receipt} to smallholders when they deposit their produce.
+Depositing money in a bank is similar conceptually to storing commodities in a \gls{warehouse}:
 
 \begin{itemize}
-\item order management systems;
-\item liquidity aggregators;
-\item internalisation engines;
-\item dark pools.
+\item the smallholder deposits their produce in a \gls{warehouse};
+\item the \glspl{warehouse} verifies the quality and quantity of the produce and issues a
+  \gls{warehouse receipt};
+\item the \glspl{warehouse} charges for safe storage of the produce (the cost of carry);
+\item the \glspl{warehouse receipt} can be used as collateral for loans;
+\item the \glspl{warehouse receipt} can be traded (assuming they are transferable);
+\item the \glspl{warehouse receipt} entitles the holder to withdraw produce from the \gls{warehouse}.
 \end{itemize}
 
-The \glspl{order-book} themselves are often specific to an \gls{asset}-class, and tightly coupled
-with surrounding componentry and business logic. I have personally worked on several such systems,
-and I was often dissapointed by the lack of generality and missed opportunity for reuse, especially
-after repeatedly solving the same problem for many organisations.
+The advantage of this system is that it increases bargaining power of smallholders; if they don't
+like the price they're offered at the farm gate, they can drive their produce to the nearest
+\gls{warehouse}, store it there until they receive a better offer, and still receive immediate
+``payment'' in the form of a loan.
 
-Some, of course, will claim that their particular \gls{order-book} is superior to the rest, and that
-its implementation must remain a closely guarded secret to protect their \gls{ip} and maintain a
-competitive edge. While there may be some truth to this argument -- there are good and bad ways to
-implement an \gls{order-book} -- a trading application's \gls{ip} is likely to be dominated by other
-domain-specific technological and business innovations, and it makes more sense to focus one's
-investment in these areas.
+\section{Mission Statement}
 
-\Glspl{order-book} are by no means the reserve of large financial organisations. We shall see in the
-following section that, given the right level of abstraction, they can be deployed with great effect
-to solve broad range of applications from online \glspl{auction}, to price comparison websites, and
-even \gls{bitcoin} \glspl{exchange}.
+Smallholders can acheive economies of scale by pooling their resources within cooperatives or
+farmers' unions. Collectives, such as these, allow farmers to focus on their core business, rather
+than marketing and sales, which reduces their vulnerability to price exploitation by local
+traders. These same principles can be applied to technology.
 
-\section{Key Concepts}
+\scorg{} aims to promote fairnness across the value-chain, by delivering electronic trading
+technology into the hands of all \gls{market}-participants, so that they can benefit from improved
+transparency, competition, \gls{market} information and pricing.
 
-By way of introduction, I will attempt to explain how an \gls{order-book} works in terms of more
-familiar concepts. If you already know what an \gls{order-book} is, and you familiar with the
-nomenclature, then feel free to skim this section and move on to the next.
+\section{Electronic Trading}
 
-We'll start with something that we're all familiar with: purchasing some goods from a
-retailer. Let's say that an online retailer is offering to sell milk at $49$ pence per pint, and
-they only have 10 pints in stock. This can be depicted as follows:
+Many of us routinely use online retailers, auctions, and price comparison websites to buy or sell
+goods electronically. In this section, we will see how the same principles apply to trading
+platforms that drive wholesale \glspl{market} and commodity \glspl{exchange}.
+
+Coffee is the most popular drink in the world with over 400 billion cups consumed each year. Coffee
+production begins on coffee farms, where coffee ``cherries'' are picked from trees. The cherries may
+be harvested mechanically or by hand, depending on the size of the farm. Mills are then used to turn
+the cherry crop into beans. Coffee beans are exported around the world for retail consumption.
+
+A retail consumer in the UK might decide to purchase coffee beans direct from an online
+retailer. Suppose that an online retailer called ``eShop'' in selling coffee beans at \s10.00 per
+bag, and they currently have 12 bags in stock. We can depict this as follows:
 
 \vspace{5mm}
 \begin{tabular}{rr}
-\multicolumn{2}{c}{Milk price per pint}\\
+\multicolumn{2}{c}{eShop Coffee Beans}\\
 Offer Price&Offer Lots\\
 \hline
-\texttt{0.49}&\texttt{10}\\
+\texttt{10.00}&\texttt{12}\\
 \end{tabular}
 \vspace{5mm}
 
-(In this introduction, we'll assume that \glspl{lot} means quantity, so 10 \glspl{lot} equals 10
-pints in this example.)
-
-If we decide to buy 3 of the 10 pints on \gls{offer}, then only 7 will remain. The online retailer
-may, rather unscrupulously, decide to raise the price if they believe that supply outstrips demand:
+Each ``\gls{lot}'' in this example represents a large bag of Coffee Beans. (We are being
+deliberately vague at this stage about the exact type and quality of the beans.) If we decide to buy
+5 of the 12 \glspl{lot} on ``\gls{offer}'', then only 7 will remain. The online retailer may then,
+rather unscrupulously, decide to raise the price if they believe their supply outstrips demand:
 
 \vspace{5mm}
 \begin{tabular}{rr}
-\multicolumn{2}{c}{Milk price per pint}\\
+\multicolumn{2}{c}{eShop Coffee Beans}\\
 Offer Price&Offer Lots\\
 \hline
-\texttt{0.51}&\texttt{7}\\
+\texttt{10.50}&\texttt{7}\\
 \end{tabular}
 \vspace{5mm}
 
 This price is presumably non-negotiable, so we have to either ``take'' it or leave it. But what if
 we could negotiate, or ``\gls{bid}'' for the remaining \glspl{lot}? You would then have a system
-similar to an online ``\gls{auction}'', such as eBay\cite{ebay}, where the \gls{offer} of $51$ pence
-is effectively the ``Buy Now'' price. Let's say we place a \gls{bid} to buy 3 more pints of milk at
-$48$ pence:
+similar to an online ``\gls{auction}'', such as eBay\cite{ebay}, where the \gls{offer} of \s10.50 is
+effectively the ``Buy Now'' price. Let's say we place a \gls{bid} to buy 3 more \glspl{lot} of eShop
+Coffee Beans at \s10.20:
 
 \vspace{5mm}
 \begin{tabular}{rrrrr}
-\multicolumn{5}{c}{Milk price per pint}\\
+\multicolumn{5}{c}{eShop Coffee Beans}\\
 Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
 \hline
-\texttt{3}&\texttt{0.48}&\texttt{0.03}&\texttt{0.51}&\texttt{7}\\
+\texttt{3}&\texttt{10.20}&\texttt{0.30}&\texttt{10.50}&\texttt{7}\\
 \end{tabular}
 \vspace{5mm}
 
-The difference between the \gls{bid} and \gls{offer} price is $3$ pence, which is known as the
-``\gls{spread}''. In an online \gls{auction}, another buyer may compete by raising the ``best''
-\gls{bid} to ``buy 2 \glspl{lot} at $49$'':
+There are now two sides of the \gls{market}: the \gls{bid}- and \gls{offer}-side. The difference
+between the \gls{bid} and \gls{offer} price is 30 pence, which is known as the ``\gls{spread}''. In
+an online \gls{auction}, another buyer may compete by raising the ``best'' \gls{bid} to ``buy 2
+\glspl{lot} at \s10.30'':
 
 \vspace{5mm}
 \begin{tabular}{r|rrrrr}
-\multicolumn{6}{c}{Milk price per pint}\\
+\multicolumn{6}{c}{eShop Coffee Beans}\\
 Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
 \hline
-\texttt{1}&\texttt{2}&\texttt{0.49}&\texttt{0.02}&\texttt{0.51}&\texttt{7}\\
-\texttt{2}&\texttt{3}&\texttt{0.48}&\texttt{-}&\texttt{-}&\texttt{-}\\
+\texttt{1}&\texttt{2}&\texttt{10.30}&\texttt{0.20}&\texttt{10.50}&\texttt{7}\\
+\texttt{2}&\texttt{3}&\texttt{10.20}&\texttt{-}&\texttt{-}&\texttt{-}\\
 \end{tabular}
 \vspace{5mm}
 
-There are now two ``\glspl{price-level}'' on the \gls{bid}-side of the ``\gls{order-book}''. Our
-order is said to be ``resting'' at the second \gls{price-level}, beneath the \gls{tob}. The
-\gls{spread} on the first \gls{price-level} has now been reduced to $2$ pence. (There is no
+The \gls{bid}-side of the \gls{market} now has two ``\glspl{price-level}'', while the
+\gls{offer}-side has just one. A collection of \glspl{order} organised by side and \gls{price-level}
+in this way is known as an ``\gls{order-book}''. The best \gls{price-level} on each side of the
+\gls{order-book} is \gls{tob}.
+
+Our \gls{order} is said to be ``resting'' at the second \gls{price-level}, beneath \gls{tob}. The
+\gls{spread} on the first \gls{price-level} has now been reduced to 20 pence. (There is no
 \gls{spread} on the second level, because there is no \gls{offer} at this level.)
 
 Note also at this point that the average price the seller can expect to receive for 5 of the 7
-\glspl{lot} they are offering is $48.4$ pence:
+\glspl{lot} they are offering is \s10.24:
 
 \[
-\frac{1}{n}\sum_{i=1}^{n}p_iq_i = \frac{2\times0.49+3\times0.48}{5} = 48.4 \enskip\mbox{pence}
+\frac{1}{n}\sum_{i=1}^{n}p_iq_i = \frac{2\times10.30+3\times10.20}{5} = 10.24
 \]
 
-Where $p$ is price, $q$ is \glspl{lot}, and $n$ is total \glspl{lot} (or ``volume''). This is known
-as the \gls{vwap}.
+Where $p$ is price, $q$ is \glspl{lot}, and $n$ is total \glspl{lot} (or ``\gls{volume}''). This is
+known as the \gls{vwap}.
 
-If this new buyer then decides to ``revise'' their \gls{bid} to $51$ pence, then the \gls{bid} will
-``cross the \gls{spread}'' and match the \gls{offer} to create a trade, which will further reduce
-the supply down to 5 \glspl{lot}. The \gls{offer} of $48$ pence will once again be the \gls{tob}:
+If this new buyer then decides to ``revise'' their \gls{bid} with a more ``aggressive'' price of
+\s10.50, then their \gls{bid} will ``cross the \gls{spread}'' and match the \gls{offer} to create a
+trade, which will reduce the remaining supply down to 5 \glspl{lot}. The buyer effectively decided
+to ``buy now''. The \gls{offer} of \s10.20 will once again rise to be \gls{tob}:
 
 \vspace{5mm}
 \begin{tabular}{r|rrrrr}
-\multicolumn{6}{c}{Milk price per pint}\\
+\multicolumn{6}{c}{eShop Coffee Beans}\\
 Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
 \hline
-\texttt{1}&\texttt{3}&\texttt{0.48}&\texttt{0.03}&\texttt{0.51}&\texttt{5}\\
+\texttt{1}&\texttt{3}&\texttt{10.20}&\texttt{0.30}&\texttt{10.50}&\texttt{5}\\
 \texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{-}\\
 \end{tabular}
 \vspace{5mm}
 
 All manner of goods can be sold in an online \gls{auction}. Oftentimes, the items on sale are one of
 a kind. If would be difficult, for example, to \gls{offer} many second-hand bicycles of the exact
-same specification, so each has to be sold separately.
+same specification, so each would have to be sold separately in its own \gls{market}.
 
 It is interesting to contrast this idea of an online \gls{auction} with a price-comparison
-website. Perhaps, as prospective buyers, we're interested in comparing prices for the latest smart
-phone, offered by many suppliers:
+website. Perhaps, as prospective buyers, we're interested in finding the best price for the latest
+smart phone:
 
 \vspace{5mm}
 \begin{tabular}{r|rrrrr}
-\multicolumn{6}{c}{Smart phone prices}\\
+\multicolumn{6}{c}{Smart Phone Model XYZ}\\
 Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
 \hline
 \texttt{1}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{419.99}&\texttt{5}\\
@@ -303,67 +357,145 @@ Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
 \end{tabular}
 \vspace{5mm}
 
-Here there are 3 \glspl{price-level} in the \gls{order-book}, and we can see that there is a greater
-quantity on \gls{offer} if we're willing to pay more. (This is unsurprising given that Traders like
-to secure a profit by buying low and selling high!)  We could also compare milk prices from many
-suppliers in the same way, but we'd first need to define exactly what kind of milk we were selling,
-in what quantity, and when it would be delivered. This information would form the basis of a
-``\gls{contract}'':
+Here there are 3 \glspl{price-level} in this \gls{order-book}, and we can see that, unsurprisingly,
+more smart phones are available at a higher prices. An \gls{order-book} is slightly different to a
+price comparison website, however, because an \gls{order-book} aggregates \glspl{order}
+(\glspl{offer} in this case) at each \gls{price-level}, rather than by each supplier. The 20
+\glspl{lot} available at the third \gls{price-level}, for example, may comprise \glspl{order} from
+many suppliers, so attempting to take all 20 \glspl{lot} may result in trades with more than one
+supplier.
+
+We could use this same system to compare prices from coffee bean suppliers, but we'd need to be more
+specific about the exact type and quality of the beans, and how and when they would be
+delivered. This information would form the basis of a ``\gls{contract}'':
 
 \vspace{5mm}
 \begin{tabular}{r|rrrrr}
-\multicolumn{6}{c}{UK Farmgate Milk prices per litre}\\
-\multicolumn{6}{c}{December 2014}\\
+\multicolumn{6}{c}{Aribica Coffee Beans per Kilo}\\
+\multicolumn{6}{c}{September 2015}\\
 Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
 \hline
-\texttt{1}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{27.85}&\texttt{50}\\
-\texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{27.86}&\texttt{120}\\
-\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{27.88}&\texttt{200}\\
+\texttt{1}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{10.50}&\texttt{5}\\
+\texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{10.60}&\texttt{12}\\
+\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{10.80}&\texttt{25}\\
 \end{tabular}
 \vspace{5mm}
 
-What if we were now to combine the online \gls{auction} with the price comparison website? We would
-then have something much more reminiscent of a wholesale \gls{market} in an ``\gls{exchange}'',
-where there are many buyers and sellers:
+If we now combine this notion of an online \gls{auction} with a price comparison website, then we
+end up with something much more reminiscent of a wholesale \gls{market} on an \gls{exchange}, where
+there are many active buyers and sellers:
 
 \vspace{5mm}
 \begin{tabular}{r|rrrrr}
-\multicolumn{6}{c}{UK Farmgate Milk prices per litre}\\
-\multicolumn{6}{c}{December 2014}\\
+\multicolumn{6}{c}{Aribica Coffee Beans per Kilo}\\
+\multicolumn{6}{c}{September 2015}\\
 Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
 \hline
-\texttt{1}&\texttt{45}&\texttt{27.83}&\texttt{0.02}&\texttt{27.85}&\texttt{50}\\
-\texttt{2}&\texttt{135}&\texttt{27.81}&\texttt{0.05}&\texttt{27.86}&\texttt{120}\\
-\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{27.88}&\texttt{200}\\
+\texttt{1}&\texttt{10}&\texttt{10.40}&\texttt{0.10}&\texttt{10.50}&\texttt{5}\\
+\texttt{2}&\texttt{15}&\texttt{10.25}&\texttt{0.35}&\texttt{10.60}&\texttt{12}\\
+\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{10.80}&\texttt{25}\\
 \end{tabular}
 \vspace{5mm}
 
-Market participants would typically enter orders electronically via \gls{ui} similar to the
-following:
+A larger number of \gls{market} participants generally helps to improve the \gls{market}'s
+efficiency and stability. This is known as a ``\gls{liquid market}''. \Gls{market} participants
+would typically enter electronic \glspl{order} via \gls{ui} similar to the following:
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.6]{milkorder.eps}
-\caption{Placing a milk order}
+\includegraphics[scale=0.6]{orderentry.eps}
+\caption{Order Entry}
 \end{figure}
 
-A larger number of \gls{market} participants generally helps to improve the \gls{market}'s
-efficiency and stability. This is known as a ``\gls{liquid market}''.
+Financial organisations use such systems to trade a wide range of products spanning different
+\gls{asset}-classes.
 
-In this section, we've seen how the concept of an \gls{order-book} can be used to express different
-kinds of \gls{market-place}, including online \glspl{auction}, price comparison websites, and
-wholesale \glspl{market}. \Glspl{order-book} are prevalent in financial organisations, where they
-are used to trade financial products across many different \gls{asset}-classes, including
-commodities, corporate and government bonds, currencies, equities and indexes.
+In this section, we've seen how \glspl{order-book} can represent different kinds of
+\gls{market-place}, including online \glspl{auction}, price comparison websites, and wholesale
+\glspl{market}.
+
+If we can combine the generality of \glspl{order-book} with the pervasiveness of mobile and
+\gls{web} technologies, then we can truely build compelling solutions that benefit the entire
+community from smallholder to \gls{exchange} trader.
+
+\subsection{Settlement}
+
+When we agree a trade with a counter-party, we expose ourselves to ``counter-party risk'', meaning
+that the counter-party may default on their obligations under the terms of the contract. The level
+of risk depends on many factors, including the credit-worthiness of the counter-party, the size of
+the contract, and the time until the goods or services are delivered.
+
+Who we trade with will, at least in part, be determined by the likely-hood that the counter-party
+will honour the agreement, and the impact to our business if they don't.
+
+An online retailer failing to deliver a kilo of coffee beans is one thing, but consider a
+multi-million dollar infrastructure project that depends on delivery of a raw material at some
+future date. As the project manager, it may be in your interest to agree the price upfront for
+budgeting purposes and to avoid exposure to price risk (the risk that market prices will move
+against you), but it may not be economical or even feasible to take delivery of the material upfront
+and store it securely until it is required.
+
+If you arrange with a counter-party to deliver the raw material in the future, then you are exposed
+to the risk that this counter-party will default, which could potentially jeopardise the entire
+project. You can either accept this risk or try to manage it.
+
+There a few options for managing risk:
+
+\begin{itemize}
+\item pay on delivery;
+\item verify credit-worthiness;
+\item offset the risk;
+\item hold collateral or a deposit.
+\end{itemize}
+
+\subsection{Infrastructure}
+
+Large online retailers and tech companies have invested heavily in technologies, such as
+Google's\cite{google} BigTable\cite{bigtable}, that can cope with Internet-scale workloads, and they
+are providing access to their global storage and compute as a managed service (the \gls{cloud}). The
+landscape of modern software development has fundamentally changed as a consequence.
+
+The beauty of \gls{cloud} computing is that we only pay for what we use, so we don't need to invest
+our capital on infrastructure and additional capacity for future growth. The \gls{cloud} also
+simplifies maintenance, operations, disaster recovery and security, so that we can focus our efforts
+on writing great software.
+
+\twirly{} has been designed from the ground-up to run efficiently in the \gls{cloud} with limited
+resources.  It draws on lessons learned from years spent building electronic trading applications,
+and adapts their best ideas for the \gls{cloud}. The \gls{order-book} at the heart of our
+application has been developed using \gls{hft} techniques, so that we can minimise latency.
+
+We deliberately develop and test our system with very limited resource quotas, so that we remain
+focused on our bottom line. We have also taken care to avoid vendor lock-in, by ensuring that our
+core application only uses open standards and technologies. This gives us the option to target
+different application containers, run on dedicated infrastructure, or to open-source the software.
+
+\subsection{Interface Design}
+
+If the Internet generation is guilty of a short attention span, then the Facebook\cite{facebook}
+generation is even more so. Often for good reason. There simply isn't enough time in the day. Most
+of us are overloaded and stressed-out trying to manage our busy lives. We mine and sift through
+mountains of information every day. We have to make every second of every minute count. Human cycles
+are valuable and most certainly more so than \gls{cpu} cycles! We were acutely aware of these
+factors when designing our \twirly{} \gls{ui}. Our barrier to entry has to be kept low.
+
+We put new users on a fast track that allows them to get started quickly. They can sign-in using
+their Google\cite{google} account, so there is no need to create and maintain yet another set of
+online credentials. Any non-essential information has been removed from the sign-up process and
+deferred to a preferences screen. The \gls{ui} is free of clutter and unnecessary
+distractions. There are no gimmicks, pop-ups or excessive use of colour. The layout and workflows
+follow the principle of least surprise, so that they feel familiar and intuitive to professional
+traders. We work hard to retain a simple, consistent and functional interface that works well on a
+range of devices from mobile to desktop.
 
 \section{Architecture}
 
-\twirly{} is a \gls{microservice} that provides a \gls{restful} \gls{order-book} \gls{api} to for
-querying reference-data, market-data, and managing \glspl{order}. Twirly's\cite{twirly} software
+\twirly{} is an electronic \gls{order-book} that provides a ``\gls{restful}'' \gls{api} for querying
+reference-data, \gls{market}-data, and managing \glspl{order}. Twirly's\cite{twirly} software
 architecture is designed to achieve the following goals:
 
 \begin{itemize}
-\item clean and simple user experience;
+\item clean and simple user interface;
 \item mobile, \gls{web} and desktop equality;
 \item language- and platform-agnostic \gls{api};
 \item scalable \gls{microservice} architecture;
@@ -417,7 +549,7 @@ GET&\texttt{/api/rec/trader/[mnem]}\\
 
 \subsection{Market Data}
 
-The following table summarises the \gls{restful} \gls{api} for querying market-data:
+The following table summarises the \gls{restful} \gls{api} for querying \gls{market}-data:
 
 \vspace{5mm}
 \begin{tabular}{ll}
@@ -607,66 +739,30 @@ with the following \gls{json} content:
 \end{verbatim}
 }
 
-\section{Swirly Cloud Demo}
-
-\subsection{Cloud Computing}
-
-We believe that cost-cutting by financial organisations will lead to new software architectures that
-can dynamically grow or shrink to meet demand.
-
-Large online retailers and tech companies have invested heavily in technologies, such as
-Google's\cite{google} BigTable\cite{bigtable}, that can cope with Internet-scale workloads, and they
-are providing access to their global storage and compute as a managed service (the \gls{cloud}). The
-landscape of modern software development has fundamentally changed as a consequence.
-
-The beauty of \gls{cloud} computing is that we only pay for what we use, so we don't need to invest
-our capital on infrastructure and additional capacity for future growth. The \gls{cloud} also
-simplifies maintenance, operations, disaster recovery and security, so that we can focus our efforts
-on writing great software.
-
-\twirly{} has been designed from the ground-up to run efficiently in the \gls{cloud} with limited
-resources.  It draws on lessons learned from years spent building front-office trading applications,
-and adapts their best ideas for the \gls{cloud}. The \gls{order-book} at the heart of our
-application has been developed using \gls{hft} techniques, so that we can achieve microsecond
-latencies.
-
-We deliberately develop and test our system with very limited resource quotas, so that we remain
-focused on our bottom line. We have also taken care to avoid vendor lock-in, by ensuring that our
-core application only uses open standards and technologies. This gives us the option to target
-different application containers, run on dedicated infrastructure, or to open-source the software.
-
-\subsection{Barrier to Entry}
-
-When I download a software package for the first time, I \gls{unzip} it and attempt to compile it
-using familiar commands, without even a fleeting glimpse at the ``INSTALL'' or ``README''
-documents. If the build fails, then I discard it and move onto the next, mentally branding it as
-``broken'' or ``too complex''. Similarly, when I try a new website for the first time and I'm
-presented with a complex, lengthy and intrusive sign-up processes, or I find the site cluttered and
-confusing, or awash with advertising, then I throw my hands up in despair and begin my search anew
-for an alternative.
-
-Am I being unfair? Probably, but then I'm not the only one. If the Internet generation is guilty of
-a short attention span, then the Facebook\cite{facebook} generation is even more so. Often for good
-reason. There simply isn't enough time in the day. Most of us are overloaded and stressed-out trying
-to manage our busy lives. We mine and sift through mountains of information every day. We have to
-make every second of every minute count. Human cycles are precious and most certainly more so than
-\gls{cpu} cycles!
-
-We were acutely aware of these factors when designing our \twirly{} \gls{ui}. We could not afford to
-drop the ball when privileged with those few valuable moments in which to attract a new user. Our
-barrier to entry had to be kept low.
-
-We put new users on a fast track that allows them to get started quickly. They can sign-in using
-their Google\cite{google} account, so there is no need to create and maintain yet another set of
-online credentials. Any non-essential information has been removed from the sign-up process and
-deferred to a preferences screen. The \gls{ui} is free of clutter and unnecessary
-distractions. There are no gimmicks, pop-ups or excessive use of colour. The layout and workflows
-follow the principle of least surprise, so that they feel familiar and intuitive to professional
-traders. We work hard to retain a simple, consistent and functional interface that works well on a
-range of devices from mobile to desktop.
-
 \begin{appendices}
 
+\section{Business Plan}
+
+\subsection{Executive Summary}
+
+\subsection{Business Summary}
+\subsubsection{Mission Statement}
+\subsubsection{Company Structure}
+\subsubsection{Management Structure}
+\subsubsection{Products And Services}
+
+\subsection{Market Summary}
+\subsubsection{Industry Analysis}
+\subsubsection{Market Analysis}
+\subsubsection{Competitor Analysis}
+\subsubsection{SWOT Analysis}
+
+\subsection{Strategic Summary}
+\subsubsection{Development Plan}
+\subsubsection{Marketing Plan}
+\subsubsection{Operations Plan}
+\subsubsection{Financial Plan}
+  
 \section{Contributing}
 
 The \twirly{} project is available on GitHub\cite{github} for members of the \scorg{} organisation.

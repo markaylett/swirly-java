@@ -12,9 +12,9 @@
 
     <jsp:include page="navbar.jsp"/>
 
-    <div class="container">
+    <div class="container" style="margin-top: 32px">
 
-      <div class="jumbotron" style="margin-top: 32px">
+      <div class="jumbotron">
 
         <div class="container">
           <div class="row">

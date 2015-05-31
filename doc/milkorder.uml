@@ -1,8 +1,0 @@
-@startsalt
-{
-  Market   | "UKFARMGATE.DEC14"
-  Price    | "27.83           "
-  Lots     | "10              "
-  [ Buy  ] | [ Sell ]
-}
-@endsalt

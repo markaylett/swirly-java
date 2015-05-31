@@ -26,6 +26,7 @@ import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
+import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.View;
 import com.swirlycloud.twirly.exception.BadRequestException;
@@ -426,8 +427,8 @@ public final class Unrest {
     }
 
     public final Market postMarket(String mnem, String display, String contr, int settlDate,
-            int expiryDate, int state, Params params, long now) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+            int expiryDate, int state, Params params, long now) throws BadRequestException,
+            NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postMarket(mnem, display, contr, settlDate, expiryDate, state, params, now, sb);
 
@@ -573,6 +574,17 @@ public final class Unrest {
         final StringBuilder sb = new StringBuilder();
         rest.getTrade(email, market, id, params, now, sb);
 
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Exec.parse(p);
+        }
+    }
+
+    public final Exec postTrade(String trader, String marketMnem, String ref, Action action,
+            long ticks, long lots, Role role, String cpty, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.postTrade(trader, marketMnem, ref, action, ticks, lots, role, cpty, params, now, sb);
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
             return Exec.parse(p);
