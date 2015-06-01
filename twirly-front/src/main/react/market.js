@@ -74,8 +74,12 @@ var MarketModuleImpl = React.createClass({
             var staging = this.staging;
 
             enrichMarket(contrMap, market);
-            marketMap[market.key] = market.contr;
             staging.markets.set(market.key, market);
+
+            marketMap = {};
+            staging.markets.forEach(function(key, market) {
+                marketMap[market.key] = market.contr;
+            });
 
             this.setState({
                 marketMap: marketMap,
