@@ -499,6 +499,10 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
         return resd == 0;
     }
 
+    public final boolean isAuto() {
+        return orderId != 0;
+    }
+
     public final boolean isManual() {
         return orderId == 0;
     }

@@ -142,6 +142,11 @@ public final class DatastoreModel implements Model {
         entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
+        if (exec.getState() == State.TRADE && exec.isAuto()) {
+            market.setUnindexedProperty("lastTicks", exec.getLastTicks());
+            market.setUnindexedProperty("lastLots", exec.getLastLots());
+            market.setUnindexedProperty("lastTime", exec.getCreated());
+        }
         updateMaxExecId(market, exec.getId());
         return entity;
     }
