@@ -91,17 +91,19 @@ public class Serv {
     private final void insertOrder(Order order) {
         final Trader trader = (Trader) traders.find(order.getTrader());
         assert trader != null;
-        final Market market = (Market) markets.find(order.getMarket());
-        assert market != null;
-        market.insertOrder(order);
-        boolean success = false;
-        try {
-            final Sess sess = getLazySess(trader);
-            sess.insertOrder(order);
-            success = true;
-        } finally {
-            if (!success) {
-                market.removeOrder(order);
+        final Sess sess = getLazySess(trader);
+        sess.insertOrder(order);
+        if (!order.isDone()) {
+            final Market market = (Market) markets.find(order.getMarket());
+            assert market != null;
+            boolean success = false;
+            try {
+                market.insertOrder(order);
+                success = true;
+            } finally {
+                if (!success) {
+                    sess.removeOrder(order);
+                }
             }
         }
     }
