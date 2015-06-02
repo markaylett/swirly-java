@@ -254,11 +254,13 @@ public final class DatastoreModel implements Model {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, exec.getMarket());
-            if (exec.getState() == State.NEW) {
-                datastore.put(txn, newOrder(market, exec));
-            } else {
-                datastore.put(txn,
-                        applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
+            final long orderId = exec.getOrderId();
+            if (orderId != 0) {
+                if (exec.getState() == State.NEW) {
+                    datastore.put(txn, newOrder(market, exec));
+                } else {
+                    datastore.put(txn, applyExec(getOrder(txn, market.getKey(), orderId), exec));
+                }
             }
             datastore.put(txn, newExec(market, exec));
             datastore.put(txn, market);
@@ -292,7 +294,7 @@ public final class DatastoreModel implements Model {
                     if (orderId != 0) {
                         if (exec.getState() == State.NEW) {
                             // Defer actual datastore put.
-                            orders.put(exec.getOrderId(), newOrder(market, exec));
+                            orders.put(orderId, newOrder(market, exec));
                         } else {
                             // This exec may apply to a cached order.
                             Entity order = orders.get(orderId);
