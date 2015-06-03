@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.node.SlUtil.popNext;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -109,16 +110,20 @@ public class Serv {
     }
 
     private final void insertAssets(SlNode first) {
-        for (SlNode node = first; node != null; node = node.slNext()) {
+        for (SlNode node = first; node != null;) {
             final Asset asset = (Asset) node;
+            node = popNext(node);
+
             final RbNode unused = assets.insert(asset);
             assert unused == null;
         }
     }
 
     private final void insertContrs(SlNode first) {
-        for (SlNode node = first; node != null; node = node.slNext()) {
+        for (SlNode node = first; node != null;) {
             final Contr contr = (Contr) node;
+            node = popNext(node);
+
             enrichContr(contr);
             final RbNode unused = contrs.insert(contr);
             assert unused == null;
@@ -128,17 +133,19 @@ public class Serv {
     private final void insertTraders(SlNode first) {
         for (SlNode node = first; node != null;) {
             final Trader trader = (Trader) node;
+            node = popNext(node);
+
             final RbNode unused = traders.insert(trader);
             assert unused == null;
-            // Move to next node before this node is resused by mailIdx.
-            node = node.slNext();
             emailIdx.insert(trader);
         }
     }
 
     private final void insertMarkets(SlNode first) {
-        for (SlNode node = first; node != null; node = node.slNext()) {
+        for (SlNode node = first; node != null;) {
             final Market market = (Market) node;
+            node = popNext(node);
+
             enrichMarket(market);
             final RbNode unused = markets.insert(market);
             assert unused == null;
@@ -146,15 +153,19 @@ public class Serv {
     }
 
     private final void insertOrders(SlNode first) {
-        for (SlNode node = first; node != null; node = node.slNext()) {
+        for (SlNode node = first; node != null;) {
             final Order order = (Order) node;
+            node = popNext(node);
+
             insertOrder(order);
         }
     }
 
     private final void insertTrades(SlNode first) {
-        for (SlNode node = first; node != null; node = node.slNext()) {
+        for (SlNode node = first; node != null;) {
             final Exec trade = (Exec) node;
+            node = popNext(node);
+
             final Trader trader = (Trader) traders.find(trade.getTrader());
             assert trader != null;
             final Sess sess = getLazySess(trader);
@@ -163,8 +174,10 @@ public class Serv {
     }
 
     private final void insertPosns(SlNode first) {
-        for (SlNode node = first; node != null; node = node.slNext()) {
+        for (SlNode node = first; node != null;) {
             final Posn posn = (Posn) node;
+            node = popNext(node);
+
             final Trader trader = (Trader) traders.find(posn.getTrader());
             assert trader != null;
             final Sess sess = getLazySess(trader);

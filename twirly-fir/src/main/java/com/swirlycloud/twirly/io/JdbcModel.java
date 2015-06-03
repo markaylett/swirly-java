@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
+import static com.swirlycloud.twirly.node.SlUtil.popNext;
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
 import java.sql.Connection;
@@ -26,7 +27,6 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;
@@ -369,8 +369,7 @@ public final class JdbcModel implements Model {
             try {
                 while (node != null) {
                     final Exec exec = (Exec) node;
-                    node = node.slNext();
-                    exec.setSlNext(null);
+                    node = popNext(node);
 
                     insertExec(exec);
                 }
@@ -387,9 +386,7 @@ public final class JdbcModel implements Model {
         } finally {
             // Clear nodes to ensure no unwanted retention.
             while (node != null) {
-                final Exec exec = (Exec) node;
-                node = node.slNext();
-                exec.setSlNext(null);
+                node = popNext(node);
             }
         }
     }
