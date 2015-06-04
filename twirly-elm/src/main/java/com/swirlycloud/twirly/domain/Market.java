@@ -257,9 +257,9 @@ public final class Market extends Rec implements Financial {
     public final void takeOrder(Order order, long lots, long now) {
         final Side side = getSide(order.getAction());
         side.takeOrder(order, lots, now);
-        lastTicks = side.getLastTicks();
-        lastLots = side.getLastLots();
-        lastTime = side.getLastTime();
+        lastTicks = order.getTicks();
+        lastLots = lots;
+        lastTime = now;
     }
 
     public final long allocOrderId() {
