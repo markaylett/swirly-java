@@ -7,77 +7,77 @@ import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
 
-public final class MockModel implements Model {
+public class MockModel implements Model {
 
     @Override
-    public final void close() {
+    public void close() {
     }
 
     @Override
-    public final void insertMarket(String mnem, String display, String contr, int settlDay,
+    public void insertMarket(String mnem, String display, String contr, int settlDay,
             int expiryDay, int state) {
     }
 
     @Override
-    public final void updateMarket(String mnem, String display, int state) {
+    public void updateMarket(String mnem, String display, int state) {
     }
 
     @Override
-    public final void insertTrader(String mnem, String display, String email) {
+    public void insertTrader(String mnem, String display, String email) {
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) {
+    public void updateTrader(String mnem, String display) {
     }
 
     @Override
-    public final void insertExec(Exec exec) {
+    public void insertExec(Exec exec) {
     }
 
     @Override
-    public final void insertExecList(String market, SlNode first) {
+    public void insertExecList(String market, SlNode first) {
     }
 
     @Override
-    public final void archiveOrder(String market, long id, long modified) {
+    public void archiveOrder(String market, long id, long modified) {
     }
 
     @Override
-    public final void archiveTrade(String market, long id, long modified) {
+    public void archiveTrade(String market, long id, long modified) {
     }
 
     @Override
-    public final SlNode selectAsset() {
+    public SlNode selectAsset() {
         return MockAsset.selectAsset();
     }
 
     @Override
-    public final SlNode selectContr() {
+    public SlNode selectContr() {
         return MockContr.selectContr();
     }
 
     @Override
-    public final SlNode selectMarket() {
+    public SlNode selectMarket() {
         return null;
     }
 
     @Override
-    public final SlNode selectTrader() {
+    public SlNode selectTrader() {
         return MockTrader.selectTrader();
     }
 
     @Override
-    public final SlNode selectOrder() {
+    public SlNode selectOrder() {
         return null;
     }
 
     @Override
-    public final SlNode selectTrade() {
+    public SlNode selectTrade() {
         return null;
     }
 
     @Override
-    public final SlNode selectPosn() {
+    public SlNode selectPosn() {
         return null;
     }
 }

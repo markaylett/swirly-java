@@ -31,11 +31,6 @@ public final class Side {
     private final LongRbTree levels = new LevelTree();
     private final DlList orders = new DlList();
 
-    // Last trade.
-    private long lastTicks = 0;
-    private long lastLots = 0;
-    private long lastTime = 0;
-
     private final Level getLazyLevel(Order order) {
         final long key = Level.composeKey(order.getAction(), order.getTicks());
         Level level = (Level) levels.pfind(key);
@@ -154,16 +149,12 @@ public final class Side {
 
         reduce(order, lots);
 
-        // Last trade.
-        lastTicks = order.getTicks();
-        lastLots = lots;
-        lastTime = now;
-
+        final long ticks = order.getTicks();
         order.state = State.TRADE;
-        order.exec += lastLots;
-        order.cost += lastLots * lastTicks;
-        order.lastTicks = lastTicks;
-        order.lastLots = lastLots;
+        order.exec += lots;
+        order.cost += lots * ticks;
+        order.lastTicks = ticks;
+        order.lastLots = lots;
         order.modified = now;
     }
 
@@ -197,17 +188,5 @@ public final class Side {
 
     public final boolean isEmptyLevel() {
         return levels.isEmpty();
-    }
-
-    public final long getLastTicks() {
-        return lastTicks;
-    }
-
-    public final long getLastLots() {
-        return lastLots;
-    }
-
-    public final long getLastTime() {
-        return lastTime;
     }
 }

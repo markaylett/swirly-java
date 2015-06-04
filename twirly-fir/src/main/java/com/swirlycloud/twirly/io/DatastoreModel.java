@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
+import static com.swirlycloud.twirly.node.SlUtil.popNext;
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
 import java.util.ConcurrentModificationException;
@@ -34,7 +35,6 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.node.RbNode;
@@ -142,6 +142,11 @@ public final class DatastoreModel implements Model {
         entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
+        if (exec.getState() == State.TRADE && exec.isAuto()) {
+            market.setUnindexedProperty("lastTicks", exec.getLastTicks());
+            market.setUnindexedProperty("lastLots", exec.getLastLots());
+            market.setUnindexedProperty("lastTime", exec.getCreated());
+        }
         updateMaxExecId(market, exec.getId());
         return entity;
     }
@@ -249,11 +254,13 @@ public final class DatastoreModel implements Model {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, exec.getMarket());
-            if (exec.getState() == State.NEW) {
-                datastore.put(txn, newOrder(market, exec));
-            } else {
-                datastore.put(txn,
-                        applyExec(getOrder(txn, market.getKey(), exec.getOrderId()), exec));
+            final long orderId = exec.getOrderId();
+            if (orderId != 0) {
+                if (exec.getState() == State.NEW) {
+                    datastore.put(txn, newOrder(market, exec));
+                } else {
+                    datastore.put(txn, applyExec(getOrder(txn, market.getKey(), orderId), exec));
+                }
             }
             datastore.put(txn, newExec(market, exec));
             datastore.put(txn, market);
@@ -280,14 +287,13 @@ public final class DatastoreModel implements Model {
                 final Entity market = getMarket(txn, marketMnem);
                 while (node != null) {
                     final Exec exec = (Exec) node;
-                    node = node.slNext();
-                    exec.setSlNext(null);
+                    node = popNext(node);
 
                     final long orderId = exec.getOrderId();
                     if (orderId != 0) {
                         if (exec.getState() == State.NEW) {
                             // Defer actual datastore put.
-                            orders.put(exec.getOrderId(), newOrder(market, exec));
+                            orders.put(orderId, newOrder(market, exec));
                         } else {
                             // This exec may apply to a cached order.
                             Entity order = orders.get(orderId);
@@ -317,9 +323,7 @@ public final class DatastoreModel implements Model {
         } finally {
             // Clear nodes to ensure no unwanted retention.
             while (node != null) {
-                final Exec exec = (Exec) node;
-                node = node.slNext();
-                exec.setSlNext(null);
+                node = popNext(node);
             }
         }
     }
