@@ -34,15 +34,15 @@ var SignupForm = React.createClass({
         var mnem = state.mnem;
         var display = state.display;
         return (
-            <form className="signupForm">
+            <form className="signupForm form">
               <h3>Sign up for a trading account</h3>
               <div className="form-group">
-                <label htmlFor="mnem">Trader name:</label>
+                <label htmlFor="mnem" className="control-label">Trader name:</label>
                 <input id="mnem" type="text" className="form-control" value={mnem}
                        onChange={this.onChangeMnem}/>
               </div>
               <div className="form-group">
-                <label htmlFor="display">Full name:</label>
+                <label htmlFor="display" className="control-label">Full name:</label>
                 <input id="display" type="text" className="form-control" value={display}
                        onChange={this.onChangeDisplay}/>
               </div>
@@ -138,28 +138,27 @@ var NewOrderForm = React.createClass({
         return (
             <form className="newOrderForm form-inline">
               <div className="form-group">
-                <input ref="market" type="text" className="form-control" placeholder="Enter market"
-                       value={state.market} disabled={isSelectedWorking} onChange={this.onChangeMarket}/>
+                <input ref="market" type="text" className="form-control" placeholder="Market"
+                       value={state.market} disabled={isSelectedWorking}
+                       onChange={this.onChangeMarket}/>
               </div>
               <div className="form-group">
-                <input type="number" className="form-control" placeholder="Enter price"
-                       value={state.price} disabled={isSelectedWorking} onChange={this.onChangePrice}
-                       step={priceInc}/>
+                <input type="number" className="form-control" placeholder="Price"
+                       value={state.price} disabled={isSelectedWorking}
+                       onChange={this.onChangePrice} step={priceInc}/>
               </div>
               <div className="form-group">
-                <input type="number" className="form-control" placeholder="Enter lots"
-                       value={state.lots} disabled={isSelectedWorking} onChange={this.onChangeLots}
-                       min={minLots}/>
+                <input type="number" className="form-control" placeholder="Lots"
+                       value={state.lots} disabled={isSelectedWorking}
+                       onChange={this.onChangeLots} min={minLots}/>
               </div>
               <button type="button" className="btn btn-default"
                       disabled={isSelectedWorking} onClick={this.onClickBuy}>
-                <span className="glyphicon glyphicon-plus"></span>
-                Buy
+                <span className="glyphicon glyphicon-plus"></span> Buy
               </button>
               <button type="button" className="btn btn-default"
                       disabled={isSelectedWorking} onClick={this.onClickSell}>
-                <span className="glyphicon glyphicon-minus"></span>
-                Sell
+                <span className="glyphicon glyphicon-minus"></span> Sell
               </button>
             </form>
         );
@@ -222,29 +221,25 @@ var ReviseOrderForm = React.createClass({
               <div className="btn-group">
                 <button type="button" className="btn btn-default"
                         disabled={!isSelectedWorking} onClick={this.onClickCancel}>
-                  <span className="glyphicon glyphicon-remove"></span>
-                  Cancel
+                  <span className="glyphicon glyphicon-remove"></span> Cancel
                 </button>
                 <button type="button" className="btn btn-default"
                         disabled={!isSelectedArchivable} onClick={this.onClickArchive}>
-                  <span className="glyphicon glyphicon-ok"></span>
-                  Archive
+                  <span className="glyphicon glyphicon-ok"></span> Archive
                 </button>
                 <button type="button" className="btn btn-default"
                         onClick={this.onClickRefresh}>
-                  <span className="glyphicon glyphicon-refresh"></span>
-                  Refresh
+                  <span className="glyphicon glyphicon-refresh"></span> Refresh
                 </button>
               </div>
               <div className="form-group">
-                <input type="number" className="form-control" placeholder="Enter lots"
+                <input type="number" className="form-control" placeholder="Lots"
                        value={state.lots} disabled={!isSelectedWorking} onChange={this.onChangeLots}
                        min={minLots}/>
               </div>
               <button type="button" className="btn btn-default"
                       disabled={!isSelectedWorking} onClick={this.onClickRevise}>
-                <span className="glyphicon glyphicon-pencil"></span>
-                Revise
+                <span className="glyphicon glyphicon-pencil"></span> Revise
               </button>
             </form>
         );

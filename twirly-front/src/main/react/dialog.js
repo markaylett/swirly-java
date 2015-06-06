@@ -39,8 +39,12 @@ var NewTradeDialog = React.createClass({
         });
     },
     onChangeRole: function(event) {
+        var role = event.target.value;
+        if (role === 'N/A') {
+            role = undefined;
+        }
         this.setState({
-            role: event.target.value
+            role: role
         });
     },
     onChangeCpty: function(event) {
@@ -101,6 +105,9 @@ var NewTradeDialog = React.createClass({
         var lots = state.lots;
         var role = state.role;
         var cpty = state.cpty;
+        if (role === undefined) {
+            role = 'N/A';
+        }
         return (
             <div id="newTradeDialog" className="modal fade" tabindex={-1}>
               <div className="modal-dialog">
@@ -113,46 +120,71 @@ var NewTradeDialog = React.createClass({
                     <h4 className="modal-title">New Trade</h4>
                   </div>
                   <div className="modal-body">
-                    <form role="form">
+                    <form role="form" className="form-horizontal">
                       <div className="form-group">
-                        <label htmlFor="trader">Trader:</label>
-                        <input id="trader" type="text" className="form-control"
-                               value={trader} onChange={this.onChangeTrader}/>
+                        <label htmlFor="trader" className="col-sm-2 control-label">Trader</label>
+                        <div className="col-sm-10">
+                          <input id="trader" type="text" className="form-control"
+                                 value={trader} onChange={this.onChangeTrader}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="market">Market:</label>
-                        <input id="market" ref="market" type="text" className="form-control"
-                               value={market} onChange={this.onChangeMarket}/>
+                        <label htmlFor="market" className="col-sm-2 control-label">Market</label>
+                        <div className="col-sm-10">
+                          <input id="market" ref="market" type="text" className="form-control"
+                                 value={market} onChange={this.onChangeMarket}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="ref">Ref:</label>
-                        <input id="ref" type="text" className="form-control"
-                               value={ref} onChange={this.onChangeRef}/>
+                        <label htmlFor="ref" className="col-sm-2 control-label">Ref</label>
+                        <div className="col-sm-10">
+                          <input id="ref" type="text" className="form-control" value={ref}
+                                 onChange={this.onChangeRef}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="action">Action:</label>
-                        <input id="action" type="text" className="form-control"
-                               value={action} onChange={this.onChangeAction}/>
+                        <div className="col-sm-offset-2 col-sm-10">
+                          <label className="radio-inline">
+                            <input name="action" type="radio" value="BUY"
+                                   checked={action ==='BUY'} onChange={this.onChangeAction}/>Buy
+                          </label>
+                          <label className="radio-inline">
+                            <input name="action" type="radio" value="SELL"
+                                   checked={action ==='SELL'} onChange={this.onChangeAction}/>Sell
+                          </label>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="price">Price:</label>
-                        <input id="price" type="text" className="form-control"
-                               value={price} onChange={this.onChangePrice}/>
+                        <label htmlFor="price" className="col-sm-2 control-label">Price</label>
+                        <div className="col-sm-10">
+                          <input id="price" type="text" className="form-control" value={price}
+                                 onChange={this.onChangePrice}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="lots">Lots:</label>
-                        <input id="lots" type="text" className="form-control"
-                               value={lots} onChange={this.onChangeLots}/>
+                        <label htmlFor="lots" className="col-sm-2 control-label">Lots</label>
+                        <div className="col-sm-10">
+                          <input id="lots" type="text" className="form-control" value={lots}
+                                 onChange={this.onChangeLots}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="role">Role:</label>
-                        <input id="role" type="text" className="form-control"
-                               value={role} onChange={this.onChangeRole}/>
+                        <label htmlFor="role" className="col-sm-2 control-label">Role</label>
+                        <div className="col-sm-10">
+                          <select id="role" className="form-control" value={role}
+                                 onChange={this.onChangeRole}>
+                            <option>N/A</option>
+                            <option>MAKER</option>
+                            <option>TAKER</option>
+                          </select>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="cpty">Cpty:</label>
-                        <input id="cpty" type="text" className="form-control"
-                               value={cpty} onChange={this.onChangeCpty}/>
+                        <label htmlFor="cpty" className="col-sm-2 control-label">Cpty</label>
+                        <div className="col-sm-10">
+                          <input id="cpty" type="text" className="form-control" value={cpty}
+                                 onChange={this.onChangeCpty}/>
+                        </div>
                       </div>
                     </form>
                   </div>
@@ -236,7 +268,7 @@ var NewMarketDialog = React.createClass({
             contr: undefined,
             settlDate: undefined,
             expiryDate: undefined,
-            state: undefined
+            state: 0
         };
     },
     componentDidMount: function() {
@@ -275,37 +307,51 @@ var NewMarketDialog = React.createClass({
                     <h4 className="modal-title">New Market</h4>
                   </div>
                   <div className="modal-body">
-                    <form role="form">
+                    <form role="form" className="form-horizontal">
                       <div className="form-group">
-                        <label htmlFor="mnem">Mnem:</label>
-                        <input id="mnem" type="text" className="form-control"
-                               value={mnem} onChange={this.onChangeMnem}/>
+                        <label htmlFor="mnem" className="col-sm-2 control-label">Mnem</label>
+                        <div className="col-sm-10">
+                          <input id="mnem" type="text" className="form-control" value={mnem}
+                                 onChange={this.onChangeMnem}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="display">Display:</label>
-                        <input id="display" type="text" className="form-control"
-                               value={display} onChange={this.onChangeDisplay}/>
+                        <label htmlFor="display" className="col-sm-2 control-label">Display</label>
+                        <div className="col-sm-10">
+                          <input id="display" type="text" className="form-control" value={display}
+                                 onChange={this.onChangeDisplay}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="contr">Contract:</label>
-                        <input id="contr" ref="contr" type="text" className="form-control"
-                               value={contr} onChange={this.onChangeContr}/>
+                        <label htmlFor="contr" className="col-sm-2 control-label">Contr</label>
+                        <div className="col-sm-10">
+                          <input id="contr" ref="contr" type="text" className="form-control"
+                                 value={contr} onChange={this.onChangeContr}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="settlDate">Settl Date:</label>
-                        <input id="settlDate" type="date" className="form-control"
-                               value={settlDate} onChange={this.onChangeSettlDate}/>
+                        <label htmlFor="settlDate" className="col-sm-2 control-label">
+                               Settl</label>
+                        <div className="col-sm-10">
+                          <input id="settlDate" type="date" className="form-control"
+                                 value={settlDate} onChange={this.onChangeSettlDate}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="expiryDate">Expiry Date:</label>
-                        <input id="expiryDate" type="date" className="form-control"
-                               value={expiryDate} onChange={this.onChangeExpiryDate}
-                               onFocus={this.onFocusExpiryDate}/>
+                        <label htmlFor="expiryDate" className="col-sm-2 control-label">
+                               Expiry</label>
+                        <div className="col-sm-10">
+                          <input id="expiryDate" type="date" className="form-control"
+                                 value={expiryDate} onChange={this.onChangeExpiryDate}
+                                 onFocus={this.onFocusExpiryDate}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="state">State:</label>
-                        <input id="state" type="number" className="form-control"
-                               value={state} onChange={this.onChangeState}/>
+                        <label htmlFor="state" className="col-sm-2 control-label">State</label>
+                        <div className="col-sm-10">
+                          <input id="state" type="number" className="form-control" value={state}
+                                 onChange={this.onChangeState}/>
+                        </div>
                       </div>
                     </form>
                   </div>
@@ -381,21 +427,27 @@ var NewTraderDialog = React.createClass({
                     <h4 className="modal-title">New Trader</h4>
                   </div>
                   <div className="modal-body">
-                    <form role="form">
+                    <form role="form" className="form-horizontal">
                       <div className="form-group">
-                        <label htmlFor="mnem">Mnem:</label>
-                        <input id="mnem" type="text" className="form-control"
-                               value={mnem} onChange={this.onChangeMnem}/>
+                        <label htmlFor="mnem" className="col-sm-2 control-label">Mnem</label>
+                        <div className="col-sm-10">
+                          <input id="mnem" type="text" className="form-control" value={mnem}
+                                 onChange={this.onChangeMnem}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="display">Display:</label>
-                        <input id="display" type="email" className="form-control"
-                               value={display} onChange={this.onChangeDisplay}/>
+                        <label htmlFor="display" className="col-sm-2 control-label">Display</label>
+                        <div className="col-sm-10">
+                          <input id="display" type="email" className="form-control" value={display}
+                                 onChange={this.onChangeDisplay}/>
+                        </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="email">Email:</label>
-                        <input id="email" type="text" className="form-control"
-                               value={email} onChange={this.onChangeEmail}/>
+                        <label htmlFor="email" className="col-sm-2 control-label">Email</label>
+                        <div className="col-sm-10">
+                          <input id="email" type="text" className="form-control" value={email}
+                                 onChange={this.onChangeEmail}/>
+                        </div>
                       </div>
                     </form>
                   </div>
