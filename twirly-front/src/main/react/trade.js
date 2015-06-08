@@ -88,8 +88,8 @@ var TradeModuleImpl = React.createClass({
             isSelectedArchivable: isSelectedArchivable
         });
     },
-    placeOrder: function(market, action, price, lots) {
-        console.debug('placeOrder: market=' + market + ', action=' + action
+    postOrder: function(market, action, price, lots) {
+        console.debug('postOrder: market=' + market + ', action=' + action
                       + ', price=' + price + ', lots=' + lots);
         if (!isSpecified(market)) {
             this.onReportError(internalError('market not specified'));
@@ -127,8 +127,8 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    reviseOrder: function(market, id, lots) {
-        console.debug('reviseOrder: market=' + market + ', id=' + id + ', lots=' + lots);
+    putOrder: function(market, id, lots) {
+        console.debug('putOrder: market=' + market + ', id=' + id + ', lots=' + lots);
         if (!isSpecified(market)) {
             this.onReportError(internalError('market not specified'));
             return;
@@ -155,28 +155,8 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    cancelOrder: function(market, id) {
-        console.debug('cancelOrder: market=' + market + ', id=' + id);
-        if (!isSpecified(market)) {
-            this.onReportError(internalError('market not specified'));
-            return;
-        }
-        if (!isSpecified(id)) {
-            this.onReportError(internalError('order-id not specified'));
-            return;
-        }
-        $.ajax({
-            type: 'put',
-            url: '/api/sess/order/' + market + '/' + id,
-            data: '{"lots":0}'
-        }).done(function(trans) {
-            this.applyTrans(trans);
-        }.bind(this)).fail(function(xhr) {
-            this.onReportError(parseError(xhr));
-        }.bind(this));
-    },
-    archiveOrder: function(market, id) {
-        console.debug('archiveOrder: market=' + market + ', id=' + id);
+    deleteOrder: function(market, id) {
+        console.debug('deleteOrder: market=' + market + ', id=' + id);
         if (!isSpecified(market)) {
             this.onReportError(internalError('market not specified'));
             return;
@@ -205,8 +185,8 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    archiveTrade: function(market, id) {
-        console.debug('archiveTrade: market=' + market + ', id=' + id);
+    deleteTrade: function(market, id) {
+        console.debug('deleteTrade: market=' + market + ', id=' + id);
         if (!isSpecified(market)) {
             this.onReportError(internalError('market not specified'));
             return;
@@ -297,8 +277,8 @@ var TradeModuleImpl = React.createClass({
             errors: errors.toArray()
         });
     },
-    onClickRefresh: function() {
-        console.debug('onClickRefresh');
+    onRefresh: function() {
+        console.debug('onRefresh');
         this.refresh();
     },
     onChangeContext: function(context) {
@@ -306,10 +286,10 @@ var TradeModuleImpl = React.createClass({
         this.staging.context = context;
         this.updateSelected();
     },
-    onClickItem: function(market, price, lots) {
-        console.debug('onClickItem: market=' + market + ', price=' + price + ', lots=' + lots);
-        this.refs.newOrder.setItem(market, price, lots);
-        this.refs.reviseOrder.setItem(market, price, lots);
+    onChangeFields: function(market, price, lots) {
+        console.debug('onChangeFields: market=' + market + ', price=' + price + ', lots=' + lots);
+        this.refs.newOrder.setFields(market, price, lots);
+        this.refs.reviseOrder.setFields(market, price, lots);
     },
     onSelectOrder: function(order, isSelected) {
         console.debug('onSelectOrder: key=' + order.key + ', isSelected=' + isSelected);
@@ -340,31 +320,31 @@ var TradeModuleImpl = React.createClass({
         }
         this.updateSelected();
     },
-    onClickPlace: function(market, action, price, lots) {
-        this.placeOrder(market, action, price, lots);
+    onPostOrder: function(market, action, price, lots) {
+        this.postOrder(market, action, price, lots);
     },
-    onClickRevise: function(lots) {
+    onReviseAll: function(lots) {
         if (this.staging.context === 'working') {
             this.staging.selectedWorking.forEach(function(key, order) {
-                this.reviseOrder(order.market, order.id, lots);
+                this.putOrder(order.market, order.id, lots);
             }.bind(this));
         }
     },
-    onClickCancel: function() {
+    onCancelAll: function() {
         if (this.staging.context === 'working') {
             this.staging.selectedWorking.forEach(function(key, order) {
-                this.cancelOrder(order.market, order.id);
+                this.putOrder(order.market, order.id, 0);
             }.bind(this));
         }
     },
-    onClickArchive: function() {
+    onArchiveAll: function() {
         if (this.staging.context === 'done') {
             this.staging.selectedDone.forEach(function(key, order) {
-                this.archiveOrder(order.market, order.id);
+                this.deleteOrder(order.market, order.id);
             }.bind(this));
         } else if (this.staging.context === 'trades') {
             this.staging.selectedTrades.forEach(function(key, trade) {
-                this.archiveTrade(trade.market, trade.id);
+                this.deleteTrade(trade.market, trade.id);
             }.bind(this));
         }
     },
@@ -374,15 +354,15 @@ var TradeModuleImpl = React.createClass({
             module: {
                 onClearErrors: this.onClearErrors,
                 onReportError: this.onReportError,
-                onClickRefresh: this.onClickRefresh,
+                onRefresh: this.onRefresh,
                 onChangeContext: this.onChangeContext,
-                onClickItem: this.onClickItem,
+                onChangeFields: this.onChangeFields,
                 onSelectOrder: this.onSelectOrder,
                 onSelectTrade: this.onSelectTrade,
-                onClickPlace: this.onClickPlace,
-                onClickRevise: this.onClickRevise,
-                onClickCancel: this.onClickCancel,
-                onClickArchive: this.onClickArchive
+                onPostOrder: this.onPostOrder,
+                onReviseAll: this.onReviseAll,
+                onCancelAll: this.onCancelAll,
+                onArchiveAll: this.onArchiveAll
             },
             errors: [],
             marketMap: {},

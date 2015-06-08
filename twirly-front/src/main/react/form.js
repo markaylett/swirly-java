@@ -20,7 +20,7 @@ var SignupForm = React.createClass({
         var state = this.state;
         var mnem = state.mnem;
         var display = state.display;
-        this.props.module.onClickSignup(mnem, display);
+        this.props.module.onPostTrader(mnem, display);
     },
     // Lifecycle.
     getInitialState: function() {
@@ -46,8 +46,10 @@ var SignupForm = React.createClass({
                 <input id="display" type="text" className="form-control" value={display}
                        onChange={this.onChangeDisplay}/>
               </div>
+              <div className="btn-group">
                 <button type="button" className="btn btn-lg btn-primary btn-block"
                         onClick={this.onClickSignup}>Sign up</button>
+              </div>
             </form>
         );
     }
@@ -55,7 +57,7 @@ var SignupForm = React.createClass({
 
 var NewOrderForm = React.createClass({
     // Mutators.
-    setItem: function(market, price, lots) {
+    setFields: function(market, price, lots) {
         var newState = {};
         if (market !== undefined) {
             newState.market = market;
@@ -90,7 +92,7 @@ var NewOrderForm = React.createClass({
         var market = state.market;
         var price = state.price;
         var lots = state.lots;
-        this.props.module.onClickPlace(market, 'BUY', price, lots);
+        this.props.module.onPostOrder(market, 'BUY', price, lots);
     },
     onClickSell: function(event) {
         event.preventDefault();
@@ -98,7 +100,7 @@ var NewOrderForm = React.createClass({
         var market = state.market;
         var price = state.price;
         var lots = state.lots;
-        this.props.module.onClickPlace(market, 'SELL', price, lots);
+        this.props.module.onPostOrder(market, 'SELL', price, lots);
     },
     // Lifecycle.
     getInitialState: function() {
@@ -126,8 +128,11 @@ var NewOrderForm = React.createClass({
     },
     render: function() {
         var state = this.state;
-        var contr = this.props.marketMap[state.market];
+        var market = state.market;
+        var price = state.price;
+        var lots = state.lots;
 
+        var contr = this.props.marketMap[market];
         var priceInc = 0.01;
         var minLots = 1;
         if (contr !== undefined) {
@@ -139,27 +144,29 @@ var NewOrderForm = React.createClass({
             <form className="newOrderForm form-inline">
               <div className="form-group">
                 <input ref="market" type="text" className="form-control" placeholder="Market"
-                       value={state.market} disabled={isSelectedWorking}
+                       value={market} disabled={isSelectedWorking}
                        onChange={this.onChangeMarket}/>
               </div>
               <div className="form-group">
                 <input type="number" className="form-control" placeholder="Price"
-                       value={state.price} disabled={isSelectedWorking}
+                       value={price} disabled={isSelectedWorking}
                        onChange={this.onChangePrice} step={priceInc}/>
               </div>
               <div className="form-group">
                 <input type="number" className="form-control" placeholder="Lots"
-                       value={state.lots} disabled={isSelectedWorking}
+                       value={lots} disabled={isSelectedWorking}
                        onChange={this.onChangeLots} min={minLots}/>
               </div>
-              <button type="button" className="btn btn-default"
-                      disabled={isSelectedWorking} onClick={this.onClickBuy}>
-                <span className="glyphicon glyphicon-plus"></span> Buy
-              </button>
-              <button type="button" className="btn btn-default"
-                      disabled={isSelectedWorking} onClick={this.onClickSell}>
-                <span className="glyphicon glyphicon-minus"></span> Sell
-              </button>
+              <div className="btn-group">
+                <button type="button" className="btn btn-default"
+                        disabled={isSelectedWorking} onClick={this.onClickBuy}>
+                  <span className="glyphicon glyphicon-plus"></span> Buy
+                </button>
+                <button type="button" className="btn btn-default"
+                        disabled={isSelectedWorking} onClick={this.onClickSell}>
+                  <span className="glyphicon glyphicon-minus"></span> Sell
+                </button>
+              </div>
             </form>
         );
     }
@@ -167,7 +174,7 @@ var NewOrderForm = React.createClass({
 
 var ReviseOrderForm = React.createClass({
     // Mutators.
-    setItem: function(market, price, lots) {
+    setFields: function(market, price, lots) {
         var newState = {};
         if (market !== undefined) {
             newState.market = market;
@@ -185,19 +192,19 @@ var ReviseOrderForm = React.createClass({
     },
     onClickCancel: function(event) {
         event.preventDefault();
-        this.props.module.onClickCancel();
+        this.props.module.onCancelAll();
     },
     onClickArchive: function(event) {
         event.preventDefault();
-        this.props.module.onClickArchive();
+        this.props.module.onArchiveAll();
     },
     onClickRefresh: function(event) {
         event.preventDefault();
-        this.props.module.onClickRefresh();
+        this.props.module.onRefresh();
     },
     onClickRevise: function(event) {
         event.preventDefault();
-        this.props.module.onClickRevise(this.state.lots);
+        this.props.module.onReviseAll(this.state.lots);
     },
     // Lifecycle.
     getInitialState: function() {
@@ -208,8 +215,10 @@ var ReviseOrderForm = React.createClass({
     },
     render: function() {
         var state = this.state;
-        var contr = this.props.marketMap[state.market];
+        var market = state.market;
+        var lots = state.lots;
 
+        var contr = this.props.marketMap[market];
         var minLots = 1;
         if (contr !== undefined) {
             minLots = contr.minLots;
@@ -234,13 +243,15 @@ var ReviseOrderForm = React.createClass({
               </div>
               <div className="form-group">
                 <input type="number" className="form-control" placeholder="Lots"
-                       value={state.lots} disabled={!isSelectedWorking} onChange={this.onChangeLots}
+                       value={lots} disabled={!isSelectedWorking} onChange={this.onChangeLots}
                        min={minLots}/>
               </div>
-              <button type="button" className="btn btn-default"
-                      disabled={!isSelectedWorking} onClick={this.onClickRevise}>
-                <span className="glyphicon glyphicon-pencil"></span> Revise
-              </button>
+              <div className="btn-group">
+                <button type="button" className="btn btn-default"
+                        disabled={!isSelectedWorking} onClick={this.onClickRevise}>
+                  <span className="glyphicon glyphicon-pencil"></span> Revise
+                </button>
+              </div>
             </form>
         );
     }

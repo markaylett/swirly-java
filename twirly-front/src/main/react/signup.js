@@ -4,7 +4,7 @@
 
 var SignupModule = React.createClass({
     // Mutators.
-    signup: function(mnem, display) {
+    postTrader: function(mnem, display) {
         console.debug('signup: mnem=' + mnem + ', display=' + display);
         if (!isSpecified(mnem)) {
             this.onReportError(internalError('mnem not specified'));
@@ -44,8 +44,8 @@ var SignupModule = React.createClass({
             errors: errors.toArray()
         });
     },
-    onClickSignup: function(mnem, display) {
-        this.signup(mnem, display);
+    onPostTrader: function(mnem, display) {
+        this.postTrader(mnem, display);
     },
     // Lifecycle.
     getInitialState: function() {
@@ -53,7 +53,7 @@ var SignupModule = React.createClass({
             module: {
                 onClearErrors: this.onClearErrors,
                 onReportError: this.onReportError,
-                onClickSignup: this.onClickSignup
+                onPostTrader: this.onPostTrader
             },
             errors: []
         };

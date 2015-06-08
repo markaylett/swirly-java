@@ -27,8 +27,8 @@ var MarketModuleImpl = React.createClass({
             });
         }.bind(this));
     },
-    newMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
-        console.debug('newMarket: mnem=' + mnem + ', display=' + display + ', contr='
+    postMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
+        console.debug('postMarket: mnem=' + mnem + ', display=' + display + ', contr='
                       + contr + ', settlDate=' + settlDate + ', expiryDate='
                       + expiryDate + ', state=' + state);
         if (!isSpecified(mnem)) {
@@ -89,63 +89,10 @@ var MarketModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    newTrade: function(trader, market, ref, action, price, lots, role, cpty) {
-        console.debug('newTrade: trader=' + trader + ', market=' + market
-                      + ', ref=' + ref + ', action=' + action + ', price=' + price
-                      + ', lots=' + lots + ', role=' + role + ', cpty=' + cpty);
-        if (!isSpecified(trader)) {
-            this.onReportError(internalError('trader not specified'));
-            return;
-        }
-        if (!isSpecified(market)) {
-            this.onReportError(internalError('market not specified'));
-            return;
-        }
-        var contr = this.state.marketMap[market];
-        if (contr === undefined) {
-            this.onReportError(internalError('invalid market: ' + market));
-            return;
-        }
-        if (!isSpecified(action)) {
-            this.onReportError(internalError('action not specified'));
-            return;
-        }
-        if (!isSpecified(price)) {
-            this.onReportError(internalError('price not specified'));
-            return;
-        }
-        var ticks = priceToTicks(price, contr);
-        if (!isSpecified(lots) || lots === 0) {
-            this.onReportError(internalError('lots not specified'));
-            return;
-        }
-        lots = parseInt(lots);
-
-        if (ref === undefined) {
-            ref = null;
-        }
-        if (role === undefined) {
-            role = null;
-        }
-        if (cpty === undefined) {
-            cpty = null;
-        }
-        $.ajax({
-            type: 'post',
-            url: '/api/sess/trade/' + market,
-            data: JSON.stringify({
-                trader: trader,
-                ref: ref,
-                action: action,
-                ticks: ticks,
-                lots: lots,
-                role: role,
-                cpty: cpty
-            })
-        }).done(function(market) {
-        }.bind(this)).fail(function(xhr) {
-            this.onReportError(parseError(xhr));
-        }.bind(this));
+    putMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
+        console.debug('putMarket: mnem=' + mnem + ', display=' + display + ', contr='
+                      + contr + ', settlDate=' + settlDate + ', expiryDate='
+                      + expiryDate + ', state=' + state);
     },
     // DOM Events.
     onClearErrors: function() {
@@ -164,11 +111,18 @@ var MarketModuleImpl = React.createClass({
             errors: errors.toArray()
         });
     },
-    onClickNewMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
-        this.newMarket(mnem, display, contr, settlDate, expiryDate, state);
+    onPostMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
+        this.postMarket(mnem, display, contr, settlDate, expiryDate, state);
     },
-    onClickNewTrade: function(trader, market, ref, action, price, lots, role, cpty) {
-        this.newTrade(trader, market, ref, action, price, lots, role, cpty);
+    onPutMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
+        this.putMarket(mnem, display, contr, settlDate, expiryDate, state);
+    },
+    onEditMarket: function(market) {
+        console.debug('onEditMarket: mnem=' + market.mnem);
+        var ref = this.refs.marketDialog;
+        var node = ref.getDOMNode();
+        ref.setMarket(market);
+        $(node).modal('show');
     },
     // Lifecycle.
     getInitialState: function() {
@@ -176,8 +130,9 @@ var MarketModuleImpl = React.createClass({
             module: {
                 onClearErrors: this.onClearErrors,
                 onReportError: this.onReportError,
-                onClickNewMarket: this.onClickNewMarket,
-                onClickNewTrade: this.onClickNewTrade
+                onPostMarket: this.onPostMarket,
+                onPutMarket: this.onPutMarket,
+                onEditMarket: this.onEditMarket
             },
             errors: [],
             marketMap: {},
@@ -205,17 +160,14 @@ var MarketModuleImpl = React.createClass({
                 <h3>Markets</h3>
               </div>
               <MultiAlertWidget module={module} errors={errors}/>
-              <button type="button" className="btn btn-default"
-                      data-toggle="modal" data-target="#newMarketDialog">
-                New Market
-              </button>
-              <button type="button" className="btn btn-default"
-                      data-toggle="modal" data-target="#newTradeDialog">
-                New Trade
-              </button>
-              <NewMarketDialog module={module} contrMap={contrMap}/>
-              <NewTradeDialog module={module} marketMap={marketMap}/>
-              <MarketTable markets={markets}/>
+              <div className="btn-group">
+                <button type="button" className="btn btn-default"
+                        data-toggle="modal" data-target="#marketDialog">
+                  New Market
+                </button>
+              </div>
+              <MarketDialog ref="marketDialog" module={module} contrMap={contrMap}/>
+              <MarketTable module={module} markets={markets}/>
             </div>
         );
     },
