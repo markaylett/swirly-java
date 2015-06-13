@@ -25,16 +25,16 @@
         </div>
       </c:if>
 
-      <form class="signinForm"
+      <form class="signinForm form"
             action='<%= response.encodeURL("j_security_check") %>'
             method="POST">
         <h3>Sign in to your account</h3>
         <div class="form-group">
-          <label for="email">Email:</label>
+          <label for="email" class="control-label">Email:</label>
           <input id="email" name="j_username" type="text" class="form-control"/>
         </div>
         <div class="form-group">
-          <label for="pass">Password:</label>
+          <label for="pass" class="control-label">Password:</label>
           <input id="pass" name="j_password" type="password" class="form-control"/>
         </div>
         <button type="submit" class="btn btn-lg btn-primary btn-block">Sign in</button>

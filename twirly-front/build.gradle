@@ -47,6 +47,7 @@ minifyJs {
     dest = file("${buildDir}/js/twirly.min.js")
     sourceMap = file("${buildDir}/js/twirly.sourcemap.json")
     closure {
+        compilationLevel = 'WHITESPACE_ONLY'
         warningLevel = 'QUIET'
     }
 }

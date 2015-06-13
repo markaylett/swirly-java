@@ -55,7 +55,7 @@ public abstract class RestServlet extends HttpServlet {
             final Request r = new Request();
             r.parse(p);
             return r;
-        } catch (IOException e) {
+        } catch (IllegalArgumentException | IOException e) {
             throw new BadRequestException(e.getMessage(), e);
         }
     }

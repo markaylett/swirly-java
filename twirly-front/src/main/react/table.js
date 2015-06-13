@@ -113,9 +113,14 @@ var ContrTable = React.createClass({
 var MarketRow = React.createClass({
     // Mutators.
     // DOM Events.
+    onClickEditMarket: function(event) {
+        var props = this.props;
+        props.module.onEditMarket(props.market);
+    },
     // Lifecycle.
     render: function() {
-        var market = this.props.market;
+        var props = this.props;
+        var market = props.market;
         return (
             <tr>
               <td>{market.mnem}</td>
@@ -124,6 +129,14 @@ var MarketRow = React.createClass({
               <td>{market.settlDate}</td>
               <td>{market.expiryDate}</td>
               <td>{market.state}</td>
+              <td>
+                <div className="btn-group btn-group-xs" role="group">
+                  <button type="button" className="btn btn-default"
+                          onClick={this.onClickEditMarket}>
+                    <span className="glyphicon glyphicon-pencil"></span>
+                  </button>
+                </div>
+              </td>
             </tr>
         );
     }
@@ -135,11 +148,13 @@ var MarketTable = React.createClass({
     // Lifecycle.
     render: function() {
         var props = this.props;
-        var rows = props.markets.map(function(market) {
+        var module = props.module;
+        var rows = props.markets.map(function(module, market) {
             return (
-                <MarketRow key={market.key} market={market}/>
+                <MarketRow key={market.key} market={market}
+                           module={module}/>
             );
-        });
+        }.bind(this, module));
         return (
             <table className="marketTable table table-hover table-striped">
               <thead>
@@ -150,6 +165,7 @@ var MarketTable = React.createClass({
                   <th>Settl Date</th>
                   <th>Expiry Date</th>
                   <th>State</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,14 +179,43 @@ var MarketTable = React.createClass({
 var TraderRow = React.createClass({
     // Mutators.
     // DOM Events.
+    onClickEditTrader: function(event) {
+        var props = this.props;
+        props.module.onEditTrader(props.trader);
+    },
+    onClickNewTrade: function(event) {
+        var props = this.props;
+        props.module.onNewTrade(props.trader);
+    },
+    onClickNewTransfer: function(event) {
+        var props = this.props;
+        props.module.onNewTransfer(props.trader);
+    },
     // Lifecycle.
     render: function() {
-        var trader = this.props.trader;
+        var props = this.props;
+        var trader = props.trader;
         return (
             <tr>
               <td>{trader.mnem}</td>
               <td>{trader.display}</td>
               <td>{trader.email}</td>
+              <td>
+                <div className="btn-group btn-group-xs" role="group">
+                  <button type="button" className="btn btn-default"
+                          onClick={this.onClickEditTrader}>
+                    <span className="glyphicon glyphicon-pencil"></span>
+                  </button>
+                  <button type="button" className="btn btn-default"
+                          onClick={this.onClickNewTrade}>
+                    <span className="glyphicon glyphicon-record"></span>
+                  </button>
+                  <button type="button" className="btn btn-default"
+                          onClick={this.onClickNewTransfer}>
+                    <span className="glyphicon glyphicon-transfer"></span>
+                  </button>
+                </div>
+              </td>
             </tr>
         );
     }
@@ -182,11 +227,13 @@ var TraderTable = React.createClass({
     // Lifecycle.
     render: function() {
         var props = this.props;
-        var rows = props.traders.map(function(trader) {
+        var module = props.module;
+        var rows = props.traders.map(function(module, trader) {
             return (
-                <TraderRow key={trader.key} trader={trader}/>
+                <TraderRow key={trader.key} trader={trader}
+                           module={module}/>
             );
-        });
+        }.bind(this, module));
         return (
             <table className="traderTable table table-hover table-striped">
               <thead>
@@ -194,6 +241,7 @@ var TraderTable = React.createClass({
                   <th>Mnem</th>
                   <th>Display</th>
                   <th>Email</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -244,7 +292,7 @@ var ViewRow = React.createClass({
             }
             lots = undefined;
         }
-        this.props.module.onClickItem(market, price, lots);
+        this.props.module.onChangeFields(market, price, lots);
     },
     onClickLast: function(event) {
         var view = this.props.view;
@@ -254,7 +302,7 @@ var ViewRow = React.createClass({
         if (price === null) {
             price = 0;
         }
-        this.props.module.onClickItem(market, price, lots);
+        this.props.module.onChangeFields(market, price, lots);
     },
     onClickOffer: function(event) {
         var view = this.props.view;
@@ -268,7 +316,7 @@ var ViewRow = React.createClass({
             }
             lots = undefined;
         }
-        this.props.module.onClickItem(market, price, lots);
+        this.props.module.onChangeFields(market, price, lots);
     },
     // Lifecycle.
     getInitialState: function() {
@@ -376,7 +424,7 @@ var OrderRow = React.createClass({
         var market = order.market;
         var price = order.price;
         var lots = order.resd > 0 ? order.resd : order.lots;
-        this.props.module.onClickItem(market, price, lots);
+        this.props.module.onChangeFields(market, price, lots);
     },
     // Lifecycle.
     componentWillUnmount: function() {
@@ -468,7 +516,7 @@ var TradeRow = React.createClass({
         var market = trade.market;
         var price = trade.lastPrice;
         var lots = trade.resd > 0 ? trade.resd : trade.lastLots;
-        this.props.module.onClickItem(market, price, lots);
+        this.props.module.onChangeFields(market, price, lots);
     },
     // Lifecycle.
     componentWillUnmount: function() {

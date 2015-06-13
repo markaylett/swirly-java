@@ -185,6 +185,17 @@ public final class Rest {
         }
     }
 
+    public final void putTrader(String mnem, String display, Params params, long now, Appendable out)
+            throws BadRequestException, ServiceUnavailableException, IOException {
+        serv.acquireWrite();
+        try {
+            final Trader trader = serv.updateTrader(mnem, display);
+            trader.toJson(params, out);
+        } finally {
+            serv.releaseWrite();
+        }
+    }
+
     public final void postMarket(String mnem, String display, String contrMnem, int settlDate,
             int expiryDate, int state, Params params, long now, Appendable out)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
@@ -199,6 +210,18 @@ public final class Rest {
             final int expiryDay = isoToJd(expiryDate);
             final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay,
                     state, now);
+            market.toJson(params, out);
+        } finally {
+            serv.releaseWrite();
+        }
+    }
+
+    public final void putMarket(String mnem, String display, int state, Params params, long now,
+            Appendable out) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        serv.acquireWrite();
+        try {
+            final Market market = serv.updateMarket(mnem, display, state, now);
             market.toJson(params, out);
         } finally {
             serv.releaseWrite();
