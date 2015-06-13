@@ -364,6 +364,12 @@ public class Serv {
         return trader;
     }
 
+    @NonNull
+    public final Trader updateTrader(String mnem, String display) throws BadRequestException,
+            ServiceUnavailableException {
+        throw new BadRequestException("method not supported");
+    }
+
     @Nullable
     public final Rec findRec(RecType recType, String mnem) {
         Rec ret = null;
@@ -505,6 +511,12 @@ public class Serv {
             throw new NotFoundException(String.format("contr '%s' does not exist", contrMnem));
         }
         return createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
+    }
+
+    @NonNull
+    public final Market updateMarket(String mnem, String display, int state, long now)
+            throws BadRequestException, ServiceUnavailableException {
+        throw new BadRequestException("method not supported");
     }
 
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {

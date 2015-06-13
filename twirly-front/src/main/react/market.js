@@ -93,6 +93,60 @@ var MarketModuleImpl = React.createClass({
         console.debug('putMarket: mnem=' + mnem + ', display=' + display + ', contr='
                       + contr + ', settlDate=' + settlDate + ', expiryDate='
                       + expiryDate + ', state=' + state);
+        if (!isSpecified(mnem)) {
+            this.onReportError(internalError('mnem not specified'));
+            return;
+        }
+        if (!isSpecified(display)) {
+            this.onReportError(internalError('display not specified'));
+            return;
+        }
+        if (!isSpecified(contr)) {
+            this.onReportError(internalError('contr not specified'));
+            return;
+        }
+        if (!isSpecified(settlDate)) {
+            this.onReportError(internalError('settlDate not specified'));
+            return;
+        }
+        settlDate = toDateInt(settlDate);
+        if (!isSpecified(expiryDate)) {
+            this.onReportError(internalError('expiryDate not specified'));
+            return;
+        }
+        expiryDate = toDateInt(expiryDate);
+        if (!isSpecified(state)) {
+            this.onReportError(internalError('state not specified'));
+            return;
+        }
+        state = parseInt(state);
+        $.ajax({
+            type: 'put',
+            url: '/api/rec/market/',
+            data: JSON.stringify({
+                mnem: mnem,
+                display: display,
+                state: state
+            })
+        }).done(function(market) {
+            var contrMap = this.props.contrMap;
+            var staging = this.staging;
+
+            enrichMarket(contrMap, market);
+            staging.markets.set(market.key, market);
+
+            marketMap = {};
+            staging.markets.forEach(function(key, market) {
+                marketMap[market.key] = market.contr;
+            });
+
+            this.setState({
+                marketMap: marketMap,
+                markets: staging.markets.toSortedArray()
+            });
+        }.bind(this)).fail(function(xhr) {
+            this.onReportError(parseError(xhr));
+        }.bind(this));
     },
     // DOM Events.
     onClearErrors: function() {

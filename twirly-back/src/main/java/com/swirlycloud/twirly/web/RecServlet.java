@@ -158,4 +158,63 @@ public final class RecServlet extends RestServlet {
             sendJsonResponse(resp, e);
         }
     }
+
+    @Override
+    protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        if (realm.isDevServer(req)) {
+            resp.setHeader("Access-Control-Allow-Origin", "*");
+        }
+        try {
+            if (!realm.isUserSignedIn(req)) {
+                throw new UnauthorizedException("user is not logged-in");
+            }
+
+            final String pathInfo = req.getPathInfo();
+            final String[] parts = splitPath(pathInfo);
+
+            if (parts.length != 1) {
+                throw new MethodNotAllowedException("put is not allowed on this resource");
+            }
+
+            final Request r = parseRequest(req);
+            if ("market".equals(parts[TYPE_PART])) {
+
+                if (!realm.isUserAdmin(req)) {
+                    throw new BadRequestException("user is not an admin");
+                }
+
+                if (r.getFields() != (Request.MNEM | Request.DISPLAY | Request.STATE)) {
+                    throw new BadRequestException("request fields are invalid");
+                }
+                final long now = System.currentTimeMillis();
+                rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE, now, resp.getWriter());
+
+            } else if ("trader".equals(parts[TYPE_PART])) {
+
+                String email = realm.getUserEmail(req);
+
+                int fields = r.getFields();
+                if ((fields & Request.EMAIL) != 0) {
+                    if (!r.getEmail().equals(email) && !realm.isUserAdmin(req)) {
+                        throw new ForbiddenException("user is not an admin");
+                    }
+                    fields &= ~Request.EMAIL;
+                    email = r.getEmail();
+                }
+                if (fields != (Request.MNEM | Request.DISPLAY)) {
+                    throw new BadRequestException("request fields are invalid");
+                }
+                final long now = System.currentTimeMillis();
+                rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now,
+                        resp.getWriter());
+
+            } else {
+                throw new NotFoundException("resource does not exist");
+            }
+            sendJsonResponse(resp);
+        } catch (final ServException e) {
+            sendJsonResponse(resp, e);
+        }
+    }
 }

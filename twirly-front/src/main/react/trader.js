@@ -77,6 +77,38 @@ var TraderModuleImpl = React.createClass({
     },
     putTrader: function(mnem, display, email) {
         console.debug('putTrader: mnem=' + mnem + ', display=' + display + ', email=' + email);
+        if (!isSpecified(mnem)) {
+            this.onReportError(internalError('mnem not specified'));
+            return;
+        }
+        if (!isSpecified(display)) {
+            this.onReportError(internalError('display not specified'));
+            return;
+        }
+        if (!isSpecified(email)) {
+            this.onReportError(internalError('email not specified'));
+            return;
+        }
+        $.ajax({
+            type: 'put',
+            url: '/api/rec/trader/',
+            data: JSON.stringify({
+                mnem: mnem,
+                display: display,
+                email: email
+            })
+        }).done(function(trader) {
+            var staging = this.staging;
+
+            enrichTrader(trader);
+            staging.traders.set(trader.key, trader);
+
+            this.setState({
+                traders: staging.traders.toSortedArray()
+            });
+        }.bind(this)).fail(function(xhr) {
+            this.onReportError(parseError(xhr));
+        }.bind(this));
     },
     postTrade: function(trader, market, ref, action, price, lots, role, cpty) {
         console.debug('postTrade: trader=' + trader + ', market=' + market
