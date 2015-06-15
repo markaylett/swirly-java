@@ -354,11 +354,10 @@ public class Serv {
         }
         final Trader trader = newTrader(mnem, display, email);
         try {
-            journ.insertTrader(trader.getMnem(), trader.getDisplay(), trader.getEmail());
+            journ.insertTrader(mnem, display, email);
         } catch (RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
-
         traders.insert(trader);
         emailIdx.insert(trader);
         return trader;
@@ -366,8 +365,18 @@ public class Serv {
 
     @NonNull
     public final Trader updateTrader(String mnem, String display) throws BadRequestException,
-            ServiceUnavailableException {
-        throw new BadRequestException("method not supported");
+            NotFoundException, ServiceUnavailableException {
+        final Trader trader = (Trader) traders.find(mnem);
+        if (trader == null) {
+            throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
+        }
+        trader.setDisplay(display);
+        try {
+            journ.updateTrader(mnem, display);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+        return trader;
     }
 
     @Nullable
@@ -515,8 +524,19 @@ public class Serv {
 
     @NonNull
     public final Market updateMarket(String mnem, String display, int state, long now)
-            throws BadRequestException, ServiceUnavailableException {
-        throw new BadRequestException("method not supported");
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        final Market market = (Market) markets.find(mnem);
+        if (market == null) {
+            throw new NotFoundException(String.format("market '%s' does not exist", mnem));
+        }
+        market.setDisplay(display);
+        market.setState(state);
+        try {
+            journ.updateMarket(mnem, display, state);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+        return market;
     }
 
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {

@@ -25,7 +25,7 @@ public final class Market extends Rec implements Financial {
     private Memorable contr;
     private final int settlDay;
     private final int expiryDay;
-    private final int state;
+    private int state;
     private final Side bidSide = new Side();
     private final Side offerSide = new Side();
     private long lastTicks;
@@ -234,6 +234,14 @@ public final class Market extends Rec implements Financial {
         this.contr = contr;
     }
 
+    public final long allocOrderId() {
+        return ++maxOrderId;
+    }
+
+    public final long allocExecId() {
+        return ++maxExecId;
+    }
+
     public final void insertOrder(Order order) {
         getSide(order.getAction()).insertOrder(order);
     }
@@ -262,12 +270,8 @@ public final class Market extends Rec implements Financial {
         lastTime = now;
     }
 
-    public final long allocOrderId() {
-        return ++maxOrderId;
-    }
-
-    public final long allocExecId() {
-        return ++maxExecId;
+    public final void setState(int state) {
+        this.state = state;
     }
 
     @Override

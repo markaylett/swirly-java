@@ -29,7 +29,7 @@ public final class AsyncModelAdaptor implements AsyncModel {
     }
 
     @Override
-    public final void updateMarket(String mnem, String display, int state) {
+    public final void updateMarket(String mnem, String display, int state) throws NotFoundException {
         model.updateMarket(mnem, display, state);
     }
 
@@ -39,7 +39,7 @@ public final class AsyncModelAdaptor implements AsyncModel {
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) {
+    public final void updateTrader(String mnem, String display) throws NotFoundException {
         model.updateTrader(mnem, display);
     }
 

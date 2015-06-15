@@ -426,11 +426,33 @@ public final class Unrest {
         }
     }
 
+    public final Trader putTrader(String mnem, String display, Params params, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.putTrader(mnem, display, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Trader.parse(p);
+        }
+    }
+
     public final Market postMarket(String mnem, String display, String contr, int settlDate,
             int expiryDate, int state, Params params, long now) throws BadRequestException,
             NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postMarket(mnem, display, contr, settlDate, expiryDate, state, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Market.parse(p);
+        }
+    }
+
+    public final Market putMarket(String mnem, String display, int state, Params params, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.putMarket(mnem, display, state, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);

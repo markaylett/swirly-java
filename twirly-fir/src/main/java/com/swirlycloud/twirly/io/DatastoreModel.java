@@ -173,6 +173,16 @@ public final class DatastoreModel implements Model {
         }
     }
 
+    private final Entity getTrader(Transaction txn, String trader) throws NotFoundException {
+        final Key key = KeyFactory.createKey(TRADER_KIND, trader);
+        try {
+            return datastore.get(txn, key);
+        } catch (final EntityNotFoundException e) {
+            throw new NotFoundException(String.format("trader '%s' does not exist in datastore",
+                    trader));
+        }
+    }
+
     private final Entity getOrder(Transaction txn, Key parent, long id) throws NotFoundException {
         final Key key = KeyFactory.createKey(parent, ORDER_KIND, id);
         try {
@@ -222,8 +232,22 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void updateMarket(String mnem, String display, int state) {
-        throw new UnsupportedOperationException();
+    public final void updateMarket(String mnem, String display, int state) throws NotFoundException {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity entity = getMarket(txn, mnem);
+            entity.setUnindexedProperty("display", display);
+            entity.setUnindexedProperty("state", Integer.valueOf(state));
+            datastore.put(txn, entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
     }
 
     @Override
@@ -245,8 +269,21 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) {
-        throw new UnsupportedOperationException();
+    public final void updateTrader(String mnem, String display) throws NotFoundException {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity entity = getTrader(txn, mnem);
+            entity.setUnindexedProperty("display", display);
+            datastore.put(txn, entity);
+            txn.commit();
+        } catch (ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
     }
 
     @Override

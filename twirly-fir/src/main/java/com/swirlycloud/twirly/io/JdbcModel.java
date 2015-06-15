@@ -24,6 +24,7 @@ import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
+import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
@@ -43,6 +44,8 @@ public final class JdbcModel implements Model {
     private final PreparedStatement insertMarketStmt;
     private final PreparedStatement insertTraderStmt;
     private final PreparedStatement insertExecStmt;
+    private final PreparedStatement updateMarketStmt;
+    private final PreparedStatement updateTraderStmt;
     private final PreparedStatement updateOrderStmt;
     private final PreparedStatement updateExecStmt;
 
@@ -156,6 +159,8 @@ public final class JdbcModel implements Model {
         PreparedStatement insertMarketStmt = null;
         PreparedStatement insertTraderStmt = null;
         PreparedStatement insertExecStmt = null;
+        PreparedStatement updateMarketStmt = null;
+        PreparedStatement updateTraderStmt = null;
         PreparedStatement updateOrderStmt = null;
         PreparedStatement updateExecStmt = null;
         boolean success = false;
@@ -182,6 +187,10 @@ public final class JdbcModel implements Model {
                         .prepareStatement("INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn
                         .prepareStatement("INSERT INTO Exec_t (id, orderId, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                updateMarketStmt = conn
+                        .prepareStatement("UPDATE Market_t SET display = ?, state = ? WHERE mnem = ?");
+                updateTraderStmt = conn
+                        .prepareStatement("UPDATE Trader_t SET display = ? WHERE mnem = ?");
                 updateOrderStmt = conn
                         .prepareStatement("UPDATE Order_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
                 updateExecStmt = conn
@@ -198,6 +207,8 @@ public final class JdbcModel implements Model {
                 this.insertMarketStmt = insertMarketStmt;
                 this.insertTraderStmt = insertTraderStmt;
                 this.insertExecStmt = insertExecStmt;
+                this.updateMarketStmt = updateMarketStmt;
+                this.updateTraderStmt = updateTraderStmt;
                 this.updateOrderStmt = updateOrderStmt;
                 this.updateExecStmt = updateExecStmt;
                 success = true;
@@ -208,6 +219,12 @@ public final class JdbcModel implements Model {
                     }
                     if (updateOrderStmt != null) {
                         updateOrderStmt.close();
+                    }
+                    if (updateTraderStmt != null) {
+                        updateTraderStmt.close();
+                    }
+                    if (updateMarketStmt != null) {
+                        updateMarketStmt.close();
                     }
                     if (insertExecStmt != null) {
                         insertExecStmt.close();
@@ -253,6 +270,8 @@ public final class JdbcModel implements Model {
     public final void close() throws SQLException {
         updateExecStmt.close();
         updateOrderStmt.close();
+        updateTraderStmt.close();
+        updateMarketStmt.close();
         insertExecStmt.close();
         insertTraderStmt.close();
         insertMarketStmt.close();
@@ -285,7 +304,15 @@ public final class JdbcModel implements Model {
 
     @Override
     public final void updateMarket(String mnem, String display, int state) {
-        throw new UnsupportedOperationException();
+        try {
+            int i = 1;
+            updateMarketStmt.setString(i++, display);
+            updateMarketStmt.setInt(i++, state);
+            updateMarketStmt.setString(i++, mnem);
+            updateMarketStmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
@@ -302,8 +329,15 @@ public final class JdbcModel implements Model {
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) {
-        throw new UnsupportedOperationException();
+    public final void updateTrader(String mnem, String display) throws NotFoundException {
+        try {
+            int i = 1;
+            updateTraderStmt.setString(i++, display);
+            updateTraderStmt.setString(i++, mnem);
+            updateTraderStmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override

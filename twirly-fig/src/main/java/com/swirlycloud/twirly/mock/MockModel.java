@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.mock;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
 
@@ -27,7 +28,7 @@ public class MockModel implements Model {
     }
 
     @Override
-    public void updateTrader(String mnem, String display) {
+    public void updateTrader(String mnem, String display) throws NotFoundException {
     }
 
     @Override

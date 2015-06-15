@@ -14,7 +14,7 @@ public abstract class Rec extends BasicRbNode implements Cloneable, Jsonifiable,
     private transient SlNode next;
 
     protected final String mnem;
-    protected final String display;
+    protected String display;
 
     public Rec(String mnem, String display) {
         assert mnem != null;
@@ -71,6 +71,10 @@ public abstract class Rec extends BasicRbNode implements Cloneable, Jsonifiable,
     @Override
     public final SlNode slNext() {
         return next;
+    }
+
+    public void setDisplay(String display) {
+        this.display = display;
     }
 
     public abstract RecType getRecType();

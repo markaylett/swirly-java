@@ -186,7 +186,7 @@ public final class Rest {
     }
 
     public final void putTrader(String mnem, String display, Params params, long now, Appendable out)
-            throws BadRequestException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         serv.acquireWrite();
         try {
             final Trader trader = serv.updateTrader(mnem, display);

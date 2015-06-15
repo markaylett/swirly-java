@@ -54,7 +54,6 @@ public final class UnrestTest {
     private static final int TODAY = ymdToJd(2014, 2, 11);
     private static final int SETTL_DAY = TODAY + 2;
     private static final int EXPIRY_DAY = TODAY + 1;
-    private static final int STATE = 0x01;
 
     private static final long NOW = jdToMillis(TODAY);
 
@@ -106,14 +105,14 @@ public final class UnrestTest {
         });
     }
 
-    private static void assertMarket(String mnem, String display, String contr, Market actual) {
+    private static void assertMarket(String mnem, String display, String contr, int state,
+            Market actual) {
         assertNotNull(actual);
         assertEquals(mnem, actual.getMnem());
         assertEquals(display, actual.getDisplay());
         assertEquals(contr, actual.getContr());
         assertEquals(SETTL_DAY, actual.getSettlDay());
         assertEquals(EXPIRY_DAY, actual.getExpiryDay());
-        assertEquals(STATE, actual.getState());
     }
 
     private static void assertTrader(Trader expected, Trader actual) {
@@ -221,10 +220,20 @@ public final class UnrestTest {
         return unrest.postTrader(mnem, display, email, PARAMS_NONE, NOW);
     }
 
-    private final Market postMarket(String mnem, String display, String contr)
+    private final Trader putTrader(String mnem, String display, String email)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        return unrest.putTrader(mnem, display, PARAMS_NONE, NOW);
+    }
+
+    private final Market postMarket(String mnem, String display, String contr, int state)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         return unrest.postMarket(mnem, display, contr, jdToIso(SETTL_DAY), jdToIso(EXPIRY_DAY),
-                STATE, PARAMS_NONE, NOW);
+                state, PARAMS_NONE, NOW);
+    }
+
+    private final Market putMarket(String mnem, String display, int state)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        return unrest.putMarket(mnem, display, state, PARAMS_NONE, NOW);
     }
 
     private final void deleteOrder(String market, long id) throws BadRequestException,
@@ -252,7 +261,7 @@ public final class UnrestTest {
             ServiceUnavailableException, IOException {
         model = new MockModel();
         unrest = new Unrest(model);
-        postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD");
+        postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1);
     }
 
     @After
@@ -270,7 +279,8 @@ public final class UnrestTest {
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertEquals(1, st.markets.size());
-        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", st.markets.get("EURUSD.MAR14"));
+        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1,
+                st.markets.get("EURUSD.MAR14"));
         assertTraders(st.traders);
 
         // Without traders.
@@ -278,7 +288,8 @@ public final class UnrestTest {
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertEquals(1, st.markets.size());
-        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", st.markets.get("EURUSD.MAR14"));
+        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1,
+                st.markets.get("EURUSD.MAR14"));
         assertTrue(st.traders.isEmpty());
     }
 
@@ -293,7 +304,8 @@ public final class UnrestTest {
 
         recs = unrest.getRec(RecType.MARKET, PARAMS_NONE, NOW);
         assertEquals(1, recs.size());
-        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", (Market) recs.get("EURUSD.MAR14"));
+        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1,
+                (Market) recs.get("EURUSD.MAR14"));
 
         recs = unrest.getRec(RecType.TRADER, PARAMS_NONE, NOW);
         assertTraders(recs);
@@ -320,7 +332,7 @@ public final class UnrestTest {
 
         final Market market = (Market) unrest.getRec(RecType.MARKET, "EURUSD.MAR14", PARAMS_NONE,
                 NOW);
-        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", market);
+        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1, market);
         try {
             unrest.getRec(RecType.MARKET, "EURUSD.MAR14x", PARAMS_NONE, NOW);
             fail("Expected exception");
@@ -365,6 +377,18 @@ public final class UnrestTest {
     }
 
     @Test
+    public final void testPutTrader() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+
+        Trader trader = postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com");
+        trader = putTrader("MARAYL2", "Mark Aylettx", "mark.aylett@swirlycloud.com");
+        assertNotNull(trader);
+        assertEquals("MARAYL2", trader.getMnem());
+        assertEquals("Mark Aylettx", trader.getDisplay());
+        assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
+    }
+
+    @Test
     public final void testGetView() throws BadRequestException, NotFoundException, IOException {
 
         long now = NOW;
@@ -406,9 +430,19 @@ public final class UnrestTest {
     @Test
     public final void testPostMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD");
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", market);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD",
+        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1, market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1,
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+    }
+
+    @Test
+    public final void testPutMarket() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
+        market = putMarket("GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", 0x2, market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", 0x2,
                 (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
     }
 
