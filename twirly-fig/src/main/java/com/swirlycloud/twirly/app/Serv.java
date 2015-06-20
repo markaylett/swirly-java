@@ -4,7 +4,7 @@
 package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
-import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.node.SlUtil.popNext;
 
 import java.util.concurrent.ExecutionException;
@@ -354,11 +354,10 @@ public class Serv {
         }
         final Trader trader = newTrader(mnem, display, email);
         try {
-            journ.insertTrader(trader.getMnem(), trader.getDisplay(), trader.getEmail());
+            journ.insertTrader(mnem, display, email);
         } catch (RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
-
         traders.insert(trader);
         emailIdx.insert(trader);
         return trader;
@@ -366,8 +365,18 @@ public class Serv {
 
     @NonNull
     public final Trader updateTrader(String mnem, String display) throws BadRequestException,
-            ServiceUnavailableException {
-        throw new BadRequestException("method not supported");
+            NotFoundException, ServiceUnavailableException {
+        final Trader trader = (Trader) traders.find(mnem);
+        if (trader == null) {
+            throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
+        }
+        trader.setDisplay(display);
+        try {
+            journ.updateTrader(mnem, display);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+        return trader;
     }
 
     @Nullable
@@ -478,13 +487,19 @@ public class Serv {
     public final Market createMarket(String mnem, String display, Contr contr, int settlDay,
             int expiryDay, int state, long now) throws BadRequestException,
             ServiceUnavailableException {
-        // busDay <= expiryDay <= settlDay.
-        final int busDay = getBusDate(now).toJd();
-        if (settlDay < expiryDay) {
-            throw new BadRequestException("settl-day before expiry-day");
-        }
-        if (expiryDay < busDay) {
-            throw new BadRequestException("expiry-day before bus-day");
+        if (settlDay != 0) {
+            // busDay <= expiryDay <= settlDay.
+            final int busDay = getBusDate(now).toJd();
+            if (settlDay < expiryDay) {
+                throw new BadRequestException("settl-day before expiry-day");
+            }
+            if (expiryDay < busDay) {
+                throw new BadRequestException("expiry-day before bus-day");
+            }
+        } else {
+            if (expiryDay != 0) {
+                throw new BadRequestException("expiry-day without settl-day");
+            }
         }
         Market market = (Market) markets.pfind(mnem);
         if (market != null && market.getMnem().equals(mnem)) {
@@ -515,8 +530,19 @@ public class Serv {
 
     @NonNull
     public final Market updateMarket(String mnem, String display, int state, long now)
-            throws BadRequestException, ServiceUnavailableException {
-        throw new BadRequestException("method not supported");
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        final Market market = (Market) markets.find(mnem);
+        if (market == null) {
+            throw new NotFoundException(String.format("market '%s' does not exist", mnem));
+        }
+        market.setDisplay(display);
+        market.setState(state);
+        try {
+            journ.updateMarket(mnem, display, state);
+        } catch (RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+        return market;
     }
 
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
@@ -524,7 +550,8 @@ public class Serv {
         for (RbNode node = markets.getFirst(); node != null;) {
             final Market market = (Market) node;
             node = node.rbNext();
-            if (market.getExpiryDay() < busDay) {
+            final int expiryDay = market.getExpiryDay();
+            if (expiryDay != 0 && expiryDay < busDay) {
                 cancelOrders(market, now);
             }
         }
@@ -535,7 +562,8 @@ public class Serv {
         for (RbNode node = markets.getFirst(); node != null;) {
             final Market market = (Market) node;
             node = node.rbNext();
-            if (market.getSettlDay() < busDay) {
+            final int settlDay = market.getSettlDay();
+            if (settlDay != 0 && market.getSettlDay() < busDay) {
                 markets.remove(market);
             }
         }
@@ -595,9 +623,10 @@ public class Serv {
             NotFoundException, ServiceUnavailableException {
         final Trader trader = sess.getTraderRich();
         final int busDay = DateUtil.getBusDate(now).toJd();
-        if (market.getExpiryDay() < busDay) {
+        final int expiryDay = market.getExpiryDay();
+        if (expiryDay != 0 && expiryDay < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
-                    .getContrRich().getMnem(), jdToIso(market.getSettlDay())));
+                    .getContrRich().getMnem(), maybeJdToIso(market.getSettlDay())));
         }
         if (lots == 0 || lots < minLots) {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));

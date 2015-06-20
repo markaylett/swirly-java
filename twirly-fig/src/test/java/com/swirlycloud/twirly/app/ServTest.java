@@ -228,7 +228,6 @@ public final class ServTest {
         assertEquals(1, actual.getMinLots());
         assertTrue(actual.isDone());
         assertTrue(actual.isAuto());
-        assertFalse(actual.isManual());
         assertEquals(1, actual.getMatchId());
         assertEquals(Role.MAKER, actual.getRole());
         assertEquals("RAMMAC", actual.getCpty());
@@ -252,7 +251,6 @@ public final class ServTest {
         assertEquals(1, actual.getMinLots());
         assertFalse(actual.isDone());
         assertTrue(actual.isAuto());
-        assertFalse(actual.isManual());
         assertEquals(2, actual.getMatchId());
         assertEquals(Role.TAKER, actual.getRole());
         assertEquals("RAMMAC", actual.getCpty());

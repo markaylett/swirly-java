@@ -203,8 +203,8 @@ INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
 ;
 
 INSERT INTO market_t (mnem, display, contr, settlDay, expiryDay, state)
-       VALUES ('EURUSD.JUN15', 'EURUSD June 15', 'EURUSD',
-              TO_DAYS('2015-06-19') + 1721060, TO_DAYS('2015-06-18') + 1721060, 0)
+       VALUES ('EURUSD.DEC15', 'EURUSD Dec 15', 'EURUSD',
+              TO_DAYS('2015-10-18') + 1721060, TO_DAYS('2015-10-17') + 1721060, 0)
 ;
 
 INSERT INTO market_t (mnem, display, contr, settlDay, expiryDay, state)
@@ -213,8 +213,8 @@ INSERT INTO market_t (mnem, display, contr, settlDay, expiryDay, state)
 ;
 
 INSERT INTO market_t (mnem, display, contr, settlDay, expiryDay, state)
-       VALUES ('GBPUSD.JUN15', 'GBPUSD June 15', 'GBPUSD',
-              TO_DAYS('2015-06-19') + 1721060, TO_DAYS('2015-06-18') + 1721060, 0)
+       VALUES ('GBPUSD.DEC15', 'GBPUSD Dec 15', 'GBPUSD',
+              TO_DAYS('2015-12-18') + 1721060, TO_DAYS('2015-12-17') + 1721060, 0)
 ;
 
 INSERT INTO User_t (email, pass)

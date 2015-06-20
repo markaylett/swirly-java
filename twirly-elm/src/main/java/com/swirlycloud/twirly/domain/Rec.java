@@ -9,12 +9,12 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Memorable;
 
-public abstract class Rec extends BasicRbNode implements Jsonifiable, SlNode, Memorable {
+public abstract class Rec extends BasicRbNode implements Cloneable, Jsonifiable, SlNode, Memorable {
 
     private transient SlNode next;
 
     protected final String mnem;
-    protected final String display;
+    protected String display;
 
     public Rec(String mnem, String display) {
         assert mnem != null;
@@ -51,6 +51,19 @@ public abstract class Rec extends BasicRbNode implements Jsonifiable, SlNode, Me
     }
 
     @Override
+    public final Rec clone() {
+        Rec rec = null;
+        try {
+            rec = (Rec) super.clone();
+            // Nullify intrusive nodes.
+            rec.next = null;
+        } catch (final CloneNotSupportedException e) {
+            assert false;
+        }
+        return rec;
+    }
+
+    @Override
     public final void setSlNext(SlNode next) {
         this.next = next;
     }
@@ -58,6 +71,10 @@ public abstract class Rec extends BasicRbNode implements Jsonifiable, SlNode, Me
     @Override
     public final SlNode slNext() {
         return next;
+    }
+
+    public void setDisplay(String display) {
+        this.display = display;
     }
 
     public abstract RecType getRecType();

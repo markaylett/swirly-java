@@ -24,6 +24,7 @@ import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
+import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
@@ -43,8 +44,50 @@ public final class JdbcModel implements Model {
     private final PreparedStatement insertMarketStmt;
     private final PreparedStatement insertTraderStmt;
     private final PreparedStatement insertExecStmt;
+    private final PreparedStatement updateMarketStmt;
+    private final PreparedStatement updateTraderStmt;
     private final PreparedStatement updateOrderStmt;
     private final PreparedStatement updateExecStmt;
+
+    private static void setParam(PreparedStatement stmt, int i, int val) throws SQLException {
+        stmt.setInt(i, val);
+    }
+
+    private static void setNullIfZero(PreparedStatement stmt, int i, int val) throws SQLException {
+        if (val != 0) {
+            stmt.setInt(i, val);
+        } else {
+            stmt.setNull(i, Types.INTEGER);
+        }
+    }
+
+    private static void setParam(PreparedStatement stmt, int i, long val) throws SQLException {
+        stmt.setLong(i, val);
+    }
+
+    private static void setNullIfZero(PreparedStatement stmt, int i, long val) throws SQLException {
+        if (val != 0) {
+            stmt.setLong(i, val);
+        } else {
+            stmt.setNull(i, Types.INTEGER);
+        }
+    }
+
+    private static void setParam(PreparedStatement stmt, int i, String val) throws SQLException {
+        stmt.setString(i, val);
+    }
+
+    private static void setNullIfEmpty(PreparedStatement stmt, int i, String val) throws SQLException {
+        if (val != null && !val.isEmpty()) {
+            stmt.setString(i, val);
+        } else {
+            stmt.setNull(i, Types.CHAR);
+        }
+    }
+
+    private static void setParam(PreparedStatement stmt, int i, boolean val) throws SQLException {
+        stmt.setBoolean(i, val);
+    }
 
     private static Asset getAsset(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
@@ -73,7 +116,9 @@ public final class JdbcModel implements Model {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final Memorable contr = newMnem(rs.getString("contr"));
+        // getInt() returns zero if value is null.
         final int settlDay = rs.getInt("settlDay");
+        // getInt() returns zero if value is null.
         final int expiryDay = rs.getInt("expiryDay");
         final int state = rs.getInt("state");
         final long lastTicks = rs.getLong("lastTicks");
@@ -117,11 +162,12 @@ public final class JdbcModel implements Model {
 
     private static Exec getTrade(ResultSet rs) throws SQLException {
         final long id = rs.getLong("id");
-        // getLong() returns zero if orderId is null.
+        // getLong() returns zero if value is null.
         final long orderId = rs.getLong("orderId");
         final String trader = rs.getString("trader");
         final String market = rs.getString("market");
         final String contr = rs.getString("contr");
+        // getInt() returns zero if value is null.
         final int settlDay = rs.getInt("settlDay");
         final String ref = rs.getString("ref");
         final State state = State.TRADE;
@@ -156,6 +202,8 @@ public final class JdbcModel implements Model {
         PreparedStatement insertMarketStmt = null;
         PreparedStatement insertTraderStmt = null;
         PreparedStatement insertExecStmt = null;
+        PreparedStatement updateMarketStmt = null;
+        PreparedStatement updateTraderStmt = null;
         PreparedStatement updateOrderStmt = null;
         PreparedStatement updateExecStmt = null;
         boolean success = false;
@@ -182,6 +230,10 @@ public final class JdbcModel implements Model {
                         .prepareStatement("INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn
                         .prepareStatement("INSERT INTO Exec_t (id, orderId, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                updateMarketStmt = conn
+                        .prepareStatement("UPDATE Market_t SET display = ?, state = ? WHERE mnem = ?");
+                updateTraderStmt = conn
+                        .prepareStatement("UPDATE Trader_t SET display = ? WHERE mnem = ?");
                 updateOrderStmt = conn
                         .prepareStatement("UPDATE Order_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
                 updateExecStmt = conn
@@ -198,6 +250,8 @@ public final class JdbcModel implements Model {
                 this.insertMarketStmt = insertMarketStmt;
                 this.insertTraderStmt = insertTraderStmt;
                 this.insertExecStmt = insertExecStmt;
+                this.updateMarketStmt = updateMarketStmt;
+                this.updateTraderStmt = updateTraderStmt;
                 this.updateOrderStmt = updateOrderStmt;
                 this.updateExecStmt = updateExecStmt;
                 success = true;
@@ -208,6 +262,12 @@ public final class JdbcModel implements Model {
                     }
                     if (updateOrderStmt != null) {
                         updateOrderStmt.close();
+                    }
+                    if (updateTraderStmt != null) {
+                        updateTraderStmt.close();
+                    }
+                    if (updateMarketStmt != null) {
+                        updateMarketStmt.close();
                     }
                     if (insertExecStmt != null) {
                         insertExecStmt.close();
@@ -253,6 +313,8 @@ public final class JdbcModel implements Model {
     public final void close() throws SQLException {
         updateExecStmt.close();
         updateOrderStmt.close();
+        updateTraderStmt.close();
+        updateMarketStmt.close();
         insertExecStmt.close();
         insertTraderStmt.close();
         insertMarketStmt.close();
@@ -271,12 +333,12 @@ public final class JdbcModel implements Model {
             int expiryDay, int state) {
         try {
             int i = 1;
-            insertMarketStmt.setString(i++, mnem);
-            insertMarketStmt.setString(i++, display);
-            insertMarketStmt.setString(i++, contr);
-            insertMarketStmt.setInt(i++, settlDay);
-            insertMarketStmt.setInt(i++, expiryDay);
-            insertMarketStmt.setInt(i++, state);
+            setParam(insertMarketStmt, i++, mnem);
+            setParam(insertMarketStmt, i++, display);
+            setParam(insertMarketStmt, i++, contr);
+            setNullIfZero(insertMarketStmt, i++, settlDay);
+            setNullIfZero(insertMarketStmt, i++, expiryDay);
+            setParam(insertMarketStmt, i++, state);
             insertMarketStmt.executeUpdate();
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
@@ -285,16 +347,24 @@ public final class JdbcModel implements Model {
 
     @Override
     public final void updateMarket(String mnem, String display, int state) {
-        throw new UnsupportedOperationException();
+        try {
+            int i = 1;
+            setParam(updateMarketStmt, i++, display);
+            setParam(updateMarketStmt, i++, state);
+            setParam(updateMarketStmt, i++, mnem);
+            updateMarketStmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
     public final void insertTrader(String mnem, String display, String email) {
         try {
             int i = 1;
-            insertTraderStmt.setString(i++, mnem);
-            insertTraderStmt.setString(i++, display);
-            insertTraderStmt.setString(i++, email);
+            setParam(insertTraderStmt, i++, mnem);
+            setParam(insertTraderStmt, i++, display);
+            setParam(insertTraderStmt, i++, email);
             insertTraderStmt.executeUpdate();
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
@@ -302,58 +372,53 @@ public final class JdbcModel implements Model {
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) {
-        throw new UnsupportedOperationException();
+    public final void updateTrader(String mnem, String display) throws NotFoundException {
+        try {
+            int i = 1;
+            setParam(updateTraderStmt, i++, display);
+            setParam(updateTraderStmt, i++, mnem);
+            updateTraderStmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
     public final void insertExec(Exec exec) {
         try {
             int i = 1;
-            insertExecStmt.setLong(i++, exec.getId());
-            if (exec.getOrderId() != 0) {
-                insertExecStmt.setLong(i++, exec.getOrderId());
-            } else {
-                insertExecStmt.setNull(i++, Types.INTEGER);
-            }
-            insertExecStmt.setString(i++, exec.getTrader());
-            insertExecStmt.setString(i++, exec.getMarket());
-            insertExecStmt.setString(i++, exec.getContr());
-            insertExecStmt.setInt(i++, exec.getSettlDay());
-            if (!exec.getRef().isEmpty()) {
-                insertExecStmt.setString(i++, exec.getRef());
-            } else {
-                insertExecStmt.setNull(i++, Types.CHAR);
-            }
-            insertExecStmt.setInt(i++, exec.getState().intValue());
-            insertExecStmt.setInt(i++, exec.getAction().intValue());
-            insertExecStmt.setLong(i++, exec.getTicks());
-            insertExecStmt.setLong(i++, exec.getLots());
-            insertExecStmt.setLong(i++, exec.getResd());
-            insertExecStmt.setLong(i++, exec.getExec());
-            insertExecStmt.setLong(i++, exec.getCost());
+            setParam(insertExecStmt, i++, exec.getId());
+            setNullIfZero(insertExecStmt, i++, exec.getOrderId());
+            setParam(insertExecStmt, i++, exec.getTrader());
+            setParam(insertExecStmt, i++, exec.getMarket());
+            setParam(insertExecStmt, i++, exec.getContr());
+            setNullIfZero(insertExecStmt, i++, exec.getSettlDay());
+            setParam(insertExecStmt, i++, exec.getRef());
+            setParam(insertExecStmt, i++, exec.getState().intValue());
+            setParam(insertExecStmt, i++, exec.getAction().intValue());
+            setParam(insertExecStmt, i++, exec.getTicks());
+            setParam(insertExecStmt, i++, exec.getLots());
+            setParam(insertExecStmt, i++, exec.getResd());
+            setParam(insertExecStmt, i++, exec.getExec());
+            setParam(insertExecStmt, i++, exec.getCost());
             if (exec.getLastLots() > 0) {
-                insertExecStmt.setLong(i++, exec.getLastTicks());
-                insertExecStmt.setLong(i++, exec.getLastLots());
+                setParam(insertExecStmt, i++, exec.getLastTicks());
+                setParam(insertExecStmt, i++, exec.getLastLots());
             } else {
                 insertExecStmt.setNull(i++, Types.INTEGER);
                 insertExecStmt.setNull(i++, Types.INTEGER);
             }
-            insertExecStmt.setLong(i++, exec.getMinLots());
-            insertExecStmt.setLong(i++, exec.getMatchId());
+            setParam(insertExecStmt, i++, exec.getMinLots());
+            setNullIfZero(insertExecStmt, i++, exec.getMatchId());
             if (exec.getRole() != null) {
-                insertExecStmt.setInt(i++, exec.getRole().intValue());
+                setParam(insertExecStmt, i++, exec.getRole().intValue());
             } else {
                 insertExecStmt.setNull(i++, Types.INTEGER);
             }
-            if (exec.getCpty() != null) {
-                insertExecStmt.setString(i++, exec.getCpty());
-            } else {
-                insertExecStmt.setNull(i++, Types.CHAR);
-            }
-            insertExecStmt.setBoolean(i++, false);
-            insertExecStmt.setLong(i++, exec.getCreated());
-            insertExecStmt.setLong(i++, exec.getCreated());
+            setNullIfEmpty(insertExecStmt, i++, exec.getCpty());
+            setParam(insertExecStmt, i++, false);
+            setParam(insertExecStmt, i++, exec.getCreated());
+            setParam(insertExecStmt, i++, exec.getCreated());
             insertExecStmt.executeUpdate();
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
@@ -395,9 +460,9 @@ public final class JdbcModel implements Model {
     public final void archiveOrder(String market, long id, long modified) {
         try {
             int i = 1;
-            updateOrderStmt.setLong(i++, modified);
-            updateOrderStmt.setString(i++, market);
-            updateOrderStmt.setLong(i++, id);
+            setParam(updateOrderStmt, i++, modified);
+            setParam(updateOrderStmt, i++, market);
+            setParam(updateOrderStmt, i++, id);
             updateOrderStmt.executeUpdate();
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
@@ -408,9 +473,9 @@ public final class JdbcModel implements Model {
     public final void archiveTrade(String market, long id, long modified) {
         try {
             int i = 1;
-            updateExecStmt.setLong(i++, modified);
-            updateExecStmt.setString(i++, market);
-            updateExecStmt.setLong(i++, id);
+            setParam(updateExecStmt, i++, modified);
+            setParam(updateExecStmt, i++, market);
+            setParam(updateExecStmt, i++, id);
             updateExecStmt.executeUpdate();
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);

@@ -11,8 +11,8 @@ import static com.swirlycloud.twirly.app.FixUtility.roleToLastLiquidityInd;
 import static com.swirlycloud.twirly.app.FixUtility.sideToAction;
 import static com.swirlycloud.twirly.app.FixUtility.stateToExecType;
 import static com.swirlycloud.twirly.app.FixUtility.stateToOrdStatus;
-import static com.swirlycloud.twirly.date.JulianDay.isoToJd;
-import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
+import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 
 import java.util.Date;
 import java.util.List;
@@ -247,11 +247,11 @@ public final class FixBuilder {
     // FutSettDate(64)
 
     public final void setFutSettDate(int settlDay) {
-        message.setInt(FutSettDate.FIELD, jdToIso(settlDay));
+        message.setInt(FutSettDate.FIELD, maybeJdToIso(settlDay));
     }
 
     public final int getFutSettDate() throws FieldNotFound {
-        return isoToJd(message.getInt(FutSettDate.FIELD));
+        return maybeIsoToJd(message.getInt(FutSettDate.FIELD));
     }
 
     // MinQty(110)

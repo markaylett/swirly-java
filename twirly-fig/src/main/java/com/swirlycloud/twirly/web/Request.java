@@ -95,6 +95,12 @@ public final class Request {
                 } else if ("contr".equals(name)) {
                     fields |= CONTR;
                     contr = null;
+                } else if ("settlDate".equals(name)) {
+                    fields |= SETTL_DATE;
+                    settlDate = 0;
+                } else if ("expiryDate".equals(name)) {
+                    fields |= EXPIRY_DATE;
+                    expiryDate = 0;
                 } else if ("ref".equals(name)) {
                     fields |= REF;
                     ref = null;
@@ -179,67 +185,156 @@ public final class Request {
         return fields;
     }
 
+    public final boolean isIdSet() {
+        return (fields & ID) != 0;
+    }
+
     public final long getId() {
         return id;
+    }
+
+    public final boolean isMnemSet() {
+        return (fields & MNEM) != 0;
     }
 
     public final String getMnem() {
         return mnem;
     }
 
+    public final boolean isDisplaySet() {
+        return (fields & DISPLAY) != 0;
+    }
+
     public final String getDisplay() {
         return display;
+    }
+
+    public final boolean isEmailSet() {
+        return (fields & EMAIL) != 0;
     }
 
     public final String getEmail() {
         return email;
     }
 
+    public final boolean isTraderSet() {
+        return (fields & TRADER) != 0;
+    }
+
     public final String getTrader() {
         return trader;
+    }
+
+    public final boolean isContrSet() {
+        return (fields & CONTR) != 0;
     }
 
     public final String getContr() {
         return contr;
     }
 
+    public final boolean isSettlDateSet() {
+        return (fields & SETTL_DATE) != 0;
+    }
+
     public final int getSettlDate() {
         return settlDate;
+    }
+
+    public final boolean isExpiryDateSet() {
+        return (fields & EXPIRY_DATE) != 0;
     }
 
     public final int getExpiryDate() {
         return expiryDate;
     }
 
+    public final boolean isStateSet() {
+        return (fields & STATE) != 0;
+    }
+
     public final int getState() {
         return state;
+    }
+
+    public final boolean isRefSet() {
+        return (fields & REF) != 0;
     }
 
     public final String getRef() {
         return ref;
     }
 
+    public final boolean isActionSet() {
+        return (fields & ACTION) != 0;
+    }
+
     public final Action getAction() {
         return action;
+    }
+
+    public final boolean isTicksSet() {
+        return (fields & TICKS) != 0;
     }
 
     public final long getTicks() {
         return ticks;
     }
 
+    public final boolean isLotsSet() {
+        return (fields & LOTS) != 0;
+    }
+
     public final long getLots() {
         return lots;
+    }
+
+    public final boolean isMinLotsSet() {
+        return (fields & MIN_LOTS) != 0;
     }
 
     public final long getMinLots() {
         return minLots;
     }
 
+    public final boolean isRoleSet() {
+        return (fields & ROLE) != 0;
+    }
+
     public final Role getRole() {
         return role;
     }
 
+    public final boolean isCptySet() {
+        return (fields & CPTY) != 0;
+    }
+
     public final String getCpty() {
         return cpty;
+    }
+
+    /**
+     * Validate fields.
+     * 
+     * @param required
+     *            Required fields.
+     * @return true if fields are value.
+     */
+    public final boolean isValid(int required) {
+        return (fields & required) == required;
+    }
+
+    /**
+     * Validate fields.
+     * 
+     * @param required
+     *            Required fields.
+     * @param optional
+     *            Optional fields.
+     * @return true if fields are value.
+     */
+    public final boolean isValid(int required, int optional) {
+        return (fields & required) == required //
+                && (fields & ~(required | optional)) == 0;
     }
 }

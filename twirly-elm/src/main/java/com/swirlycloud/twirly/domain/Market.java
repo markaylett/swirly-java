@@ -25,7 +25,7 @@ public final class Market extends Rec implements Financial {
     private Memorable contr;
     private final int settlDay;
     private final int expiryDay;
-    private final int state;
+    private int state;
     private final Side bidSide = new Side();
     private final Side offerSide = new Side();
     private long lastTicks;
@@ -75,11 +75,18 @@ public final class Market extends Rec implements Financial {
             case KEY_NAME:
                 name = p.getString();
                 break;
+            case VALUE_NULL:
+                if ("settlDate".equals(name)) {
+                    settlDay = 0;
+                } else if ("expiryDate".equals(name)) {
+                    expiryDay = 0;
+                }
+                break;
             case VALUE_NUMBER:
                 if ("settlDate".equals(name)) {
-                    settlDay = JulianDay.isoToJd(p.getInt());
+                    settlDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("expiryDate".equals(name)) {
-                    expiryDay = JulianDay.isoToJd(p.getInt());
+                    expiryDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("state".equals(name)) {
                     state = p.getInt();
                 } else {
@@ -109,8 +116,18 @@ public final class Market extends Rec implements Financial {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"contr\":\"").append(contr.getMnem());
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
+        out.append("\",\"settlDate\":");
+        if (settlDay != 0) {
+            out.append(String.valueOf(jdToIso(settlDay)));
+        } else {
+            out.append("null");
+        }
+        out.append(",\"expiryDate\":");
+        if (expiryDay != 0) {
+            out.append(String.valueOf(jdToIso(expiryDay)));
+        } else {
+            out.append("null");
+        }
         out.append(",\"state\":").append(String.valueOf(state));
         out.append('}');
     }
@@ -130,7 +147,12 @@ public final class Market extends Rec implements Financial {
 
         out.append("{\"market\":\"").append(mnem);
         out.append("\",\"contr\":\"").append(contr.getMnem());
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append("\",\"settlDate\":");
+        if (settlDay != 0) {
+            out.append(String.valueOf(jdToIso(settlDay)));
+        } else {
+            out.append("null");
+        }
         out.append(",\"bidTicks\":[");
 
         final RbNode firstBid = bidSide.getFirstLevel();
@@ -234,6 +256,14 @@ public final class Market extends Rec implements Financial {
         this.contr = contr;
     }
 
+    public final long allocOrderId() {
+        return ++maxOrderId;
+    }
+
+    public final long allocExecId() {
+        return ++maxExecId;
+    }
+
     public final void insertOrder(Order order) {
         getSide(order.getAction()).insertOrder(order);
     }
@@ -262,12 +292,8 @@ public final class Market extends Rec implements Financial {
         lastTime = now;
     }
 
-    public final long allocOrderId() {
-        return ++maxOrderId;
-    }
-
-    public final long allocExecId() {
-        return ++maxExecId;
+    public final void setState(int state) {
+        this.state = state;
     }
 
     @Override

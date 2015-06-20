@@ -67,7 +67,7 @@ var MarketDialog = React.createClass({
         var mstate = state.state;
         var edit = state.edit;
         if (edit) {
-            this.props.module.onPutMarket(mnem, display, contr, settlDate, expiryDate, mstate);
+            this.props.module.onPutMarket(mnem, display, mstate);
         } else {
             this.props.module.onPostMarket(mnem, display, contr, settlDate, expiryDate, mstate);
         }

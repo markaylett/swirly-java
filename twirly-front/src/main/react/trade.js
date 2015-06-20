@@ -91,36 +91,41 @@ var TradeModuleImpl = React.createClass({
     postOrder: function(market, action, price, lots) {
         console.debug('postOrder: market=' + market + ', action=' + action
                       + ', price=' + price + ', lots=' + lots);
-        if (!isSpecified(market)) {
+        var req = {};
+        var contr = undefined;
+        if (isSpecified(market)) {
+            contr = this.state.marketMap[market];
+        } else {
             this.onReportError(internalError('market not specified'));
             return;
         }
-        var contr = this.state.marketMap[market];
         if (contr === undefined) {
             this.onReportError(internalError('invalid market: ' + market));
             return;
         }
-        if (!isSpecified(price)) {
+        if (isSpecified(action)) {
+            req.action = action;
+        } else {
+            this.onReportError(internalError('action not specified'));
+            return;
+        }
+        if (isSpecified(price)) {
+            req.ticks = priceToTicks(price, contr);
+        } else {
             this.onReportError(internalError('price not specified'));
             return;
         }
-        var ticks = priceToTicks(price, contr);
-        if (!isSpecified(lots) || lots === 0) {
+        if (isSpecified(lots) && lots > 0) {
+            req.lots = parseInt(lots);
+        } else {
             this.onReportError(internalError('lots not specified'));
             return;
         }
-        lots = parseInt(lots);
 
         $.ajax({
             type: 'post',
             url: '/api/sess/order/' + market,
-            data: JSON.stringify({
-                ref: '',
-                action: action,
-                ticks: ticks,
-                lots: lots,
-                minLots: 0
-            })
+            data: JSON.stringify(req)
         }).done(function(trans) {
             this.applyTrans(trans);
         }.bind(this)).fail(function(xhr) {
@@ -129,6 +134,7 @@ var TradeModuleImpl = React.createClass({
     },
     putOrder: function(market, id, lots) {
         console.debug('putOrder: market=' + market + ', id=' + id + ', lots=' + lots);
+        var req = {};
         if (!isSpecified(market)) {
             this.onReportError(internalError('market not specified'));
             return;
@@ -137,18 +143,17 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('order-id not specified'));
             return;
         }
-        if (!isSpecified(lots)) {
+        if (isSpecified(lots)) {
+            req.lots = parseInt(lots);
+        } else {
             this.onReportError(internalError('lots not specified'));
             return;
         }
-        lots = parseInt(lots);
 
         $.ajax({
             type: 'put',
             url: '/api/sess/order/' + market + '/' + id,
-            data: JSON.stringify({
-                lots: lots
-            })
+            data: JSON.stringify(req)
         }).done(function(trans) {
             this.applyTrans(trans);
         }.bind(this)).fail(function(xhr) {
@@ -165,14 +170,14 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('order-id not specified'));
             return;
         }
-        var k = market + '/' + zeroPad(id);
+        var key = market + '/' + zeroPad(id);
         $.ajax({
             type: 'delete',
-            url: '/api/sess/order/' + k
+            url: '/api/sess/order/' + key
         }).done(function(unused) {
             var done = this.staging.done;
             var sess = this.state.sess;
-            done.delete(k);
+            done.delete(key);
             this.setState({
                 sess: {
                     working: sess.working,
@@ -195,14 +200,14 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('trade-id not specified'));
             return;
         }
-        var k = market + '/' + zeroPad(id);
+        var key = market + '/' + zeroPad(id);
         $.ajax({
             type: 'delete',
-            url: '/api/sess/trade/' + k
+            url: '/api/sess/trade/' + key
         }).done(function(unused) {
             var trades = this.staging.trades;
             var sess = this.state.sess;
-            trades.delete(k);
+            trades.delete(key);
             this.setState({
                 sess: {
                     working: sess.working,

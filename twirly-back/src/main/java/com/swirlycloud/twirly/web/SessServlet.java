@@ -166,20 +166,24 @@ public final class SessServlet extends RestServlet {
 
             final Request r = parseRequest(req);
             if ("order".equals(parts[TYPE_PART])) {
-                if (r.getFields() != (Request.REF | Request.ACTION | Request.TICKS //
-                        | Request.LOTS | Request.MIN_LOTS)) {
+
+                final int required = Request.ACTION | Request.TICKS | Request.LOTS;
+                final int optional = Request.REF | Request.MIN_LOTS;
+                if (!r.isValid(required, optional)) {
                     throw new BadRequestException("request fields are invalid");
                 }
                 rest.postOrder(email, market, r.getRef(), r.getAction(), r.getTicks(), r.getLots(),
                         r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             } else if ("trade".equals(parts[TYPE_PART])) {
 
+                final int required = Request.TRADER | Request.ACTION | Request.TICKS | Request.LOTS;
+                final int optional = Request.REF | Request.ROLE | Request.CPTY;
+                if (!r.isValid(required, optional)) {
+                    throw new BadRequestException("request fields are invalid");
+                }
+
                 if (!realm.isUserAdmin(req)) {
                     throw new BadRequestException("user is not an admin");
-                }
-                if (r.getFields() != (Request.TRADER | Request.REF | Request.ACTION //
-                        | Request.TICKS | Request.LOTS | Request.ROLE | Request.CPTY)) {
-                    throw new BadRequestException("request fields are invalid");
                 }
                 rest.postTrade(r.getTrader(), market, r.getRef(), r.getAction(), r.getTicks(),
                         r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
@@ -214,7 +218,7 @@ public final class SessServlet extends RestServlet {
             final long id = Long.parseLong(parts[ID_PART]);
 
             final Request r = parseRequest(req);
-            if (r.getFields() != Request.LOTS) {
+            if (!r.isLotsSet()) {
                 throw new BadRequestException("request fields are invalid");
             }
             final long now = System.currentTimeMillis();

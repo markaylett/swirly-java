@@ -84,7 +84,7 @@ public final class AsyncModelService implements AsyncModel {
     }
 
     @Override
-    public final void updateTrader(final String mnem, final String display) {
+    public final void updateTrader(final String mnem, final String display) throws NotFoundException {
         service.submit(new Runnable() {
             @Override
             public final void run() {
