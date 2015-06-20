@@ -126,8 +126,8 @@ var MarketRow = React.createClass({
               <td>{market.mnem}</td>
               <td>{market.display}</td>
               <td>{market.contr.mnem}</td>
-              <td>{market.settlDate}</td>
-              <td>{market.expiryDate}</td>
+              <td>{optional(market.settlDate)}</td>
+              <td>{optional(market.expiryDate)}</td>
               <td>{market.state}</td>
               <td>
                 <div className="btn-group btn-group-xs" role="group">

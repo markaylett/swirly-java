@@ -31,44 +31,38 @@ var MarketModuleImpl = React.createClass({
         console.debug('postMarket: mnem=' + mnem + ', display=' + display + ', contr='
                       + contr + ', settlDate=' + settlDate + ', expiryDate='
                       + expiryDate + ', state=' + state);
-        if (!isSpecified(mnem)) {
+        var req = {};
+        if (isSpecified(mnem)) {
+            req.mnem = mnem;
+        } else {
             this.onReportError(internalError('mnem not specified'));
             return;
         }
-        if (!isSpecified(display)) {
+        if (isSpecified(display)) {
+            req.display = display;
+        } else {
             this.onReportError(internalError('display not specified'));
             return;
         }
-        if (!isSpecified(contr)) {
+        if (isSpecified(contr)) {
+            req.contr = contr;
+        } else {
             this.onReportError(internalError('contr not specified'));
             return;
         }
-        if (!isSpecified(settlDate)) {
-            this.onReportError(internalError('settlDate not specified'));
-            return;
+        if (isSpecified(settlDate)) {
+            req.settlDate = toDateInt(settlDate);
         }
-        settlDate = toDateInt(settlDate);
-        if (!isSpecified(expiryDate)) {
-            this.onReportError(internalError('expiryDate not specified'));
-            return;
+        if (isSpecified(expiryDate)) {
+            req.expiryDate = toDateInt(expiryDate);
         }
-        expiryDate = toDateInt(expiryDate);
-        if (!isSpecified(state)) {
-            this.onReportError(internalError('state not specified'));
-            return;
+        if (isSpecified(state)) {
+            req.state = parseInt(state);
         }
-        state = parseInt(state);
         $.ajax({
             type: 'post',
             url: '/api/rec/market/',
-            data: JSON.stringify({
-                mnem: mnem,
-                display: display,
-                contr: contr,
-                settlDate: settlDate,
-                expiryDate: expiryDate,
-                state: state
-            })
+            data: JSON.stringify(req)
         }).done(function(market) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
@@ -89,45 +83,31 @@ var MarketModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    putMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
-        console.debug('putMarket: mnem=' + mnem + ', display=' + display + ', contr='
-                      + contr + ', settlDate=' + settlDate + ', expiryDate='
-                      + expiryDate + ', state=' + state);
-        if (!isSpecified(mnem)) {
+    putMarket: function(mnem, display, state) {
+        console.debug('putMarket: mnem=' + mnem + ', display=' + display + ', state=' + state);
+        var req = {};
+        if (isSpecified(mnem)) {
+            req.mnem = mnem;
+        } else {
             this.onReportError(internalError('mnem not specified'));
             return;
         }
-        if (!isSpecified(display)) {
+        if (isSpecified(display)) {
+            req.display = display;
+        } else {
             this.onReportError(internalError('display not specified'));
             return;
         }
-        if (!isSpecified(contr)) {
-            this.onReportError(internalError('contr not specified'));
-            return;
-        }
-        if (!isSpecified(settlDate)) {
-            this.onReportError(internalError('settlDate not specified'));
-            return;
-        }
-        settlDate = toDateInt(settlDate);
-        if (!isSpecified(expiryDate)) {
-            this.onReportError(internalError('expiryDate not specified'));
-            return;
-        }
-        expiryDate = toDateInt(expiryDate);
-        if (!isSpecified(state)) {
+        if (isSpecified(state)) {
+            req.state = parseInt(state);
+        } else {
             this.onReportError(internalError('state not specified'));
             return;
         }
-        state = parseInt(state);
         $.ajax({
             type: 'put',
             url: '/api/rec/market/',
-            data: JSON.stringify({
-                mnem: mnem,
-                display: display,
-                state: state
-            })
+            data: JSON.stringify(req)
         }).done(function(market) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
@@ -168,8 +148,8 @@ var MarketModuleImpl = React.createClass({
     onPostMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
         this.postMarket(mnem, display, contr, settlDate, expiryDate, state);
     },
-    onPutMarket: function(mnem, display, contr, settlDate, expiryDate, state) {
-        this.putMarket(mnem, display, contr, settlDate, expiryDate, state);
+    onPutMarket: function(mnem, display, state) {
+        this.putMarket(mnem, display, state);
     },
     onEditMarket: function(market) {
         console.debug('onEditMarket: mnem=' + market.mnem);

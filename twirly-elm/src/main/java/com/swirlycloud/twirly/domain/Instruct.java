@@ -18,6 +18,9 @@ import com.swirlycloud.twirly.util.Identifiable;
  */
 public interface Instruct extends RbNode, Identifiable, Financial {
 
+    /**
+     * @return order-id or zero if there is no associated order.
+     */
     long getOrderId();
 
     String getTrader();

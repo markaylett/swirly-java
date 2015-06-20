@@ -75,11 +75,18 @@ public final class Market extends Rec implements Financial {
             case KEY_NAME:
                 name = p.getString();
                 break;
+            case VALUE_NULL:
+                if ("settlDate".equals(name)) {
+                    settlDay = 0;
+                } else if ("expiryDate".equals(name)) {
+                    expiryDay = 0;
+                }
+                break;
             case VALUE_NUMBER:
                 if ("settlDate".equals(name)) {
-                    settlDay = JulianDay.isoToJd(p.getInt());
+                    settlDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("expiryDate".equals(name)) {
-                    expiryDay = JulianDay.isoToJd(p.getInt());
+                    expiryDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("state".equals(name)) {
                     state = p.getInt();
                 } else {
@@ -109,8 +116,18 @@ public final class Market extends Rec implements Financial {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"contr\":\"").append(contr.getMnem());
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
-        out.append(",\"expiryDate\":").append(String.valueOf(jdToIso(expiryDay)));
+        out.append("\",\"settlDate\":");
+        if (settlDay != 0) {
+            out.append(String.valueOf(jdToIso(settlDay)));
+        } else {
+            out.append("null");
+        }
+        out.append(",\"expiryDate\":");
+        if (expiryDay != 0) {
+            out.append(String.valueOf(jdToIso(expiryDay)));
+        } else {
+            out.append("null");
+        }
         out.append(",\"state\":").append(String.valueOf(state));
         out.append('}');
     }
@@ -130,7 +147,12 @@ public final class Market extends Rec implements Financial {
 
         out.append("{\"market\":\"").append(mnem);
         out.append("\",\"contr\":\"").append(contr.getMnem());
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append("\",\"settlDate\":");
+        if (settlDay != 0) {
+            out.append(String.valueOf(jdToIso(settlDay)));
+        } else {
+            out.append("null");
+        }
         out.append(",\"bidTicks\":[");
 
         final RbNode firstBid = bidSide.getFirstLevel();

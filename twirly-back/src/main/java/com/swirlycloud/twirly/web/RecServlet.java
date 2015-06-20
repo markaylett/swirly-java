@@ -119,13 +119,14 @@ public final class RecServlet extends RestServlet {
             final Request r = parseRequest(req);
             if ("market".equals(parts[TYPE_PART])) {
 
-                if (!realm.isUserAdmin(req)) {
-                    throw new BadRequestException("user is not an admin");
+                final int required = Request.MNEM | Request.DISPLAY | Request.CONTR;
+                final int optional = Request.SETTL_DATE | Request.EXPIRY_DATE | Request.STATE;
+                if (!r.isValid(required, optional)) {
+                    throw new BadRequestException("request fields are invalid");
                 }
 
-                if (r.getFields() != (Request.MNEM | Request.DISPLAY | Request.CONTR
-                        | Request.SETTL_DATE | Request.EXPIRY_DATE | Request.STATE)) {
-                    throw new BadRequestException("request fields are invalid");
+                if (!realm.isUserAdmin(req)) {
+                    throw new BadRequestException("user is not an admin");
                 }
                 final long now = System.currentTimeMillis();
                 rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(), r.getSettlDate(),
@@ -133,18 +134,18 @@ public final class RecServlet extends RestServlet {
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                String email = realm.getUserEmail(req);
+                final int required = Request.MNEM | Request.DISPLAY;
+                final int optional = Request.EMAIL;
+                if (!r.isValid(required, optional)) {
+                    throw new BadRequestException("request fields are invalid");
+                }
 
-                int fields = r.getFields();
-                if ((fields & Request.EMAIL) != 0) {
-                    if (!r.getEmail().equals(email) && !realm.isUserAdmin(req)) {
+                String email = realm.getUserEmail(req);
+                if (r.isEmailSet()) {
+                    if (!email.equals(r.getEmail()) && !realm.isUserAdmin(req)) {
                         throw new ForbiddenException("user is not an admin");
                     }
-                    fields &= ~Request.EMAIL;
                     email = r.getEmail();
-                }
-                if (fields != (Request.MNEM | Request.DISPLAY)) {
-                    throw new BadRequestException("request fields are invalid");
                 }
                 final long now = System.currentTimeMillis();
                 rest.postTrader(r.getMnem(), r.getDisplay(), email, PARAMS_NONE, now,
@@ -160,8 +161,7 @@ public final class RecServlet extends RestServlet {
     }
 
     @Override
-    protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+    protected final void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
@@ -180,34 +180,35 @@ public final class RecServlet extends RestServlet {
             final Request r = parseRequest(req);
             if ("market".equals(parts[TYPE_PART])) {
 
+                final int required = Request.MNEM | Request.DISPLAY | Request.STATE;
+                if (!r.isValid(required)) {
+                    throw new BadRequestException("request fields are invalid");
+                }
+
                 if (!realm.isUserAdmin(req)) {
                     throw new BadRequestException("user is not an admin");
                 }
-
-                if (r.getFields() != (Request.MNEM | Request.DISPLAY | Request.STATE)) {
-                    throw new BadRequestException("request fields are invalid");
-                }
                 final long now = System.currentTimeMillis();
-                rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE, now, resp.getWriter());
+                rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE, now,
+                        resp.getWriter());
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                String email = realm.getUserEmail(req);
-
-                int fields = r.getFields();
-                if ((fields & Request.EMAIL) != 0) {
-                    if (!r.getEmail().equals(email) && !realm.isUserAdmin(req)) {
-                        throw new ForbiddenException("user is not an admin");
-                    }
-                    fields &= ~Request.EMAIL;
-                    email = r.getEmail();
-                }
-                if (fields != (Request.MNEM | Request.DISPLAY)) {
+                final int required = Request.MNEM | Request.DISPLAY;
+                final int optional = Request.EMAIL;
+                if (!r.isValid(required, optional)) {
                     throw new BadRequestException("request fields are invalid");
                 }
+
+                String email = realm.getUserEmail(req);
+                if (r.isEmailSet()) {
+                    if (!email.equals(r.getEmail()) && !realm.isUserAdmin(req)) {
+                        throw new ForbiddenException("user is not an admin");
+                    }
+                    email = r.getEmail();
+                }
                 final long now = System.currentTimeMillis();
-                rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now, resp.getWriter());
 
             } else {
                 throw new NotFoundException("resource does not exist");

@@ -194,12 +194,16 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
                 name = p.getString();
                 break;
             case VALUE_NULL:
-                if ("ref".equals(name)) {
+                if ("settlDate".equals(name)) {
+                    settlDay = 0;
+                } else if ("ref".equals(name)) {
                     ref = "";
                 } else if ("lastTicks".equals(name)) {
                     lastTicks = 0;
                 } else if ("lastLots".equals(name)) {
                     lastLots = 0;
+                } else if ("matchId".equals(name)) {
+                    matchId = 0;
                 } else if ("role".equals(name)) {
                     role = null;
                 } else if ("cpty".equals(name)) {
@@ -214,7 +218,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
                 } else if ("orderId".equals(name)) {
                     orderId = p.getLong();
                 } else if ("settlDate".equals(name)) {
-                    settlDay = JulianDay.isoToJd(p.getInt());
+                    settlDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("ticks".equals(name)) {
                     ticks = p.getLong();
                 } else if ("lots".equals(name)) {
@@ -315,7 +319,12 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
         out.append(",\"trader\":\"").append(trader);
         out.append("\",\"market\":\"").append(market);
         out.append("\",\"contr\":\"").append(contr);
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append("\",\"settlDate\":");
+        if (settlDay != 0) {
+            out.append(String.valueOf(jdToIso(settlDay)));
+        } else {
+            out.append("null");
+        }
         out.append(",\"ref\":");
         if (!ref.isEmpty()) {
             out.append('"').append(ref).append('"');
@@ -336,7 +345,12 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
             out.append(",\"lastTicks\":null,\"lastLots\":null");
         }
         out.append(",\"minLots\":").append(String.valueOf(minLots));
-        out.append(",\"matchId\":").append(String.valueOf(matchId));
+        out.append(",\"matchId\":");
+        if (matchId != 0) {
+            out.append(String.valueOf(matchId));
+        } else {
+            out.append("null");
+        }
         out.append(",\"role\":");
         if (role != null) {
             out.append('"').append(role.name()).append('"');
@@ -499,12 +513,11 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
         return resd == 0;
     }
 
+    /**
+     * @return true if this execution is an automated trade.
+     */
     public final boolean isAuto() {
-        return orderId != 0;
-    }
-
-    public final boolean isManual() {
-        return orderId == 0;
+        return matchId != 0;
     }
 
     public final long getMatchId() {

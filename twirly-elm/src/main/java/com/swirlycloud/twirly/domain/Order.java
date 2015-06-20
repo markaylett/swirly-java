@@ -96,8 +96,8 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     }
 
     public Order(long id, String trader, Financial fin, String ref, State state, Action action,
-            long ticks, long lots, long resd, long exec, long cost, long lastTicks,
-            long lastLots, long minLots, long created, long modified) {
+            long ticks, long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
+            long minLots, long created, long modified) {
         assert trader != null;
         assert lots > 0 && lots >= minLots;
         this.id = id;
@@ -200,7 +200,9 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
                 name = p.getString();
                 break;
             case VALUE_NULL:
-                if ("ref".equals(name)) {
+                if ("settlDate".equals(name)) {
+                    settlDay = 0;
+                } else if ("ref".equals(name)) {
                     ref = "";
                 } else if ("lastTicks".equals(name)) {
                     lastTicks = 0;
@@ -214,7 +216,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
                 if ("id".equals(name)) {
                     id = p.getLong();
                 } else if ("settlDate".equals(name)) {
-                    settlDay = JulianDay.isoToJd(p.getInt());
+                    settlDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("ticks".equals(name)) {
                     ticks = p.getLong();
                 } else if ("lots".equals(name)) {
@@ -304,7 +306,12 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         out.append(",\"trader\":\"").append(trader);
         out.append("\",\"market\":\"").append(market);
         out.append("\",\"contr\":\"").append(contr);
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append("\",\"settlDate\":");
+        if (settlDay != 0) {
+            out.append(String.valueOf(jdToIso(settlDay)));
+        } else {
+            out.append("null");
+        }
         out.append(",\"ref\":");
         if (!ref.isEmpty()) {
             out.append('"').append(ref).append('"');

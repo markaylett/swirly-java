@@ -6,21 +6,23 @@ var SignupModule = React.createClass({
     // Mutators.
     postTrader: function(mnem, display) {
         console.debug('signup: mnem=' + mnem + ', display=' + display);
-        if (!isSpecified(mnem)) {
+        var req = {};
+        if (isSpecified(mnem)) {
+            req.mnem = mnem;
+        } else {
             this.onReportError(internalError('mnem not specified'));
             return;
         }
-        if (!isSpecified(display)) {
+        if (isSpecified(display)) {
+            req.display = display;
+        } else {
             this.onReportError(internalError('display not specified'));
             return;
         }
         $.ajax({
             type: 'post',
             url: '/api/rec/trader/',
-            data: JSON.stringify({
-                mnem: mnem,
-                display: display
-            })
+            data: JSON.stringify(req)
         }).done(function(unused) {
             window.location.reload();
         }.bind(this)).fail(function(xhr) {

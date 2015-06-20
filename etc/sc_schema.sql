@@ -141,7 +141,7 @@ CREATE TABLE Contr_t (
   lotNumer INT NOT NULL,
   lotDenom INT NOT NULL,
   pipDp INT NOT NULL,
-  minLots BIGINT NOT NULL,
+  minLots BIGINT NOT NULL DEFAULT 1,
   maxLots BIGINT NOT NULL,
 
   FOREIGN KEY (asset) REFERENCES Asset_t (mnem),

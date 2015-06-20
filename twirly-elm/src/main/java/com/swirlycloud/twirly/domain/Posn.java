@@ -65,9 +65,14 @@ public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
             case KEY_NAME:
                 name = p.getString();
                 break;
+            case VALUE_NULL:
+                if ("settlDate".equals(name)) {
+                    settlDay = 0;
+                }
+                break;
             case VALUE_NUMBER:
                 if ("settlDate".equals(name)) {
-                    settlDay = JulianDay.isoToJd(p.getInt());
+                    settlDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("buyCost".equals(name)) {
                     buyCost = p.getLong();
                 } else if ("buyLots".equals(name)) {
@@ -139,7 +144,12 @@ public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
     public final void toJson(Params params, Appendable out) throws IOException {
         out.append("{\"trader\":\"").append(trader);
         out.append("\",\"contr\":\"").append(contr);
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append("\",\"settlDate\":");
+        if (settlDay != 0) {
+            out.append(String.valueOf(jdToIso(settlDay)));
+        } else {
+            out.append("null");
+        }
         if (buyLots != 0) {
             out.append(",\"buyCost\":").append(String.valueOf(buyCost));
             out.append(",\"buyLots\":").append(String.valueOf(buyLots));

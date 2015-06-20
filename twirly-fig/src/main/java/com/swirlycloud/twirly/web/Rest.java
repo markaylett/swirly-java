@@ -4,7 +4,7 @@
 package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
-import static com.swirlycloud.twirly.date.JulianDay.isoToJd;
+import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -206,8 +206,8 @@ public final class Rest {
                 throw new NotFoundException(
                         String.format("contract '%s' does not exist", contrMnem));
             }
-            final int settlDay = isoToJd(settlDate);
-            final int expiryDay = isoToJd(expiryDate);
+            final int settlDay = maybeIsoToJd(settlDate);
+            final int expiryDay = maybeIsoToJd(expiryDate);
             final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay,
                     state, now);
             market.toJson(params, out);
@@ -572,7 +572,7 @@ public final class Rest {
             if (sess == null) {
                 throw new NotFoundException(String.format("trader '%s' has no posns", email));
             }
-            final Posn posn = sess.findPosn(contr, isoToJd(settlDate));
+            final Posn posn = sess.findPosn(contr, maybeIsoToJd(settlDate));
             if (posn == null) {
                 throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",
                         contr, settlDate));

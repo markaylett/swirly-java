@@ -23,7 +23,7 @@ public final class JulianDay {
      */
 
     public static int ymdToJd(int year, int mon, int mday) {
-        // The formula given above was taken from the 1990 edition of the U.S. Naval Observatory's
+        // The formula given below was taken from the 1990 edition of the U.S. Naval Observatory's
         // Almanac for Computers.
         // See http://aa.usno.navy.mil/faq/docs/JD_Formula.php.
 
@@ -108,5 +108,21 @@ public final class JulianDay {
         final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
         // Add half day for 12pm.
         return (jd - JD_UNIX_EPOC) * MILLIS_IN_DAY + (MILLIS_IN_DAY >> 1);
+    }
+
+    /**
+     * Julian day to ISO8601 if argument is non-zero.
+     */
+
+    public static int maybeJdToIso(int jd) {
+        return jd != 0 ? jdToIso(jd) : 0;
+    }
+
+    /**
+     * ISO8601 to Julian day if argument is non-zero.
+     */
+
+    public static int maybeIsoToJd(int iso) {
+        return iso != 0 ? isoToJd(iso) : 0;
     }
 }

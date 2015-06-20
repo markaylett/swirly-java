@@ -13,5 +13,8 @@ public interface Financial {
 
     String getContr();
 
+    /**
+     * @return settlement-date or zero if there is no settlement date.
+     */
     int getSettlDay();
 }

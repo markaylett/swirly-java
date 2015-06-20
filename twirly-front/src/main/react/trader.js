@@ -42,26 +42,30 @@ var TraderModuleImpl = React.createClass({
     },
     postTrader: function(mnem, display, email) {
         console.debug('postTrader: mnem=' + mnem + ', display=' + display + ', email=' + email);
-        if (!isSpecified(mnem)) {
+        var req = {};
+        if (isSpecified(mnem)) {
+            req.mnem = mnem;
+        } else {
             this.onReportError(internalError('mnem not specified'));
             return;
         }
-        if (!isSpecified(display)) {
+        if (isSpecified(display)) {
+            req.display = display;
+        } else {
             this.onReportError(internalError('display not specified'));
             return;
         }
-        if (!isSpecified(email)) {
+        if (isSpecified(email)) {
+            req.email = email;
+        } else {
             this.onReportError(internalError('email not specified'));
             return;
         }
+
         $.ajax({
             type: 'post',
             url: '/api/rec/trader/',
-            data: JSON.stringify({
-                mnem: mnem,
-                display: display,
-                email: email
-            })
+            data: JSON.stringify(req)
         }).done(function(trader) {
             var staging = this.staging;
 
@@ -77,26 +81,30 @@ var TraderModuleImpl = React.createClass({
     },
     putTrader: function(mnem, display, email) {
         console.debug('putTrader: mnem=' + mnem + ', display=' + display + ', email=' + email);
-        if (!isSpecified(mnem)) {
+        var req = {};
+        if (isSpecified(mnem)) {
+            req.mnem = mnem;
+        } else {
             this.onReportError(internalError('mnem not specified'));
             return;
         }
-        if (!isSpecified(display)) {
+        if (isSpecified(display)) {
+            req.display = display;
+        } else {
             this.onReportError(internalError('display not specified'));
             return;
         }
-        if (!isSpecified(email)) {
+        if (isSpecified(email)) {
+            req.email = email;
+        } else {
             this.onReportError(internalError('email not specified'));
             return;
         }
+
         $.ajax({
             type: 'put',
             url: '/api/rec/trader/',
-            data: JSON.stringify({
-                mnem: mnem,
-                display: display,
-                email: email
-            })
+            data: JSON.stringify(req)
         }).done(function(trader) {
             var staging = this.staging;
 
@@ -114,7 +122,10 @@ var TraderModuleImpl = React.createClass({
         console.debug('postTrade: trader=' + trader + ', market=' + market
                       + ', ref=' + ref + ', action=' + action + ', price=' + price
                       + ', lots=' + lots + ', role=' + role + ', cpty=' + cpty);
-        if (!isSpecified(trader)) {
+        var req = {};
+        if (isSpecified(trader)) {
+            req.trader = trader;
+        } else {
             this.onReportError(internalError('trader not specified'));
             return;
         }
@@ -127,42 +138,38 @@ var TraderModuleImpl = React.createClass({
             this.onReportError(internalError('invalid market: ' + market));
             return;
         }
-        if (!isSpecified(action)) {
+        if (isSpecified(ref)) {
+            req.ref = ref;
+        }
+        if (isSpecified(action)) {
+            req.action = action;
+        } else {
             this.onReportError(internalError('action not specified'));
             return;
         }
-        if (!isSpecified(price)) {
+        if (isSpecified(price)) {
+            req.ticks = priceToTicks(price, contr);
+        } else {
             this.onReportError(internalError('price not specified'));
             return;
         }
-        var ticks = priceToTicks(price, contr);
-        if (!isSpecified(lots) || lots === 0) {
+        if (isSpecified(lots) && lots > 0) {
+            req.lots = parseInt(lots);
+        } else {
             this.onReportError(internalError('lots not specified'));
             return;
         }
-        lots = parseInt(lots);
+        if (isSpecified(role)) {
+            req.role = role;
+        }
+        if (isSpecified(cpty)) {
+            req.cpty = cpty;
+        }
 
-        if (ref === undefined) {
-            ref = null;
-        }
-        if (role === undefined) {
-            role = null;
-        }
-        if (cpty === undefined) {
-            cpty = null;
-        }
         $.ajax({
             type: 'post',
             url: '/api/sess/trade/' + market,
-            data: JSON.stringify({
-                trader: trader,
-                ref: ref,
-                action: action,
-                ticks: ticks,
-                lots: lots,
-                role: role,
-                cpty: cpty
-            })
+            data: JSON.stringify(req)
         }).done(function(market) {
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));

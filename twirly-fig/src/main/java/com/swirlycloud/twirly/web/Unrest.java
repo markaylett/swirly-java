@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartArray;
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 
@@ -629,7 +629,7 @@ public final class Unrest {
     public final Posn getPosn(String email, String contr, int settlDay, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getPosn(email, contr, jdToIso(settlDay), params, now, sb);
+        rest.getPosn(email, contr, maybeJdToIso(settlDay), params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);

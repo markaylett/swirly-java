@@ -30,8 +30,8 @@ function enrichMarket(contrMap, market) {
     market.key = market.mnem;
 
     market.contr = contrMap[market.contr];
-    market.settlDate = toDateStr(market.settlDate);
-    market.expiryDate = toDateStr(market.expiryDate);
+    market.settlDate = isSpecified(market.settlDate) ? toDateStr(market.settlDate) : null;
+    market.expiryDate = isSpecified(market.expiryDate) ? toDateStr(market.expiryDate) : null;
 }
 
 function enrichTrader(trader) {
@@ -44,14 +44,14 @@ function enrichView(contrMap, view) {
 
     var contr = contrMap[view.contr];
     view.contr = contr;
-    view.settlDate = toDateStr(view.settlDate);
+    view.settlDate = isSpecified(view.settlDate) ? toDateStr(view.settlDate) : null;
     view.bidPrice = view.bidTicks.map(function(val) {
         return val !== null ? ticksToPrice(val, contr) : null;
     });
     view.offerPrice = view.offerTicks.map(function(val) {
         return val !== null ? ticksToPrice(val, contr) : null;
     });
-    view.lastPrice = view.lastTicks !== null ? ticksToPrice(view.lastTicks, contr) : null;
+    view.lastPrice = isSpecified(view.lastTicks) ? ticksToPrice(view.lastTicks, contr) : null;
 }
 
 function enrichOrder(contrMap, order) {
@@ -60,9 +60,9 @@ function enrichOrder(contrMap, order) {
 
     var contr = contrMap[order.contr];
     order.contr = contr;
-    order.settlDate = toDateStr(order.settlDate);
+    order.settlDate = isSpecified(order.settlDate) ? toDateStr(order.settlDate) : null;
     order.price = ticksToPrice(order.ticks, contr);
-    order.lastPrice = order.lastTicks !== null ? ticksToPrice(order.lastTicks, contr) : null;
+    order.lastPrice = isSpecified(order.lastTicks) ? ticksToPrice(order.lastTicks, contr) : null;
     order.isDone = order.resd === 0;
 }
 
@@ -72,9 +72,9 @@ function enrichTrade(contrMap, trade) {
 
     var contr = contrMap[trade.contr];
     trade.contr = contr;
-    trade.settlDate = toDateStr(trade.settlDate);
+    trade.settlDate = isSpecified(trade.settlDate) ? toDateStr(trade.settlDate) : null;
     trade.price = ticksToPrice(trade.ticks, contr);
-    trade.lastPrice = trade.lastTicks !== null ? ticksToPrice(trade.lastTicks, contr) : null;
+    trade.lastPrice = isSpecified(trade.lastTicks) ? ticksToPrice(trade.lastTicks, contr) : null;
 }
 
 function posnPrice(cost, lots, contr) {
@@ -104,7 +104,7 @@ function enrichPosn(contrMap, posn) {
 
     var contr = contrMap[posn.contr];
     posn.contr = contr;
-    posn.settlDate = toDateStr(posn.settlDate);
+    posn.settlDate = isSpecified(posn.settlDate) ? toDateStr(posn.settlDate) : null;
     posn.buyPrice = posnPrice(posn.buyCost, posn.buyLots, contr);
     posn.sellPrice = posnPrice(posn.sellCost, posn.sellLots, contr);
     posn.netPrice = calcNetPrice(posn);

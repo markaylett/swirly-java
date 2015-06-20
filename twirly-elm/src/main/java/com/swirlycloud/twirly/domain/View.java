@@ -113,7 +113,9 @@ public final class View implements Jsonifiable, Financial {
                 }
                 break;
             case VALUE_NULL:
-                if ("lastTicks".equals(name)) {
+                if ("settlDate".equals(name)) {
+                    settlDay = 0;
+                } else if ("lastTicks".equals(name)) {
                     lastTicks = 0;
                 } else if ("lastLots".equals(name)) {
                     lastLots = 0;
@@ -125,7 +127,7 @@ public final class View implements Jsonifiable, Financial {
                 break;
             case VALUE_NUMBER:
                 if ("settlDate".equals(name)) {
-                    settlDay = JulianDay.isoToJd(p.getInt());
+                    settlDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("lastTicks".equals(name)) {
                     lastTicks = p.getLong();
                 } else if ("lastLots".equals(name)) {
@@ -196,7 +198,12 @@ public final class View implements Jsonifiable, Financial {
 
         out.append("{\"market\":\"").append(market);
         out.append("\",\"contr\":\"").append(contr);
-        out.append("\",\"settlDate\":").append(String.valueOf(jdToIso(settlDay)));
+        out.append("\",\"settlDate\":");
+        if (settlDay != 0) {
+            out.append(String.valueOf(jdToIso(settlDay)));
+        } else {
+            out.append("null");
+        }
         out.append(",\"bidTicks\":[");
 
         for (int i = 0; i < depth; ++i) {

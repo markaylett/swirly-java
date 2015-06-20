@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_EXPIRED;
@@ -105,14 +105,15 @@ public final class UnrestTest {
         });
     }
 
-    private static void assertMarket(String mnem, String display, String contr, int state,
-            Market actual) {
+    private static void assertMarket(String mnem, String display, String contr, int settlDay,
+            int expiryDay, int state, Market actual) {
         assertNotNull(actual);
         assertEquals(mnem, actual.getMnem());
         assertEquals(display, actual.getDisplay());
         assertEquals(contr, actual.getContr());
-        assertEquals(SETTL_DAY, actual.getSettlDay());
-        assertEquals(EXPIRY_DAY, actual.getExpiryDay());
+        assertEquals(settlDay, actual.getSettlDay());
+        assertEquals(expiryDay, actual.getExpiryDay());
+        assertEquals(state, actual.getState());
     }
 
     private static void assertTrader(Trader expected, Trader actual) {
@@ -136,12 +137,12 @@ public final class UnrestTest {
         });
     }
 
-    private static void assertView(String market, String contr, View actual)
+    private static void assertView(String market, String contr, int settlDay, View actual)
             throws NotFoundException, IOException {
         assertNotNull(actual);
         assertEquals(market, actual.getMarket());
         assertEquals(contr, actual.getContr());
-        assertEquals(SETTL_DAY, actual.getSettlDay());
+        assertEquals(settlDay, actual.getSettlDay());
 
         assertEquals(0, actual.getOfferTicks(0));
         assertEquals(0, actual.getOfferLots(0));
@@ -178,7 +179,7 @@ public final class UnrestTest {
 
     private static void assertExec(String market, State state, Action action, long ticks,
             long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
-            String contr, Role role, Exec actual) {
+            String contr, int settlDay, Role role, Exec actual) {
         assertNotNull(actual);
         assertEquals(TRADER, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -194,18 +195,18 @@ public final class UnrestTest {
         assertEquals(lastLots, actual.getLastLots());
         assertEquals(1, actual.getMinLots());
         assertEquals(contr, actual.getContr());
-        assertEquals(SETTL_DAY, actual.getSettlDay());
+        assertEquals(settlDay, actual.getSettlDay());
         assertEquals(role, actual.getRole());
         assertEquals(TRADER, actual.getCpty());
         assertEquals(NOW, actual.getCreated());
     }
 
-    private static void assertPosn(String market, String contr, long buyCost, long buyLots,
-            long sellCost, long sellLots, Posn actual) {
+    private static void assertPosn(String market, String contr, int settlDay, long buyCost,
+            long buyLots, long sellCost, long sellLots, Posn actual) {
         assertNotNull(actual);
         assertEquals(TRADER, actual.getTrader());
         assertEquals(contr, actual.getContr());
-        assertEquals(SETTL_DAY, actual.getSettlDay());
+        assertEquals(settlDay, actual.getSettlDay());
         assertEquals(buyCost, actual.getBuyCost());
         assertEquals(buyLots, actual.getBuyLots());
         assertEquals(sellCost, actual.getSellCost());
@@ -227,8 +228,14 @@ public final class UnrestTest {
 
     private final Market postMarket(String mnem, String display, String contr, int state)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        return unrest.postMarket(mnem, display, contr, jdToIso(SETTL_DAY), jdToIso(EXPIRY_DAY),
-                state, PARAMS_NONE, NOW);
+        return unrest.postMarket(mnem, display, contr, 0, 0, state, PARAMS_NONE, NOW);
+    }
+
+    private final Market postMarket(String mnem, String display, String contr, int settlDay,
+            int expiryDay, int state) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        return unrest.postMarket(mnem, display, contr, maybeJdToIso(settlDay),
+                maybeJdToIso(expiryDay), state, PARAMS_NONE, NOW);
     }
 
     private final Market putMarket(String mnem, String display, int state)
@@ -261,7 +268,7 @@ public final class UnrestTest {
             ServiceUnavailableException, IOException {
         model = new MockModel();
         unrest = new Unrest(model);
-        postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1);
+        postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
     }
 
     @After
@@ -279,7 +286,7 @@ public final class UnrestTest {
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertEquals(1, st.markets.size());
-        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1,
+        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 st.markets.get("EURUSD.MAR14"));
         assertTraders(st.traders);
 
@@ -288,7 +295,7 @@ public final class UnrestTest {
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertEquals(1, st.markets.size());
-        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1,
+        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 st.markets.get("EURUSD.MAR14"));
         assertTrue(st.traders.isEmpty());
     }
@@ -304,7 +311,7 @@ public final class UnrestTest {
 
         recs = unrest.getRec(RecType.MARKET, PARAMS_NONE, NOW);
         assertEquals(1, recs.size());
-        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1,
+        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 (Market) recs.get("EURUSD.MAR14"));
 
         recs = unrest.getRec(RecType.TRADER, PARAMS_NONE, NOW);
@@ -332,7 +339,8 @@ public final class UnrestTest {
 
         final Market market = (Market) unrest.getRec(RecType.MARKET, "EURUSD.MAR14", PARAMS_NONE,
                 NOW);
-        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", 0x1, market);
+        assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
+                market);
         try {
             unrest.getRec(RecType.MARKET, "EURUSD.MAR14x", PARAMS_NONE, NOW);
             fail("Expected exception");
@@ -397,7 +405,7 @@ public final class UnrestTest {
         for (int i = 0; i < 2; ++i) {
             assertEquals(1, views.size());
             final View view = views.get("EURUSD.MAR14");
-            assertView("EURUSD.MAR14", "EURUSD", view);
+            assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, view);
             // Use now beyond expiry.
             now = jdToMillis(EXPIRY_DAY + 1);
             views = unrest.getView(PARAMS_EXPIRED, now);
@@ -420,7 +428,7 @@ public final class UnrestTest {
 
         View view = unrest.getView("EURUSD.MAR14", PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
-            assertView("EURUSD.MAR14", "EURUSD", view);
+            assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, view);
             // Use now beyond expiry.
             now = jdToMillis(EXPIRY_DAY + 1);
             view = unrest.getView("EURUSD.MAR14", PARAMS_EXPIRED, now);
@@ -431,18 +439,31 @@ public final class UnrestTest {
     public final void testPostMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1, market);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1,
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1, market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1,
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+    }
+
+    @Test
+    public final void testPostMarketSettl() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
+                EXPIRY_DAY, 0x1);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
+                market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
     }
 
     @Test
     public final void testPutMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
+        Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
+                EXPIRY_DAY, 0x1);
         market = putMarket("GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", 0x2, market);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", 0x2,
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
+                market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
                 (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
     }
 
@@ -457,10 +478,10 @@ public final class UnrestTest {
         assertOrder("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
                 out.orders.get(Long.valueOf(2)));
         assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.MAKER, out.trades.get(Long.valueOf(3)));
+                "EURUSD", SETTL_DAY, Role.MAKER, out.trades.get(Long.valueOf(3)));
         assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.TAKER, out.trades.get(Long.valueOf(4)));
-        assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10,
+                "EURUSD", SETTL_DAY, Role.TAKER, out.trades.get(Long.valueOf(4)));
+        assertPosn("EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
                 out.posns.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
@@ -541,7 +562,7 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Exec trade = unrest.getTrade(EMAIL, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
         assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.MAKER, trade);
+                "EURUSD", SETTL_DAY, Role.MAKER, trade);
         deleteTrade(EMAIL, "EURUSD.MAR14", 3);
         try {
             unrest.getTrade(EMAIL, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
@@ -557,9 +578,9 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Map<Long, Exec> out = unrest.getTrade(EMAIL, PARAMS_NONE, NOW);
         assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.MAKER, out.get(Long.valueOf(3)));
+                "EURUSD", SETTL_DAY, Role.MAKER, out.get(Long.valueOf(3)));
         assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.TAKER, out.get(Long.valueOf(4)));
+                "EURUSD", SETTL_DAY, Role.TAKER, out.get(Long.valueOf(4)));
     }
 
     @Test
@@ -569,9 +590,9 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Map<Long, Exec> out = unrest.getTrade(EMAIL, "EURUSD.MAR14", PARAMS_NONE, NOW);
         assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.MAKER, out.get(Long.valueOf(3)));
+                "EURUSD", SETTL_DAY, Role.MAKER, out.get(Long.valueOf(3)));
         assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.TAKER, out.get(Long.valueOf(4)));
+                "EURUSD", SETTL_DAY, Role.TAKER, out.get(Long.valueOf(4)));
         assertTrue(unrest.getTrade(EMAIL, "USDJPY.MAR14", PARAMS_NONE, NOW).isEmpty());
     }
 
@@ -582,9 +603,9 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Map<Long, Exec> out = unrest.getTrade(EMAIL, "EURUSD.MAR14", PARAMS_NONE, NOW);
         assertExec("EURUSD.MAR14", State.TRADE, Action.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.MAKER, out.get(Long.valueOf(3)));
+                "EURUSD", SETTL_DAY, Role.MAKER, out.get(Long.valueOf(3)));
         assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.TAKER, out.get(Long.valueOf(4)));
+                "EURUSD", SETTL_DAY, Role.TAKER, out.get(Long.valueOf(4)));
         try {
             unrest.getOrder(EMAIL, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
             fail("Expected exception");
@@ -603,7 +624,7 @@ public final class UnrestTest {
         final Exec exec = unrest.postTrade(TRADER, "EURUSD.MAR14", "", Action.BUY, 12345, 10,
                 Role.MAKER, TRADER, PARAMS_NONE, NOW);
         assertExec("EURUSD.MAR14", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", Role.MAKER, exec);
+                "EURUSD", SETTL_DAY, Role.MAKER, exec);
     }
 
     @Test
@@ -612,7 +633,7 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Map<PosnKey, Posn> out = unrest.getPosn(EMAIL, PARAMS_NONE, NOW);
-        assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10,
+        assertPosn("EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
                 out.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
@@ -622,7 +643,7 @@ public final class UnrestTest {
         postOrder("EURUSD.MAR14", Action.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Action.BUY, 12345, 10);
         final Posn posn = unrest.getPosn(EMAIL, "EURUSD", SETTL_DAY, PARAMS_NONE, NOW);
-        assertPosn("EURUSD.MAR14", "EURUSD", 123450, 10, 123450, 10, posn);
+        assertPosn("EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10, posn);
         try {
             unrest.getPosn(EMAIL, "USDJPY", SETTL_DAY, PARAMS_NONE, NOW);
             fail("Expected exception");
