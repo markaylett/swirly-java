@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.NullUtil.nullIfEmpty;
 
 import java.io.IOException;
 
@@ -37,7 +38,6 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
     /**
      * Ref is optional.
      */
-    @NonNull
     private final String ref;
     private State state;
     private final Action action;
@@ -76,7 +76,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = state;
         this.action = action;
         this.ticks = ticks;
@@ -102,7 +102,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = state;
         this.action = action;
         this.ticks = ticks;
@@ -326,7 +326,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
             out.append("null");
         }
         out.append(",\"ref\":");
-        if (!ref.isEmpty()) {
+        if (ref != null) {
             out.append('"').append(ref).append('"');
         } else {
             out.append("null");
@@ -447,7 +447,6 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
         return settlDay;
     }
 
-    @NonNull
     @Override
     public final String getRef() {
         return ref;

@@ -4,13 +4,12 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.NullUtil.nullIfEmpty;
 
 import java.io.IOException;
 
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
-
-import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
@@ -42,7 +41,6 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     /**
      * Ref is optional.
      */
-    @NonNull
     private final String ref;
     State state;
     private final Action action;
@@ -80,7 +78,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = state;
         this.action = action;
         this.ticks = ticks;
@@ -105,7 +103,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = state;
         this.action = action;
         this.ticks = ticks;
@@ -130,7 +128,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = State.NEW;
         this.action = action;
         this.ticks = ticks;
@@ -154,7 +152,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = State.NEW;
         this.action = action;
         this.ticks = ticks;
@@ -313,7 +311,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
             out.append("null");
         }
         out.append(",\"ref\":");
-        if (!ref.isEmpty()) {
+        if (ref != null) {
             out.append('"').append(ref).append('"');
         } else {
             out.append("null");
@@ -476,7 +474,6 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         return settlDay;
     }
 
-    @NonNull
     @Override
     public final String getRef() {
         return ref;

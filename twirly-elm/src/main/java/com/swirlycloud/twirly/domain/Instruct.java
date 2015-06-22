@@ -3,8 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Identifiable;
 
@@ -34,7 +32,6 @@ public interface Instruct extends RbNode, Identifiable, Financial {
     @Override
     int getSettlDay();
 
-    @NonNull
     String getRef();
 
     State getState();

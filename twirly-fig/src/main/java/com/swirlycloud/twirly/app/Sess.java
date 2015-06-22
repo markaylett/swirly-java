@@ -174,7 +174,7 @@ public final class Sess extends BasicRbNode {
     final void insertOrder(Order order) {
         final RbNode unused = orders.insert(order);
         assert unused == null;
-        if (!order.getRef().isEmpty()) {
+        if (order.getRef() != null) {
             refIdx.insert(order);
         }
     }
@@ -182,7 +182,7 @@ public final class Sess extends BasicRbNode {
     final void removeOrder(Order order) {
         assert order.getTrader().equals(trader.getMnem());
         orders.remove(order);
-        if (!order.getRef().isEmpty()) {
+        if (order.getRef() != null) {
             refIdx.remove(trader.getMnem(), order.getRef());
         }
     }
@@ -210,7 +210,7 @@ public final class Sess extends BasicRbNode {
     }
 
     public final Order findOrder(String ref) {
-        assert ref != null && !ref.isEmpty();
+        assert ref != null;
         return (Order) refIdx.find(trader.getMnem(), ref);
     }
 

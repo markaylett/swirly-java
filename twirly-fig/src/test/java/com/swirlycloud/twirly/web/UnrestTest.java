@@ -3,13 +3,14 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
+import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_EXPIRED;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -162,7 +163,7 @@ public final class UnrestTest {
         assertNotNull(actual);
         assertEquals(TRADER, actual.getTrader());
         assertEquals(market, actual.getMarket());
-        assertEquals("", actual.getRef());
+        assertNull(actual.getRef());
         assertEquals(state, actual.getState());
         assertEquals(action, actual.getAction());
         assertEquals(ticks, actual.getTicks());
@@ -183,7 +184,7 @@ public final class UnrestTest {
         assertNotNull(actual);
         assertEquals(TRADER, actual.getTrader());
         assertEquals(market, actual.getMarket());
-        assertEquals("", actual.getRef());
+        assertNull(actual.getRef());
         assertEquals(state, actual.getState());
         assertEquals(action, actual.getAction());
         assertEquals(ticks, actual.getTicks());
