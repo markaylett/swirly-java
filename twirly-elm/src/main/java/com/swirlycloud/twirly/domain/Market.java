@@ -39,9 +39,9 @@ public final class Market extends Rec implements Financial {
     }
 
     public Market(String mnem, String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId,
-            long maxExecId) {
+            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
         super(mnem, display);
+        assert (settlDay == 0) == (expiryDay == 0);
         this.contr = contr;
         this.settlDay = settlDay;
         this.expiryDay = expiryDay;
@@ -322,6 +322,15 @@ public final class Market extends Rec implements Financial {
 
     public final int getExpiryDay() {
         return expiryDay;
+    }
+
+    /**
+     * @param busDay
+     *            The business-day.
+     * @return true if this market has expired.
+     */
+    public boolean isExpired(int busDay) {
+        return expiryDay != 0 && expiryDay < busDay;
     }
 
     public final int getState() {

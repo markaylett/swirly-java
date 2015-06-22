@@ -237,7 +237,7 @@ public final class Rest {
             RbNode node = serv.getFirstRec(RecType.MARKET);
             for (int i = 0; node != null; node = node.rbNext()) {
                 final Market market = (Market) node;
-                if (!withExpired && market.getExpiryDay() < busDay) {
+                if (!withExpired && market.isExpired(busDay)) {
                     // Ignore expired contracts.
                     continue;
                 }
@@ -263,7 +263,7 @@ public final class Rest {
             if (market == null) {
                 throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
-            if (!withExpired && market.getExpiryDay() < busDay) {
+            if (!withExpired && market.isExpired(busDay)) {
                 throw new NotFoundException(String.format("market '%s' has expired", marketMnem));
             }
             market.toJsonView(params, out);

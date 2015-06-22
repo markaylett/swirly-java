@@ -550,8 +550,7 @@ public class Serv {
         for (RbNode node = markets.getFirst(); node != null;) {
             final Market market = (Market) node;
             node = node.rbNext();
-            final int expiryDay = market.getExpiryDay();
-            if (expiryDay != 0 && expiryDay < busDay) {
+            if (market.isExpired(busDay)) {
                 cancelOrders(market, now);
             }
         }
@@ -623,8 +622,7 @@ public class Serv {
             NotFoundException, ServiceUnavailableException {
         final Trader trader = sess.getTraderRich();
         final int busDay = DateUtil.getBusDate(now).toJd();
-        final int expiryDay = market.getExpiryDay();
-        if (expiryDay != 0 && expiryDay < busDay) {
+        if (market.isExpired(busDay)) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
                     .getContrRich().getMnem(), maybeJdToIso(market.getSettlDay())));
         }
