@@ -89,8 +89,8 @@ public final class PosnTree extends Tree<RbNode> {
     }
 
     @Override
-    protected final void setNode(RbNode node, RbNode left, RbNode right, RbNode parent, int color) {
-        node.setNode(left, right, parent, color);
+    protected final void setNode(RbNode lhs, RbNode rhs) {
+        lhs.setNode(rhs);
     }
 
     @Override

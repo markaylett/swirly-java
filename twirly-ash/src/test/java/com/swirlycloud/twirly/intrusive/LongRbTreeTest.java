@@ -193,7 +193,7 @@ public final class LongRbTreeTest {
             t.print();
             System.out.println("--");
         }
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 50; ++i) {
             for (int j = 0; j < 500; j++) {
                 final int key = rand.nextInt(1000);
                 final int value = rand.nextInt(1000);

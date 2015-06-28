@@ -28,7 +28,7 @@ public abstract class Tree<V> {
 
     protected V root;
 
-    protected abstract void setNode(V node, V left, V right, V parent, int color);
+    protected abstract void setNode(V lhs, V rhs);
 
     protected abstract V setLeft(V node, V left);
 
@@ -362,7 +362,7 @@ public abstract class Tree<V> {
                 parent = tmp;
             }
 
-            setNode(tmp, getLeft(node), getRight(node), getParent(node), getColor(node));
+            setNode(tmp, node);
 
             if (getParent(node) != null) {
                 if (getLeft(getParent(node)) == node) {
