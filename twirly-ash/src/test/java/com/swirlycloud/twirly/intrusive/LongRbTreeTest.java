@@ -7,6 +7,7 @@ import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -72,16 +73,16 @@ public final class LongRbTreeTest {
     /**
      * A node is either red or black.
      * 
-     * @param n
+     * @param node
      *            The node.
      */
-    private static void verifyProperty1(final RbNode n) {
-        assertTrue(getColor(n) == RED || getColor(n) == BLACK);
-        if (n == null) {
+    private static void verifyProperty1(final RbNode node) {
+        assertTrue(getColor(node) == RED || getColor(node) == BLACK);
+        if (node == null) {
             return;
         }
-        verifyProperty1(n.getLeft());
-        verifyProperty1(n.getRight());
+        verifyProperty1(node.getLeft());
+        verifyProperty1(node.getRight());
     }
 
     /**
@@ -98,38 +99,38 @@ public final class LongRbTreeTest {
     /**
      * Every red node must have two black child nodes, and therefore it must have a black parent.
      * 
-     * @param n
+     * @param node
      *            The node.
      */
-    private static void verifyProperty4(final RbNode n) {
-        if (getColor(n) == RED) {
-            assertEquals(BLACK, getColor(n.getLeft()));
-            assertEquals(BLACK, getColor(n.getRight()));
-            assertEquals(BLACK, getColor(n.getParent()));
+    private static void verifyProperty4(final RbNode node) {
+        if (getColor(node) == RED) {
+            assertEquals(BLACK, getColor(node.getLeft()));
+            assertEquals(BLACK, getColor(node.getRight()));
+            assertEquals(BLACK, getColor(node.getParent()));
         }
-        if (n == null) {
+        if (node == null) {
             return;
         }
-        verifyProperty4(n.getLeft());
-        verifyProperty4(n.getRight());
+        verifyProperty4(node.getLeft());
+        verifyProperty4(node.getRight());
     }
 
     /**
      * Every path from a given node to any of its descendant NIL nodes contains the same number of
      * black nodes.
      * 
-     * @param n
+     * @param node
      *            The node.
      */
-    private static void verifyProperty5(final RbNode n) {
-        verifyProperty5(n, 0, -1);
+    private static void verifyProperty5(final RbNode node) {
+        verifyProperty5(node, 0, -1);
     }
 
-    private static int verifyProperty5(final RbNode n, int blackCount, int pathBlackCount) {
-        if (getColor(n) == BLACK) {
+    private static int verifyProperty5(final RbNode node, int blackCount, int pathBlackCount) {
+        if (getColor(node) == BLACK) {
             blackCount++;
         }
-        if (n == null) {
+        if (node == null) {
             if (pathBlackCount == -1) {
                 pathBlackCount = blackCount;
             } else {
@@ -137,13 +138,13 @@ public final class LongRbTreeTest {
             }
             return pathBlackCount;
         }
-        pathBlackCount = verifyProperty5(n.getLeft(), blackCount, pathBlackCount);
-        pathBlackCount = verifyProperty5(n.getRight(), blackCount, pathBlackCount);
+        pathBlackCount = verifyProperty5(node.getLeft(), blackCount, pathBlackCount);
+        pathBlackCount = verifyProperty5(node.getRight(), blackCount, pathBlackCount);
         return pathBlackCount;
     }
 
-    private static void verifyProperties(NodeTree t) {
-        final RbNode root = t.getRoot();
+    private static void verifyProperties(final NodeTree tree) {
+        final RbNode root = tree.getRoot();
         verifyProperty1(root);
         verifyProperty2(root);
         // Property 3 is implicit: all leaves (NIL) are black. All leaves are of the same color as
@@ -188,9 +189,9 @@ public final class LongRbTreeTest {
     public final void testProperties() {
         final java.util.Random rand = new java.util.Random();
 
-        final NodeTree t = new NodeTree();
+        final NodeTree tree = new NodeTree();
         if (DEBUG) {
-            t.print();
+            tree.print();
             System.out.println("--");
         }
         for (int i = 0; i < 50; ++i) {
@@ -198,31 +199,30 @@ public final class LongRbTreeTest {
                 final int key = rand.nextInt(1000);
                 final int value = rand.nextInt(1000);
 
-                Node n = new Node(key, value);
-                t.insert(n);
+                Node node = new Node(key, value);
+                tree.insert(node);
                 if (DEBUG) {
-                    System.out.println("insert " + n + ":");
-                    t.print();
+                    System.out.println("insert " + node + ":");
+                    tree.print();
                     System.out.println("--");
                 }
-                verifyProperties(t);
+                verifyProperties(tree);
 
-                n = (Node) t.find(key);
-                if (n.getValue() != value) {
-                    throw new AssertionError();
-                }
+                node = (Node) tree.find(key);
+                assertNotNull(node);
+                assertEquals(value, node.getValue());
             }
             for (int j = 0; j < 6000; j++) {
                 final int key = rand.nextInt(1000);
-                final Node n = (Node) t.find(key);
-                if (n != null) {
-                    t.remove(n);
+                final Node node = (Node) tree.find(key);
+                if (node != null) {
+                    tree.remove(node);
                     if (DEBUG) {
                         System.out.println("remove " + key + ":");
-                        t.print();
+                        tree.print();
                         System.out.println("--");
                     }
-                    verifyProperties(t);
+                    verifyProperties(tree);
                 }
             }
         }
