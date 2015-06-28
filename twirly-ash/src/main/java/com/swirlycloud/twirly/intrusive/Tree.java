@@ -30,11 +30,11 @@ public abstract class Tree<V> {
 
     protected abstract void setNode(V lhs, V rhs);
 
-    protected abstract V setLeft(V node, V left);
+    protected abstract void setLeft(V node, V left);
 
-    protected abstract V setRight(V node, V right);
+    protected abstract void setRight(V node, V right);
 
-    protected abstract V setParent(V node, V parent);
+    protected abstract void setParent(V node, V parent);
 
     protected abstract void setColor(V node, int color);
 

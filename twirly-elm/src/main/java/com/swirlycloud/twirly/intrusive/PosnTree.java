@@ -94,18 +94,18 @@ public final class PosnTree extends Tree<RbNode> {
     }
 
     @Override
-    protected final RbNode setLeft(RbNode node, RbNode left) {
-        return node.setLeft(left);
+    protected final void setLeft(RbNode node, RbNode left) {
+        node.setLeft(left);
     }
 
     @Override
-    protected final RbNode setRight(RbNode node, RbNode right) {
-        return node.setRight(right);
+    protected final void setRight(RbNode node, RbNode right) {
+        node.setRight(right);
     }
 
     @Override
-    protected final RbNode setParent(RbNode node, RbNode parent) {
-        return node.setParent(parent);
+    protected final void setParent(RbNode node, RbNode parent) {
+        node.setParent(parent);
     }
 
     @Override
