@@ -47,7 +47,7 @@ public enum Direct implements Invertible<Direct> {
 
     @Override
     public final Direct inverse() {
-        return this == Direct.PAID ? Direct.GIVEN : Direct.PAID; 
+        return this == Direct.PAID ? Direct.GIVEN : Direct.PAID;
     }
 
     public final int intValue() {

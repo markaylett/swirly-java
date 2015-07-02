@@ -12,10 +12,13 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Contr extends Rec {
+public final @NonNullByDefault class Contr extends Rec {
     private Memorable asset;
     private Memorable ccy;
     private final int tickNumer;
@@ -30,8 +33,9 @@ public final class Contr extends Rec {
     private final long minLots;
     private final long maxLots;
 
-    public Contr(String mnem, String display, Memorable asset, Memorable ccy, int tickNumer,
-            int tickDenom, int lotNumer, int lotDenom, int pipDp, long minLots, long maxLots) {
+    public Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
+            int tickNumer, int tickDenom, int lotNumer, int lotDenom, int pipDp, long minLots,
+            long maxLots) {
         super(mnem, display);
         this.asset = asset;
         this.ccy = ccy;
@@ -66,6 +70,15 @@ public final class Contr extends Rec {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
+                if (mnem == null) {
+                    throw new IOException("mnem is null");
+                }
+                if (asset == null) {
+                    throw new IOException("asset is null");
+                }
+                if (ccy == null) {
+                    throw new IOException("ccy is null");
+                }
                 return new Contr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer,
                         lotDenom, pipDp, minLots, maxLots);
             case KEY_NAME:
@@ -96,9 +109,13 @@ public final class Contr extends Rec {
                 } else if ("display".equals(name)) {
                     display = p.getString();
                 } else if ("asset".equals(name)) {
-                    asset = newMnem(p.getString());
+                    final String s = p.getString();
+                    assert s != null;
+                    asset = newMnem(s);
                 } else if ("ccy".equals(name)) {
-                    ccy = newMnem(p.getString());
+                    final String s = p.getString();
+                    assert s != null;
+                    ccy = newMnem(s);
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -111,7 +128,7 @@ public final class Contr extends Rec {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"asset\":\"").append(asset.getMnem());
@@ -127,8 +144,8 @@ public final class Contr extends Rec {
     }
 
     public final void enrich(Asset asset, Asset ccy) {
-        assert this.asset.getMnem() == asset.getMnem();
-        assert this.ccy.getMnem() == ccy.getMnem();
+        assert this.asset.getMnem().equals(asset.getMnem());
+        assert this.ccy.getMnem().equals(ccy.getMnem());
         this.asset = asset;
         this.ccy = ccy;
     }

@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.regex.Pattern;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Action;
@@ -44,12 +44,14 @@ import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 
-public class Serv {
+public @NonNullByDefault class Serv {
 
     private static final int CAPACITY = 1 << 5; // 64
+    @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
-    private static final class SessTree extends BasicRbTree<String> {
+    private static final @NonNullByDefault(value = false) class SessTree extends
+            BasicRbTree<String> {
 
         private static String getTraderMnem(RbNode node) {
             return ((Sess) node).getTrader();
@@ -77,8 +79,8 @@ public class Serv {
 
     private final void enrichContr(Contr contr) {
         final Asset asset = (Asset) assets.find(contr.getAsset());
-        assert asset != null;
         final Asset ccy = (Asset) assets.find(contr.getCcy());
+        assert asset != null;
         assert ccy != null;
         contr.enrich(asset, ccy);
     }
@@ -96,9 +98,9 @@ public class Serv {
         sess.insertOrder(order);
         if (!order.isDone()) {
             final Market market = (Market) markets.find(order.getMarket());
-            assert market != null;
             boolean success = false;
             try {
+                assert market != null;
                 market.insertOrder(order);
                 success = true;
             } finally {
@@ -109,7 +111,7 @@ public class Serv {
         }
     }
 
-    private final void insertAssets(SlNode first) {
+    private final void insertAssets(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Asset asset = (Asset) node;
             node = popNext(node);
@@ -119,7 +121,7 @@ public class Serv {
         }
     }
 
-    private final void insertContrs(SlNode first) {
+    private final void insertContrs(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Contr contr = (Contr) node;
             node = popNext(node);
@@ -130,7 +132,7 @@ public class Serv {
         }
     }
 
-    private final void insertTraders(SlNode first) {
+    private final void insertTraders(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Trader trader = (Trader) node;
             node = popNext(node);
@@ -141,7 +143,7 @@ public class Serv {
         }
     }
 
-    private final void insertMarkets(SlNode first) {
+    private final void insertMarkets(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Market market = (Market) node;
             node = popNext(node);
@@ -152,7 +154,7 @@ public class Serv {
         }
     }
 
-    private final void insertOrders(SlNode first) {
+    private final void insertOrders(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Order order = (Order) node;
             node = popNext(node);
@@ -161,7 +163,7 @@ public class Serv {
         }
     }
 
-    private final void insertTrades(SlNode first) {
+    private final void insertTrades(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Exec trade = (Exec) node;
             node = popNext(node);
@@ -173,7 +175,7 @@ public class Serv {
         }
     }
 
-    private final void insertPosns(SlNode first) {
+    private final void insertPosns(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Posn posn = (Posn) node;
             node = popNext(node);
@@ -185,7 +187,6 @@ public class Serv {
         }
     }
 
-    @NonNull
     private final Trader newTrader(String mnem, String display, String email)
             throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
@@ -194,7 +195,6 @@ public class Serv {
         return new Trader(mnem, display, email);
     }
 
-    @NonNull
     private final Market newMarket(String mnem, String display, Contr contr, int settlDay,
             int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
@@ -203,7 +203,6 @@ public class Serv {
         return new Market(mnem, display, contr, settlDay, expiryDay, state);
     }
 
-    @NonNull
     private final Exec newExec(Market market, Instruct instruct, long now) {
         return new Exec(market.allocExecId(), instruct, now);
     }
@@ -299,6 +298,7 @@ public class Serv {
         for (SlNode node = trans.matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
+            assert makerOrder != null;
             // Reduce maker.
             market.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
@@ -306,11 +306,15 @@ public class Serv {
             assert maker != null;
             // Maker updated first because this is consistent with last-look semantics.
             // Update maker.
-            maker.insertTrade(match.makerTrade);
-            match.makerPosn.applyTrade(match.makerTrade);
+            final Exec makerTrade = match.makerTrade;
+            assert makerTrade != null;
+            maker.insertTrade(makerTrade);
+            match.makerPosn.applyTrade(makerTrade);
             // Update taker.
-            taker.insertTrade(match.takerTrade);
-            trans.posn.applyTrade(match.takerTrade);
+            final Exec takerTrade = match.takerTrade;
+            assert takerTrade != null;
+            taker.insertTrade(takerTrade);
+            trans.posn.applyTrade(takerTrade);
         }
     }
 
@@ -343,7 +347,6 @@ public class Serv {
         insertPosns(model.selectPosn());
     }
 
-    @NonNull
     public final Trader createTrader(String mnem, String display, String email)
             throws BadRequestException, ServiceUnavailableException {
         if (traders.find(mnem) != null) {
@@ -363,7 +366,6 @@ public class Serv {
         return trader;
     }
 
-    @NonNull
     public final Trader updateTrader(String mnem, String display) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
         final Trader trader = (Trader) traders.find(mnem);
@@ -379,8 +381,7 @@ public class Serv {
         return trader;
     }
 
-    @Nullable
-    public final Rec findRec(RecType recType, String mnem) {
+    public final @Nullable Rec findRec(RecType recType, String mnem) {
         Rec ret = null;
         switch (recType) {
         case ASSET:
@@ -399,8 +400,7 @@ public class Serv {
         return ret;
     }
 
-    @Nullable
-    public final RbNode getRootRec(RecType recType) {
+    public final @Nullable RbNode getRootRec(RecType recType) {
         RbNode ret = null;
         switch (recType) {
         case ASSET:
@@ -419,8 +419,7 @@ public class Serv {
         return ret;
     }
 
-    @Nullable
-    public final RbNode getFirstRec(RecType recType) {
+    public final @Nullable RbNode getFirstRec(RecType recType) {
         RbNode ret = null;
         switch (recType) {
         case ASSET:
@@ -439,8 +438,7 @@ public class Serv {
         return ret;
     }
 
-    @Nullable
-    public final RbNode getLastRec(RecType recType) {
+    public final @Nullable RbNode getLastRec(RecType recType) {
         RbNode ret = null;
         switch (recType) {
         case ASSET:
@@ -478,12 +476,10 @@ public class Serv {
         return ret;
     }
 
-    @Nullable
-    public final Trader findTraderByEmail(String email) {
+    public final @Nullable Trader findTraderByEmail(String email) {
         return (Trader) emailIdx.find(email);
     }
 
-    @NonNull
     public final Market createMarket(String mnem, String display, Contr contr, int settlDay,
             int expiryDay, int state, long now) throws BadRequestException,
             ServiceUnavailableException {
@@ -517,7 +513,6 @@ public class Serv {
         return market;
     }
 
-    @NonNull
     public final Market createMarket(String mnem, String display, String contrMnem, int settlDay,
             int expiryDay, int state, long now) throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
@@ -528,7 +523,6 @@ public class Serv {
         return createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
     }
 
-    @NonNull
     public final Market updateMarket(String mnem, String display, int state, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Market market = (Market) markets.find(mnem);
@@ -568,7 +562,6 @@ public class Serv {
         }
     }
 
-    @NonNull
     public final Sess getLazySess(Trader trader) {
         Sess sess = (Sess) sesss.pfind(trader.getMnem());
         if (sess == null || !sess.getTrader().equals(trader.getMnem())) {
@@ -579,7 +572,6 @@ public class Serv {
         return sess;
     }
 
-    @NonNull
     public final Sess getLazySess(String mnem) throws NotFoundException {
         Sess sess = (Sess) sesss.pfind(mnem);
         if (sess == null || !sess.getTrader().equals(mnem)) {
@@ -594,7 +586,6 @@ public class Serv {
         return sess;
     }
 
-    @NonNull
     public final Sess getLazySessByEmail(String email) throws NotFoundException {
         final Trader trader = (Trader) emailIdx.find(email);
         if (trader == null) {
@@ -603,13 +594,11 @@ public class Serv {
         return getLazySess(trader);
     }
 
-    @Nullable
-    public final Sess findSess(String mnem) {
+    public final @Nullable Sess findSess(String mnem) {
         return (Sess) sesss.find(mnem);
     }
 
-    @Nullable
-    public final Sess findSessByEmail(String email) throws NotFoundException {
+    public final @Nullable Sess findSessByEmail(String email) throws NotFoundException {
         final Trader trader = (Trader) emailIdx.find(email);
         if (trader == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -617,8 +606,8 @@ public class Serv {
         return findSess(trader.getMnem());
     }
 
-    public final void placeOrder(Sess sess, Market market, String ref, Action action, long ticks,
-            long lots, long minLots, long now, Trans trans) throws BadRequestException,
+    public final void placeOrder(Sess sess, Market market, @Nullable String ref, Action action,
+            long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
         final Trader trader = sess.getTraderRich();
         final int busDay = DateUtil.getBusDate(now).toJd();
@@ -878,12 +867,13 @@ public class Serv {
         }
     }
 
-    @NonNull
     public final Exec createTrade(Sess sess, Market market, String ref, Action action, long ticks,
-            long lots, Role role, String cpty, long created) throws NotFoundException,
-            ServiceUnavailableException {
+            long lots, @Nullable Role role, @Nullable String cpty, long created)
+            throws NotFoundException, ServiceUnavailableException {
         final Posn posn = sess.getLazyPosn(market);
-        final Exec trade = Exec.manual(market.allocExecId(), sess.getTrader(), market.getMnem(),
+        final String trader = sess.getTrader();
+        assert trader != null;
+        final Exec trade = Exec.manual(market.allocExecId(), trader, market.getMnem(),
                 market.getContr(), market.getSettlDay(), ref, action, ticks, lots, role, cpty,
                 created);
         if (cpty != null) {

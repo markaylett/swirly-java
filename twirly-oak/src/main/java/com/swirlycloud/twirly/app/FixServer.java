@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +96,7 @@ public final class FixServer extends MessageCracker implements Application {
                 : System.currentTimeMillis();
     }
 
+    @SuppressWarnings("null")
     private final Sess findSessLocked(SessionID sessionId) {
         try {
             return serv.getLazySessByEmail(settings.getString(sessionId, "Email"));
@@ -151,6 +153,7 @@ public final class FixServer extends MessageCracker implements Application {
             while (it.hasNext()) {
                 final SessionID sessionId = it.next();
                 final String email = settings.getString(sessionId, "Email");
+                assert email != null;
                 final Trader trader = serv.findTraderByEmail(email);
                 if (trader == null) {
                     throw new NotFoundException(String.format("trader '%s' does not exist", email));
@@ -162,13 +165,13 @@ public final class FixServer extends MessageCracker implements Application {
         }
     }
 
-    public FixServer(SessionSettings settings, AsyncModel model) throws ConfigError,
+    public FixServer(SessionSettings settings, @NonNull AsyncModel model) throws ConfigError,
             FieldConvertError, NotFoundException, InterruptedException, ExecutionException {
         this(settings, new LockableServ(model));
     }
 
-    public FixServer(SessionSettings settings, Model model) throws ConfigError, FieldConvertError,
-            NotFoundException {
+    public FixServer(SessionSettings settings, @NonNull Model model) throws ConfigError,
+            FieldConvertError, NotFoundException {
         this(settings, new LockableServ(model));
     }
 
@@ -189,6 +192,10 @@ public final class FixServer extends MessageCracker implements Application {
         final long lots = (long) message.getDouble(OrderQty.FIELD);
         final long minLots = (long) message.getDouble(MinQty.FIELD);
         final long now = getNow(message);
+
+        assert marketMnem != null;
+        assert action != null;
+
         if ("NONE".equals(ref)) {
             // This is reserved in our FIX specification to mean "not a reference."
             throw new IncorrectTagValue(ClOrdID.FIELD, ref);
@@ -239,6 +246,8 @@ public final class FixServer extends MessageCracker implements Application {
         final long lots = (long) message.getDouble(OrderQty.FIELD);
         final long now = getNow(message);
         Order order = null;
+
+        assert marketMnem != null;
 
         serv.acquireWrite();
         try {
@@ -299,6 +308,8 @@ public final class FixServer extends MessageCracker implements Application {
         }
         final long now = getNow(message);
         Order order = null;
+
+        assert marketMnem != null;
 
         serv.acquireWrite();
         try {

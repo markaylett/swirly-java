@@ -3,11 +3,13 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Fields common to both Order and Exec.
  */
 
-public interface Financial {
+public @NonNullByDefault interface Financial {
 
     String getMarket();
 

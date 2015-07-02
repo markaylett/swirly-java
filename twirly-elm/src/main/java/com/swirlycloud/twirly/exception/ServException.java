@@ -5,6 +5,9 @@ package com.swirlycloud.twirly.exception;
 
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
@@ -25,7 +28,7 @@ public abstract class ServException extends Exception implements Jsonifiable {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, @NonNull Appendable out) throws IOException {
         out.append("{\"num\":");
         out.append(String.valueOf(num));
         out.append(",\"msg\":\"");

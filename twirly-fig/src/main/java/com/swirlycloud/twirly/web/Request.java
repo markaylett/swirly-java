@@ -164,7 +164,9 @@ public final class Request {
                     ref = p.getString();
                 } else if ("action".equals(name)) {
                     fields |= ACTION;
-                    action = Action.valueOf(p.getString());
+                    final String s = p.getString();
+                    assert s != null;
+                    action = Action.valueOf(s);
                 } else if ("role".equals(name)) {
                     fields |= ROLE;
                     role = Role.valueOf(p.getString());

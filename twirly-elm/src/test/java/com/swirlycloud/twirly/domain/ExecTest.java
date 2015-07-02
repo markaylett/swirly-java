@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.date.JulianDay;
@@ -19,7 +20,7 @@ public final class ExecTest {
     private static final int SETTL_DAY = TODAY + 2;
     private static final long NOW = jdToMillis(TODAY);
 
-    private static Order newOrder() {
+    private static @NonNull Order newOrder() {
         return new Order(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test", Action.BUY,
                 12345, 10, 1, NOW);
     }

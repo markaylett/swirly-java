@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import static com.swirlycloud.twirly.util.NullUtil.emptyIfNull;
+
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.node.SlNode;
 
@@ -18,7 +20,7 @@ public final class RefHashTable extends HashTable<SlNode> {
 
     private static boolean equalKeyDirect(SlNode lhs, String trader, String ref) {
         final Order lorder = (Order) lhs;
-        return lorder.getTrader().equals(trader) && lorder.getRef().equals(ref);
+        return lorder.getTrader().equals(trader) && emptyIfNull(lorder.getRef()).equals(ref);
     }
 
     @Override
@@ -42,7 +44,7 @@ public final class RefHashTable extends HashTable<SlNode> {
         final Order lorder = (Order) lhs;
         final Order rorder = (Order) rhs;
         return lorder.getTrader().equals(rorder.getTrader())
-                && lorder.getRef().equals(rorder.getRef());
+                && emptyIfNull(lorder.getRef()).equals(rorder.getRef());
     }
 
     public RefHashTable(int capacity) {

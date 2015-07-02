@@ -33,6 +33,7 @@ public final class SessServlet extends RestServlet {
         super.init(config);
     }
 
+    @SuppressWarnings("null")
     @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -76,6 +77,7 @@ public final class SessServlet extends RestServlet {
         }
     }
 
+    @SuppressWarnings("null")
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (realm.isDevServer(req)) {
@@ -143,6 +145,7 @@ public final class SessServlet extends RestServlet {
         }
     }
 
+    @SuppressWarnings("null")
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -196,6 +199,7 @@ public final class SessServlet extends RestServlet {
         }
     }
 
+    @SuppressWarnings("null")
     @Override
     protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

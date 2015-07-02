@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.SlNode;
@@ -84,7 +86,8 @@ public final class AsyncModelService implements AsyncModel {
     }
 
     @Override
-    public final void updateTrader(final String mnem, final String display) throws NotFoundException {
+    public final void updateTrader(final String mnem, final String display)
+            throws NotFoundException {
         service.submit(new Runnable() {
             @Override
             public final void run() {
@@ -156,8 +159,9 @@ public final class AsyncModelService implements AsyncModel {
         });
     }
 
+    @SuppressWarnings("null")
     @Override
-    public final Future<SlNode> selectAsset() {
+    public final @NonNull Future<SlNode> selectAsset() {
         return service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -166,8 +170,9 @@ public final class AsyncModelService implements AsyncModel {
         });
     }
 
+    @SuppressWarnings("null")
     @Override
-    public final Future<SlNode> selectContr() {
+    public final @NonNull Future<SlNode> selectContr() {
         return service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -176,8 +181,9 @@ public final class AsyncModelService implements AsyncModel {
         });
     }
 
+    @SuppressWarnings("null")
     @Override
-    public final Future<SlNode> selectMarket() {
+    public final @NonNull Future<SlNode> selectMarket() {
         return service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -186,8 +192,9 @@ public final class AsyncModelService implements AsyncModel {
         });
     }
 
+    @SuppressWarnings("null")
     @Override
-    public final Future<SlNode> selectTrader() {
+    public final @NonNull Future<SlNode> selectTrader() {
         return service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -196,8 +203,9 @@ public final class AsyncModelService implements AsyncModel {
         });
     }
 
+    @SuppressWarnings("null")
     @Override
-    public final Future<SlNode> selectOrder() {
+    public final @NonNull Future<SlNode> selectOrder() {
         return service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -206,8 +214,9 @@ public final class AsyncModelService implements AsyncModel {
         });
     }
 
+    @SuppressWarnings("null")
     @Override
-    public final Future<SlNode> selectTrade() {
+    public final @NonNull Future<SlNode> selectTrade() {
         return service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -216,8 +225,9 @@ public final class AsyncModelService implements AsyncModel {
         });
     }
 
+    @SuppressWarnings("null")
     @Override
-    public final Future<SlNode> selectPosn() {
+    public final @NonNull Future<SlNode> selectPosn() {
         return service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {

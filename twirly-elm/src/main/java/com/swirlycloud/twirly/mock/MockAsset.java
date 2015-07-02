@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.function.NullaryFunction;
@@ -19,7 +21,8 @@ public final class MockAsset {
     private static final List<NullaryFunction<Asset>> LIST = new ArrayList<>();
     private static final Map<String, NullaryFunction<Asset>> MAP = new HashMap<>();
 
-    private static void put(final String mnem, final String display, final AssetType type) {
+    private static void put(final @NonNull String mnem, final String display,
+            final @NonNull AssetType type) {
         final NullaryFunction<Asset> fn = new NullaryFunction<Asset>() {
             @Override
             public final Asset call() {
@@ -63,7 +66,8 @@ public final class MockAsset {
     private MockAsset() {
     }
 
-    public static Asset newAsset(String mnem) {
+    @SuppressWarnings("null")
+    public static @NonNull Asset newAsset(String mnem) {
         return MAP.get(mnem).call();
     }
 

@@ -6,6 +6,8 @@ package com.swirlycloud.twirly.app;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.swirlycloud.twirly.io.AsyncModel;
 import com.swirlycloud.twirly.io.Model;
 
@@ -14,7 +16,7 @@ import com.swirlycloud.twirly.io.Model;
  * 
  * @author Mark Aylett
  */
-public final class LockableServ extends Serv {
+public final @NonNullByDefault class LockableServ extends Serv {
 
     private static final int PERMITS = Runtime.getRuntime().availableProcessors();
     private final Semaphore sem = new Semaphore(PERMITS);

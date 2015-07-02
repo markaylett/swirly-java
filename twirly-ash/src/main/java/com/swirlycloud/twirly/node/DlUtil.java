@@ -4,11 +4,13 @@
 package com.swirlycloud.twirly.node;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-public final class DlUtil {
+public final @NonNullByDefault class DlUtil {
     private DlUtil() {
     }
-    public static final @NonNull DlNode NULL = new DlNode() {
+
+    public static final DlNode NULL = new DlNode() {
 
         @Override
         public final void insert(DlNode prev, DlNode next) {

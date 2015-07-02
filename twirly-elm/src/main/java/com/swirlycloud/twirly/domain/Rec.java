@@ -3,21 +3,23 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Memorable;
 
-public abstract class Rec extends BasicRbNode implements Cloneable, Jsonifiable, SlNode, Memorable {
+public abstract @NonNullByDefault class Rec extends BasicRbNode implements Cloneable, Jsonifiable, SlNode, Memorable {
 
-    private transient SlNode next;
+    private transient @Nullable SlNode next;
 
     protected final String mnem;
     protected String display;
 
-    public Rec(String mnem, String display) {
-        assert mnem != null;
+    public Rec(String mnem, @Nullable String display) {
         this.mnem = mnem;
         this.display = display != null ? display : mnem;
     }
@@ -28,7 +30,7 @@ public abstract class Rec extends BasicRbNode implements Cloneable, Jsonifiable,
     }
 
     @Override
-    public final boolean equals(Object obj) {
+    public final boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -52,29 +54,28 @@ public abstract class Rec extends BasicRbNode implements Cloneable, Jsonifiable,
 
     @Override
     public final Rec clone() {
-        Rec rec = null;
         try {
-            rec = (Rec) super.clone();
+            final Rec rec = (Rec) super.clone();
             // Nullify intrusive nodes.
             rec.next = null;
+            return rec;
         } catch (final CloneNotSupportedException e) {
-            assert false;
+            throw new RuntimeException(e);
         }
-        return rec;
     }
 
     @Override
-    public final void setSlNext(SlNode next) {
+    public final void setSlNext(@Nullable SlNode next) {
         this.next = next;
     }
 
     @Override
-    public final SlNode slNext() {
+    public final @Nullable SlNode slNext() {
         return next;
     }
 
-    public void setDisplay(String display) {
-        this.display = display;
+    public void setDisplay(@Nullable String display) {
+        this.display = display != null ? display : mnem;
     }
 
     public abstract RecType getRecType();

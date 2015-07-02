@@ -39,7 +39,7 @@ public enum Role implements Invertible<Role> {
 
     @Override
     public final Role inverse() {
-        return this == Role.MAKER ? Role.TAKER : Role.MAKER; 
+        return this == Role.MAKER ? Role.TAKER : Role.MAKER;
     }
 
     public final int intValue() {

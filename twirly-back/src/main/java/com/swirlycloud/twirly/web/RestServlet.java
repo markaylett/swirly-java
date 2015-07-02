@@ -67,6 +67,7 @@ public abstract class RestServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
+    @SuppressWarnings("null")
     protected final void sendJsonResponse(HttpServletResponse resp, ServException e)
             throws IOException {
         e.toJson(null, resp.getWriter());
@@ -91,10 +92,12 @@ public abstract class RestServlet extends HttpServlet {
         RestServlet.realm = realm;
     }
 
+    @SuppressWarnings("null")
     public static void setModel(AsyncModel model) throws InterruptedException, ExecutionException {
         RestServlet.rest = new Rest(model);
     }
 
+    @SuppressWarnings("null")
     public static void setModel(Model model) {
         RestServlet.rest = new Rest(model);
     }

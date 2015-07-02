@@ -133,7 +133,8 @@ public final class ViewTest {
 
         final View in = new View(mnem, contr, settlDay, ladder, lastTicks, lastLots, lastTime);
 
-        try (JsonParser p = Json.createParser(new StringReader(in.toString()))) {
+        try (final JsonParser p = Json.createParser(new StringReader(in.toString()))) {
+            assert p != null;
             parseStartObject(p);
             final View out = View.parse(p);
 

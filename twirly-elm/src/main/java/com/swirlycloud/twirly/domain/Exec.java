@@ -11,7 +11,8 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
@@ -21,10 +22,10 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, Instruct {
+public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, TransNode, Instruct {
 
-    private transient SlNode slNext;
-    private transient TransNode transNext;
+    private transient @Nullable SlNode slNext;
+    private transient @Nullable TransNode transNext;
 
     private final long id;
     private final long orderId;
@@ -38,7 +39,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
     /**
      * Ref is optional.
      */
-    private final String ref;
+    private final @Nullable String ref;
     private State state;
     private final Action action;
     private final long ticks;
@@ -62,14 +63,14 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
      */
     private final long minLots;
     private long matchId;
-    private Role role;
-    private String cpty;
+    private @Nullable Role role;
+    private @Nullable String cpty;
     private final long created;
 
     public Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
-            String ref, State state, Action action, long ticks, long lots, long resd, long exec,
-            long cost, long lastTicks, long lastLots, long minLots, long matchId, Role role,
-            String cpty, long created) {
+            @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
+            long exec, long cost, long lastTicks, long lastLots, long minLots, long matchId,
+            @Nullable Role role, @Nullable String cpty, long created) {
         this.id = id;
         this.orderId = orderId;
         this.trader = trader;
@@ -95,7 +96,8 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
 
     public Exec(long id, long orderId, String trader, Financial fin, String ref, State state,
             Action action, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
-            long lastLots, long minLots, long matchId, Role role, String cpty, long created) {
+            long lastLots, long minLots, long matchId, @Nullable Role role, @Nullable String cpty,
+            long created) {
         this.id = id;
         this.orderId = orderId;
         this.trader = trader;
@@ -143,9 +145,9 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
     /**
      * Special factory method for manual adjustments.
      */
-    @NonNull
     public static Exec manual(long id, String trader, String market, String contr, int settlDay,
-            String ref, Action action, long ticks, long lots, Role role, String cpty, long created) {
+            @Nullable String ref, Action action, long ticks, long lots, @Nullable Role role,
+            @Nullable String cpty, long created) {
         final long orderId = 0;
         final State state = State.TRADE;
         final long resd = 0;
@@ -187,6 +189,21 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
+                if (trader == null) {
+                    throw new IOException("trader is null");
+                }
+                if (market == null) {
+                    throw new IOException("market is null");
+                }
+                if (contr == null) {
+                    throw new IOException("contr is null");
+                }
+                if (state == null) {
+                    throw new IOException("state is null");
+                }
+                if (action == null) {
+                    throw new IOException("action is null");
+                }
                 return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action,
                         ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role,
                         cpty, created);
@@ -253,9 +270,13 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
                 } else if ("ref".equals(name)) {
                     ref = p.getString();
                 } else if ("state".equals(name)) {
-                    state = State.valueOf(p.getString());
+                    final String s = p.getString();
+                    assert s != null;
+                    state = State.valueOf(s);
                 } else if ("action".equals(name)) {
-                    action = Action.valueOf(p.getString());
+                    final String s = p.getString();
+                    assert s != null;
+                    action = Action.valueOf(s);
                 } else if ("role".equals(name)) {
                     role = Role.valueOf(p.getString());
                 } else if ("cpty".equals(name)) {
@@ -272,9 +293,17 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
     }
 
     public final Exec inverse(long id) {
+        final String cpty = this.cpty;
+        if (cpty == null) {
+            throw new IllegalArgumentException("cpty is null");
+        }
+        Role role = this.role;
+        if (role != null) {
+            role = role.inverse();
+        }
         return new Exec(id, orderId, cpty, market, contr, settlDay, ref, state, action.inverse(),
-                ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId,
-                role.inverse(), trader, created);
+                ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, trader,
+                created);
     }
 
     @Override
@@ -287,7 +316,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
     }
 
     @Override
-    public final boolean equals(Object obj) {
+    public final boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -313,7 +342,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));
         out.append(",\"trader\":\"").append(trader);
@@ -352,6 +381,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
             out.append("null");
         }
         out.append(",\"role\":");
+        final Role role = this.role;
         if (role != null) {
             out.append('"').append(role.name()).append('"');
         } else {
@@ -368,22 +398,22 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
     }
 
     @Override
-    public final void setSlNext(SlNode next) {
+    public final void setSlNext(@Nullable SlNode next) {
         this.slNext = next;
     }
 
     @Override
-    public final SlNode slNext() {
+    public final @Nullable SlNode slNext() {
         return slNext;
     }
 
     @Override
-    public final void setTransNext(TransNode next) {
+    public final void setTransNext(@Nullable TransNode next) {
         this.transNext = next;
     }
 
     @Override
-    public final TransNode transNext() {
+    public final @Nullable TransNode transNext() {
         return transNext;
     }
 
@@ -448,7 +478,7 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
     }
 
     @Override
-    public final String getRef() {
+    public final @Nullable String getRef() {
         return ref;
     }
 
@@ -523,11 +553,11 @@ public final class Exec extends BasicRbNode implements Jsonifiable, TransNode, I
         return matchId;
     }
 
-    public final Role getRole() {
+    public final @Nullable Role getRole() {
         return role;
     }
 
-    public final String getCpty() {
+    public final @Nullable String getCpty() {
         return cpty;
     }
 

@@ -11,12 +11,15 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Market extends Rec implements Financial {
+public final @NonNullByDefault class Market extends Rec implements Financial {
     /**
      * Maximum price levels in view.
      */
@@ -38,8 +41,9 @@ public final class Market extends Rec implements Financial {
         return action == Action.BUY ? bidSide : offerSide;
     }
 
-    public Market(String mnem, String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
+    public Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
+            int expiryDay, int state, long lastTicks, long lastLots, long lastTime,
+            long maxOrderId, long maxExecId) {
         super(mnem, display);
         assert (settlDay == 0) == (expiryDay == 0);
         this.contr = contr;
@@ -53,8 +57,8 @@ public final class Market extends Rec implements Financial {
         this.maxExecId = maxExecId;
     }
 
-    public Market(String mnem, String display, Memorable contr, int settlDay, int expiryDay,
-            int state) {
+    public Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
+            int expiryDay, int state) {
         this(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L);
     }
 
@@ -71,6 +75,12 @@ public final class Market extends Rec implements Financial {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
+                if (mnem == null) {
+                    throw new IOException("mnem is null");
+                }
+                if (contr == null) {
+                    throw new IOException("contr is null");
+                }
                 return new Market(mnem, display, contr, settlDay, expiryDay, state);
             case KEY_NAME:
                 name = p.getString();
@@ -99,7 +109,9 @@ public final class Market extends Rec implements Financial {
                 } else if ("display".equals(name)) {
                     display = p.getString();
                 } else if ("contr".equals(name)) {
-                    contr = newMnem(p.getString());
+                    final String s = p.getString();
+                    assert s != null;
+                    contr = newMnem(s);
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -112,7 +124,7 @@ public final class Market extends Rec implements Financial {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"contr\":\"").append(contr.getMnem());
@@ -132,7 +144,7 @@ public final class Market extends Rec implements Financial {
         out.append('}');
     }
 
-    public final void toJsonView(Params params, Appendable out) throws IOException {
+    public final void toJsonView(@Nullable Params params, Appendable out) throws IOException {
         int depth = 3; // Default depth.
         if (params != null) {
             final Integer val = params.getParam("depth", Integer.class);
@@ -252,7 +264,7 @@ public final class Market extends Rec implements Financial {
     }
 
     public final void enrich(Contr contr) {
-        assert this.contr.getMnem() == contr.getMnem();
+        assert this.contr.getMnem().equals(contr.getMnem());
         this.contr = contr;
     }
 

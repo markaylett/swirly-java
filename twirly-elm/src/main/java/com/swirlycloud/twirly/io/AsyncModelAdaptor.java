@@ -5,6 +5,8 @@ package com.swirlycloud.twirly.io;
 
 import java.util.concurrent.Future;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.concurrent.FutureAdapter;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -64,37 +66,37 @@ public final class AsyncModelAdaptor implements AsyncModel {
     }
 
     @Override
-    public final Future<SlNode> selectAsset() {
+    public final @NonNull Future<SlNode> selectAsset() {
         return new FutureAdapter<>(model.selectAsset());
     }
 
     @Override
-    public final Future<SlNode> selectContr() {
+    public final @NonNull Future<SlNode> selectContr() {
         return new FutureAdapter<>(model.selectContr());
     }
 
     @Override
-    public final Future<SlNode> selectMarket() {
+    public final @NonNull Future<SlNode> selectMarket() {
         return new FutureAdapter<>(model.selectMarket());
     }
 
     @Override
-    public final Future<SlNode> selectTrader() {
+    public final @NonNull Future<SlNode> selectTrader() {
         return new FutureAdapter<>(model.selectTrader());
     }
 
     @Override
-    public final Future<SlNode> selectOrder() {
+    public final @NonNull Future<SlNode> selectOrder() {
         return new FutureAdapter<>(model.selectOrder());
     }
 
     @Override
-    public final Future<SlNode> selectTrade() {
+    public final @NonNull Future<SlNode> selectTrade() {
         return new FutureAdapter<>(model.selectTrade());
     }
 
     @Override
-    public final Future<SlNode> selectPosn() {
+    public final @NonNull Future<SlNode> selectPosn() {
         return new FutureAdapter<>(model.selectPosn());
     }
 }

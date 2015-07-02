@@ -9,6 +9,9 @@ import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.app.Sess;
 import com.swirlycloud.twirly.app.Trans;
@@ -30,7 +33,7 @@ import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Rest {
+public final @NonNullByDefault class Rest {
 
     private final LockableServ serv;
 
@@ -380,9 +383,10 @@ public final class Rest {
         }
     }
 
-    public final void postOrder(String email, String marketMnem, String ref, Action action,
-            long ticks, long lots, long minLots, Params params, long now, Appendable out)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+    public final void postOrder(String email, String marketMnem, @Nullable String ref,
+            Action action, long ticks, long lots, long minLots, Params params, long now,
+            Appendable out) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
         serv.acquireWrite();
         try {
             final Sess sess = serv.getLazySessByEmail(email);

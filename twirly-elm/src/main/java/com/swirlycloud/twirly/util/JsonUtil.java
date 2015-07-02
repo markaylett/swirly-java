@@ -8,6 +8,8 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 
 public final class JsonUtil {
@@ -42,7 +44,8 @@ public final class JsonUtil {
         }
     };
 
-    public static String toJson(Jsonifiable j) {
+    @SuppressWarnings("null")
+    public static @NonNull String toJson(Jsonifiable j) {
         final StringBuilder sb = new StringBuilder();
         try {
             j.toJson(PARAMS_NONE, sb);

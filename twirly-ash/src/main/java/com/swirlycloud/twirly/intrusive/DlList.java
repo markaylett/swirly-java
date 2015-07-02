@@ -4,11 +4,12 @@
 package com.swirlycloud.twirly.intrusive;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.twirly.node.BasicDlNode;
 import com.swirlycloud.twirly.node.DlNode;
 
-public final class DlList extends List<DlNode> {
+public final @NonNullByDefault class DlList extends List<DlNode> {
 
     @Override
     protected final void insert(DlNode node, DlNode prev, DlNode next) {

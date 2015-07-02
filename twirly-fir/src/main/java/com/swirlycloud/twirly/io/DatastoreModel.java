@@ -11,6 +11,8 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -156,7 +158,8 @@ public final class DatastoreModel implements Model {
         }
         entity.setUnindexedProperty("minLots", exec.getMinLots());
         entity.setUnindexedProperty("matchId", nullIfZero(exec.getMatchId()));
-        entity.setUnindexedProperty("role", exec.getRole() != null ? exec.getRole().name() : null);
+        final Role role = exec.getRole();
+        entity.setUnindexedProperty("role", role != null ? role.name() : null);
         entity.setUnindexedProperty("cpty", exec.getCpty());
         entity.setProperty("archive", Boolean.FALSE);
         entity.setUnindexedProperty("created", exec.getCreated());
@@ -430,25 +433,26 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final SlNode selectAsset() {
+    public final @Nullable SlNode selectAsset() {
         // TODO: migrate to datastore.
         return MockAsset.selectAsset();
     }
 
     @Override
-    public final SlNode selectContr() {
+    public final @Nullable SlNode selectContr() {
         // TODO: migrate to datastore.
         return MockContr.selectContr();
     }
 
     @Override
-    public final SlNode selectMarket() {
+    public final @Nullable SlNode selectMarket() {
         final SlQueue q = new SlQueue();
         final Query query = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
             final String mnem = entity.getKey().getName();
             final String display = (String) entity.getProperty("display");
+            @SuppressWarnings("null")
             final Memorable contr = newMnem((String) entity.getProperty("contr"));
             final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
             final int expiryDay = intOrZeroIfNull(entity.getProperty("expiryDay"));
@@ -458,6 +462,8 @@ public final class DatastoreModel implements Model {
             final long lastTime = longOrZeroIfNull(entity.getProperty("lastTime"));
             final long maxOrderId = (Long) entity.getProperty("maxOrderId");
             final long maxExecId = (Long) entity.getProperty("maxExecId");
+
+            assert mnem != null;
             final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state,
                     lastTicks, lastLots, lastTime, maxOrderId, maxExecId);
             q.insertBack(market);
@@ -466,7 +472,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final SlNode selectTrader() {
+    public final @Nullable SlNode selectTrader() {
         final SlQueue q = new SlQueue();
         final Query query = new Query(TRADER_KIND);
         final PreparedQuery pq = datastore.prepare(query);
@@ -474,6 +480,9 @@ public final class DatastoreModel implements Model {
             final String mnem = entity.getKey().getName();
             final String display = (String) entity.getProperty("display");
             final String email = (String) entity.getProperty("email");
+
+            assert mnem != null;
+            assert email != null;
             final Trader trader = new Trader(mnem, display, email);
             q.insertBack(trader);
         }
@@ -481,7 +490,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final SlNode selectOrder() {
+    public final @Nullable SlNode selectOrder() {
         final SlQueue q = new SlQueue();
         final Filter filter = new FilterPredicate("archive", FilterOperator.EQUAL, Boolean.FALSE);
         foreachMarket(new UnaryCallback<Entity>() {
@@ -496,7 +505,9 @@ public final class DatastoreModel implements Model {
                     final String contr = (String) entity.getProperty("contr");
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
                     final String ref = (String) entity.getProperty("ref");
+                    @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
+                    @SuppressWarnings("null")
                     final Action action = Action.valueOf((String) entity.getProperty("action"));
                     final long ticks = (Long) entity.getProperty("ticks");
                     final long lots = (Long) entity.getProperty("lots");
@@ -508,6 +519,10 @@ public final class DatastoreModel implements Model {
                     final long minLots = (Long) entity.getProperty("minLots");
                     final long created = (Long) entity.getProperty("created");
                     final long modified = (Long) entity.getProperty("modified");
+
+                    assert trader != null;
+                    assert market != null;
+                    assert contr != null;
                     final Order order = new Order(id, trader, market, contr, settlDay, ref, state,
                             action, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots,
                             created, modified);
@@ -519,7 +534,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final SlNode selectTrade() {
+    public final @Nullable SlNode selectTrade() {
         final SlQueue q = new SlQueue();
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
@@ -539,7 +554,9 @@ public final class DatastoreModel implements Model {
                     final String contr = (String) entity.getProperty("contr");
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
                     final String ref = (String) entity.getProperty("ref");
+                    @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
+                    @SuppressWarnings("null")
                     final Action action = Action.valueOf((String) entity.getProperty("action"));
                     final long ticks = (Long) entity.getProperty("ticks");
                     final long lots = (Long) entity.getProperty("lots");
@@ -554,6 +571,10 @@ public final class DatastoreModel implements Model {
                     final Role role = s != null ? Role.valueOf(s) : null;
                     final String cpty = (String) entity.getProperty("cpty");
                     final long created = (Long) entity.getProperty("created");
+
+                    assert trader != null;
+                    assert market != null;
+                    assert contr != null;
                     final Exec trade = new Exec(id, orderId, trader, market, contr, settlDay, ref,
                             state, action, ticks, lots, resd, exec, cost, lastTicks, lastLots,
                             minLots, matchId, role, cpty, created);
@@ -565,7 +586,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final SlNode selectPosn() {
+    public final @Nullable SlNode selectPosn() {
         final PosnTree posns = new PosnTree();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
         foreachMarket(new UnaryCallback<Entity>() {
@@ -582,9 +603,12 @@ public final class DatastoreModel implements Model {
                     if (posn == null || !posn.getTrader().equals(trader)
                             || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
                         final RbNode parent = posn;
+                        assert trader != null;
+                        assert contr != null;
                         posn = new Posn(trader, contr, settlDay);
                         posns.pinsert(posn, parent);
                     }
+                    @SuppressWarnings("null")
                     final Action action = Action.valueOf((String) entity.getProperty("action"));
                     final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));

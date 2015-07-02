@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
@@ -18,7 +20,8 @@ public final class MockTrader {
     private static final List<NullaryFunction<Trader>> LIST = new ArrayList<>();
     private static final Map<String, NullaryFunction<Trader>> MAP = new HashMap<>();
 
-    private static void put(final String mnem, final String display, final String email) {
+    private static void put(final @NonNull String mnem, final String display,
+            final @NonNull String email) {
         final NullaryFunction<Trader> fn = new NullaryFunction<Trader>() {
             @Override
             public final Trader call() {

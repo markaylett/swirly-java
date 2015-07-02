@@ -32,6 +32,7 @@ import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.mock.MockModel;
 import com.swirlycloud.twirly.node.SlNode;
 
+@SuppressWarnings("null")
 public final class ServTest {
 
     private static final double DELTA = 0.1;
@@ -281,7 +282,7 @@ public final class ServTest {
             final Order order = trans.getOrder();
             assertEquals(sess.getTrader(), order.getTrader());
             assertEquals(market.getMnem(), order.getMarket());
-            assertEquals("", order.getRef());
+            assertNull(order.getRef());
             assertEquals(State.NEW, order.getState());
             assertEquals(Action.BUY, order.getAction());
             assertEquals(12345, order.getTicks());

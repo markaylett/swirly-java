@@ -8,13 +8,16 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.util.Params;
 
-public final class Trader extends Rec {
+public final @NonNullByDefault class Trader extends Rec {
 
     private final String email;
 
-    public Trader(String mnem, String display, String email) {
+    public Trader(String mnem, @Nullable String display, String email) {
         super(mnem, display);
         this.email = email;
     }
@@ -29,6 +32,12 @@ public final class Trader extends Rec {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
+                if (mnem == null) {
+                    throw new IOException("mnem is null");
+                }
+                if (email == null) {
+                    throw new IOException("email is null");
+                }
                 return new Trader(mnem, display, email);
             case KEY_NAME:
                 name = p.getString();
@@ -52,7 +61,7 @@ public final class Trader extends Rec {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"email\":\"").append(email);

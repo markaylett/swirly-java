@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.util;
 
-public interface Memorable {
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
+public @NonNullByDefault interface Memorable {
     String getMnem();
 }

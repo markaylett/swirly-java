@@ -5,6 +5,9 @@ package com.swirlycloud.twirly.app;
 
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
@@ -65,7 +68,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, @NonNull Appendable out) throws IOException {
         final String trader = order.getTrader();
         out.append("{\"view\":");
         market.toJsonView(params, out);

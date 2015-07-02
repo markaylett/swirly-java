@@ -3,13 +3,15 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.DlNode;
 
 /**
  * A level is an aggregation of orders by price.
  */
-public final class Level extends BasicRbNode {
+public final @NonNullByDefault class Level extends BasicRbNode {
     final long key;
     final long ticks;
     Order firstOrder;

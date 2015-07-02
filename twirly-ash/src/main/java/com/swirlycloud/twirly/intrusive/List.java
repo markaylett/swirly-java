@@ -3,10 +3,10 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-public abstract class List<V> {
-    private final @NonNull V end;
+public abstract @NonNullByDefault class List<V> {
+    private final V end;
 
     protected abstract void insert(V node, V prev, V next);
 
@@ -16,15 +16,15 @@ public abstract class List<V> {
 
     protected abstract void remove(V node);
 
-    protected abstract void setPrev(V node, @NonNull V prev);
+    protected abstract void setPrev(V node, V prev);
 
-    protected abstract void setNext(V node, @NonNull V next);
+    protected abstract void setNext(V node, V next);
 
     protected abstract V next(V node);
 
     protected abstract V prev(V node);
 
-    protected List(@NonNull V end) {
+    protected List(V end) {
         this.end = end;
         clear();
     }

@@ -10,6 +10,9 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
@@ -20,7 +23,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final class View implements Jsonifiable, Financial {
+public final @NonNullByDefault class View implements Jsonifiable, Financial {
     /**
      * Maximum price levels in view.
      */
@@ -36,8 +39,6 @@ public final class View implements Jsonifiable, Financial {
 
     public View(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
             long lastLots, long lastTime) {
-        assert market != null;
-        assert ladder != null;
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -48,7 +49,6 @@ public final class View implements Jsonifiable, Financial {
     }
 
     public View(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
-        assert ladder != null;
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
@@ -91,6 +91,12 @@ public final class View implements Jsonifiable, Financial {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
+                if (market == null) {
+                    throw new IOException("market is null");
+                }
+                if (contr == null) {
+                    throw new IOException("contr is null");
+                }
                 return new View(market, contr, settlDay, ladder, lastTicks, lastLots, lastTime);
             case KEY_NAME:
                 name = p.getString();
@@ -160,7 +166,7 @@ public final class View implements Jsonifiable, Financial {
     }
 
     @Override
-    public final boolean equals(Object obj) {
+    public final boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -183,7 +189,7 @@ public final class View implements Jsonifiable, Financial {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         int depth = 3; // Default depth.
         if (params != null) {
             final Integer val = params.getParam("depth", Integer.class);
