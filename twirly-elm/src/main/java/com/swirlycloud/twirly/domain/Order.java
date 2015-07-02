@@ -11,9 +11,12 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.DlNode;
+import com.swirlycloud.twirly.node.DlUtil;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
@@ -22,8 +25,8 @@ import com.swirlycloud.twirly.util.Params;
 
 public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlNode, Instruct {
 
-    private transient DlNode dlPrev;
-    private transient DlNode dlNext;
+    private transient @NonNull DlNode dlPrev = DlUtil.NULL;
+    private transient @NonNull DlNode dlNext = DlUtil.NULL;
 
     private transient SlNode slNext;
 
@@ -364,17 +367,17 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     public final void remove() {
         dlNext().setDlPrev(dlPrev);
         dlPrev().setDlNext(dlNext);
-        setDlPrev(null);
-        setDlNext(null);
+        setDlPrev(DlUtil.NULL);
+        setDlNext(DlUtil.NULL);
     }
 
     @Override
-    public void setDlPrev(DlNode prev) {
+    public void setDlPrev(@NonNull DlNode prev) {
         this.dlPrev = prev;
     }
 
     @Override
-    public void setDlNext(DlNode next) {
+    public void setDlNext(@NonNull DlNode next) {
         this.dlNext = next;
     }
 

@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 public interface DlNode {
 
     void insert(DlNode prev, DlNode next);
@@ -13,9 +15,9 @@ public interface DlNode {
 
     void remove();
 
-    void setDlPrev(DlNode prev);
+    void setDlPrev(@NonNull DlNode prev);
 
-    void setDlNext(DlNode next);
+    void setDlNext(@NonNull DlNode next);
 
     DlNode dlNext();
 

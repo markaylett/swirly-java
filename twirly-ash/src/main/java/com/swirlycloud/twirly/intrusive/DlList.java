@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.node.BasicDlNode;
 import com.swirlycloud.twirly.node.DlNode;
 
@@ -29,12 +31,12 @@ public final class DlList extends List<DlNode> {
     }
 
     @Override
-    protected final void setPrev(DlNode node, DlNode prev) {
+    protected final void setPrev(DlNode node, @NonNull DlNode prev) {
         node.setDlPrev(prev);
     }
 
     @Override
-    protected final void setNext(DlNode node, DlNode next) {
+    protected final void setNext(DlNode node, @NonNull DlNode next) {
         node.setDlNext(next);
     }
 

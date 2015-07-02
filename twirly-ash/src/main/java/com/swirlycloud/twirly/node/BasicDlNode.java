@@ -3,10 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 public abstract class BasicDlNode implements DlNode {
 
-    private transient DlNode prev;
-    private transient DlNode next;
+    private transient @NonNull DlNode prev = DlUtil.NULL;
+    private transient @NonNull DlNode next = DlUtil.NULL;
 
     @Override
     public final void insert(DlNode prev, DlNode next) {
@@ -37,17 +39,17 @@ public abstract class BasicDlNode implements DlNode {
     public final void remove() {
         dlNext().setDlPrev(prev);
         dlPrev().setDlNext(next);
-        setDlPrev(null);
-        setDlNext(null);
+        setDlPrev(DlUtil.NULL);
+        setDlNext(DlUtil.NULL);
     }
 
     @Override
-    public void setDlPrev(DlNode prev) {
+    public void setDlPrev(@NonNull DlNode prev) {
         this.prev = prev;
     }
 
     @Override
-    public void setDlNext(DlNode next) {
+    public void setDlNext(@NonNull DlNode next) {
         this.next = next;
     }
 
