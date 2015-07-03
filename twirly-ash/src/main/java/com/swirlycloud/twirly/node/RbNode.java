@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.node;
 
 public interface RbNode {
 
-    void setNode(RbNode left, RbNode right, RbNode parent, int color);
+    void setNode(RbNode rhs);
 
     RbNode setLeft(RbNode left);
 

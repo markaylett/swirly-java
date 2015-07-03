@@ -8,12 +8,15 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.util.Params;
 
-public final class Asset extends Rec {
+public final @NonNullByDefault class Asset extends Rec {
     private final AssetType type;
 
-    public Asset(String mnem, String display, AssetType type) {
+    public Asset(String mnem, @Nullable String display, AssetType type) {
         super(mnem, display);
         this.type = type;
     }
@@ -28,6 +31,12 @@ public final class Asset extends Rec {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
+                if (mnem == null) {
+                    throw new IOException("mnem is null");
+                }
+                if (type == null) {
+                    throw new IOException("type is null");
+                }
                 return new Asset(mnem, display, type);
             case KEY_NAME:
                 name = p.getString();
@@ -51,7 +60,7 @@ public final class Asset extends Rec {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"type\":\"").append(type.name());

@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
@@ -19,9 +21,10 @@ public final class MockContr {
     private static final List<NullaryFunction<Contr>> LIST = new ArrayList<>();
     private static final Map<String, NullaryFunction<Contr>> MAP = new HashMap<>();
 
-    private static void put(final String mnem, final String display, final String asset,
-            final String ccy, final int tickNumer, final int tickDenom, final int lotNumer,
-            final int lotDenom, final int pipDp, final long minLots, final long maxLots) {
+    private static void put(final @NonNull String mnem, final String display,
+            final @NonNull String asset, final @NonNull String ccy, final int tickNumer,
+            final int tickDenom, final int lotNumer, final int lotDenom, final int pipDp,
+            final long minLots, final long maxLots) {
         final NullaryFunction<Contr> fn = new NullaryFunction<Contr>() {
             @Override
             public final Contr call() {
@@ -68,7 +71,8 @@ public final class MockContr {
     private MockContr() {
     }
 
-    public static Contr newContr(String mnem) {
+    @SuppressWarnings("null")
+    public static @NonNull Contr newContr(String mnem) {
         return MAP.get(mnem).call();
     }
 

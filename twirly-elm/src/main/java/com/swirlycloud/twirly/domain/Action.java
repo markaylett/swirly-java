@@ -3,9 +3,11 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.swirlycloud.twirly.util.Invertible;
 
-public enum Action implements Invertible<Action> {
+public @NonNullByDefault enum Action implements Invertible<Action> {
     BUY(1), SELL(-1);
     private final int id;
 
@@ -23,9 +25,6 @@ public enum Action implements Invertible<Action> {
     public static Action valueOf(int id) {
         Action val;
         switch (id) {
-        case 0:
-            val = null;
-            break;
         case 1:
             val = Action.BUY;
             break;
@@ -40,7 +39,7 @@ public enum Action implements Invertible<Action> {
 
     @Override
     public final Action inverse() {
-        return this == Action.BUY ? Action.SELL : Action.BUY; 
+        return this == Action.BUY ? Action.SELL : Action.BUY;
     }
 
     public final int intValue() {

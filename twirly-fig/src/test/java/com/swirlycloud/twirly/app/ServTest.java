@@ -9,6 +9,7 @@ import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
@@ -31,6 +32,7 @@ import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.mock.MockModel;
 import com.swirlycloud.twirly.node.SlNode;
 
+@SuppressWarnings("null")
 public final class ServTest {
 
     private static final double DELTA = 0.1;
@@ -280,7 +282,7 @@ public final class ServTest {
             final Order order = trans.getOrder();
             assertEquals(sess.getTrader(), order.getTrader());
             assertEquals(market.getMnem(), order.getMarket());
-            assertEquals("", order.getRef());
+            assertNull(order.getRef());
             assertEquals(State.NEW, order.getState());
             assertEquals(Action.BUY, order.getAction());
             assertEquals(12345, order.getTicks());
@@ -312,7 +314,7 @@ public final class ServTest {
             serv.reviseOrder(sess, market, order, 4, NOW + 1, trans);
             assertEquals(sess.getTrader(), order.getTrader());
             assertEquals(market.getMnem(), order.getMarket());
-            assertEquals("", order.getRef());
+            assertNull(order.getRef());
             assertEquals(State.REVISE, order.getState());
             assertEquals(Action.BUY, order.getAction());
             assertEquals(12345, order.getTicks());
@@ -344,7 +346,7 @@ public final class ServTest {
             serv.cancelOrder(sess, market, order, NOW + 1, trans);
             assertEquals(sess.getTrader(), order.getTrader());
             assertEquals(market.getMnem(), order.getMarket());
-            assertEquals("", order.getRef());
+            assertNull(order.getRef());
             assertEquals(State.CANCEL, order.getState());
             assertEquals(Action.BUY, order.getAction());
             assertEquals(12345, order.getTicks());

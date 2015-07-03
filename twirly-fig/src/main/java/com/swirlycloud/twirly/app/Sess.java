@@ -96,24 +96,23 @@ public final class Sess extends BasicRbNode {
         }
 
         @Override
-        protected final void setNode(RbNode node, RbNode left, RbNode right, RbNode parent,
-                int color) {
-            node.setNode(left, right, parent, color);
+        protected final void setNode(RbNode lhs, RbNode rhs) {
+            lhs.setNode(rhs);
         }
 
         @Override
-        protected final RbNode setLeft(RbNode node, RbNode left) {
-            return node.setLeft(left);
+        protected final void setLeft(RbNode node, RbNode left) {
+            node.setLeft(left);
         }
 
         @Override
-        protected final RbNode setRight(RbNode node, RbNode right) {
-            return node.setRight(right);
+        protected final void setRight(RbNode node, RbNode right) {
+            node.setRight(right);
         }
 
         @Override
-        protected final RbNode setParent(RbNode node, RbNode parent) {
-            return node.setParent(parent);
+        protected final void setParent(RbNode node, RbNode parent) {
+            node.setParent(parent);
         }
 
         @Override
@@ -174,7 +173,7 @@ public final class Sess extends BasicRbNode {
     final void insertOrder(Order order) {
         final RbNode unused = orders.insert(order);
         assert unused == null;
-        if (!order.getRef().isEmpty()) {
+        if (order.getRef() != null) {
             refIdx.insert(order);
         }
     }
@@ -182,7 +181,7 @@ public final class Sess extends BasicRbNode {
     final void removeOrder(Order order) {
         assert order.getTrader().equals(trader.getMnem());
         orders.remove(order);
-        if (!order.getRef().isEmpty()) {
+        if (order.getRef() != null) {
             refIdx.remove(trader.getMnem(), order.getRef());
         }
     }
@@ -210,7 +209,7 @@ public final class Sess extends BasicRbNode {
     }
 
     public final Order findOrder(String ref) {
-        assert ref != null && !ref.isEmpty();
+        assert ref != null;
         return (Order) refIdx.find(trader.getMnem(), ref);
     }
 

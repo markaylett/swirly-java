@@ -3,45 +3,88 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 public final class RbUtil {
     private RbUtil() {
     }
 
-    public static RbNode rbNext(RbNode node) {
-        if (node.getRight() != null) {
-            node = node.getRight();
-            while (node.getLeft() != null) {
-                node = node.getLeft();
-            }
-        } else {
-            if (node.getParent() != null && node == node.getParent().getLeft()) {
-                node = node.getParent();
-            } else {
-                while (node.getParent() != null && node == node.getParent().getRight()) {
-                    node = node.getParent();
+    public static @Nullable RbNode rbSucc(final RbNode node) {
+        RbNode succ = node.getRight();
+        if (succ != null) {
+            for (;;) {
+                final RbNode left = succ.getLeft();
+                if (left == null) {
+                    break;
                 }
-                node = node.getParent();
+                succ = left;
             }
         }
-        return node;
+        return succ;
     }
 
-    public static RbNode rbPrev(RbNode node) {
-        if (node.getLeft() != null) {
-            node = node.getLeft();
-            while (node.getRight() != null) {
-                node = node.getRight();
-            }
-        } else {
-            if (node.getParent() != null && node == node.getParent().getRight()) {
-                node = node.getParent();
-            } else {
-                while (node.getParent() != null && node == node.getParent().getLeft()) {
-                    node = node.getParent();
+    public static @Nullable RbNode rbPred(final RbNode node) {
+        RbNode pred = node.getLeft();
+        if (pred != null) {
+            for (;;) {
+                final RbNode right = pred.getRight();
+                if (right == null) {
+                    break;
                 }
-                node = node.getParent();
+                pred = right;
             }
         }
-        return node;
+        return pred;
+    }
+
+    public static RbNode rbNext(@NonNull RbNode node) {
+        RbNode tmp = node;
+        final RbNode right = tmp.getRight(); 
+        if (right != null) {
+            tmp = right;
+            RbNode left = tmp.getLeft(); 
+            while (left != null) {
+                tmp = left;
+                left = tmp.getLeft();
+            }
+        } else {
+            RbNode parent = tmp.getParent();
+            if (parent != null && parent.getLeft() == tmp) {
+                tmp = parent;
+            } else {
+                while (parent != null && parent.getRight() == tmp) {
+                    tmp = parent;
+                    parent = tmp.getParent();
+                }
+                tmp = tmp.getParent();
+            }
+        }
+        return tmp;
+    }
+
+    public static RbNode rbPrev(@NonNull RbNode node) {
+        RbNode tmp = node;
+        final RbNode left = tmp.getLeft(); 
+        if (left != null) {
+            tmp = left;
+            RbNode right = tmp.getRight();
+            while (right != null) {
+                tmp = right;
+                right = tmp.getRight();
+            }
+        } else {
+            RbNode parent = tmp.getParent();
+            if (parent != null && parent.getRight() == tmp) {
+                tmp = parent;
+            } else {
+                while (parent != null && parent.getLeft() == tmp) {
+                    tmp = parent;
+                    parent = tmp.getParent();
+                }
+                tmp = tmp.getParent();
+            }
+        }
+        return tmp;
     }
 }

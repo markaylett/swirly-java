@@ -3,16 +3,16 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
-public abstract class BasicDlNode implements DlNode {
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-    private transient DlNode prev;
-    private transient DlNode next;
+public abstract @NonNullByDefault class BasicDlNode implements DlNode {
+
+    private transient DlNode prev = DlUtil.NULL;
+    private transient DlNode next = DlUtil.NULL;
 
     @Override
     public final void insert(DlNode prev, DlNode next) {
-
-        assert prev != null;
-        assert next != null;
 
         prev.setDlNext(this);
         this.setDlPrev(prev);
@@ -23,7 +23,6 @@ public abstract class BasicDlNode implements DlNode {
 
     @Override
     public final void insertBefore(DlNode next) {
-        assert next != null;
         insert(next.dlPrev(), next);
     }
 
@@ -37,17 +36,17 @@ public abstract class BasicDlNode implements DlNode {
     public final void remove() {
         dlNext().setDlPrev(prev);
         dlPrev().setDlNext(next);
-        setDlPrev(null);
-        setDlNext(null);
+        setDlPrev(DlUtil.NULL);
+        setDlNext(DlUtil.NULL);
     }
 
     @Override
-    public void setDlPrev(DlNode prev) {
+    public void setDlPrev(@NonNull DlNode prev) {
         this.prev = prev;
     }
 
     @Override
-    public void setDlNext(DlNode next) {
+    public void setDlNext(@NonNull DlNode next) {
         this.next = next;
     }
 

@@ -5,6 +5,8 @@ package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.intrusive.DlList;
 import com.swirlycloud.twirly.intrusive.LongRbTree;
 import com.swirlycloud.twirly.node.DlNode;
@@ -53,6 +55,7 @@ public final class Side {
         if (delta < order.getResd()) {
             // Reduce level and order by lots.
             final Level level = (Level) order.level;
+            assert level != null;
             level.lots -= delta;
             order.resd -= delta;
         } else {
@@ -96,6 +99,7 @@ public final class Side {
         assert order.level != null;
 
         final Level level = (Level) order.level;
+        assert level != null;
         level.lots -= order.resd;
 
         if (--level.count == 0) {
@@ -170,19 +174,19 @@ public final class Side {
         return orders.isEmpty();
     }
 
-    public final Level findLevel(long id) {
+    public final @Nullable Level findLevel(long id) {
         return (Level) levels.find(id);
     }
 
-    public final RbNode getRootLevel() {
+    public final @Nullable RbNode getRootLevel() {
         return levels.getRoot();
     }
 
-    public final RbNode getFirstLevel() {
+    public final @Nullable RbNode getFirstLevel() {
         return levels.getFirst();
     }
 
-    public final RbNode getLastLevel() {
+    public final @Nullable RbNode getLastLevel() {
         return levels.getLast();
     }
 

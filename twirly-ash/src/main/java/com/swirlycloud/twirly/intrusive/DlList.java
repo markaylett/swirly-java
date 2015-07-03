@@ -3,10 +3,13 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.swirlycloud.twirly.node.BasicDlNode;
 import com.swirlycloud.twirly.node.DlNode;
 
-public final class DlList extends List<DlNode> {
+public final @NonNullByDefault class DlList extends List<DlNode> {
 
     @Override
     protected final void insert(DlNode node, DlNode prev, DlNode next) {
@@ -29,12 +32,12 @@ public final class DlList extends List<DlNode> {
     }
 
     @Override
-    protected final void setPrev(DlNode node, DlNode prev) {
+    protected final void setPrev(DlNode node, @NonNull DlNode prev) {
         node.setDlPrev(prev);
     }
 
     @Override
-    protected final void setNext(DlNode node, DlNode next) {
+    protected final void setNext(DlNode node, @NonNull DlNode next) {
         node.setDlNext(next);
     }
 

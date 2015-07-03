@@ -77,7 +77,8 @@ public final class JdbcModel implements Model {
         stmt.setString(i, val);
     }
 
-    private static void setNullIfEmpty(PreparedStatement stmt, int i, String val) throws SQLException {
+    private static void setNullIfEmpty(PreparedStatement stmt, int i, String val)
+            throws SQLException {
         if (val != null && !val.isEmpty()) {
             stmt.setString(i, val);
         } else {
@@ -93,13 +94,17 @@ public final class JdbcModel implements Model {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final AssetType assetType = AssetType.valueOf(rs.getInt("typeId"));
+        assert mnem != null;
+        assert assetType != null;
         return new Asset(mnem, display, assetType);
     }
 
     private static Contr getContr(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
+        @SuppressWarnings("null")
         final Memorable asset = newMnem(rs.getString("asset"));
+        @SuppressWarnings("null")
         final Memorable ccy = newMnem(rs.getString("ccy"));
         final int tickNumer = rs.getInt("tickNumer");
         final int tickDenom = rs.getInt("tickDenom");
@@ -108,6 +113,8 @@ public final class JdbcModel implements Model {
         final int pipDp = rs.getInt("pipDp");
         final int minLots = rs.getInt("minLots");
         final int maxLots = rs.getInt("maxLots");
+
+        assert mnem != null;
         return new Contr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom,
                 pipDp, minLots, maxLots);
     }
@@ -115,6 +122,7 @@ public final class JdbcModel implements Model {
     private static Market getMarket(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
+        @SuppressWarnings("null")
         final Memorable contr = newMnem(rs.getString("contr"));
         // getInt() returns zero if value is null.
         final int settlDay = rs.getInt("settlDay");
@@ -126,6 +134,8 @@ public final class JdbcModel implements Model {
         final long lastTime = rs.getLong("lastTime");
         final long maxOrderId = rs.getLong("maxOrderId");
         final long maxExecId = rs.getLong("maxExecId");
+
+        assert mnem != null;
         return new Market(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots,
                 lastTime, maxOrderId, maxExecId);
     }
@@ -134,6 +144,9 @@ public final class JdbcModel implements Model {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final String email = rs.getString("email");
+
+        assert mnem != null;
+        assert email != null;
         return new Trader(mnem, display, email);
     }
 
@@ -156,6 +169,9 @@ public final class JdbcModel implements Model {
         final long minLots = rs.getLong("minLots");
         final long created = rs.getLong("created");
         final long modified = rs.getLong("modified");
+        assert trader != null;
+        assert market != null;
+        assert contr != null;
         return new Order(id, trader, market, contr, settlDay, ref, state, action, ticks, lots,
                 resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
     }
@@ -186,6 +202,10 @@ public final class JdbcModel implements Model {
         final Role role = Role.valueOf(rs.getInt("roleId"));
         final String cpty = rs.getString("cpty");
         final long created = rs.getLong("created");
+
+        assert trader != null;
+        assert market != null;
+        assert contr != null;
         return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action, ticks,
                 lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
     }
@@ -410,8 +430,9 @@ public final class JdbcModel implements Model {
             }
             setParam(insertExecStmt, i++, exec.getMinLots());
             setNullIfZero(insertExecStmt, i++, exec.getMatchId());
-            if (exec.getRole() != null) {
-                setParam(insertExecStmt, i++, exec.getRole().intValue());
+            final Role role = exec.getRole();
+            if (role != null) {
+                setParam(insertExecStmt, i++, role.intValue());
             } else {
                 insertExecStmt.setNull(i++, Types.INTEGER);
             }
@@ -573,6 +594,8 @@ public final class JdbcModel implements Model {
                 if (posn == null || !posn.getTrader().equals(trader)
                         || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
                     final RbNode parent = posn;
+                    assert trader != null;
+                    assert contr != null;
                     posn = new Posn(trader, contr, settlDay);
                     posns.pinsert(posn, parent);
                 }

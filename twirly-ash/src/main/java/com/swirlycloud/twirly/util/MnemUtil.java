@@ -3,7 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.util;
 
-public final class MnemUtil {
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
+public final @NonNullByDefault class MnemUtil {
     private MnemUtil() {
     }
 

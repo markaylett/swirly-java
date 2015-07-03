@@ -27,6 +27,7 @@ public final class ViewServlet extends RestServlet {
         super.init(config);
     }
 
+    @SuppressWarnings("null")
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (realm.isDevServer(req)) {

@@ -38,14 +38,14 @@ public final class SideTest {
                 JulianDay.isoToJd(20140314), "orange", Action.BUY, 12345, 20, 0, now);
         final Side side = new Side();
 
-        apple.state = null;
+        apple.state = State.PENDING;
         apple.resd = -1;
         apple.exec = -1;
         apple.cost = -1;
         apple.lastTicks = -1;
         apple.lastLots = -1;
 
-        orange.state = null;
+        orange.state = State.PENDING;
         orange.resd = -1;
         orange.exec = -1;
         orange.cost = -1;
@@ -73,6 +73,7 @@ public final class SideTest {
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
         Level level = (Level) side.getFirstLevel();
+        assert level != null;
         assertEquals(12345, level.getTicks());
         // Sum of lots.
         assertEquals(30, level.getLots());
@@ -99,6 +100,7 @@ public final class SideTest {
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
         level = (Level) side.getFirstLevel();
+        assert level != null;
         assertEquals(12345, level.getTicks());
         // Sum of lots.
         assertEquals(25, level.getLots());
@@ -125,6 +127,7 @@ public final class SideTest {
         assertEquals("apple", ((Order) side.getLastOrder()).getRef());
 
         level = (Level) side.getFirstLevel();
+        assert level != null;
         assertEquals(12345, level.getTicks());
         assertEquals(5, level.getLots());
         assertEquals(1, level.getCount());
@@ -154,11 +157,13 @@ public final class SideTest {
         assertEquals("orange", ((Order) side.getLastOrder()).getRef());
 
         Level level = (Level) side.getFirstLevel();
+        assert level != null;
         assertEquals(12346, level.getTicks());
         assertEquals(25, level.getLots());
         assertEquals(1, level.getCount());
 
         level = (Level) side.getLastLevel();
+        assert level != null;
         assertEquals(12345, level.getTicks());
         assertEquals(30, level.getLots());
         assertEquals(2, level.getCount());

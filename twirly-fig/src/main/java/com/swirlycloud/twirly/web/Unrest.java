@@ -34,6 +34,7 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.util.Params;
 
+@SuppressWarnings("null")
 public final class Unrest {
     public static final class PosnKey {
         private final String contr;

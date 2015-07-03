@@ -11,11 +11,11 @@ public abstract class BasicRbNode implements RbNode {
     private transient int color;
 
     @Override
-    public final void setNode(RbNode left, RbNode right, RbNode parent, int color) {
-        this.left = left;
-        this.right = right;
-        this.parent = parent;
-        this.color = color;
+    public final void setNode(RbNode rhs) {
+        this.left = rhs.getLeft();
+        this.right = rhs.getRight();
+        this.parent = rhs.getParent();
+        this.color = rhs.getColor();
     }
 
     @Override

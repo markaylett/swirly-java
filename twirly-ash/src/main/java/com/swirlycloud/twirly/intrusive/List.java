@@ -3,7 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-public abstract class List<V> {
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
+public abstract @NonNullByDefault class List<V> {
     private final V end;
 
     protected abstract void insert(V node, V prev, V next);

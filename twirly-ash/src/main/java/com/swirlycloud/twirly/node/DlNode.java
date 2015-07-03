@@ -3,7 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
-public interface DlNode {
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
+public @NonNullByDefault interface DlNode {
 
     void insert(DlNode prev, DlNode next);
 

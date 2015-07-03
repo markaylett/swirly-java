@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
+import static com.swirlycloud.twirly.util.NullUtil.nullIfEmpty;
 
 import java.io.IOException;
 
@@ -11,25 +12,29 @@ import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.DlNode;
+import com.swirlycloud.twirly.node.DlUtil;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlNode, Instruct {
+public final @NonNullByDefault class Order extends BasicRbNode implements Jsonifiable, DlNode,
+        SlNode, Instruct {
 
-    private transient DlNode dlPrev;
-    private transient DlNode dlNext;
+    private transient DlNode dlPrev = DlUtil.NULL;
+    private transient DlNode dlNext = DlUtil.NULL;
 
-    private transient SlNode slNext;
+    private transient @Nullable SlNode slNext = null;
 
     // Internals.
-    transient RbNode level;
+    transient @Nullable RbNode level = null;
 
     private final long id;
     /**
@@ -42,8 +47,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     /**
      * Ref is optional.
      */
-    @NonNull
-    private final String ref;
+    private final @Nullable String ref;
     State state;
     private final Action action;
     private final long ticks;
@@ -69,18 +73,17 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     long created;
     long modified;
 
-    public Order(long id, String trader, String market, String contr, int settlDay, String ref,
-            State state, Action action, long ticks, long lots, long resd, long exec, long cost,
-            long lastTicks, long lastLots, long minLots, long created, long modified) {
-        assert trader != null;
-        assert market != null;
+    public Order(long id, String trader, String market, String contr, int settlDay,
+            @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
+            long exec, long cost, long lastTicks, long lastLots, long minLots, long created,
+            long modified) {
         assert lots > 0 && lots >= minLots;
         this.id = id;
         this.trader = trader;
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = state;
         this.action = action;
         this.ticks = ticks;
@@ -95,17 +98,16 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.modified = modified;
     }
 
-    public Order(long id, String trader, Financial fin, String ref, State state, Action action,
-            long ticks, long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
-            long minLots, long created, long modified) {
-        assert trader != null;
+    public Order(long id, String trader, Financial fin, @Nullable String ref, State state,
+            Action action, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
+            long lastLots, long minLots, long created, long modified) {
         assert lots > 0 && lots >= minLots;
         this.id = id;
         this.trader = trader;
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = state;
         this.action = action;
         this.ticks = ticks;
@@ -120,17 +122,15 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.modified = modified;
     }
 
-    public Order(long id, String trader, String market, String contr, int settlDay, String ref,
-            Action action, long ticks, long lots, long minLots, long created) {
-        assert trader != null;
-        assert market != null;
+    public Order(long id, String trader, String market, String contr, int settlDay,
+            @Nullable String ref, Action action, long ticks, long lots, long minLots, long created) {
         assert lots > 0 && lots >= minLots;
         this.id = id;
         this.trader = trader;
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = State.NEW;
         this.action = action;
         this.ticks = ticks;
@@ -145,16 +145,15 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         this.modified = created;
     }
 
-    public Order(long id, String trader, Financial fin, String ref, Action action, long ticks,
-            long lots, long minLots, long created) {
-        assert trader != null;
+    public Order(long id, String trader, Financial fin, @Nullable String ref, Action action,
+            long ticks, long lots, long minLots, long created) {
         assert lots > 0 && lots >= minLots;
         this.id = id;
         this.trader = trader;
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.ref = ref != null ? ref : "";
+        this.ref = nullIfEmpty(ref);
         this.state = State.NEW;
         this.action = action;
         this.ticks = ticks;
@@ -194,6 +193,21 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
+                if (trader == null) {
+                    throw new IOException("trader is null");
+                }
+                if (market == null) {
+                    throw new IOException("market is null");
+                }
+                if (contr == null) {
+                    throw new IOException("contr is null");
+                }
+                if (state == null) {
+                    throw new IOException("state is null");
+                }
+                if (action == null) {
+                    throw new IOException("action is null");
+                }
                 return new Order(id, trader, market, contr, settlDay, ref, state, action, ticks,
                         lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
             case KEY_NAME:
@@ -251,9 +265,13 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
                 } else if ("ref".equals(name)) {
                     ref = p.getString();
                 } else if ("state".equals(name)) {
-                    state = State.valueOf(p.getString());
+                    final String s = p.getString();
+                    assert s != null;
+                    state = State.valueOf(s);
                 } else if ("action".equals(name)) {
-                    action = Action.valueOf(p.getString());
+                    final String s = p.getString();
+                    assert s != null;
+                    action = Action.valueOf(s);
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -275,7 +293,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     }
 
     @Override
-    public final boolean equals(Object obj) {
+    public final boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -301,7 +319,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"trader\":\"").append(trader);
         out.append("\",\"market\":\"").append(market);
@@ -313,7 +331,7 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
             out.append("null");
         }
         out.append(",\"ref\":");
-        if (!ref.isEmpty()) {
+        if (ref != null) {
             out.append('"').append(ref).append('"');
         } else {
             out.append("null");
@@ -340,9 +358,6 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     @Override
     public final void insert(DlNode prev, DlNode next) {
 
-        assert prev != null;
-        assert next != null;
-
         prev.setDlNext(this);
         this.setDlPrev(prev);
 
@@ -352,13 +367,11 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
 
     @Override
     public final void insertBefore(DlNode next) {
-        assert next != null;
         insert(next.dlPrev(), next);
     }
 
     @Override
     public final void insertAfter(DlNode prev) {
-        assert prev != null;
         insert(prev, prev.dlNext());
     }
 
@@ -366,17 +379,17 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     public final void remove() {
         dlNext().setDlPrev(dlPrev);
         dlPrev().setDlNext(dlNext);
-        setDlPrev(null);
-        setDlNext(null);
+        setDlPrev(DlUtil.NULL);
+        setDlNext(DlUtil.NULL);
     }
 
     @Override
-    public void setDlPrev(DlNode prev) {
+    public void setDlPrev(@NonNull DlNode prev) {
         this.dlPrev = prev;
     }
 
     @Override
-    public void setDlNext(DlNode next) {
+    public void setDlNext(@NonNull DlNode next) {
         this.dlNext = next;
     }
 
@@ -396,12 +409,12 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
     }
 
     @Override
-    public final void setSlNext(SlNode next) {
+    public final void setSlNext(@Nullable SlNode next) {
         this.slNext = next;
     }
 
     @Override
-    public final SlNode slNext() {
+    public final @Nullable SlNode slNext() {
         return slNext;
     }
 
@@ -476,9 +489,8 @@ public final class Order extends BasicRbNode implements Jsonifiable, DlNode, SlN
         return settlDay;
     }
 
-    @NonNull
     @Override
-    public final String getRef() {
+    public final @Nullable String getRef() {
         return ref;
     }
 

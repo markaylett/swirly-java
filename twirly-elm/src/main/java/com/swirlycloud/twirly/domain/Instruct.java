@@ -3,7 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Identifiable;
@@ -16,7 +17,7 @@ import com.swirlycloud.twirly.util.Identifiable;
  * @author Mark Aylett
  *
  */
-public interface Instruct extends RbNode, Identifiable, Financial {
+public @NonNullByDefault interface Instruct extends RbNode, Identifiable, Financial {
 
     /**
      * @return order-id or zero if there is no associated order.
@@ -34,7 +35,7 @@ public interface Instruct extends RbNode, Identifiable, Financial {
     @Override
     int getSettlDay();
 
-    @NonNull
+    @Nullable
     String getRef();
 
     State getState();

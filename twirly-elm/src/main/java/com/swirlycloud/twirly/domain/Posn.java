@@ -10,6 +10,9 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.SlNode;
@@ -17,9 +20,9 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
+public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifiable, SlNode {
 
-    private transient SlNode next;
+    private transient @Nullable SlNode next;
 
     private final String trader;
     private final String contr;
@@ -29,8 +32,8 @@ public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
     private long sellCost;
     private long sellLots;
 
-    private Posn(String trader, String contr, int settlDay, long buyCost,
-            long buyLots, long sellCost, long sellLots) {
+    private Posn(String trader, String contr, int settlDay, long buyCost, long buyLots,
+            long sellCost, long sellLots) {
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -60,8 +63,13 @@ public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
             final Event event = p.next();
             switch (event) {
             case END_OBJECT:
-                return new Posn(trader, contr, settlDay, buyCost, buyLots, sellCost,
-                        sellLots);
+                if (trader == null) {
+                    throw new IOException("trader is null");
+                }
+                if (contr == null) {
+                    throw new IOException("contr is null");
+                }
+                return new Posn(trader, contr, settlDay, buyCost, buyLots, sellCost, sellLots);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -112,7 +120,7 @@ public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
     }
 
     @Override
-    public final boolean equals(Object obj) {
+    public final boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -141,7 +149,7 @@ public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
     }
 
     @Override
-    public final void toJson(Params params, Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"trader\":\"").append(trader);
         out.append("\",\"contr\":\"").append(contr);
         out.append("\",\"settlDate\":");
@@ -166,12 +174,12 @@ public final class Posn extends BasicRbNode implements Jsonifiable, SlNode {
     }
 
     @Override
-    public final void setSlNext(SlNode next) {
+    public final void setSlNext(@Nullable SlNode next) {
         this.next = next;
     }
 
     @Override
-    public final SlNode slNext() {
+    public final @Nullable SlNode slNext() {
         return next;
     }
 

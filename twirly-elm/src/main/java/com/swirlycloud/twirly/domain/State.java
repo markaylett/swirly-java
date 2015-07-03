@@ -3,8 +3,10 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-public enum State {
-    NEW(1), REVISE(2), CANCEL(3), TRADE(4);
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
+public @NonNullByDefault enum State {
+    PENDING(0), NEW(1), REVISE(2), CANCEL(3), TRADE(4);
     private final int id;
 
     private State(int id) {
@@ -22,7 +24,7 @@ public enum State {
         State val;
         switch (id) {
         case 0:
-            val = null;
+            val = State.PENDING;
             break;
         case 1:
             val = State.NEW;

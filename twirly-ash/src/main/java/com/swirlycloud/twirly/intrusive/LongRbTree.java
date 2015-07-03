@@ -8,23 +8,23 @@ import com.swirlycloud.twirly.node.RbNode;
 public abstract class LongRbTree extends LongTree<RbNode> {
 
     @Override
-    protected final void setNode(RbNode node, RbNode left, RbNode right, RbNode parent, int color) {
-        node.setNode(left, right, parent, color);
+    protected final void setNode(RbNode lhs, RbNode rhs) {
+        lhs.setNode(rhs);
     }
 
     @Override
-    protected final RbNode setLeft(RbNode node, RbNode left) {
-        return node.setLeft(left);
+    protected final void setLeft(RbNode node, RbNode left) {
+        node.setLeft(left);
     }
 
     @Override
-    protected final RbNode setRight(RbNode node, RbNode right) {
-        return node.setRight(right);
+    protected final void setRight(RbNode node, RbNode right) {
+        node.setRight(right);
     }
 
     @Override
-    protected final RbNode setParent(RbNode node, RbNode parent) {
-        return node.setParent(parent);
+    protected final void setParent(RbNode node, RbNode parent) {
+        node.setParent(parent);
     }
 
     @Override

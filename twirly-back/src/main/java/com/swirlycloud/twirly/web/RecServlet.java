@@ -33,6 +33,7 @@ public final class RecServlet extends RestServlet {
         super.init(config);
     }
 
+    @SuppressWarnings("null")
     @Override
     public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (realm.isDevServer(req)) {
@@ -98,6 +99,7 @@ public final class RecServlet extends RestServlet {
         }
     }
 
+    @SuppressWarnings("null")
     @Override
     protected final void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -160,6 +162,7 @@ public final class RecServlet extends RestServlet {
         }
     }
 
+    @SuppressWarnings("null")
     @Override
     protected final void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (realm.isDevServer(req)) {
