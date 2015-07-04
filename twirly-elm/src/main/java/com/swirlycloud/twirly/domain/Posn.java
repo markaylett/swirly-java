@@ -26,7 +26,7 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
 
     private final String trader;
     private final String contr;
-    private final int settlDay;
+    private int settlDay;
     private long buyCost;
     private long buyLots;
     private long sellCost;
@@ -183,20 +183,43 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         return next;
     }
 
-    public final void applyTrade(Action action, long lastTicks, long lastLots) {
-        final double cost = lastLots * lastTicks;
+    public final void add(Posn rhs) {
+        addBuy(rhs.buyCost, rhs.buyLots);
+        addSell(rhs.sellCost, rhs.sellLots);
+    }
+
+    public final void addBuy(long cost, long lots) {
+        this.buyCost += cost;
+        this.buyLots += lots;
+    }
+
+    public final void addSell(long cost, long lots) {
+        this.sellCost += cost;
+        this.sellLots += lots;
+    }
+
+    public final void addTrade(Action action, long lastTicks, long lastLots) {
+        final long cost = lastLots * lastTicks;
         if (action == Action.BUY) {
-            buyCost += cost;
-            buyLots += lastLots;
+            addBuy(cost, lastLots);
         } else {
             assert action == Action.SELL;
-            sellCost += cost;
-            sellLots += lastLots;
+            addSell(cost, lastLots);
         }
     }
 
-    public final void applyTrade(Exec trade) {
-        applyTrade(trade.getAction(), trade.getLastTicks(), trade.getLastLots());
+    public final void addTrade(Exec trade) {
+        addTrade(trade.getAction(), trade.getLastTicks(), trade.getLastLots());
+    }
+
+    /**
+     * This function is typically used to change the settlement-day to zero during settlement.
+     * 
+     * @param settlDay
+     *            The new settlement-day.
+     */
+    public final void setSettlDay(int settlDay) {
+        this.settlDay = settlDay;
     }
 
     public final void setBuyCost(long buyCost) {
@@ -225,6 +248,10 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
 
     public final int getSettlDay() {
         return settlDay;
+    }
+
+    public final boolean isSettlDaySet() {
+        return settlDay != 0;
     }
 
     public final long getBuyCost() {

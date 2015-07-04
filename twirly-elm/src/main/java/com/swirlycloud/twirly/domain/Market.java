@@ -332,17 +332,17 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
         return settlDay;
     }
 
+    @Override
+    public final boolean isSettlDaySet() {
+        return settlDay != 0;
+    }
+
     public final int getExpiryDay() {
         return expiryDay;
     }
 
-    /**
-     * @param busDay
-     *            The business-day.
-     * @return true if this market has expired.
-     */
-    public boolean isExpired(int busDay) {
-        return expiryDay != 0 && expiryDay < busDay;
+    public final boolean isExpiryDaySet() {
+        return expiryDay != 0;
     }
 
     public final int getState() {

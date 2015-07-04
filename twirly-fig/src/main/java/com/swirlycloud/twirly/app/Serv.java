@@ -309,12 +309,12 @@ public @NonNullByDefault class Serv {
             final Exec makerTrade = match.makerTrade;
             assert makerTrade != null;
             maker.insertTrade(makerTrade);
-            match.makerPosn.applyTrade(makerTrade);
+            match.makerPosn.addTrade(makerTrade);
             // Update taker.
             final Exec takerTrade = match.takerTrade;
             assert takerTrade != null;
             taker.insertTrade(takerTrade);
-            trans.posn.applyTrade(takerTrade);
+            trans.posn.addTrade(takerTrade);
         }
     }
 
@@ -544,21 +544,24 @@ public @NonNullByDefault class Serv {
         for (RbNode node = markets.getFirst(); node != null;) {
             final Market market = (Market) node;
             node = node.rbNext();
-            if (market.isExpired(busDay)) {
+            if (market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
                 cancelOrders(market, now);
             }
         }
     }
 
-    public final void settlMarkets(long now) throws NotFoundException {
+    public final void settlMarkets(long now) {
         final int busDay = DateUtil.getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final Market market = (Market) node;
             node = node.rbNext();
-            final int settlDay = market.getSettlDay();
-            if (settlDay != 0 && market.getSettlDay() < busDay) {
+            if (market.isSettlDaySet() && market.getSettlDay() <= busDay) {
                 markets.remove(market);
             }
+        }
+        for (RbNode node = sesss.getFirst(); node != null; node = node.rbNext()) {
+            final Sess sess = (Sess) node;
+            sess.settlPosns(busDay);
         }
     }
 
@@ -611,7 +614,7 @@ public @NonNullByDefault class Serv {
             NotFoundException, ServiceUnavailableException {
         final Trader trader = sess.getTraderRich();
         final int busDay = DateUtil.getBusDate(now).toJd();
-        if (market.isExpired(busDay)) {
+        if (market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
                     .getContrRich().getMnem(), maybeJdToIso(market.getSettlDay())));
         }
@@ -888,9 +891,9 @@ public @NonNullByDefault class Serv {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
             sess.insertTrade(trade);
-            posn.applyTrade(trade);
+            posn.addTrade(trade);
             cptySess.insertTrade(cptyTrade);
-            cptyPosn.applyTrade(cptyTrade);
+            cptyPosn.addTrade(cptyTrade);
         } else {
             try {
                 journ.insertExec(trade);
@@ -898,7 +901,7 @@ public @NonNullByDefault class Serv {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
             sess.insertTrade(trade);
-            posn.applyTrade(trade);
+            posn.addTrade(trade);
         }
         return trade;
     }

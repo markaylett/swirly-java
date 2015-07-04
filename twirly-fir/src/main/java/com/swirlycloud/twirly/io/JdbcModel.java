@@ -591,6 +591,7 @@ public final class JdbcModel implements Model {
                 final int settlDay = rs.getInt("settlDay");
                 assert trader != null;
                 assert contr != null;
+                // FIXME: handle settled contracts.
                 // Lazy position.
                 Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
                 if (posn == null || !posn.getTrader().equals(trader)
@@ -605,12 +606,10 @@ public final class JdbcModel implements Model {
                 final long cost = rs.getLong("cost");
                 final long lots = rs.getLong("lots");
                 if (action == Action.BUY) {
-                    posn.setBuyCost(cost);
-                    posn.setBuyLots(lots);
+                    posn.addBuy(cost, lots);
                 } else {
                     assert action == Action.SELL;
-                    posn.setSellCost(cost);
-                    posn.setSellLots(lots);
+                    posn.addSell(cost, lots);
                 }
             }
         } catch (final SQLException e) {

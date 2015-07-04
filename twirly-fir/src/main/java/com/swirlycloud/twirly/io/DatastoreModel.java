@@ -598,6 +598,7 @@ public final class DatastoreModel implements Model {
                     final String trader = (String) entity.getProperty("trader");
                     final String contr = (String) entity.getProperty("contr");
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    // FIXME: handle settled contracts.
                     assert trader != null;
                     assert contr != null;
                     // Lazy position.
@@ -614,7 +615,7 @@ public final class DatastoreModel implements Model {
                     final Action action = Action.valueOf((String) entity.getProperty("action"));
                     final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
-                    posn.applyTrade(action, lastTicks, lastLots);
+                    posn.addTrade(action, lastTicks, lastLots);
                 }
             }
         });

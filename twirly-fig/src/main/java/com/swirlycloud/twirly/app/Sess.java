@@ -275,19 +275,13 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
         assert unused == null;
     }
 
-    final Posn updatePosn(Posn posn) {
+    final Posn addPosn(Posn posn) {
         final String contr = posn.getContr();
         final int settlDay = posn.getSettlDay();
         final Posn exist = (Posn) posns.pfind(contr, settlDay);
         if (exist != null && exist.getContr().equals(contr) && exist.getSettlDay() == settlDay) {
-
-            // Update existing position.
-
-            exist.setBuyCost(posn.getBuyCost());
-            exist.setBuyLots(posn.getBuyLots());
-            exist.setSellCost(posn.getSellCost());
-            exist.setSellLots(posn.getSellLots());
-
+            // Add to existing position.
+            exist.add(posn);
             posn = exist;
         } else {
             final RbNode parent = exist;
@@ -325,5 +319,17 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
 
     public final boolean isEmptyPosn() {
         return posns.isEmpty();
+    }
+
+    public final void settlPosns(int busDay) {
+        for (RbNode node = posns.getFirst(); node != null;) {
+            final Posn posn = (Posn) node;
+            node = node.rbNext();
+            if (posn.isSettlDaySet() && posn.getSettlDay() <= busDay) {
+                posns.remove(posn);
+                posn.setSettlDay(0);
+                addPosn(posn);
+            }
+        }
     }
 }

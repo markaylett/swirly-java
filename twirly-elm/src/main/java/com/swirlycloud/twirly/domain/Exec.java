@@ -478,6 +478,11 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
     }
 
     @Override
+    public final boolean isSettlDaySet() {
+        return settlDay != 0;
+    }
+
+    @Override
     public final @Nullable String getRef() {
         return ref;
     }
