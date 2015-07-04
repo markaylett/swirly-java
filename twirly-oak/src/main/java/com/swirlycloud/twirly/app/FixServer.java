@@ -248,6 +248,7 @@ public final class FixServer extends MessageCracker implements Application {
         Order order = null;
 
         assert marketMnem != null;
+        assert orderRef != null;
 
         serv.acquireWrite();
         try {
@@ -310,6 +311,7 @@ public final class FixServer extends MessageCracker implements Application {
         Order order = null;
 
         assert marketMnem != null;
+        assert orderRef != null;
 
         serv.acquireWrite();
         try {
