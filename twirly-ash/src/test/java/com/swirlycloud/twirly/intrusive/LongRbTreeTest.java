@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.node.BasicRbNode;
@@ -39,7 +40,7 @@ public final class LongRbTreeTest {
         }
     }
 
-    private static final class NodeTree extends LongRbTree {
+    private static final @NonNullByDefault class NodeTree extends LongRbTree {
 
         private static long getKey(RbNode node) {
             return ((Node) node).key;

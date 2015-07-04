@@ -5,10 +5,12 @@ package com.swirlycloud.twirly.intrusive;
 
 import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Identifiable;
 
-public final class IdRbTree extends LongRbTree {
+public final @NonNullByDefault class IdRbTree extends LongRbTree {
 
     private static long getId(RbNode node) {
         return ((Identifiable) node).getId();

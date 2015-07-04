@@ -3,9 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.node.RbNode;
 
-public abstract class BasicRbTree<K> extends BasicTree<K, RbNode> {
+public abstract @NonNullByDefault class BasicRbTree<K> extends BasicTree<K, RbNode> {
 
     @Override
     protected final void setNode(RbNode lhs, RbNode rhs) {
@@ -13,17 +16,17 @@ public abstract class BasicRbTree<K> extends BasicTree<K, RbNode> {
     }
 
     @Override
-    protected final void setLeft(RbNode node, RbNode left) {
+    protected final void setLeft(RbNode node, @Nullable RbNode left) {
         node.setLeft(left);
     }
 
     @Override
-    protected final void setRight(RbNode node, RbNode right) {
+    protected final void setRight(RbNode node, @Nullable RbNode right) {
         node.setRight(right);
     }
 
     @Override
-    protected final void setParent(RbNode node, RbNode parent) {
+    protected final void setParent(RbNode node, @Nullable RbNode parent) {
         node.setParent(parent);
     }
 
@@ -33,27 +36,27 @@ public abstract class BasicRbTree<K> extends BasicTree<K, RbNode> {
     }
 
     @Override
-    protected final RbNode next(RbNode node) {
+    protected final @Nullable RbNode next(RbNode node) {
         return node.rbNext();
     }
 
     @Override
-    protected final RbNode prev(RbNode node) {
+    protected final @Nullable RbNode prev(RbNode node) {
         return node.rbPrev();
     }
 
     @Override
-    protected final RbNode getLeft(RbNode node) {
+    protected final @Nullable RbNode getLeft(RbNode node) {
         return node.getLeft();
     }
 
     @Override
-    protected final RbNode getRight(RbNode node) {
+    protected final @Nullable RbNode getRight(RbNode node) {
         return node.getRight();
     }
 
     @Override
-    protected final RbNode getParent(RbNode node) {
+    protected final @Nullable RbNode getParent(RbNode node) {
         return node.getParent();
     }
 

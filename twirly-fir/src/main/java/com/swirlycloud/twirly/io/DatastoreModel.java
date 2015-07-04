@@ -598,6 +598,8 @@ public final class DatastoreModel implements Model {
                     final String trader = (String) entity.getProperty("trader");
                     final String contr = (String) entity.getProperty("contr");
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    assert trader != null;
+                    assert contr != null;
                     // Lazy position.
                     Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
                     if (posn == null || !posn.getTrader().equals(trader)

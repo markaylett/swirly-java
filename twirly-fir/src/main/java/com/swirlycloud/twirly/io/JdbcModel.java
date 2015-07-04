@@ -589,6 +589,8 @@ public final class JdbcModel implements Model {
                 final String trader = rs.getString("trader");
                 final String contr = rs.getString("contr");
                 final int settlDay = rs.getInt("settlDay");
+                assert trader != null;
+                assert contr != null;
                 // Lazy position.
                 Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
                 if (posn == null || !posn.getTrader().equals(trader)

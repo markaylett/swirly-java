@@ -50,7 +50,7 @@ public @NonNullByDefault class Serv {
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
-    private static final @NonNullByDefault(value = false) class SessTree extends
+    private static final class SessTree extends
             BasicRbTree<String> {
 
         private static String getTraderMnem(RbNode node) {

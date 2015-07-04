@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.intrusive;
 
 import java.io.PrintStream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -20,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * black nodes.</li>
  * </ol>
  */
-public abstract class Tree<V> {
+public abstract @NonNullByDefault class Tree<V> {
     private static final int INDENT = 4;
     private static final int NONE = 0;
     private static final int BLACK = 1;
@@ -30,11 +31,11 @@ public abstract class Tree<V> {
 
     protected abstract void setNode(V lhs, V rhs);
 
-    protected abstract void setLeft(V node, V left);
+    protected abstract void setLeft(V node, @Nullable V left);
 
-    protected abstract void setRight(V node, V right);
+    protected abstract void setRight(V node, @Nullable V right);
 
-    protected abstract void setParent(V node, V parent);
+    protected abstract void setParent(V node, @Nullable V parent);
 
     protected abstract void setColor(V node, int color);
 

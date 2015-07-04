@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.intrusive.DlList;
@@ -15,15 +16,18 @@ import com.swirlycloud.twirly.node.RbNode;
 public final class Side {
     private static final class LevelTree extends LongRbTree {
 
-        private static long getKey(RbNode node) {
+        private static long getKey(@NonNull RbNode node) {
             return ((Level) node).getKey();
         }
 
         @Override
-        protected final int compareKey(RbNode lhs, RbNode rhs) {
+        protected final int compareKey(@NonNull RbNode lhs, @NonNull RbNode rhs) {
             return compareLong(getKey(lhs), getKey(rhs));
         }
 
+        // FIXME: Adding a @NonNull attribute to lhs causes the following erroneous error:
+        // Illegal redefinition of parameter lhs, ...
+        @SuppressWarnings("null")
         @Override
         protected final int compareKeyDirect(RbNode lhs, long rhs) {
             return compareLong(getKey(lhs), rhs);

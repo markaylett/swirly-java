@@ -3,6 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Tree with a single key derived from Object.
  * 
@@ -12,7 +15,7 @@ package com.swirlycloud.twirly.intrusive;
  *            The element or value type.
  */
 
-public abstract class BasicTree<K, V> extends Tree<V> {
+public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
 
     protected abstract int compareKeyDirect(V lhs, K rhs);
 
@@ -20,7 +23,7 @@ public abstract class BasicTree<K, V> extends Tree<V> {
      * Finds the node with the same key as node.
      */
 
-    public final V find(K key) {
+    public final @Nullable V find(K key) {
         V tmp = root;
         int comp;
         while (tmp != null) {
@@ -40,7 +43,7 @@ public abstract class BasicTree<K, V> extends Tree<V> {
      * Finds the first node greater than or equal to the search key.
      */
 
-    public final V nfind(K key) {
+    public final @Nullable V nfind(K key) {
         V tmp = root;
         V res = null;
         int comp;
@@ -64,7 +67,7 @@ public abstract class BasicTree<K, V> extends Tree<V> {
      * Return match or parent.
      */
 
-    public final V pfind(K key) {
+    public final @Nullable V pfind(K key) {
         V tmp = root, parent = null;
         while (tmp != null) {
             parent = tmp;
