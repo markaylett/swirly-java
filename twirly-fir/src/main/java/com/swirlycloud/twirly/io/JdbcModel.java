@@ -588,10 +588,13 @@ public final class JdbcModel implements Model {
             while (rs.next()) {
                 final String trader = rs.getString("trader");
                 final String contr = rs.getString("contr");
-                final int settlDay = rs.getInt("settlDay");
+                int settlDay = rs.getInt("settlDay");
                 assert trader != null;
                 assert contr != null;
-                // FIXME: handle settled contracts.
+                // FIXME: Consider time-of-day.
+                if (settlDay != 0 && settlDay <= busDay) {
+                    settlDay = 0;
+                }
                 // Lazy position.
                 Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
                 if (posn == null || !posn.getTrader().equals(trader)
