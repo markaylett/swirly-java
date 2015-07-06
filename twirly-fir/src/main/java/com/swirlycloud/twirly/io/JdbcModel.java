@@ -582,7 +582,7 @@ public final class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectPosn() {
+    public final SlNode selectPosn(int busDay) {
         final PosnTree posns = new PosnTree();
         try (final ResultSet rs = selectPosnStmt.executeQuery()) {
             while (rs.next()) {

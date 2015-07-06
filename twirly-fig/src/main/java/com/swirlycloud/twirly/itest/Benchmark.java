@@ -78,7 +78,7 @@ public final class Benchmark {
 
     public static void main(String[] args) throws Exception {
         try (final Model model = new MockModel()) {
-            run(new Serv(model));
+            run(new Serv(model, System.currentTimeMillis()));
         }
     }
 }

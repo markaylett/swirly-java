@@ -318,15 +318,16 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    public Serv(AsyncModel model) throws InterruptedException, ExecutionException {
+    public Serv(AsyncModel model, long now) throws InterruptedException, ExecutionException {
         this.journ = model;
+        final int busDay = DateUtil.getBusDate(now).toJd();
         final Future<SlNode> assets = model.selectAsset();
         final Future<SlNode> contrs = model.selectContr();
         final Future<SlNode> traders = model.selectTrader();
         final Future<SlNode> markets = model.selectMarket();
         final Future<SlNode> orders = model.selectOrder();
         final Future<SlNode> trades = model.selectTrade();
-        final Future<SlNode> posns = model.selectPosn();
+        final Future<SlNode> posns = model.selectPosn(busDay);
         insertAssets(assets.get());
         insertContrs(contrs.get());
         insertTraders(traders.get());
@@ -336,15 +337,16 @@ public @NonNullByDefault class Serv {
         insertPosns(posns.get());
     }
 
-    public Serv(Model model) {
+    public Serv(Model model, long now) {
         this.journ = model;
+        final int busDay = DateUtil.getBusDate(now).toJd();
         insertAssets(model.selectAsset());
         insertContrs(model.selectContr());
         insertTraders(model.selectTrader());
         insertMarkets(model.selectMarket());
         insertOrders(model.selectOrder());
         insertTrades(model.selectTrade());
-        insertPosns(model.selectPosn());
+        insertPosns(model.selectPosn(busDay));
     }
 
     public final Trader createTrader(String mnem, String display, String email)

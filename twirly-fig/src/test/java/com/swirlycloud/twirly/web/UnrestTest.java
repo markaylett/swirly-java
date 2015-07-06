@@ -268,7 +268,7 @@ public final class UnrestTest {
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         model = new MockModel();
-        unrest = new Unrest(model);
+        unrest = new Unrest(model, NOW);
         postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
     }
 

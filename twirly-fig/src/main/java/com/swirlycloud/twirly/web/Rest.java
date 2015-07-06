@@ -124,12 +124,12 @@ public final @NonNullByDefault class Rest {
         this.serv = serv;
     }
 
-    public Rest(AsyncModel model) throws InterruptedException, ExecutionException {
-        this(new LockableServ(model));
+    public Rest(AsyncModel model, long now) throws InterruptedException, ExecutionException {
+        this(new LockableServ(model, now));
     }
 
-    public Rest(Model model) {
-        this(new LockableServ(model));
+    public Rest(Model model, long now) {
+        this(new LockableServ(model, now));
     }
 
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)

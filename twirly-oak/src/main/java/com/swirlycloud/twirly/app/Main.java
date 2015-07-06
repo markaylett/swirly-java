@@ -116,7 +116,7 @@ public final class Main {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
         try (final Model model = new MockModel()) {
 
-            final LockableServ serv = new LockableServ(model);
+            final LockableServ serv = new LockableServ(model, System.currentTimeMillis());
             final String mnem = "EURUSD.MAR14";
             final String display = "EURUSD March 14";
             final String contr = "EURUSD";

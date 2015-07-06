@@ -94,11 +94,13 @@ public abstract class RestServlet extends HttpServlet {
 
     @SuppressWarnings("null")
     public static void setModel(AsyncModel model) throws InterruptedException, ExecutionException {
-        RestServlet.rest = new Rest(model);
+        final long now = System.currentTimeMillis();
+        RestServlet.rest = new Rest(model, now);
     }
 
     @SuppressWarnings("null")
     public static void setModel(Model model) {
-        RestServlet.rest = new Rest(model);
+        final long now = System.currentTimeMillis();
+        RestServlet.rest = new Rest(model, now);
     }
 }

@@ -586,7 +586,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectPosn() {
+    public final @Nullable SlNode selectPosn(int busDay) {
         final PosnTree posns = new PosnTree();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
         foreachMarket(new UnaryCallback<Entity>() {

@@ -167,12 +167,12 @@ public final class FixServer extends MessageCracker implements Application {
 
     public FixServer(SessionSettings settings, @NonNull AsyncModel model) throws ConfigError,
             FieldConvertError, NotFoundException, InterruptedException, ExecutionException {
-        this(settings, new LockableServ(model));
+        this(settings, new LockableServ(model, System.currentTimeMillis()));
     }
 
     public FixServer(SessionSettings settings, @NonNull Model model) throws ConfigError,
             FieldConvertError, NotFoundException {
-        this(settings, new LockableServ(model));
+        this(settings, new LockableServ(model, System.currentTimeMillis()));
     }
 
     @Override

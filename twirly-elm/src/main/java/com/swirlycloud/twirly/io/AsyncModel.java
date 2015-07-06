@@ -30,5 +30,5 @@ public interface AsyncModel extends Journ {
     Future<SlNode> selectTrade();
 
     @NonNull
-    Future<SlNode> selectPosn();
+    Future<SlNode> selectPosn(int busDay);
 }

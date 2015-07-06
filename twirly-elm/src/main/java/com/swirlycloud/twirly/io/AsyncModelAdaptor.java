@@ -96,7 +96,7 @@ public final class AsyncModelAdaptor implements AsyncModel {
     }
 
     @Override
-    public final @NonNull Future<SlNode> selectPosn() {
-        return new FutureAdapter<>(model.selectPosn());
+    public final @NonNull Future<SlNode> selectPosn(int busDay) {
+        return new FutureAdapter<>(model.selectPosn(busDay));
     }
 }
