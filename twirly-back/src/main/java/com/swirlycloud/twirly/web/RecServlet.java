@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static com.swirlycloud.twirly.util.StringUtil.splitPath;
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
@@ -47,7 +48,7 @@ public final class RecServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
-            final long now = System.currentTimeMillis();
+            final long now = now();
 
             boolean match = false;
             if (parts.length == 0) {
@@ -130,7 +131,7 @@ public final class RecServlet extends RestServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new BadRequestException("user is not an admin");
                 }
-                final long now = System.currentTimeMillis();
+                final long now = now();
                 rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(), r.getSettlDate(),
                         r.getExpiryDate(), r.getState(), PARAMS_NONE, now, resp.getWriter());
 
@@ -149,7 +150,7 @@ public final class RecServlet extends RestServlet {
                     }
                     email = r.getEmail();
                 }
-                final long now = System.currentTimeMillis();
+                final long now = now();
                 rest.postTrader(r.getMnem(), r.getDisplay(), email, PARAMS_NONE, now,
                         resp.getWriter());
 
@@ -191,7 +192,7 @@ public final class RecServlet extends RestServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new BadRequestException("user is not an admin");
                 }
-                final long now = System.currentTimeMillis();
+                final long now = now();
                 rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE, now,
                         resp.getWriter());
 
@@ -210,7 +211,7 @@ public final class RecServlet extends RestServlet {
                     }
                     email = r.getEmail();
                 }
-                final long now = System.currentTimeMillis();
+                final long now = now();
                 rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now, resp.getWriter());
 
             } else {

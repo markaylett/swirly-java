@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.itest;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
@@ -33,12 +34,12 @@ public final class Benchmark {
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;
         final Market market = s.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", settlDay,
-                expiryDay, state, System.currentTimeMillis());
+                expiryDay, state, now());
         assert market != null;
 
         try (final Trans trans = new Trans()) {
             for (int i = 0; i < 250000; ++i) {
-                final long now = System.currentTimeMillis();
+                final long now = now();
                 final long startNanos = System.nanoTime();
 
                 // Maker sell-side.
@@ -78,7 +79,7 @@ public final class Benchmark {
 
     public static void main(String[] args) throws Exception {
         try (final Model model = new MockModel()) {
-            run(new Serv(model, System.currentTimeMillis()));
+            run(new Serv(model, now()));
         }
     }
 }

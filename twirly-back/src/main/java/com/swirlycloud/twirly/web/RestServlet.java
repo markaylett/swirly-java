@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -94,13 +95,13 @@ public abstract class RestServlet extends HttpServlet {
 
     @SuppressWarnings("null")
     public static void setModel(AsyncModel model) throws InterruptedException, ExecutionException {
-        final long now = System.currentTimeMillis();
+        final long now = now();
         RestServlet.rest = new Rest(model, now);
     }
 
     @SuppressWarnings("null")
     public static void setModel(Model model) {
-        final long now = System.currentTimeMillis();
+        final long now = now();
         RestServlet.rest = new Rest(model, now);
     }
 }

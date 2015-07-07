@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,7 +117,7 @@ public final class Main {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
         try (final Model model = new MockModel()) {
 
-            final LockableServ serv = new LockableServ(model, System.currentTimeMillis());
+            final LockableServ serv = new LockableServ(model, now());
             final String mnem = "EURUSD.MAR14";
             final String display = "EURUSD March 14";
             final String contr = "EURUSD";

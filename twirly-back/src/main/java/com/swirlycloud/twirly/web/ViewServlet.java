@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.StringUtil.splitPath;
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
@@ -41,7 +42,7 @@ public final class ViewServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
-            final long now = System.currentTimeMillis();
+            final long now = now();
 
             if (parts.length == 0) {
                 rest.getView(params, now, resp.getWriter());
