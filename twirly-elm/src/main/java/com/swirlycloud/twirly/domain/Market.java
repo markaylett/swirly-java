@@ -19,6 +19,9 @@ import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
+/**
+ * A place where buyers and sellers come together to exchange goods or services.
+ */
 public final @NonNullByDefault class Market extends Rec implements Financial {
     /**
      * Maximum price levels in view.
@@ -337,6 +340,9 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
         return settlDay != 0;
     }
 
+    /**
+     * @return the market expiry-day.
+     */
     public final int getExpiryDay() {
         return expiryDay;
     }

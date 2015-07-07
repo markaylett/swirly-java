@@ -18,6 +18,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
+/**
+ * A specification that stipulates the terms and conditions of sale.
+ */
 public final @NonNullByDefault class Contr extends Rec {
     private Memorable asset;
     private Memorable ccy;

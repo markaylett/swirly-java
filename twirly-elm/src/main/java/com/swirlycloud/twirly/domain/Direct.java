@@ -7,11 +7,11 @@ import com.swirlycloud.twirly.util.Invertible;
 
 public enum Direct implements Invertible<Direct> {
     /**
-     * Aggressor buys.
+     * Aggressor buys. I.e. taker lifts the offer.
      */
     PAID(1),
     /**
-     * Aggressor sells.
+     * Aggressor sells. I.e. taker hits the bid.
      */
     GIVEN(-1);
     private final int id;

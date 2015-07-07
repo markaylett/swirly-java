@@ -12,11 +12,6 @@ import com.swirlycloud.twirly.util.Identifiable;
 /**
  * Fields common to both Order and Exec.
  */
-
-/**
- * @author Mark Aylett
- *
- */
 public @NonNullByDefault interface Instruct extends RbNode, Identifiable, Financial {
 
     /**

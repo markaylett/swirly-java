@@ -9,7 +9,10 @@ import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.DlNode;
 
 /**
- * A level is an aggregation of orders by price.
+ * Price level.
+ * 
+ * A price level is an aggregation of orders by price. I.e. the sum of all orders in the book at the
+ * same price.
  */
 public final @NonNullByDefault class Level extends BasicRbNode {
     final long key;
