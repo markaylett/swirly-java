@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static com.swirlycloud.twirly.util.StringUtil.splitPath;
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
@@ -48,7 +49,7 @@ public final class SessServlet extends RestServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
-            final long now = System.currentTimeMillis();
+            final long now = now();
 
             boolean match = false;
             if (parts.length > 0) {
@@ -92,7 +93,7 @@ public final class SessServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
-            final long now = System.currentTimeMillis();
+            final long now = now();
 
             boolean match = false;
             if (parts.length == 0) {
@@ -165,7 +166,7 @@ public final class SessServlet extends RestServlet {
                 throw new MethodNotAllowedException("post is not allowed on this resource");
             }
             final String market = parts[MARKET_PART];
-            final long now = System.currentTimeMillis();
+            final long now = now();
 
             final Request r = parseRequest(req);
             if ("order".equals(parts[TYPE_PART])) {
@@ -225,7 +226,7 @@ public final class SessServlet extends RestServlet {
             if (!r.isLotsSet()) {
                 throw new BadRequestException("request fields are invalid");
             }
-            final long now = System.currentTimeMillis();
+            final long now = now();
             rest.putOrder(email, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {

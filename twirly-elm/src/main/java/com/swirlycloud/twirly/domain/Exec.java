@@ -22,7 +22,13 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, TransNode, Instruct {
+/**
+ * A transaction that occurs as an {@link Order} transitions through a workflow.
+ * 
+ * Trade executions represent the exchange of goods or services between counter-parties.
+ */
+public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, TransNode,
+        Instruct {
 
     private transient @Nullable SlNode slNext;
     private transient @Nullable TransNode transNext;
@@ -475,6 +481,11 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
     @Override
     public final int getSettlDay() {
         return settlDay;
+    }
+
+    @Override
+    public final boolean isSettlDaySet() {
+        return settlDay != 0;
     }
 
     @Override

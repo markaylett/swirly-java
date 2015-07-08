@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+ * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
@@ -16,7 +16,12 @@ public @NonNullByDefault interface Financial {
     String getContr();
 
     /**
-     * @return settlement-date or zero if there is no settlement date.
+     * @return settlement-day or zero if there is no settlement date.
      */
     int getSettlDay();
+
+    /**
+     * @return true if settlement-day is non-zero. 
+     */
+    boolean isSettlDaySet();
 }

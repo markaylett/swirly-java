@@ -69,21 +69,6 @@ INSERT INTO Asset_t (mnem, display, typeId)
 INSERT INTO Asset_t (mnem, display, typeId)
        VALUES ('ZAR', 'South Africa, Rand', 3)
 ;
-INSERT INTO Asset_t (mnem, display, typeId)
-       VALUES ('CAP', 'Central Appalachia Coal', 1)
-;
-INSERT INTO Asset_t (mnem, display, typeId)
-       VALUES ('NAP', 'Northern Appalachia Coal', 1)
-;
-INSERT INTO Asset_t (mnem, display, typeId)
-       VALUES ('ILB', 'Illinois Basin Coal', 1)
-;
-INSERT INTO Asset_t (mnem, display, typeId)
-       VALUES ('PRB', 'Powder River Basin Coal', 1)
-;
-INSERT INTO Asset_t (mnem, display, typeId)
-       VALUES ('UIB', 'Uinta Basin Coal', 1)
-;
 
 INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
        tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
@@ -181,100 +166,18 @@ INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
        tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
        VALUES ('USDZAR', 'USDZAR', 'USD', 'ZAR', 1, 1000, 1000000, 1, 3, 1, 10)
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('CAP', 'Central Appalachia Coal', 'CAP', 'USD', 1, 20, 1000, 1, 2, 1, 10);
-;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('NAP', 'Northern Appalachia Coal', 'NAP', 'USD', 1, 20, 1000, 1, 2, 1, 10);
-;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('ILB', 'Illinois Basin Coal', 'ILB', 'USD', 1, 20, 1000, 1, 2, 1, 10);
-;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('PRB', 'Powder River Basin Coal', 'PRB', 'USD', 1, 20, 1000, 1, 2, 1, 10);
-;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('UIB', 'Uinta Basin Coal', 'UIB', 'USD', 1, 20, 1000, 1, 2, 1, 10);
-;
 
-INSERT INTO market_t (mnem, display, contr, settlDay, expiryDay, state)
-       VALUES ('EURUSD.DEC15', 'EURUSD Dec 15', 'EURUSD',
-              TO_DAYS('2015-10-18') + 1721060, TO_DAYS('2015-10-17') + 1721060, 0)
+INSERT INTO Market_t (mnem, display, contr, settlDay, expiryDay, state)
+       VALUES ('EURUSD', 'EURUSD', 'EURUSD', 0, 0, 0)
 ;
-
-INSERT INTO market_t (mnem, display, contr, settlDay, expiryDay, state)
-       VALUES ('EURUSD.SEP15', 'EURUSD Sept 15', 'EURUSD',
-              TO_DAYS('2015-09-18') + 1721060, TO_DAYS('2015-09-17') + 1721060, 0)
+INSERT INTO Market_t (mnem, display, contr, settlDay, expiryDay, state)
+       VALUES ('GBPUSD', 'GBPUSD', 'GBPUSD', 0, 0, 0)
 ;
-
-INSERT INTO market_t (mnem, display, contr, settlDay, expiryDay, state)
-       VALUES ('GBPUSD.DEC15', 'GBPUSD Dec 15', 'GBPUSD',
-              TO_DAYS('2015-12-18') + 1721060, TO_DAYS('2015-12-17') + 1721060, 0)
+INSERT INTO Market_t (mnem, display, contr, settlDay, expiryDay, state)
+       VALUES ('USDCHF', 'USDCHF', 'USDCHF', 0, 0, 0)
 ;
-
-INSERT INTO User_t (email, pass)
-       VALUES ('mark.aylett@gmail.com', 'test')
-;
-
-INSERT INTO User_t (email, pass)
-       VALUES ('goska.aylett@gmail.com', 'test')
-;
-
-INSERT INTO User_t (email, pass)
-       VALUES ('toby.aylett@gmail.com', 'test')
-;
-
-INSERT INTO User_t (email, pass)
-       VALUES ('emily.aylett@gmail.com', 'test')
-;
-
-INSERT INTO User_t (email, pass)
-       VALUES ('info@swirlycloud.com', 'test')
-;
-
-INSERT INTO User_t (email, pass)
-       VALUES ('ram.mac@gmail.com', 'test')
-;
-
-INSERT INTO UserGroup_t (userId, groupId)
-       VALUES (
-          (SELECT Id FROM User_t WHERE email = 'mark.aylett@gmail.com'),
-          (SELECT id FROM Group_t WHERE mnem = 'admin')
-       )
-;
-
-INSERT INTO UserGroup_t (userId, groupId)
-       VALUES (
-          (SELECT id FROM User_t WHERE email = 'mark.aylett@gmail.com'),
-          (SELECT id FROM Group_t WHERE mnem = 'tomcat')
-       )
-;
-
-INSERT INTO UserGroup_t (userId, groupId)
-       VALUES (
-          (SELECT id FROM User_t WHERE email = 'ram.mac@gmail.com'),
-          (SELECT id FROM Group_t WHERE mnem = 'admin')
-       )
-;
-
-INSERT INTO UserGroup_t (userId, groupId)
-       VALUES (
-          (SELECT id FROM User_t WHERE email = 'ram.mac@gmail.com'),
-          (SELECT id FROM Group_t WHERE mnem = 'tomcat')
-       )
-;
-
-INSERT INTO Trader_t (mnem, display, email)
-       VALUES ('MARAYL', 'Mark Aylett', 'mark.aylett@gmail.com')
-;
-
-INSERT INTO Trader_t (mnem, display, email)
-       VALUES ('RAMMAC', 'Ram Macharaj', 'ram.mac@gmail.com')
+INSERT INTO Market_t (mnem, display, contr, settlDay, expiryDay, state)
+       VALUES ('USDJPY', 'USDJPY', 'USDJPY', 0, 0, 0)
 ;
 
 COMMIT

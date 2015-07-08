@@ -3,10 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Memorable;
 
-public final class MnemRbTree extends BasicRbTree<String> {
+public final @NonNullByDefault class MnemRbTree extends BasicRbTree<String> {
 
     private static String getMnem(RbNode node) {
         return ((Memorable) node).getMnem();

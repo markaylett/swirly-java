@@ -94,7 +94,7 @@ public final class ServTest {
 
     @Test
     public final void testFindMarket() throws Exception {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
 
         assertNotNull(actual);
@@ -113,7 +113,7 @@ public final class ServTest {
 
     @Test
     public final void testBidSide() throws Exception {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
         assertNotNull(actual);
         final Side side = actual.getBidSide();
@@ -127,7 +127,7 @@ public final class ServTest {
 
     @Test
     public final void testOfferSide() throws Exception {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
         assertNotNull(actual);
         final Side side = actual.getOfferSide();
@@ -141,7 +141,7 @@ public final class ServTest {
 
     @Test
     public final void testFindOrder() throws Exception {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 
@@ -208,7 +208,7 @@ public final class ServTest {
 
     @Test
     public final void testFindTrade() throws Exception {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 
@@ -262,7 +262,7 @@ public final class ServTest {
     @Test(expected = BadRequestException.class)
     public final void testDuplicateMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY,
                 STATE, NOW);
     }
@@ -270,7 +270,7 @@ public final class ServTest {
     @Test
     public final void testPlace() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 
@@ -301,7 +301,7 @@ public final class ServTest {
     @Test
     public final void testRevise() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 
@@ -333,7 +333,7 @@ public final class ServTest {
     @Test
     public final void testCancel() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Serv serv = new Serv(model);
+        final Serv serv = new Serv(model, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 

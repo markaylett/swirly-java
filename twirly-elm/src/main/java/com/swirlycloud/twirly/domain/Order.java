@@ -25,6 +25,9 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
+/**
+ * An instruction to buy or sell goods or services.
+ */
 public final @NonNullByDefault class Order extends BasicRbNode implements Jsonifiable, DlNode,
         SlNode, Instruct {
 
@@ -487,6 +490,11 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
     @Override
     public final int getSettlDay() {
         return settlDay;
+    }
+
+    @Override
+    public final boolean isSettlDaySet() {
+        return settlDay != 0;
     }
 
     @Override

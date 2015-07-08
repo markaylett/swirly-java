@@ -1,8 +1,11 @@
 /*******************************************************************************
- * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+ * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+/**
+ * Asset class.
+ */
 public enum AssetType {
     COMMODITY(1), CORPORATE(2), CURRENCY(3), EQUITY(4), GOVERNMENT(5), INDEX(6);
     private final int id;

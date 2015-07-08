@@ -28,5 +28,5 @@ public interface Model extends Journ {
     SlNode selectTrade();
 
     @Nullable
-    SlNode selectPosn();
+    SlNode selectPosn(int busDay);
 }

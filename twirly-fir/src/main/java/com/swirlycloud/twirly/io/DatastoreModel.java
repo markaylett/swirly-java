@@ -586,7 +586,7 @@ public final class DatastoreModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectPosn() {
+    public final @Nullable SlNode selectPosn(final int busDay) {
         final PosnTree posns = new PosnTree();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
         foreachMarket(new UnaryCallback<Entity>() {
@@ -597,7 +597,13 @@ public final class DatastoreModel implements Model {
                 for (final Entity entity : pq.asIterable()) {
                     final String trader = (String) entity.getProperty("trader");
                     final String contr = (String) entity.getProperty("contr");
-                    final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    assert trader != null;
+                    assert contr != null;
+                    // FIXME: Consider time-of-day.
+                    if (settlDay != 0 && settlDay <= busDay) {
+                        settlDay = 0;
+                    }
                     // Lazy position.
                     Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
                     if (posn == null || !posn.getTrader().equals(trader)
@@ -612,7 +618,7 @@ public final class DatastoreModel implements Model {
                     final Action action = Action.valueOf((String) entity.getProperty("action"));
                     final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
-                    posn.applyTrade(action, lastTicks, lastLots);
+                    posn.addTrade(action, lastTicks, lastLots);
                 }
             }
         });

@@ -124,12 +124,12 @@ public final @NonNullByDefault class Rest {
         this.serv = serv;
     }
 
-    public Rest(AsyncModel model) throws InterruptedException, ExecutionException {
-        this(new LockableServ(model));
+    public Rest(AsyncModel model, long now) throws InterruptedException, ExecutionException {
+        this(new LockableServ(model, now));
     }
 
-    public Rest(Model model) {
-        this(new LockableServ(model));
+    public Rest(Model model, long now) {
+        this(new LockableServ(model, now));
     }
 
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)
@@ -240,7 +240,7 @@ public final @NonNullByDefault class Rest {
             RbNode node = serv.getFirstRec(RecType.MARKET);
             for (int i = 0; node != null; node = node.rbNext()) {
                 final Market market = (Market) node;
-                if (!withExpired && market.isExpired(busDay)) {
+                if (!withExpired && market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
                     // Ignore expired contracts.
                     continue;
                 }
@@ -266,7 +266,7 @@ public final @NonNullByDefault class Rest {
             if (market == null) {
                 throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
             }
-            if (!withExpired && market.isExpired(busDay)) {
+            if (!withExpired && market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
                 throw new NotFoundException(String.format("market '%s' has expired", marketMnem));
             }
             market.toJsonView(params, out);

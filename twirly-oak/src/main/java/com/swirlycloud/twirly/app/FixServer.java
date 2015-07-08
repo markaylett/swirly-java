@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.app.FixUtility.sideToAction;
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,8 +93,7 @@ public final class FixServer extends MessageCracker implements Application {
     }
 
     private final long getNow(Message message) throws FieldNotFound {
-        return nowFromTransactTime ? message.getUtcTimeStamp(TransactTime.FIELD).getTime() //
-                : System.currentTimeMillis();
+        return nowFromTransactTime ? message.getUtcTimeStamp(TransactTime.FIELD).getTime() : now();
     }
 
     @SuppressWarnings("null")
@@ -167,12 +167,12 @@ public final class FixServer extends MessageCracker implements Application {
 
     public FixServer(SessionSettings settings, @NonNull AsyncModel model) throws ConfigError,
             FieldConvertError, NotFoundException, InterruptedException, ExecutionException {
-        this(settings, new LockableServ(model));
+        this(settings, new LockableServ(model, now()));
     }
 
     public FixServer(SessionSettings settings, @NonNull Model model) throws ConfigError,
             FieldConvertError, NotFoundException {
-        this(settings, new LockableServ(model));
+        this(settings, new LockableServ(model, now()));
     }
 
     @Override
@@ -248,6 +248,7 @@ public final class FixServer extends MessageCracker implements Application {
         Order order = null;
 
         assert marketMnem != null;
+        assert orderRef != null;
 
         serv.acquireWrite();
         try {
@@ -310,6 +311,7 @@ public final class FixServer extends MessageCracker implements Application {
         Order order = null;
 
         assert marketMnem != null;
+        assert orderRef != null;
 
         serv.acquireWrite();
         try {

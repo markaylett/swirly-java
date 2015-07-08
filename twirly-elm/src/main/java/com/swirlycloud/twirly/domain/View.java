@@ -302,6 +302,11 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
         return settlDay;
     }
 
+    @Override
+    public final boolean isSettlDaySet() {
+        return settlDay != 0;
+    }
+
     public final boolean isValidBid(int row) {
         return ladder.isValidBid(row);
     }

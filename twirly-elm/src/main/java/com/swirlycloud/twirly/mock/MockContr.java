@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+ * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 package com.swirlycloud.twirly.mock;
 
@@ -37,35 +37,22 @@ public final class MockContr {
     }
 
     static {
-        put("AUDUSD", "AUDUSD", "AUD", "USD", 1, 10000, 1000000, 1, 4, 1, 10);
-        put("EURCHF", "EURCHF", "EUR", "CHF", 1, 10000, 1000000, 1, 4, 1, 10);
-        put("EURCZK", "EURCZK", "EUR", "CZK", 1, 100, 1000000, 1, 2, 1, 10);
-        put("EURDKK", "EURDKK", "EUR", "DKK", 1, 1000, 1000000, 1, 3, 1, 10);
-        put("EURGBP", "EURGBP", "EUR", "GBP", 1, 10000, 1000000, 1, 4, 1, 10);
-        put("EURHUF", "EURHUF", "EUR", "HUF", 1, 100, 1000000, 1, 2, 1, 10);
-        put("EURJPY", "EURJPY", "EUR", "JPY", 1, 100, 1000000, 1, 2, 1, 10);
-        put("EURNOK", "EURNOK", "EUR", "NOK", 1, 1000, 1000000, 1, 3, 1, 10);
-        put("EURPLN", "EURPLN", "EUR", "PLN", 1, 1000, 1000000, 1, 3, 1, 10);
-        put("EURRON", "EURRON", "EUR", "RON", 1, 1000, 1000000, 1, 3, 1, 10);
-        put("EURSEK", "EURSEK", "EUR", "SEK", 1, 1000, 1000000, 1, 3, 1, 10);
+        // Forex.
         put("EURUSD", "EURUSD", "EUR", "USD", 1, 10000, 1000000, 1, 4, 1, 10);
         put("GBPUSD", "GBPUSD", "GBP", "USD", 1, 10000, 1000000, 1, 4, 1, 10);
-        put("NZDUSD", "NZDUSD", "NZD", "USD", 1, 10000, 1000000, 1, 4, 1, 10);
-        put("USDCAD", "USDCAD", "USD", "CAD", 1, 10000, 1000000, 1, 4, 1, 10);
         put("USDCHF", "USDCHF", "USD", "CHF", 1, 10000, 1000000, 1, 4, 1, 10);
-        put("USDHKD", "USDHKD", "USD", "HKD", 1, 1000, 1000000, 1, 3, 1, 10);
-        put("USDILS", "USDILS", "USD", "ILS", 1, 1000, 1000000, 1, 3, 1, 10);
         put("USDJPY", "USDJPY", "USD", "JPY", 1, 100, 1000000, 1, 2, 1, 10);
-        put("USDMXN", "USDMXN", "USD", "MXN", 1, 1000, 1000000, 1, 3, 1, 10);
-        put("USDSGD", "USDSGD", "USD", "SGD", 1, 10000, 1000000, 1, 4, 1, 10);
-        put("USDTHB", "USDTHB", "USD", "THB", 1, 100, 1000000, 1, 2, 1, 10);
-        put("USDTRY", "USDTRY", "USD", "TRY", 1, 1000, 1000000, 1, 4, 1, 10);
-        put("USDZAR", "USDZAR", "USD", "ZAR", 1, 1000, 1000000, 1, 3, 1, 10);
+        // Coal.
         put("CAP", "Central Appalachia Coal", "CAP", "USD", 1, 20, 1000, 1, 2, 1, 10);
         put("NAP", "Northern Appalachia Coal", "NAP", "USD", 1, 20, 1000, 1, 2, 1, 10);
         put("ILB", "Illinois Basin Coal", "ILB", "USD", 1, 20, 1000, 1, 2, 1, 10);
         put("PRB", "Powder River Basin Coal", "PRB", "USD", 1, 20, 1000, 1, 2, 1, 10);
         put("UIB", "Uinta Basin Coal", "UIB", "USD", 1, 20, 1000, 1, 2, 1, 10);
+        // Coffee.
+        put("WYCA", "Yirgachefe A", "WYCA", "ETB", 1, 1, 1, 1, 0, 1, 10);
+        put("WWNA", "Wenago A", "WWNA", "ETB", 1, 1, 1, 1, 0, 1, 10);
+        put("WKCA", "Kochere A", "WKCA", "ETB", 1, 1, 1, 1, 0, 1, 10);
+        put("WGAA", "Gelena Abaya A", "WGAA", "ETB", 1, 1, 1, 1, 0, 1, 10);
     }
 
     private MockContr() {

@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.StringUtil.splitPath;
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
@@ -34,7 +35,7 @@ public final class CronServlet extends RestServlet {
         try {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
-            final long now = System.currentTimeMillis();
+            final long now = now();
 
             boolean match = false;
             if (parts.length > 0) {

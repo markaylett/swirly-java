@@ -350,8 +350,8 @@ public final class Unrest {
         throw new IOException("end-of object not found");
     }
 
-    public Unrest(Model model) {
-        rest = new Rest(model);
+    public Unrest(Model model, long now) {
+        rest = new Rest(model, now);
     }
 
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {

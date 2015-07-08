@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+ * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 package com.swirlycloud.twirly.mock;
 
@@ -34,33 +34,25 @@ public final class MockAsset {
     }
 
     static {
-        put("AUD", "Australia, Dollars", AssetType.CURRENCY);
-        put("CAD", "Canada, Dollars", AssetType.CURRENCY);
+        // Forex.
         put("CHF", "Switzerland, Francs", AssetType.CURRENCY);
-        put("CZK", "Czech Republic, Koruny", AssetType.CURRENCY);
-        put("DKK", "Denmark, Kroner", AssetType.CURRENCY);
         put("EUR", "Euro Member Countries, Euro", AssetType.CURRENCY);
         put("GBP", "United Kingdom, Pounds", AssetType.CURRENCY);
-        put("HKD", "Hong Kong, Dollars", AssetType.CURRENCY);
-        put("HUF", "Hungary, Forint", AssetType.CURRENCY);
-        put("ILS", "Israel, New Shekels", AssetType.CURRENCY);
         put("JPY", "Japan, Yen", AssetType.CURRENCY);
-        put("MXN", "Mexico, Pesos", AssetType.CURRENCY);
-        put("NOK", "Norway, Krone", AssetType.CURRENCY);
-        put("NZD", "New Zealand, Dollars", AssetType.CURRENCY);
-        put("PLN", "Poland, Zlotych", AssetType.CURRENCY);
-        put("RON", "Romania, New Lei", AssetType.CURRENCY);
-        put("SEK", "Sweden, Kronor", AssetType.CURRENCY);
-        put("SGD", "Singapore, Dollars", AssetType.CURRENCY);
-        put("THB", "Thailand, Baht", AssetType.CURRENCY);
-        put("TRY", "Turkey, New Lira", AssetType.CURRENCY);
         put("USD", "United States of America, Dollars", AssetType.CURRENCY);
         put("ZAR", "South Africa, Rand", AssetType.CURRENCY);
+        // Coal.
         put("CAP", "Central Appalachia Coal", AssetType.COMMODITY);
         put("NAP", "Northern Appalachia Coal", AssetType.COMMODITY);
         put("ILB", "Illinois Basin Coal", AssetType.COMMODITY);
         put("PRB", "Powder River Basin Coal", AssetType.COMMODITY);
         put("UIB", "Uinta Basin Coal", AssetType.COMMODITY);
+        // Coffee.
+        put("ETB", "Ethiopia, Birr", AssetType.CURRENCY);
+        put("WYCA", "Yirgachefe A", AssetType.COMMODITY);
+        put("WWNA", "Wenago A", AssetType.COMMODITY);
+        put("WKCA", "Kochere A", AssetType.COMMODITY);
+        put("WGAA", "Gelena Abaya A", AssetType.COMMODITY);
     }
 
     private MockAsset() {

@@ -13,6 +13,9 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.util.Params;
 
+/**
+ * An item of value.
+ */
 public final @NonNullByDefault class Asset extends Rec {
     private final AssetType type;
 

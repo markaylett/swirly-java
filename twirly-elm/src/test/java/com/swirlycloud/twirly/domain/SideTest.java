@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
+import static com.swirlycloud.twirly.util.TimeUtil.now;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -30,7 +31,7 @@ public final class SideTest {
 
     @Test
     public final void testOrders() {
-        long now = System.currentTimeMillis();
+        long now = now();
         // Two orders at the same price level.
         final Order apple = new Order(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
                 JulianDay.isoToJd(20140314), "apple", Action.BUY, 12345, 10, 0, now);
@@ -135,7 +136,7 @@ public final class SideTest {
 
     @Test
     public final void testLevels() {
-        final long now = System.currentTimeMillis();
+        final long now = now();
         // Two orders at the same price level.
         final Order apple = new Order(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
                 JulianDay.isoToJd(20140314), "apple", Action.BUY, 12345, 10, 0, now);

@@ -5,6 +5,9 @@ package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.util.CollectionUtil.compareInt;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
@@ -16,7 +19,7 @@ import com.swirlycloud.twirly.intrusive.Tree;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.RbNode;
 
-public final class Sess extends BasicRbNode {
+public final @NonNullByDefault class Sess extends BasicRbNode {
 
     public final class PosnTree extends Tree<RbNode> {
 
@@ -35,7 +38,7 @@ public final class Sess extends BasicRbNode {
             return n;
         }
 
-        public final RbNode find(String contr, int settlDay) {
+        public final @Nullable RbNode find(String contr, int settlDay) {
             RbNode tmp = root;
             int comp;
             while (tmp != null) {
@@ -55,7 +58,7 @@ public final class Sess extends BasicRbNode {
          * Finds the first node greater than or equal to the search key.
          */
 
-        public final RbNode nfind(String contr, int settlDay) {
+        public final @Nullable RbNode nfind(String contr, int settlDay) {
             RbNode tmp = root;
             RbNode res = null;
             int comp;
@@ -79,7 +82,7 @@ public final class Sess extends BasicRbNode {
          * Return match or parent.
          */
 
-        public final RbNode pfind(String contr, int settlDay) {
+        public final @Nullable RbNode pfind(String contr, int settlDay) {
             RbNode tmp = root, parent = null;
             while (tmp != null) {
                 parent = tmp;
@@ -101,17 +104,17 @@ public final class Sess extends BasicRbNode {
         }
 
         @Override
-        protected final void setLeft(RbNode node, RbNode left) {
+        protected final void setLeft(RbNode node, @Nullable RbNode left) {
             node.setLeft(left);
         }
 
         @Override
-        protected final void setRight(RbNode node, RbNode right) {
+        protected final void setRight(RbNode node, @Nullable RbNode right) {
             node.setRight(right);
         }
 
         @Override
-        protected final void setParent(RbNode node, RbNode parent) {
+        protected final void setParent(RbNode node, @Nullable RbNode parent) {
             node.setParent(parent);
         }
 
@@ -121,27 +124,27 @@ public final class Sess extends BasicRbNode {
         }
 
         @Override
-        protected final RbNode next(RbNode node) {
+        protected final @Nullable RbNode next(RbNode node) {
             return node.rbNext();
         }
 
         @Override
-        protected final RbNode prev(RbNode node) {
+        protected final @Nullable RbNode prev(RbNode node) {
             return node.rbPrev();
         }
 
         @Override
-        protected final RbNode getLeft(RbNode node) {
+        protected final @Nullable RbNode getLeft(RbNode node) {
             return node.getLeft();
         }
 
         @Override
-        protected final RbNode getRight(RbNode node) {
+        protected final @Nullable RbNode getRight(RbNode node) {
             return node.getRight();
         }
 
         @Override
-        protected final RbNode getParent(RbNode node) {
+        protected final @Nullable RbNode getParent(RbNode node) {
             return node.getParent();
         }
 
@@ -186,7 +189,7 @@ public final class Sess extends BasicRbNode {
         }
     }
 
-    final Order removeOrder(String market, long id) {
+    final @Nullable Order removeOrder(String market, long id) {
         final RbNode node = orders.find(market, id);
         if (node == null) {
             return null;
@@ -196,7 +199,7 @@ public final class Sess extends BasicRbNode {
         return order;
     }
 
-    final Order removeOrder(String ref) {
+    final @Nullable Order removeOrder(String ref) {
         final Order order = (Order) refIdx.remove(trader.getMnem(), ref);
         if (order != null) {
             orders.remove(order);
@@ -204,24 +207,24 @@ public final class Sess extends BasicRbNode {
         return order;
     }
 
-    public final Order findOrder(String market, long id) {
+    public final @Nullable Order findOrder(String market, long id) {
         return (Order) orders.find(market, id);
     }
 
-    public final Order findOrder(String ref) {
+    public final @Nullable Order findOrder(String ref) {
         assert ref != null;
         return (Order) refIdx.find(trader.getMnem(), ref);
     }
 
-    public final RbNode getRootOrder() {
+    public final @Nullable RbNode getRootOrder() {
         return orders.getRoot();
     }
 
-    public final RbNode getFirstOrder() {
+    public final @Nullable RbNode getFirstOrder() {
         return orders.getFirst();
     }
 
-    public final RbNode getLastOrder() {
+    public final @Nullable RbNode getLastOrder() {
         return orders.getLast();
     }
 
@@ -247,19 +250,19 @@ public final class Sess extends BasicRbNode {
         return true;
     }
 
-    public final Exec findTrade(String market, long id) {
+    public final @Nullable Exec findTrade(String market, long id) {
         return (Exec) trades.find(market, id);
     }
 
-    public final RbNode getRootTrade() {
+    public final @Nullable RbNode getRootTrade() {
         return trades.getRoot();
     }
 
-    public final RbNode getFirstTrade() {
+    public final @Nullable RbNode getFirstTrade() {
         return trades.getFirst();
     }
 
-    public final RbNode getLastTrade() {
+    public final @Nullable RbNode getLastTrade() {
         return trades.getLast();
     }
 
@@ -272,19 +275,13 @@ public final class Sess extends BasicRbNode {
         assert unused == null;
     }
 
-    final Posn updatePosn(Posn posn) {
+    final Posn addPosn(Posn posn) {
         final String contr = posn.getContr();
         final int settlDay = posn.getSettlDay();
         final Posn exist = (Posn) posns.pfind(contr, settlDay);
         if (exist != null && exist.getContr().equals(contr) && exist.getSettlDay() == settlDay) {
-
-            // Update existing position.
-
-            exist.setBuyCost(posn.getBuyCost());
-            exist.setBuyLots(posn.getBuyLots());
-            exist.setSellCost(posn.getSellCost());
-            exist.setSellLots(posn.getSellLots());
-
+            // Add to existing position.
+            exist.add(posn);
             posn = exist;
         } else {
             final RbNode parent = exist;
@@ -304,23 +301,35 @@ public final class Sess extends BasicRbNode {
         return posn;
     }
 
-    public final Posn findPosn(String contr, int settlDay) {
+    public final @Nullable Posn findPosn(String contr, int settlDay) {
         return (Posn) posns.find(contr, settlDay);
     }
 
-    public final RbNode getRootPosn() {
+    public final @Nullable RbNode getRootPosn() {
         return posns.getRoot();
     }
 
-    public final RbNode getFirstPosn() {
+    public final @Nullable RbNode getFirstPosn() {
         return posns.getFirst();
     }
 
-    public final RbNode getLastPosn() {
+    public final @Nullable RbNode getLastPosn() {
         return posns.getLast();
     }
 
     public final boolean isEmptyPosn() {
         return posns.isEmpty();
+    }
+
+    public final void settlPosns(int busDay) {
+        for (RbNode node = posns.getFirst(); node != null;) {
+            final Posn posn = (Posn) node;
+            node = node.rbNext();
+            if (posn.isSettlDaySet() && posn.getSettlDay() <= busDay) {
+                posns.remove(posn);
+                posn.setSettlDay(0);
+                addPosn(posn);
+            }
+        }
     }
 }

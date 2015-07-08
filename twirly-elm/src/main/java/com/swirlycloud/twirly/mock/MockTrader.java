@@ -44,7 +44,8 @@ public final class MockTrader {
     private MockTrader() {
     }
 
-    public static Trader newTrader(String mnem) {
+    @SuppressWarnings("null")
+    public static @NonNull Trader newTrader(String mnem) {
         return MAP.get(mnem).call();
     }
 

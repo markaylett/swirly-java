@@ -227,11 +227,11 @@ public final class AsyncModelService implements AsyncModel {
 
     @SuppressWarnings("null")
     @Override
-    public final @NonNull Future<SlNode> selectPosn() {
+    public final @NonNull Future<SlNode> selectPosn(final int busDay) {
         return service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
-                return model.selectPosn();
+                return model.selectPosn(busDay);
             }
         });
     }

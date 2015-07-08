@@ -49,6 +49,13 @@ var MarketDialog = React.createClass({
             state: event.target.value
         });
     },
+    onFocusDisplay: function(event) {
+        if (!isSpecified(this.state.display)) {
+            this.setState({
+                display: this.state.mnem
+            });
+        }
+    },
     onFocusExpiryDate: function(event) {
         if (!isSpecified(this.state.expiryDate)) {
             this.setState({
@@ -135,7 +142,7 @@ var MarketDialog = React.createClass({
                         <label htmlFor="display" className="col-sm-2 control-label">Display</label>
                         <div className="col-sm-10">
                           <input id="display" type="text" className="form-control" value={display}
-                                 onChange={this.onChangeDisplay}/>
+                                 onChange={this.onChangeDisplay} onFocus={this.onFocusDisplay}/>
                         </div>
                       </div>
                       <div className="form-group">
@@ -220,6 +227,13 @@ var TraderDialog = React.createClass({
             email: event.target.value
         });
     },
+    onFocusDisplay: function(event) {
+        if (!isSpecified(this.state.display)) {
+            this.setState({
+                display: this.state.mnem
+            });
+        }
+    },
     onClickSave: function(event) {
         event.preventDefault();
         var state = this.state;
@@ -274,7 +288,7 @@ var TraderDialog = React.createClass({
                         <label htmlFor="display" className="col-sm-2 control-label">Display</label>
                         <div className="col-sm-10">
                           <input id="display" type="email" className="form-control" value={display}
-                                 onChange={this.onChangeDisplay}/>
+                                 onChange={this.onChangeDisplay} onFocus={this.onFocusDisplay}/>
                         </div>
                       </div>
                       <div className="form-group">

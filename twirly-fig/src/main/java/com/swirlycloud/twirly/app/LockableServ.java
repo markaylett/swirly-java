@@ -21,12 +21,12 @@ public final @NonNullByDefault class LockableServ extends Serv {
     private static final int PERMITS = Runtime.getRuntime().availableProcessors();
     private final Semaphore sem = new Semaphore(PERMITS);
 
-    public LockableServ(AsyncModel model) throws InterruptedException, ExecutionException {
-        super(model);
+    public LockableServ(AsyncModel model, long now) throws InterruptedException, ExecutionException {
+        super(model, now);
     }
 
-    public LockableServ(Model model) {
-        super(model);
+    public LockableServ(Model model, long now) {
+        super(model, now);
     }
 
     public final void acquireRead() {

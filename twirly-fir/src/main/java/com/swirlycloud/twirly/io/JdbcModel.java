@@ -582,13 +582,19 @@ public final class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectPosn() {
+    public final SlNode selectPosn(int busDay) {
         final PosnTree posns = new PosnTree();
         try (final ResultSet rs = selectPosnStmt.executeQuery()) {
             while (rs.next()) {
                 final String trader = rs.getString("trader");
                 final String contr = rs.getString("contr");
-                final int settlDay = rs.getInt("settlDay");
+                int settlDay = rs.getInt("settlDay");
+                assert trader != null;
+                assert contr != null;
+                // FIXME: Consider time-of-day.
+                if (settlDay != 0 && settlDay <= busDay) {
+                    settlDay = 0;
+                }
                 // Lazy position.
                 Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
                 if (posn == null || !posn.getTrader().equals(trader)
@@ -603,12 +609,10 @@ public final class JdbcModel implements Model {
                 final long cost = rs.getLong("cost");
                 final long lots = rs.getLong("lots");
                 if (action == Action.BUY) {
-                    posn.setBuyCost(cost);
-                    posn.setBuyLots(lots);
+                    posn.addBuy(cost, lots);
                 } else {
                     assert action == Action.SELL;
-                    posn.setSellCost(cost);
-                    posn.setSellLots(lots);
+                    posn.addSell(cost, lots);
                 }
             }
         } catch (final SQLException e) {

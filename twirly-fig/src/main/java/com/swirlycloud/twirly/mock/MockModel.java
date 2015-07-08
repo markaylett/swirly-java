@@ -78,7 +78,7 @@ public class MockModel implements Model {
     }
 
     @Override
-    public SlNode selectPosn() {
+    public SlNode selectPosn(int busDay) {
         return null;
     }
 }

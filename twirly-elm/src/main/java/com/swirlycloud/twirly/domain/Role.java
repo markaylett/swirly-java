@@ -1,12 +1,18 @@
 /*******************************************************************************
- * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+ * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
 import com.swirlycloud.twirly.util.Invertible;
 
 public enum Role implements Invertible<Role> {
-    MAKER(1), TAKER(2);
+    /**
+     * Passive buyer or seller that receives the spread.
+     */
+    MAKER(1), /**
+     * Aggressive buyer or seller that crosses the market and pays the spread.
+     */
+    TAKER(2);
     private final int id;
 
     private Role(int id) {
