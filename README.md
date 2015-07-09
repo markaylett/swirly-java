@@ -110,10 +110,19 @@ JDBC Realm
 
 You can configure the `JDBCRealm` instead of the `UserDatabaseRealm` as follows:
 
-    cp mysql-connector-java-x.y.z.jar $CATALINA_HOME/lib/
+    $ cp mysql-connector-java-x.y.z.jar $CATALINA_HOME/lib/
 
     <Realm className="org.apache.catalina.realm.JDBCRealm"
            driverName="org.gjt.mm.mysql.Driver"
            connectionURL="jdbc:mysql://localhost/twirly?user=root&amp;password="
            userTable="User_t" userNameCol="email" userCredCol="pass"
            userRoleTable="UserGroup_v" roleNameCol="group_" />
+
+OS X Daemons
+------------
+
+After installing mysql-server and memcached from Mac Ports, start the daemons using the following
+commands:
+
+    $ auso launchctl load -w /Library/LaunchDaemons/org.macports.mysql56-server.plist 
+    $ sudo launchctl load -w /Library/LaunchDaemons/org.macports.memcached.plist
