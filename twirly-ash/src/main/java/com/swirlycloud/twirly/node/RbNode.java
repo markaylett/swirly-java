@@ -3,6 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
+/**
+ * Red-black node.
+ */
 public interface RbNode {
 
     void setNode(RbNode rhs);

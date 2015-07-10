@@ -3,9 +3,11 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 public interface SlNode {
 
-    void setSlNext(SlNode next);
+    void setSlNext(@Nullable SlNode next);
 
-    SlNode slNext();
+    @Nullable SlNode slNext();
 }
