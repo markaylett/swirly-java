@@ -5,6 +5,8 @@ package com.swirlycloud.twirly.domain;
 
 /**
  * Asset class.
+ *
+ * @author Mark Aylett
  */
 public enum AssetType {
     COMMODITY(1), CORPORATE(2), CURRENCY(3), EQUITY(4), GOVERNMENT(5), INDEX(6);

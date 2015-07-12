@@ -14,9 +14,9 @@ import java.util.LinkedList;
  * A sorted and unique set of elements. Although this collection could be considered a
  * {@link java.util.List} or {@link java.util.Set}, neither interface is currently implemented.
  *
- * @author Mark Aylett
  * @param <V>
  *            The element type.
+ * @author Mark Aylett
  */
 public final class SortedList<V> implements Collection<V> {
 

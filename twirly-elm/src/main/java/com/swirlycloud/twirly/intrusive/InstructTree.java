@@ -47,7 +47,6 @@ public final @NonNullByDefault class InstructTree extends Tree<RbNode> {
     /**
      * Finds the first node greater than or equal to the search key.
      */
-
     public final @Nullable RbNode nfind(String market, long id) {
         RbNode tmp = root;
         RbNode res = null;
@@ -71,7 +70,6 @@ public final @NonNullByDefault class InstructTree extends Tree<RbNode> {
     /**
      * Return match or parent.
      */
-
     public final @Nullable RbNode pfind(String market, long id) {
         RbNode tmp = root, parent = null;
         while (tmp != null) {

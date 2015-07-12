@@ -5,6 +5,11 @@ package com.swirlycloud.twirly.node;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+/**
+ * Doubly-linked node.
+ * 
+ * @author Mark Aylett
+ */
 public @NonNullByDefault interface DlNode {
 
     void insert(DlNode prev, DlNode next);

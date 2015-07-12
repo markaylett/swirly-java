@@ -27,6 +27,8 @@ import com.swirlycloud.twirly.util.Params;
 
 /**
  * An instruction to buy or sell goods or services.
+ * 
+ * @author Mark Aylett
  */
 public final @NonNullByDefault class Order extends BasicRbNode implements Jsonifiable, DlNode,
         SlNode, Instruct {

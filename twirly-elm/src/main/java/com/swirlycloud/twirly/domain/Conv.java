@@ -24,7 +24,6 @@ public final class Conv {
     /**
      * Convert quantity to lots.
      */
-
     public static long qtyToLots(double qty, double qtyInc) {
         return realToIncs(qty, qtyInc);
     }
@@ -32,7 +31,6 @@ public final class Conv {
     /**
      * Convert lots to quantity.
      */
-
     public static double lotsToQty(long lots, double qtyInc) {
         return incsToReal(lots, qtyInc);
     }
@@ -40,7 +38,6 @@ public final class Conv {
     /**
      * Convert price to ticks.
      */
-
     public static long priceToTicks(double price, double priceInc) {
         return realToIncs(price, priceInc);
     }
@@ -48,7 +45,6 @@ public final class Conv {
     /**
      * Convert ticks to price.
      */
-
     public static double ticksToPrice(long ticks, double priceInc) {
         return incsToReal(ticks, priceInc);
     }
@@ -56,7 +52,6 @@ public final class Conv {
     /**
      * Number of decimal places in real.
      */
-
     public static int realToDp(double d) {
         int dp;
         for (dp = 0; dp < 9; ++dp) {
@@ -72,7 +67,6 @@ public final class Conv {
     /**
      * Decimal places as real.
      */
-
     public static double dpToReal(int dp) {
         return Math.pow(10, -dp);
     }

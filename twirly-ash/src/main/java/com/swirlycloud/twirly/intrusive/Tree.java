@@ -20,6 +20,8 @@ import org.eclipse.jdt.annotation.Nullable;
  * <li>Every path from a given node to any of its descendant NIL nodes contains the same number of
  * black nodes.</li>
  * </ol>
+ * 
+ * @author Mark Aylett
  */
 public abstract @NonNullByDefault class Tree<V> {
     private static final int INDENT = 4;

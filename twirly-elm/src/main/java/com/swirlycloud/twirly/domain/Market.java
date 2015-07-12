@@ -21,6 +21,8 @@ import com.swirlycloud.twirly.util.Params;
 
 /**
  * A place where buyers and sellers come together to exchange goods or services.
+ * 
+ * @author Mark Aylett
  */
 public final @NonNullByDefault class Market extends Rec implements Financial {
     /**

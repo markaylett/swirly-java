@@ -11,7 +11,6 @@ public final class JulianDay {
     /**
      * Gregorian to ISO8601 date.
      */
-
     public static int ymdToIso(int year, int mon, int mday) {
         assert mon <= 11;
         assert mday <= 31;
@@ -21,7 +20,6 @@ public final class JulianDay {
     /**
      * Gregorian date to Julian day.
      */
-
     public static int ymdToJd(int year, int mon, int mday) {
         // The formula given below was taken from the 1990 edition of the U.S. Naval Observatory's
         // Almanac for Computers.
@@ -35,7 +33,6 @@ public final class JulianDay {
     /**
      * ISO8601 to Julian day.
      */
-
     public static int isoToJd(int iso) {
         final int year = iso / 10000;
         final int mon = (iso / 100 % 100) - 1;
@@ -46,7 +43,6 @@ public final class JulianDay {
     /**
      * Julian day to ISO8601.
      */
-
     public static int jdToIso(int jd) {
         // The formula given above was taken from the 1990 edition of the U.S. Naval Observatory's
         // Almanac for Computers.
@@ -69,7 +65,6 @@ public final class JulianDay {
     /**
      * Juilian day to Modified Julian day. Epoch is November 17, 1858.
      */
-
     public static int jdToMjd(int jd) {
         return jd - 2400000;
     }
@@ -77,7 +72,6 @@ public final class JulianDay {
     /**
      * Modified Julian day to Julian day. Epoch is November 17, 1858.
      */
-
     public static int mjdToJd(int mjd) {
         return mjd + 2400000;
     }
@@ -85,7 +79,6 @@ public final class JulianDay {
     /**
      * Julian day to Truncated Julian day. Epoch is May 24, 1968.
      */
-
     public static int jdToTjd(int jd) {
         return jd - 2440000;
     }
@@ -93,7 +86,6 @@ public final class JulianDay {
     /**
      * Truncated Julian day to Gregorian date. Epoch is May 24, 1968.
      */
-
     public static int tjdToJd(int tjd) {
         return tjd + 2440000;
     }
@@ -101,7 +93,6 @@ public final class JulianDay {
     /**
      * Julian day to milliseconds since Unix epoch.
      */
-
     public static long jdToMillis(int jd) {
         // Julian day for January 1st, 1970.
         final int JD_UNIX_EPOC = 2440588;
@@ -113,7 +104,6 @@ public final class JulianDay {
     /**
      * Julian day to ISO8601 if argument is non-zero.
      */
-
     public static int maybeJdToIso(int jd) {
         return jd != 0 ? jdToIso(jd) : 0;
     }
@@ -121,7 +111,6 @@ public final class JulianDay {
     /**
      * ISO8601 to Julian day if argument is non-zero.
      */
-
     public static int maybeIsoToJd(int iso) {
         return iso != 0 ? isoToJd(iso) : 0;
     }

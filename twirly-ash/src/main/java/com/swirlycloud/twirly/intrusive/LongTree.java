@@ -13,7 +13,6 @@ public abstract @NonNullByDefault class LongTree<V> extends Tree<V> {
     /**
      * Finds the node with the same key as node.
      */
-
     public final @Nullable V find(long key) {
         V tmp = root;
         int comp;
@@ -33,7 +32,6 @@ public abstract @NonNullByDefault class LongTree<V> extends Tree<V> {
     /**
      * Finds the first node greater than or equal to the search key.
      */
-
     public final @Nullable V nfind(long key) {
         V tmp = root;
         V res = null;
@@ -57,7 +55,6 @@ public abstract @NonNullByDefault class LongTree<V> extends Tree<V> {
     /**
      * Return match or parent.
      */
-
     public final @Nullable V pfind(long key) {
         V tmp = root, parent = null;
         while (tmp != null) {

@@ -15,6 +15,8 @@ import com.swirlycloud.twirly.util.Params;
 
 /**
  * An item of value.
+ *
+ * @author Mark Aylett
  */
 public final @NonNullByDefault class Asset extends Rec {
     private final AssetType type;

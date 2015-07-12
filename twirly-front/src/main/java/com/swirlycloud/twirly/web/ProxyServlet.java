@@ -32,7 +32,7 @@ import com.google.appengine.api.utils.SystemProperty;
  * </p>
  *
  * @author Mark Aylett
- * */
+ */
 @SuppressWarnings("serial")
 public final class ProxyServlet extends HttpServlet {
     private String module;

@@ -14,8 +14,9 @@ import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Gregorian date.
+ * 
+ * @author Mark Aylett
  */
-
 public final class GregDate implements Comparable<GregDate> {
     private static final int[] MDAYS = new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -164,9 +165,7 @@ public final class GregDate implements Comparable<GregDate> {
     /**
      * ISO8601 to Gregorian date.
      */
-
-    @NonNull
-    public static GregDate valueOfIso(int iso) {
+    public static @NonNull GregDate valueOfIso(int iso) {
         final int year = iso / 10000;
         final int mon = (iso / 100 % 100) - 1;
         final int mday = iso % 100;

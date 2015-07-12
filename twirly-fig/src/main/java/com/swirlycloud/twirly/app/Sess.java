@@ -57,7 +57,6 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
         /**
          * Finds the first node greater than or equal to the search key.
          */
-
         public final @Nullable RbNode nfind(String contr, int settlDay) {
             RbNode tmp = root;
             RbNode res = null;
@@ -81,7 +80,6 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
         /**
          * Return match or parent.
          */
-
         public final @Nullable RbNode pfind(String contr, int settlDay) {
             RbNode tmp = root, parent = null;
             while (tmp != null) {
