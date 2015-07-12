@@ -38,10 +38,10 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
-import com.swirlycloud.twirly.mock.MockModel;
+import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.mock.MockTrader;
 import com.swirlycloud.twirly.web.Unrest.PosnKey;
 import com.swirlycloud.twirly.web.Unrest.RecStruct;
@@ -214,7 +214,7 @@ public final class UnrestTest {
         assertEquals(sellLots, actual.getSellLots());
     }
 
-    private Model model;
+    private Datastore datastore;
     private Unrest unrest;
 
     private final Trader postTrader(String mnem, String display, String email)
@@ -267,16 +267,16 @@ public final class UnrestTest {
     @Before
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        model = new MockModel();
-        unrest = new Unrest(model, NOW);
+        datastore = new MockDatastore();
+        unrest = new Unrest(datastore, NOW);
         postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
     }
 
     @After
     public final void tearDown() throws Exception {
-        model.close();
+        datastore.close();
         unrest = null;
-        model = null;
+        datastore = null;
     }
 
     @Test

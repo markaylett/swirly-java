@@ -9,7 +9,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.node.SlNode;
 
-public interface AsyncModel extends Journ {
+public interface AsyncModel {
 
     @NonNull
     Future<SlNode> selectAsset();

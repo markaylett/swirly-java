@@ -28,8 +28,8 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.io.AsyncModel;
-import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.io.AsyncDatastore;
+import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
 
@@ -124,12 +124,12 @@ public final @NonNullByDefault class Rest {
         this.serv = serv;
     }
 
-    public Rest(AsyncModel model, long now) throws InterruptedException, ExecutionException {
-        this(new LockableServ(model, now));
+    public Rest(AsyncDatastore datastore, long now) throws InterruptedException, ExecutionException {
+        this(new LockableServ(datastore, now));
     }
 
-    public Rest(Model model, long now) {
-        this(new LockableServ(model, now));
+    public Rest(Datastore datastore, long now) {
+        this(new LockableServ(datastore, now));
     }
 
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)

@@ -16,7 +16,6 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
@@ -32,6 +31,7 @@ import com.swirlycloud.twirly.domain.View;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("null")
@@ -350,8 +350,8 @@ public final class Unrest {
         throw new IOException("end-of object not found");
     }
 
-    public Unrest(Model model, long now) {
-        rest = new Rest(model, now);
+    public Unrest(Datastore datastore, long now) {
+        rest = new Rest(datastore, now);
     }
 
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {

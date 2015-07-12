@@ -7,7 +7,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.node.SlNode;
 
-public interface Model extends Journ {
+public interface Model extends AutoCloseable {
 
     @Nullable
     SlNode selectAsset();

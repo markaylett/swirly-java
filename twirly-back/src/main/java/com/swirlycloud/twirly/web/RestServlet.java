@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ServException;
-import com.swirlycloud.twirly.io.AsyncModel;
-import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.io.AsyncDatastore;
+import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
@@ -51,7 +51,7 @@ public abstract class RestServlet extends HttpServlet {
     }
 
     protected final Request parseRequest(HttpServletRequest req) throws BadRequestException {
-        try (JsonParser p = Json.createParser(req.getReader())) {
+        try (final JsonParser p = Json.createParser(req.getReader())) {
             parseStartObject(p);
             final Request r = new Request();
             r.parse(p);
@@ -94,14 +94,15 @@ public abstract class RestServlet extends HttpServlet {
     }
 
     @SuppressWarnings("null")
-    public static void setModel(AsyncModel model) throws InterruptedException, ExecutionException {
+    public static void setDatastore(AsyncDatastore datastore) throws InterruptedException,
+            ExecutionException {
         final long now = now();
-        RestServlet.rest = new Rest(model, now);
+        RestServlet.rest = new Rest(datastore, now);
     }
 
     @SuppressWarnings("null")
-    public static void setModel(Model model) {
+    public static void setDatastore(Datastore datastore) {
         final long now = now();
-        RestServlet.rest = new Rest(model, now);
+        RestServlet.rest = new Rest(datastore, now);
     }
 }

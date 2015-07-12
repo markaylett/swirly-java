@@ -56,8 +56,8 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.FixRejectException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.io.AsyncModel;
-import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.io.AsyncDatastore;
+import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.node.TransNode;
 
 public final class FixServer extends MessageCracker implements Application {
@@ -165,14 +165,15 @@ public final class FixServer extends MessageCracker implements Application {
         }
     }
 
-    public FixServer(SessionSettings settings, @NonNull AsyncModel model) throws ConfigError,
-            FieldConvertError, NotFoundException, InterruptedException, ExecutionException {
-        this(settings, new LockableServ(model, now()));
+    public FixServer(SessionSettings settings, @NonNull AsyncDatastore datastore)
+            throws ConfigError, FieldConvertError, NotFoundException, InterruptedException,
+            ExecutionException {
+        this(settings, new LockableServ(datastore, now()));
     }
 
-    public FixServer(SessionSettings settings, @NonNull Model model) throws ConfigError,
+    public FixServer(SessionSettings settings, @NonNull Datastore datastore) throws ConfigError,
             FieldConvertError, NotFoundException {
-        this(settings, new LockableServ(model, now()));
+        this(settings, new LockableServ(datastore, now()));
     }
 
     @Override
