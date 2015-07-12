@@ -15,6 +15,7 @@ import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class Trader extends Rec {
 
+    private static final long serialVersionUID = 1L;
     private final String email;
 
     public Trader(String mnem, @Nullable String display, String email) {

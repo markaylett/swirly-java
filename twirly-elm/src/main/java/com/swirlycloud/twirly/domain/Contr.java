@@ -24,6 +24,8 @@ import com.swirlycloud.twirly.util.Params;
  * @author Mark Aylett
  */
 public final @NonNullByDefault class Contr extends Rec {
+
+    private static final long serialVersionUID = 1L;
     private Memorable asset;
     private Memorable ccy;
     private final int tickNumer;

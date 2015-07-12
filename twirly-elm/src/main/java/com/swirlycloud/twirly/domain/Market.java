@@ -25,6 +25,8 @@ import com.swirlycloud.twirly.util.Params;
  * @author Mark Aylett
  */
 public final @NonNullByDefault class Market extends Rec implements Financial {
+
+    private static final long serialVersionUID = 1L;
     /**
      * Maximum price levels in view.
      */
