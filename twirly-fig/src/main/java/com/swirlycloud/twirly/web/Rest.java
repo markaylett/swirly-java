@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
+import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -42,67 +43,27 @@ public final @NonNullByDefault class Rest {
         return val == null ? false : val.booleanValue();
     }
 
-    private final void doGetRec(RecType recType, Params params, long now, Appendable out)
+    private final void doGetRec(RecType recType, Params params, Appendable out)
             throws IOException {
-        out.append('[');
-        RbNode node = serv.getFirstRec(recType);
-        for (int i = 0; node != null; node = node.rbNext()) {
-            final Rec rec = (Rec) node;
-            if (i > 0) {
-                out.append(',');
-            }
-            rec.toJson(params, out);
-            ++i;
-        }
-        out.append(']');
+        toJsonArray(serv.getFirstRec(recType), params, out);
     }
 
-    private final void doGetOrder(Sess sess, Params params, long now, Appendable out)
+    private final void doGetOrder(Sess sess, Params params, Appendable out)
             throws IOException {
-        out.append('[');
-        RbNode node = sess.getFirstOrder();
-        for (int i = 0; node != null; node = node.rbNext()) {
-            final Order order = (Order) node;
-            if (i > 0) {
-                out.append(',');
-            }
-            order.toJson(params, out);
-            ++i;
-        }
-        out.append(']');
+        toJsonArray(sess.getFirstOrder(), params, out);
     }
 
-    private final void doGetTrade(Sess sess, Params params, long now, Appendable out)
+    private final void doGetTrade(Sess sess, Params params, Appendable out)
             throws IOException {
-        out.append('[');
-        RbNode node = sess.getFirstTrade();
-        for (int i = 0; node != null; node = node.rbNext()) {
-            final Exec trade = (Exec) node;
-            if (i > 0) {
-                out.append(',');
-            }
-            trade.toJson(params, out);
-            ++i;
-        }
-        out.append(']');
+        toJsonArray(sess.getFirstTrade(), params, out);
     }
 
-    private final void doGetPosn(Sess sess, Params params, long now, Appendable out)
+    private final void doGetPosn(Sess sess, Params params, Appendable out)
             throws IOException {
-        out.append('[');
-        RbNode node = sess.getFirstPosn();
-        for (int i = 0; node != null; node = node.rbNext()) {
-            final Posn posn = (Posn) node;
-            if (i > 0) {
-                out.append(',');
-            }
-            posn.toJson(params, out);
-            ++i;
-        }
-        out.append(']');
+        toJsonArray(sess.getFirstPosn(), params, out);
     }
 
-    private final void doGetPosn(Sess sess, String contr, Params params, long now, Appendable out)
+    private final void doGetPosn(Sess sess, String contr, Params params, Appendable out)
             throws IOException {
         out.append('[');
         RbNode node = sess.getFirstPosn();
@@ -137,14 +98,14 @@ public final @NonNullByDefault class Rest {
         serv.acquireRead();
         try {
             out.append("{\"assets\":");
-            doGetRec(RecType.ASSET, params, now, out);
+            doGetRec(RecType.ASSET, params, out);
             out.append(",\"contrs\":");
-            doGetRec(RecType.CONTR, params, now, out);
+            doGetRec(RecType.CONTR, params, out);
             out.append(",\"markets\":");
-            doGetRec(RecType.MARKET, params, now, out);
+            doGetRec(RecType.MARKET, params, out);
             if (withTraders) {
                 out.append(",\"traders\":");
-                doGetRec(RecType.TRADER, params, now, out);
+                doGetRec(RecType.TRADER, params, out);
             }
             out.append('}');
         } finally {
@@ -156,7 +117,7 @@ public final @NonNullByDefault class Rest {
             throws IOException {
         serv.acquireRead();
         try {
-            doGetRec(recType, params, now, out);
+            doGetRec(recType, params, out);
         } finally {
             serv.releaseRead();
         }
@@ -289,11 +250,11 @@ public final @NonNullByDefault class Rest {
                 return;
             }
             out.append("{\"orders\":");
-            doGetOrder(sess, params, now, out);
+            doGetOrder(sess, params, out);
             out.append(",\"trades\":");
-            doGetTrade(sess, params, now, out);
+            doGetTrade(sess, params, out);
             out.append(",\"posns\":");
-            doGetPosn(sess, params, now, out);
+            doGetPosn(sess, params, out);
             out.append('}');
         } finally {
             serv.releaseRead();
@@ -327,7 +288,7 @@ public final @NonNullByDefault class Rest {
                 out.append("[]");
                 return;
             }
-            doGetOrder(sess, params, now, out);
+            doGetOrder(sess, params, out);
         } finally {
             serv.releaseRead();
         }
@@ -456,7 +417,7 @@ public final @NonNullByDefault class Rest {
                 out.append("[]");
                 return;
             }
-            doGetTrade(sess, params, now, out);
+            doGetTrade(sess, params, out);
         } finally {
             serv.releaseRead();
         }
@@ -543,7 +504,7 @@ public final @NonNullByDefault class Rest {
                 out.append("[]");
                 return;
             }
-            doGetPosn(sess, params, now, out);
+            doGetPosn(sess, params, out);
         } finally {
             serv.releaseRead();
         }
@@ -562,7 +523,7 @@ public final @NonNullByDefault class Rest {
                 out.append("[]");
                 return;
             }
-            doGetPosn(sess, contr, params, now, out);
+            doGetPosn(sess, contr, params, out);
         } finally {
             serv.releaseRead();
         }
