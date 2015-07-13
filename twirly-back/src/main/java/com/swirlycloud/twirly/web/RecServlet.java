@@ -9,8 +9,6 @@ import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,11 +26,6 @@ public final class RecServlet extends RestServlet {
 
     private static final int TYPE_PART = 0;
     private static final int MNEM_PART = 1;
-
-    @Override
-    public final void init(ServletConfig config) throws ServletException {
-        super.init(config);
-    }
 
     @SuppressWarnings("null")
     @Override

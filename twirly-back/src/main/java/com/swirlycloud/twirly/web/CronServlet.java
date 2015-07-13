@@ -8,8 +8,6 @@ import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,11 +19,6 @@ import com.swirlycloud.twirly.fx.EcbRates;
 public final class CronServlet extends RestServlet {
 
     private static final int JOB_PART = 0;
-
-    @Override
-    public final void init(ServletConfig config) throws ServletException {
-        super.init(config);
-    }
 
     @Override
     protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
