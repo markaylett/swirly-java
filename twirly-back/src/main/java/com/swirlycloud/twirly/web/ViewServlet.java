@@ -30,7 +30,7 @@ public final class ViewServlet extends RestServlet {
 
     @SuppressWarnings("null")
     @Override
-    public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
