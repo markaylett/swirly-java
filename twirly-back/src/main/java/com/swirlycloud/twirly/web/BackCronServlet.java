@@ -16,7 +16,7 @@ import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.fx.EcbRates;
 
 @SuppressWarnings("serial")
-public final class CronServlet extends RestServlet {
+public final class BackCronServlet extends RestServlet {
 
     private static final int JOB_PART = 0;
 

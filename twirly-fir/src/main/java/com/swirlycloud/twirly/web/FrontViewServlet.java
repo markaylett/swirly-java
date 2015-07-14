@@ -17,9 +17,9 @@ import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
-public final class ViewServlet extends RestServlet {
+public class FrontViewServlet extends RestServlet {
 
-    private static final int MNEM_PART = 0;
+    protected static final int MNEM_PART = 0;
 
     @SuppressWarnings("null")
     @Override
@@ -31,12 +31,12 @@ public final class ViewServlet extends RestServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-
+    
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
             final long now = now();
-
+    
             if (parts.length == 0) {
                 rest.getView(params, now, resp.getWriter());
             } else if (parts.length == 1) {

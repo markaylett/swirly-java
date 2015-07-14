@@ -25,22 +25,22 @@
 
   <servlet>
     <servlet-name>rec</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.RecServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.BackRecServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>view</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.ViewServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.BackViewServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>sess</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.SessServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.BackSessServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>cron</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.CronServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.BackCronServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
