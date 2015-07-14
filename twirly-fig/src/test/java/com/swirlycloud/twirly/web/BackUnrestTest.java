@@ -43,12 +43,12 @@ import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.mock.MockTrader;
-import com.swirlycloud.twirly.web.Unrest.PosnKey;
-import com.swirlycloud.twirly.web.Unrest.RecStruct;
-import com.swirlycloud.twirly.web.Unrest.SessStruct;
-import com.swirlycloud.twirly.web.Unrest.TransStruct;
+import com.swirlycloud.twirly.web.BackUnrest.PosnKey;
+import com.swirlycloud.twirly.web.BackUnrest.RecStruct;
+import com.swirlycloud.twirly.web.BackUnrest.SessStruct;
+import com.swirlycloud.twirly.web.BackUnrest.TransStruct;
 
-public final class UnrestTest {
+public final class BackUnrestTest {
 
     private static final String EMAIL = "mark.aylett@gmail.com";
     private static final String TRADER = "MARAYL";
@@ -215,7 +215,7 @@ public final class UnrestTest {
     }
 
     private Datastore datastore;
-    private Unrest unrest;
+    private BackUnrest unrest;
 
     private final Trader postTrader(String mnem, String display, String email)
             throws BadRequestException, ServiceUnavailableException, IOException {
@@ -268,7 +268,7 @@ public final class UnrestTest {
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         datastore = new MockDatastore();
-        unrest = new Unrest(datastore, NOW);
+        unrest = new BackUnrest(datastore, NOW);
         postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
     }
 

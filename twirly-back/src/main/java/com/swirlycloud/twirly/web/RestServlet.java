@@ -4,10 +4,8 @@
 package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
-import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -17,8 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ServException;
-import com.swirlycloud.twirly.io.AsyncDatastore;
-import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
@@ -93,16 +89,7 @@ public abstract class RestServlet extends HttpServlet {
         RestServlet.realm = realm;
     }
 
-    @SuppressWarnings("null")
-    public static void setDatastore(AsyncDatastore datastore) throws InterruptedException,
-            ExecutionException {
-        final long now = now();
-        RestServlet.rest = new Rest(datastore, now);
-    }
-
-    @SuppressWarnings("null")
-    public static void setDatastore(Datastore datastore) {
-        final long now = now();
-        RestServlet.rest = new Rest(datastore, now);
+    public static void setRest(Rest rest) {
+        RestServlet.rest = rest;
     }
 }

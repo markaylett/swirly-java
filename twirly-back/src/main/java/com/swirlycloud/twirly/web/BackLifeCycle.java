@@ -3,11 +3,15 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.util.TimeUtil.now;
+
 import java.util.concurrent.ExecutionException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.io.AsyncDatastore;
 import com.swirlycloud.twirly.io.AsyncDatastoreService;
@@ -32,7 +36,7 @@ public final class BackLifeCycle implements ServletContextListener {
         }
     }
 
-    private static Datastore getDatastore(ServletContext sc) {
+    private static @NonNull Datastore getDatastore(ServletContext sc) {
         Datastore datastore;
         final String url = sc.getInitParameter("url");
         if (url == null || url.equals("appengine:datastore:")) {
@@ -65,18 +69,19 @@ public final class BackLifeCycle implements ServletContextListener {
         this.closeable = datastore;
         boolean success = false;
         try {
+            final long now = now();
             if (sc.getServerInfo().startsWith("Apache Tomcat")) {
                 RestServlet.setRealm(new CatalinaRealm());
                 final AsyncDatastore asyncDatastore = new AsyncDatastoreService(datastore);
                 this.closeable = asyncDatastore;
                 try {
-                    RestServlet.setDatastore(asyncDatastore);
+                    RestServlet.setRest(new BackRest(asyncDatastore, now));
                 } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException("failed to create async datastore", e);
                 }
             } else {
                 RestServlet.setRealm(new AppEngineRealm());
-                RestServlet.setDatastore(datastore);
+                RestServlet.setRest(new BackRest(datastore, now));
             }
             success = true;
         } finally {

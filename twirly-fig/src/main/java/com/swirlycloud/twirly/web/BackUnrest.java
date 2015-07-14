@@ -35,7 +35,7 @@ import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("null")
-public final class Unrest {
+public final class BackUnrest {
     public static final class PosnKey {
         private final String contr;
         private final int settlDay;
@@ -85,7 +85,7 @@ public final class Unrest {
         }
     }
 
-    private final Rest rest;
+    private final BackRest rest;
 
     private static void parseAssets(JsonParser p, Map<String, ? super Asset> out)
             throws IOException {
@@ -350,8 +350,8 @@ public final class Unrest {
         throw new IOException("end-of object not found");
     }
 
-    public Unrest(Datastore datastore, long now) {
-        rest = new Rest(datastore, now);
+    public BackUnrest(Datastore datastore, long now) {
+        rest = new BackRest(datastore, now);
     }
 
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {

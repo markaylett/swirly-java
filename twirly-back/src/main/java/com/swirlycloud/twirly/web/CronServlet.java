@@ -22,6 +22,7 @@ public final class CronServlet extends RestServlet {
 
     @Override
     protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        final BackRest rest = (BackRest) RestServlet.rest;
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
