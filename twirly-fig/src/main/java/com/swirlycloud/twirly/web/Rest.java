@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
+import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 

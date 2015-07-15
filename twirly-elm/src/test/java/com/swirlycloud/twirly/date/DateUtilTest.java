@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.date;
 
-import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
+import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
+import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.node.SlUtil.popNext;
 
@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.date.DateUtil;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
