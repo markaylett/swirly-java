@@ -2,11 +2,11 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
   <context-param>
     <param-name>url</param-name>
     <!--param-value>appengine:datastore:</param-value-->
     <param-value>jdbc:mysql://localhost:3306/twirly?sessionVariables=foreign_key_checks=1</param-value>
-    <!--param-value>mock:</param-value-->
   </context-param>
 
   <context-param>

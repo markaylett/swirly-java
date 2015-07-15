@@ -3,14 +3,40 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
+  <context-param>
+    <param-name>url</param-name>
+    <!--param-value>appengine:datastore:</param-value-->
+    <param-value>jdbc:mysql://localhost:3306/twirly?sessionVariables=foreign_key_checks=1</param-value>
+  </context-param>
+
+  <context-param>
+  	<param-name>user</param-name>
+  	<param-value>root</param-value>
+  </context-param>
+
+  <context-param>
+  	<param-name>password</param-name>
+  	<param-value></param-value>
+  </context-param>
+
   <listener>
     <listener-class>com.swirlycloud.twirly.web.FrontLifeCycle</listener-class>
   </listener>
 
   <servlet>
+    <servlet-name>rec</servlet-name>
+    <servlet-class>com.swirlycloud.twirly.web.FrontRecServlet</servlet-class>
+  </servlet>
+
+  <servlet>
     <servlet-name>page</servlet-name>
     <servlet-class>com.swirlycloud.twirly.web.PageServlet</servlet-class>
   </servlet>
+
+  <servlet-mapping>
+    <servlet-name>rec</servlet-name>
+    <url-pattern>/front/rec/*</url-pattern>
+  </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>page</servlet-name>
