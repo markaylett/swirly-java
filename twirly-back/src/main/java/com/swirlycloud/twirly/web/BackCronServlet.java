@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.fx.EcbRates;
+import com.swirlycloud.twirly.rest.BackRest;
 
 @SuppressWarnings("serial")
 public final class BackCronServlet extends RestServlet {

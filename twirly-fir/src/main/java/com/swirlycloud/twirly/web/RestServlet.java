@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ServException;
+import com.swirlycloud.twirly.rest.Request;
+import com.swirlycloud.twirly.rest.Rest;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")

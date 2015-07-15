@@ -1,4 +1,4 @@
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.rest;
 
 import java.io.IOException;
 

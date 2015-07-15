@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
@@ -24,7 +24,7 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
 
-public abstract @NonNullByDefault class RestImpl {
+abstract @NonNullByDefault class RestImpl {
 
     protected final Serv serv;
 

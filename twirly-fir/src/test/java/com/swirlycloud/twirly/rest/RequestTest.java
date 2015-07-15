@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 import static org.junit.Assert.assertEquals;
@@ -16,6 +16,7 @@ import javax.json.stream.JsonParser;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.rest.Request;
 
 public final class RequestTest {
     private static final Request parse(String s) throws IOException {

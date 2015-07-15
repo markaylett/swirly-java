@@ -19,6 +19,7 @@ import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.AppEngineDatastore;
 import com.swirlycloud.twirly.io.JdbcDatastore;
 import com.swirlycloud.twirly.mock.MockDatastore;
+import com.swirlycloud.twirly.rest.BackRest;
 
 public final class BackLifeCycle implements ServletContextListener {
     private AutoCloseable closeable;

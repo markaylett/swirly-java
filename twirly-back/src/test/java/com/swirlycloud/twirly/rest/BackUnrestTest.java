@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
@@ -43,10 +43,10 @@ import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.mock.MockTrader;
-import com.swirlycloud.twirly.web.BackUnrest.PosnKey;
-import com.swirlycloud.twirly.web.BackUnrest.RecStruct;
-import com.swirlycloud.twirly.web.BackUnrest.SessStruct;
-import com.swirlycloud.twirly.web.BackUnrest.TransStruct;
+import com.swirlycloud.twirly.rest.BackUnrest.PosnKey;
+import com.swirlycloud.twirly.rest.BackUnrest.RecStruct;
+import com.swirlycloud.twirly.rest.BackUnrest.SessStruct;
+import com.swirlycloud.twirly.rest.BackUnrest.TransStruct;
 
 public final class BackUnrestTest {
 

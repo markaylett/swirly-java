@@ -18,6 +18,8 @@ import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
+import com.swirlycloud.twirly.rest.BackRest;
+import com.swirlycloud.twirly.rest.Request;
 
 @SuppressWarnings("serial")
 public final class BackSessServlet extends FrontSessServlet {
