@@ -533,11 +533,11 @@ The following table summarises the \gls{restful} \gls{api} for querying referenc
 \multicolumn{2}{c}{Synopsis}\\
 Method&Resource\\
 \hline
-GET&\texttt{/api/rec/}\\
-GET&\texttt{/api/rec/asset/[mnem]}\\
-GET&\texttt{/api/rec/contr/[mnem]}\\
-GET&\texttt{/api/rec/market/[mnem]}\\
-GET&\texttt{/api/rec/trader/[mnem]}\\
+GET&\texttt{/back/rec/}\\
+GET&\texttt{/back/rec/asset/[mnem]}\\
+GET&\texttt{/back/rec/contr/[mnem]}\\
+GET&\texttt{/back/rec/market/[mnem]}\\
+GET&\texttt{/back/rec/trader/[mnem]}\\
 \end{tabular}
 \vspace{5mm}
 
@@ -556,7 +556,7 @@ The following table summarises the \gls{restful} \gls{api} for querying \gls{mar
 \multicolumn{2}{c}{Synopsis}\\
 Method&Resource\\
 \hline
-GET&\texttt{/api/view/[market]}\\
+GET&\texttt{/back/view/[market]}\\
 \end{tabular}
 \vspace{5mm}
 
@@ -573,14 +573,14 @@ GET&\texttt{/api/view/[market]}\\
 \multicolumn{2}{c}{Rest API}&\multicolumn{1}{c}{Fix API}\\
 Method&Resource&Message\\
 \hline
-GET&\texttt{/api/sess/}\\
-GET&\texttt{/api/sess/order/[market]/[id]}\\
-GET&\texttt{/api/sess/trade/[market]/[id]}\\
-GET&\texttt{/api/sess/posn/[contr]/[settlDate]}\\
-DELETE&\texttt{/api/sess/order/<market>/<id>}\\
-DELETE&\texttt{/api/sess/trade/<market>/<id>}\\
-POST&\texttt{/api/sess/order/<market>/}&NewOrderSingle\\
-PUT&\texttt{/api/sess/order/<market>/<id>}\\
+GET&\texttt{/back/sess/}\\
+GET&\texttt{/back/sess/order/[market]/[id]}\\
+GET&\texttt{/back/sess/trade/[market]/[id]}\\
+GET&\texttt{/back/sess/posn/[contr]/[settlDate]}\\
+DELETE&\texttt{/back/sess/order/<market>/<id>}\\
+DELETE&\texttt{/back/sess/trade/<market>/<id>}\\
+POST&\texttt{/back/sess/order/<market>/}&NewOrderSingle\\
+PUT&\texttt{/back/sess/order/<market>/<id>}\\
 \end{tabular}
 \vspace{5mm}
 
@@ -702,8 +702,8 @@ Id&Long&37&OrderId&Y&Order identifier\\
 \multicolumn{2}{c}{Synopsis}\\
 Method&Resource\\
 \hline
-POST&\texttt{/api/rec/market/}\\
-POST&\texttt{/api/rec/trader/}\\
+POST&\texttt{/back/rec/market/}\\
+POST&\texttt{/back/rec/trader/}\\
 \end{tabular}
 \vspace{5mm}
 
@@ -713,7 +713,7 @@ POST&\texttt{/api/rec/trader/}\\
 \caption{New Market Dialog}
 \end{figure}
 
-To create a new \gls{market}, submit an \gls{http} post request to the \texttt{/api/rec/market/}
+To create a new \gls{market}, submit an \gls{http} post request to the \texttt{/back/rec/market/}
 resource with the following \gls{json} content:
 
 {\tt\small
@@ -729,7 +729,7 @@ resource with the following \gls{json} content:
 \caption{New Trader Dialog}
 \end{figure}
 
-To create a new trader, submit an \gls{http} post request to the \texttt{/api/rec/trader/} resource
+To create a new trader, submit an \gls{http} post request to the \texttt{/back/rec/trader/} resource
 with the following \gls{json} content:
 
 {\tt\small

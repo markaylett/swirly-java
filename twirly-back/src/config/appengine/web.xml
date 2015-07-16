@@ -34,22 +34,22 @@
 
   <servlet-mapping>
     <servlet-name>rec</servlet-name>
-    <url-pattern>/api/rec/*</url-pattern>
+    <url-pattern>/back/rec/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>view</servlet-name>
-    <url-pattern>/api/view/*</url-pattern>
+    <url-pattern>/back/view/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>sess</servlet-name>
-    <url-pattern>/api/sess/*</url-pattern>
+    <url-pattern>/back/sess/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>cron</servlet-name>
-    <url-pattern>/api/cron/*</url-pattern>
+    <url-pattern>/back/cron/*</url-pattern>
   </servlet-mapping>
 
   <error-page>
@@ -85,7 +85,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>cron</web-resource-name>
-      <url-pattern>/api/cron/*</url-pattern>
+      <url-pattern>/back/cron/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>

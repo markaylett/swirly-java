@@ -19,7 +19,7 @@ dependencies {
 eclipse {
     wtp {
         component {
-            contextPath = '/api'
+            contextPath = '/back'
         }
     }
 }

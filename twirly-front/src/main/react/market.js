@@ -5,7 +5,7 @@
 var MarketModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/api/rec/market', function(markets) {
+        $.getJSON('/back/rec/market', function(markets) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
             var marketMap = {};
@@ -61,7 +61,7 @@ var MarketModuleImpl = React.createClass({
         }
         $.ajax({
             type: 'post',
-            url: '/api/rec/market/',
+            url: '/back/rec/market/',
             data: JSON.stringify(req)
         }).done(function(market) {
             var contrMap = this.props.contrMap;
@@ -106,7 +106,7 @@ var MarketModuleImpl = React.createClass({
         }
         $.ajax({
             type: 'put',
-            url: '/api/rec/market/',
+            url: '/back/rec/market/',
             data: JSON.stringify(req)
         }).done(function(market) {
             var contrMap = this.props.contrMap;
@@ -214,7 +214,7 @@ var MarketModuleImpl = React.createClass({
 var MarketModule = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/api/rec/contr', function(contrs) {
+        $.getJSON('/back/rec/contr', function(contrs) {
             var contrMap = {};
             contrs.forEach(function(contr) {
                 enrichContr(contr);

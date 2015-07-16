@@ -34,7 +34,7 @@ asyncTest('get all contracts', function() {
     expect(1);
     $.ajax({
         type: 'get',
-        url: '/api/rec/contr/'
+        url: '/back/rec/contr/'
     }).done(function(arr) {
         var dict = [];
         $.each(arr, function(k, v) {
@@ -51,7 +51,7 @@ asyncTest('get single contract', function() {
     expect(14);
     $.ajax({
         type: 'get',
-        url: '/api/rec/contr/EURJPY'
+        url: '/back/rec/contr/EURJPY'
     }).done(function(v) {
         equal(v.mnem, 'EURJPY', 'mnem');
         equal(v.display, 'EURJPY', 'display');

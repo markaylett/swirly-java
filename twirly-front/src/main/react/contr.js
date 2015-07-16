@@ -5,7 +5,7 @@
 var ContrModule = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/api/rec/contr', function(contrs) {
+        $.getJSON('/back/rec/contr', function(contrs) {
             contrs.forEach(enrichContr.bind(this));
             this.setState({
                 contrs: contrs

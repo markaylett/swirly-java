@@ -21,7 +21,7 @@ var SignupModule = React.createClass({
         }
         $.ajax({
             type: 'post',
-            url: '/api/rec/trader/',
+            url: '/back/rec/trader/',
             data: JSON.stringify(req)
         }).done(function(unused) {
             window.location.reload();

@@ -88,7 +88,7 @@ Click Finish to complete the wizard.
 You should now have a Servers project in your Eclipse workspace containing a `twirly-config`
 folder. The `path` attributes of the following contexts in `servers.xml` should be as follows:
 
-    <Context docBase="twirly-back" path="/api" ... />
+    <Context docBase="twirly-back" path="/back" ... />
     <Context docBase="twirly-front" path="/" ... />
 
 Add the following element to the `Host` section to enable Single Sign On (SSO):

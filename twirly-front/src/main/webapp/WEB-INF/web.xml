@@ -7,25 +7,10 @@
     <listener-class>com.swirlycloud.twirly.web.FrontLifeCycle</listener-class>
   </listener>
 
-  <!-- The proxy servlet is only used by the development server. -->
-  <servlet>
-    <servlet-name>proxy</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.ProxyServlet</servlet-class>
-    <init-param>
-	  <param-name>module</param-name>
-	  <param-value>backend</param-value>
-	</init-param>
-  </servlet>
-
   <servlet>
     <servlet-name>page</servlet-name>
     <servlet-class>com.swirlycloud.twirly.web.PageServlet</servlet-class>
   </servlet>
-
-  <servlet-mapping>
-    <servlet-name>proxy</servlet-name>
-    <url-pattern>/api/*</url-pattern>
-  </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>page</servlet-name>

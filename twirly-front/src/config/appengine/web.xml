@@ -24,7 +24,7 @@
 
   <servlet-mapping>
     <servlet-name>proxy</servlet-name>
-    <url-pattern>/api/*</url-pattern>
+    <url-pattern>/back/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

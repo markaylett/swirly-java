@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dispatch-entries>
   <dispatch>
-    <url>*/api/*</url>
+    <url>*/back/*</url>
     <module>backend</module>
   </dispatch>
 </dispatch-entries>

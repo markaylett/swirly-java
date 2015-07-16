@@ -75,7 +75,7 @@ var MultiAlertWidget = React.createClass({
 var RecWidget = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/api/rec', function(rec) {
+        $.getJSON('/back/rec', function(rec) {
             var contrMap = this.props.contrMap;
             rec.assets.forEach(enrichAsset);
             rec.contrs.forEach(enrichContr);
@@ -128,7 +128,7 @@ var RecWidget = React.createClass({
 var ViewWidget = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/api/view', function(views) {
+        $.getJSON('/back/view', function(views) {
             var contrMap = this.props.contrMap;
             views.forEach(enrichView.bind(undefined, contrMap));
             this.setState({

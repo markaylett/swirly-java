@@ -5,7 +5,7 @@
 var TradeModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/api/view', function(views) {
+        $.getJSON('/back/view', function(views) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
             var marketMap = {};
@@ -25,7 +25,7 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
 
-        $.getJSON('/api/sess', function(sess) {
+        $.getJSON('/back/sess', function(sess) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
 
@@ -124,7 +124,7 @@ var TradeModuleImpl = React.createClass({
 
         $.ajax({
             type: 'post',
-            url: '/api/sess/order/' + market,
+            url: '/back/sess/order/' + market,
             data: JSON.stringify(req)
         }).done(function(trans) {
             this.applyTrans(trans);
@@ -152,7 +152,7 @@ var TradeModuleImpl = React.createClass({
 
         $.ajax({
             type: 'put',
-            url: '/api/sess/order/' + market + '/' + id,
+            url: '/back/sess/order/' + market + '/' + id,
             data: JSON.stringify(req)
         }).done(function(trans) {
             this.applyTrans(trans);
@@ -173,7 +173,7 @@ var TradeModuleImpl = React.createClass({
         var key = market + '/' + zeroPad(id);
         $.ajax({
             type: 'delete',
-            url: '/api/sess/order/' + key
+            url: '/back/sess/order/' + key
         }).done(function(unused) {
             var done = this.staging.done;
             var sess = this.state.sess;
@@ -203,7 +203,7 @@ var TradeModuleImpl = React.createClass({
         var key = market + '/' + zeroPad(id);
         $.ajax({
             type: 'delete',
-            url: '/api/sess/trade/' + key
+            url: '/back/sess/trade/' + key
         }).done(function(unused) {
             var trades = this.staging.trades;
             var sess = this.state.sess;
@@ -442,7 +442,7 @@ var TradeModuleImpl = React.createClass({
 var TradeModule = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/api/rec/contr', function(contrs) {
+        $.getJSON('/back/rec/contr', function(contrs) {
             var contrMap = {};
             contrs.forEach(function(contr) {
                 enrichContr(contr);
