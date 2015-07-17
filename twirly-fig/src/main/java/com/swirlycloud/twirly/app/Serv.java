@@ -71,8 +71,8 @@ public @NonNullByDefault class Serv {
     private final Journ journ;
     private final MnemRbTree assets = new MnemRbTree();
     private final MnemRbTree contrs = new MnemRbTree();
-    private final MnemRbTree traders = new MnemRbTree();
     private final MnemRbTree markets = new MnemRbTree();
+    private final MnemRbTree traders = new MnemRbTree();
     private final SessTree sesss = new SessTree();
     private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
     private final RefHashTable refIdx = new RefHashTable(CAPACITY);
@@ -132,17 +132,6 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final void insertTraders(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
-            final Trader trader = (Trader) node;
-            node = popNext(node);
-
-            final RbNode unused = traders.insert(trader);
-            assert unused == null;
-            emailIdx.insert(trader);
-        }
-    }
-
     private final void insertMarkets(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Market market = (Market) node;
@@ -151,6 +140,17 @@ public @NonNullByDefault class Serv {
             enrichMarket(market);
             final RbNode unused = markets.insert(market);
             assert unused == null;
+        }
+    }
+
+    private final void insertTraders(@Nullable SlNode first) {
+        for (SlNode node = first; node != null;) {
+            final Trader trader = (Trader) node;
+            node = popNext(node);
+
+            final RbNode unused = traders.insert(trader);
+            assert unused == null;
+            emailIdx.insert(trader);
         }
     }
 
@@ -323,15 +323,15 @@ public @NonNullByDefault class Serv {
         final int busDay = DateUtil.getBusDate(now).toJd();
         final Future<SlNode> assets = datastore.selectAsset();
         final Future<SlNode> contrs = datastore.selectContr();
-        final Future<SlNode> traders = datastore.selectTrader();
         final Future<SlNode> markets = datastore.selectMarket();
+        final Future<SlNode> traders = datastore.selectTrader();
         final Future<SlNode> orders = datastore.selectOrder();
         final Future<SlNode> trades = datastore.selectTrade();
         final Future<SlNode> posns = datastore.selectPosn(busDay);
         insertAssets(assets.get());
         insertContrs(contrs.get());
-        insertTraders(traders.get());
         insertMarkets(markets.get());
+        insertTraders(traders.get());
         insertOrders(orders.get());
         insertTrades(trades.get());
         insertPosns(posns.get());
@@ -342,8 +342,8 @@ public @NonNullByDefault class Serv {
         final int busDay = DateUtil.getBusDate(now).toJd();
         insertAssets(datastore.selectAsset());
         insertContrs(datastore.selectContr());
-        insertTraders(datastore.selectTrader());
         insertMarkets(datastore.selectMarket());
+        insertTraders(datastore.selectTrader());
         insertOrders(datastore.selectOrder());
         insertTrades(datastore.selectTrade());
         insertPosns(datastore.selectPosn(busDay));
