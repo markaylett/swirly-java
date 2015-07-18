@@ -18,9 +18,10 @@ Add remote upstream to fork:
 
 Sync local fork:
 
-    $ git fetch upstream
     $ git checkout master
+    $ git fetch upstream
     $ git rebase upstream/master
+    $ git push origin
 
 Build and Test
 --------------
