@@ -26,6 +26,8 @@ import com.swirlycloud.twirly.util.Params;
  * A transaction that occurs as an {@link Order} transitions through a workflow.
  * 
  * Trade executions represent the exchange of goods or services between counter-parties.
+ * 
+ * @author Mark Aylett
  */
 public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, TransNode,
         Instruct {

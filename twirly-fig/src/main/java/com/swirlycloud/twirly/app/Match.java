@@ -10,8 +10,9 @@ import com.swirlycloud.twirly.node.BasicSlNode;
 
 /**
  * A Match represents two orders from opposing sides of the market that may trade.
+ * 
+ * @author Mark Aylett
  */
-
 public final class Match extends BasicSlNode {
     long ticks;
     long lots;

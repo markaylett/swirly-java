@@ -8,8 +8,8 @@ import java.util.concurrent.Semaphore;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.io.AsyncModel;
-import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.io.AsyncDatastore;
+import com.swirlycloud.twirly.io.Datastore;
 
 /**
  * Serv with methods for acquiring read-write locks.
@@ -21,12 +21,12 @@ public final @NonNullByDefault class LockableServ extends Serv {
     private static final int PERMITS = Runtime.getRuntime().availableProcessors();
     private final Semaphore sem = new Semaphore(PERMITS);
 
-    public LockableServ(AsyncModel model, long now) throws InterruptedException, ExecutionException {
-        super(model, now);
+    public LockableServ(AsyncDatastore datastore, long now) throws InterruptedException, ExecutionException {
+        super(datastore, now);
     }
 
-    public LockableServ(Model model, long now) {
-        super(model, now);
+    public LockableServ(Datastore datastore, long now) {
+        super(datastore, now);
     }
 
     public final void acquireRead() {

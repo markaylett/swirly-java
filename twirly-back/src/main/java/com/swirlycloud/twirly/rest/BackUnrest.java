@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartArray;
@@ -16,7 +16,6 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
@@ -32,10 +31,11 @@ import com.swirlycloud.twirly.domain.View;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("null")
-public final class Unrest {
+public final class BackUnrest {
     public static final class PosnKey {
         private final String contr;
         private final int settlDay;
@@ -85,7 +85,7 @@ public final class Unrest {
         }
     }
 
-    private final Rest rest;
+    private final BackRest rest;
 
     private static void parseAssets(JsonParser p, Map<String, ? super Asset> out)
             throws IOException {
@@ -350,8 +350,8 @@ public final class Unrest {
         throw new IOException("end-of object not found");
     }
 
-    public Unrest(Model model, long now) {
-        rest = new Rest(model, now);
+    public BackUnrest(Datastore datastore, long now) {
+        rest = new BackRest(datastore, now);
     }
 
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {

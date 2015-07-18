@@ -10,6 +10,8 @@ package com.swirlycloud.twirly.intrusive;
  *            The key type.
  * @param <V>
  *            The element or value type.
+ * 
+ * @author Mark Aylett
  */
 public abstract class BasicHashTable<K, V> extends HashTable<V> {
 

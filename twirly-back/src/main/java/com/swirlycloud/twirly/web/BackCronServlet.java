@@ -8,27 +8,22 @@ import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.fx.EcbRates;
+import com.swirlycloud.twirly.rest.BackRest;
 
 @SuppressWarnings("serial")
-public final class CronServlet extends RestServlet {
+public final class BackCronServlet extends RestServlet {
 
     private static final int JOB_PART = 0;
 
     @Override
-    public final void init(ServletConfig config) throws ServletException {
-        super.init(config);
-    }
-
-    @Override
-    public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        final BackRest rest = (BackRest) RestServlet.rest;
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }

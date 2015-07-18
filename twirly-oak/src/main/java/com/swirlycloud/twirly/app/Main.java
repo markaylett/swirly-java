@@ -31,8 +31,8 @@ import quickfix.fix44.OrderCancelRequest;
 
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.io.Model;
-import com.swirlycloud.twirly.mock.MockModel;
+import com.swirlycloud.twirly.io.Datastore;
+import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 import com.swirlycloud.twirly.quickfix.Slf4jLogFactory;
 
@@ -115,9 +115,8 @@ public final class Main {
 
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
-        try (final Model model = new MockModel()) {
-
-            final LockableServ serv = new LockableServ(model, now());
+        try (final Datastore datastore = new MockDatastore()) {
+            final LockableServ serv = new LockableServ(datastore, now());
             final String mnem = "EURUSD.MAR14";
             final String display = "EURUSD March 14";
             final String contr = "EURUSD";

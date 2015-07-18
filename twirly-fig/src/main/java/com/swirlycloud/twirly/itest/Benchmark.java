@@ -16,8 +16,8 @@ import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.io.Model;
-import com.swirlycloud.twirly.mock.MockModel;
+import com.swirlycloud.twirly.io.Datastore;
+import com.swirlycloud.twirly.mock.MockDatastore;
 
 // -server -verbose:gc -Xprof
 
@@ -78,8 +78,8 @@ public final class Benchmark {
     }
 
     public static void main(String[] args) throws Exception {
-        try (final Model model = new MockModel()) {
-            run(new Serv(model, now()));
+        try (final Datastore datastore = new MockDatastore()) {
+            run(new Serv(datastore, now()));
         }
     }
 }

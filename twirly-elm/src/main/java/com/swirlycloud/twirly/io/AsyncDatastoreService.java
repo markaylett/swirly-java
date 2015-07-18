@@ -18,17 +18,18 @@ import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.SlNode;
 
-public final class AsyncModelService implements AsyncModel {
+public final class AsyncDatastoreService implements AsyncDatastore {
+
     /**
      * Bounded queue capacity.
      */
     private static int CAPACITY = 1000;
-    private static final Logger log = Logger.getLogger(AsyncModelService.class.getName());
-    private final Model model;
+    private static final Logger log = Logger.getLogger(AsyncDatastoreService.class.getName());
+    private final Datastore datastore;
     private final ExecutorService service;
 
-    public AsyncModelService(Model model) {
-        this.model = model;
+    public AsyncDatastoreService(Datastore datastore) {
+        this.datastore = datastore;
         service = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(CAPACITY));
     }
@@ -39,7 +40,84 @@ public final class AsyncModelService implements AsyncModel {
         if (!service.awaitTermination(30, TimeUnit.SECONDS)) {
             service.shutdownNow();
         }
-        model.close();
+        datastore.close();
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public final @NonNull Future<SlNode> selectAsset() {
+        return service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectAsset();
+            }
+        });
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public final @NonNull Future<SlNode> selectContr() {
+        return service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectContr();
+            }
+        });
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public final @NonNull Future<SlNode> selectMarket() {
+        return service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectMarket();
+            }
+        });
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public final @NonNull Future<SlNode> selectTrader() {
+        return service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectTrader();
+            }
+        });
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public final @NonNull Future<SlNode> selectOrder() {
+        return service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectOrder();
+            }
+        });
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public final @NonNull Future<SlNode> selectTrade() {
+        return service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectTrade();
+            }
+        });
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public final @NonNull Future<SlNode> selectPosn(final int busDay) {
+        return service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectPosn(busDay);
+            }
+        });
     }
 
     @Override
@@ -49,7 +127,7 @@ public final class AsyncModelService implements AsyncModel {
             @Override
             public final void run() {
                 try {
-                    model.insertMarket(mnem, display, contr, settlDay, expiryDay, state);
+                    datastore.insertMarket(mnem, display, contr, settlDay, expiryDay, state);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to insert market", t);
                 }
@@ -63,7 +141,7 @@ public final class AsyncModelService implements AsyncModel {
             @Override
             public final void run() {
                 try {
-                    model.updateMarket(mnem, display, state);
+                    datastore.updateMarket(mnem, display, state);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to update market", t);
                 }
@@ -77,7 +155,7 @@ public final class AsyncModelService implements AsyncModel {
             @Override
             public final void run() {
                 try {
-                    model.insertTrader(mnem, display, email);
+                    datastore.insertTrader(mnem, display, email);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to insert trader", t);
                 }
@@ -92,7 +170,7 @@ public final class AsyncModelService implements AsyncModel {
             @Override
             public final void run() {
                 try {
-                    model.updateTrader(mnem, display);
+                    datastore.updateTrader(mnem, display);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to update trader", t);
                 }
@@ -106,7 +184,7 @@ public final class AsyncModelService implements AsyncModel {
             @Override
             public final void run() {
                 try {
-                    model.insertExec(exec);
+                    datastore.insertExec(exec);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to insert exec", t);
                 }
@@ -121,7 +199,7 @@ public final class AsyncModelService implements AsyncModel {
             @Override
             public final void run() {
                 try {
-                    model.insertExecList(market, first);
+                    datastore.insertExecList(market, first);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to insert exec-list", t);
                 }
@@ -136,7 +214,7 @@ public final class AsyncModelService implements AsyncModel {
             @Override
             public final void run() {
                 try {
-                    model.archiveOrder(market, id, modified);
+                    datastore.archiveOrder(market, id, modified);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to archive order", t);
                 }
@@ -151,87 +229,10 @@ public final class AsyncModelService implements AsyncModel {
             @Override
             public final void run() {
                 try {
-                    model.archiveTrade(market, id, modified);
+                    datastore.archiveTrade(market, id, modified);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, "failed to archive trade", t);
                 }
-            }
-        });
-    }
-
-    @SuppressWarnings("null")
-    @Override
-    public final @NonNull Future<SlNode> selectAsset() {
-        return service.submit(new Callable<SlNode>() {
-            @Override
-            public final SlNode call() throws Exception {
-                return model.selectAsset();
-            }
-        });
-    }
-
-    @SuppressWarnings("null")
-    @Override
-    public final @NonNull Future<SlNode> selectContr() {
-        return service.submit(new Callable<SlNode>() {
-            @Override
-            public final SlNode call() throws Exception {
-                return model.selectContr();
-            }
-        });
-    }
-
-    @SuppressWarnings("null")
-    @Override
-    public final @NonNull Future<SlNode> selectMarket() {
-        return service.submit(new Callable<SlNode>() {
-            @Override
-            public final SlNode call() throws Exception {
-                return model.selectMarket();
-            }
-        });
-    }
-
-    @SuppressWarnings("null")
-    @Override
-    public final @NonNull Future<SlNode> selectTrader() {
-        return service.submit(new Callable<SlNode>() {
-            @Override
-            public final SlNode call() throws Exception {
-                return model.selectTrader();
-            }
-        });
-    }
-
-    @SuppressWarnings("null")
-    @Override
-    public final @NonNull Future<SlNode> selectOrder() {
-        return service.submit(new Callable<SlNode>() {
-            @Override
-            public final SlNode call() throws Exception {
-                return model.selectOrder();
-            }
-        });
-    }
-
-    @SuppressWarnings("null")
-    @Override
-    public final @NonNull Future<SlNode> selectTrade() {
-        return service.submit(new Callable<SlNode>() {
-            @Override
-            public final SlNode call() throws Exception {
-                return model.selectTrade();
-            }
-        });
-    }
-
-    @SuppressWarnings("null")
-    @Override
-    public final @NonNull Future<SlNode> selectPosn(final int busDay) {
-        return service.submit(new Callable<SlNode>() {
-            @Override
-            public final SlNode call() throws Exception {
-                return model.selectPosn(busDay);
             }
         });
     }

@@ -13,8 +13,9 @@ import org.eclipse.jdt.annotation.Nullable;
  *            The key type.
  * @param <V>
  *            The element or value type.
+ * 
+ * @author Mark Aylett
  */
-
 public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
 
     protected abstract int compareKeyDirect(V lhs, K rhs);
@@ -22,7 +23,6 @@ public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
     /**
      * Finds the node with the same key as node.
      */
-
     public final @Nullable V find(K key) {
         V tmp = root;
         int comp;
@@ -42,7 +42,6 @@ public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
     /**
      * Finds the first node greater than or equal to the search key.
      */
-
     public final @Nullable V nfind(K key) {
         V tmp = root;
         V res = null;
@@ -66,7 +65,6 @@ public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
     /**
      * Return match or parent.
      */
-
     public final @Nullable V pfind(K key) {
         V tmp = root, parent = null;
         while (tmp != null) {

@@ -8,8 +8,6 @@ import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,18 +17,13 @@ import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
-public final class ViewServlet extends RestServlet {
+public class FrontViewServlet extends RestServlet {
 
-    private static final int MNEM_PART = 0;
-
-    @Override
-    public final void init(ServletConfig config) throws ServletException {
-        super.init(config);
-    }
+    protected static final int MNEM_PART = 0;
 
     @SuppressWarnings("null")
     @Override
-    public final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
@@ -38,12 +31,12 @@ public final class ViewServlet extends RestServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-
+    
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
             final long now = now();
-
+    
             if (parts.length == 0) {
                 rest.getView(params, now, resp.getWriter());
             } else if (parts.length == 1) {

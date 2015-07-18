@@ -23,6 +23,9 @@ environments {
         }
     }
     local {
+        front {
+            webinf = 'src/config/appengine'
+        }
         back {
             webinf = 'src/config/devengine'
         }

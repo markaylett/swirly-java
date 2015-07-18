@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import static com.swirlycloud.twirly.app.DateUtil.getBusDate;
+import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.node.SlUtil.popNext;
 
@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.date.DateUtil;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
@@ -37,9 +38,9 @@ import com.swirlycloud.twirly.intrusive.BasicRbTree;
 import com.swirlycloud.twirly.intrusive.EmailHashTable;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.RefHashTable;
-import com.swirlycloud.twirly.io.AsyncModel;
+import com.swirlycloud.twirly.io.AsyncDatastore;
+import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
-import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
@@ -71,8 +72,8 @@ public @NonNullByDefault class Serv {
     private final Journ journ;
     private final MnemRbTree assets = new MnemRbTree();
     private final MnemRbTree contrs = new MnemRbTree();
-    private final MnemRbTree traders = new MnemRbTree();
     private final MnemRbTree markets = new MnemRbTree();
+    private final MnemRbTree traders = new MnemRbTree();
     private final SessTree sesss = new SessTree();
     private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
     private final RefHashTable refIdx = new RefHashTable(CAPACITY);
@@ -132,17 +133,6 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final void insertTraders(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
-            final Trader trader = (Trader) node;
-            node = popNext(node);
-
-            final RbNode unused = traders.insert(trader);
-            assert unused == null;
-            emailIdx.insert(trader);
-        }
-    }
-
     private final void insertMarkets(@Nullable SlNode first) {
         for (SlNode node = first; node != null;) {
             final Market market = (Market) node;
@@ -151,6 +141,17 @@ public @NonNullByDefault class Serv {
             enrichMarket(market);
             final RbNode unused = markets.insert(market);
             assert unused == null;
+        }
+    }
+
+    private final void insertTraders(@Nullable SlNode first) {
+        for (SlNode node = first; node != null;) {
+            final Trader trader = (Trader) node;
+            node = popNext(node);
+
+            final RbNode unused = traders.insert(trader);
+            assert unused == null;
+            emailIdx.insert(trader);
         }
     }
 
@@ -318,35 +319,35 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    public Serv(AsyncModel model, long now) throws InterruptedException, ExecutionException {
-        this.journ = model;
+    public Serv(AsyncDatastore datastore, long now) throws InterruptedException, ExecutionException {
+        this.journ = datastore;
         final int busDay = DateUtil.getBusDate(now).toJd();
-        final Future<SlNode> assets = model.selectAsset();
-        final Future<SlNode> contrs = model.selectContr();
-        final Future<SlNode> traders = model.selectTrader();
-        final Future<SlNode> markets = model.selectMarket();
-        final Future<SlNode> orders = model.selectOrder();
-        final Future<SlNode> trades = model.selectTrade();
-        final Future<SlNode> posns = model.selectPosn(busDay);
+        final Future<SlNode> assets = datastore.selectAsset();
+        final Future<SlNode> contrs = datastore.selectContr();
+        final Future<SlNode> markets = datastore.selectMarket();
+        final Future<SlNode> traders = datastore.selectTrader();
+        final Future<SlNode> orders = datastore.selectOrder();
+        final Future<SlNode> trades = datastore.selectTrade();
+        final Future<SlNode> posns = datastore.selectPosn(busDay);
         insertAssets(assets.get());
         insertContrs(contrs.get());
-        insertTraders(traders.get());
         insertMarkets(markets.get());
+        insertTraders(traders.get());
         insertOrders(orders.get());
         insertTrades(trades.get());
         insertPosns(posns.get());
     }
 
-    public Serv(Model model, long now) {
-        this.journ = model;
+    public Serv(Datastore datastore, long now) {
+        this.journ = datastore;
         final int busDay = DateUtil.getBusDate(now).toJd();
-        insertAssets(model.selectAsset());
-        insertContrs(model.selectContr());
-        insertTraders(model.selectTrader());
-        insertMarkets(model.selectMarket());
-        insertOrders(model.selectOrder());
-        insertTrades(model.selectTrade());
-        insertPosns(model.selectPosn(busDay));
+        insertAssets(datastore.selectAsset());
+        insertContrs(datastore.selectContr());
+        insertMarkets(datastore.selectMarket());
+        insertTraders(datastore.selectTrader());
+        insertOrders(datastore.selectOrder());
+        insertTrades(datastore.selectTrade());
+        insertPosns(datastore.selectPosn(busDay));
     }
 
     public final Trader createTrader(String mnem, String display, String email)

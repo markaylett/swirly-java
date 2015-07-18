@@ -10,6 +10,8 @@ import static com.swirlycloud.twirly.util.CollectionUtil.hashLong;
  * 
  * @param <V>
  *            The concrete element type.
+ * 
+ * @author Mark Aylett
  */
 public abstract class LongHashTable<V> extends HashTable<V> {
 

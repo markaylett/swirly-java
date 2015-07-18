@@ -2,10 +2,10 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
   <context-param>
     <param-name>url</param-name>
-    <param-value>datastore:</param-value>
-    <!--param-value>mock:</param-value-->
+    <param-value>appengine:datastore:</param-value>
   </context-param>
 
   <listener>
@@ -14,42 +14,42 @@
 
   <servlet>
     <servlet-name>rec</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.RecServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.BackRecServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>view</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.ViewServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.BackViewServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>sess</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.SessServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.BackSessServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>cron</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.CronServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.BackCronServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
     <servlet-name>rec</servlet-name>
-    <url-pattern>/api/rec/*</url-pattern>
+    <url-pattern>/back/rec/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>view</servlet-name>
-    <url-pattern>/api/view/*</url-pattern>
+    <url-pattern>/back/view/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>sess</servlet-name>
-    <url-pattern>/api/sess/*</url-pattern>
+    <url-pattern>/back/sess/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>cron</servlet-name>
-    <url-pattern>/api/cron/*</url-pattern>
+    <url-pattern>/back/cron/*</url-pattern>
   </servlet-mapping>
 
   <error-page>
@@ -85,7 +85,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>cron</web-resource-name>
-      <url-pattern>/api/cron/*</url-pattern>
+      <url-pattern>/back/cron/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>

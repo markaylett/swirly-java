@@ -20,8 +20,12 @@ import com.swirlycloud.twirly.util.Params;
 
 /**
  * A specification that stipulates the terms and conditions of sale.
+ *
+ * @author Mark Aylett
  */
 public final @NonNullByDefault class Contr extends Rec {
+
+    private static final long serialVersionUID = 1L;
     private Memorable asset;
     private Memorable ccy;
     private final int tickNumer;

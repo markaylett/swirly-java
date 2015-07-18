@@ -6,28 +6,28 @@ abstract class RestServlet {
 }
 
 class RecServlet <<Reference Data>> {
-  GET(): /api/rec/
-  GET(): /api/rec/asset/[mnem]
-  GET(): /api/rec/contr/[mnem]
-  GET(): /api/rec/market/[mnem]
-  GET(): /api/rec/trader/[mnem]
-  POST(): /api/rec/market/
-  POST(): /api/rec/trader/
+  GET(): /back/rec/
+  GET(): /back/rec/asset/[mnem]
+  GET(): /back/rec/contr/[mnem]
+  GET(): /back/rec/market/[mnem]
+  GET(): /back/rec/trader/[mnem]
+  POST(): /back/rec/market/
+  POST(): /back/rec/trader/
 }
 
 class ViewServlet <<Market Data>> {
-  GET(): /api/view/[market]
+  GET(): /back/view/[market]
 }
 
 class SessServlet <<Order Management>> {
-  GET(): /api/sess/
-  GET(): /api/sess/order/[market]/[id]
-  GET(): /api/sess/trade/[market]/[id]
-  GET(): /api/sess/posn/[contr]/[settlDate]
-  DELETE(): /api/sess/order/<market>/<id>
-  DELETE(): /api/sess/trade/<market>/<id>
-  POST(): /api/sess/order/<market>/
-  PUT(): /api/sess/order/<market>/<id>
+  GET(): /back/sess/
+  GET(): /back/sess/order/[market]/[id]
+  GET(): /back/sess/trade/[market]/[id]
+  GET(): /back/sess/posn/[contr]/[settlDate]
+  DELETE(): /back/sess/order/<market>/<id>
+  DELETE(): /back/sess/trade/<market>/<id>
+  POST(): /back/sess/order/<market>/
+  PUT(): /back/sess/order/<market>/<id>
 }
 
 RestServlet <|-- RecServlet

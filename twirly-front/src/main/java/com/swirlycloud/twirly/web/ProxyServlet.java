@@ -22,6 +22,7 @@ import com.google.appengine.api.urlfetch.HTTPMethod;
 import com.google.appengine.api.urlfetch.HTTPRequest;
 import com.google.appengine.api.urlfetch.HTTPResponse;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
+import com.google.appengine.api.utils.SystemProperty;
 
 /**
  * Alternative to dispatch.xml for testing.
@@ -31,7 +32,7 @@ import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
  * </p>
  *
  * @author Mark Aylett
- * */
+ */
 @SuppressWarnings("serial")
 public final class ProxyServlet extends HttpServlet {
     private String module;
@@ -67,6 +68,9 @@ public final class ProxyServlet extends HttpServlet {
     }
 
     private static void setCredentials(HttpServletRequest req, HTTPRequest modReq) {
+        if (SystemProperty.environment.value() != SystemProperty.Environment.Value.Development) {
+            return;
+        }
         final Cookie[] cookies = req.getCookies();
         for (int i = 0; i < cookies.length; ++i) {
             final String name = cookies[i].getName();

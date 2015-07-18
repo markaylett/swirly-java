@@ -88,7 +88,7 @@ Click Finish to complete the wizard.
 You should now have a Servers project in your Eclipse workspace containing a `twirly-config`
 folder. The `path` attributes of the following contexts in `servers.xml` should be as follows:
 
-    <Context docBase="twirly-back" path="/api" ... />
+    <Context docBase="twirly-back" path="/back" ... />
     <Context docBase="twirly-front" path="/" ... />
 
 Add the following element to the `Host` section to enable Single Sign On (SSO):
@@ -110,10 +110,19 @@ JDBC Realm
 
 You can configure the `JDBCRealm` instead of the `UserDatabaseRealm` as follows:
 
-    cp mysql-connector-java-x.y.z.jar $CATALINA_HOME/lib/
+    $ cp mysql-connector-java-x.y.z.jar $CATALINA_HOME/lib/
 
     <Realm className="org.apache.catalina.realm.JDBCRealm"
            driverName="org.gjt.mm.mysql.Driver"
            connectionURL="jdbc:mysql://localhost/twirly?user=root&amp;password="
            userTable="User_t" userNameCol="email" userCredCol="pass"
            userRoleTable="UserGroup_v" roleNameCol="group_" />
+
+OS X Daemons
+------------
+
+After installing mysql-server and memcached from Mac Ports, start the daemons using the following
+commands:
+
+    $ auso launchctl load -w /Library/LaunchDaemons/org.macports.mysql56-server.plist 
+    $ sudo launchctl load -w /Library/LaunchDaemons/org.macports.memcached.plist

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.web;
+package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
@@ -38,17 +38,17 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
-import com.swirlycloud.twirly.mock.MockModel;
+import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.mock.MockTrader;
-import com.swirlycloud.twirly.web.Unrest.PosnKey;
-import com.swirlycloud.twirly.web.Unrest.RecStruct;
-import com.swirlycloud.twirly.web.Unrest.SessStruct;
-import com.swirlycloud.twirly.web.Unrest.TransStruct;
+import com.swirlycloud.twirly.rest.BackUnrest.PosnKey;
+import com.swirlycloud.twirly.rest.BackUnrest.RecStruct;
+import com.swirlycloud.twirly.rest.BackUnrest.SessStruct;
+import com.swirlycloud.twirly.rest.BackUnrest.TransStruct;
 
-public final class UnrestTest {
+public final class BackUnrestTest {
 
     private static final String EMAIL = "mark.aylett@gmail.com";
     private static final String TRADER = "MARAYL";
@@ -214,8 +214,8 @@ public final class UnrestTest {
         assertEquals(sellLots, actual.getSellLots());
     }
 
-    private Model model;
-    private Unrest unrest;
+    private Datastore datastore;
+    private BackUnrest unrest;
 
     private final Trader postTrader(String mnem, String display, String email)
             throws BadRequestException, ServiceUnavailableException, IOException {
@@ -267,16 +267,16 @@ public final class UnrestTest {
     @Before
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        model = new MockModel();
-        unrest = new Unrest(model, NOW);
+        datastore = new MockDatastore();
+        unrest = new BackUnrest(datastore, NOW);
         postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
     }
 
     @After
     public final void tearDown() throws Exception {
-        model.close();
+        datastore.close();
         unrest = null;
-        model = null;
+        datastore = null;
     }
 
     @Test

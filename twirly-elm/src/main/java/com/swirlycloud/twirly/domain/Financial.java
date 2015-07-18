@@ -7,8 +7,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Fields common to both Order and Exec.
+ * 
+ * @author Mark Aylett
  */
-
 public @NonNullByDefault interface Financial {
 
     String getMarket();

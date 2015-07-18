@@ -13,6 +13,8 @@ import com.swirlycloud.twirly.node.DlNode;
  * 
  * A price level is an aggregation of orders by price. I.e. the sum of all orders in the book at the
  * same price.
+ * 
+ * @author Mark Aylett
  */
 public final @NonNullByDefault class Level extends BasicRbNode {
     final long key;
@@ -39,7 +41,6 @@ public final @NonNullByDefault class Level extends BasicRbNode {
     /**
      * Synthetic level key.
      */
-
     public static long composeKey(Action action, long ticks) {
         return action == Action.BUY ? -ticks : ticks;
     }

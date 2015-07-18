@@ -15,7 +15,7 @@
     </web>
     <web>
       <web-uri>twirly-back-0.1</web-uri>
-      <context-root>/api</context-root>
+      <context-root>/back</context-root>
     </web>
   </module>
 </application>

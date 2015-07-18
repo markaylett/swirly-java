@@ -67,7 +67,6 @@ import com.swirlycloud.twirly.quickfix.MatchId;
 
 /**
  * @author Mark Aylett
- *
  */
 public final class FixBuilder {
     private Message message;

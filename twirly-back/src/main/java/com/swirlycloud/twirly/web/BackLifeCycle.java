@@ -3,41 +3,45 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.util.TimeUtil.now;
+
 import java.util.concurrent.ExecutionException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import com.swirlycloud.twirly.io.AsyncModel;
-import com.swirlycloud.twirly.io.AsyncModelService;
-import com.swirlycloud.twirly.io.DatastoreModel;
-import com.swirlycloud.twirly.io.JdbcModel;
-import com.swirlycloud.twirly.io.Model;
-import com.swirlycloud.twirly.mock.MockModel;
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.swirlycloud.twirly.io.AppEngineDatastore;
+import com.swirlycloud.twirly.io.AsyncDatastore;
+import com.swirlycloud.twirly.io.AsyncDatastoreService;
+import com.swirlycloud.twirly.io.Datastore;
+import com.swirlycloud.twirly.io.JdbcDatastore;
+import com.swirlycloud.twirly.rest.BackRest;
 
 public final class BackLifeCycle implements ServletContextListener {
-    private AutoCloseable closeable;
+    private AutoCloseable datastore;
 
     private final void close(final ServletContext sc) {
         try {
             // We have to check for null here because contextDestroyed may be called even when
             // contextInitialized fails.
-            if (closeable != null) {
-                closeable.close();
-                closeable = null;
+            if (datastore != null) {
+                datastore.close();
+                datastore = null;
             }
         } catch (Exception e) {
-            sc.log("failed to close model", e);
+            sc.log("failed to close datastore", e);
         }
     }
 
-    private static Model getModel(ServletContext sc) {
-        Model model;
+    private static @NonNull Datastore getDatastore(ServletContext sc) {
+        Datastore datastore;
         final String url = sc.getInitParameter("url");
-        if (url == null || url.equals("datastore:")) {
+        if (url == null || url.equals("appengine:datastore:")) {
             // Default.
-            model = new DatastoreModel();
+            datastore = new AppEngineDatastore();
         } else if (url.startsWith("jdbc:mysql:")) {
             final String user = sc.getInitParameter("user");
             final String password = sc.getInitParameter("password");
@@ -47,13 +51,11 @@ public final class BackLifeCycle implements ServletContextListener {
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("mysql jdbc driver not found", e);
             }
-            model = new JdbcModel(url, user, password);
-        } else if (url.equals("mock:")) {
-            model = new MockModel();
+            datastore = new JdbcDatastore(url, user, password);
         } else {
-            throw new RuntimeException("invalid model url: " + url);
+            throw new RuntimeException("invalid datastore url: " + url);
         }
-        return model;
+        return datastore;
     }
 
     @Override
@@ -61,23 +63,26 @@ public final class BackLifeCycle implements ServletContextListener {
         // This will be invoked as part of a warmup request, or the first user request if no warmup
         // request was invoked.
         final ServletContext sc = event.getServletContext();
-        final Model model = getModel(sc);
-        this.closeable = model;
+        final Datastore datastore = getDatastore(sc);
+        this.datastore = datastore;
         boolean success = false;
         try {
+            final long now = now();
+            Realm realm = null;
             if (sc.getServerInfo().startsWith("Apache Tomcat")) {
-                RestServlet.setRealm(new CatalinaRealm());
-                final AsyncModel asyncModel = new AsyncModelService(model);
-                this.closeable = asyncModel;
+                realm = new CatalinaRealm();
+                final AsyncDatastore asyncDatastore = new AsyncDatastoreService(datastore);
+                this.datastore = asyncDatastore;
                 try {
-                    RestServlet.setModel(asyncModel);
+                    RestServlet.setRest(new BackRest(asyncDatastore, now));
                 } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException("failed to create async model", e);
+                    throw new RuntimeException("failed to create async datastore", e);
                 }
             } else {
-                RestServlet.setRealm(new AppEngineRealm());
-                RestServlet.setModel(model);
+                realm = new AppEngineRealm();
+                RestServlet.setRest(new BackRest(datastore, now));
             }
+            RestServlet.setRealm(realm);
             success = true;
         } finally {
             if (!success) {
