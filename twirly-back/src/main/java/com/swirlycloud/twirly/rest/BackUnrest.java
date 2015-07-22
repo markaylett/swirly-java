@@ -16,6 +16,7 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
@@ -31,7 +32,6 @@ import com.swirlycloud.twirly.domain.View;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("null")
@@ -350,8 +350,8 @@ public final class BackUnrest {
         throw new IOException("end-of object not found");
     }
 
-    public BackUnrest(Datastore datastore, long now) {
-        rest = new BackRest(datastore, now);
+    public BackUnrest(LockableServ serv) {
+        rest = new BackRest(serv);
     }
 
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {

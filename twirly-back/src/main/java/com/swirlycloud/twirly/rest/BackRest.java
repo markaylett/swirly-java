@@ -6,7 +6,6 @@ package com.swirlycloud.twirly.rest;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -24,23 +23,12 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.io.AsyncDatastore;
-import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
 
     public BackRest(LockableServ serv) {
         super(serv);
-    }
-
-    public BackRest(AsyncDatastore datastore, long now) throws InterruptedException,
-            ExecutionException {
-        this(new LockableServ(datastore, now));
-    }
-
-    public BackRest(Datastore datastore, long now) {
-        this(new LockableServ(datastore, now));
     }
 
     @Override

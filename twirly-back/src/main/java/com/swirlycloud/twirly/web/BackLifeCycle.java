@@ -13,26 +13,29 @@ import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.app.LockableServ;
+import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.io.AppEngineDatastore;
 import com.swirlycloud.twirly.io.AsyncDatastore;
 import com.swirlycloud.twirly.io.AsyncDatastoreService;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.JdbcDatastore;
 import com.swirlycloud.twirly.rest.BackRest;
+import com.swirlycloud.twirly.rest.Rest;
 
 public final class BackLifeCycle implements ServletContextListener {
-    private AutoCloseable datastore;
+    private Serv serv;
 
     private final void close(final ServletContext sc) {
         try {
             // We have to check for null here because contextDestroyed may be called even when
             // contextInitialized fails.
-            if (datastore != null) {
-                datastore.close();
-                datastore = null;
+            if (serv != null) {
+                serv.close();
+                serv = null;
             }
-        } catch (Exception e) {
-            sc.log("failed to close datastore", e);
+        } catch (final Exception e) {
+            sc.log("failed to close serv", e);
         }
     }
 
@@ -58,35 +61,50 @@ public final class BackLifeCycle implements ServletContextListener {
         return datastore;
     }
 
+    @SuppressWarnings("resource")
     @Override
     public final void contextInitialized(ServletContextEvent event) {
         // This will be invoked as part of a warmup request, or the first user request if no warmup
         // request was invoked.
         final ServletContext sc = event.getServletContext();
         final Datastore datastore = getDatastore(sc);
-        this.datastore = datastore;
+        AutoCloseable resource = datastore;
         boolean success = false;
         try {
             final long now = now();
             Realm realm = null;
+            LockableServ serv = null;
             if (sc.getServerInfo().startsWith("Apache Tomcat")) {
                 realm = new CatalinaRealm();
                 final AsyncDatastore asyncDatastore = new AsyncDatastoreService(datastore);
-                this.datastore = asyncDatastore;
+                // AsyncDatastore owns Datastore.
+                resource = asyncDatastore;
                 try {
-                    RestServlet.setRest(new BackRest(asyncDatastore, now));
+                    serv = new LockableServ(asyncDatastore, now);
+                    // LockableServ owns AsyncDatastore.
+                    resource = serv;
                 } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException("failed to create async datastore", e);
                 }
             } else {
                 realm = new AppEngineRealm();
-                RestServlet.setRest(new BackRest(datastore, now));
+                serv = new LockableServ(datastore, now);
+                // LockableServ owns Datastore.
+                resource = serv;
             }
+            final Rest rest = new BackRest(serv);
+            // Commit.
             RestServlet.setRealm(realm);
+            RestServlet.setRest(rest);
+            this.serv = serv;
             success = true;
         } finally {
             if (!success) {
-                close(sc);
+                try {
+                    resource.close();
+                } catch (final Exception e) {
+                    sc.log("failed to close resource", e);
+                }
             }
         }
     }

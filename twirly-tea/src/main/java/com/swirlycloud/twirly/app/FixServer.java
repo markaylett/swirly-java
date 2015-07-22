@@ -9,9 +9,7 @@ import static com.swirlycloud.twirly.util.TimeUtil.now;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +54,6 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.FixRejectException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.io.AsyncDatastore;
-import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.node.TransNode;
 
 public final class FixServer extends MessageCracker implements Application {
@@ -163,17 +159,6 @@ public final class FixServer extends MessageCracker implements Application {
         } finally {
             serv.releaseRead();
         }
-    }
-
-    public FixServer(SessionSettings settings, @NonNull AsyncDatastore datastore)
-            throws ConfigError, FieldConvertError, NotFoundException, InterruptedException,
-            ExecutionException {
-        this(settings, new LockableServ(datastore, now()));
-    }
-
-    public FixServer(SessionSettings settings, @NonNull Datastore datastore) throws ConfigError,
-            FieldConvertError, NotFoundException {
-        this(settings, new LockableServ(datastore, now()));
     }
 
     @Override

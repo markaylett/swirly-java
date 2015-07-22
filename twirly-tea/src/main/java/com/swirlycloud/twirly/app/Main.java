@@ -43,14 +43,15 @@ public final class Main {
         final Acceptor acceptor = new SocketAcceptor(application, new NullStoreFactory(), settings,
                 logFactory, new DefaultMessageFactory());
         try {
-            acceptor.start();
-            return new AutoCloseable() {
+            final AutoCloseable ac = new AutoCloseable() {
                 @Override
                 public final void close() throws Exception {
                     acceptor.stop();
                 }
             };
-        } catch (ConfigError e) {
+            acceptor.start();
+            return ac;
+        } catch (final ConfigError e) {
             // If a ConfigError is thrown during start(), QuickFIX may leak a daemonised thread,
             // which prevents a fail-fast shutdown, because the thread is blocked in a poll/select
             // call. The API does not offer any facility to forcibly disconnect or interrupt this
@@ -66,13 +67,14 @@ public final class Main {
         final Initiator initiator = new SocketInitiator(application, new NullStoreFactory(),
                 settings, logFactory, new DefaultMessageFactory());
         try {
-            initiator.start();
-            return new AutoCloseable() {
+            final AutoCloseable ac = new AutoCloseable() {
                 @Override
                 public final void close() throws Exception {
                     initiator.stop();
                 }
             };
+            initiator.start();
+            return ac;
         } catch (ConfigError e) {
             // See comment in newAcceptor().
             e.printStackTrace();
@@ -113,65 +115,75 @@ public final class Main {
         return newFixInitiator(application, settings, logFactory);
     }
 
-    public static void main(String[] args) throws Exception {
-        PropertyConfigurator.configure(readProperties("log4j.properties"));
-        try (final Datastore datastore = new MockDatastore()) {
-            final LockableServ serv = new LockableServ(datastore, now());
-            final String mnem = "EURUSD.MAR14";
-            final String display = "EURUSD March 14";
-            final String contr = "EURUSD";
-            final int today = ymdToJd(2014, 2, 11);
-            final int settlDay = today + 2;
-            final int expiryDay = today + 1;
-            final int state = 0x01;
-            final long now = jdToMillis(today);
+    public static void run(final LockableServ serv) throws Exception {
+        final String mnem = "EURUSD.MAR14";
+        final String display = "EURUSD March 14";
+        final String contr = "EURUSD";
+        final int today = ymdToJd(2014, 2, 11);
+        final int settlDay = today + 2;
+        final int expiryDay = today + 1;
+        final int state = 0x01;
+        final long now = jdToMillis(today);
 
-            serv.acquireWrite();
-            try {
-                serv.createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
-            } finally {
-                serv.releaseWrite();
-            }
+        serv.acquireWrite();
+        try {
+            serv.createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
+        } finally {
+            serv.releaseWrite();
+        }
 
-            try (final AutoCloseable fixServ = startFixServ("FixServ.conf", serv)) {
+        try (final AutoCloseable fixServ = startFixServ("FixServ.conf", serv)) {
+
+            Thread.sleep(2000);
+
+            try (final AutoCloseable fixClient = startFixClient("FixClient.conf")) {
 
                 Thread.sleep(2000);
 
-                try (final AutoCloseable fixClient = startFixClient("FixClient.conf")) {
+                final SessionID marayl = new SessionID("FIX.4.4", "MarkAylett", "Twirly");
+                final SessionID gosayl = new SessionID("FIX.4.4", "GoskaAylett", "Twirly");
 
-                    Thread.sleep(2000);
+                final FixBuilder builder = new FixBuilder();
+                builder.setMessage(new NewOrderSingle());
+                builder.setNewOrderSingle("EURUSD.MAR14", "marayl1", Action.BUY, 12345, 10, 1, now);
+                Session.sendToTarget(builder.getMessage(), marayl);
 
-                    final SessionID marayl = new SessionID("FIX.4.4", "MarkAylett", "Twirly");
-                    final SessionID gosayl = new SessionID("FIX.4.4", "GoskaAylett", "Twirly");
+                Thread.sleep(2000);
 
-                    final FixBuilder builder = new FixBuilder();
-                    builder.setMessage(new NewOrderSingle());
-                    builder.setNewOrderSingle("EURUSD.MAR14", "marayl1", Action.BUY, 12345, 10, 1,
-                            now);
-                    Session.sendToTarget(builder.getMessage(), marayl);
+                builder.setMessage(new NewOrderSingle());
+                builder.setNewOrderSingle("EURUSD.MAR14", "gosayl1", Action.SELL, 12345, 5, 1, now);
+                Session.sendToTarget(builder.getMessage(), gosayl);
 
-                    Thread.sleep(2000);
+                Thread.sleep(2000);
 
-                    builder.setMessage(new NewOrderSingle());
-                    builder.setNewOrderSingle("EURUSD.MAR14", "gosayl1", Action.SELL, 12345, 5, 1,
-                            now);
-                    Session.sendToTarget(builder.getMessage(), gosayl);
+                builder.setMessage(new OrderCancelReplaceRequest());
+                builder.setOrderCancelReplaceRequest("EURUSD.MAR14", "marayl2", "marayl1", 9, now);
+                Session.sendToTarget(builder.getMessage(), marayl);
 
-                    Thread.sleep(2000);
+                Thread.sleep(2000);
 
-                    builder.setMessage(new OrderCancelReplaceRequest());
-                    builder.setOrderCancelReplaceRequest("EURUSD.MAR14", "marayl2", "marayl1", 9,
-                            now);
-                    Session.sendToTarget(builder.getMessage(), marayl);
+                builder.setMessage(new OrderCancelRequest());
+                builder.setOrderCancelRequest("EURUSD.MAR14", "marayl3", "marayl1", now);
+                Session.sendToTarget(builder.getMessage(), marayl);
 
-                    Thread.sleep(2000);
+                Thread.sleep(2000);
+            }
+        }
+    }
 
-                    builder.setMessage(new OrderCancelRequest());
-                    builder.setOrderCancelRequest("EURUSD.MAR14", "marayl3", "marayl1", now);
-                    Session.sendToTarget(builder.getMessage(), marayl);
-
-                    Thread.sleep(2000);
-                }
+    public static void main(String[] args) throws Exception {
+        PropertyConfigurator.configure(readProperties("log4j.properties"));
+        @SuppressWarnings("resource")
+        final Datastore datastore = new MockDatastore();
+        boolean success = false;
+        try {
+            try (final LockableServ serv = new LockableServ(datastore, now())) {
+                success = true;
+                run(serv);
+            }
+        } finally {
+            if (!success) {
+                datastore.close();
             }
         }
     }

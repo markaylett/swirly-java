@@ -21,6 +21,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.swirlycloud.twirly.app.LockableServ;
+import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
@@ -214,7 +216,7 @@ public final class BackUnrestTest {
         assertEquals(sellLots, actual.getSellLots());
     }
 
-    private Datastore datastore;
+    private Serv serv;
     private BackUnrest unrest;
 
     private final Trader postTrader(String mnem, String display, String email)
@@ -264,19 +266,38 @@ public final class BackUnrestTest {
         unrest.deleteTrade(EMAIL, market, id, NOW);
     }
 
+    @SuppressWarnings("resource")
     @Before
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        datastore = new MockDatastore();
-        unrest = new BackUnrest(datastore, NOW);
+        final Datastore datastore = new MockDatastore();
+        AutoCloseable resource = datastore;
+        boolean success = false;
+        try {
+            final LockableServ serv = new LockableServ(datastore, NOW);
+            // LockableServ owns Datastore.
+            resource = serv;
+            unrest = new BackUnrest(serv);
+            // Commit.
+            this.serv = serv;
+            success = true;
+        } finally {
+            if (!success) {
+                try {
+                    resource.close();
+                } catch (final Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
     }
 
     @After
     public final void tearDown() throws Exception {
-        datastore.close();
+        serv.close();
         unrest = null;
-        datastore = null;
+        serv = null;
     }
 
     @Test
