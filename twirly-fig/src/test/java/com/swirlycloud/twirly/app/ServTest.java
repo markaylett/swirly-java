@@ -44,11 +44,10 @@ public final class ServTest {
 
     private static final long NOW = jdToMillis(TODAY);
 
-    private Datastore datastore;
+    private Serv serv;
 
-    @Before
-    public final void setUp() {
-        datastore = new MockDatastore() {
+    private static Datastore newDatastore() {
+        return new MockDatastore() {
             @Override
             public final SlNode selectMarket() {
                 return new Market("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"), SETTL_DAY,
@@ -86,15 +85,29 @@ public final class ServTest {
         };
     }
 
+    @Before
+    public final void setUp() throws Exception {
+        @SuppressWarnings("resource")
+        final Datastore datastore = newDatastore();
+        boolean success = false;
+        try {
+            serv = new Serv(datastore, NOW);
+            success = true;
+        } finally {
+            if (!success) {
+                datastore.close();
+            }
+        }
+    }
+
     @After
     public final void tearDown() throws Exception {
-        datastore.close();
-        datastore = null;
+        serv.close();
+        serv = null;
     }
 
     @Test
     public final void testFindMarket() throws Exception {
-        final Serv serv = new Serv(datastore, NOW);
         final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
 
         assertNotNull(actual);
@@ -113,7 +126,6 @@ public final class ServTest {
 
     @Test
     public final void testBidSide() throws Exception {
-        final Serv serv = new Serv(datastore, NOW);
         final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
         assertNotNull(actual);
         final Side side = actual.getBidSide();
@@ -127,7 +139,6 @@ public final class ServTest {
 
     @Test
     public final void testOfferSide() throws Exception {
-        final Serv serv = new Serv(datastore, NOW);
         final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
         assertNotNull(actual);
         final Side side = actual.getOfferSide();
@@ -141,7 +152,6 @@ public final class ServTest {
 
     @Test
     public final void testFindOrder() throws Exception {
-        final Serv serv = new Serv(datastore, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 
@@ -208,7 +218,6 @@ public final class ServTest {
 
     @Test
     public final void testFindTrade() throws Exception {
-        final Serv serv = new Serv(datastore, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 
@@ -262,7 +271,6 @@ public final class ServTest {
     @Test(expected = BadRequestException.class)
     public final void testDuplicateMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Serv serv = new Serv(datastore, NOW);
         serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY,
                 STATE, NOW);
     }
@@ -270,7 +278,6 @@ public final class ServTest {
     @Test
     public final void testPlace() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Serv serv = new Serv(datastore, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 
@@ -301,7 +308,6 @@ public final class ServTest {
     @Test
     public final void testRevise() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Serv serv = new Serv(datastore, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 
@@ -333,7 +339,6 @@ public final class ServTest {
     @Test
     public final void testCancel() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Serv serv = new Serv(datastore, NOW);
         final Sess sess = serv.getLazySess(TRADER);
         assertNotNull(sess);
 

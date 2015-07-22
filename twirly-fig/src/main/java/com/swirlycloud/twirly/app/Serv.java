@@ -45,7 +45,7 @@ import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 
-public @NonNullByDefault class Serv {
+public @NonNullByDefault class Serv implements AutoCloseable {
 
     private static final int CAPACITY = 1 << 5; // 64
     @SuppressWarnings("null")
@@ -348,6 +348,11 @@ public @NonNullByDefault class Serv {
         insertOrders(datastore.selectOrder());
         insertTrades(datastore.selectTrade());
         insertPosns(datastore.selectPosn(busDay));
+    }
+
+    @Override
+    public final void close() throws Exception {
+        journ.close();
     }
 
     public final Trader createTrader(String mnem, String display, String email)

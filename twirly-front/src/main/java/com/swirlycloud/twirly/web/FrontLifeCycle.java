@@ -13,6 +13,7 @@ import com.swirlycloud.twirly.io.AppEngineModel;
 import com.swirlycloud.twirly.io.JdbcDatastore;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.rest.FrontRest;
+import com.swirlycloud.twirly.rest.Rest;
 
 public final class FrontLifeCycle implements ServletContextListener {
 
@@ -58,8 +59,7 @@ public final class FrontLifeCycle implements ServletContextListener {
         // This will be invoked as part of a warmup request, or the first user request if no warmup
         // request was invoked.
         final ServletContext sc = event.getServletContext();
-        final Model datastore = getModel(sc);
-        this.model = datastore;
+        final Model model = getModel(sc);
         boolean success = false;
         try {
             Realm realm = null;
@@ -68,13 +68,20 @@ public final class FrontLifeCycle implements ServletContextListener {
             } else {
                 realm = new AppEngineRealm();
             }
+            final Rest rest = new FrontRest(model);
+            // Commit.
             PageServlet.setRealm(realm);
             RestServlet.setRealm(realm);
-            RestServlet.setRest(new FrontRest(datastore));
+            RestServlet.setRest(rest);
+            this.model = model;
             success = true;
         } finally {
             if (!success) {
-                close(sc);
+                try {
+                    model.close();
+                } catch (final Exception e) {
+                    sc.log("failed to close resource", e);
+                }
             }
         }
     }
