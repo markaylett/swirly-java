@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -68,7 +70,7 @@ public final class FrontLifeCycle implements ServletContextListener {
             } else {
                 realm = new AppEngineRealm();
             }
-            final Rest rest = new FrontRest(model);
+            final Rest rest = new FrontRest(model, NO_CACHE);
             // Commit.
             PageServlet.setRealm(realm);
             RestServlet.setRealm(realm);

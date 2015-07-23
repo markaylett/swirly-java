@@ -15,6 +15,7 @@ import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
@@ -23,6 +24,8 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class FrontRest implements Rest {
 
     private final Model model;
+    @SuppressWarnings("unused")
+    private final Cache cache;
 
     private final MnemRbTree makeTree(@Nullable SlNode first) {
         final MnemRbTree tree = new MnemRbTree();
@@ -64,8 +67,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         toJsonArray(tree.getFirst(), params, out);
     }
 
-    public FrontRest(Model model) {
+    public FrontRest(Model model, Cache cache) {
         this.model = model;
+        this.cache = cache;
     }
 
     @Override
