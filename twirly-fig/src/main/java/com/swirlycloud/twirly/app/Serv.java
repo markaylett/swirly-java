@@ -51,8 +51,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
-    private static final class SessTree extends
-            BasicRbTree<String> {
+    private static final class SessTree extends BasicRbTree<String> {
 
         private static String getTraderMnem(RbNode node) {
             return ((Sess) node).getTrader();
@@ -319,6 +318,16 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
+    /**
+     * Ownership and responsibility for closing the datastore will transferred to the new instance.
+     * 
+     * @param datastore
+     *            The datastore.
+     * @param now
+     *            The current time.
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
     public Serv(AsyncDatastore datastore, long now) throws InterruptedException, ExecutionException {
         this.journ = datastore;
         final int busDay = DateUtil.getBusDate(now).toJd();
@@ -338,6 +347,14 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         insertPosns(posns.get());
     }
 
+    /**
+     * Ownership and responsibility for closing the datastore will transferred to the new instance.
+     * 
+     * @param datastore
+     *            The datastore.
+     * @param now
+     *            The current time.
+     */
     public Serv(Datastore datastore, long now) {
         this.journ = datastore;
         final int busDay = DateUtil.getBusDate(now).toJd();

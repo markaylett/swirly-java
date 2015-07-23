@@ -78,8 +78,18 @@ public final class Benchmark {
     }
 
     public static void main(String[] args) throws Exception {
-        try (final Datastore datastore = new MockDatastore()) {
-            run(new Serv(datastore, now()));
+        @SuppressWarnings("resource")
+        final Datastore datastore = new MockDatastore();
+        boolean success = false;
+        try {
+            try (final Serv serv = new Serv(datastore, now())) {
+                success = true;
+                run(serv);
+            }
+        } finally {
+            if (!success) {
+                datastore.close();
+            }
         }
     }
 }
