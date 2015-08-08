@@ -33,6 +33,8 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class Order extends BasicRbNode implements Jsonifiable, DlNode,
         SlNode, Instruct {
 
+    private static final long serialVersionUID = 1L;
+
     private transient DlNode dlPrev = DlUtil.NULL;
     private transient DlNode dlNext = DlUtil.NULL;
 

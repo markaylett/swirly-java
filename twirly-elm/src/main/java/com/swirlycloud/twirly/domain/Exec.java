@@ -32,6 +32,8 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, TransNode,
         Instruct {
 
+    private static final long serialVersionUID = 1L;
+
     private transient @Nullable SlNode slNext;
     private transient @Nullable TransNode transNext;
 

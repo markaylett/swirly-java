@@ -17,6 +17,9 @@ import com.swirlycloud.twirly.node.DlNode;
  * @author Mark Aylett
  */
 public final @NonNullByDefault class Level extends BasicRbNode {
+
+    private static final long serialVersionUID = 1L;
+
     final long key;
     final long ticks;
     Order firstOrder;

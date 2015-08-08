@@ -3,8 +3,10 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.util;
 
+import java.io.Serializable;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-public @NonNullByDefault interface Memorable {
+public @NonNullByDefault interface Memorable extends Serializable {
     String getMnem();
 }

@@ -22,6 +22,9 @@ public final class LongRbTreeTest {
     private static final boolean DEBUG = false;
 
     private static final class Node extends BasicRbNode {
+
+        private static final long serialVersionUID = 1L;
+
         private final long key;
         private final long value;
 
@@ -41,6 +44,8 @@ public final class LongRbTreeTest {
     }
 
     private static final @NonNullByDefault class NodeTree extends LongRbTree {
+
+        private static final long serialVersionUID = 1L;
 
         private static long getKey(RbNode node) {
             return ((Node) node).key;

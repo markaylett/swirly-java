@@ -3,8 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import java.io.Serializable;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -14,7 +12,7 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Memorable;
 
-public abstract @NonNullByDefault class Rec extends BasicRbNode implements Cloneable, Serializable,
+public abstract @NonNullByDefault class Rec extends BasicRbNode implements Cloneable,
         Jsonifiable, SlNode, Memorable {
 
     private static final long serialVersionUID = 1L;

@@ -53,6 +53,8 @@ public @NonNullByDefault class Serv implements AutoCloseable {
 
     private static final class SessTree extends BasicRbTree<String> {
 
+        private static final long serialVersionUID = 1L;
+
         private static String getTraderMnem(RbNode node) {
             return ((Sess) node).getTrader();
         }

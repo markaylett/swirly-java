@@ -16,6 +16,8 @@ import com.swirlycloud.twirly.node.RbNode;
 public final class Side {
     private static final class LevelTree extends LongRbTree {
 
+        private static final long serialVersionUID = 1L;
+
         private static long getKey(@NonNull RbNode node) {
             return ((Level) node).getKey();
         }

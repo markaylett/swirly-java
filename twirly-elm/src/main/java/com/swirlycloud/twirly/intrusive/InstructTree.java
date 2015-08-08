@@ -13,6 +13,8 @@ import com.swirlycloud.twirly.node.RbNode;
 
 public final @NonNullByDefault class InstructTree extends Tree<RbNode> {
 
+    private static final long serialVersionUID = 1L;
+
     @Override
     protected final int compareKey(RbNode lhs, RbNode rhs) {
         final Instruct r = (Instruct) rhs;

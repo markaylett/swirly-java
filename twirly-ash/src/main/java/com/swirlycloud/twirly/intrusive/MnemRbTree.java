@@ -10,6 +10,8 @@ import com.swirlycloud.twirly.util.Memorable;
 
 public final @NonNullByDefault class MnemRbTree extends BasicRbTree<String> {
 
+    private static final long serialVersionUID = 1L;
+
     private static String getMnem(RbNode node) {
         return ((Memorable) node).getMnem();
     }

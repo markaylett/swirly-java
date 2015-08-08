@@ -3,7 +3,11 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -23,11 +27,22 @@ import org.eclipse.jdt.annotation.Nullable;
  * 
  * @author Mark Aylett
  */
-public abstract @NonNullByDefault class Tree<V> {
+public abstract @NonNullByDefault class Tree<V> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private static final int INDENT = 4;
     private static final int NONE = 0;
     private static final int BLACK = 1;
     private static final int RED = 2;
+
+    private final void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    private final void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+    }
 
     protected @Nullable V root;
 

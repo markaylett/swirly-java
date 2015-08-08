@@ -36,8 +36,8 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
     private final int settlDay;
     private final int expiryDay;
     private int state;
-    private final Side bidSide = new Side();
-    private final Side offerSide = new Side();
+    private final transient Side bidSide = new Side();
+    private final transient Side offerSide = new Side();
     private long lastTicks;
     private long lastLots;
     private long lastTime;

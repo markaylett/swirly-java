@@ -22,6 +22,8 @@ import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifiable, SlNode {
 
+    private static final long serialVersionUID = 1L;
+
     private transient @Nullable SlNode next;
 
     private final String trader;
