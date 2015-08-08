@@ -3,6 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.mock;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
 
@@ -13,22 +16,22 @@ public class MockModel implements Model {
     }
 
     @Override
-    public SlNode selectAsset() {
+    public @NonNull MnemRbTree selectAsset() {
         return MockAsset.selectAsset();
     }
 
     @Override
-    public SlNode selectContr() {
+    public MnemRbTree selectContr() {
         return MockContr.selectContr();
     }
 
     @Override
-    public SlNode selectMarket() {
-        return null;
+    public MnemRbTree selectMarket() {
+        return new MnemRbTree();
     }
 
     @Override
-    public SlNode selectTrader() {
+    public MnemRbTree selectTrader() {
         return MockTrader.selectTrader();
     }
 

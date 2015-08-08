@@ -71,10 +71,10 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     }
 
     private final Journ journ;
-    private final MnemRbTree assets = new MnemRbTree();
-    private final MnemRbTree contrs = new MnemRbTree();
-    private final MnemRbTree markets = new MnemRbTree();
-    private final MnemRbTree traders = new MnemRbTree();
+    private final MnemRbTree assets;
+    private final MnemRbTree contrs;
+    private final MnemRbTree markets;
+    private final MnemRbTree traders;
     private final SessTree sesss = new SessTree();
     private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
     private final RefHashTable refIdx = new RefHashTable(CAPACITY);
@@ -113,45 +113,23 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
-    private final void insertAssets(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
-            final Asset asset = (Asset) node;
-            node = popNext(node);
-
-            final RbNode unused = assets.insert(asset);
-            assert unused == null;
-        }
-    }
-
-    private final void insertContrs(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
+    private final void enrichContrs() {
+        for (RbNode node = contrs.getFirst(); node != null; node = node.rbNext()) {
             final Contr contr = (Contr) node;
-            node = popNext(node);
-
             enrichContr(contr);
-            final RbNode unused = contrs.insert(contr);
-            assert unused == null;
         }
     }
 
-    private final void insertMarkets(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
+    private final void enrichMarkets() {
+        for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
             final Market market = (Market) node;
-            node = popNext(node);
-
             enrichMarket(market);
-            final RbNode unused = markets.insert(market);
-            assert unused == null;
         }
     }
 
-    private final void insertTraders(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
+    private final void updateEmailIdx() {
+        for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final Trader trader = (Trader) node;
-            node = popNext(node);
-
-            final RbNode unused = traders.insert(trader);
-            assert unused == null;
             emailIdx.insert(trader);
         }
     }
@@ -333,17 +311,33 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     public Serv(AsyncDatastore datastore, long now) throws InterruptedException, ExecutionException {
         this.journ = datastore;
         final int busDay = DateUtil.getBusDate(now).toJd();
-        final Future<SlNode> assets = datastore.selectAsset();
-        final Future<SlNode> contrs = datastore.selectContr();
-        final Future<SlNode> markets = datastore.selectMarket();
-        final Future<SlNode> traders = datastore.selectTrader();
+        final Future<MnemRbTree> assets = datastore.selectAsset();
+        final Future<MnemRbTree> contrs = datastore.selectContr();
+        final Future<MnemRbTree> markets = datastore.selectMarket();
+        final Future<MnemRbTree> traders = datastore.selectTrader();
         final Future<SlNode> orders = datastore.selectOrder();
         final Future<SlNode> trades = datastore.selectTrade();
         final Future<SlNode> posns = datastore.selectPosn(busDay);
-        insertAssets(assets.get());
-        insertContrs(contrs.get());
-        insertMarkets(markets.get());
-        insertTraders(traders.get());
+
+        MnemRbTree t = assets.get();
+        assert t != null;
+        this.assets = t;
+
+        t = contrs.get();
+        assert t != null;
+        this.contrs = t;
+        enrichContrs();
+
+        t = markets.get();
+        assert t != null;
+        this.markets = t;
+        enrichMarkets();
+
+        t = traders.get();
+        assert t != null;
+        this.traders = t;
+        updateEmailIdx();
+
         insertOrders(orders.get());
         insertTrades(trades.get());
         insertPosns(posns.get());
@@ -360,10 +354,26 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     public Serv(Datastore datastore, long now) {
         this.journ = datastore;
         final int busDay = DateUtil.getBusDate(now).toJd();
-        insertAssets(datastore.selectAsset());
-        insertContrs(datastore.selectContr());
-        insertMarkets(datastore.selectMarket());
-        insertTraders(datastore.selectTrader());
+
+        MnemRbTree t = datastore.selectAsset();
+        assert t != null;
+        this.assets = t;
+
+        t = datastore.selectContr();
+        assert t != null;
+        this.contrs = t;
+        enrichContrs();
+
+        t = datastore.selectMarket();
+        assert t != null;
+        this.markets = t;
+        enrichMarkets();
+
+        t = datastore.selectTrader();
+        assert t != null;
+        this.traders = t;
+        updateEmailIdx();
+        
         insertOrders(datastore.selectOrder());
         insertTrades(datastore.selectTrade());
         insertPosns(datastore.selectPosn(busDay));

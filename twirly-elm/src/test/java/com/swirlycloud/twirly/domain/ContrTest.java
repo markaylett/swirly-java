@@ -11,8 +11,6 @@ import org.junit.Test;
 
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.mock.MockContr;
-import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.node.SlNode;
 
 public final class ContrTest extends SerializableTest {
     @Test
@@ -24,10 +22,7 @@ public final class ContrTest extends SerializableTest {
 
     @Test
     public final void testSerializable() throws ClassNotFoundException, IOException {
-        final MnemRbTree t = new MnemRbTree();
-        for (SlNode node = MockContr.selectContr(); node != null; node = node.slNext()) {
-            t.insert((RbNode) node);
-        }
+        final MnemRbTree t = MockContr.selectContr();
         final MnemRbTree u = writeAndRead(t);
 
         assertEquals(toJsonString(t.getFirst()), toJsonString(u.getFirst()));

@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class AsyncDatastoreService implements AsyncDatastore {
@@ -45,10 +46,10 @@ public final class AsyncDatastoreService implements AsyncDatastore {
 
     @SuppressWarnings("null")
     @Override
-    public final @NonNull Future<SlNode> selectAsset() {
-        return service.submit(new Callable<SlNode>() {
+    public final @NonNull Future<MnemRbTree> selectAsset() {
+        return service.submit(new Callable<MnemRbTree>() {
             @Override
-            public final SlNode call() throws Exception {
+            public final MnemRbTree call() throws Exception {
                 return datastore.selectAsset();
             }
         });
@@ -56,10 +57,10 @@ public final class AsyncDatastoreService implements AsyncDatastore {
 
     @SuppressWarnings("null")
     @Override
-    public final @NonNull Future<SlNode> selectContr() {
-        return service.submit(new Callable<SlNode>() {
+    public final @NonNull Future<MnemRbTree> selectContr() {
+        return service.submit(new Callable<MnemRbTree>() {
             @Override
-            public final SlNode call() throws Exception {
+            public final MnemRbTree call() throws Exception {
                 return datastore.selectContr();
             }
         });
@@ -67,10 +68,10 @@ public final class AsyncDatastoreService implements AsyncDatastore {
 
     @SuppressWarnings("null")
     @Override
-    public final @NonNull Future<SlNode> selectMarket() {
-        return service.submit(new Callable<SlNode>() {
+    public final @NonNull Future<MnemRbTree> selectMarket() {
+        return service.submit(new Callable<MnemRbTree>() {
             @Override
-            public final SlNode call() throws Exception {
+            public final MnemRbTree call() throws Exception {
                 return datastore.selectMarket();
             }
         });
@@ -78,10 +79,10 @@ public final class AsyncDatastoreService implements AsyncDatastore {
 
     @SuppressWarnings("null")
     @Override
-    public final @NonNull Future<SlNode> selectTrader() {
-        return service.submit(new Callable<SlNode>() {
+    public final @NonNull Future<MnemRbTree> selectTrader() {
+        return service.submit(new Callable<MnemRbTree>() {
             @Override
-            public final SlNode call() throws Exception {
+            public final MnemRbTree call() throws Exception {
                 return datastore.selectTrader();
             }
         });

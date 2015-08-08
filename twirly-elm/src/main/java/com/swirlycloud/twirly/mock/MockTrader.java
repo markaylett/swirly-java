@@ -13,8 +13,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 
 public final class MockTrader {
     private static final List<NullaryFunction<Trader>> LIST = new ArrayList<>();
@@ -49,12 +48,14 @@ public final class MockTrader {
         return MAP.get(mnem).call();
     }
 
-    public static SlNode selectTrader() {
-        final SlQueue q = new SlQueue();
+    public static @NonNull MnemRbTree selectTrader() {
+        final MnemRbTree t = new MnemRbTree();
         for (final NullaryFunction<Trader> entry : LIST) {
-            q.insertBack(entry.call());
+            final Trader trader = entry.call();
+            assert trader != null;
+            t.insert(trader);
         }
-        return q.getFirst();
+        return t;
     }
 
     public static void selectTrader(UnaryCallback<Trader> cb) {

@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.io;
 
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -25,6 +26,7 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.mock.MockAsset;
@@ -65,20 +67,20 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectAsset() {
+    public final @NonNull MnemRbTree selectAsset() {
         // TODO: migrate to datastore.
         return MockAsset.selectAsset();
     }
 
     @Override
-    public final @Nullable SlNode selectContr() {
+    public final @Nullable MnemRbTree selectContr() {
         // TODO: migrate to datastore.
         return MockContr.selectContr();
     }
 
     @Override
-    public final @Nullable SlNode selectMarket() {
-        final SlQueue q = new SlQueue();
+    public final @Nullable MnemRbTree selectMarket() {
+        final MnemRbTree t = new MnemRbTree();
         final Query query = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
@@ -98,14 +100,14 @@ public class AppEngineModel implements Model {
             assert mnem != null;
             final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state,
                     lastTicks, lastLots, lastTime, maxOrderId, maxExecId);
-            q.insertBack(market);
+            t.insert(market);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
-    public final @Nullable SlNode selectTrader() {
-        final SlQueue q = new SlQueue();
+    public final @Nullable MnemRbTree selectTrader() {
+        final MnemRbTree t = new MnemRbTree();
         final Query query = new Query(TRADER_KIND);
         final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
@@ -116,9 +118,9 @@ public class AppEngineModel implements Model {
             assert mnem != null;
             assert email != null;
             final Trader trader = new Trader(mnem, display, email);
-            q.insertBack(trader);
+            t.insert(trader);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override

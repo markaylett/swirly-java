@@ -3,13 +3,11 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.rest;
 
-import static com.swirlycloud.twirly.node.SlUtil.popNext;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
@@ -17,8 +15,6 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Model;
-import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class FrontRest implements Rest {
@@ -27,39 +23,26 @@ public final @NonNullByDefault class FrontRest implements Rest {
     @SuppressWarnings("unused")
     private final Cache cache;
 
-    private final MnemRbTree makeTree(@Nullable SlNode first) {
-        final MnemRbTree tree = new MnemRbTree();
-        for (SlNode slNode = first; slNode != null;) {
-            final RbNode rbNode = (RbNode) slNode;
-            slNode = popNext(slNode);
-
-            final RbNode unused = tree.insert(rbNode);
-            assert unused == null;
-        }
-        return tree;
-    }
-
     private final MnemRbTree getRecTree(RecType recType) {
-        MnemRbTree tree;
+        MnemRbTree t = null;
         switch (recType) {
         case ASSET:
-            tree = makeTree(model.selectAsset());
+            t = model.selectAsset();
             break;
         case CONTR:
-            tree = makeTree(model.selectContr());
+            t = model.selectContr();
             break;
         case MARKET:
-            tree = makeTree(model.selectMarket());
+            t = model.selectMarket();
             break;
         case TRADER:
-            tree = makeTree(model.selectTrader());
-            break;
-        default:
-            assert false;
-            tree = new MnemRbTree();
+            t = model.selectTrader();
             break;
         }
-        return tree;
+        if (t == null) {
+            t = new MnemRbTree();
+        }
+        return t;
     }
 
     private final void doGetRec(RecType recType, Params params, Appendable out) throws IOException {

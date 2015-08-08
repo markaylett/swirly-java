@@ -11,6 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
@@ -23,6 +25,7 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.node.RbNode;
@@ -39,7 +42,7 @@ public class JdbcModel implements Model {
     private final PreparedStatement selectTradeStmt;
     private final PreparedStatement selectPosnStmt;
 
-    private static Asset getAsset(ResultSet rs) throws SQLException {
+    private static @NonNull Asset getAsset(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final AssetType assetType = AssetType.valueOf(rs.getInt("typeId"));
@@ -48,7 +51,7 @@ public class JdbcModel implements Model {
         return new Asset(mnem, display, assetType);
     }
 
-    private static Contr getContr(ResultSet rs) throws SQLException {
+    private static @NonNull Contr getContr(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         @SuppressWarnings("null")
@@ -68,7 +71,7 @@ public class JdbcModel implements Model {
                 pipDp, minLots, maxLots);
     }
 
-    private static Market getMarket(ResultSet rs) throws SQLException {
+    private static @NonNull Market getMarket(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         @SuppressWarnings("null")
@@ -89,7 +92,7 @@ public class JdbcModel implements Model {
                 lastTime, maxOrderId, maxExecId);
     }
 
-    private static Trader getTrader(ResultSet rs) throws SQLException {
+    private static @NonNull Trader getTrader(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final String email = rs.getString("email");
@@ -242,55 +245,55 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectAsset() {
-        final SlQueue q = new SlQueue();
+    public final MnemRbTree selectAsset() {
+        final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectAssetStmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getAsset(rs));
+                t.insert(getAsset(rs));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
-    public final SlNode selectContr() {
-        final SlQueue q = new SlQueue();
+    public final MnemRbTree selectContr() {
+        final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectContrStmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getContr(rs));
+                t.insert(getContr(rs));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
-    public final SlNode selectMarket() {
-        final SlQueue q = new SlQueue();
+    public final MnemRbTree selectMarket() {
+        final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectMarketStmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getMarket(rs));
+                t.insert(getMarket(rs));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
-    public final SlNode selectTrader() {
-        final SlQueue q = new SlQueue();
+    public final MnemRbTree selectTrader() {
+        final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectTraderStmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getTrader(rs));
+                t.insert(getTrader(rs));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override

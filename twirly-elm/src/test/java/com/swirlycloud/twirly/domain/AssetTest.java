@@ -11,8 +11,6 @@ import org.junit.Test;
 
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.mock.MockAsset;
-import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.node.SlNode;
 
 public final class AssetTest extends SerializableTest {
 
@@ -25,10 +23,7 @@ public final class AssetTest extends SerializableTest {
 
     @Test
     public final void testSerializable() throws ClassNotFoundException, IOException {
-        final MnemRbTree t = new MnemRbTree();
-        for (SlNode node = MockAsset.selectAsset(); node != null; node = node.slNext()) {
-            t.insert((RbNode) node);
-        }
+        final MnemRbTree t = MockAsset.selectAsset();
         final MnemRbTree u = writeAndRead(t);
 
         assertEquals(toJsonString(t.getFirst()), toJsonString(u.getFirst()));

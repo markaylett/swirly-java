@@ -14,8 +14,7 @@ import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 
 public final class MockAsset {
     private static final List<NullaryFunction<Asset>> LIST = new ArrayList<>();
@@ -63,12 +62,14 @@ public final class MockAsset {
         return MAP.get(mnem).call();
     }
 
-    public static SlNode selectAsset() {
-        final SlQueue q = new SlQueue();
+    public static @NonNull MnemRbTree selectAsset() {
+        final MnemRbTree t = new MnemRbTree();
         for (final NullaryFunction<Asset> entry : LIST) {
-            q.insertBack(entry.call());
+            final Asset asset = entry.call();
+            assert asset != null;
+            t.insert(asset);
         }
-        return q.getFirst();
+        return t;
     }
 
     public static void selectAsset(UnaryCallback<Asset> cb) {

@@ -7,21 +7,22 @@ import java.util.concurrent.Future;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public interface AsyncModel {
 
     @NonNull
-    Future<SlNode> selectAsset();
+    Future<MnemRbTree> selectAsset();
 
     @NonNull
-    Future<SlNode> selectContr();
+    Future<MnemRbTree> selectContr();
 
     @NonNull
-    Future<SlNode> selectMarket();
+    Future<MnemRbTree> selectMarket();
 
     @NonNull
-    Future<SlNode> selectTrader();
+    Future<MnemRbTree> selectTrader();
 
     @NonNull
     Future<SlNode> selectOrder();

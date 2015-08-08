@@ -10,6 +10,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.swirlycloud.twirly.concurrent.FutureAdapter;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class AsyncDatastoreAdaptor implements AsyncDatastore {
@@ -25,22 +26,22 @@ public final class AsyncDatastoreAdaptor implements AsyncDatastore {
     }
 
     @Override
-    public final @NonNull Future<SlNode> selectAsset() {
+    public final @NonNull Future<MnemRbTree> selectAsset() {
         return new FutureAdapter<>(datastore.selectAsset());
     }
 
     @Override
-    public final @NonNull Future<SlNode> selectContr() {
+    public final @NonNull Future<MnemRbTree> selectContr() {
         return new FutureAdapter<>(datastore.selectContr());
     }
 
     @Override
-    public final @NonNull Future<SlNode> selectMarket() {
+    public final @NonNull Future<MnemRbTree> selectMarket() {
         return new FutureAdapter<>(datastore.selectMarket());
     }
 
     @Override
-    public final @NonNull Future<SlNode> selectTrader() {
+    public final @NonNull Future<MnemRbTree> selectTrader() {
         return new FutureAdapter<>(datastore.selectTrader());
     }
 

@@ -13,8 +13,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 
 public final class MockContr {
 
@@ -63,12 +62,14 @@ public final class MockContr {
         return MAP.get(mnem).call();
     }
 
-    public static SlNode selectContr() {
-        final SlQueue q = new SlQueue();
+    public static @NonNull MnemRbTree selectContr() {
+        final MnemRbTree t = new MnemRbTree();
         for (final NullaryFunction<Contr> entry : LIST) {
-            q.insertBack(entry.call());
+            final Contr contr = entry.call();
+            assert contr != null;
+            t.insert(contr);
         }
-        return q.getFirst();
+        return t;
     }
 
     public static void selectContr(UnaryCallback<Contr> cb) {
