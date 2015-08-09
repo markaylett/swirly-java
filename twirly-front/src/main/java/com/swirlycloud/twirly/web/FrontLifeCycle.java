@@ -12,7 +12,7 @@ import javax.servlet.ServletContextListener;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.io.AppEngineModel;
-import com.swirlycloud.twirly.io.JdbcDatastore;
+import com.swirlycloud.twirly.io.JdbcModel;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.rest.FrontRest;
 import com.swirlycloud.twirly.rest.Rest;
@@ -49,7 +49,7 @@ public final class FrontLifeCycle implements ServletContextListener {
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("mysql jdbc driver not found", e);
             }
-            model = new JdbcDatastore(url, user, password);
+            model = new JdbcModel(url, user, password);
         } else {
             throw new RuntimeException("invalid datastore url: " + url);
         }
