@@ -35,44 +35,44 @@ public final class CacheModel implements Model {
 
     @Override
     public final @Nullable MnemRbTree selectAsset() {
-        MnemRbTree t = (MnemRbTree) cache.get("asset");
+        MnemRbTree t = (MnemRbTree) cache.select("asset");
         if (t == null) {
             t = model.selectAsset();
             assert t != null;
-            cache.put("asset", t);
+            cache.insert("asset", t);
         }
         return t;
     }
 
     @Override
     public final @Nullable MnemRbTree selectContr() {
-        MnemRbTree t = (MnemRbTree) cache.get("contr");
+        MnemRbTree t = (MnemRbTree) cache.select("contr");
         if (t == null) {
             t = model.selectContr();
             assert t != null;
-            cache.put("contr", t);
+            cache.insert("contr", t);
         }
         return t;
     }
 
     @Override
     public final @Nullable MnemRbTree selectMarket() {
-        MnemRbTree t = (MnemRbTree) cache.get("market");
+        MnemRbTree t = (MnemRbTree) cache.select("market");
         if (t == null) {
             t = model.selectMarket();
             assert t != null;
-            cache.put("market", t);
+            cache.insert("market", t);
         }
         return t;
     }
 
     @Override
     public final @Nullable MnemRbTree selectTrader() {
-        MnemRbTree t = (MnemRbTree) cache.get("trader");
+        MnemRbTree t = (MnemRbTree) cache.select("trader");
         if (t == null) {
             t = model.selectTrader();
             assert t != null;
-            cache.put("trader", t);
+            cache.insert("trader", t);
         }
         return t;
     }

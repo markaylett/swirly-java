@@ -17,12 +17,16 @@ public final @NonNullByDefault class CacheUtil {
         }
 
         @Override
-        public final @Nullable Object get(String key) {
+        public final @Nullable Object select(String key) {
             return null;
         }
 
         @Override
-        public final void put(String key, Object val) {
+        public final void insert(String key, Object val) {
+        }
+
+        @Override
+        public final void update(String key, Object val) {
         }
     };
 }
