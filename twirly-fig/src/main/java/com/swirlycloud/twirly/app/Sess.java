@@ -167,6 +167,29 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
         this.refIdx = refIdx;
     }
 
+    @Override
+    public final int hashCode() {
+        return trader.hashCode();
+    }
+
+    @Override
+    public final boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Sess other = (Sess) obj;
+        if (!trader.equals(other.trader)) {
+            return false;
+        }
+        return true;
+    }
+
     public final String getTrader() {
         return trader.getMnem();
     }

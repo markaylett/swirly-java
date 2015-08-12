@@ -649,7 +649,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     public final void placeOrder(Sess sess, Market market, @Nullable String ref, Action action,
             long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
-        final Trader trader = sess.getTraderRich();
+        final String trader = sess.getTrader();
         final int busDay = DateUtil.getBusDate(now).toJd();
         if (market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
@@ -659,7 +659,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = market.allocOrderId();
-        final Order order = new Order(orderId, trader.getMnem(), market, ref, action, ticks, lots,
+        final Order order = new Order(orderId, trader, market, ref, action, ticks, lots,
                 minLots, now);
         final Exec exec = newExec(market, order, now);
 
