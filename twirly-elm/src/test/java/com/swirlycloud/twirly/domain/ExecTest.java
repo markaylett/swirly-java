@@ -15,20 +15,23 @@ import org.junit.Test;
 import com.swirlycloud.twirly.date.JulianDay;
 
 public final class ExecTest {
+
+    private static final Factory FACTORY = new BasicFactory();
+
     private static final double DELTA = 0.000001;
     private static final int TODAY = ymdToJd(2014, 2, 12);
     private static final int SETTL_DAY = TODAY + 2;
     private static final long NOW = jdToMillis(TODAY);
 
     private static @NonNull Order newOrder() {
-        return new Order(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test", Action.BUY,
-                12345, 10, 1, NOW);
+        return FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test",
+                Action.BUY, 12345, 10, 1, NOW);
     }
 
     @Test
     public final void testContruct() {
         final Order order = newOrder();
-        final Exec exec = new Exec(2, order, NOW + 1);
+        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
 
         assertEquals(2, exec.getId());
         assertEquals(1, exec.getOrderId());
@@ -54,7 +57,7 @@ public final class ExecTest {
     @Test
     public final void testTrade() {
         final Order order = newOrder();
-        final Exec exec = new Exec(2, order, NOW + 1);
+        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
         exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
 
         assertEquals(2, exec.getId());
@@ -85,7 +88,7 @@ public final class ExecTest {
     @Test
     public final void testInverse() {
         final Order order = newOrder();
-        Exec exec = new Exec(2, order, NOW + 1);
+        Exec exec = FACTORY.newExec(2, order, NOW + 1);
         exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
         exec = exec.inverse(3);
 
@@ -117,7 +120,7 @@ public final class ExecTest {
     @Test
     public final void testRevise() {
         final Order order = newOrder();
-        final Exec exec = new Exec(2, order, NOW + 1);
+        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
         exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
         exec.revise(5);
 
@@ -149,7 +152,7 @@ public final class ExecTest {
     @Test
     public final void testCancel() {
         final Order order = newOrder();
-        final Exec exec = new Exec(2, order, NOW + 1);
+        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
         exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
         exec.cancel();
 
@@ -181,7 +184,7 @@ public final class ExecTest {
     @Test
     public final void testMulti() {
         final Order order = newOrder();
-        final Exec exec = new Exec(2, order, NOW + 1);
+        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
         exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
         exec.trade(12345, 3, 3, Role.MAKER, "GOSAYL");
 
@@ -212,9 +215,9 @@ public final class ExecTest {
 
     @Test
     public final void testToString() {
-        final Order order = new Order(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
+        final Order order = FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
                 JulianDay.isoToJd(20140314), "test", Action.BUY, 12345, 3, 1, 1414692516006L);
-        final Exec exec = new Exec(2, order, 1414692516007L);
+        final Exec exec = FACTORY.newExec(2, order, 1414692516007L);
         assertEquals(
                 "{\"id\":2,\"orderId\":1,\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":3,\"exec\":0,\"cost\":0,\"lastTicks\":null,\"lastLots\":null,\"minLots\":1,\"matchId\":null,\"role\":null,\"cpty\":null,\"created\":1414692516007}",
                 exec.toString());

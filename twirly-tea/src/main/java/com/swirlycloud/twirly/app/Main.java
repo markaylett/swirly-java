@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.jdt.annotation.NonNull;
 
 import quickfix.Acceptor;
 import quickfix.Application;
@@ -30,6 +31,8 @@ import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
 import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.BasicFactory;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockDatastore;
@@ -37,6 +40,8 @@ import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 import com.swirlycloud.twirly.quickfix.Slf4jLogFactory;
 
 public final class Main {
+
+    private static final @NonNull Factory FACTORY = new BasicFactory();
 
     public static AutoCloseable newFixAcceptor(final Application application,
             final SessionSettings settings, final LogFactory logFactory) throws ConfigError {
@@ -174,10 +179,10 @@ public final class Main {
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
         @SuppressWarnings("resource")
-        final Datastore datastore = new MockDatastore();
+        final Datastore datastore = new MockDatastore(FACTORY);
         boolean success = false;
         try {
-            try (final LockableServ serv = new LockableServ(datastore, now())) {
+            try (final LockableServ serv = new LockableServ(datastore, FACTORY, now())) {
                 success = true;
                 run(serv);
             }

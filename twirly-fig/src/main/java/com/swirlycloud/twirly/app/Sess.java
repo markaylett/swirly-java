@@ -9,6 +9,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
@@ -158,13 +159,15 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
 
     private final Trader trader;
     private final RefHashTable refIdx;
+    private final Factory factory;
     private final InstructTree orders = new InstructTree();
     private final InstructTree trades = new InstructTree();
     private final PosnTree posns = new PosnTree();
 
-    public Sess(Trader trader, RefHashTable refIdx) {
+    public Sess(Trader trader, RefHashTable refIdx, Factory factory) {
         this.trader = trader;
         this.refIdx = refIdx;
+        this.factory = factory;
     }
 
     @Override
@@ -320,7 +323,7 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
         if (posn == null || !posn.getContr().equals(market.getContr())
                 || posn.getSettlDay() != market.getSettlDay()) {
             final RbNode parent = posn;
-            posn = new Posn(trader.getMnem(), market.getContr(), market.getSettlDay());
+            posn = factory.newPosn(trader.getMnem(), market.getContr(), market.getSettlDay());
             posns.pinsert(posn, parent);
         }
         return posn;

@@ -5,11 +5,22 @@ package com.swirlycloud.twirly.mock;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
 
 public class MockModel implements Model {
+
+    private final MockAsset mockAsset;
+    private final MockContr mockContr;
+    private final MockTrader mockTrader;
+
+    public MockModel(Factory factory) {
+        mockAsset = new MockAsset(factory);
+        mockContr = new MockContr(factory);
+        mockTrader = new MockTrader(factory);
+    }
 
     @Override
     public void close() {
@@ -17,12 +28,12 @@ public class MockModel implements Model {
 
     @Override
     public @NonNull MnemRbTree selectAsset() {
-        return MockAsset.selectAsset();
+        return mockAsset.selectAsset();
     }
 
     @Override
     public MnemRbTree selectContr() {
-        return MockContr.selectContr();
+        return mockContr.selectContr();
     }
 
     @Override
@@ -32,7 +43,7 @@ public class MockModel implements Model {
 
     @Override
     public MnemRbTree selectTrader() {
-        return MockTrader.selectTrader();
+        return mockTrader.selectTrader();
     }
 
     @Override

@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +26,10 @@ import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
+import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
@@ -52,6 +55,11 @@ import com.swirlycloud.twirly.rest.BackUnrest.TransStruct;
 
 public final class BackUnrestTest {
 
+    private static final @NonNull Factory FACTORY = new BasicFactory();
+    private static final MockAsset MOCK_ASSET = new MockAsset(FACTORY);
+    private static final MockContr MOCK_CONTR = new MockContr(FACTORY);
+    private static final MockTrader MOCK_TRADER = new MockTrader(FACTORY);
+
     private static final String EMAIL = "mark.aylett@gmail.com";
     private static final String TRADER = "MARAYL";
     private static final int TODAY = ymdToJd(2014, 2, 11);
@@ -69,11 +77,11 @@ public final class BackUnrestTest {
 
     private static void assertAsset(String mnem, Asset actual) {
         assertNotNull(actual);
-        assertAsset(MockAsset.newAsset(mnem), actual);
+        assertAsset(MOCK_ASSET.newAsset(mnem), actual);
     }
 
     private static void assertAssets(final Map<String, ? super Asset> assets) {
-        MockAsset.selectAsset(new UnaryCallback<Asset>() {
+        MOCK_ASSET.selectAsset(new UnaryCallback<Asset>() {
             @Override
             public final void call(Asset arg) {
                 assertAsset(arg, (Asset) assets.get(arg.getMnem()));
@@ -96,11 +104,11 @@ public final class BackUnrestTest {
 
     private static void assertContr(String mnem, Contr actual) {
         assertNotNull(actual);
-        assertContr(MockContr.newContr(mnem), actual);
+        assertContr(MOCK_CONTR.newContr(mnem), actual);
     }
 
     private static void assertContrs(final Map<String, ? super Contr> contrs) {
-        MockContr.selectContr(new UnaryCallback<Contr>() {
+        MOCK_CONTR.selectContr(new UnaryCallback<Contr>() {
             @Override
             public final void call(Contr arg) {
                 assertEquals(arg, contrs.get(arg.getMnem()));
@@ -128,11 +136,11 @@ public final class BackUnrestTest {
 
     private static void assertTrader(String mnem, Trader actual) {
         assertNotNull(actual);
-        assertTrader(MockTrader.newTrader(mnem), actual);
+        assertTrader(MOCK_TRADER.newTrader(mnem), actual);
     }
 
     private static void assertTraders(final Map<String, ? super Trader> traders) {
-        MockTrader.selectTrader(new UnaryCallback<Trader>() {
+        MOCK_TRADER.selectTrader(new UnaryCallback<Trader>() {
             @Override
             public final void call(Trader arg) {
                 assertEquals(arg, traders.get(arg.getMnem()));
@@ -270,11 +278,11 @@ public final class BackUnrestTest {
     @Before
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        final Datastore datastore = new MockDatastore();
+        final Datastore datastore = new MockDatastore(FACTORY);
         AutoCloseable resource = datastore;
         boolean success = false;
         try {
-            final LockableServ serv = new LockableServ(datastore, NOW);
+            final LockableServ serv = new LockableServ(datastore, FACTORY, NOW);
             // LockableServ owns Datastore.
             resource = serv;
             unrest = new BackUnrest(serv);

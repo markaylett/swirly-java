@@ -34,8 +34,8 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
     private long sellCost;
     private long sellLots;
 
-    private Posn(String trader, String contr, int settlDay, long buyCost, long buyLots,
-            long sellCost, long sellLots) {
+    Posn(String trader, String contr, int settlDay, long buyCost, long buyLots, long sellCost,
+            long sellLots) {
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -43,12 +43,6 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         this.buyLots = buyLots;
         this.sellCost = sellCost;
         this.sellLots = sellLots;
-    }
-
-    public Posn(String trader, String contr, int settlDay) {
-        this.trader = trader;
-        this.contr = contr;
-        this.settlDay = settlDay;
     }
 
     public static Posn parse(JsonParser p) throws IOException {

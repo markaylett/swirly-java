@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
@@ -65,8 +66,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
         stmt.setBoolean(i, val);
     }
 
-    public JdbcDatastore(String url, String user, String password) {
-        super(url, user, password);
+    public JdbcDatastore(String url, String user, String password, Factory factory) {
+        super(url, user, password, factory);
         PreparedStatement insertMarketStmt = null;
         PreparedStatement insertTraderStmt = null;
         PreparedStatement insertExecStmt = null;

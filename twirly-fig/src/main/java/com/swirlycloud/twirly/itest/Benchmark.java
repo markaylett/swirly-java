@@ -8,10 +8,14 @@ import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Sess;
 import com.swirlycloud.twirly.app.Trans;
 import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.BasicFactory;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -22,6 +26,8 @@ import com.swirlycloud.twirly.mock.MockDatastore;
 // -server -verbose:gc -Xprof
 
 public final class Benchmark {
+
+    private static final @NonNull Factory FACTORY = new BasicFactory();
 
     private static void run(final Serv s) throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
@@ -79,10 +85,10 @@ public final class Benchmark {
 
     public static void main(String[] args) throws Exception {
         @SuppressWarnings("resource")
-        final Datastore datastore = new MockDatastore();
+        final Datastore datastore = new MockDatastore(FACTORY);
         boolean success = false;
         try {
-            try (final Serv serv = new Serv(datastore, now())) {
+            try (final Serv serv = new Serv(datastore, FACTORY, now())) {
                 success = true;
                 run(serv);
             }

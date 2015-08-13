@@ -80,10 +80,9 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
     long created;
     long modified;
 
-    public Order(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
-            long exec, long cost, long lastTicks, long lastLots, long minLots, long created,
-            long modified) {
+    Order(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
+            State state, Action action, long ticks, long lots, long resd, long exec, long cost,
+            long lastTicks, long lastLots, long minLots, long created, long modified) {
         assert lots > 0 && lots >= minLots;
         this.id = id;
         this.trader = trader;
@@ -103,76 +102,6 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         this.minLots = minLots;
         this.created = created;
         this.modified = modified;
-    }
-
-    public Order(long id, String trader, Financial fin, @Nullable String ref, State state,
-            Action action, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
-            long lastLots, long minLots, long created, long modified) {
-        assert lots > 0 && lots >= minLots;
-        this.id = id;
-        this.trader = trader;
-        this.market = fin.getMarket();
-        this.contr = fin.getContr();
-        this.settlDay = fin.getSettlDay();
-        this.ref = nullIfEmpty(ref);
-        this.state = state;
-        this.action = action;
-        this.ticks = ticks;
-        this.lots = lots;
-        this.resd = resd;
-        this.exec = exec;
-        this.cost = cost;
-        this.lastTicks = lastTicks;
-        this.lastLots = lastLots;
-        this.minLots = minLots;
-        this.created = created;
-        this.modified = modified;
-    }
-
-    public Order(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, Action action, long ticks, long lots, long minLots, long created) {
-        assert lots > 0 && lots >= minLots;
-        this.id = id;
-        this.trader = trader;
-        this.market = market;
-        this.contr = contr;
-        this.settlDay = settlDay;
-        this.ref = nullIfEmpty(ref);
-        this.state = State.NEW;
-        this.action = action;
-        this.ticks = ticks;
-        this.lots = lots;
-        this.resd = lots;
-        this.exec = 0;
-        this.cost = 0;
-        this.lastTicks = 0;
-        this.lastLots = 0;
-        this.minLots = minLots;
-        this.created = created;
-        this.modified = created;
-    }
-
-    public Order(long id, String trader, Financial fin, @Nullable String ref, Action action,
-            long ticks, long lots, long minLots, long created) {
-        assert lots > 0 && lots >= minLots;
-        this.id = id;
-        this.trader = trader;
-        this.market = fin.getMarket();
-        this.contr = fin.getContr();
-        this.settlDay = fin.getSettlDay();
-        this.ref = nullIfEmpty(ref);
-        this.state = State.NEW;
-        this.action = action;
-        this.ticks = ticks;
-        this.lots = lots;
-        this.resd = lots;
-        this.exec = 0;
-        this.cost = 0;
-        this.lastTicks = 0;
-        this.lastLots = 0;
-        this.minLots = minLots;
-        this.created = created;
-        this.modified = created;
     }
 
     public static Order parse(JsonParser p) throws IOException {

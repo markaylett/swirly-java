@@ -19,6 +19,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
@@ -44,6 +45,10 @@ public class AppEngineModel implements Model {
     protected static final String ORDER_KIND = "Order";
     protected static final String EXEC_KIND = "Exec";
 
+    private final Factory factory;
+    private final MockAsset mockAsset;
+    private final MockContr mockContr;
+
     protected final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     private static int intOrZeroIfNull(Object o) {
@@ -62,6 +67,12 @@ public class AppEngineModel implements Model {
         }
     }
 
+    public AppEngineModel(Factory factory) {
+        this.factory = factory;
+        mockAsset = new MockAsset(factory);
+        mockContr = new MockContr(factory);
+    }
+
     @Override
     public void close() {
     }
@@ -69,13 +80,13 @@ public class AppEngineModel implements Model {
     @Override
     public final @NonNull MnemRbTree selectAsset() {
         // TODO: migrate to datastore.
-        return MockAsset.selectAsset();
+        return mockAsset.selectAsset();
     }
 
     @Override
     public final @Nullable MnemRbTree selectContr() {
         // TODO: migrate to datastore.
-        return MockContr.selectContr();
+        return mockContr.selectContr();
     }
 
     @Override
@@ -98,8 +109,8 @@ public class AppEngineModel implements Model {
             final long maxExecId = (Long) entity.getProperty("maxExecId");
 
             assert mnem != null;
-            final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state,
-                    lastTicks, lastLots, lastTime, maxOrderId, maxExecId);
+            final Market market = factory.newMarket(mnem, display, contr, settlDay, expiryDay,
+                    state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId);
             t.insert(market);
         }
         return t;
@@ -117,7 +128,7 @@ public class AppEngineModel implements Model {
 
             assert mnem != null;
             assert email != null;
-            final Trader trader = new Trader(mnem, display, email);
+            final Trader trader = factory.newTrader(mnem, display, email);
             t.insert(trader);
         }
         return t;
@@ -157,9 +168,9 @@ public class AppEngineModel implements Model {
                     assert trader != null;
                     assert market != null;
                     assert contr != null;
-                    final Order order = new Order(id, trader, market, contr, settlDay, ref, state,
-                            action, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots,
-                            created, modified);
+                    final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
+                            state, action, ticks, lots, resd, exec, cost, lastTicks, lastLots,
+                            minLots, created, modified);
                     q.insertBack(order);
                 }
             }
@@ -209,9 +220,9 @@ public class AppEngineModel implements Model {
                     assert trader != null;
                     assert market != null;
                     assert contr != null;
-                    final Exec trade = new Exec(id, orderId, trader, market, contr, settlDay, ref,
-                            state, action, ticks, lots, resd, exec, cost, lastTicks, lastLots,
-                            minLots, matchId, role, cpty, created);
+                    final Exec trade = factory.newExec(id, orderId, trader, market, contr,
+                            settlDay, ref, state, action, ticks, lots, resd, exec, cost, lastTicks,
+                            lastLots, minLots, matchId, role, cpty, created);
                     q.insertBack(trade);
                 }
             }
@@ -245,7 +256,7 @@ public class AppEngineModel implements Model {
                         final RbNode parent = posn;
                         assert trader != null;
                         assert contr != null;
-                        posn = new Posn(trader, contr, settlDay);
+                        posn = factory.newPosn(trader, contr, settlDay);
                         posns.pinsert(posn, parent);
                     }
                     @SuppressWarnings("null")

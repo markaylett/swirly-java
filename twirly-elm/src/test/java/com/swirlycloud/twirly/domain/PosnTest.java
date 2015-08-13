@@ -13,13 +13,14 @@ import org.junit.Test;
 import com.swirlycloud.twirly.date.JulianDay;
 
 public final class PosnTest {
+    private static final Factory FACTORY = new BasicFactory();
 
     private static final int TODAY = ymdToJd(2014, 2, 12);
     private static final int SETTL_DAY = TODAY + 2;
 
     @Test
     public final void testAdd() {
-        final Posn posn = new Posn("MARAYL", "EURUSD", SETTL_DAY);
+        final Posn posn = FACTORY.newPosn("MARAYL", "EURUSD", SETTL_DAY);
         assertEquals("MARAYL", posn.getTrader());
         assertEquals("EURUSD", posn.getContr());
         assertEquals(SETTL_DAY, posn.getSettlDay());
@@ -50,7 +51,7 @@ public final class PosnTest {
 
     @Test
     public final void testSettlDay() {
-        final Posn posn = new Posn("MARAYL", "EURUSD", SETTL_DAY);
+        final Posn posn = FACTORY.newPosn("MARAYL", "EURUSD", SETTL_DAY);
         assertEquals(SETTL_DAY, posn.getSettlDay());
         assertTrue(posn.isSettlDaySet());
         posn.setSettlDay(0);
@@ -59,7 +60,7 @@ public final class PosnTest {
 
     @Test
     public final void testToString() {
-        final Posn posn = new Posn("MARAYL", "EURUSD", JulianDay.isoToJd(20140314));
+        final Posn posn = FACTORY.newPosn("MARAYL", "EURUSD", JulianDay.isoToJd(20140314));
         posn.setBuyCost(1);
         posn.setBuyLots(2);
         posn.setSellCost(3);

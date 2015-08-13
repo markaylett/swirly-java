@@ -14,6 +14,8 @@ import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.domain.BasicFactory;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineModel;
@@ -26,6 +28,8 @@ import com.swirlycloud.twirly.rest.FrontRest;
 import com.swirlycloud.twirly.rest.Rest;
 
 public final class FrontLifeCycle implements ServletContextListener {
+
+    private static final Factory FACTORY = new BasicFactory();
 
     private Model model;
 
@@ -44,7 +48,7 @@ public final class FrontLifeCycle implements ServletContextListener {
 
     @SuppressWarnings("resource")
     private static @NonNull Model newAppEngineModel(ServletContext sc) {
-        Model model = new AppEngineModel();
+        Model model = new AppEngineModel(FACTORY);
         Cache cache = null;
         boolean success = false;
         try {
@@ -73,7 +77,7 @@ public final class FrontLifeCycle implements ServletContextListener {
     @SuppressWarnings("resource")
     private static @NonNull Model newJdbcModel(ServletContext sc, String url, String user,
             String password) throws IOException {
-        Model model = new JdbcModel(url, user, password);
+        Model model = new JdbcModel(url, user, password, FACTORY);
         Cache cache = null;
         boolean success = false;
         try {

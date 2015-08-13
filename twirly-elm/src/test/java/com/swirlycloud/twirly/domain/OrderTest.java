@@ -12,14 +12,16 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public final class OrderTest {
+    private static final Factory FACTORY = new BasicFactory();
+
     private static final double DELTA = 0.000001;
     private static final int TODAY = ymdToJd(2014, 2, 12);
     private static final int SETTL_DAY = TODAY + 2;
     private static final long NOW = jdToMillis(TODAY);
 
     private static Order newOrder() {
-        return new Order(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test", Action.BUY,
-                12345, 10, 1, NOW);
+        return FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test",
+                Action.BUY, 12345, 10, 1, NOW);
     }
 
     @Test

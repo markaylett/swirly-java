@@ -49,7 +49,12 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
         return action == Action.BUY ? bidSide : offerSide;
     }
 
-    public Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
+    private Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
+            int expiryDay, int state) {
+        this(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L);
+    }
+
+    Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
             int expiryDay, int state, long lastTicks, long lastLots, long lastTime,
             long maxOrderId, long maxExecId) {
         super(mnem, display);
@@ -63,11 +68,6 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
         this.lastTime = lastTime;
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
-    }
-
-    public Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
-            int expiryDay, int state) {
-        this(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L);
     }
 
     public static Market parse(JsonParser p) throws IOException {

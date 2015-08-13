@@ -21,6 +21,7 @@ import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Direct;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Instruct;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
@@ -71,6 +72,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     }
 
     private final Journ journ;
+    private final Factory factory;
     private final MnemRbTree assets;
     private final MnemRbTree contrs;
     private final MnemRbTree markets;
@@ -172,7 +174,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
-        return new Trader(mnem, display, email);
+        return factory.newTrader(mnem, display, email);
     }
 
     private final Market newMarket(String mnem, String display, Contr contr, int settlDay,
@@ -180,11 +182,11 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
-        return new Market(mnem, display, contr, settlDay, expiryDay, state);
+        return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state);
     }
 
     private final Exec newExec(Market market, Instruct instruct, long now) {
-        return new Exec(market.allocExecId(), instruct, now);
+        return factory.newExec(market.allocExecId(), instruct, now);
     }
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
@@ -232,11 +234,11 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             lastTicks = match.ticks;
             lastLots = match.lots;
 
-            final Exec makerTrade = new Exec(makerId, makerOrder, now);
+            final Exec makerTrade = factory.newExec(makerId, makerOrder, now);
             makerTrade.trade(match.ticks, match.lots, takerId, Role.MAKER, takerOrder.getTrader());
             match.makerTrade = makerTrade;
 
-            final Exec takerTrade = new Exec(takerId, takerOrder, now);
+            final Exec takerTrade = factory.newExec(takerId, takerOrder, now);
             takerTrade.trade(takenLots, takenCost, match.ticks, match.lots, makerId, Role.TAKER,
                     makerOrder.getTrader());
             match.takerTrade = takerTrade;
@@ -303,13 +305,17 @@ public @NonNullByDefault class Serv implements AutoCloseable {
      * 
      * @param datastore
      *            The datastore.
+     * @param factory
+     *            The factory.
      * @param now
      *            The current time.
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    public Serv(AsyncDatastore datastore, long now) throws InterruptedException, ExecutionException {
+    public Serv(AsyncDatastore datastore, Factory factory, long now) throws InterruptedException,
+            ExecutionException {
         this.journ = datastore;
+        this.factory = factory;
         final int busDay = DateUtil.getBusDate(now).toJd();
         final Future<MnemRbTree> assets = datastore.selectAsset();
         final Future<MnemRbTree> contrs = datastore.selectContr();
@@ -348,11 +354,14 @@ public @NonNullByDefault class Serv implements AutoCloseable {
      * 
      * @param datastore
      *            The datastore.
+     * @param factory
+     *            The factory.
      * @param now
      *            The current time.
      */
-    public Serv(Datastore datastore, long now) {
+    public Serv(Datastore datastore, Factory factory, long now) {
         this.journ = datastore;
+        this.factory = factory;
         final int busDay = DateUtil.getBusDate(now).toJd();
 
         MnemRbTree t = datastore.selectAsset();
@@ -373,7 +382,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         assert t != null;
         this.traders = t;
         updateEmailIdx();
-        
+
         insertOrders(datastore.selectOrder());
         insertTrades(datastore.selectTrade());
         insertPosns(datastore.selectPosn(busDay));
@@ -606,7 +615,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         Sess sess = (Sess) sesss.pfind(trader.getMnem());
         if (sess == null || !sess.getTrader().equals(trader.getMnem())) {
             final RbNode parent = sess;
-            sess = new Sess(trader, refIdx);
+            sess = new Sess(trader, refIdx, factory);
             sesss.pinsert(sess, parent);
         }
         return sess;
@@ -620,7 +629,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
                 throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
             }
             final RbNode parent = sess;
-            sess = new Sess(trader, refIdx);
+            sess = new Sess(trader, refIdx, factory);
             sesss.pinsert(sess, parent);
         }
         return sess;
@@ -659,7 +668,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = market.allocOrderId();
-        final Order order = new Order(orderId, trader, market, ref, action, ticks, lots,
+        final Order order = factory.newOrder(orderId, trader, market, ref, action, ticks, lots,
                 minLots, now);
         final Exec exec = newExec(market, order, now);
 

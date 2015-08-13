@@ -14,15 +14,19 @@ import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.util.Params;
 
 public final class MarketTest {
+
+    private static final Factory FACTORY = new BasicFactory();
+    private static final MockContr MOCK_CONTR = new MockContr(FACTORY);
+
     @Test
     public final void testToJson() throws IOException {
         final String mnem = "EURUSD.MAR14";
         final String display = "EURUSD March 14";
-        final Contr contr = MockContr.newContr("EURUSD");
+        final Contr contr = MOCK_CONTR.newContr("EURUSD");
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;
-        final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state);
+        final Market market = FACTORY.newMarket(mnem, display, contr, settlDay, expiryDay, state);
 
         final StringBuilder sb = new StringBuilder();
 
@@ -36,21 +40,21 @@ public final class MarketTest {
     public final void testToJsonView() throws IOException {
         final String mnem = "EURUSD.MAR14";
         final String display = "EURUSD March 14";
-        final Contr contr = MockContr.newContr("EURUSD");
+        final Contr contr = MOCK_CONTR.newContr("EURUSD");
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;
-        final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state);
+        final Market market = FACTORY.newMarket(mnem, display, contr, settlDay, expiryDay, state);
 
         final long now = 1414932078620L;
 
-        market.placeOrder(new Order(1, "MARAYL", market, "apple", Action.BUY, 12343, 10, 0, now),
+        market.placeOrder(FACTORY.newOrder(1, "MARAYL", market, "apple", Action.BUY, 12343, 10, 0, now),
                 now);
-        market.placeOrder(new Order(2, "MARAYL", market, "orange", Action.BUY, 12344, 5, 0, now),
+        market.placeOrder(FACTORY.newOrder(2, "MARAYL", market, "orange", Action.BUY, 12344, 5, 0, now),
                 now);
-        market.placeOrder(new Order(3, "MARAYL", market, "pear", Action.SELL, 12346, 5, 0, now),
+        market.placeOrder(FACTORY.newOrder(3, "MARAYL", market, "pear", Action.SELL, 12346, 5, 0, now),
                 now);
-        market.placeOrder(new Order(4, "MARAYL", market, "banana", Action.SELL, 12346, 2, 0, now),
+        market.placeOrder(FACTORY.newOrder(4, "MARAYL", market, "banana", Action.SELL, 12346, 2, 0, now),
                 now);
 
         final StringBuilder sb = new StringBuilder();

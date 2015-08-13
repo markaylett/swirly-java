@@ -17,7 +17,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Level;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
@@ -36,6 +38,8 @@ import com.swirlycloud.twirly.node.SlNode;
 @SuppressWarnings("null")
 public final class ServTest {
 
+    private static final Factory FACTORY = new BasicFactory();
+
     private static final double DELTA = 0.1;
     private static final String TRADER = "MARAYL";
     private static final int TODAY = ymdToJd(2014, 2, 11);
@@ -47,24 +51,25 @@ public final class ServTest {
 
     private Serv serv;
 
-    private static Datastore newDatastore() {
-        return new MockDatastore() {
+    private static Datastore newDatastore(Factory factory) {
+        return new MockDatastore(factory) {
+
             @Override
             public final MnemRbTree selectMarket() {
                 final MnemRbTree t = new MnemRbTree();
-                t.insert(new Market("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"), SETTL_DAY,
-                        EXPIRY_DAY, STATE, 12345, 10, NOW - 2, 3, 2));
+                t.insert(FACTORY.newMarket("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"),
+                        SETTL_DAY, EXPIRY_DAY, STATE, 12345, 10, NOW - 2, 3, 2));
                 return t;
             }
 
             @Override
             public final SlNode selectOrder() {
-                final Order first = new Order(1, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
-                        "first", Action.BUY, 12344, 11, 1, NOW - 5);
-                final Order second = new Order(2, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
-                        "second", Action.BUY, 12345, 10, 1, NOW - 4);
-                final Order third = new Order(3, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
-                        "third", Action.SELL, 12346, 10, 1, NOW - 3);
+                final Order first = FACTORY.newOrder(1, TRADER, "EURUSD.MAR14", "EURUSD",
+                        SETTL_DAY, "first", Action.BUY, 12344, 11, 1, NOW - 5);
+                final Order second = FACTORY.newOrder(2, TRADER, "EURUSD.MAR14", "EURUSD",
+                        SETTL_DAY, "second", Action.BUY, 12345, 10, 1, NOW - 4);
+                final Order third = FACTORY.newOrder(3, TRADER, "EURUSD.MAR14", "EURUSD",
+                        SETTL_DAY, "third", Action.SELL, 12346, 10, 1, NOW - 3);
                 // Fully fill second order.
                 second.trade(12345, 10, NOW - 2);
                 // Partially fill third order.
@@ -76,12 +81,12 @@ public final class ServTest {
 
             @Override
             public final SlNode selectTrade() {
-                final Exec second = new Exec(1, 2, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
-                        "second", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450, 12345, 10, 1,
-                        1, Role.MAKER, "RAMMAC", NOW - 2);
-                final Exec third = new Exec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
-                        "third", State.TRADE, Action.SELL, 12346, 10, 3, 7, 86422, 12346, 7, 1, 2,
-                        Role.TAKER, "RAMMAC", NOW - 1);
+                final Exec second = FACTORY.newExec(1, 2, TRADER, "EURUSD.MAR14", "EURUSD",
+                        SETTL_DAY, "second", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450,
+                        12345, 10, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
+                final Exec third = FACTORY.newExec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD",
+                        SETTL_DAY, "third", State.TRADE, Action.SELL, 12346, 10, 3, 7, 86422,
+                        12346, 7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
                 second.setSlNext(third);
                 return second;
             }
@@ -91,10 +96,10 @@ public final class ServTest {
     @Before
     public final void setUp() throws Exception {
         @SuppressWarnings("resource")
-        final Datastore datastore = newDatastore();
+        final Datastore datastore = newDatastore(FACTORY);
         boolean success = false;
         try {
-            serv = new Serv(datastore, NOW);
+            serv = new Serv(datastore, FACTORY, NOW);
             success = true;
         } finally {
             if (!success) {

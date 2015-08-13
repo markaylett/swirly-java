@@ -16,6 +16,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -182,6 +183,10 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         } catch (final EntityNotFoundException e) {
             throw new NotFoundException(String.format("exec '%d' does not exist in datastore", id));
         }
+    }
+
+    public AppEngineDatastore(Factory factory) {
+        super(factory);
     }
 
     @Override

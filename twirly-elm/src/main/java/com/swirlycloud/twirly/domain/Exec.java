@@ -77,7 +77,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
     private @Nullable String cpty;
     private final long created;
 
-    public Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
+    Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
             @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
             long exec, long cost, long lastTicks, long lastLots, long minLots, long matchId,
             @Nullable Role role, @Nullable String cpty, long created) {
@@ -101,54 +101,6 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         this.matchId = matchId;
         this.role = role;
         this.cpty = cpty;
-        this.created = created;
-    }
-
-    public Exec(long id, long orderId, String trader, Financial fin, String ref, State state,
-            Action action, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
-            long lastLots, long minLots, long matchId, @Nullable Role role, @Nullable String cpty,
-            long created) {
-        this.id = id;
-        this.orderId = orderId;
-        this.trader = trader;
-        this.market = fin.getMarket();
-        this.contr = fin.getContr();
-        this.settlDay = fin.getSettlDay();
-        this.ref = nullIfEmpty(ref);
-        this.state = state;
-        this.action = action;
-        this.ticks = ticks;
-        this.lots = lots;
-        this.resd = resd;
-        this.exec = exec;
-        this.cost = cost;
-        this.lastTicks = lastTicks;
-        this.lastLots = lastLots;
-        this.minLots = minLots;
-        this.matchId = matchId;
-        this.role = role;
-        this.cpty = cpty;
-        this.created = created;
-    }
-
-    public Exec(long id, Instruct instruct, long created) {
-        this.id = id;
-        this.orderId = instruct.getOrderId();
-        this.trader = instruct.getTrader();
-        this.market = instruct.getMarket();
-        this.contr = instruct.getContr();
-        this.settlDay = instruct.getSettlDay();
-        this.ref = instruct.getRef();
-        this.state = instruct.getState();
-        this.action = instruct.getAction();
-        this.ticks = instruct.getTicks();
-        this.lots = instruct.getLots();
-        this.resd = instruct.getResd();
-        this.exec = instruct.getExec();
-        this.cost = instruct.getCost();
-        this.lastTicks = instruct.getLastTicks();
-        this.lastLots = instruct.getLastLots();
-        this.minLots = instruct.getMinLots();
         this.created = created;
     }
 

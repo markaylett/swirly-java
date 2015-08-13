@@ -12,27 +12,31 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 
 public final class MockAsset {
-    private static final List<NullaryFunction<Asset>> LIST = new ArrayList<>();
-    private static final Map<String, NullaryFunction<Asset>> MAP = new HashMap<>();
 
-    private static void put(final @NonNull String mnem, final String display,
+    private final Factory factory;
+    private final List<NullaryFunction<Asset>> list = new ArrayList<>();
+    private final Map<String, NullaryFunction<Asset>> map = new HashMap<>();
+
+    private final void put(final @NonNull String mnem, final String display,
             final @NonNull AssetType type) {
         final NullaryFunction<Asset> fn = new NullaryFunction<Asset>() {
             @Override
             public final Asset call() {
-                return new Asset(mnem, display, type);
+                return factory.newAsset(mnem, display, type);
             }
         };
-        LIST.add(fn);
-        MAP.put(mnem, fn);
+        list.add(fn);
+        map.put(mnem, fn);
     }
 
-    static {
+    public MockAsset(Factory factory) {
+        this.factory = factory;
         // Forex.
         put("CHF", "Switzerland, Francs", AssetType.CURRENCY);
         put("EUR", "Euro Member Countries, Euro", AssetType.CURRENCY);
@@ -54,17 +58,14 @@ public final class MockAsset {
         put("WGAA", "Gelena Abaya A", AssetType.COMMODITY);
     }
 
-    private MockAsset() {
-    }
-
     @SuppressWarnings("null")
-    public static @NonNull Asset newAsset(String mnem) {
-        return MAP.get(mnem).call();
+    public final @NonNull Asset newAsset(String mnem) {
+        return map.get(mnem).call();
     }
 
-    public static @NonNull MnemRbTree selectAsset() {
+    public final @NonNull MnemRbTree selectAsset() {
         final MnemRbTree t = new MnemRbTree();
-        for (final NullaryFunction<Asset> entry : LIST) {
+        for (final NullaryFunction<Asset> entry : list) {
             final Asset asset = entry.call();
             assert asset != null;
             t.insert(asset);
@@ -72,8 +73,8 @@ public final class MockAsset {
         return t;
     }
 
-    public static void selectAsset(UnaryCallback<Asset> cb) {
-        for (final NullaryFunction<Asset> entry : LIST) {
+    public final void selectAsset(UnaryCallback<Asset> cb) {
+        for (final NullaryFunction<Asset> entry : list) {
             cb.call(entry.call());
         }
     }
