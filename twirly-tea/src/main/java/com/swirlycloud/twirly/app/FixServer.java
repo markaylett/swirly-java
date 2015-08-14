@@ -48,7 +48,6 @@ import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.FixRejectException;
@@ -93,10 +92,10 @@ public final class FixServer extends MessageCracker implements Application {
     }
 
     @SuppressWarnings("null")
-    private final Sess findSessLocked(SessionID sessionId) {
+    private final TraderSess getTraderLocked(SessionID sessionId) throws NotFoundException {
         try {
-            return serv.getLazySessByEmail(settings.getString(sessionId, "Email"));
-        } catch (ConfigError | FieldConvertError | NotFoundException e) {
+            return serv.getTraderByEmail(settings.getString(sessionId, "Email"));
+        } catch (ConfigError | FieldConvertError e) {
             return null;
         }
     }
@@ -122,9 +121,9 @@ public final class FixServer extends MessageCracker implements Application {
         sendToTarget(builder.getMessage(), sessionId);
     }
 
-    private final void sendTransLocked(Sess sess, Trans trans, SessionID sessionId) {
+    private final void sendTransLocked(TraderSess sess, Trans trans, SessionID sessionId) {
         final FixBuilder builder = getBuilder(new ExecutionReport());
-        String targetTrader = sess.getTrader();
+        String targetTrader = sess.getMnem();
         SessionID targetSessionId = sessionId;
         for (TransNode node = trans.execs.getFirst(); node != null; node = node.transNext()) {
             final Exec exec = (Exec) node;
@@ -150,10 +149,7 @@ public final class FixServer extends MessageCracker implements Application {
                 final SessionID sessionId = it.next();
                 final String email = settings.getString(sessionId, "Email");
                 assert email != null;
-                final Trader trader = serv.findTraderByEmail(email);
-                if (trader == null) {
-                    throw new NotFoundException(String.format("trader '%s' does not exist", email));
-                }
+                final Trader trader = serv.getTraderByEmail(email);
                 traderIdx.put(trader.getMnem(), sessionId);
             }
         } finally {
@@ -189,15 +185,11 @@ public final class FixServer extends MessageCracker implements Application {
 
         serv.acquireWrite();
         try {
-            final Sess sess = findSessLocked(sessionId);
+            final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
                 throw new FixRejectException("session misconfigured");
             }
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new FixRejectException(
-                        String.format("market '%s' does not exist", marketMnem));
-            }
+            final Market market = serv.getMarket(marketMnem);
             try (final Trans trans = new Trans()) {
                 serv.placeOrder(sess, market, ref, action, ticks, lots, minLots, now, trans);
                 log.info(sessionId + ": " + trans);
@@ -238,15 +230,11 @@ public final class FixServer extends MessageCracker implements Application {
 
         serv.acquireWrite();
         try {
-            final Sess sess = findSessLocked(sessionId);
+            final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
                 throw new FixRejectException("session misconfigured");
             }
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new FixRejectException(
-                        String.format("market '%s' does not exist", marketMnem));
-            }
+            final Market market = serv.getMarket(marketMnem);
             if (orderId != null) {
                 order = sess.findOrder(marketMnem, orderId);
                 if (order == null) {
@@ -301,15 +289,11 @@ public final class FixServer extends MessageCracker implements Application {
 
         serv.acquireWrite();
         try {
-            final Sess sess = findSessLocked(sessionId);
+            final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
                 throw new FixRejectException("session misconfigured");
             }
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new FixRejectException(
-                        String.format("market '%s' does not exist", marketMnem));
-            }
+            final Market market = serv.getMarket(marketMnem);
             if (orderId != null) {
                 order = sess.findOrder(marketMnem, orderId);
                 if (order == null) {

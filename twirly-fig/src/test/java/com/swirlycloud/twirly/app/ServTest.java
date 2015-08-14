@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.Action;
-import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Level;
@@ -38,7 +37,7 @@ import com.swirlycloud.twirly.node.SlNode;
 @SuppressWarnings("null")
 public final class ServTest {
 
-    private static final Factory FACTORY = new BasicFactory();
+    private static final Factory FACTORY = new ServFactory();
 
     private static final double DELTA = 0.1;
     private static final String TRADER = "MARAYL";
@@ -160,7 +159,7 @@ public final class ServTest {
 
     @Test
     public final void testFindOrder() throws Exception {
-        final Sess sess = serv.getLazySess(TRADER);
+        final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
         Order actual = sess.findOrder("EURUSD.MAR14", 1);
@@ -226,7 +225,7 @@ public final class ServTest {
 
     @Test
     public final void testFindTrade() throws Exception {
-        final Sess sess = serv.getLazySess(TRADER);
+        final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
         Exec actual = sess.findTrade("EURUSD.MAR14", 1);
@@ -286,16 +285,16 @@ public final class ServTest {
     @Test
     public final void testPlace() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Sess sess = serv.getLazySess(TRADER);
+        final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
-        final Market market = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
+        final Market market = serv.getMarket("EURUSD.MAR14");
         assertNotNull(market);
 
         try (final Trans trans = new Trans()) {
             serv.placeOrder(sess, market, "", Action.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
-            assertEquals(sess.getTrader(), order.getTrader());
+            assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(market.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.NEW, order.getState());
@@ -316,17 +315,17 @@ public final class ServTest {
     @Test
     public final void testRevise() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Sess sess = serv.getLazySess(TRADER);
+        final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
-        final Market market = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
+        final Market market = serv.getMarket("EURUSD.MAR14");
         assertNotNull(market);
 
         try (final Trans trans = new Trans()) {
             serv.placeOrder(sess, market, "", Action.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
             serv.reviseOrder(sess, market, order, 4, NOW + 1, trans);
-            assertEquals(sess.getTrader(), order.getTrader());
+            assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(market.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.REVISE, order.getState());
@@ -347,17 +346,17 @@ public final class ServTest {
     @Test
     public final void testCancel() throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
-        final Sess sess = serv.getLazySess(TRADER);
+        final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
-        final Market market = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
+        final Market market = serv.getMarket("EURUSD.MAR14");
         assertNotNull(market);
 
         try (final Trans trans = new Trans()) {
             serv.placeOrder(sess, market, "", Action.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
             serv.cancelOrder(sess, market, order, NOW + 1, trans);
-            assertEquals(sess.getTrader(), order.getTrader());
+            assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(market.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.CANCEL, order.getState());

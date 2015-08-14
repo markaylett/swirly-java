@@ -12,14 +12,13 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.twirly.app.Serv;
-import com.swirlycloud.twirly.app.Sess;
+import com.swirlycloud.twirly.app.TraderSess;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
-import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
@@ -37,19 +36,19 @@ abstract @NonNullByDefault class RestImpl {
         toJsonArray(serv.getFirstRec(recType), params, out);
     }
 
-    private final void doGetOrder(Sess sess, Params params, Appendable out) throws IOException {
+    private final void doGetOrder(TraderSess sess, Params params, Appendable out) throws IOException {
         toJsonArray(sess.getFirstOrder(), params, out);
     }
 
-    private final void doGetTrade(Sess sess, Params params, Appendable out) throws IOException {
+    private final void doGetTrade(TraderSess sess, Params params, Appendable out) throws IOException {
         toJsonArray(sess.getFirstTrade(), params, out);
     }
 
-    private final void doGetPosn(Sess sess, Params params, Appendable out) throws IOException {
+    private final void doGetPosn(TraderSess sess, Params params, Appendable out) throws IOException {
         toJsonArray(sess.getFirstPosn(), params, out);
     }
 
-    private final void doGetPosn(Sess sess, String contr, Params params, Appendable out)
+    private final void doGetPosn(TraderSess sess, String contr, Params params, Appendable out)
             throws IOException {
         out.append('[');
         RbNode node = sess.getFirstPosn();
@@ -120,10 +119,7 @@ abstract @NonNullByDefault class RestImpl {
             throws NotFoundException, IOException {
         final boolean withExpired = getExpiredParam(params);
         final int busDay = getBusDate(now).toJd();
-        final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-        if (market == null) {
-            throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
-        }
+        final Market market = serv.getMarket(marketMnem);
         if (!withExpired && market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market '%s' has expired", marketMnem));
         }
@@ -132,15 +128,7 @@ abstract @NonNullByDefault class RestImpl {
 
     protected final void doGetSess(String email, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final Trader trader = serv.findTraderByEmail(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        final Sess sess = serv.findSess(trader.getMnem());
-        if (sess == null) {
-            out.append("{\"orders\":[],\"trades\":[],\"posns\":[]}");
-            return;
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         out.append("{\"orders\":");
         doGetOrder(sess, params, out);
         out.append(",\"trades\":");
@@ -152,29 +140,13 @@ abstract @NonNullByDefault class RestImpl {
 
     protected final void doGetOrder(String email, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final Trader trader = serv.findTraderByEmail(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        final Sess sess = serv.findSess(trader.getMnem());
-        if (sess == null) {
-            out.append("[]");
-            return;
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         doGetOrder(sess, params, out);
     }
 
     protected final void doGetOrder(String email, String market, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final Trader trader = serv.findTraderByEmail(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        final Sess sess = serv.findSess(trader.getMnem());
-        if (sess == null) {
-            out.append("[]");
-            return;
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         out.append('[');
         RbNode node = sess.getFirstOrder();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -193,10 +165,7 @@ abstract @NonNullByDefault class RestImpl {
 
     protected final void doGetOrder(String email, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final Sess sess = serv.findSessByEmail(email);
-        if (sess == null) {
-            throw new NotFoundException(String.format("trader '%s' has no orders", email));
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         final Order order = sess.findOrder(market, id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
@@ -206,29 +175,13 @@ abstract @NonNullByDefault class RestImpl {
 
     protected final void doGetTrade(String email, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final Trader trader = serv.findTraderByEmail(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        final Sess sess = serv.findSess(trader.getMnem());
-        if (sess == null) {
-            out.append("[]");
-            return;
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         doGetTrade(sess, params, out);
     }
 
     protected final void doGetTrade(String email, String market, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final Trader trader = serv.findTraderByEmail(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        final Sess sess = serv.findSess(trader.getMnem());
-        if (sess == null) {
-            out.append("[]");
-            return;
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         out.append('[');
         RbNode node = sess.getFirstTrade();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -247,10 +200,7 @@ abstract @NonNullByDefault class RestImpl {
 
     protected final void doGetTrade(String email, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final Sess sess = serv.findSessByEmail(email);
-        if (sess == null) {
-            throw new NotFoundException(String.format("trader '%s' has no trades", email));
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         final Exec trade = sess.findTrade(market, id);
         if (trade == null) {
             throw new NotFoundException(String.format("trade '%d' does not exist", id));
@@ -260,38 +210,19 @@ abstract @NonNullByDefault class RestImpl {
 
     protected final void doGetPosn(String email, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final Trader trader = serv.findTraderByEmail(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        final Sess sess = serv.findSess(trader.getMnem());
-        if (sess == null) {
-            out.append("[]");
-            return;
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         doGetPosn(sess, params, out);
     }
 
     protected final void doGetPosn(String email, String contr, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final Trader trader = serv.findTraderByEmail(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        final Sess sess = serv.findSess(trader.getMnem());
-        if (sess == null) {
-            out.append("[]");
-            return;
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         doGetPosn(sess, contr, params, out);
     }
 
     protected final void doGetPosn(String email, String contr, int settlDate, Params params,
             long now, Appendable out) throws NotFoundException, IOException {
-        final Sess sess = serv.findSessByEmail(email);
-        if (sess == null) {
-            throw new NotFoundException(String.format("trader '%s' has no posns", email));
-        }
+        final TraderSess sess = serv.getTraderByEmail(email);
         final Posn posn = sess.findPosn(contr, maybeIsoToJd(settlDate));
         if (posn == null) {
             throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",

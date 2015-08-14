@@ -11,7 +11,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.app.Sess;
+import com.swirlycloud.twirly.app.TraderSess;
 import com.swirlycloud.twirly.app.Trans;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Contr;
@@ -274,10 +274,7 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final Sess sess = serv.findSessByEmail(email);
-            if (sess == null) {
-                throw new NotFoundException(String.format("trader '%s' has no orders", email));
-            }
+            final TraderSess sess = serv.getTraderByEmail(email);
             serv.archiveOrder(sess, market, id, now);
         } finally {
             serv.releaseWrite();
@@ -291,11 +288,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final Sess sess = serv.getLazySessByEmail(email);
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
-            }
+            final TraderSess sess = serv.getTraderByEmail(email);
+            final Market market = serv.getMarket(marketMnem);
             try (final Trans trans = new Trans()) {
                 serv.placeOrder(sess, market, ref, action, ticks, lots, minLots, now, trans);
                 trans.toJson(params, out);
@@ -311,14 +305,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final Sess sess = serv.findSessByEmail(email);
-            if (sess == null) {
-                throw new NotFoundException(String.format("trader '%s' has no orders", email));
-            }
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
-            }
+            final TraderSess sess = serv.getTraderByEmail(email);
+            final Market market = serv.getMarket(marketMnem);
             try (final Trans trans = new Trans()) {
                 if (lots > 0) {
                     serv.reviseOrder(sess, market, id, lots, now, trans);
@@ -337,10 +325,7 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final Sess sess = serv.findSessByEmail(email);
-            if (sess == null) {
-                throw new NotFoundException(String.format("trader '%s' has no trades", email));
-            }
+            final TraderSess sess = serv.getTraderByEmail(email);
             serv.archiveTrade(sess, market, id, now);
         } finally {
             serv.releaseWrite();
@@ -353,11 +338,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final Sess sess = serv.getLazySess(trader);
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new NotFoundException(String.format("market '%s' does not exist", marketMnem));
-            }
+            final TraderSess sess = serv.getTrader(trader);
+            final Market market = serv.getMarket(marketMnem);
             final Exec trade = serv.createTrade(sess, market, ref, action, ticks, lots, role, cpty,
                     now);
             trade.toJson(params, out);

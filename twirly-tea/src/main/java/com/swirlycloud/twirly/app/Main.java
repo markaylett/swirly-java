@@ -31,7 +31,6 @@ import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
 import com.swirlycloud.twirly.domain.Action;
-import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
@@ -41,7 +40,7 @@ import com.swirlycloud.twirly.quickfix.Slf4jLogFactory;
 
 public final class Main {
 
-    private static final @NonNull Factory FACTORY = new BasicFactory();
+    private static final @NonNull Factory FACTORY = new ServFactory();
 
     public static AutoCloseable newFixAcceptor(final Application application,
             final SessionSettings settings, final LogFactory logFactory) throws ConfigError {

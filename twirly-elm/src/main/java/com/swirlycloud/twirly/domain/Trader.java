@@ -13,12 +13,12 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class Trader extends Rec {
+public @NonNullByDefault class Trader extends Rec {
 
     private static final long serialVersionUID = 1L;
-    private final String email;
+    protected final String email;
 
-    Trader(String mnem, @Nullable String display, String email) {
+    public Trader(String mnem, @Nullable String display, String email) {
         super(mnem, display);
         this.email = email;
     }

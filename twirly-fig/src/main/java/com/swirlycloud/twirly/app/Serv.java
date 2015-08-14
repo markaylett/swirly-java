@@ -35,10 +35,8 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.intrusive.BasicRbTree;
 import com.swirlycloud.twirly.intrusive.EmailHashTable;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
-import com.swirlycloud.twirly.intrusive.RefHashTable;
 import com.swirlycloud.twirly.io.AsyncDatastore;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
@@ -52,34 +50,13 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
-    private static final class SessTree extends BasicRbTree<String> {
-
-        private static final long serialVersionUID = 1L;
-
-        private static String getTraderMnem(RbNode node) {
-            return ((Sess) node).getTrader();
-        }
-
-        @Override
-        protected final int compareKey(RbNode lhs, RbNode rhs) {
-            return getTraderMnem(lhs).compareTo(getTraderMnem(rhs));
-        }
-
-        @Override
-        protected final int compareKeyDirect(RbNode lhs, String rhs) {
-            return getTraderMnem(lhs).compareTo(rhs);
-        }
-    }
-
     private final Journ journ;
     private final Factory factory;
     private final MnemRbTree assets;
     private final MnemRbTree contrs;
     private final MnemRbTree markets;
     private final MnemRbTree traders;
-    private final SessTree sesss = new SessTree();
     private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
-    private final RefHashTable refIdx = new RefHashTable(CAPACITY);
 
     private final void enrichContr(Contr contr) {
         final Asset asset = (Asset) assets.find(contr.getAsset());
@@ -98,7 +75,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     private final void insertOrder(Order order) {
         final Trader trader = (Trader) traders.find(order.getTrader());
         assert trader != null;
-        final Sess sess = getLazySess(trader);
+        final TraderSess sess = getLazySess(trader);
         sess.insertOrder(order);
         if (!order.isDone()) {
             final Market market = (Market) markets.find(order.getMarket());
@@ -152,7 +129,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
 
             final Trader trader = (Trader) traders.find(trade.getTrader());
             assert trader != null;
-            final Sess sess = getLazySess(trader);
+            final TraderSess sess = getLazySess(trader);
             sess.insertTrade(trade);
         }
     }
@@ -164,7 +141,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
 
             final Trader trader = (Trader) traders.find(posn.getTrader());
             assert trader != null;
-            final Sess sess = getLazySess(trader);
+            final TraderSess sess = getLazySess(trader);
             sess.insertPosn(posn);
         }
     }
@@ -197,8 +174,8 @@ public @NonNullByDefault class Serv implements AutoCloseable {
                 : takerOrder.getTicks() - makerOrder.getTicks();
     }
 
-    private final void matchOrders(Sess takerSess, Market market, Order takerOrder, Side side,
-            Direct direct, Trans trans) {
+    private final void matchOrders(TraderSess takerSess, Market market, Order takerOrder,
+            Side side, Direct direct, Trans trans) {
 
         final long now = takerOrder.getCreated();
 
@@ -219,7 +196,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             final long makerId = market.allocExecId();
             final long takerId = market.allocExecId();
 
-            final Sess makerSess = findSess(makerOrder.getTrader());
+            final TraderSess makerSess = (TraderSess) traders.find(makerOrder.getTrader());
             assert makerSess != null;
             final Posn makerPosn = makerSess.getLazyPosn(market);
 
@@ -258,7 +235,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
-    private final void matchOrders(Sess sess, Market market, Order order, Trans trans) {
+    private final void matchOrders(TraderSess sess, Market market, Order order, Trans trans) {
         Side side;
         Direct direct;
         if (order.getAction() == Action.BUY) {
@@ -276,7 +253,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
 
     // Assumes that maker lots have not been reduced since matching took place.
 
-    private final void commitMatches(Sess taker, Market market, long now, Trans trans) {
+    private final void commitMatches(TraderSess taker, Market market, long now, Trans trans) {
         for (SlNode node = trans.matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
@@ -284,7 +261,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             // Reduce maker.
             market.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
-            final Sess maker = findSess(makerOrder.getTrader());
+            final TraderSess maker = (TraderSess) traders.find(makerOrder.getTrader());
             assert maker != null;
             // Maker updated first because this is consistent with last-look semantics.
             // Update maker.
@@ -522,8 +499,28 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         return ret;
     }
 
-    public final @Nullable Trader findTraderByEmail(String email) {
-        return (Trader) emailIdx.find(email);
+    public final Market getMarket(String mnem) throws NotFoundException {
+        final Market market = (Market) markets.find(mnem);
+        if (market == null) {
+            throw new NotFoundException(String.format("market '%s' does not exist", mnem));
+        }
+        return market;
+    }
+
+    public final TraderSess getTrader(String mnem) throws NotFoundException {
+        final TraderSess sess = (TraderSess) traders.find(mnem);
+        if (sess == null) {
+            throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
+        }
+        return sess;
+    }
+
+    public final TraderSess getTraderByEmail(String email) throws NotFoundException {
+        final TraderSess sess = (TraderSess) emailIdx.find(email);
+        if (sess == null) {
+            throw new NotFoundException(String.format("trader '%s' does not exist", email));
+        }
+        return sess;
     }
 
     public final Market createMarket(String mnem, String display, Contr contr, int settlDay,
@@ -605,60 +602,19 @@ public @NonNullByDefault class Serv implements AutoCloseable {
                 markets.remove(market);
             }
         }
-        for (RbNode node = sesss.getFirst(); node != null; node = node.rbNext()) {
-            final Sess sess = (Sess) node;
+        for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
+            final TraderSess sess = (TraderSess) node;
             sess.settlPosns(busDay);
         }
     }
 
-    public final Sess getLazySess(Trader trader) {
-        Sess sess = (Sess) sesss.pfind(trader.getMnem());
-        if (sess == null || !sess.getTrader().equals(trader.getMnem())) {
-            final RbNode parent = sess;
-            sess = new Sess(trader, refIdx, factory);
-            sesss.pinsert(sess, parent);
-        }
-        return sess;
+    public final TraderSess getLazySess(Trader trader) {
+        return (TraderSess) trader;
     }
 
-    public final Sess getLazySess(String mnem) throws NotFoundException {
-        Sess sess = (Sess) sesss.pfind(mnem);
-        if (sess == null || !sess.getTrader().equals(mnem)) {
-            final Trader trader = (Trader) traders.find(mnem);
-            if (trader == null) {
-                throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
-            }
-            final RbNode parent = sess;
-            sess = new Sess(trader, refIdx, factory);
-            sesss.pinsert(sess, parent);
-        }
-        return sess;
-    }
-
-    public final Sess getLazySessByEmail(String email) throws NotFoundException {
-        final Trader trader = (Trader) emailIdx.find(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        return getLazySess(trader);
-    }
-
-    public final @Nullable Sess findSess(String mnem) {
-        return (Sess) sesss.find(mnem);
-    }
-
-    public final @Nullable Sess findSessByEmail(String email) throws NotFoundException {
-        final Trader trader = (Trader) emailIdx.find(email);
-        if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        return findSess(trader.getMnem());
-    }
-
-    public final void placeOrder(Sess sess, Market market, @Nullable String ref, Action action,
-            long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException {
-        final String trader = sess.getTrader();
+    public final void placeOrder(TraderSess sess, Market market, @Nullable String ref,
+            Action action, long ticks, long lots, long minLots, long now, Trans trans)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = DateUtil.getBusDate(now).toJd();
         if (market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
@@ -668,8 +624,8 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = market.allocOrderId();
-        final Order order = factory.newOrder(orderId, trader, market, ref, action, ticks, lots,
-                minLots, now);
+        final Order order = factory.newOrder(orderId, sess.getMnem(), market, ref, action, ticks,
+                lots, minLots, now);
         final Exec exec = newExec(market, order, now);
 
         trans.reset(market, order, exec);
@@ -701,7 +657,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         commitMatches(sess, market, now, trans);
     }
 
-    public final void reviseOrder(Sess sess, Market market, Order order, long lots, long now,
+    public final void reviseOrder(TraderSess sess, Market market, Order order, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
@@ -729,7 +685,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         trans.reset(market, order, exec);
     }
 
-    public final void reviseOrder(Sess sess, Market market, long id, long lots, long now,
+    public final void reviseOrder(TraderSess sess, Market market, long id, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(market.getMnem(), id);
         if (order == null) {
@@ -738,7 +694,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         reviseOrder(sess, market, order, lots, now, trans);
     }
 
-    public final void reviseOrder(Sess sess, Market market, String ref, long lots, long now,
+    public final void reviseOrder(TraderSess sess, Market market, String ref, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
@@ -747,7 +703,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         reviseOrder(sess, market, order, lots, now, trans);
     }
 
-    public final void cancelOrder(Sess sess, Market market, Order order, long now, Trans trans)
+    public final void cancelOrder(TraderSess sess, Market market, Order order, long now, Trans trans)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
@@ -766,7 +722,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         trans.reset(market, order, exec);
     }
 
-    public final void cancelOrder(Sess sess, Market market, long id, long now, Trans trans)
+    public final void cancelOrder(TraderSess sess, Market market, long id, long now, Trans trans)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(market.getMnem(), id);
         if (order == null) {
@@ -775,7 +731,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         cancelOrder(sess, market, order, now, trans);
     }
 
-    public final void cancelOrder(Sess sess, Market market, String ref, long now, Trans trans)
+    public final void cancelOrder(TraderSess sess, Market market, String ref, long now, Trans trans)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
@@ -796,7 +752,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void cancelOrders(Sess sess, long now) throws NotFoundException,
+    public final void cancelOrders(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
         for (;;) {
             final Order order = (Order) sess.getRootOrder();
@@ -859,8 +815,8 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
-    public final void archiveOrder(Sess sess, Order order, long now) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException {
+    public final void archiveOrder(TraderSess sess, Order order, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (!order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is not done", order.getId()));
         }
@@ -874,7 +830,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         sess.removeOrder(order);
     }
 
-    public final void archiveOrder(Sess sess, String market, long id, long now)
+    public final void archiveOrder(TraderSess sess, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(market, id);
         if (order == null) {
@@ -895,7 +851,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void archiveOrders(Sess sess, long now) throws NotFoundException,
+    public final void archiveOrders(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
         RbNode node = sess.getFirstOrder();
         while (node != null) {
@@ -916,18 +872,19 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
-    public final Exec createTrade(Sess sess, Market market, String ref, Action action, long ticks,
-            long lots, @Nullable Role role, @Nullable String cpty, long created)
+    public final Exec createTrade(TraderSess sess, Market market, String ref, Action action,
+            long ticks, long lots, @Nullable Role role, @Nullable String cpty, long created)
             throws NotFoundException, ServiceUnavailableException {
         final Posn posn = sess.getLazyPosn(market);
-        final String trader = sess.getTrader();
-        assert trader != null;
-        final Exec trade = Exec.manual(market.allocExecId(), trader, market.getMnem(),
+        final Exec trade = Exec.manual(market.allocExecId(), sess.getMnem(), market.getMnem(),
                 market.getContr(), market.getSettlDay(), ref, action, ticks, lots, role, cpty,
                 created);
         if (cpty != null) {
             // Create back-to-back trade if counter-party is specified.
-            final Sess cptySess = getLazySess(cpty);
+            final TraderSess cptySess = (TraderSess) traders.find(cpty);
+            if (cptySess == null) {
+                throw new NotFoundException(String.format("cpty '%s' does not exist", cpty));
+            }
             final Posn cptyPosn = cptySess.getLazyPosn(market);
             final Exec cptyTrade = trade.inverse(market.allocExecId());
             trade.setSlNext(cptyTrade);
@@ -952,8 +909,8 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         return trade;
     }
 
-    public final void archiveTrade(Sess sess, Exec trade, long now) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException {
+    public final void archiveTrade(TraderSess sess, Exec trade, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (trade.getState() != State.TRADE) {
             throw new BadRequestException(String.format("exec '%d' is not a trade", trade.getId()));
         }
@@ -967,7 +924,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         sess.removeTrade(trade);
     }
 
-    public final void archiveTrade(Sess sess, String market, long id, long now)
+    public final void archiveTrade(TraderSess sess, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Exec trade = sess.findTrade(market, id);
         if (trade == null) {
@@ -988,7 +945,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void archiveTrades(Sess sess, long now) throws NotFoundException,
+    public final void archiveTrades(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
         for (;;) {
             final Exec trade = (Exec) sess.getRootTrade();
@@ -1006,7 +963,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
-    public final void archiveAll(Sess sess, long now) throws NotFoundException,
+    public final void archiveAll(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
         archiveOrders(sess, now);
         archiveTrades(sess, now);

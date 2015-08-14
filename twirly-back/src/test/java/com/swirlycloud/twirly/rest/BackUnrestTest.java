@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.app.Serv;
+import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.domain.Action;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.BasicFactory;
@@ -278,11 +279,12 @@ public final class BackUnrestTest {
     @Before
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        final Datastore datastore = new MockDatastore(FACTORY);
+        final Factory factory = new ServFactory();
+        final Datastore datastore = new MockDatastore(factory);
         AutoCloseable resource = datastore;
         boolean success = false;
         try {
-            final LockableServ serv = new LockableServ(datastore, FACTORY, NOW);
+            final LockableServ serv = new LockableServ(datastore, factory, NOW);
             // LockableServ owns Datastore.
             resource = serv;
             unrest = new BackUnrest(serv);
