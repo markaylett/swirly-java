@@ -11,14 +11,14 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.app.Serv;
-import com.swirlycloud.twirly.app.TraderSess;
 import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Market;
+import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
+import com.swirlycloud.twirly.domain.Serv;
+import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
@@ -36,11 +36,13 @@ abstract @NonNullByDefault class RestImpl {
         toJsonArray(serv.getFirstRec(recType), params, out);
     }
 
-    private final void doGetOrder(TraderSess sess, Params params, Appendable out) throws IOException {
+    private final void doGetOrder(TraderSess sess, Params params, Appendable out)
+            throws IOException {
         toJsonArray(sess.getFirstOrder(), params, out);
     }
 
-    private final void doGetTrade(TraderSess sess, Params params, Appendable out) throws IOException {
+    private final void doGetTrade(TraderSess sess, Params params, Appendable out)
+            throws IOException {
         toJsonArray(sess.getFirstTrade(), params, out);
     }
 
@@ -101,29 +103,29 @@ abstract @NonNullByDefault class RestImpl {
         out.append('[');
         RbNode node = serv.getFirstRec(RecType.MARKET);
         for (int i = 0; node != null; node = node.rbNext()) {
-            final Market market = (Market) node;
-            if (!withExpired && market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
+            final MarketBook book = (MarketBook) node;
+            if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
                 // Ignore expired contracts.
                 continue;
             }
             if (i > 0) {
                 out.append(',');
             }
-            market.toJsonView(params, out);
+            book.toJsonView(params, out);
             ++i;
         }
         out.append(']');
     }
 
-    protected final void doGetView(String marketMnem, Params params, long now, Appendable out)
+    protected final void doGetView(String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final boolean withExpired = getExpiredParam(params);
         final int busDay = getBusDate(now).toJd();
-        final Market market = serv.getMarket(marketMnem);
-        if (!withExpired && market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
-            throw new NotFoundException(String.format("market '%s' has expired", marketMnem));
+        final MarketBook book = serv.getMarket(market);
+        if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
+            throw new NotFoundException(String.format("market '%s' has expired", market));
         }
-        market.toJsonView(params, out);
+        book.toJsonView(params, out);
     }
 
     protected final void doGetSess(String email, Params params, long now, Appendable out)

@@ -95,7 +95,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getView(String marketMnem, Params params, long now, Appendable out)
+    public final void getView(String market, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getView");
     }

@@ -8,12 +8,14 @@ import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.intrusive.DlList;
 import com.swirlycloud.twirly.intrusive.LongRbTree;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 
-public final class Side {
+public final class BookSide {
     private static final class LevelTree extends LongRbTree {
 
         private static final long serialVersionUID = 1L;

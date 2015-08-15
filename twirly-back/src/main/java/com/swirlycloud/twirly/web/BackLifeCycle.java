@@ -13,10 +13,10 @@ import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.app.Serv;
-import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.LockableServ;
+import com.swirlycloud.twirly.domain.Serv;
+import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.io.AppEngineDatastore;
 import com.swirlycloud.twirly.io.AsyncDatastore;
 import com.swirlycloud.twirly.io.AsyncDatastoreService;

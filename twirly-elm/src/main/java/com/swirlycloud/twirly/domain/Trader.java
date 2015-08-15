@@ -18,7 +18,7 @@ public @NonNullByDefault class Trader extends Rec {
     private static final long serialVersionUID = 1L;
     protected final String email;
 
-    public Trader(String mnem, @Nullable String display, String email) {
+    Trader(String mnem, @Nullable String display, String email) {
         super(mnem, display);
         this.email = email;
     }

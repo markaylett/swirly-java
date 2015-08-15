@@ -179,7 +179,7 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         return next;
     }
 
-    public final void add(Posn rhs) {
+    final void add(Posn rhs) {
         addBuy(rhs.buyCost, rhs.buyLots);
         addSell(rhs.sellCost, rhs.sellLots);
     }
@@ -204,7 +204,7 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         }
     }
 
-    public final void addTrade(Exec trade) {
+    final void addTrade(Exec trade) {
         addTrade(trade.getAction(), trade.getLastTicks(), trade.getLastLots());
     }
 
@@ -214,23 +214,23 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
      * @param settlDay
      *            The new settlement-day.
      */
-    public final void setSettlDay(int settlDay) {
+    final void setSettlDay(int settlDay) {
         this.settlDay = settlDay;
     }
 
-    public final void setBuyCost(long buyCost) {
+    final void setBuyCost(long buyCost) {
         this.buyCost = buyCost;
     }
 
-    public final void setBuyLots(long buyLots) {
+    final void setBuyLots(long buyLots) {
         this.buyLots = buyLots;
     }
 
-    public final void setSellCost(long sellCost) {
+    final void setSellCost(long sellCost) {
         this.sellCost = sellCost;
     }
 
-    public final void setSellLots(long sellLots) {
+    final void setSellLots(long sellLots) {
         this.sellLots = sellLots;
     }
 

@@ -354,7 +354,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         return slNext;
     }
 
-    public final void place(long now) {
+    final void place(long now) {
         assert lots > 0 && lots >= minLots;
         state = State.NEW;
         resd = lots;
@@ -363,7 +363,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         modified = now;
     }
 
-    public final void revise(long lots, long now) {
+    final void revise(long lots, long now) {
         assert lots > 0;
         assert lots >= exec && lots >= minLots && lots <= this.lots;
         final long delta = this.lots - lots;
@@ -374,14 +374,14 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         modified = now;
     }
 
-    public final void cancel(long now) {
+    final void cancel(long now) {
         state = State.CANCEL;
         // Note that executed lots is not affected.
         resd = 0;
         modified = now;
     }
 
-    public final void trade(long takenLots, long takenCost, long lastTicks, long lastLots, long now) {
+    final void trade(long takenLots, long takenCost, long lastTicks, long lastLots, long now) {
         state = State.TRADE;
         resd -= takenLots;
         this.exec += takenLots;
@@ -391,7 +391,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         modified = now;
     }
 
-    public final void trade(long lastTicks, long lastLots, long now) {
+    final void trade(long lastTicks, long lastLots, long now) {
         trade(lastLots, lastLots * lastTicks, lastTicks, lastLots, now);
     }
 

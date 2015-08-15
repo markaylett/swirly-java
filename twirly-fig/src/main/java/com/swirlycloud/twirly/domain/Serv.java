@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
@@ -29,7 +29,6 @@ import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Role;
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
@@ -78,11 +77,11 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         final TraderSess sess = getLazySess(trader);
         sess.insertOrder(order);
         if (!order.isDone()) {
-            final Market market = (Market) markets.find(order.getMarket());
+            final MarketBook book = (MarketBook) markets.find(order.getMarket());
             boolean success = false;
             try {
-                assert market != null;
-                market.insertOrder(order);
+                assert book != null;
+                book.insertOrder(order);
                 success = true;
             } finally {
                 if (!success) {
@@ -175,7 +174,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     }
 
     private final void matchOrders(TraderSess takerSess, Market market, Order takerOrder,
-            Side side, Direct direct, Trans trans) {
+            BookSide side, Direct direct, Trans trans) {
 
         final long now = takerOrder.getCreated();
 
@@ -235,31 +234,31 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
-    private final void matchOrders(TraderSess sess, Market market, Order order, Trans trans) {
-        Side side;
+    private final void matchOrders(TraderSess sess, MarketBook book, Order order, Trans trans) {
+        BookSide side;
         Direct direct;
         if (order.getAction() == Action.BUY) {
             // Paid when the taker lifts the offer.
-            side = market.getOfferSide();
+            side = book.getOfferSide();
             direct = Direct.PAID;
         } else {
             assert order.getAction() == Action.SELL;
             // Given when the taker hits the bid.
-            side = market.getBidSide();
+            side = book.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(sess, market, order, side, direct, trans);
+        matchOrders(sess, book, order, side, direct, trans);
     }
 
     // Assumes that maker lots have not been reduced since matching took place.
 
-    private final void commitMatches(TraderSess taker, Market market, long now, Trans trans) {
+    private final void commitMatches(TraderSess taker, MarketBook book, long now, Trans trans) {
         for (SlNode node = trans.matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
             assert makerOrder != null;
             // Reduce maker.
-            market.takeOrder(makerOrder, match.getLots(), now);
+            book.takeOrder(makerOrder, match.getLots(), now);
             // Must succeed because maker order exists.
             final TraderSess maker = (TraderSess) traders.find(makerOrder.getTrader());
             assert maker != null;
@@ -499,12 +498,12 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         return ret;
     }
 
-    public final Market getMarket(String mnem) throws NotFoundException {
-        final Market market = (Market) markets.find(mnem);
-        if (market == null) {
+    public final MarketBook getMarket(String mnem) throws NotFoundException {
+        final MarketBook book = (MarketBook) markets.find(mnem);
+        if (book == null) {
             throw new NotFoundException(String.format("market '%s' does not exist", mnem));
         }
-        return market;
+        return book;
     }
 
     public final TraderSess getTrader(String mnem) throws NotFoundException {
@@ -585,10 +584,10 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
         final int busDay = DateUtil.getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
-            final Market market = (Market) node;
+            final MarketBook book = (MarketBook) node;
             node = node.rbNext();
-            if (market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
-                cancelOrders(market, now);
+            if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
+                cancelOrders(book, now);
             }
         }
     }
@@ -612,52 +611,52 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         return (TraderSess) trader;
     }
 
-    public final void placeOrder(TraderSess sess, Market market, @Nullable String ref,
+    public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref,
             Action action, long ticks, long lots, long minLots, long now, Trans trans)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = DateUtil.getBusDate(now).toJd();
-        if (market.isExpiryDaySet() && market.getExpiryDay() < busDay) {
-            throw new NotFoundException(String.format("market for '%s' on '%d' has expired", market
-                    .getContrRich().getMnem(), maybeJdToIso(market.getSettlDay())));
+        if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
+            throw new NotFoundException(String.format("market for '%s' on '%d' has expired", book
+                    .getContrRich().getMnem(), maybeJdToIso(book.getSettlDay())));
         }
         if (lots == 0 || lots < minLots) {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
-        final long orderId = market.allocOrderId();
-        final Order order = factory.newOrder(orderId, sess.getMnem(), market, ref, action, ticks,
+        final long orderId = book.allocOrderId();
+        final Order order = factory.newOrder(orderId, sess.getMnem(), book, ref, action, ticks,
                 lots, minLots, now);
-        final Exec exec = newExec(market, order, now);
+        final Exec exec = newExec(book, order, now);
 
-        trans.reset(market, order, exec);
+        trans.reset(book, order, exec);
         // Order fields are updated on match.
-        matchOrders(sess, market, order, trans);
+        matchOrders(sess, book, order, trans);
         // Place incomplete order in market.
         if (!order.isDone()) {
             // This may fail if level cannot be allocated.
-            market.insertOrder(order);
+            book.insertOrder(order);
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
         // any unfilled quantity.
         boolean success = false;
         try {
             final SlNode first = trans.prepareExecList();
-            journ.insertExecList(market.getMnem(), first);
+            journ.insertExecList(book.getMnem(), first);
             success = true;
         } catch (RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         } finally {
             if (!success && !order.isDone()) {
                 // Undo market insertion.
-                market.removeOrder(order);
+                book.removeOrder(order);
             }
         }
         // Final commit phase cannot fail.
         sess.insertOrder(order);
         // Commit trans to cycle and free matches.
-        commitMatches(sess, market, now, trans);
+        commitMatches(sess, book, now, trans);
     }
 
-    public final void reviseOrder(TraderSess sess, Market market, Order order, long lots, long now,
+    public final void reviseOrder(TraderSess sess, MarketBook book, Order order, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
@@ -671,7 +670,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
 
-        final Exec exec = newExec(market, order, now);
+        final Exec exec = newExec(book, order, now);
         exec.revise(lots);
         try {
             journ.insertExec(exec);
@@ -680,35 +679,35 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
 
         // Final commit phase cannot fail.
-        market.reviseOrder(order, lots, now);
+        book.reviseOrder(order, lots, now);
 
-        trans.reset(market, order, exec);
+        trans.reset(book, order, exec);
     }
 
-    public final void reviseOrder(TraderSess sess, Market market, long id, long lots, long now,
+    public final void reviseOrder(TraderSess sess, MarketBook book, long id, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        final Order order = sess.findOrder(market.getMnem(), id);
+        final Order order = sess.findOrder(book.getMnem(), id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        reviseOrder(sess, market, order, lots, now, trans);
+        reviseOrder(sess, book, order, lots, now, trans);
     }
 
-    public final void reviseOrder(TraderSess sess, Market market, String ref, long lots, long now,
+    public final void reviseOrder(TraderSess sess, MarketBook book, String ref, long lots, long now,
             Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
         }
-        reviseOrder(sess, market, order, lots, now, trans);
+        reviseOrder(sess, book, order, lots, now, trans);
     }
 
-    public final void cancelOrder(TraderSess sess, Market market, Order order, long now, Trans trans)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+    public final void cancelOrder(TraderSess sess, MarketBook book, Order order, long now,
+            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
-        final Exec exec = newExec(market, order, now);
+        final Exec exec = newExec(book, order, now);
         exec.cancel();
         try {
             journ.insertExec(exec);
@@ -717,27 +716,27 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
 
         // Final commit phase cannot fail.
-        market.cancelOrder(order, now);
+        book.cancelOrder(order, now);
 
-        trans.reset(market, order, exec);
+        trans.reset(book, order, exec);
     }
 
-    public final void cancelOrder(TraderSess sess, Market market, long id, long now, Trans trans)
+    public final void cancelOrder(TraderSess sess, MarketBook book, long id, long now, Trans trans)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        final Order order = sess.findOrder(market.getMnem(), id);
+        final Order order = sess.findOrder(book.getMnem(), id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
         }
-        cancelOrder(sess, market, order, now, trans);
+        cancelOrder(sess, book, order, now, trans);
     }
 
-    public final void cancelOrder(TraderSess sess, Market market, String ref, long now, Trans trans)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+    public final void cancelOrder(TraderSess sess, MarketBook book, String ref, long now,
+            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
         }
-        cancelOrder(sess, market, order, now, trans);
+        cancelOrder(sess, book, order, now, trans);
     }
 
     /**
@@ -759,10 +758,10 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             if (order == null) {
                 break;
             }
-            final Market market = (Market) markets.find(order.getMarket());
-            assert market != null;
+            final MarketBook book = (MarketBook) markets.find(order.getMarket());
+            assert book != null;
 
-            final Exec exec = newExec(market, order, now);
+            final Exec exec = newExec(book, order, now);
             exec.cancel();
             try {
                 journ.insertExec(exec);
@@ -771,19 +770,19 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             }
 
             // Final commit phase cannot fail.
-            market.cancelOrder(order, now);
+            book.cancelOrder(order, now);
         }
     }
 
-    public final void cancelOrders(Market market, long now) throws NotFoundException,
+    public final void cancelOrders(MarketBook book, long now) throws NotFoundException,
             ServiceUnavailableException {
-        final Side bidSide = market.getBidSide();
-        final Side offerSide = market.getOfferSide();
+        final BookSide bidSide = book.getBidSide();
+        final BookSide offerSide = book.getOfferSide();
 
         SlNode first = null;
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
-            final Exec exec = newExec(market, order, now);
+            final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
             exec.setSlNext(first);
@@ -791,14 +790,14 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
         for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
-            final Exec exec = newExec(market, order, now);
+            final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
             exec.setSlNext(first);
             first = exec;
         }
         try {
-            journ.insertExecList(market.getMnem(), first);
+            journ.insertExecList(book.getMnem(), first);
         } catch (RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }

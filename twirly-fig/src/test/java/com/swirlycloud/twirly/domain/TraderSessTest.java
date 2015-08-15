@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
@@ -19,8 +19,8 @@ public final class TraderSessTest {
     private static final int TODAY = ymdToJd(2014, 2, 12);
     private static final int SETTL_DAY = TODAY + 2;
 
-    private MockTrader mockTrader;
     private Factory factory;
+    private MockTrader mockTrader;
 
     @Before
     public final void setUp() {

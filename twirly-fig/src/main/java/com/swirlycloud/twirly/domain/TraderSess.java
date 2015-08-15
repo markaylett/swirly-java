@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.util.CollectionUtil.compareInt;
 
@@ -162,7 +162,7 @@ public final @NonNullByDefault class TraderSess extends Trader {
     private final transient InstructTree trades = new InstructTree();
     private final transient PosnTree posns = new PosnTree();
 
-    public TraderSess(String mnem, @Nullable String display, String email, RefHashTable refIdx,
+    TraderSess(String mnem, @Nullable String display, String email, RefHashTable refIdx,
             Factory factory) {
         super(mnem, display, email);
         this.refIdx = refIdx;
@@ -317,7 +317,7 @@ public final @NonNullByDefault class TraderSess extends Trader {
         return posns.isEmpty();
     }
 
-    public final void settlPosns(int busDay) {
+    final void settlPosns(int busDay) {
         for (RbNode node = posns.getFirst(); node != null;) {
             final Posn posn = (Posn) node;
             node = node.rbNext();

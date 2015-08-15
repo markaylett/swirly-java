@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
@@ -17,15 +17,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.BookSide;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Level;
 import com.swirlycloud.twirly.domain.Market;
+import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Role;
-import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -133,9 +136,9 @@ public final class ServTest {
 
     @Test
     public final void testBidSide() throws Exception {
-        final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
+        final MarketBook actual = serv.getMarket("EURUSD.MAR14");
         assertNotNull(actual);
-        final Side side = actual.getBidSide();
+        final BookSide side = actual.getBidSide();
         assertNotNull(side);
         final Level level = (Level) side.getFirstLevel();
         assertNotNull(level);
@@ -146,9 +149,9 @@ public final class ServTest {
 
     @Test
     public final void testOfferSide() throws Exception {
-        final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
+        final MarketBook actual = serv.getMarket("EURUSD.MAR14");
         assertNotNull(actual);
-        final Side side = actual.getOfferSide();
+        final BookSide side = actual.getOfferSide();
         assertNotNull(side);
         final Level level = (Level) side.getFirstLevel();
         assertNotNull(level);
@@ -288,14 +291,14 @@ public final class ServTest {
         final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
-        final Market market = serv.getMarket("EURUSD.MAR14");
-        assertNotNull(market);
+        final MarketBook book = serv.getMarket("EURUSD.MAR14");
+        assertNotNull(book);
 
         try (final Trans trans = new Trans()) {
-            serv.placeOrder(sess, market, "", Action.BUY, 12345, 5, 1, NOW, trans);
+            serv.placeOrder(sess, book, "", Action.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
             assertEquals(sess.getMnem(), order.getTrader());
-            assertEquals(market.getMnem(), order.getMarket());
+            assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.NEW, order.getState());
             assertEquals(Action.BUY, order.getAction());
@@ -318,15 +321,15 @@ public final class ServTest {
         final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
-        final Market market = serv.getMarket("EURUSD.MAR14");
-        assertNotNull(market);
+        final MarketBook book = serv.getMarket("EURUSD.MAR14");
+        assertNotNull(book);
 
         try (final Trans trans = new Trans()) {
-            serv.placeOrder(sess, market, "", Action.BUY, 12345, 5, 1, NOW, trans);
+            serv.placeOrder(sess, book, "", Action.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
-            serv.reviseOrder(sess, market, order, 4, NOW + 1, trans);
+            serv.reviseOrder(sess, book, order, 4, NOW + 1, trans);
             assertEquals(sess.getMnem(), order.getTrader());
-            assertEquals(market.getMnem(), order.getMarket());
+            assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.REVISE, order.getState());
             assertEquals(Action.BUY, order.getAction());
@@ -349,15 +352,15 @@ public final class ServTest {
         final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
-        final Market market = serv.getMarket("EURUSD.MAR14");
-        assertNotNull(market);
+        final MarketBook book = serv.getMarket("EURUSD.MAR14");
+        assertNotNull(book);
 
         try (final Trans trans = new Trans()) {
-            serv.placeOrder(sess, market, "", Action.BUY, 12345, 5, 1, NOW, trans);
+            serv.placeOrder(sess, book, "", Action.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
-            serv.cancelOrder(sess, market, order, NOW + 1, trans);
+            serv.cancelOrder(sess, book, order, NOW + 1, trans);
             assertEquals(sess.getMnem(), order.getTrader());
-            assertEquals(market.getMnem(), order.getMarket());
+            assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.CANCEL, order.getState());
             assertEquals(Action.BUY, order.getAction());
