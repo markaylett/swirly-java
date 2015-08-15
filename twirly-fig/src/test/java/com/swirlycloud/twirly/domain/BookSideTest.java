@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.BookSide;
 import com.swirlycloud.twirly.domain.Factory;
@@ -42,9 +42,9 @@ public final class BookSideTest {
         long now = now();
         // Two orders at the same price level.
         final Order apple = FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "apple", Action.BUY, 12345, 10, 0, now);
+                JulianDay.isoToJd(20140314), "apple", Side.BUY, 12345, 10, 0, now);
         final Order orange = FACTORY.newOrder(2, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "orange", Action.BUY, 12345, 20, 0, now);
+                JulianDay.isoToJd(20140314), "orange", Side.BUY, 12345, 20, 0, now);
         final BookSide side = new BookSide();
 
         apple.state = State.PENDING;
@@ -147,12 +147,12 @@ public final class BookSideTest {
         final long now = now();
         // Two orders at the same price level.
         final Order apple = FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "apple", Action.BUY, 12345, 10, 0, now);
+                JulianDay.isoToJd(20140314), "apple", Side.BUY, 12345, 10, 0, now);
         final Order orange = FACTORY.newOrder(2, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "orange", Action.BUY, 12345, 20, 0, now);
+                JulianDay.isoToJd(20140314), "orange", Side.BUY, 12345, 20, 0, now);
         // Best inserted last.
         final Order pear = FACTORY.newOrder(3, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "pear", Action.BUY, 12346, 25, 0, now);
+                JulianDay.isoToJd(20140314), "pear", Side.BUY, 12346, 25, 0, now);
         final BookSide side = new BookSide();
 
         side.placeOrder(apple, now);

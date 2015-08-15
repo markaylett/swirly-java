@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.node.RbNode;
@@ -34,8 +34,8 @@ public final @NonNullByDefault class MarketBook extends Market {
     private final transient BookSide bidSide = new BookSide();
     private final transient BookSide offerSide = new BookSide();
 
-    private final BookSide getSide(Action action) {
-        return action == Action.BUY ? bidSide : offerSide;
+    private final BookSide getSide(Side side) {
+        return side == Side.BUY ? bidSide : offerSide;
     }
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
@@ -164,27 +164,27 @@ public final @NonNullByDefault class MarketBook extends Market {
     }
 
     final void insertOrder(Order order) {
-        getSide(order.getAction()).insertOrder(order);
+        getSide(order.getSide()).insertOrder(order);
     }
 
     final void removeOrder(Order order) {
-        getSide(order.getAction()).removeOrder(order);
+        getSide(order.getSide()).removeOrder(order);
     }
 
     final void placeOrder(Order order, long now) {
-        getSide(order.getAction()).placeOrder(order, now);
+        getSide(order.getSide()).placeOrder(order, now);
     }
 
     final void reviseOrder(Order order, long lots, long now) {
-        getSide(order.getAction()).reviseOrder(order, lots, now);
+        getSide(order.getSide()).reviseOrder(order, lots, now);
     }
 
     final void cancelOrder(Order order, long now) {
-        getSide(order.getAction()).cancelOrder(order, now);
+        getSide(order.getSide()).cancelOrder(order, now);
     }
 
     final void takeOrder(Order order, long lots, long now) {
-        final BookSide side = getSide(order.getAction());
+        final BookSide side = getSide(order.getSide());
         side.takeOrder(order, lots, now);
         lastTicks = order.getTicks();
         lastLots = lots;

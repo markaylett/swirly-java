@@ -8,7 +8,7 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Role;
 
 public final class Request {
@@ -23,7 +23,7 @@ public final class Request {
     public static final int EXPIRY_DATE = 1 << 7;
     public static final int STATE = 1 << 8;
     public static final int REF = 1 << 9;
-    public static final int ACTION = 1 << 10;
+    public static final int SIDE = 1 << 10;
     public static final int TICKS = 1 << 11;
     public static final int LOTS = 1 << 12;
     public static final int MIN_LOTS = 1 << 13;
@@ -42,7 +42,7 @@ public final class Request {
     private int expiryDate;
     private int state;
     private String ref;
-    private Action action;
+    private Side side;
     private long ticks;
     private long lots;
     private long minLots;
@@ -61,7 +61,7 @@ public final class Request {
         expiryDate = 0;
         state = 0;
         ref = null;
-        action = null;
+        side = null;
         ticks = 0;
         lots = 0;
         minLots = 0;
@@ -104,9 +104,9 @@ public final class Request {
                 } else if ("ref".equals(name)) {
                     fields |= REF;
                     ref = null;
-                } else if ("action".equals(name)) {
-                    fields |= ACTION;
-                    action = null;
+                } else if ("side".equals(name)) {
+                    fields |= SIDE;
+                    side = null;
                 } else if ("role".equals(name)) {
                     fields |= ROLE;
                     role = null;
@@ -162,11 +162,11 @@ public final class Request {
                 } else if ("ref".equals(name)) {
                     fields |= REF;
                     ref = p.getString();
-                } else if ("action".equals(name)) {
-                    fields |= ACTION;
+                } else if ("side".equals(name)) {
+                    fields |= SIDE;
                     final String s = p.getString();
                     assert s != null;
-                    action = Action.valueOf(s);
+                    side = Side.valueOf(s);
                 } else if ("role".equals(name)) {
                     fields |= ROLE;
                     role = Role.valueOf(p.getString());
@@ -267,12 +267,12 @@ public final class Request {
         return ref;
     }
 
-    public final boolean isActionSet() {
-        return (fields & ACTION) != 0;
+    public final boolean isSideSet() {
+        return (fields & SIDE) != 0;
     }
 
-    public final Action getAction() {
-        return action;
+    public final Side getSide() {
+        return side;
     }
 
     public final boolean isTicksSet() {

@@ -3,12 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import static com.swirlycloud.twirly.app.FixUtility.actionToSide;
+import static com.swirlycloud.twirly.app.FixUtility.sideToFix;
 import static com.swirlycloud.twirly.app.FixUtility.execTypeToState;
 import static com.swirlycloud.twirly.app.FixUtility.lastLiquidityIndToRole;
 import static com.swirlycloud.twirly.app.FixUtility.ordStatusToState;
 import static com.swirlycloud.twirly.app.FixUtility.roleToLastLiquidityInd;
-import static com.swirlycloud.twirly.app.FixUtility.sideToAction;
+import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
 import static com.swirlycloud.twirly.app.FixUtility.stateToExecType;
 import static com.swirlycloud.twirly.app.FixUtility.stateToOrdStatus;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
@@ -50,12 +50,11 @@ import quickfix.field.OrigClOrdID;
 import quickfix.field.Price;
 import quickfix.field.RefMsgType;
 import quickfix.field.RefSeqNum;
-import quickfix.field.Side;
 import quickfix.field.Symbol;
 import quickfix.field.Text;
 import quickfix.field.TransactTime;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Instruct;
 import com.swirlycloud.twirly.domain.Order;
@@ -215,12 +214,12 @@ public final class FixBuilder {
 
     // Side(54)
 
-    public final void setSide(Action action) {
-        message.setChar(Side.FIELD, actionToSide(action));
+    public final void setSide(Side side) {
+        message.setChar(quickfix.field.Side.FIELD, sideToFix(side));
     }
 
-    public final Action getSide() throws FieldNotFound, IncorrectTagValue {
-        return sideToAction(message.getChar(Side.FIELD));
+    public final Side getSide() throws FieldNotFound, IncorrectTagValue {
+        return fixToSide(message.getChar(quickfix.field.Side.FIELD));
     }
 
     // Symbol(55)
@@ -407,7 +406,7 @@ public final class FixBuilder {
         setClOrdId(instruct.getRef());
         setExecType(instruct.getState(), instruct.getResd());
         setOrdStatus(instruct.getState(), instruct.getResd());
-        setSide(instruct.getAction());
+        setSide(instruct.getSide());
         setOrdType();
         setPrice(instruct.getTicks());
         setOrderQty(instruct.getLots());
@@ -436,11 +435,11 @@ public final class FixBuilder {
         setTransactTime(exec.getCreated());
     }
 
-    public final void setNewOrderSingle(String market, String ref, Action action, long ticks,
+    public final void setNewOrderSingle(String market, String ref, Side side, long ticks,
             long lots, long minLots, long now) {
         setSymbol(market);
         setClOrdId(ref);
-        setSide(action);
+        setSide(side);
         setOrdType();
         setPrice(ticks);
         setOrderQty(lots);
@@ -453,7 +452,7 @@ public final class FixBuilder {
         setSymbol(market);
         setClOrdId(ref);
         setOrigClOrdId(orderRef);
-        message.setChar(Side.FIELD, Side.UNDISCLOSED);
+        message.setChar(quickfix.field.Side.FIELD, quickfix.field.Side.UNDISCLOSED);
         setOrdType();
         setOrderQty(lots);
         setTransactTime(now);

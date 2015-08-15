@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Serv;
@@ -49,26 +49,26 @@ public final class Benchmark {
                 final long startNanos = System.nanoTime();
 
                 // Maker sell-side.
-                serv.placeOrder(marayl, book, "", Action.SELL, 12348, 5, 1, now, trans);
-                serv.placeOrder(gosayl, book, "", Action.SELL, 12348, 5, 1, now, trans);
-                serv.placeOrder(marayl, book, "", Action.SELL, 12348, 5, 1, now, trans);
-                serv.placeOrder(gosayl, book, "", Action.SELL, 12347, 5, 1, now, trans);
-                serv.placeOrder(marayl, book, "", Action.SELL, 12347, 5, 1, now, trans);
-                serv.placeOrder(gosayl, book, "", Action.SELL, 12346, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.SELL, 12348, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.SELL, 12348, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.SELL, 12348, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.SELL, 12347, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.SELL, 12347, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.SELL, 12346, 5, 1, now, trans);
 
                 // Maker buy-side.
-                serv.placeOrder(marayl, book, "", Action.BUY, 12344, 5, 1, now, trans);
-                serv.placeOrder(gosayl, book, "", Action.BUY, 12343, 5, 1, now, trans);
-                serv.placeOrder(marayl, book, "", Action.BUY, 12343, 5, 1, now, trans);
-                serv.placeOrder(gosayl, book, "", Action.BUY, 12342, 5, 1, now, trans);
-                serv.placeOrder(marayl, book, "", Action.BUY, 12342, 5, 1, now, trans);
-                serv.placeOrder(gosayl, book, "", Action.BUY, 12342, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.BUY, 12344, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.BUY, 12343, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.BUY, 12343, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.BUY, 12342, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.BUY, 12342, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.BUY, 12342, 5, 1, now, trans);
 
                 // Taker sell-side.
-                serv.placeOrder(tobayl, book, "", Action.SELL, 12342, 30, 1, now, trans);
+                serv.placeOrder(tobayl, book, "", Side.SELL, 12342, 30, 1, now, trans);
 
                 // Taker buy-side.
-                serv.placeOrder(emiayl, book, "", Action.BUY, 12348, 30, 1, now, trans);
+                serv.placeOrder(emiayl, book, "", Side.BUY, 12348, 30, 1, now, trans);
 
                 serv.archiveAll(marayl, now);
                 serv.archiveAll(gosayl, now);

@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.domain;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.DlNode;
@@ -36,7 +36,7 @@ public final @NonNullByDefault class Level extends BasicRbNode {
 
     public Level(Order order) {
         final long ticks = order.getTicks();
-        this.key = composeKey(order.getAction(), ticks);
+        this.key = composeKey(order.getSide(), ticks);
         this.ticks = ticks;
         this.firstOrder = order;
         this.lots = order.getResd();
@@ -46,8 +46,8 @@ public final @NonNullByDefault class Level extends BasicRbNode {
     /**
      * Synthetic level key.
      */
-    public static long composeKey(Action action, long ticks) {
-        return action == Action.BUY ? -ticks : ticks;
+    public static long composeKey(Side side, long ticks) {
+        return side == Side.BUY ? -ticks : ticks;
     }
 
     public final long getKey() {

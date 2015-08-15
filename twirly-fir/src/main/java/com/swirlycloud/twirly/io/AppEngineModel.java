@@ -17,7 +17,7 @@ import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
@@ -153,7 +153,7 @@ public class AppEngineModel implements Model {
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
-                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
                     final long ticks = (Long) entity.getProperty("ticks");
                     final long lots = (Long) entity.getProperty("lots");
                     final long resd = (Long) entity.getProperty("resd");
@@ -169,7 +169,7 @@ public class AppEngineModel implements Model {
                     assert market != null;
                     assert contr != null;
                     final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
-                            state, action, ticks, lots, resd, exec, cost, lastTicks, lastLots,
+                            state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
                             minLots, created, modified);
                     q.insertBack(order);
                 }
@@ -202,7 +202,7 @@ public class AppEngineModel implements Model {
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
-                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
                     final long ticks = (Long) entity.getProperty("ticks");
                     final long lots = (Long) entity.getProperty("lots");
                     final long resd = (Long) entity.getProperty("resd");
@@ -221,7 +221,7 @@ public class AppEngineModel implements Model {
                     assert market != null;
                     assert contr != null;
                     final Exec trade = factory.newExec(id, orderId, trader, market, contr,
-                            settlDay, ref, state, action, ticks, lots, resd, exec, cost, lastTicks,
+                            settlDay, ref, state, side, ticks, lots, resd, exec, cost, lastTicks,
                             lastLots, minLots, matchId, role, cpty, created);
                     q.insertBack(trade);
                 }
@@ -260,10 +260,10 @@ public class AppEngineModel implements Model {
                         posns.pinsert(posn, parent);
                     }
                     @SuppressWarnings("null")
-                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
                     final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
-                    posn.addTrade(action, lastTicks, lastLots);
+                    posn.addTrade(side, lastTicks, lastLots);
                 }
             }
         });

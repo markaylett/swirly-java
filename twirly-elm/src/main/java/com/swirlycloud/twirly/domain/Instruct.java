@@ -37,7 +37,7 @@ public @NonNullByDefault interface Instruct extends RbNode, Identifiable, Financ
 
     State getState();
 
-    Action getAction();
+    Side getSide();
 
     long getTicks();
 

@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.DateUtil;
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Direct;
@@ -237,12 +237,12 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     private final void matchOrders(TraderSess sess, MarketBook book, Order order, Trans trans) {
         BookSide side;
         Direct direct;
-        if (order.getAction() == Action.BUY) {
+        if (order.getSide() == Side.BUY) {
             // Paid when the taker lifts the offer.
             side = book.getOfferSide();
             direct = Direct.PAID;
         } else {
-            assert order.getAction() == Action.SELL;
+            assert order.getSide() == Side.SELL;
             // Given when the taker hits the bid.
             side = book.getBidSide();
             direct = Direct.GIVEN;
@@ -611,9 +611,9 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         return (TraderSess) trader;
     }
 
-    public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref,
-            Action action, long ticks, long lots, long minLots, long now, Trans trans)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+    public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
+            long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
+            NotFoundException, ServiceUnavailableException {
         final int busDay = DateUtil.getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", book
@@ -623,8 +623,8 @@ public @NonNullByDefault class Serv implements AutoCloseable {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = book.allocOrderId();
-        final Order order = factory.newOrder(orderId, sess.getMnem(), book, ref, action, ticks,
-                lots, minLots, now);
+        final Order order = factory.newOrder(orderId, sess.getMnem(), book, ref, side, ticks, lots,
+                minLots, now);
         final Exec exec = newExec(book, order, now);
 
         trans.reset(book, order, exec);
@@ -656,8 +656,9 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         commitMatches(sess, book, now, trans);
     }
 
-    public final void reviseOrder(TraderSess sess, MarketBook book, Order order, long lots, long now,
-            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
+    public final void reviseOrder(TraderSess sess, MarketBook book, Order order, long lots,
+            long now, Trans trans) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
@@ -693,8 +694,9 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         reviseOrder(sess, book, order, lots, now, trans);
     }
 
-    public final void reviseOrder(TraderSess sess, MarketBook book, String ref, long lots, long now,
-            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
+    public final void reviseOrder(TraderSess sess, MarketBook book, String ref, long lots,
+            long now, Trans trans) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
@@ -871,12 +873,12 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
-    public final Exec createTrade(TraderSess sess, Market market, String ref, Action action,
+    public final Exec createTrade(TraderSess sess, Market market, String ref, Side side,
             long ticks, long lots, @Nullable Role role, @Nullable String cpty, long created)
             throws NotFoundException, ServiceUnavailableException {
         final Posn posn = sess.getLazyPosn(market);
         final Exec trade = Exec.manual(market.allocExecId(), sess.getMnem(), market.getMnem(),
-                market.getContr(), market.getSettlDay(), ref, action, ticks, lots, role, cpty,
+                market.getContr(), market.getSettlDay(), ref, side, ticks, lots, role, cpty,
                 created);
         if (cpty != null) {
             // Create back-to-back trade if counter-party is specified.

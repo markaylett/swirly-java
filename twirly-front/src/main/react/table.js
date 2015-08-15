@@ -165,7 +165,7 @@ var MarketTable = React.createClass({
                   <th>Settl Date</th>
                   <th>Expiry Date</th>
                   <th>State</th>
-                  <th>Action</th>
+                  <th>Side</th>
                 </tr>
               </thead>
               <tbody>
@@ -241,7 +241,7 @@ var TraderTable = React.createClass({
                   <th>Mnem</th>
                   <th>Display</th>
                   <th>Email</th>
-                  <th>Action</th>
+                  <th>Side</th>
                 </tr>
               </thead>
               <tbody>
@@ -440,7 +440,7 @@ var OrderRow = React.createClass({
               <td>{order.market}</td>
               <td>{order.id}</td>
               <td>{order.state}</td>
-              <td>{order.action}</td>
+              <td>{order.side}</td>
               <td style={alignRight}>{order.price}</td>
               <td style={alignRight}>{order.lots}</td>
               <td style={alignRight}>{order.resd}</td>
@@ -482,7 +482,7 @@ var OrderTable = React.createClass({
                   <th>Market</th>
                   <th>Id</th>
                   <th>State</th>
-                  <th>Action</th>
+                  <th>Side</th>
                   <th style={alignRight}>Price</th>
                   <th style={alignRight}>Lots</th>
                   <th style={alignRight}>Resd</th>
@@ -532,7 +532,7 @@ var TradeRow = React.createClass({
               <td>{trade.market}</td>
               <td>{trade.id}</td>
               <td>{trade.orderId}</td>
-              <td>{trade.action}</td>
+              <td>{trade.side}</td>
               <td style={alignRight}>{trade.lastPrice}</td>
               <td style={alignRight}>{trade.lastLots}</td>
               <td style={alignRight}>{trade.resd}</td>
@@ -579,7 +579,7 @@ var TradeTable = React.createClass({
                   <th>Market</th>
                   <th>Id</th>
                   <th>Order Id</th>
-                  <th>Action</th>
+                  <th>Side</th>
                   <th style={alignRight}>Price</th>
                   <th style={alignRight}>Lots</th>
                   <th style={alignRight}>Resd</th>

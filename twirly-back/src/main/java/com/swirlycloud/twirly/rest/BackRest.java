@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.LockableServ;
@@ -282,7 +282,7 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         }
     }
 
-    public final void postOrder(String email, String market, @Nullable String ref, Action action,
+    public final void postOrder(String email, String market, @Nullable String ref, Side side,
             long ticks, long lots, long minLots, Params params, long now, Appendable out)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
@@ -291,7 +291,7 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
             final TraderSess sess = serv.getTraderByEmail(email);
             final MarketBook book = serv.getMarket(market);
             try (final Trans trans = new Trans()) {
-                serv.placeOrder(sess, book, ref, action, ticks, lots, minLots, now, trans);
+                serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
                 trans.toJson(params, out);
             }
         } finally {
@@ -332,7 +332,7 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         }
     }
 
-    public final void postTrade(String trader, String market, String ref, Action action,
+    public final void postTrade(String trader, String market, String ref, Side side,
             long ticks, long lots, Role role, String cpty, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
@@ -340,7 +340,7 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         try {
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            final Exec trade = serv.createTrade(sess, book, ref, action, ticks, lots, role, cpty,
+            final Exec trade = serv.createTrade(sess, book, ref, side, ticks, lots, role, cpty,
                     now);
             trade.toJson(params, out);
         } finally {

@@ -56,7 +56,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
      */
     private final @Nullable String ref;
     State state;
-    private final Action action;
+    private final Side side;
     private final long ticks;
     /**
      * Must be greater than zero.
@@ -81,7 +81,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
     long modified;
 
     Order(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
-            State state, Action action, long ticks, long lots, long resd, long exec, long cost,
+            State state, Side side, long ticks, long lots, long resd, long exec, long cost,
             long lastTicks, long lastLots, long minLots, long created, long modified) {
         assert lots > 0 && lots >= minLots;
         this.id = id;
@@ -91,7 +91,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         this.settlDay = settlDay;
         this.ref = nullIfEmpty(ref);
         this.state = state;
-        this.action = action;
+        this.side = side;
         this.ticks = ticks;
         this.lots = lots;
         this.resd = resd;
@@ -112,7 +112,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         int settlDay = 0;
         String ref = null;
         State state = null;
-        Action action = null;
+        Side side = null;
         long ticks = 0;
         long lots = 0;
         long resd = 0;
@@ -141,10 +141,10 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
                 if (state == null) {
                     throw new IOException("state is null");
                 }
-                if (action == null) {
-                    throw new IOException("action is null");
+                if (side == null) {
+                    throw new IOException("side is null");
                 }
-                return new Order(id, trader, market, contr, settlDay, ref, state, action, ticks,
+                return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks,
                         lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
             case KEY_NAME:
                 name = p.getString();
@@ -204,10 +204,10 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
                     final String s = p.getString();
                     assert s != null;
                     state = State.valueOf(s);
-                } else if ("action".equals(name)) {
+                } else if ("side".equals(name)) {
                     final String s = p.getString();
                     assert s != null;
-                    action = Action.valueOf(s);
+                    side = Side.valueOf(s);
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -273,7 +273,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
             out.append("null");
         }
         out.append(",\"state\":\"").append(state.name());
-        out.append("\",\"action\":\"").append(action.name());
+        out.append("\",\"side\":\"").append(side.name());
         out.append("\",\"ticks\":").append(String.valueOf(ticks));
         out.append(",\"lots\":").append(String.valueOf(lots));
         out.append(",\"resd\":").append(String.valueOf(resd));
@@ -441,8 +441,8 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
     }
 
     @Override
-    public final Action getAction() {
-        return action;
+    public final Side getSide() {
+        return side;
     }
 
     @Override

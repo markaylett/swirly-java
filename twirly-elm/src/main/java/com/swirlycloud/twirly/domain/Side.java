@@ -7,39 +7,39 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.twirly.util.Invertible;
 
-public @NonNullByDefault enum Action implements Invertible<Action> {
+public @NonNullByDefault enum Side implements Invertible<Side> {
     BUY(1), SELL(-1);
     private final int id;
 
-    private Action(int id) {
+    private Side(int id) {
         this.id = id;
     }
 
     /**
      * @param id
      *            Numeric identifier.
-     * @return action or null if {@code id} is zero.
+     * @return side or null if {@code id} is zero.
      * @throws IllegalArgumentException
      *             if {@code id} is invalid.
      */
-    public static Action valueOf(int id) {
-        Action val;
+    public static Side valueOf(int id) {
+        Side val;
         switch (id) {
         case 1:
-            val = Action.BUY;
+            val = Side.BUY;
             break;
         case -1:
-            val = Action.SELL;
+            val = Side.SELL;
             break;
         default:
-            throw new IllegalArgumentException("invalid action");
+            throw new IllegalArgumentException("invalid side");
         }
         return val;
     }
 
     @Override
-    public final Action inverse() {
-        return this == Action.BUY ? Action.SELL : Action.BUY;
+    public final Side inverse() {
+        return this == Side.BUY ? Side.SELL : Side.BUY;
     }
 
     public final int intValue() {

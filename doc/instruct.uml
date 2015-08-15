@@ -14,7 +14,7 @@ abstract class Instruct {
   settlDay: int
   ref: String
   state: State
-  action: Action
+  side: Side
   ticks: long
   lots: long
   resd: long

@@ -21,7 +21,7 @@ public final class OrderTest {
 
     private static Order newOrder() {
         return FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test",
-                Action.BUY, 12345, 10, 1, NOW);
+                Side.BUY, 12345, 10, 1, NOW);
     }
 
     @Test
@@ -36,7 +36,7 @@ public final class OrderTest {
         assertEquals(SETTL_DAY, order.getSettlDay());
         assertEquals("test", order.getRef());
         assertEquals(State.NEW, order.getState());
-        assertEquals(Action.BUY, order.getAction());
+        assertEquals(Side.BUY, order.getSide());
         assertEquals(12345, order.getTicks());
         assertEquals(10, order.getLots());
         assertEquals(10, order.getResd());
@@ -63,7 +63,7 @@ public final class OrderTest {
         assertEquals(SETTL_DAY, order.getSettlDay());
         assertEquals("test", order.getRef());
         assertEquals(State.TRADE, order.getState());
-        assertEquals(Action.BUY, order.getAction());
+        assertEquals(Side.BUY, order.getSide());
         assertEquals(12345, order.getTicks());
         assertEquals(10, order.getLots());
         assertEquals(8, order.getResd());
@@ -92,7 +92,7 @@ public final class OrderTest {
         assertEquals(SETTL_DAY, order.getSettlDay());
         assertEquals("test", order.getRef());
         assertEquals(State.REVISE, order.getState());
-        assertEquals(Action.BUY, order.getAction());
+        assertEquals(Side.BUY, order.getSide());
         assertEquals(12345, order.getTicks());
         assertEquals(5, order.getLots());
         assertEquals(3, order.getResd());
@@ -121,7 +121,7 @@ public final class OrderTest {
         assertEquals(SETTL_DAY, order.getSettlDay());
         assertEquals("test", order.getRef());
         assertEquals(State.CANCEL, order.getState());
-        assertEquals(Action.BUY, order.getAction());
+        assertEquals(Side.BUY, order.getSide());
         assertEquals(12345, order.getTicks());
         assertEquals(10, order.getLots());
         assertEquals(0, order.getResd());
@@ -150,7 +150,7 @@ public final class OrderTest {
         assertEquals(SETTL_DAY, order.getSettlDay());
         assertEquals("test", order.getRef());
         assertEquals(State.TRADE, order.getState());
-        assertEquals(Action.BUY, order.getAction());
+        assertEquals(Side.BUY, order.getSide());
         assertEquals(12345, order.getTicks());
         assertEquals(10, order.getLots());
         assertEquals(5, order.getResd());
@@ -169,7 +169,7 @@ public final class OrderTest {
     public final void testToString() {
         final Order order = newOrder();
         assertEquals(
-                "{\"id\":1,\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"action\":\"BUY\",\"ticks\":12345,\"lots\":10,\"resd\":10,\"exec\":0,\"cost\":0,\"lastTicks\":null,\"lastLots\":null,\"minLots\":1,\"created\":1394625600000,\"modified\":1394625600000}",
+                "{\"id\":1,\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"side\":\"BUY\",\"ticks\":12345,\"lots\":10,\"resd\":10,\"exec\":0,\"cost\":0,\"lastTicks\":null,\"lastLots\":null,\"minLots\":1,\"created\":1394625600000,\"modified\":1394625600000}",
                 order.toString());
     }
 }

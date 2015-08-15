@@ -118,9 +118,9 @@ var TraderModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    postTrade: function(trader, market, ref, action, price, lots, role, cpty) {
+    postTrade: function(trader, market, ref, side, price, lots, role, cpty) {
         console.debug('postTrade: trader=' + trader + ', market=' + market
-                      + ', ref=' + ref + ', action=' + action + ', price=' + price
+                      + ', ref=' + ref + ', side=' + side + ', price=' + price
                       + ', lots=' + lots + ', role=' + role + ', cpty=' + cpty);
         var req = {};
         if (isSpecified(trader)) {
@@ -141,10 +141,10 @@ var TraderModuleImpl = React.createClass({
         if (isSpecified(ref)) {
             req.ref = ref;
         }
-        if (isSpecified(action)) {
-            req.action = action;
+        if (isSpecified(side)) {
+            req.side = side;
         } else {
-            this.onReportError(internalError('action not specified'));
+            this.onReportError(internalError('side not specified'));
             return;
         }
         if (isSpecified(price)) {
@@ -198,8 +198,8 @@ var TraderModuleImpl = React.createClass({
     onPutTrader: function(mnem, display, email) {
         this.putTrader(mnem, display, email);
     },
-    onPostTrade: function(trader, market, ref, action, price, lots, role, cpty) {
-        this.postTrade(trader, market, ref, action, price, lots, role, cpty);
+    onPostTrade: function(trader, market, ref, side, price, lots, role, cpty) {
+        this.postTrade(trader, market, ref, side, price, lots, role, cpty);
     },
     onEditTrader: function(trader) {
         console.debug('onEditTrader: mnem=' + trader.mnem);

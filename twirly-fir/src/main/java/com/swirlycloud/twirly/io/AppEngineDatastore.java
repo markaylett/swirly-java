@@ -72,7 +72,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         entity.setUnindexedProperty("settlDay", nullIfZero(exec.getSettlDay()));
         entity.setUnindexedProperty("ref", exec.getRef());
         entity.setUnindexedProperty("state", exec.getState().name());
-        entity.setUnindexedProperty("action", exec.getAction().name());
+        entity.setUnindexedProperty("side", exec.getSide().name());
         entity.setUnindexedProperty("ticks", exec.getTicks());
         entity.setUnindexedProperty("lots", exec.getLots());
         entity.setProperty("resd", exec.getResd());
@@ -102,7 +102,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         entity.setUnindexedProperty("settlDay", nullIfZero(exec.getSettlDay()));
         entity.setUnindexedProperty("ref", exec.getRef());
         entity.setProperty("state", exec.getState().name());
-        entity.setUnindexedProperty("action", exec.getAction().name());
+        entity.setUnindexedProperty("side", exec.getSide().name());
         entity.setUnindexedProperty("ticks", exec.getTicks());
         entity.setUnindexedProperty("lots", exec.getLots());
         entity.setUnindexedProperty("resd", exec.getResd());

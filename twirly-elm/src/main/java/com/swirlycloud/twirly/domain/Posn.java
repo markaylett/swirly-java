@@ -194,18 +194,18 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         this.sellLots += lots;
     }
 
-    public final void addTrade(Action action, long lastTicks, long lastLots) {
+    public final void addTrade(Side side, long lastTicks, long lastLots) {
         final long cost = lastLots * lastTicks;
-        if (action == Action.BUY) {
+        if (side == Side.BUY) {
             addBuy(cost, lastLots);
         } else {
-            assert action == Action.SELL;
+            assert side == Side.SELL;
             addSell(cost, lastLots);
         }
     }
 
     final void addTrade(Exec trade) {
-        addTrade(trade.getAction(), trade.getLastTicks(), trade.getLastLots());
+        addTrade(trade.getSide(), trade.getLastTicks(), trade.getLastLots());
     }
 
     /**

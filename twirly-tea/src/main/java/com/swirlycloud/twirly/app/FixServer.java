@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import static com.swirlycloud.twirly.app.FixUtility.sideToAction;
+import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.util.HashMap;
@@ -33,7 +33,6 @@ import quickfix.field.OrderID;
 import quickfix.field.OrderQty;
 import quickfix.field.OrigClOrdID;
 import quickfix.field.Price;
-import quickfix.field.Side;
 import quickfix.field.Symbol;
 import quickfix.field.TransactTime;
 import quickfix.fix44.BusinessMessageReject;
@@ -44,7 +43,7 @@ import quickfix.fix44.OrderCancelReject;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.MarketBook;
@@ -172,14 +171,14 @@ public final class FixServer extends MessageCracker implements Application {
 
         final String market = message.getString(Symbol.FIELD);
         final String ref = message.getString(ClOrdID.FIELD);
-        final Action action = sideToAction(message.getChar(Side.FIELD));
+        final Side side = fixToSide(message.getChar(quickfix.field.Side.FIELD));
         final long ticks = (long) message.getDouble(Price.FIELD);
         final long lots = (long) message.getDouble(OrderQty.FIELD);
         final long minLots = (long) message.getDouble(MinQty.FIELD);
         final long now = getNow(message);
 
         assert market != null;
-        assert action != null;
+        assert side != null;
 
         if ("NONE".equals(ref)) {
             // This is reserved in our FIX specification to mean "not a reference."
@@ -194,7 +193,7 @@ public final class FixServer extends MessageCracker implements Application {
             }
             final MarketBook book = serv.getMarket(market);
             try (final Trans trans = new Trans()) {
-                serv.placeOrder(sess, book, ref, action, ticks, lots, minLots, now, trans);
+                serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, trans, sessionId);
             }

@@ -26,27 +26,27 @@ public @NonNullByDefault interface Factory {
     Trader newTrader(String mnem, @Nullable String display, String email);
 
     Order newOrder(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
+            @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
             long exec, long cost, long lastTicks, long lastLots, long minLots, long created,
             long modified);
 
     Order newOrder(long id, String trader, Financial fin, @Nullable String ref, State state,
-            Action action, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
+            Side side, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
             long lastLots, long minLots, long created, long modified);
 
     Order newOrder(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, Action action, long ticks, long lots, long minLots, long created);
+            @Nullable String ref, Side side, long ticks, long lots, long minLots, long created);
 
-    Order newOrder(long id, String trader, Financial fin, @Nullable String ref, Action action,
+    Order newOrder(long id, String trader, Financial fin, @Nullable String ref, Side side,
             long ticks, long lots, long minLots, long created);
 
     Exec newExec(long id, long orderId, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
+            @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
             long exec, long cost, long lastTicks, long lastLots, long minLots, long matchId,
             @Nullable Role role, @Nullable String cpty, long created);
 
     Exec newExec(long id, long orderId, String trader, Financial fin, @Nullable String ref,
-            State state, Action action, long ticks, long lots, long resd, long exec, long cost,
+            State state, Side side, long ticks, long lots, long resd, long exec, long cost,
             long lastTicks, long lastLots, long minLots, long matchId, @Nullable Role role,
             @Nullable String cpty, long created);
 

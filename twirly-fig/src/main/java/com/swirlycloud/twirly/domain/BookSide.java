@@ -42,7 +42,7 @@ public final class BookSide {
     private final DlList orders = new DlList();
 
     private final Level getLazyLevel(Order order) {
-        final long key = Level.composeKey(order.getAction(), order.getTicks());
+        final long key = Level.composeKey(order.getSide(), order.getTicks());
         Level level = (Level) levels.pfind(key);
         if (level == null || level.getKey() != key) {
             final RbNode parent = level;

@@ -13,7 +13,7 @@ import java.sql.SQLException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.domain.Contr;
@@ -112,7 +112,7 @@ public class JdbcModel implements Model {
         final int settlDay = rs.getInt("settlDay");
         final String ref = rs.getString("ref");
         final State state = State.valueOf(rs.getInt("stateId"));
-        final Action action = Action.valueOf(rs.getInt("actionId"));
+        final Side side = Side.valueOf(rs.getInt("sideId"));
         final long ticks = rs.getLong("ticks");
         final long lots = rs.getLong("lots");
         final long resd = rs.getLong("resd");
@@ -126,7 +126,7 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return factory.newOrder(id, trader, market, contr, settlDay, ref, state, action, ticks,
+        return factory.newOrder(id, trader, market, contr, settlDay, ref, state, side, ticks,
                 lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
     }
 
@@ -141,7 +141,7 @@ public class JdbcModel implements Model {
         final int settlDay = rs.getInt("settlDay");
         final String ref = rs.getString("ref");
         final State state = State.TRADE;
-        final Action action = Action.valueOf(rs.getInt("actionId"));
+        final Side side = Side.valueOf(rs.getInt("sideId"));
         final long ticks = rs.getLong("ticks");
         final long lots = rs.getLong("lots");
         final long resd = rs.getLong("resd");
@@ -160,7 +160,7 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return factory.newExec(id, orderId, trader, market, contr, settlDay, ref, state, action,
+        return factory.newExec(id, orderId, trader, market, contr, settlDay, ref, state, side,
                 ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty,
                 created);
     }
@@ -187,11 +187,11 @@ public class JdbcModel implements Model {
                 selectTraderStmt = conn
                         .prepareStatement("SELECT mnem, display, email FROM Trader_t");
                 selectOrderStmt = conn
-                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
+                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
                 selectTradeStmt = conn
-                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
+                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
                 selectPosnStmt = conn
-                        .prepareStatement("SELECT trader, contr, settlDay, actionId, cost, lots FROM Posn_v");
+                        .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v");
                 // Success.
                 this.factory = factory;
                 this.conn = conn;
@@ -350,13 +350,13 @@ public class JdbcModel implements Model {
                     posn = factory.newPosn(trader, contr, settlDay);
                     posns.pinsert(posn, parent);
                 }
-                final Action action = Action.valueOf(rs.getInt("actionId"));
+                final Side side = Side.valueOf(rs.getInt("sideId"));
                 final long cost = rs.getLong("cost");
                 final long lots = rs.getLong("lots");
-                if (action == Action.BUY) {
+                if (side == Side.BUY) {
                     posn.addBuy(cost, lots);
                 } else {
-                    assert action == Action.SELL;
+                    assert side == Side.SELL;
                     posn.addSell(cost, lots);
                 }
             }

@@ -30,7 +30,7 @@ import quickfix.fix44.NewOrderSingle;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.ServFactory;
@@ -151,13 +151,13 @@ public final class Main {
 
                 final FixBuilder builder = new FixBuilder();
                 builder.setMessage(new NewOrderSingle());
-                builder.setNewOrderSingle("EURUSD.MAR14", "marayl1", Action.BUY, 12345, 10, 1, now);
+                builder.setNewOrderSingle("EURUSD.MAR14", "marayl1", Side.BUY, 12345, 10, 1, now);
                 Session.sendToTarget(builder.getMessage(), marayl);
 
                 Thread.sleep(2000);
 
                 builder.setMessage(new NewOrderSingle());
-                builder.setNewOrderSingle("EURUSD.MAR14", "gosayl1", Action.SELL, 12345, 5, 1, now);
+                builder.setNewOrderSingle("EURUSD.MAR14", "gosayl1", Side.SELL, 12345, 5, 1, now);
                 Session.sendToTarget(builder.getMessage(), gosayl);
 
                 Thread.sleep(2000);

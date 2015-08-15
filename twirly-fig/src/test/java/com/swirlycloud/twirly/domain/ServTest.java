@@ -16,7 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.BookSide;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
@@ -67,11 +67,11 @@ public final class ServTest {
             @Override
             public final SlNode selectOrder() {
                 final Order first = FACTORY.newOrder(1, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "first", Action.BUY, 12344, 11, 1, NOW - 5);
+                        SETTL_DAY, "first", Side.BUY, 12344, 11, 1, NOW - 5);
                 final Order second = FACTORY.newOrder(2, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "second", Action.BUY, 12345, 10, 1, NOW - 4);
+                        SETTL_DAY, "second", Side.BUY, 12345, 10, 1, NOW - 4);
                 final Order third = FACTORY.newOrder(3, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "third", Action.SELL, 12346, 10, 1, NOW - 3);
+                        SETTL_DAY, "third", Side.SELL, 12346, 10, 1, NOW - 3);
                 // Fully fill second order.
                 second.trade(12345, 10, NOW - 2);
                 // Partially fill third order.
@@ -84,10 +84,10 @@ public final class ServTest {
             @Override
             public final SlNode selectTrade() {
                 final Exec second = FACTORY.newExec(1, 2, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "second", State.TRADE, Action.BUY, 12345, 10, 0, 10, 123450,
+                        SETTL_DAY, "second", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
                         12345, 10, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
                 final Exec third = FACTORY.newExec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "third", State.TRADE, Action.SELL, 12346, 10, 3, 7, 86422,
+                        SETTL_DAY, "third", State.TRADE, Side.SELL, 12346, 10, 3, 7, 86422,
                         12346, 7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
                 second.setSlNext(third);
                 return second;
@@ -172,7 +172,7 @@ public final class ServTest {
         assertEquals("EURUSD.MAR14", actual.getMarket());
         assertEquals("first", actual.getRef());
         assertEquals(State.NEW, actual.getState());
-        assertEquals(Action.BUY, actual.getAction());
+        assertEquals(Side.BUY, actual.getSide());
         assertEquals(12344, actual.getTicks());
         assertEquals(11, actual.getLots());
         assertEquals(11, actual.getResd());
@@ -192,7 +192,7 @@ public final class ServTest {
         assertEquals("EURUSD.MAR14", actual.getMarket());
         assertEquals("second", actual.getRef());
         assertEquals(State.TRADE, actual.getState());
-        assertEquals(Action.BUY, actual.getAction());
+        assertEquals(Side.BUY, actual.getSide());
         assertEquals(12345, actual.getTicks());
         assertEquals(10, actual.getLots());
         assertEquals(0, actual.getResd());
@@ -212,7 +212,7 @@ public final class ServTest {
         assertEquals("EURUSD.MAR14", actual.getMarket());
         assertEquals("third", actual.getRef());
         assertEquals(State.TRADE, actual.getState());
-        assertEquals(Action.SELL, actual.getAction());
+        assertEquals(Side.SELL, actual.getSide());
         assertEquals(12346, actual.getTicks());
         assertEquals(10, actual.getLots());
         assertEquals(3, actual.getResd());
@@ -237,7 +237,7 @@ public final class ServTest {
         assertEquals("EURUSD.MAR14", actual.getMarket());
         assertEquals("second", actual.getRef());
         assertEquals(State.TRADE, actual.getState());
-        assertEquals(Action.BUY, actual.getAction());
+        assertEquals(Side.BUY, actual.getSide());
         assertEquals(12345, actual.getTicks());
         assertEquals(10, actual.getLots());
         assertEquals(0, actual.getResd());
@@ -260,7 +260,7 @@ public final class ServTest {
         assertEquals("EURUSD.MAR14", actual.getMarket());
         assertEquals("third", actual.getRef());
         assertEquals(State.TRADE, actual.getState());
-        assertEquals(Action.SELL, actual.getAction());
+        assertEquals(Side.SELL, actual.getSide());
         assertEquals(12346, actual.getTicks());
         assertEquals(10, actual.getLots());
         assertEquals(3, actual.getResd());
@@ -295,13 +295,13 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Trans trans = new Trans()) {
-            serv.placeOrder(sess, book, "", Action.BUY, 12345, 5, 1, NOW, trans);
+            serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.NEW, order.getState());
-            assertEquals(Action.BUY, order.getAction());
+            assertEquals(Side.BUY, order.getSide());
             assertEquals(12345, order.getTicks());
             assertEquals(5, order.getLots());
             assertEquals(5, order.getResd());
@@ -325,14 +325,14 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Trans trans = new Trans()) {
-            serv.placeOrder(sess, book, "", Action.BUY, 12345, 5, 1, NOW, trans);
+            serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
             serv.reviseOrder(sess, book, order, 4, NOW + 1, trans);
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.REVISE, order.getState());
-            assertEquals(Action.BUY, order.getAction());
+            assertEquals(Side.BUY, order.getSide());
             assertEquals(12345, order.getTicks());
             assertEquals(4, order.getLots());
             assertEquals(4, order.getResd());
@@ -356,14 +356,14 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Trans trans = new Trans()) {
-            serv.placeOrder(sess, book, "", Action.BUY, 12345, 5, 1, NOW, trans);
+            serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, trans);
             final Order order = trans.getOrder();
             serv.cancelOrder(sess, book, order, NOW + 1, trans);
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());
             assertEquals(State.CANCEL, order.getState());
-            assertEquals(Action.BUY, order.getAction());
+            assertEquals(Side.BUY, order.getSide());
             assertEquals(12345, order.getTicks());
             assertEquals(5, order.getLots());
             assertEquals(0, order.getResd());

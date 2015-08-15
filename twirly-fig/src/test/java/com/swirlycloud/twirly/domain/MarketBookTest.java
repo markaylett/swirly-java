@@ -11,7 +11,7 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
@@ -43,13 +43,13 @@ public final class MarketBookTest {
 
         final long now = 1414932078620L;
 
-        book.placeOrder(factory.newOrder(1, "MARAYL", book, "apple", Action.BUY, 12343, 10, 0, now),
+        book.placeOrder(factory.newOrder(1, "MARAYL", book, "apple", Side.BUY, 12343, 10, 0, now),
                 now);
-        book.placeOrder(factory.newOrder(2, "MARAYL", book, "orange", Action.BUY, 12344, 5, 0, now),
+        book.placeOrder(factory.newOrder(2, "MARAYL", book, "orange", Side.BUY, 12344, 5, 0, now),
                 now);
-        book.placeOrder(factory.newOrder(3, "MARAYL", book, "pear", Action.SELL, 12346, 5, 0, now),
+        book.placeOrder(factory.newOrder(3, "MARAYL", book, "pear", Side.SELL, 12346, 5, 0, now),
                 now);
-        book.placeOrder(factory.newOrder(4, "MARAYL", book, "banana", Action.SELL, 12346, 2, 0, now),
+        book.placeOrder(factory.newOrder(4, "MARAYL", book, "banana", Side.SELL, 12346, 2, 0, now),
                 now);
 
         final StringBuilder sb = new StringBuilder();

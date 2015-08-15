@@ -7,9 +7,8 @@ import quickfix.IncorrectTagValue;
 import quickfix.field.ExecType;
 import quickfix.field.LastLiquidityInd;
 import quickfix.field.OrdStatus;
-import quickfix.field.Side;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 
@@ -65,14 +64,14 @@ public final class FixUtility {
 
     // Side(54)
 
-    public static char actionToSide(Action in) {
+    public static char sideToFix(Side in) {
         char out;
         switch (in) {
         case BUY:
-            out = Side.BUY;
+            out = quickfix.field.Side.BUY;
             break;
         case SELL:
-            out = Side.SELL;
+            out = quickfix.field.Side.SELL;
             break;
         default:
             out = '\0';
@@ -81,17 +80,17 @@ public final class FixUtility {
         return out;
     }
 
-    public static Action sideToAction(char in) throws IncorrectTagValue {
-        Action out = null;
+    public static Side fixToSide(char in) throws IncorrectTagValue {
+        Side out = null;
         switch (in) {
-        case Side.BUY:
-            out = Action.BUY;
+        case quickfix.field.Side.BUY:
+            out = Side.BUY;
             break;
-        case Side.SELL:
-            out = Action.SELL;
+        case quickfix.field.Side.SELL:
+            out = Side.SELL;
             break;
         default:
-            throw new IncorrectTagValue(Side.FIELD);
+            throw new IncorrectTagValue(quickfix.field.Side.FIELD);
         }
         return out;
     }

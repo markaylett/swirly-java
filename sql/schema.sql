@@ -70,15 +70,15 @@ INSERT INTO State_t (id, mnem) VALUES (3, 'CANCEL')
 INSERT INTO State_t (id, mnem) VALUES (4, 'TRADE')
 ;
 
-CREATE TABLE Action_t (
+CREATE TABLE Side_t (
   id INT NOT NULL PRIMARY KEY,
   mnem CHAR(16) NOT NULL UNIQUE
 )
 ENGINE = InnoDB;
 
-INSERT INTO Action_t (id, mnem) VALUES (1, 'BUY')
+INSERT INTO Side_t (id, mnem) VALUES (1, 'BUY')
 ;
-INSERT INTO Action_t (id, mnem) VALUES (-1, 'SELL')
+INSERT INTO Side_t (id, mnem) VALUES (-1, 'SELL')
 ;
 
 CREATE TABLE Direct_t (
@@ -241,7 +241,7 @@ CREATE TABLE Order_t (
   settlDay INT NULL DEFAULT NULL,
   ref VARCHAR(64) NULL DEFAULT NULL,
   stateId INT NOT NULL,
-  actionId INT NOT NULL,
+  sideId INT NOT NULL,
   ticks BIGINT NOT NULL,
   lots BIGINT NOT NULL,
   resd BIGINT NOT NULL,
@@ -261,7 +261,7 @@ CREATE TABLE Order_t (
   FOREIGN KEY (market) REFERENCES Market_t (mnem),
   FOREIGN KEY (contr) REFERENCES Contr_t (mnem),
   FOREIGN KEY (stateId) REFERENCES State_t (id),
-  FOREIGN KEY (actionId) REFERENCES Action_t (id)
+  FOREIGN KEY (sideId) REFERENCES Side_t (id)
 )
 ENGINE = InnoDB;
 
@@ -277,7 +277,7 @@ CREATE TABLE Exec_t (
   settlDay INT NULL DEFAULT NULL,
   ref VARCHAR(64) NULL DEFAULT NULL,
   stateId INT NOT NULL,
-  actionId INT NOT NULL,
+  sideId INT NOT NULL,
   ticks BIGINT NOT NULL,
   lots BIGINT NOT NULL,
   resd BIGINT NOT NULL,
@@ -299,7 +299,7 @@ CREATE TABLE Exec_t (
   FOREIGN KEY (trader) REFERENCES Trader_t (mnem),
   FOREIGN KEY (contr) REFERENCES Contr_t (mnem),
   FOREIGN KEY (stateId) REFERENCES State_t (id),
-  FOREIGN KEY (actionId) REFERENCES Action_t (id),
+  FOREIGN KEY (sideId) REFERENCES Side_t (id),
   FOREIGN KEY (roleId) REFERENCES Role_t (id),
   FOREIGN KEY (cpty) REFERENCES Trader_t (mnem)
 )
@@ -323,7 +323,7 @@ CREATE TRIGGER beforeInsertOnExec
           settlDay,
           ref,
           stateId,
-          actionId,
+          sideId,
           ticks,
           lots,
           resd,
@@ -343,7 +343,7 @@ CREATE TRIGGER beforeInsertOnExec
           NEW.settlDay,
           NEW.ref,
           NEW.stateId,
-          NEW.actionId,
+          NEW.sideId,
           NEW.ticks,
           NEW.lots,
           NEW.resd,
@@ -438,7 +438,7 @@ CREATE VIEW Order_v AS
     o.settlDay,
     o.ref,
     s.mnem state,
-    a.mnem action,
+    a.mnem side,
     o.ticks,
     o.lots,
     o.resd,
@@ -452,8 +452,8 @@ CREATE VIEW Order_v AS
   FROM Order_t o
   LEFT OUTER JOIN State_t s
   ON o.stateId = s.id
-  LEFT OUTER JOIN Action_t a
-  ON o.actionId = a.id
+  LEFT OUTER JOIN Side_t a
+  ON o.sideId = a.id
 ;
 
 CREATE VIEW Exec_v AS
@@ -465,7 +465,7 @@ CREATE VIEW Exec_v AS
     e.settlDay,
     e.ref,
     s.mnem state,
-    a.mnem action,
+    a.mnem side,
     e.ticks,
     e.lots,
     e.resd,
@@ -483,8 +483,8 @@ CREATE VIEW Exec_v AS
   FROM Exec_t e
   LEFT OUTER JOIN State_t s
   ON e.stateId = s.id
-  LEFT OUTER JOIN Action_t a
-  ON e.actionId = a.id
+  LEFT OUTER JOIN Side_t a
+  ON e.sideId = a.id
   LEFT OUTER JOIN Role_t r
   ON e.roleId = r.id
 ;
@@ -494,12 +494,12 @@ CREATE VIEW Posn_v AS
     e.trader,
     e.contr,
     e.settlDay,
-    e.actionId,
+    e.sideId,
     SUM(e.lastLots * e.lastTicks) cost,
     SUM(e.lastLots) lots
   FROM Exec_t e
   WHERE e.stateId = 4
-  GROUP BY e.trader, e.contr, e.settlDay, e.actionId
+  GROUP BY e.trader, e.contr, e.settlDay, e.sideId
 ;
 
 COMMIT

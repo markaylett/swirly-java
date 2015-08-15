@@ -44,52 +44,52 @@ public @NonNullByDefault class BasicFactory implements Factory {
 
     @Override
     public Order newOrder(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
+            @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
             long exec, long cost, long lastTicks, long lastLots, long minLots, long created,
             long modified) {
-        return new Order(id, trader, market, contr, settlDay, ref, state, action, ticks, lots,
+        return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks, lots,
                 resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
     }
 
     @Override
     public final Order newOrder(long id, String trader, Financial fin, @Nullable String ref,
-            State state, Action action, long ticks, long lots, long resd, long exec, long cost,
+            State state, Side side, long ticks, long lots, long resd, long exec, long cost,
             long lastTicks, long lastLots, long minLots, long created, long modified) {
         return newOrder(id, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), ref, state,
-                action, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created,
+                side, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created,
                 modified);
     }
 
     @Override
     public final Order newOrder(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, Action action, long ticks, long lots, long minLots, long created) {
-        return newOrder(id, trader, market, contr, settlDay, ref, State.NEW, action, ticks, lots,
+            @Nullable String ref, Side side, long ticks, long lots, long minLots, long created) {
+        return newOrder(id, trader, market, contr, settlDay, ref, State.NEW, side, ticks, lots,
                 lots, 0, 0, 0, 0, minLots, created, created);
     }
 
     @Override
     public final Order newOrder(long id, String trader, Financial fin, @Nullable String ref,
-            Action action, long ticks, long lots, long minLots, long created) {
+            Side side, long ticks, long lots, long minLots, long created) {
         return newOrder(id, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), ref,
-                State.NEW, action, ticks, lots, lots, 0, 0, 0, 0, minLots, created, created);
+                State.NEW, side, ticks, lots, lots, 0, 0, 0, 0, minLots, created, created);
     }
 
     @Override
     public Exec newExec(long id, long orderId, String trader, String market, String contr,
-            int settlDay, @Nullable String ref, State state, Action action, long ticks, long lots,
+            int settlDay, @Nullable String ref, State state, Side side, long ticks, long lots,
             long resd, long exec, long cost, long lastTicks, long lastLots, long minLots,
             long matchId, @Nullable Role role, @Nullable String cpty, long created) {
-        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action, ticks,
+        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, side, ticks,
                 lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
     }
 
     @Override
     public final Exec newExec(long id, long orderId, String trader, Financial fin,
-            @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
+            @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
             long exec, long cost, long lastTicks, long lastLots, long minLots, long matchId,
             @Nullable Role role, @Nullable String cpty, long created) {
         return newExec(id, orderId, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(),
-                ref, state, action, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots,
+                ref, state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots,
                 matchId, role, cpty, created);
     }
 
@@ -97,7 +97,7 @@ public @NonNullByDefault class BasicFactory implements Factory {
     public final Exec newExec(long id, Instruct instruct, long created) {
         return newExec(id, instruct.getOrderId(), instruct.getTrader(), instruct.getMarket(),
                 instruct.getContr(), instruct.getSettlDay(), instruct.getRef(),
-                instruct.getState(), instruct.getAction(), instruct.getTicks(), instruct.getLots(),
+                instruct.getState(), instruct.getSide(), instruct.getTicks(), instruct.getLots(),
                 instruct.getResd(), instruct.getExec(), instruct.getCost(),
                 instruct.getLastTicks(), instruct.getLastLots(), instruct.getMinLots(), 0, null,
                 null, created);
