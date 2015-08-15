@@ -5,13 +5,13 @@ wd=$PWD
 appid=${1:-'twirly-prd'}
 env=
 case "$appid" in
-    twirly-dev)
+    twirly-dev*)
         env=dev
         ;;
-    twirly-uat)
+    twirly-uat*)
         env=uat
         ;;
-    twirly-prd)
+    twirly-prd*)
         env=prd
         ;;
     *)
