@@ -8,6 +8,8 @@ import org.eclipse.jdt.annotation.Nullable;
 
 public abstract @NonNullByDefault class LongTree<V> extends Tree<V> {
 
+    private static final long serialVersionUID = 1L;
+
     protected abstract int compareKeyDirect(V lhs, long rhs);
 
     /**

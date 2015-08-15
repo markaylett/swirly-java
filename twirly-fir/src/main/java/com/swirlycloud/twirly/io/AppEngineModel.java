@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.io;
 
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -16,8 +17,9 @@ import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
@@ -25,6 +27,7 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.mock.MockAsset;
@@ -41,6 +44,10 @@ public class AppEngineModel implements Model {
     protected static final String TRADER_KIND = "Trader";
     protected static final String ORDER_KIND = "Order";
     protected static final String EXEC_KIND = "Exec";
+
+    private final Factory factory;
+    private final MockAsset mockAsset;
+    private final MockContr mockContr;
 
     protected final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -60,25 +67,31 @@ public class AppEngineModel implements Model {
         }
     }
 
+    public AppEngineModel(Factory factory) {
+        this.factory = factory;
+        mockAsset = new MockAsset(factory);
+        mockContr = new MockContr(factory);
+    }
+
     @Override
     public void close() {
     }
 
     @Override
-    public final @Nullable SlNode selectAsset() {
+    public final @NonNull MnemRbTree selectAsset() {
         // TODO: migrate to datastore.
-        return MockAsset.selectAsset();
+        return mockAsset.selectAsset();
     }
 
     @Override
-    public final @Nullable SlNode selectContr() {
+    public final @Nullable MnemRbTree selectContr() {
         // TODO: migrate to datastore.
-        return MockContr.selectContr();
+        return mockContr.selectContr();
     }
 
     @Override
-    public final @Nullable SlNode selectMarket() {
-        final SlQueue q = new SlQueue();
+    public final @Nullable MnemRbTree selectMarket() {
+        final MnemRbTree t = new MnemRbTree();
         final Query query = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
@@ -96,16 +109,16 @@ public class AppEngineModel implements Model {
             final long maxExecId = (Long) entity.getProperty("maxExecId");
 
             assert mnem != null;
-            final Market market = new Market(mnem, display, contr, settlDay, expiryDay, state,
-                    lastTicks, lastLots, lastTime, maxOrderId, maxExecId);
-            q.insertBack(market);
+            final Market market = factory.newMarket(mnem, display, contr, settlDay, expiryDay,
+                    state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId);
+            t.insert(market);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
-    public final @Nullable SlNode selectTrader() {
-        final SlQueue q = new SlQueue();
+    public final @Nullable MnemRbTree selectTrader() {
+        final MnemRbTree t = new MnemRbTree();
         final Query query = new Query(TRADER_KIND);
         final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
@@ -115,10 +128,10 @@ public class AppEngineModel implements Model {
 
             assert mnem != null;
             assert email != null;
-            final Trader trader = new Trader(mnem, display, email);
-            q.insertBack(trader);
+            final Trader trader = factory.newTrader(mnem, display, email);
+            t.insert(trader);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
@@ -140,7 +153,7 @@ public class AppEngineModel implements Model {
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
-                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
                     final long ticks = (Long) entity.getProperty("ticks");
                     final long lots = (Long) entity.getProperty("lots");
                     final long resd = (Long) entity.getProperty("resd");
@@ -155,9 +168,9 @@ public class AppEngineModel implements Model {
                     assert trader != null;
                     assert market != null;
                     assert contr != null;
-                    final Order order = new Order(id, trader, market, contr, settlDay, ref, state,
-                            action, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots,
-                            created, modified);
+                    final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
+                            state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
+                            minLots, created, modified);
                     q.insertBack(order);
                 }
             }
@@ -189,7 +202,7 @@ public class AppEngineModel implements Model {
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
-                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
                     final long ticks = (Long) entity.getProperty("ticks");
                     final long lots = (Long) entity.getProperty("lots");
                     final long resd = (Long) entity.getProperty("resd");
@@ -207,9 +220,9 @@ public class AppEngineModel implements Model {
                     assert trader != null;
                     assert market != null;
                     assert contr != null;
-                    final Exec trade = new Exec(id, orderId, trader, market, contr, settlDay, ref,
-                            state, action, ticks, lots, resd, exec, cost, lastTicks, lastLots,
-                            minLots, matchId, role, cpty, created);
+                    final Exec trade = factory.newExec(id, orderId, trader, market, contr,
+                            settlDay, ref, state, side, ticks, lots, resd, exec, cost, lastTicks,
+                            lastLots, minLots, matchId, role, cpty, created);
                     q.insertBack(trade);
                 }
             }
@@ -243,14 +256,14 @@ public class AppEngineModel implements Model {
                         final RbNode parent = posn;
                         assert trader != null;
                         assert contr != null;
-                        posn = new Posn(trader, contr, settlDay);
+                        posn = factory.newPosn(trader, contr, settlDay);
                         posns.pinsert(posn, parent);
                     }
                     @SuppressWarnings("null")
-                    final Action action = Action.valueOf((String) entity.getProperty("action"));
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
                     final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
-                    posn.addTrade(action, lastTicks, lastLots);
+                    posn.addTrade(side, lastTicks, lastLots);
                 }
             }
         });

@@ -32,6 +32,8 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, TransNode,
         Instruct {
 
+    private static final long serialVersionUID = 1L;
+
     private transient @Nullable SlNode slNext;
     private transient @Nullable TransNode transNext;
 
@@ -49,7 +51,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
      */
     private final @Nullable String ref;
     private State state;
-    private final Action action;
+    private final Side side;
     private final long ticks;
     /**
      * Must be greater than zero.
@@ -75,8 +77,8 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
     private @Nullable String cpty;
     private final long created;
 
-    public Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, State state, Action action, long ticks, long lots, long resd,
+    Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
+            @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
             long exec, long cost, long lastTicks, long lastLots, long minLots, long matchId,
             @Nullable Role role, @Nullable String cpty, long created) {
         this.id = id;
@@ -87,7 +89,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         this.settlDay = settlDay;
         this.ref = nullIfEmpty(ref);
         this.state = state;
-        this.action = action;
+        this.side = side;
         this.ticks = ticks;
         this.lots = lots;
         this.resd = resd;
@@ -99,54 +101,6 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         this.matchId = matchId;
         this.role = role;
         this.cpty = cpty;
-        this.created = created;
-    }
-
-    public Exec(long id, long orderId, String trader, Financial fin, String ref, State state,
-            Action action, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
-            long lastLots, long minLots, long matchId, @Nullable Role role, @Nullable String cpty,
-            long created) {
-        this.id = id;
-        this.orderId = orderId;
-        this.trader = trader;
-        this.market = fin.getMarket();
-        this.contr = fin.getContr();
-        this.settlDay = fin.getSettlDay();
-        this.ref = nullIfEmpty(ref);
-        this.state = state;
-        this.action = action;
-        this.ticks = ticks;
-        this.lots = lots;
-        this.resd = resd;
-        this.exec = exec;
-        this.cost = cost;
-        this.lastTicks = lastTicks;
-        this.lastLots = lastLots;
-        this.minLots = minLots;
-        this.matchId = matchId;
-        this.role = role;
-        this.cpty = cpty;
-        this.created = created;
-    }
-
-    public Exec(long id, Instruct instruct, long created) {
-        this.id = id;
-        this.orderId = instruct.getOrderId();
-        this.trader = instruct.getTrader();
-        this.market = instruct.getMarket();
-        this.contr = instruct.getContr();
-        this.settlDay = instruct.getSettlDay();
-        this.ref = instruct.getRef();
-        this.state = instruct.getState();
-        this.action = instruct.getAction();
-        this.ticks = instruct.getTicks();
-        this.lots = instruct.getLots();
-        this.resd = instruct.getResd();
-        this.exec = instruct.getExec();
-        this.cost = instruct.getCost();
-        this.lastTicks = instruct.getLastTicks();
-        this.lastLots = instruct.getLastLots();
-        this.minLots = instruct.getMinLots();
         this.created = created;
     }
 
@@ -154,7 +108,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
      * Special factory method for manual adjustments.
      */
     public static Exec manual(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, Action action, long ticks, long lots, @Nullable Role role,
+            @Nullable String ref, Side side, long ticks, long lots, @Nullable Role role,
             @Nullable String cpty, long created) {
         final long orderId = 0;
         final State state = State.TRADE;
@@ -165,7 +119,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         final long lastLots = lots;
         final long minLots = 1;
         final long matchId = 0;
-        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action, ticks,
+        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, side, ticks,
                 lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
     }
 
@@ -178,7 +132,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         int settlDay = 0;
         String ref = null;
         State state = null;
-        Action action = null;
+        Side side = null;
         long ticks = 0;
         long lots = 0;
         long resd = 0;
@@ -209,10 +163,10 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
                 if (state == null) {
                     throw new IOException("state is null");
                 }
-                if (action == null) {
-                    throw new IOException("action is null");
+                if (side == null) {
+                    throw new IOException("side is null");
                 }
-                return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action,
+                return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, side,
                         ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role,
                         cpty, created);
             case KEY_NAME:
@@ -281,10 +235,10 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
                     final String s = p.getString();
                     assert s != null;
                     state = State.valueOf(s);
-                } else if ("action".equals(name)) {
+                } else if ("side".equals(name)) {
                     final String s = p.getString();
                     assert s != null;
-                    action = Action.valueOf(s);
+                    side = Side.valueOf(s);
                 } else if ("role".equals(name)) {
                     role = Role.valueOf(p.getString());
                 } else if ("cpty".equals(name)) {
@@ -309,7 +263,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         if (role != null) {
             role = role.inverse();
         }
-        return new Exec(id, orderId, cpty, market, contr, settlDay, ref, state, action.inverse(),
+        return new Exec(id, orderId, cpty, market, contr, settlDay, ref, state, side.inverse(),
                 ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, trader,
                 created);
     }
@@ -369,7 +323,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
             out.append("null");
         }
         out.append(",\"state\":\"").append(state.name());
-        out.append("\",\"action\":\"").append(action.name());
+        out.append("\",\"side\":\"").append(side.name());
         out.append("\",\"ticks\":").append(String.valueOf(ticks));
         out.append(",\"lots\":").append(String.valueOf(lots));
         out.append(",\"resd\":").append(String.valueOf(resd));
@@ -425,7 +379,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         return transNext;
     }
 
-    public final void revise(long lots) {
+    final void revise(long lots) {
         state = State.REVISE;
         final long delta = this.lots - lots;
         assert delta >= 0;
@@ -433,13 +387,13 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         resd -= delta;
     }
 
-    public final void cancel() {
+    final void cancel() {
         state = State.CANCEL;
         resd = 0;
     }
 
-    public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots,
-            long matchId, Role role, String cpty) {
+    final void trade(long sumLots, long sumCost, long lastTicks, long lastLots, long matchId,
+            Role role, String cpty) {
         state = State.TRADE;
         resd -= sumLots;
         exec += sumLots;
@@ -451,7 +405,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         this.cpty = cpty;
     }
 
-    public final void trade(long lastTicks, long lastLots, long matchId, Role role, String cpty) {
+    final void trade(long lastTicks, long lastLots, long matchId, Role role, String cpty) {
         trade(lastLots, lastLots * lastTicks, lastTicks, lastLots, matchId, role, cpty);
     }
 
@@ -501,8 +455,8 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
     }
 
     @Override
-    public final Action getAction() {
-        return action;
+    public final Side getSide() {
+        return side;
     }
 
     @Override

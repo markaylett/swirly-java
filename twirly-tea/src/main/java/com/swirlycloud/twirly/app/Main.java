@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.jdt.annotation.NonNull;
 
 import quickfix.Acceptor;
 import quickfix.Application;
@@ -29,7 +30,10 @@ import quickfix.fix44.NewOrderSingle;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.LockableServ;
+import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockDatastore;
@@ -37,6 +41,8 @@ import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 import com.swirlycloud.twirly.quickfix.Slf4jLogFactory;
 
 public final class Main {
+
+    private static final @NonNull Factory FACTORY = new ServFactory();
 
     public static AutoCloseable newFixAcceptor(final Application application,
             final SessionSettings settings, final LogFactory logFactory) throws ConfigError {
@@ -145,13 +151,13 @@ public final class Main {
 
                 final FixBuilder builder = new FixBuilder();
                 builder.setMessage(new NewOrderSingle());
-                builder.setNewOrderSingle("EURUSD.MAR14", "marayl1", Action.BUY, 12345, 10, 1, now);
+                builder.setNewOrderSingle("EURUSD.MAR14", "marayl1", Side.BUY, 12345, 10, 1, now);
                 Session.sendToTarget(builder.getMessage(), marayl);
 
                 Thread.sleep(2000);
 
                 builder.setMessage(new NewOrderSingle());
-                builder.setNewOrderSingle("EURUSD.MAR14", "gosayl1", Action.SELL, 12345, 5, 1, now);
+                builder.setNewOrderSingle("EURUSD.MAR14", "gosayl1", Side.SELL, 12345, 5, 1, now);
                 Session.sendToTarget(builder.getMessage(), gosayl);
 
                 Thread.sleep(2000);
@@ -174,10 +180,10 @@ public final class Main {
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
         @SuppressWarnings("resource")
-        final Datastore datastore = new MockDatastore();
+        final Datastore datastore = new MockDatastore(FACTORY);
         boolean success = false;
         try {
-            try (final LockableServ serv = new LockableServ(datastore, now())) {
+            try (final LockableServ serv = new LockableServ(datastore, FACTORY, now())) {
                 success = true;
                 run(serv);
             }

@@ -28,12 +28,17 @@ public final @NonNullByDefault class SpyCache implements Cache {
     }
 
     @Override
-    public final @Nullable Object get(String key) {
+    public final @Nullable Object select(String key) {
         return mc.get(key);
     }
 
     @Override
-    public final void put(String key, Object val) {
+    public final void insert(String key, Object val) {
+        mc.add(key, EXPIRY, val);
+    }
+
+    @Override
+    public final void update(String key, Object val) {
         mc.set(key, EXPIRY, val);
     }
 }

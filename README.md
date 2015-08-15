@@ -106,6 +106,15 @@ Add roles and a user for testing to `tomcat-users.xml`:
 
 You should now be able to start your Tomcat server in debug mode from the Servers tab.
 
+OS X Daemons
+------------
+
+After installing mysql-server and memcached from Mac Ports, start the daemons using the following
+commands:
+
+    $ auso launchctl load -w /Library/LaunchDaemons/org.macports.mysql56-server.plist
+    $ sudo launchctl load -w /Library/LaunchDaemons/org.macports.memcached.plist
+
 JDBC Realm
 ----------
 
@@ -119,11 +128,8 @@ You can configure the `JDBCRealm` instead of the `UserDatabaseRealm` as follows:
            userTable="User_t" userNameCol="email" userCredCol="pass"
            userRoleTable="UserGroup_v" roleNameCol="group_" />
 
-OS X Daemons
-------------
+Memcached
+---------
 
-After installing mysql-server and memcached from Mac Ports, start the daemons using the following
-commands:
-
-    $ auso launchctl load -w /Library/LaunchDaemons/org.macports.mysql56-server.plist 
-    $ sudo launchctl load -w /Library/LaunchDaemons/org.macports.memcached.plist
+    $ cp spymemcached-x.y.z.jar $CATALINA_HOME/lib/
+    $ cp javax.json-x.y.z.jar $CATALINA_HOME/lib/

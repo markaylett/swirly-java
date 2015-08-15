@@ -10,6 +10,8 @@ import com.swirlycloud.twirly.node.RbNode;
 
 public abstract @NonNullByDefault class LongRbTree extends LongTree<RbNode> {
 
+    private static final long serialVersionUID = 1L;
+
     @Override
     protected final void setNode(RbNode lhs, RbNode rhs) {
         lhs.setNode(rhs);

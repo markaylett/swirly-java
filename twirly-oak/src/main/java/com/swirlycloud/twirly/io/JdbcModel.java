@@ -11,11 +11,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.swirlycloud.twirly.domain.Action;
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
@@ -23,6 +26,7 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.node.RbNode;
@@ -30,6 +34,7 @@ import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;
 
 public class JdbcModel implements Model {
+    private final Factory factory;
     protected final Connection conn;
     private final PreparedStatement selectAssetStmt;
     private final PreparedStatement selectContrStmt;
@@ -39,16 +44,16 @@ public class JdbcModel implements Model {
     private final PreparedStatement selectTradeStmt;
     private final PreparedStatement selectPosnStmt;
 
-    private static Asset getAsset(ResultSet rs) throws SQLException {
+    private final @NonNull Asset getAsset(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final AssetType assetType = AssetType.valueOf(rs.getInt("typeId"));
         assert mnem != null;
         assert assetType != null;
-        return new Asset(mnem, display, assetType);
+        return factory.newAsset(mnem, display, assetType);
     }
 
-    private static Contr getContr(ResultSet rs) throws SQLException {
+    private final @NonNull Contr getContr(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         @SuppressWarnings("null")
@@ -64,11 +69,11 @@ public class JdbcModel implements Model {
         final int maxLots = rs.getInt("maxLots");
 
         assert mnem != null;
-        return new Contr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom,
-                pipDp, minLots, maxLots);
+        return factory.newContr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer,
+                lotDenom, pipDp, minLots, maxLots);
     }
 
-    private static Market getMarket(ResultSet rs) throws SQLException {
+    private final @NonNull Market getMarket(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         @SuppressWarnings("null")
@@ -85,21 +90,21 @@ public class JdbcModel implements Model {
         final long maxExecId = rs.getLong("maxExecId");
 
         assert mnem != null;
-        return new Market(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots,
-                lastTime, maxOrderId, maxExecId);
+        return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state, lastTicks,
+                lastLots, lastTime, maxOrderId, maxExecId);
     }
 
-    private static Trader getTrader(ResultSet rs) throws SQLException {
+    private final @NonNull Trader getTrader(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final String email = rs.getString("email");
 
         assert mnem != null;
         assert email != null;
-        return new Trader(mnem, display, email);
+        return factory.newTrader(mnem, display, email);
     }
 
-    private static Order getOrder(ResultSet rs) throws SQLException {
+    private final @NonNull Order getOrder(ResultSet rs) throws SQLException {
         final long id = rs.getLong("id");
         final String trader = rs.getString("trader");
         final String market = rs.getString("market");
@@ -107,7 +112,7 @@ public class JdbcModel implements Model {
         final int settlDay = rs.getInt("settlDay");
         final String ref = rs.getString("ref");
         final State state = State.valueOf(rs.getInt("stateId"));
-        final Action action = Action.valueOf(rs.getInt("actionId"));
+        final Side side = Side.valueOf(rs.getInt("sideId"));
         final long ticks = rs.getLong("ticks");
         final long lots = rs.getLong("lots");
         final long resd = rs.getLong("resd");
@@ -121,11 +126,11 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return new Order(id, trader, market, contr, settlDay, ref, state, action, ticks, lots,
-                resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
+        return factory.newOrder(id, trader, market, contr, settlDay, ref, state, side, ticks,
+                lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
     }
 
-    private static Exec getTrade(ResultSet rs) throws SQLException {
+    private final @NonNull Exec getTrade(ResultSet rs) throws SQLException {
         final long id = rs.getLong("id");
         // getLong() returns zero if value is null.
         final long orderId = rs.getLong("orderId");
@@ -136,7 +141,7 @@ public class JdbcModel implements Model {
         final int settlDay = rs.getInt("settlDay");
         final String ref = rs.getString("ref");
         final State state = State.TRADE;
-        final Action action = Action.valueOf(rs.getInt("actionId"));
+        final Side side = Side.valueOf(rs.getInt("sideId"));
         final long ticks = rs.getLong("ticks");
         final long lots = rs.getLong("lots");
         final long resd = rs.getLong("resd");
@@ -155,11 +160,12 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, action, ticks,
-                lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
+        return factory.newExec(id, orderId, trader, market, contr, settlDay, ref, state, side,
+                ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty,
+                created);
     }
 
-    public JdbcModel(String url, String user, String password) {
+    public JdbcModel(String url, String user, String password, Factory factory) {
         Connection conn = null;
         PreparedStatement selectAssetStmt = null;
         PreparedStatement selectContrStmt = null;
@@ -181,12 +187,13 @@ public class JdbcModel implements Model {
                 selectTraderStmt = conn
                         .prepareStatement("SELECT mnem, display, email FROM Trader_t");
                 selectOrderStmt = conn
-                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
+                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
                 selectTradeStmt = conn
-                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
+                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
                 selectPosnStmt = conn
-                        .prepareStatement("SELECT trader, contr, settlDay, actionId, cost, lots FROM Posn_v");
+                        .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v");
                 // Success.
+                this.factory = factory;
                 this.conn = conn;
                 this.selectAssetStmt = selectAssetStmt;
                 this.selectContrStmt = selectContrStmt;
@@ -242,55 +249,55 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectAsset() {
-        final SlQueue q = new SlQueue();
+    public final MnemRbTree selectAsset() {
+        final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectAssetStmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getAsset(rs));
+                t.insert(getAsset(rs));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
-    public final SlNode selectContr() {
-        final SlQueue q = new SlQueue();
+    public final MnemRbTree selectContr() {
+        final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectContrStmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getContr(rs));
+                t.insert(getContr(rs));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
-    public final SlNode selectMarket() {
-        final SlQueue q = new SlQueue();
+    public final MnemRbTree selectMarket() {
+        final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectMarketStmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getMarket(rs));
+                t.insert(getMarket(rs));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
-    public final SlNode selectTrader() {
-        final SlQueue q = new SlQueue();
+    public final MnemRbTree selectTrader() {
+        final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectTraderStmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getTrader(rs));
+                t.insert(getTrader(rs));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
@@ -340,16 +347,16 @@ public class JdbcModel implements Model {
                     final RbNode parent = posn;
                     assert trader != null;
                     assert contr != null;
-                    posn = new Posn(trader, contr, settlDay);
+                    posn = factory.newPosn(trader, contr, settlDay);
                     posns.pinsert(posn, parent);
                 }
-                final Action action = Action.valueOf(rs.getInt("actionId"));
+                final Side side = Side.valueOf(rs.getInt("sideId"));
                 final long cost = rs.getLong("cost");
                 final long lots = rs.getLong("lots");
-                if (action == Action.BUY) {
+                if (side == Side.BUY) {
                     posn.addBuy(cost, lots);
                 } else {
-                    assert action == Action.SELL;
+                    assert side == Side.SELL;
                     posn.addSell(cost, lots);
                 }
             }

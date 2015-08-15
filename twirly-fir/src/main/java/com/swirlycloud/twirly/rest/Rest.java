@@ -19,8 +19,8 @@ public @NonNullByDefault interface Rest {
 
     void getView(Params params, long now, Appendable out) throws IOException;
 
-    void getView(String marketMnem, Params params, long now, Appendable out)
-            throws NotFoundException, IOException;
+    void getView(String market, Params params, long now, Appendable out) throws NotFoundException,
+            IOException;
 
     void getSess(String email, Params params, long now, Appendable out) throws NotFoundException,
             IOException;

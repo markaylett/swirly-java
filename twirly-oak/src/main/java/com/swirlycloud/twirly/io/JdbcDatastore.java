@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
@@ -65,8 +66,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
         stmt.setBoolean(i, val);
     }
 
-    public JdbcDatastore(String url, String user, String password) {
-        super(url, user, password);
+    public JdbcDatastore(String url, String user, String password, Factory factory) {
+        super(url, user, password, factory);
         PreparedStatement insertMarketStmt = null;
         PreparedStatement insertTraderStmt = null;
         PreparedStatement insertExecStmt = null;
@@ -82,7 +83,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
                 insertTraderStmt = conn
                         .prepareStatement("INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn
-                        .prepareStatement("INSERT INTO Exec_t (id, orderId, trader, market, contr, settlDay, ref, stateId, actionId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO Exec_t (id, orderId, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 updateMarketStmt = conn
                         .prepareStatement("UPDATE Market_t SET display = ?, state = ? WHERE mnem = ?");
                 updateTraderStmt = conn
@@ -210,7 +211,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
             setNullIfZero(insertExecStmt, i++, exec.getSettlDay());
             setParam(insertExecStmt, i++, exec.getRef());
             setParam(insertExecStmt, i++, exec.getState().intValue());
-            setParam(insertExecStmt, i++, exec.getAction().intValue());
+            setParam(insertExecStmt, i++, exec.getSide().intValue());
             setParam(insertExecStmt, i++, exec.getTicks());
             setParam(insertExecStmt, i++, exec.getLots());
             setParam(insertExecStmt, i++, exec.getResd());

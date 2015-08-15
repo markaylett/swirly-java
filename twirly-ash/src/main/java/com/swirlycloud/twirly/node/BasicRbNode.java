@@ -3,12 +3,33 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.node;
 
-public abstract class BasicRbNode implements RbNode {
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-    private transient RbNode left;
-    private transient RbNode right;
+public abstract class BasicRbNode implements Serializable, RbNode {
+
+    private static final long serialVersionUID = 1L;
+
+    private RbNode left;
+    private RbNode right;
     private transient RbNode parent;
-    private transient int color;
+    private int color;
+
+    private final void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        if (left != null) {
+            left.setParent(this);
+        }
+        if (right != null) {
+            right.setParent(this);
+        }
+    }
+
+    private final void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
 
     @Override
     public final void setNode(RbNode rhs) {

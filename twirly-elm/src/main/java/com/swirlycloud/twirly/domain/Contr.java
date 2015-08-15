@@ -40,7 +40,7 @@ public final @NonNullByDefault class Contr extends Rec {
     private final long minLots;
     private final long maxLots;
 
-    public Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
+    Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
             int tickNumer, int tickDenom, int lotNumer, int lotDenom, int pipDp, long minLots,
             long maxLots) {
         super(mnem, display);

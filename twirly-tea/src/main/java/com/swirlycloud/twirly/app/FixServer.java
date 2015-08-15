@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import static com.swirlycloud.twirly.app.FixUtility.sideToAction;
+import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.util.HashMap;
@@ -33,7 +33,6 @@ import quickfix.field.OrderID;
 import quickfix.field.OrderQty;
 import quickfix.field.OrigClOrdID;
 import quickfix.field.Price;
-import quickfix.field.Side;
 import quickfix.field.Symbol;
 import quickfix.field.TransactTime;
 import quickfix.fix44.BusinessMessageReject;
@@ -44,12 +43,14 @@ import quickfix.fix44.OrderCancelReject;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Market;
+import com.swirlycloud.twirly.domain.LockableServ;
+import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Trader;
+import com.swirlycloud.twirly.domain.TraderSess;
+import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.FixRejectException;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -93,10 +94,10 @@ public final class FixServer extends MessageCracker implements Application {
     }
 
     @SuppressWarnings("null")
-    private final Sess findSessLocked(SessionID sessionId) {
+    private final TraderSess getTraderLocked(SessionID sessionId) throws NotFoundException {
         try {
-            return serv.getLazySessByEmail(settings.getString(sessionId, "Email"));
-        } catch (ConfigError | FieldConvertError | NotFoundException e) {
+            return serv.getTraderByEmail(settings.getString(sessionId, "Email"));
+        } catch (ConfigError | FieldConvertError e) {
             return null;
         }
     }
@@ -122,11 +123,11 @@ public final class FixServer extends MessageCracker implements Application {
         sendToTarget(builder.getMessage(), sessionId);
     }
 
-    private final void sendTransLocked(Sess sess, Trans trans, SessionID sessionId) {
+    private final void sendTransLocked(TraderSess sess, Trans trans, SessionID sessionId) {
         final FixBuilder builder = getBuilder(new ExecutionReport());
-        String targetTrader = sess.getTrader();
+        String targetTrader = sess.getMnem();
         SessionID targetSessionId = sessionId;
-        for (TransNode node = trans.execs.getFirst(); node != null; node = node.transNext()) {
+        for (TransNode node = trans.getFirstExec(); node != null; node = node.transNext()) {
             final Exec exec = (Exec) node;
             if (!exec.getTrader().equals(targetTrader)) {
                 targetTrader = exec.getTrader();
@@ -150,10 +151,7 @@ public final class FixServer extends MessageCracker implements Application {
                 final SessionID sessionId = it.next();
                 final String email = settings.getString(sessionId, "Email");
                 assert email != null;
-                final Trader trader = serv.findTraderByEmail(email);
-                if (trader == null) {
-                    throw new NotFoundException(String.format("trader '%s' does not exist", email));
-                }
+                final Trader trader = serv.getTraderByEmail(email);
                 traderIdx.put(trader.getMnem(), sessionId);
             }
         } finally {
@@ -171,16 +169,16 @@ public final class FixServer extends MessageCracker implements Application {
             IncorrectTagValue {
         log.info(sessionId.getTargetCompID() + ": NewOrderSingle: " + message);
 
-        final String marketMnem = message.getString(Symbol.FIELD);
+        final String market = message.getString(Symbol.FIELD);
         final String ref = message.getString(ClOrdID.FIELD);
-        final Action action = sideToAction(message.getChar(Side.FIELD));
+        final Side side = fixToSide(message.getChar(quickfix.field.Side.FIELD));
         final long ticks = (long) message.getDouble(Price.FIELD);
         final long lots = (long) message.getDouble(OrderQty.FIELD);
         final long minLots = (long) message.getDouble(MinQty.FIELD);
         final long now = getNow(message);
 
-        assert marketMnem != null;
-        assert action != null;
+        assert market != null;
+        assert side != null;
 
         if ("NONE".equals(ref)) {
             // This is reserved in our FIX specification to mean "not a reference."
@@ -189,17 +187,13 @@ public final class FixServer extends MessageCracker implements Application {
 
         serv.acquireWrite();
         try {
-            final Sess sess = findSessLocked(sessionId);
+            final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
                 throw new FixRejectException("session misconfigured");
             }
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new FixRejectException(
-                        String.format("market '%s' does not exist", marketMnem));
-            }
+            final MarketBook book = serv.getMarket(market);
             try (final Trans trans = new Trans()) {
-                serv.placeOrder(sess, market, ref, action, ticks, lots, minLots, now, trans);
+                serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, trans, sessionId);
             }
@@ -222,7 +216,7 @@ public final class FixServer extends MessageCracker implements Application {
             throws FieldNotFound, IncorrectTagValue {
         log.info(sessionId.getTargetCompID() + ": OrderCancelReplaceRequest: " + message);
 
-        final String marketMnem = message.getString(Symbol.FIELD);
+        final String market = message.getString(Symbol.FIELD);
         final String ref = message.getString(ClOrdID.FIELD);
         final String orderRef = message.getString(OrigClOrdID.FIELD);
         Long orderId = null;
@@ -233,22 +227,18 @@ public final class FixServer extends MessageCracker implements Application {
         final long now = getNow(message);
         Order order = null;
 
-        assert marketMnem != null;
+        assert market != null;
         assert orderRef != null;
 
         serv.acquireWrite();
         try {
-            final Sess sess = findSessLocked(sessionId);
+            final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
                 throw new FixRejectException("session misconfigured");
             }
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new FixRejectException(
-                        String.format("market '%s' does not exist", marketMnem));
-            }
+            final MarketBook book = serv.getMarket(market);
             if (orderId != null) {
-                order = sess.findOrder(marketMnem, orderId);
+                order = sess.findOrder(market, orderId);
                 if (order == null) {
                     throw new FixRejectException(
                             String.format("order '%d' does not exist", orderId));
@@ -261,7 +251,7 @@ public final class FixServer extends MessageCracker implements Application {
                 }
             }
             try (final Trans trans = new Trans()) {
-                serv.reviseOrder(sess, market, order, lots, now, trans);
+                serv.reviseOrder(sess, book, order, lots, now, trans);
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, trans, sessionId);
             }
@@ -286,7 +276,7 @@ public final class FixServer extends MessageCracker implements Application {
             throws FieldNotFound, IncorrectTagValue {
         log.info(sessionId.getTargetCompID() + ": OrderCancelRequest: " + message);
 
-        final String marketMnem = message.getString(Symbol.FIELD);
+        final String market = message.getString(Symbol.FIELD);
         final String ref = message.getString(ClOrdID.FIELD);
         final String orderRef = message.getString(OrigClOrdID.FIELD);
         Long orderId = null;
@@ -296,22 +286,18 @@ public final class FixServer extends MessageCracker implements Application {
         final long now = getNow(message);
         Order order = null;
 
-        assert marketMnem != null;
+        assert market != null;
         assert orderRef != null;
 
         serv.acquireWrite();
         try {
-            final Sess sess = findSessLocked(sessionId);
+            final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
                 throw new FixRejectException("session misconfigured");
             }
-            final Market market = (Market) serv.findRec(RecType.MARKET, marketMnem);
-            if (market == null) {
-                throw new FixRejectException(
-                        String.format("market '%s' does not exist", marketMnem));
-            }
+            final MarketBook book = serv.getMarket(market);
             if (orderId != null) {
-                order = sess.findOrder(marketMnem, orderId);
+                order = sess.findOrder(market, orderId);
                 if (order == null) {
                     throw new FixRejectException(
                             String.format("order '%d' does not exist", orderId));
@@ -324,7 +310,7 @@ public final class FixServer extends MessageCracker implements Application {
                 }
             }
             try (final Trans trans = new Trans()) {
-                serv.cancelOrder(sess, market, order, now, trans);
+                serv.cancelOrder(sess, book, order, now, trans);
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, trans, sessionId);
             }

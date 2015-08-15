@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.util.CollectionUtil.compareInt;
 
@@ -9,6 +9,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
@@ -16,12 +17,15 @@ import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.RefHashTable;
 import com.swirlycloud.twirly.intrusive.Tree;
-import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.RbNode;
 
-public final @NonNullByDefault class Sess extends BasicRbNode {
+public final @NonNullByDefault class TraderSess extends Trader {
+
+    private static final long serialVersionUID = 1L;
 
     public final class PosnTree extends Tree<RbNode> {
+
+        private static final long serialVersionUID = 1L;
 
         @Override
         protected final int compareKey(RbNode lhs, RbNode rhs) {
@@ -152,23 +156,17 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
         }
     }
 
-    private final Trader trader;
-    private final RefHashTable refIdx;
-    private final InstructTree orders = new InstructTree();
-    private final InstructTree trades = new InstructTree();
-    private final PosnTree posns = new PosnTree();
+    private final transient RefHashTable refIdx;
+    private final transient Factory factory;
+    private final transient InstructTree orders = new InstructTree();
+    private final transient InstructTree trades = new InstructTree();
+    private final transient PosnTree posns = new PosnTree();
 
-    public Sess(Trader trader, RefHashTable refIdx) {
-        this.trader = trader;
+    TraderSess(String mnem, @Nullable String display, String email, RefHashTable refIdx,
+            Factory factory) {
+        super(mnem, display, email);
         this.refIdx = refIdx;
-    }
-
-    public final String getTrader() {
-        return trader.getMnem();
-    }
-
-    public final Trader getTraderRich() {
-        return trader;
+        this.factory = factory;
     }
 
     final void insertOrder(Order order) {
@@ -180,10 +178,10 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
     }
 
     final void removeOrder(Order order) {
-        assert order.getTrader().equals(trader.getMnem());
+        assert order.getTrader().equals(mnem);
         orders.remove(order);
         if (order.getRef() != null) {
-            refIdx.remove(trader.getMnem(), order.getRef());
+            refIdx.remove(mnem, order.getRef());
         }
     }
 
@@ -198,7 +196,7 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
     }
 
     final @Nullable Order removeOrder(String ref) {
-        final Order order = (Order) refIdx.remove(trader.getMnem(), ref);
+        final Order order = (Order) refIdx.remove(mnem, ref);
         if (order != null) {
             orders.remove(order);
         }
@@ -211,7 +209,7 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
 
     public final @Nullable Order findOrder(String ref) {
         assert ref != null;
-        return (Order) refIdx.find(trader.getMnem(), ref);
+        return (Order) refIdx.find(mnem, ref);
     }
 
     public final @Nullable RbNode getRootOrder() {
@@ -293,7 +291,7 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
         if (posn == null || !posn.getContr().equals(market.getContr())
                 || posn.getSettlDay() != market.getSettlDay()) {
             final RbNode parent = posn;
-            posn = new Posn(trader.getMnem(), market.getContr(), market.getSettlDay());
+            posn = factory.newPosn(mnem, market.getContr(), market.getSettlDay());
             posns.pinsert(posn, parent);
         }
         return posn;
@@ -319,7 +317,7 @@ public final @NonNullByDefault class Sess extends BasicRbNode {
         return posns.isEmpty();
     }
 
-    public final void settlPosns(int busDay) {
+    final void settlPosns(int busDay) {
         for (RbNode node = posns.getFirst(); node != null;) {
             final Posn posn = (Posn) node;
             node = node.rbNext();

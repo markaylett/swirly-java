@@ -8,11 +8,15 @@ import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
-import com.swirlycloud.twirly.app.Serv;
-import com.swirlycloud.twirly.app.Sess;
-import com.swirlycloud.twirly.app.Trans;
-import com.swirlycloud.twirly.domain.Action;
-import com.swirlycloud.twirly.domain.Market;
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.MarketBook;
+import com.swirlycloud.twirly.domain.Serv;
+import com.swirlycloud.twirly.domain.ServFactory;
+import com.swirlycloud.twirly.domain.TraderSess;
+import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -23,19 +27,21 @@ import com.swirlycloud.twirly.mock.MockDatastore;
 
 public final class Benchmark {
 
-    private static void run(final Serv s) throws BadRequestException, NotFoundException,
+    private static final @NonNull Factory FACTORY = new ServFactory();
+
+    private static void run(final Serv serv) throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        final Sess marayl = s.getLazySess("MARAYL");
-        final Sess gosayl = s.getLazySess("GOSAYL");
-        final Sess tobayl = s.getLazySess("TOBAYL");
-        final Sess emiayl = s.getLazySess("EMIAYL");
+        final TraderSess marayl = serv.getTrader("MARAYL");
+        final TraderSess gosayl = serv.getTrader("GOSAYL");
+        final TraderSess tobayl = serv.getTrader("TOBAYL");
+        final TraderSess emiayl = serv.getTrader("EMIAYL");
 
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;
-        final Market market = s.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", settlDay,
-                expiryDay, state, now());
-        assert market != null;
+        final MarketBook book = (MarketBook) serv.createMarket("EURUSD.MAR14", "EURUSD March 14",
+                "EURUSD", settlDay, expiryDay, state, now());
+        assert book != null;
 
         try (final Trans trans = new Trans()) {
             for (int i = 0; i < 250000; ++i) {
@@ -43,31 +49,31 @@ public final class Benchmark {
                 final long startNanos = System.nanoTime();
 
                 // Maker sell-side.
-                s.placeOrder(marayl, market, "", Action.SELL, 12348, 5, 1, now, trans);
-                s.placeOrder(gosayl, market, "", Action.SELL, 12348, 5, 1, now, trans);
-                s.placeOrder(marayl, market, "", Action.SELL, 12348, 5, 1, now, trans);
-                s.placeOrder(gosayl, market, "", Action.SELL, 12347, 5, 1, now, trans);
-                s.placeOrder(marayl, market, "", Action.SELL, 12347, 5, 1, now, trans);
-                s.placeOrder(gosayl, market, "", Action.SELL, 12346, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.SELL, 12348, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.SELL, 12348, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.SELL, 12348, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.SELL, 12347, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.SELL, 12347, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.SELL, 12346, 5, 1, now, trans);
 
                 // Maker buy-side.
-                s.placeOrder(marayl, market, "", Action.BUY, 12344, 5, 1, now, trans);
-                s.placeOrder(gosayl, market, "", Action.BUY, 12343, 5, 1, now, trans);
-                s.placeOrder(marayl, market, "", Action.BUY, 12343, 5, 1, now, trans);
-                s.placeOrder(gosayl, market, "", Action.BUY, 12342, 5, 1, now, trans);
-                s.placeOrder(marayl, market, "", Action.BUY, 12342, 5, 1, now, trans);
-                s.placeOrder(gosayl, market, "", Action.BUY, 12342, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.BUY, 12344, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.BUY, 12343, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.BUY, 12343, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.BUY, 12342, 5, 1, now, trans);
+                serv.placeOrder(marayl, book, "", Side.BUY, 12342, 5, 1, now, trans);
+                serv.placeOrder(gosayl, book, "", Side.BUY, 12342, 5, 1, now, trans);
 
                 // Taker sell-side.
-                s.placeOrder(tobayl, market, "", Action.SELL, 12342, 30, 1, now, trans);
+                serv.placeOrder(tobayl, book, "", Side.SELL, 12342, 30, 1, now, trans);
 
                 // Taker buy-side.
-                s.placeOrder(emiayl, market, "", Action.BUY, 12348, 30, 1, now, trans);
+                serv.placeOrder(emiayl, book, "", Side.BUY, 12348, 30, 1, now, trans);
 
-                s.archiveAll(marayl, now);
-                s.archiveAll(gosayl, now);
-                s.archiveAll(tobayl, now);
-                s.archiveAll(emiayl, now);
+                serv.archiveAll(marayl, now);
+                serv.archiveAll(gosayl, now);
+                serv.archiveAll(tobayl, now);
+                serv.archiveAll(emiayl, now);
 
                 long totalNanos = System.nanoTime() - startNanos;
                 if ((i % 1000) == 0) {
@@ -78,8 +84,18 @@ public final class Benchmark {
     }
 
     public static void main(String[] args) throws Exception {
-        try (final Datastore datastore = new MockDatastore()) {
-            run(new Serv(datastore, now()));
+        @SuppressWarnings("resource")
+        final Datastore datastore = new MockDatastore(FACTORY);
+        boolean success = false;
+        try {
+            try (final Serv serv = new Serv(datastore, FACTORY, now())) {
+                success = true;
+                run(serv);
+            }
+        } finally {
+            if (!success) {
+                datastore.close();
+            }
         }
     }
 }

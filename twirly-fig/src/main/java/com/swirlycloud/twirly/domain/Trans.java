@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.domain;
 
 import java.io.IOException;
 
@@ -9,7 +9,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.intrusive.SlQueue;
@@ -21,7 +20,7 @@ import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
 public final class Trans implements AutoCloseable, Jsonifiable {
-    private Market market;
+    private MarketBook book;
     private Order order;
     final SlQueue matches = new SlQueue();
     /**
@@ -33,11 +32,11 @@ public final class Trans implements AutoCloseable, Jsonifiable {
      */
     Posn posn;
 
-    final void reset(Market market, Order order, Exec exec) {
-        assert market != null;
+    final void reset(MarketBook book, Order order, Exec exec) {
+        assert book != null;
         assert order != null;
         assert exec != null;
-        this.market = market;
+        this.book = book;
         this.order = order;
         clear();
         execs.insertBack(exec);
@@ -71,7 +70,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     public final void toJson(@Nullable Params params, @NonNull Appendable out) throws IOException {
         final String trader = order.getTrader();
         out.append("{\"view\":");
-        market.toJsonView(params, out);
+        book.toJsonView(params, out);
         // Multiple orders may be updated if one trades with one's self.
         out.append(",\"orders\":[");
         order.toJson(params, out);

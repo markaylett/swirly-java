@@ -11,6 +11,9 @@ public final @NonNullByDefault class MnemUtil {
 
     public static Memorable newMnem(final String mnem) {
         return new Memorable() {
+
+            private static final long serialVersionUID = 1L;
+
             @Override
             public final String getMnem() {
                 return mnem;

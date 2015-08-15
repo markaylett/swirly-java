@@ -5,21 +5,22 @@ package com.swirlycloud.twirly.io;
 
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public interface Model extends AutoCloseable {
 
     @Nullable
-    SlNode selectAsset();
+    MnemRbTree selectAsset();
 
     @Nullable
-    SlNode selectContr();
+    MnemRbTree selectContr();
 
     @Nullable
-    SlNode selectMarket();
+    MnemRbTree selectMarket();
 
     @Nullable
-    SlNode selectTrader();
+    MnemRbTree selectTrader();
 
     @Nullable
     SlNode selectOrder();

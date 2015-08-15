@@ -10,29 +10,32 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.intrusive.MnemRbTree;
 
 public final class MockTrader {
-    private static final List<NullaryFunction<Trader>> LIST = new ArrayList<>();
-    private static final Map<String, NullaryFunction<Trader>> MAP = new HashMap<>();
 
-    private static void put(final @NonNull String mnem, final String display,
+    private final Factory factory;
+    private final List<NullaryFunction<Trader>> list = new ArrayList<>();
+    private final Map<String, NullaryFunction<Trader>> map = new HashMap<>();
+
+    private final void put(final @NonNull String mnem, final String display,
             final @NonNull String email) {
         final NullaryFunction<Trader> fn = new NullaryFunction<Trader>() {
             @Override
             public final Trader call() {
-                return new Trader(mnem, display, email);
+                return factory.newTrader(mnem, display, email);
             }
         };
-        LIST.add(fn);
-        MAP.put(mnem, fn);
+        list.add(fn);
+        map.put(mnem, fn);
     }
 
-    static {
+    public MockTrader(Factory factory) {
+        this.factory = factory;
         put("MARAYL", "Mark Aylett", "mark.aylett@gmail.com");
         put("GOSAYL", "Goska Aylett", "goska.aylett@gmail.com");
         put("TOBAYL", "Toby Aylett", "toby.aylett@gmail.com");
@@ -41,24 +44,23 @@ public final class MockTrader {
         put("RAMMAC", "Ram Macharaj", "ram.mac@gmail.com");
     }
 
-    private MockTrader() {
-    }
-
     @SuppressWarnings("null")
-    public static @NonNull Trader newTrader(String mnem) {
-        return MAP.get(mnem).call();
+    public final @NonNull Trader newTrader(String mnem) {
+        return map.get(mnem).call();
     }
 
-    public static SlNode selectTrader() {
-        final SlQueue q = new SlQueue();
-        for (final NullaryFunction<Trader> entry : LIST) {
-            q.insertBack(entry.call());
+    public final @NonNull MnemRbTree selectTrader() {
+        final MnemRbTree t = new MnemRbTree();
+        for (final NullaryFunction<Trader> entry : list) {
+            final Trader trader = entry.call();
+            assert trader != null;
+            t.insert(trader);
         }
-        return q.getFirst();
+        return t;
     }
 
-    public static void selectTrader(UnaryCallback<Trader> cb) {
-        for (final NullaryFunction<Trader> entry : LIST) {
+    public final void selectTrader(UnaryCallback<Trader> cb) {
+        for (final NullaryFunction<Trader> entry : list) {
             cb.call(entry.call());
         }
     }

@@ -22,6 +22,8 @@ import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifiable, SlNode {
 
+    private static final long serialVersionUID = 1L;
+
     private transient @Nullable SlNode next;
 
     private final String trader;
@@ -32,8 +34,8 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
     private long sellCost;
     private long sellLots;
 
-    private Posn(String trader, String contr, int settlDay, long buyCost, long buyLots,
-            long sellCost, long sellLots) {
+    Posn(String trader, String contr, int settlDay, long buyCost, long buyLots, long sellCost,
+            long sellLots) {
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -41,12 +43,6 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         this.buyLots = buyLots;
         this.sellCost = sellCost;
         this.sellLots = sellLots;
-    }
-
-    public Posn(String trader, String contr, int settlDay) {
-        this.trader = trader;
-        this.contr = contr;
-        this.settlDay = settlDay;
     }
 
     public static Posn parse(JsonParser p) throws IOException {
@@ -183,7 +179,7 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         return next;
     }
 
-    public final void add(Posn rhs) {
+    final void add(Posn rhs) {
         addBuy(rhs.buyCost, rhs.buyLots);
         addSell(rhs.sellCost, rhs.sellLots);
     }
@@ -198,18 +194,18 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         this.sellLots += lots;
     }
 
-    public final void addTrade(Action action, long lastTicks, long lastLots) {
+    public final void addTrade(Side side, long lastTicks, long lastLots) {
         final long cost = lastLots * lastTicks;
-        if (action == Action.BUY) {
+        if (side == Side.BUY) {
             addBuy(cost, lastLots);
         } else {
-            assert action == Action.SELL;
+            assert side == Side.SELL;
             addSell(cost, lastLots);
         }
     }
 
-    public final void addTrade(Exec trade) {
-        addTrade(trade.getAction(), trade.getLastTicks(), trade.getLastLots());
+    final void addTrade(Exec trade) {
+        addTrade(trade.getSide(), trade.getLastTicks(), trade.getLastLots());
     }
 
     /**
@@ -218,23 +214,23 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
      * @param settlDay
      *            The new settlement-day.
      */
-    public final void setSettlDay(int settlDay) {
+    final void setSettlDay(int settlDay) {
         this.settlDay = settlDay;
     }
 
-    public final void setBuyCost(long buyCost) {
+    final void setBuyCost(long buyCost) {
         this.buyCost = buyCost;
     }
 
-    public final void setBuyLots(long buyLots) {
+    final void setBuyLots(long buyLots) {
         this.buyLots = buyLots;
     }
 
-    public final void setSellCost(long sellCost) {
+    final void setSellCost(long sellCost) {
         this.sellCost = sellCost;
     }
 
-    public final void setSellLots(long sellLots) {
+    final void setSellLots(long sellLots) {
         this.sellLots = sellLots;
     }
 

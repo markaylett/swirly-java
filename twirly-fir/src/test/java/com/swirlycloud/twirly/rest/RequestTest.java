@@ -15,7 +15,7 @@ import javax.json.stream.JsonParser;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.rest.Request;
 
 public final class RequestTest {
@@ -51,9 +51,9 @@ public final class RequestTest {
 
     @Test
     public final void testAction() throws IOException {
-        final Request r = parse("{\"action\":\"SELL\"}");
-        assertEquals(Request.ACTION, r.getFields());
-        assertEquals(Action.SELL, r.getAction());
+        final Request r = parse("{\"side\":\"SELL\"}");
+        assertEquals(Request.SIDE, r.getFields());
+        assertEquals(Side.SELL, r.getSide());
     }
 
     @Test

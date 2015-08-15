@@ -16,11 +16,11 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.domain.Action;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
@@ -537,11 +537,11 @@ public final class BackUnrest {
         }
     }
 
-    public final TransStruct postOrder(String email, String market, String ref, Action action,
+    public final TransStruct postOrder(String email, String market, String ref, Side side,
             long ticks, long lots, long minLots, Params params, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postOrder(email, market, ref, action, ticks, lots, minLots, params, now, sb);
+        rest.postOrder(email, market, ref, side, ticks, lots, minLots, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -603,11 +603,11 @@ public final class BackUnrest {
         }
     }
 
-    public final Exec postTrade(String trader, String marketMnem, String ref, Action action,
+    public final Exec postTrade(String trader, String market, String ref, Side side,
             long ticks, long lots, Role role, String cpty, Params params, long now)
             throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postTrade(trader, marketMnem, ref, action, ticks, lots, role, cpty, params, now, sb);
+        rest.postTrade(trader, market, ref, side, ticks, lots, role, cpty, params, now, sb);
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
             return Exec.parse(p);

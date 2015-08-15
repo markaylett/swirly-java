@@ -12,6 +12,8 @@ import com.swirlycloud.twirly.util.Identifiable;
 
 public final @NonNullByDefault class IdRbTree extends LongRbTree {
 
+    private static final long serialVersionUID = 1L;
+
     private static long getId(RbNode node) {
         return ((Identifiable) node).getId();
     }

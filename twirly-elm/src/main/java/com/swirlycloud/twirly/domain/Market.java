@@ -15,7 +15,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
@@ -24,33 +23,27 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Market extends Rec implements Financial {
+public @NonNullByDefault class Market extends Rec implements Financial {
 
     private static final long serialVersionUID = 1L;
-    /**
-     * Maximum price levels in view.
-     */
-    private static final int DEPTH_MAX = 5;
 
-    private Memorable contr;
-    private final int settlDay;
-    private final int expiryDay;
-    private int state;
-    private final Side bidSide = new Side();
-    private final Side offerSide = new Side();
-    private long lastTicks;
-    private long lastLots;
-    private long lastTime;
-    private transient long maxOrderId;
-    private transient long maxExecId;
+    protected Memorable contr;
+    protected final int settlDay;
+    protected final int expiryDay;
+    protected int state;
+    protected long lastTicks;
+    protected long lastLots;
+    protected long lastTime;
+    protected transient long maxOrderId;
+    protected transient long maxExecId;
 
-    private final Side getSide(Action action) {
-        return action == Action.BUY ? bidSide : offerSide;
+    private Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
+            int expiryDay, int state) {
+        this(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L);
     }
 
-    public Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
-            int expiryDay, int state, long lastTicks, long lastLots, long lastTime,
-            long maxOrderId, long maxExecId) {
+    Market(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
+            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
         super(mnem, display);
         assert (settlDay == 0) == (expiryDay == 0);
         this.contr = contr;
@@ -62,11 +55,6 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
         this.lastTime = lastTime;
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
-    }
-
-    public Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
-            int expiryDay, int state) {
-        this(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L);
     }
 
     public static Market parse(JsonParser p) throws IOException {
@@ -151,125 +139,6 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
         out.append('}');
     }
 
-    public final void toJsonView(@Nullable Params params, Appendable out) throws IOException {
-        int depth = 3; // Default depth.
-        if (params != null) {
-            final Integer val = params.getParam("depth", Integer.class);
-            if (val != null) {
-                depth = val.intValue();
-            }
-        }
-        // Round-up to minimum.
-        depth = Math.max(depth, 1);
-        // Round-down to maximum.
-        depth = Math.min(depth, DEPTH_MAX);
-
-        out.append("{\"market\":\"").append(mnem);
-        out.append("\",\"contr\":\"").append(contr.getMnem());
-        out.append("\",\"settlDate\":");
-        if (settlDay != 0) {
-            out.append(String.valueOf(jdToIso(settlDay)));
-        } else {
-            out.append("null");
-        }
-        out.append(",\"bidTicks\":[");
-
-        final RbNode firstBid = bidSide.getFirstLevel();
-        final RbNode firstOffer = offerSide.getFirstLevel();
-
-        RbNode node = firstBid;
-        for (int i = 0; i < depth; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getTicks()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"bidLots\":[");
-        node = firstBid;
-        for (int i = 0; i < depth; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getLots()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"bidCount\":[");
-        node = firstBid;
-        for (int i = 0; i < depth; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getCount()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"offerTicks\":[");
-        node = firstOffer;
-        for (int i = 0; i < depth; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getTicks()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"offerLots\":[");
-        node = firstOffer;
-        for (int i = 0; i < depth; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getLots()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"offerCount\":[");
-        node = firstOffer;
-        for (int i = 0; i < depth; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (node != null) {
-                final Level level = (Level) node;
-                out.append(String.valueOf(level.getCount()));
-                node = node.rbNext();
-            } else {
-                out.append("null");
-            }
-        }
-        if (lastLots != 0) {
-            out.append("],\"lastTicks\":").append(String.valueOf(lastTicks));
-            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
-            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
-        } else {
-            out.append("],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
-        }
-        out.append('}');
-    }
-
     public final void enrich(Contr contr) {
         assert this.contr.getMnem().equals(contr.getMnem());
         this.contr = contr;
@@ -281,34 +150,6 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
 
     public final long allocExecId() {
         return ++maxExecId;
-    }
-
-    public final void insertOrder(Order order) {
-        getSide(order.getAction()).insertOrder(order);
-    }
-
-    public final void removeOrder(Order order) {
-        getSide(order.getAction()).removeOrder(order);
-    }
-
-    public final void placeOrder(Order order, long now) {
-        getSide(order.getAction()).placeOrder(order, now);
-    }
-
-    public final void reviseOrder(Order order, long lots, long now) {
-        getSide(order.getAction()).reviseOrder(order, lots, now);
-    }
-
-    public final void cancelOrder(Order order, long now) {
-        getSide(order.getAction()).cancelOrder(order, now);
-    }
-
-    public final void takeOrder(Order order, long lots, long now) {
-        final Side side = getSide(order.getAction());
-        side.takeOrder(order, lots, now);
-        lastTicks = order.getTicks();
-        lastLots = lots;
-        lastTime = now;
     }
 
     public final void setState(int state) {
@@ -357,14 +198,6 @@ public final @NonNullByDefault class Market extends Rec implements Financial {
 
     public final int getState() {
         return state;
-    }
-
-    public final Side getBidSide() {
-        return bidSide;
-    }
-
-    public final Side getOfferSide() {
-        return offerSide;
     }
 
     public final long getLastTicks() {

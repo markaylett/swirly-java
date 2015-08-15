@@ -3,19 +3,33 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.domain.BasicFactory;
+import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.exception.UncheckedIOException;
+import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineModel;
-import com.swirlycloud.twirly.io.JdbcDatastore;
+import com.swirlycloud.twirly.io.Cache;
+import com.swirlycloud.twirly.io.CacheModel;
+import com.swirlycloud.twirly.io.JdbcModel;
 import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.io.SpyCache;
 import com.swirlycloud.twirly.rest.FrontRest;
 import com.swirlycloud.twirly.rest.Rest;
 
 public final class FrontLifeCycle implements ServletContextListener {
+
+    private static final Factory FACTORY = new BasicFactory();
 
     private Model model;
 
@@ -32,12 +46,70 @@ public final class FrontLifeCycle implements ServletContextListener {
         }
     }
 
+    @SuppressWarnings("resource")
+    private static @NonNull Model newAppEngineModel(ServletContext sc) {
+        Model model = new AppEngineModel(FACTORY);
+        Cache cache = null;
+        boolean success = false;
+        try {
+            cache = new AppEngineCache();
+            model = new CacheModel(model, cache);
+            success = true;
+        } finally {
+            if (!success) {
+                if (cache != null) {
+                    try {
+                        cache.close();
+                    } catch (Exception e) {
+                        sc.log("failed to close cache", e);
+                    }
+                }
+                try {
+                    model.close();
+                } catch (Exception e) {
+                    sc.log("failed to close model", e);
+                }
+            }
+        }
+        return model;
+    }
+
+    @SuppressWarnings("resource")
+    private static @NonNull Model newJdbcModel(ServletContext sc, String url, String user,
+            String password) throws IOException {
+        Model model = new JdbcModel(url, user, password, FACTORY);
+        Cache cache = null;
+        boolean success = false;
+        try {
+            cache = new SpyCache(new InetSocketAddress("localhost", 11211));
+            model = new CacheModel(model, cache);
+            success = true;
+        } finally {
+            if (!success) {
+                if (cache != null) {
+                    try {
+                        cache.close();
+                    } catch (Exception e) {
+                        sc.log("failed to close cache", e);
+                    }
+                }
+                try {
+                    model.close();
+                } catch (Exception e) {
+                    sc.log("failed to close model", e);
+                }
+            }
+        }
+        return model;
+    }
+
+    @SuppressWarnings("resource")
     private static @NonNull Model getModel(ServletContext sc) {
         Model model;
         final String url = sc.getInitParameter("url");
         if (url == null || url.equals("appengine:datastore:")) {
             // Default.
-            model = new AppEngineModel();
+            model = newAppEngineModel(sc);
         } else if (url.startsWith("jdbc:mysql:")) {
             final String user = sc.getInitParameter("user");
             final String password = sc.getInitParameter("password");
@@ -47,7 +119,11 @@ public final class FrontLifeCycle implements ServletContextListener {
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("mysql jdbc driver not found", e);
             }
-            model = new JdbcDatastore(url, user, password);
+            try {
+                model = newJdbcModel(sc, url, user, password);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         } else {
             throw new RuntimeException("invalid datastore url: " + url);
         }
@@ -68,7 +144,7 @@ public final class FrontLifeCycle implements ServletContextListener {
             } else {
                 realm = new AppEngineRealm();
             }
-            final Rest rest = new FrontRest(model);
+            final Rest rest = new FrontRest(model, NO_CACHE);
             // Commit.
             PageServlet.setRealm(realm);
             RestServlet.setRealm(realm);

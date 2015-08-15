@@ -13,8 +13,10 @@ import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.app.Serv;
+import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.LockableServ;
+import com.swirlycloud.twirly.domain.Serv;
+import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.io.AppEngineDatastore;
 import com.swirlycloud.twirly.io.AsyncDatastore;
 import com.swirlycloud.twirly.io.AsyncDatastoreService;
@@ -24,6 +26,9 @@ import com.swirlycloud.twirly.rest.BackRest;
 import com.swirlycloud.twirly.rest.Rest;
 
 public final class BackLifeCycle implements ServletContextListener {
+
+    private static final @NonNull Factory FACTORY = new ServFactory();
+
     private Serv serv;
 
     private final void close(final ServletContext sc) {
@@ -44,7 +49,7 @@ public final class BackLifeCycle implements ServletContextListener {
         final String url = sc.getInitParameter("url");
         if (url == null || url.equals("appengine:datastore:")) {
             // Default.
-            datastore = new AppEngineDatastore();
+            datastore = new AppEngineDatastore(FACTORY);
         } else if (url.startsWith("jdbc:mysql:")) {
             final String user = sc.getInitParameter("user");
             final String password = sc.getInitParameter("password");
@@ -54,7 +59,7 @@ public final class BackLifeCycle implements ServletContextListener {
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("mysql jdbc driver not found", e);
             }
-            datastore = new JdbcDatastore(url, user, password);
+            datastore = new JdbcDatastore(url, user, password, FACTORY);
         } else {
             throw new RuntimeException("invalid datastore url: " + url);
         }
@@ -80,7 +85,7 @@ public final class BackLifeCycle implements ServletContextListener {
                 // AsyncDatastore owns Datastore.
                 resource = asyncDatastore;
                 try {
-                    serv = new LockableServ(asyncDatastore, now);
+                    serv = new LockableServ(asyncDatastore, FACTORY, now);
                     // LockableServ owns AsyncDatastore.
                     resource = serv;
                 } catch (InterruptedException | ExecutionException e) {
@@ -88,7 +93,7 @@ public final class BackLifeCycle implements ServletContextListener {
                 }
             } else {
                 realm = new AppEngineRealm();
-                serv = new LockableServ(datastore, now);
+                serv = new LockableServ(datastore, FACTORY, now);
                 // LockableServ owns Datastore.
                 resource = serv;
             }

@@ -345,9 +345,9 @@ var TradeDialog = React.createClass({
             ref: event.target.value
         });
     },
-    onChangeAction: function(event) {
+    onChangeSide: function(event) {
         this.setState({
-            action: event.target.value
+            side: event.target.value
         });
     },
     onChangePrice: function(event) {
@@ -380,12 +380,12 @@ var TradeDialog = React.createClass({
         var trader = state.trader;
         var market = state.market;
         var ref = state.ref;
-        var action = state.action;
+        var side = state.side;
         var price = state.price;
         var lots = state.lots;
         var role = state.role;
         var cpty = state.cpty;
-        this.props.module.onPostTrade(trader, market, ref, action, price, lots, role, cpty);
+        this.props.module.onPostTrade(trader, market, ref, side, price, lots, role, cpty);
         this.reset();
     },
     // Lifecycle.
@@ -394,7 +394,7 @@ var TradeDialog = React.createClass({
             trader: undefined,
             market: undefined,
             ref: undefined,
-            action: undefined,
+            side: undefined,
             price: undefined,
             lots: undefined,
             role: undefined,
@@ -422,7 +422,7 @@ var TradeDialog = React.createClass({
         var trader = state.trader;
         var market = state.market;
         var ref = state.ref;
-        var action = state.action;
+        var side = state.side;
         var price = state.price;
         var lots = state.lots;
         var role = state.role;
@@ -476,12 +476,12 @@ var TradeDialog = React.createClass({
                       <div className="form-group">
                         <div className="col-sm-offset-2 col-sm-10">
                           <label className="radio-inline">
-                            <input name="action" type="radio" value="BUY"
-                                   checked={action ==='BUY'} onChange={this.onChangeAction}/>Buy
+                            <input name="side" type="radio" value="BUY"
+                                   checked={side ==='BUY'} onChange={this.onChangeSide}/>Buy
                           </label>
                           <label className="radio-inline">
-                            <input name="action" type="radio" value="SELL"
-                                   checked={action ==='SELL'} onChange={this.onChangeAction}/>Sell
+                            <input name="side" type="radio" value="SELL"
+                                   checked={side ==='SELL'} onChange={this.onChangeSide}/>Sell
                           </label>
                         </div>
                       </div>
@@ -564,9 +564,9 @@ var TransferDialog = React.createClass({
             ref: event.target.value
         });
     },
-    onChangeAction: function(event) {
+    onChangeSide: function(event) {
         this.setState({
-            action: event.target.value
+            side: event.target.value
         });
     },
     onChangeLots: function(event) {
@@ -580,12 +580,12 @@ var TransferDialog = React.createClass({
         var trader = state.trader;
         var market = state.market;
         var ref = state.ref;
-        var action = state.action;
+        var side = state.side;
         var price = 0;
         var lots = state.lots;
         var role = undefined;
         var cpty = undefined;
-        this.props.module.onPostTrade(trader, market, ref, action, price, lots, role, cpty);
+        this.props.module.onPostTrade(trader, market, ref, side, price, lots, role, cpty);
         this.reset();
     },
     // Lifecycle.
@@ -594,7 +594,7 @@ var TransferDialog = React.createClass({
             trader: undefined,
             market: undefined,
             ref: undefined,
-            action: undefined,
+            side: undefined,
             lots: undefined
         };
     },
@@ -619,7 +619,7 @@ var TransferDialog = React.createClass({
         var trader = state.trader;
         var market = state.market;
         var ref = state.ref;
-        var action = state.action;
+        var side = state.side;
         var lots = state.lots;
 
         var contr = this.props.marketMap[market];
@@ -665,13 +665,13 @@ var TransferDialog = React.createClass({
                       <div className="form-group">
                         <div className="col-sm-offset-2 col-sm-10">
                           <label className="radio-inline">
-                            <input name="action" type="radio" value="BUY"
-                                   checked={action ==='BUY'} onChange={this.onChangeAction}/>
+                            <input name="side" type="radio" value="BUY"
+                                   checked={side ==='BUY'} onChange={this.onChangeSide}/>
                                    Deposit
                           </label>
                           <label className="radio-inline">
-                            <input name="action" type="radio" value="SELL"
-                                   checked={action ==='SELL'} onChange={this.onChangeAction}/>
+                            <input name="side" type="radio" value="SELL"
+                                   checked={side ==='SELL'} onChange={this.onChangeSide}/>
                                    Withdraw
                           </label>
                         </div>
