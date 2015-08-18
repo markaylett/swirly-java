@@ -8,8 +8,6 @@ import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.intrusive.DlList;
 import com.swirlycloud.twirly.intrusive.LongRbTree;
 import com.swirlycloud.twirly.node.DlNode;

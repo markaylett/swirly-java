@@ -87,8 +87,8 @@ public final class ServTest {
                         SETTL_DAY, "second", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
                         12345, 10, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
                 final Exec third = FACTORY.newExec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "third", State.TRADE, Side.SELL, 12346, 10, 3, 7, 86422,
-                        12346, 7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
+                        SETTL_DAY, "third", State.TRADE, Side.SELL, 12346, 10, 3, 7, 86422, 12346,
+                        7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
                 second.setSlNext(third);
                 return second;
             }
@@ -97,22 +97,12 @@ public final class ServTest {
 
     @Before
     public final void setUp() throws Exception {
-        @SuppressWarnings("resource")
-        final Datastore datastore = newDatastore(FACTORY);
-        boolean success = false;
-        try {
-            serv = new Serv(datastore, FACTORY, NOW);
-            success = true;
-        } finally {
-            if (!success) {
-                datastore.close();
-            }
-        }
+        serv = new Serv(newDatastore(FACTORY), FACTORY, NOW);
     }
 
     @After
     public final void tearDown() throws Exception {
-        serv.close();
+        // Assumption: MockDatastore need not be closed because it does not acquire resources.
         serv = null;
     }
 

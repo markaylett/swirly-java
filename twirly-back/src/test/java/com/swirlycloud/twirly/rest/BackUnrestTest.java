@@ -22,21 +22,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Role;
-import com.swirlycloud.twirly.domain.Serv;
 import com.swirlycloud.twirly.domain.ServFactory;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.View;
@@ -169,8 +167,8 @@ public final class BackUnrestTest {
         assertEquals(0, actual.getLastTime());
     }
 
-    private static void assertOrder(String market, State state, Side side, long ticks,
-            long lots, long resd, long exec, long cost, long lastTicks, long lastLots, Order actual) {
+    private static void assertOrder(String market, State state, Side side, long ticks, long lots,
+            long resd, long exec, long cost, long lastTicks, long lastLots, Order actual) {
         assertNotNull(actual);
         assertEquals(TRADER, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -189,9 +187,9 @@ public final class BackUnrestTest {
         assertEquals(NOW, actual.getModified());
     }
 
-    private static void assertExec(String market, State state, Side side, long ticks,
-            long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
-            String contr, int settlDay, Role role, Exec actual) {
+    private static void assertExec(String market, State state, Side side, long ticks, long lots,
+            long resd, long exec, long cost, long lastTicks, long lastLots, String contr,
+            int settlDay, Role role, Exec actual) {
         assertNotNull(actual);
         assertEquals(TRADER, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -225,7 +223,6 @@ public final class BackUnrestTest {
         assertEquals(sellLots, actual.getSellLots());
     }
 
-    private Serv serv;
     private BackUnrest unrest;
 
     private final Trader postTrader(String mnem, String display, String email)
@@ -278,36 +275,28 @@ public final class BackUnrestTest {
     @SuppressWarnings("resource")
     @Before
     public final void setUp() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+            ServiceUnavailableException, InterruptedException, IOException {
         final Factory factory = new ServFactory();
         final Datastore datastore = new MockDatastore(factory);
-        AutoCloseable resource = datastore;
+        final BackUnrest unrest = new BackUnrest(datastore, factory, NOW);
+        this.unrest = unrest;
         boolean success = false;
         try {
-            final LockableServ serv = new LockableServ(datastore, factory, NOW);
-            // LockableServ owns Datastore.
-            resource = serv;
-            unrest = new BackUnrest(serv);
-            // Commit.
-            this.serv = serv;
+            postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
             success = true;
         } finally {
             if (!success) {
-                try {
-                    resource.close();
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
+                // Assumption: MockDatastore need not be closed because it does not acquire
+                // resources.
+                this.unrest = null;
             }
         }
-        postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
     }
 
     @After
     public final void tearDown() throws Exception {
-        serv.close();
+        // Assumption: MockDatastore need not be closed because it does not acquire resources.
         unrest = null;
-        serv = null;
     }
 
     @Test

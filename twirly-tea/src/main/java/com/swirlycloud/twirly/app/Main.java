@@ -179,18 +179,9 @@ public final class Main {
 
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
-        @SuppressWarnings("resource")
-        final Datastore datastore = new MockDatastore(FACTORY);
-        boolean success = false;
-        try {
-            try (final LockableServ serv = new LockableServ(datastore, FACTORY, now())) {
-                success = true;
-                run(serv);
-            }
-        } finally {
-            if (!success) {
-                datastore.close();
-            }
+        try (final Datastore datastore = new MockDatastore(FACTORY)) {
+            final LockableServ serv = new LockableServ(datastore, FACTORY, now());
+            run(serv);
         }
     }
 }

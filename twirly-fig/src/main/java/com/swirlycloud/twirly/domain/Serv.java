@@ -7,43 +7,25 @@ import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.node.SlUtil.popNext;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.date.DateUtil;
-import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.Asset;
-import com.swirlycloud.twirly.domain.Contr;
-import com.swirlycloud.twirly.domain.Direct;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Instruct;
-import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.domain.Rec;
-import com.swirlycloud.twirly.domain.RecType;
-import com.swirlycloud.twirly.domain.Role;
-import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.intrusive.EmailHashTable;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
-import com.swirlycloud.twirly.io.AsyncDatastore;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 
-public @NonNullByDefault class Serv implements AutoCloseable {
+public @NonNullByDefault class Serv {
 
     private static final int CAPACITY = 1 << 5; // 64
     @SuppressWarnings("null")
@@ -276,97 +258,36 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         }
     }
 
-    /**
-     * Ownership and responsibility for closing the datastore will transferred to the new instance.
-     * 
-     * @param datastore
-     *            The datastore.
-     * @param factory
-     *            The factory.
-     * @param now
-     *            The current time.
-     * @throws InterruptedException
-     * @throws ExecutionException
-     */
-    public Serv(AsyncDatastore datastore, Factory factory, long now) throws InterruptedException,
-            ExecutionException {
-        this.journ = datastore;
+    public Serv(Model model, Journ journ, Factory factory, long now) throws InterruptedException {
+        this.journ = journ;
         this.factory = factory;
-        final int busDay = DateUtil.getBusDate(now).toJd();
-        final Future<MnemRbTree> assets = datastore.selectAsset();
-        final Future<MnemRbTree> contrs = datastore.selectContr();
-        final Future<MnemRbTree> markets = datastore.selectMarket();
-        final Future<MnemRbTree> traders = datastore.selectTrader();
-        final Future<SlNode> orders = datastore.selectOrder();
-        final Future<SlNode> trades = datastore.selectTrade();
-        final Future<SlNode> posns = datastore.selectPosn(busDay);
 
-        MnemRbTree t = assets.get();
+        MnemRbTree t = model.selectAsset();
         assert t != null;
         this.assets = t;
 
-        t = contrs.get();
+        t = model.selectContr();
         assert t != null;
         this.contrs = t;
         enrichContrs();
 
-        t = markets.get();
+        t = model.selectMarket();
         assert t != null;
         this.markets = t;
         enrichMarkets();
 
-        t = traders.get();
+        t = model.selectTrader();
         assert t != null;
         this.traders = t;
         updateEmailIdx();
 
-        insertOrders(orders.get());
-        insertTrades(trades.get());
-        insertPosns(posns.get());
+        insertOrders(model.selectOrder());
+        insertTrades(model.selectTrade());
+        insertPosns(model.selectPosn(getBusDate(now).toJd()));
     }
 
-    /**
-     * Ownership and responsibility for closing the datastore will transferred to the new instance.
-     * 
-     * @param datastore
-     *            The datastore.
-     * @param factory
-     *            The factory.
-     * @param now
-     *            The current time.
-     */
-    public Serv(Datastore datastore, Factory factory, long now) {
-        this.journ = datastore;
-        this.factory = factory;
-        final int busDay = DateUtil.getBusDate(now).toJd();
-
-        MnemRbTree t = datastore.selectAsset();
-        assert t != null;
-        this.assets = t;
-
-        t = datastore.selectContr();
-        assert t != null;
-        this.contrs = t;
-        enrichContrs();
-
-        t = datastore.selectMarket();
-        assert t != null;
-        this.markets = t;
-        enrichMarkets();
-
-        t = datastore.selectTrader();
-        assert t != null;
-        this.traders = t;
-        updateEmailIdx();
-
-        insertOrders(datastore.selectOrder());
-        insertTrades(datastore.selectTrade());
-        insertPosns(datastore.selectPosn(busDay));
-    }
-
-    @Override
-    public final void close() throws Exception {
-        journ.close();
+    public Serv(Datastore datastore, Factory factory, long now) throws InterruptedException {
+        this(datastore, datastore, factory, now);
     }
 
     public final Trader createTrader(String mnem, String display, String email)
@@ -380,7 +301,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         final Trader trader = newTrader(mnem, display, email);
         try {
             journ.insertTrader(mnem, display, email);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
         traders.insert(trader);
@@ -397,7 +318,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
         trader.setDisplay(display);
         try {
             journ.updateTrader(mnem, display);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
         return trader;
@@ -582,7 +503,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     }
 
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
-        final int busDay = DateUtil.getBusDate(now).toJd();
+        final int busDay = getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final MarketBook book = (MarketBook) node;
             node = node.rbNext();
@@ -593,7 +514,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     }
 
     public final void settlMarkets(long now) {
-        final int busDay = DateUtil.getBusDate(now).toJd();
+        final int busDay = getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final Market market = (Market) node;
             node = node.rbNext();
@@ -614,7 +535,7 @@ public @NonNullByDefault class Serv implements AutoCloseable {
     public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
             long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
-        final int busDay = DateUtil.getBusDate(now).toJd();
+        final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
             throw new NotFoundException(String.format("market for '%s' on '%d' has expired", book
                     .getContrRich().getMnem(), maybeJdToIso(book.getSettlDay())));

@@ -11,23 +11,23 @@ import com.swirlycloud.twirly.node.SlNode;
 public interface Model extends AutoCloseable {
 
     @Nullable
-    MnemRbTree selectAsset();
+    MnemRbTree selectAsset() throws InterruptedException;
 
     @Nullable
-    MnemRbTree selectContr();
+    MnemRbTree selectContr() throws InterruptedException;
 
     @Nullable
-    MnemRbTree selectMarket();
+    MnemRbTree selectMarket() throws InterruptedException;
 
     @Nullable
-    MnemRbTree selectTrader();
+    MnemRbTree selectTrader() throws InterruptedException;
 
     @Nullable
-    SlNode selectOrder();
+    SlNode selectOrder() throws InterruptedException;
 
     @Nullable
-    SlNode selectTrade();
+    SlNode selectTrade() throws InterruptedException;
 
     @Nullable
-    SlNode selectPosn(int busDay);
+    SlNode selectPosn(int busDay) throws InterruptedException;
 }
