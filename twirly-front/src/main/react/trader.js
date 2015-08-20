@@ -5,7 +5,7 @@
 var TraderModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/back/rec/market', function(markets) {
+        $.getJSON('/front/rec/market', function(markets) {
             var contrMap = this.props.contrMap;
             var marketMap = {};
 
@@ -22,7 +22,7 @@ var TraderModuleImpl = React.createClass({
                 error: parseError(xhr)
             });
         }.bind(this));
-        $.getJSON('/back/rec/trader', function(traders) {
+        $.getJSON('/front/rec/trader', function(traders) {
             var staging = this.staging;
 
             staging.traders.clear();
@@ -282,7 +282,7 @@ var TraderModuleImpl = React.createClass({
 var TraderModule = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/back/rec/contr', function(contrs) {
+        $.getJSON('/front/rec/contr', function(contrs) {
             var contrMap = {};
             contrs.forEach(function(contr) {
                 enrichContr(contr);

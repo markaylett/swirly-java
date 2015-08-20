@@ -29,7 +29,7 @@
 
   <servlet>
     <servlet-name>page</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.PageServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.FrontPageServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>

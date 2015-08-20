@@ -3,7 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-
 @SuppressWarnings("serial")
-public final class BackViewServlet extends ViewServlet {
+public final class FrontRecServlet extends RecServlet {
 }

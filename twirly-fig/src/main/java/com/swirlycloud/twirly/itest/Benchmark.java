@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.itest;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
@@ -85,7 +86,7 @@ public final class Benchmark {
 
     public static void main(String[] args) throws Exception {
         try (final Datastore datastore = new MockDatastore(FACTORY)) {
-            final Serv serv = new Serv(datastore, FACTORY, now());
+            final Serv serv = new Serv(datastore, NO_CACHE, FACTORY, now());
             run(serv);
         }
     }

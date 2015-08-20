@@ -11,19 +11,18 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.swirlycloud.twirly.domain.RecType;
+import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
-public class FrontSessServlet extends RestServlet {
+public class RecServlet extends RestServlet {
 
     protected static final int TYPE_PART = 0;
-    protected static final int MARKET_PART = 1;
-    protected static final int ID_PART = 2;
-    protected static final int CONTR_PART = 1;
-    protected static final int SETTL_DATE_PART = 2;
+    protected static final int MNEM_PART = 1;
 
     @SuppressWarnings("null")
     @Override
@@ -35,7 +34,6 @@ public class FrontSessServlet extends RestServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = realm.getUserEmail(req);
     
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -44,42 +42,41 @@ public class FrontSessServlet extends RestServlet {
     
             boolean match = false;
             if (parts.length == 0) {
-                rest.getSess(email, params, now, resp.getWriter());
+                rest.getRec(realm.isUserAdmin(req), params, now, resp.getWriter());
                 match = true;
-            } else if ("order".equals(parts[TYPE_PART])) {
+            } else if ("asset".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getOrder(email, params, now, resp.getWriter());
+                    rest.getRec(RecType.ASSET, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getOrder(email, parts[MARKET_PART], params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 3) {
-                    rest.getOrder(email, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
-                            params, now, resp.getWriter());
+                    rest.getRec(RecType.ASSET, parts[MNEM_PART], params, now, resp.getWriter());
                     match = true;
                 }
-            } else if ("trade".equals(parts[TYPE_PART])) {
+            } else if ("contr".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getTrade(email, params, now, resp.getWriter());
+                    rest.getRec(RecType.CONTR, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getTrade(email, parts[MARKET_PART], params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 3) {
-                    rest.getTrade(email, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
-                            params, now, resp.getWriter());
+                    rest.getRec(RecType.CONTR, parts[MNEM_PART], params, now, resp.getWriter());
                     match = true;
                 }
-            } else if ("posn".equals(parts[TYPE_PART])) {
+            } else if ("market".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getPosn(email, params, now, resp.getWriter());
+                    rest.getRec(RecType.MARKET, params, now, resp.getWriter());
                     match = true;
                 } else if (parts.length == 2) {
-                    rest.getPosn(email, parts[CONTR_PART], params, now, resp.getWriter());
+                    rest.getRec(RecType.MARKET, parts[MNEM_PART], params, now, resp.getWriter());
                     match = true;
-                } else if (parts.length == 3) {
-                    rest.getPosn(email, parts[CONTR_PART],
-                            Integer.parseInt(parts[SETTL_DATE_PART]), params, now, resp.getWriter());
+                }
+            } else if ("trader".equals(parts[TYPE_PART])) {
+                if (!realm.isUserAdmin(req)) {
+                    throw new BadRequestException("user is not an admin");
+                }
+                if (parts.length == 1) {
+                    rest.getRec(RecType.TRADER, params, now, resp.getWriter());
+                    match = true;
+                } else if (parts.length == 2) {
+                    rest.getRec(RecType.TRADER, parts[MNEM_PART], params, now, resp.getWriter());
                     match = true;
                 }
             }

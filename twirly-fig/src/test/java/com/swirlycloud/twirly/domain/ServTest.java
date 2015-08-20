@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -84,7 +85,7 @@ public final class ServTest {
 
     @Before
     public final void setUp() throws Exception {
-        serv = new Serv(newDatastore(FACTORY), FACTORY, NOW);
+        serv = new Serv(newDatastore(FACTORY), NO_CACHE, FACTORY, NOW);
     }
 
     @After

@@ -13,8 +13,8 @@ import org.eclipse.jdt.annotation.Nullable;
 
 public final @NonNullByDefault class SpyCache implements Cache {
 
-    // FIXME: expiry handling.
-    private static final int EXPIRY = 3600;
+    // Expire after 24 hours.
+    private static final int EXPIRY = 24 * 60 * 60;
 
     private final MemcachedClient mc;
 

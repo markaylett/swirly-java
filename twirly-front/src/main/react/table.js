@@ -165,7 +165,7 @@ var MarketTable = React.createClass({
                   <th>Settl Date</th>
                   <th>Expiry Date</th>
                   <th>State</th>
-                  <th>Side</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -241,7 +241,7 @@ var TraderTable = React.createClass({
                   <th>Mnem</th>
                   <th>Display</th>
                   <th>Email</th>
-                  <th>Side</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>

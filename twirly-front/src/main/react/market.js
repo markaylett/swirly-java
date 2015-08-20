@@ -5,7 +5,7 @@
 var MarketModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/back/rec/market', function(markets) {
+        $.getJSON('/front/rec/market', function(markets) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
             var marketMap = {};
@@ -214,7 +214,7 @@ var MarketModuleImpl = React.createClass({
 var MarketModule = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/back/rec/contr', function(contrs) {
+        $.getJSON('/front/rec/contr', function(contrs) {
             var contrMap = {};
             contrs.forEach(function(contr) {
                 enrichContr(contr);

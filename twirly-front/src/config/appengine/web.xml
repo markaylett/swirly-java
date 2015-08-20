@@ -10,7 +10,7 @@
   <!-- The proxy servlet is only used by the development server. -->
   <servlet>
     <servlet-name>proxy</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.ProxyServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.FrontProxyServlet</servlet-class>
     <init-param>
 	  <param-name>module</param-name>
 	  <param-value>backend</param-value>
@@ -18,13 +18,23 @@
   </servlet>
 
   <servlet>
+    <servlet-name>rec</servlet-name>
+    <servlet-class>com.swirlycloud.twirly.web.FrontRecServlet</servlet-class>
+  </servlet>
+
+  <servlet>
     <servlet-name>page</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.PageServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.FrontPageServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
     <servlet-name>proxy</servlet-name>
     <url-pattern>/back/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>rec</servlet-name>
+    <url-pattern>/front/rec/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
@@ -180,7 +181,7 @@ public final class Main {
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
         try (final Datastore datastore = new MockDatastore(FACTORY)) {
-            final LockableServ serv = new LockableServ(datastore, FACTORY, now());
+            final LockableServ serv = new LockableServ(datastore, NO_CACHE, FACTORY, now());
             run(serv);
         }
     }

@@ -18,6 +18,7 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.intrusive.EmailHashTable;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
@@ -32,6 +33,7 @@ public @NonNullByDefault class Serv {
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
     private final Journ journ;
+    private final Cache cache;
     private final Factory factory;
     private final MnemRbTree assets;
     private final MnemRbTree contrs;
@@ -258,36 +260,43 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    public Serv(Model model, Journ journ, Factory factory, long now) throws InterruptedException {
+    public Serv(Model model, Journ journ, Cache cache, Factory factory, long now)
+            throws InterruptedException {
         this.journ = journ;
+        this.cache = cache;
         this.factory = factory;
 
         MnemRbTree t = model.selectAsset();
         assert t != null;
         this.assets = t;
+        cache.update("asset", t);
 
         t = model.selectContr();
         assert t != null;
         this.contrs = t;
         enrichContrs();
+        cache.update("contr", t);
 
         t = model.selectMarket();
         assert t != null;
         this.markets = t;
         enrichMarkets();
+        cache.update("market", t);
 
         t = model.selectTrader();
         assert t != null;
         this.traders = t;
         updateEmailIdx();
+        cache.update("trader", t);
 
         insertOrders(model.selectOrder());
         insertTrades(model.selectTrade());
         insertPosns(model.selectPosn(getBusDate(now).toJd()));
     }
 
-    public Serv(Datastore datastore, Factory factory, long now) throws InterruptedException {
-        this(datastore, datastore, factory, now);
+    public Serv(Datastore datastore, Cache cache, Factory factory, long now)
+            throws InterruptedException {
+        this(datastore, datastore, cache, factory, now);
     }
 
     public final Trader createTrader(String mnem, String display, String email)
@@ -306,6 +315,7 @@ public @NonNullByDefault class Serv {
         }
         traders.insert(trader);
         emailIdx.insert(trader);
+        cache.update("trader", traders);
         return trader;
     }
 
@@ -321,6 +331,7 @@ public @NonNullByDefault class Serv {
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
+        cache.update("trader", traders);
         return trader;
     }
 
@@ -473,6 +484,7 @@ public @NonNullByDefault class Serv {
         }
 
         markets.pinsert(market, parent);
+        cache.update("market", markets);
         return market;
     }
 
@@ -499,6 +511,7 @@ public @NonNullByDefault class Serv {
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
+        cache.update("market", markets);
         return market;
     }
 

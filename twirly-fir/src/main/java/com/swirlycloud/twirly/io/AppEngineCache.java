@@ -16,9 +16,9 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public final @NonNullByDefault class AppEngineCache implements Cache {
 
-    // FIXME: expiry handling.
+    // Expire after 24 hours.
     @SuppressWarnings("null")
-    private static final Expiration EXPIRY = Expiration.byDeltaSeconds(3600);
+    private static final Expiration EXPIRY = Expiration.byDeltaSeconds(24 * 60 * 60);
 
     private final MemcacheService ms;
 

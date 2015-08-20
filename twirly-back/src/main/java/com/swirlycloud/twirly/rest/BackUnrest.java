@@ -33,7 +33,10 @@ import com.swirlycloud.twirly.domain.View;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
+import com.swirlycloud.twirly.io.Journ;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("null")
@@ -356,8 +359,14 @@ public final class BackUnrest {
         rest = new BackRest(serv);
     }
 
-    public BackUnrest(Datastore datastore, Factory factory, long now) throws InterruptedException {
-        this(new LockableServ(datastore, factory, now));
+    public BackUnrest(Model model, Journ journ, Cache cache, Factory factory, long now)
+            throws InterruptedException {
+        this(new LockableServ(model, journ, cache, factory, now));
+    }
+
+    public BackUnrest(Datastore datastore, Cache cache, Factory factory, long now)
+            throws InterruptedException {
+        this(new LockableServ(datastore, cache, factory, now));
     }
 
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {

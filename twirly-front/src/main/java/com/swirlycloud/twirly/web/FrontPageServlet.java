@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
-public final class PageServlet extends HttpServlet {
+public final class FrontPageServlet extends HttpServlet {
 
     private static Page getPage(HttpServletRequest req) {
         final String pathInfo = req.getPathInfo();
@@ -111,6 +111,6 @@ public final class PageServlet extends HttpServlet {
     }
 
     public static void setRealm(Realm realm) {
-        PageServlet.realm = realm;
+        FrontPageServlet.realm = realm;
     }
 }

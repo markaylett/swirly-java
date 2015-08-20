@@ -22,14 +22,14 @@ import com.swirlycloud.twirly.io.AppEngineDatastore;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.JdbcDatastore;
-import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.io.SpyCache;
 import com.swirlycloud.twirly.rest.BackRest;
 import com.swirlycloud.twirly.rest.Rest;
 
 public final class BackLifeCycle implements ServletContextListener {
 
-    private Model model;
+    private Datastore datastore;
+    private Cache cache;
 
     private static @NonNull Realm newAppEngineRealm(ServletContext sc, Factory factory) {
         return new AppEngineRealm();
@@ -58,12 +58,10 @@ public final class BackLifeCycle implements ServletContextListener {
         return new JdbcDatastore(url, user, password, factory);
     }
 
-    @SuppressWarnings("unused")
     private static @NonNull Cache newAppEngineCache(ServletContext sc, Factory factory) {
         return new AppEngineCache();
     }
 
-    @SuppressWarnings("unused")
     private static @NonNull Cache newCatalinaCache(ServletContext sc, Factory factory) {
         try {
             return new SpyCache(new InetSocketAddress("localhost", 11211));
@@ -73,25 +71,31 @@ public final class BackLifeCycle implements ServletContextListener {
     }
 
     private final void close(final ServletContext sc) {
-        try {
-            // We have to check for null here because contextDestroyed may be called even when
-            // contextInitialized fails.
-            if (model != null) {
-                model.close();
-                model = null;
+        // We have to check for null here because contextDestroyed may be called even when
+        // contextInitialized fails.
+        if (cache != null) {
+            try {
+                cache.close();
+                cache = null;
+            } catch (final Exception e) {
+                sc.log("failed to close cache", e);
             }
-        } catch (final Exception e) {
-            sc.log("failed to close model", e);
+        }
+        if (datastore != null) {
+            try {
+                datastore.close();
+                datastore = null;
+            } catch (final Exception e) {
+                sc.log("failed to close datastore", e);
+            }
         }
     }
 
-    @SuppressWarnings({ "resource", "null" })
     private final void open(ServletContext sc, @NonNull Factory factory)
             throws InterruptedException {
 
         Realm realm = null;
         Datastore datastore = null;
-        Model model = null;
         Cache cache = null;
         Rest rest = null;
         final ServletContainer c = ServletContainer.valueOf(sc);
@@ -99,20 +103,15 @@ public final class BackLifeCycle implements ServletContextListener {
             if (c == ServletContainer.APP_ENGINE) {
                 realm = newAppEngineRealm(sc, factory);
                 datastore = newAppEngineDatastore(sc, factory);
-                model = datastore;
-                //cache = newAppEngineCache(sc, factory);
+                cache = newAppEngineCache(sc, factory);
             } else if (c == ServletContainer.CATALINA) {
                 realm = newCatalinaRealm(sc, factory);
                 datastore = newCatalinaDatastore(sc, factory);
-                model = datastore;
-                //cache = newCatalinaCache(sc, factory);
+                cache = newCatalinaCache(sc, factory);
             } else {
                 throw new RuntimeException("unsupported servlet container");
             }
-            //model = new CacheModel(datastore, cache);
-            // Model now owns cache.
-            cache = null;
-            rest = new BackRest(model, datastore, factory, now());
+            rest = new BackRest(datastore, cache, factory, now());
         } finally {
             if (rest == null) {
                 if (cache != null) {
@@ -122,17 +121,18 @@ public final class BackLifeCycle implements ServletContextListener {
                         sc.log("failed to close cache", e);
                     }
                 }
-                if (model != null) {
+                if (datastore != null) {
                     try {
-                        model.close();
+                        datastore.close();
                     } catch (final Exception e) {
-                        sc.log("failed to close model", e);
+                        sc.log("failed to close datastore", e);
                     }
                 }
             }
         }
         // Commit.
-        this.model = model;
+        this.datastore = datastore;
+        this.cache = cache;
         RestServlet.setRealm(realm);
         RestServlet.setRest(rest);
     }

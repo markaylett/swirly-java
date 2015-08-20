@@ -25,6 +25,7 @@ import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
@@ -36,13 +37,14 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         super(serv);
     }
 
-    public BackRest(Model model, Journ journ, Factory factory, long now)
+    public BackRest(Model model, Journ journ, Cache cache, Factory factory, long now)
             throws InterruptedException {
-        this(new LockableServ(model, journ, factory, now));
+        this(new LockableServ(model, journ, cache, factory, now));
     }
 
-    public BackRest(Datastore datastore, Factory factory, long now) throws InterruptedException {
-        this(new LockableServ(datastore, factory, now));
+    public BackRest(Datastore datastore, Cache cache, Factory factory, long now)
+            throws InterruptedException {
+        this(new LockableServ(datastore, cache, factory, now));
     }
 
     @Override

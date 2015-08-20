@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.rest;
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_EXPIRED;
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static org.junit.Assert.assertEquals;
@@ -278,7 +279,7 @@ public final class BackUnrestTest {
             ServiceUnavailableException, InterruptedException, IOException {
         final Factory factory = new ServFactory();
         final Datastore datastore = new MockDatastore(factory);
-        final BackUnrest unrest = new BackUnrest(datastore, factory, NOW);
+        final BackUnrest unrest = new BackUnrest(datastore, NO_CACHE, factory, NOW);
         this.unrest = unrest;
         boolean success = false;
         try {
