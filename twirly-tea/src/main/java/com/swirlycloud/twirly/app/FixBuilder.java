@@ -3,12 +3,12 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import static com.swirlycloud.twirly.app.FixUtility.sideToFix;
 import static com.swirlycloud.twirly.app.FixUtility.execTypeToState;
+import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
 import static com.swirlycloud.twirly.app.FixUtility.lastLiquidityIndToRole;
 import static com.swirlycloud.twirly.app.FixUtility.ordStatusToState;
 import static com.swirlycloud.twirly.app.FixUtility.roleToLastLiquidityInd;
-import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
+import static com.swirlycloud.twirly.app.FixUtility.sideToFix;
 import static com.swirlycloud.twirly.app.FixUtility.stateToExecType;
 import static com.swirlycloud.twirly.app.FixUtility.stateToOrdStatus;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
@@ -54,11 +54,11 @@ import quickfix.field.Symbol;
 import quickfix.field.Text;
 import quickfix.field.TransactTime;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Instruct;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.quickfix.Contract;
 import com.swirlycloud.twirly.quickfix.Cost;

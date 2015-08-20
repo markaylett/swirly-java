@@ -3,8 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.web;
 
-import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
@@ -29,9 +27,46 @@ import com.swirlycloud.twirly.rest.Rest;
 
 public final class FrontLifeCycle implements ServletContextListener {
 
-    private static final Factory FACTORY = new BasicFactory();
-
     private Model model;
+
+    private static @NonNull Realm newAppEngineRealm(ServletContext sc, Factory factory) {
+        return new AppEngineRealm();
+    }
+
+    private static @NonNull Realm newCatalinaRealm(ServletContext sc, Factory factory) {
+        return new CatalinaRealm();
+    }
+
+    private static @NonNull Model newAppEngineModel(ServletContext sc, Factory factory) {
+        return new AppEngineModel(factory);
+    }
+
+    private static @NonNull Model newCatalinaModel(ServletContext sc, Factory factory) {
+        final String url = sc.getInitParameter("url");
+        final String user = sc.getInitParameter("user");
+        final String password = sc.getInitParameter("password");
+        if (url.startsWith("jdbc:mysql:")) {
+            // Locate, load, and link the Mysql Jdbc driver.
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+            } catch (final ClassNotFoundException e) {
+                throw new RuntimeException("mysql jdbc driver not found", e);
+            }
+        }
+        return new JdbcModel(url, user, password, factory);
+    }
+
+    private static @NonNull Cache newAppEngineCache(ServletContext sc, Factory factory) {
+        return new AppEngineCache();
+    }
+
+    private static @NonNull Cache newCatalinaCache(ServletContext sc, Factory factory) {
+        try {
+            return new SpyCache(new InetSocketAddress("localhost", 11211));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 
     private final void close(final ServletContext sc) {
         try {
@@ -41,93 +76,58 @@ public final class FrontLifeCycle implements ServletContextListener {
                 model.close();
                 model = null;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             sc.log("failed to close model", e);
         }
     }
 
     @SuppressWarnings("resource")
-    private static @NonNull Model newAppEngineModel(ServletContext sc) {
-        Model model = new AppEngineModel(FACTORY);
+    private final void open(ServletContext sc, @NonNull Factory factory) {
+
+        Realm realm = null;
+        Model model = null;
         Cache cache = null;
-        boolean success = false;
+        Rest rest = null;
+        final ServletContainer c = ServletContainer.valueOf(sc);
         try {
-            cache = new AppEngineCache();
+            if (c == ServletContainer.APP_ENGINE) {
+                realm = newAppEngineRealm(sc, factory);
+                model = newAppEngineModel(sc, factory);
+                cache = newAppEngineCache(sc, factory);
+            } else if (c == ServletContainer.CATALINA) {
+                realm = newCatalinaRealm(sc, factory);
+                model = newCatalinaModel(sc, factory);
+                cache = newCatalinaCache(sc, factory);
+            } else {
+                throw new RuntimeException("unsupported servlet container");
+            }
             model = new CacheModel(model, cache);
-            success = true;
+            // Model now owns cache.
+            cache = null;
+            rest = new FrontRest(model);
         } finally {
-            if (!success) {
+            if (rest == null) {
                 if (cache != null) {
                     try {
                         cache.close();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         sc.log("failed to close cache", e);
                     }
                 }
-                try {
-                    model.close();
-                } catch (Exception e) {
-                    sc.log("failed to close model", e);
-                }
-            }
-        }
-        return model;
-    }
-
-    @SuppressWarnings("resource")
-    private static @NonNull Model newJdbcModel(ServletContext sc, String url, String user,
-            String password) throws IOException {
-        Model model = new JdbcModel(url, user, password, FACTORY);
-        Cache cache = null;
-        boolean success = false;
-        try {
-            cache = new SpyCache(new InetSocketAddress("localhost", 11211));
-            model = new CacheModel(model, cache);
-            success = true;
-        } finally {
-            if (!success) {
-                if (cache != null) {
+                if (model != null) {
                     try {
-                        cache.close();
-                    } catch (Exception e) {
-                        sc.log("failed to close cache", e);
+                        model.close();
+                    } catch (final Exception e) {
+                        sc.log("failed to close model", e);
                     }
                 }
-                try {
-                    model.close();
-                } catch (Exception e) {
-                    sc.log("failed to close model", e);
-                }
             }
         }
-        return model;
-    }
-
-    @SuppressWarnings("resource")
-    private static @NonNull Model getModel(ServletContext sc) {
-        Model model;
-        final String url = sc.getInitParameter("url");
-        if (url == null || url.equals("appengine:datastore:")) {
-            // Default.
-            model = newAppEngineModel(sc);
-        } else if (url.startsWith("jdbc:mysql:")) {
-            final String user = sc.getInitParameter("user");
-            final String password = sc.getInitParameter("password");
-            // Locate, load, and link the MySql Jdbc driver.
-            try {
-                Class.forName("com.mysql.jdbc.Driver");
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("mysql jdbc driver not found", e);
-            }
-            try {
-                model = newJdbcModel(sc, url, user, password);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        } else {
-            throw new RuntimeException("invalid datastore url: " + url);
-        }
-        return model;
+        // Commit.
+        this.model = model;
+        FrontPageServlet.setRealm(realm);
+        RestServlet.setRealm(realm);
+        RestServlet.setRest(rest);
     }
 
     @Override
@@ -135,31 +135,7 @@ public final class FrontLifeCycle implements ServletContextListener {
         // This will be invoked as part of a warmup request, or the first user request if no warmup
         // request was invoked.
         final ServletContext sc = event.getServletContext();
-        final Model model = getModel(sc);
-        boolean success = false;
-        try {
-            Realm realm = null;
-            if (sc.getServerInfo().startsWith("Apache Tomcat")) {
-                realm = new CatalinaRealm();
-            } else {
-                realm = new AppEngineRealm();
-            }
-            final Rest rest = new FrontRest(model, NO_CACHE);
-            // Commit.
-            PageServlet.setRealm(realm);
-            RestServlet.setRealm(realm);
-            RestServlet.setRest(rest);
-            this.model = model;
-            success = true;
-        } finally {
-            if (!success) {
-                try {
-                    model.close();
-                } catch (final Exception e) {
-                    sc.log("failed to close resource", e);
-                }
-            }
-        }
+        open(sc, new BasicFactory());
     }
 
     @Override

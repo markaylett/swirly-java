@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
@@ -30,10 +31,10 @@ import quickfix.fix44.NewOrderSingle;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.ServFactory;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockDatastore;
@@ -81,7 +82,7 @@ public final class Main {
             };
             initiator.start();
             return ac;
-        } catch (ConfigError e) {
+        } catch (final ConfigError e) {
             // See comment in newAcceptor().
             e.printStackTrace();
             System.exit(1);
@@ -179,18 +180,9 @@ public final class Main {
 
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
-        @SuppressWarnings("resource")
-        final Datastore datastore = new MockDatastore(FACTORY);
-        boolean success = false;
-        try {
-            try (final LockableServ serv = new LockableServ(datastore, FACTORY, now())) {
-                success = true;
-                run(serv);
-            }
-        } finally {
-            if (!success) {
-                datastore.close();
-            }
+        try (final Datastore datastore = new MockDatastore(FACTORY)) {
+            final LockableServ serv = new LockableServ(datastore, NO_CACHE, FACTORY, now());
+            run(serv);
         }
     }
 }

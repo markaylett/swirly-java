@@ -44,7 +44,7 @@ public final class BackCronServlet extends RestServlet {
                     try {
                         ecbRates.parse();
                         log("EURUSD: " + ecbRates.getRate("EUR", "USD"));
-                    } catch (Throwable t) {
+                    } catch (final Throwable t) {
                         log("error: " + t.getLocalizedMessage());
                     }
                     match = true;

@@ -10,26 +10,41 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.Cache;
+import com.swirlycloud.twirly.io.Datastore;
+import com.swirlycloud.twirly.io.Journ;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
 
     public BackRest(LockableServ serv) {
         super(serv);
+    }
+
+    public BackRest(Model model, Journ journ, Cache cache, Factory factory, long now)
+            throws InterruptedException {
+        this(new LockableServ(model, journ, cache, factory, now));
+    }
+
+    public BackRest(Datastore datastore, Cache cache, Factory factory, long now)
+            throws InterruptedException {
+        this(new LockableServ(datastore, cache, factory, now));
     }
 
     @Override
@@ -332,16 +347,16 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         }
     }
 
-    public final void postTrade(String trader, String market, String ref, Side side,
-            long ticks, long lots, Role role, String cpty, Params params, long now, Appendable out)
+    public final void postTrade(String trader, String market, String ref, Side side, long ticks,
+            long lots, Role role, String cpty, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            final Exec trade = serv.createTrade(sess, book, ref, side, ticks, lots, role, cpty,
-                    now);
+            final Exec trade = serv
+                    .createTrade(sess, book, ref, side, ticks, lots, role, cpty, now);
             trade.toJson(params, out);
         } finally {
             serv.releaseWrite();

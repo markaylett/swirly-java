@@ -287,14 +287,14 @@ var TraderDialog = React.createClass({
                       <div className="form-group">
                         <label htmlFor="display" className="col-sm-2 control-label">Display</label>
                         <div className="col-sm-10">
-                          <input id="display" type="email" className="form-control" value={display}
+                          <input id="display" type="text" className="form-control" value={display}
                                  onChange={this.onChangeDisplay} onFocus={this.onFocusDisplay}/>
                         </div>
                       </div>
                       <div className="form-group">
                         <label htmlFor="email" className="col-sm-2 control-label">Email</label>
                         <div className="col-sm-10">
-                          <input id="email" type="text" className="form-control" value={email}
+                          <input id="email" type="email" className="form-control" value={email}
                                  onChange={this.onChangeEmail} readOnly={edit}/>
                         </div>
                       </div>

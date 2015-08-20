@@ -16,7 +16,6 @@ import javax.json.stream.JsonParser;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.rest.Request;
 
 public final class RequestTest {
     private static final Request parse(String s) throws IOException {

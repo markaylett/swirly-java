@@ -5,7 +5,6 @@
 
   <context-param>
     <param-name>url</param-name>
-    <!--param-value>appengine:datastore:</param-value-->
     <param-value>jdbc:mysql://localhost:3306/twirly?sessionVariables=foreign_key_checks=1</param-value>
   </context-param>
 
@@ -30,7 +29,7 @@
 
   <servlet>
     <servlet-name>page</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.PageServlet</servlet-class>
+    <servlet-class>com.swirlycloud.twirly.web.FrontPageServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>

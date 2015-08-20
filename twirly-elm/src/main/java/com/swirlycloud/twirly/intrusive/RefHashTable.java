@@ -55,7 +55,7 @@ public final class RefHashTable extends HashTable<SlNode> {
         if (isEmpty()) {
             return null;
         }
-        int i = indexFor(hashKeyDirect(trader, ref), buckets.length);
+        final int i = indexFor(hashKeyDirect(trader, ref), buckets.length);
         SlNode it = getBucket(i);
         if (it == null) {
             return null;

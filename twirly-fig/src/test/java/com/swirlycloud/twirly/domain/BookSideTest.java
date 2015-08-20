@@ -9,12 +9,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.BasicFactory;
-import com.swirlycloud.twirly.domain.BookSide;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 

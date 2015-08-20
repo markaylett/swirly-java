@@ -8,8 +8,8 @@ import quickfix.field.ExecType;
 import quickfix.field.LastLiquidityInd;
 import quickfix.field.OrdStatus;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 
 public final class FixUtility {

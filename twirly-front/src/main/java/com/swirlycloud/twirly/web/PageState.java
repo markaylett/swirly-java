@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 
 public final class PageState {
     private final Realm realm;
-    private HttpServletRequest req;
-    private HttpServletResponse resp;
-    private Page page;
+    private final HttpServletRequest req;
+    private final HttpServletResponse resp;
+    private final Page page;
 
     public PageState(Realm realm, HttpServletRequest req, HttpServletResponse resp, Page page) {
         this.realm = realm;

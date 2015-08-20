@@ -17,7 +17,7 @@ import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")
-public class FrontViewServlet extends RestServlet {
+public class ViewServlet extends RestServlet {
 
     protected static final int MNEM_PART = 0;
 

@@ -6,7 +6,6 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.intrusive.RefHashTable;
 import com.swirlycloud.twirly.util.Memorable;
 

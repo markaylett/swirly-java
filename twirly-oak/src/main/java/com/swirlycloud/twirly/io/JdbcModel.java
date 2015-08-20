@@ -13,7 +13,6 @@ import java.sql.SQLException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
 import com.swirlycloud.twirly.domain.Contr;
@@ -23,6 +22,7 @@ import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;

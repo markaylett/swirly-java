@@ -22,7 +22,7 @@ import com.swirlycloud.twirly.rest.BackRest;
 import com.swirlycloud.twirly.rest.Request;
 
 @SuppressWarnings("serial")
-public final class BackRecServlet extends FrontRecServlet {
+public final class BackRecServlet extends RecServlet {
 
     @SuppressWarnings("null")
     @Override

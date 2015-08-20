@@ -8,8 +8,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.date.GregDate;
-
 public final class DateUtilTest {
 
     @Test

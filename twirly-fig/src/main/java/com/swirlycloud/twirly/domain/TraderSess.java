@@ -8,12 +8,6 @@ import static com.swirlycloud.twirly.util.CollectionUtil.compareInt;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.RefHashTable;
 import com.swirlycloud.twirly.intrusive.Tree;

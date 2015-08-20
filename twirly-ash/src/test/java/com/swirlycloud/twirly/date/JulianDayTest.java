@@ -3,7 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.date;
 
-import static com.swirlycloud.twirly.date.JulianDay.*;
+import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
+import static com.swirlycloud.twirly.date.JulianDay.ymdToIso;
+import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

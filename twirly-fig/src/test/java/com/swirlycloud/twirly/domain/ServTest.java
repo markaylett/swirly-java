@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,19 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.BookSide;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Level;
-import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.MarketBook;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.RecType;
-import com.swirlycloud.twirly.domain.Role;
-import com.swirlycloud.twirly.domain.ServFactory;
-import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -87,8 +75,8 @@ public final class ServTest {
                         SETTL_DAY, "second", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
                         12345, 10, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
                 final Exec third = FACTORY.newExec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "third", State.TRADE, Side.SELL, 12346, 10, 3, 7, 86422,
-                        12346, 7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
+                        SETTL_DAY, "third", State.TRADE, Side.SELL, 12346, 10, 3, 7, 86422, 12346,
+                        7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
                 second.setSlNext(third);
                 return second;
             }
@@ -97,22 +85,12 @@ public final class ServTest {
 
     @Before
     public final void setUp() throws Exception {
-        @SuppressWarnings("resource")
-        final Datastore datastore = newDatastore(FACTORY);
-        boolean success = false;
-        try {
-            serv = new Serv(datastore, FACTORY, NOW);
-            success = true;
-        } finally {
-            if (!success) {
-                datastore.close();
-            }
-        }
+        serv = new Serv(newDatastore(FACTORY), NO_CACHE, FACTORY, NOW);
     }
 
     @After
     public final void tearDown() throws Exception {
-        serv.close();
+        // Assumption: MockDatastore need not be closed because it does not acquire resources.
         serv = null;
     }
 

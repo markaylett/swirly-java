@@ -16,10 +16,10 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
@@ -27,11 +27,16 @@ import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.View;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.io.Cache;
+import com.swirlycloud.twirly.io.Datastore;
+import com.swirlycloud.twirly.io.Journ;
+import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("null")
@@ -354,6 +359,16 @@ public final class BackUnrest {
         rest = new BackRest(serv);
     }
 
+    public BackUnrest(Model model, Journ journ, Cache cache, Factory factory, long now)
+            throws InterruptedException {
+        this(new LockableServ(model, journ, cache, factory, now));
+    }
+
+    public BackUnrest(Datastore datastore, Cache cache, Factory factory, long now)
+            throws InterruptedException {
+        this(new LockableServ(datastore, cache, factory, now));
+    }
+
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(withTraders, params, now, sb);
@@ -603,9 +618,9 @@ public final class BackUnrest {
         }
     }
 
-    public final Exec postTrade(String trader, String market, String ref, Side side,
-            long ticks, long lots, Role role, String cpty, Params params, long now)
-            throws NotFoundException, ServiceUnavailableException, IOException {
+    public final Exec postTrade(String trader, String market, String ref, Side side, long ticks,
+            long lots, Role role, String cpty, Params params, long now) throws NotFoundException,
+            ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postTrade(trader, market, ref, side, ticks, lots, role, cpty, params, now, sb);
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {

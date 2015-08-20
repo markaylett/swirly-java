@@ -22,7 +22,7 @@ import com.swirlycloud.twirly.rest.BackRest;
 import com.swirlycloud.twirly.rest.Request;
 
 @SuppressWarnings("serial")
-public final class BackSessServlet extends FrontSessServlet {
+public final class BackSessServlet extends SessServlet {
     @SuppressWarnings("null")
     @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)

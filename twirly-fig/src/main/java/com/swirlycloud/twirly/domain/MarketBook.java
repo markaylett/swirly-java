@@ -10,9 +10,6 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.Market;
-import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;

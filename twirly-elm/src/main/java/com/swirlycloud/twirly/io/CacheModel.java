@@ -34,7 +34,7 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectAsset() {
+    public final @Nullable MnemRbTree selectAsset() throws InterruptedException {
         MnemRbTree t = (MnemRbTree) cache.select("asset");
         if (t == null) {
             t = model.selectAsset();
@@ -45,7 +45,7 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectContr() {
+    public final @Nullable MnemRbTree selectContr() throws InterruptedException {
         MnemRbTree t = (MnemRbTree) cache.select("contr");
         if (t == null) {
             t = model.selectContr();
@@ -56,7 +56,7 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectMarket() {
+    public final @Nullable MnemRbTree selectMarket() throws InterruptedException {
         MnemRbTree t = (MnemRbTree) cache.select("market");
         if (t == null) {
             t = model.selectMarket();
@@ -67,7 +67,7 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectTrader() {
+    public final @Nullable MnemRbTree selectTrader() throws InterruptedException {
         MnemRbTree t = (MnemRbTree) cache.select("trader");
         if (t == null) {
             t = model.selectTrader();
@@ -78,17 +78,21 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectOrder() {
+    public final @Nullable SlNode selectOrder() throws InterruptedException {
         return model.selectOrder();
     }
 
     @Override
-    public final @Nullable SlNode selectTrade() {
+    public final @Nullable SlNode selectTrade() throws InterruptedException {
         return model.selectTrade();
     }
 
     @Override
-    public final @Nullable SlNode selectPosn(int busDay) {
+    public final @Nullable SlNode selectPosn(int busDay) throws InterruptedException {
         return model.selectPosn(busDay);
+    }
+
+    public final Cache getCache() {
+        return cache;
     }
 }

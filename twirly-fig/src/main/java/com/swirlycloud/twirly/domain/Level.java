@@ -5,8 +5,6 @@ package com.swirlycloud.twirly.domain;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.DlNode;
 

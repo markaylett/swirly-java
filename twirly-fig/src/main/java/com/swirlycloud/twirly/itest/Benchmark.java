@@ -4,17 +4,18 @@
 package com.swirlycloud.twirly.itest;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Serv;
 import com.swirlycloud.twirly.domain.ServFactory;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
@@ -75,7 +76,7 @@ public final class Benchmark {
                 serv.archiveAll(tobayl, now);
                 serv.archiveAll(emiayl, now);
 
-                long totalNanos = System.nanoTime() - startNanos;
+                final long totalNanos = System.nanoTime() - startNanos;
                 if ((i % 1000) == 0) {
                     System.out.println(totalNanos / 1000L + " usec");
                 }
@@ -84,18 +85,9 @@ public final class Benchmark {
     }
 
     public static void main(String[] args) throws Exception {
-        @SuppressWarnings("resource")
-        final Datastore datastore = new MockDatastore(FACTORY);
-        boolean success = false;
-        try {
-            try (final Serv serv = new Serv(datastore, FACTORY, now())) {
-                success = true;
-                run(serv);
-            }
-        } finally {
-            if (!success) {
-                datastore.close();
-            }
+        try (final Datastore datastore = new MockDatastore(FACTORY)) {
+            final Serv serv = new Serv(datastore, NO_CACHE, FACTORY, now());
+            run(serv);
         }
     }
 }

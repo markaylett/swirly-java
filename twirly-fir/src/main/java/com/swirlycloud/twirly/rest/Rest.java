@@ -6,16 +6,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.util.Params;
 
 public @NonNullByDefault interface Rest {
 
-    void getRec(boolean withTraders, Params params, long now, Appendable out) throws IOException;
+    void getRec(boolean withTraders, Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException;
 
-    void getRec(RecType recType, Params params, long now, Appendable out) throws IOException;
+    void getRec(RecType recType, Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException;
 
     void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
-            throws NotFoundException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getView(Params params, long now, Appendable out) throws IOException;
 

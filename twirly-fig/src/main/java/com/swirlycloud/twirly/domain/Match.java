@@ -3,9 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.node.BasicSlNode;
 
 /**

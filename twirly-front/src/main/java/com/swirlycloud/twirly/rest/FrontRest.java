@@ -12,32 +12,36 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
-import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class FrontRest implements Rest {
 
     private final Model model;
-    @SuppressWarnings("unused")
-    private final Cache cache;
 
-    private final MnemRbTree getRecTree(RecType recType) {
+    private final MnemRbTree getRecTree(RecType recType) throws ServiceUnavailableException {
         MnemRbTree t = null;
-        switch (recType) {
-        case ASSET:
-            t = model.selectAsset();
-            break;
-        case CONTR:
-            t = model.selectContr();
-            break;
-        case MARKET:
-            t = model.selectMarket();
-            break;
-        case TRADER:
-            t = model.selectTrader();
-            break;
+        try {
+            switch (recType) {
+            case ASSET:
+                t = model.selectAsset();
+                break;
+            case CONTR:
+                t = model.selectContr();
+                break;
+            case MARKET:
+                t = model.selectMarket();
+                break;
+            case TRADER:
+                t = model.selectTrader();
+                break;
+            }
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
         }
         if (t == null) {
             t = new MnemRbTree();
@@ -45,19 +49,19 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return t;
     }
 
-    private final void doGetRec(RecType recType, Params params, Appendable out) throws IOException {
+    private final void doGetRec(RecType recType, Params params, Appendable out)
+            throws ServiceUnavailableException, IOException {
         final MnemRbTree tree = getRecTree(recType);
         toJsonArray(tree.getFirst(), params, out);
     }
 
-    public FrontRest(Model model, Cache cache) {
+    public FrontRest(Model model) {
         this.model = model;
-        this.cache = cache;
     }
 
     @Override
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)
-            throws IOException {
+            throws ServiceUnavailableException, IOException {
         out.append("{\"assets\":");
         doGetRec(RecType.ASSET, params, out);
         out.append(",\"contrs\":");
@@ -74,13 +78,13 @@ public final @NonNullByDefault class FrontRest implements Rest {
 
     @Override
     public final void getRec(RecType recType, Params params, long now, Appendable out)
-            throws IOException {
+            throws ServiceUnavailableException, IOException {
         doGetRec(recType, params, out);
     }
 
     @Override
     public final void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final MnemRbTree tree = getRecTree(recType);
         final Rec rec = (Rec) tree.find(mnem);
         if (rec == null) {

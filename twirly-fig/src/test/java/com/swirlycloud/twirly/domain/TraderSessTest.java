@@ -10,8 +10,6 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.mock.MockTrader;
 
 public final class TraderSessTest {

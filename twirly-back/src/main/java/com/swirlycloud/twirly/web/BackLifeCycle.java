@@ -5,7 +5,8 @@ package com.swirlycloud.twirly.web;
 
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
-import java.util.concurrent.ExecutionException;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -14,103 +15,139 @@ import javax.servlet.ServletContextListener;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.LockableServ;
-import com.swirlycloud.twirly.domain.Serv;
 import com.swirlycloud.twirly.domain.ServFactory;
+import com.swirlycloud.twirly.exception.UncheckedIOException;
+import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineDatastore;
-import com.swirlycloud.twirly.io.AsyncDatastore;
-import com.swirlycloud.twirly.io.AsyncDatastoreService;
+import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.JdbcDatastore;
+import com.swirlycloud.twirly.io.SpyCache;
 import com.swirlycloud.twirly.rest.BackRest;
 import com.swirlycloud.twirly.rest.Rest;
 
 public final class BackLifeCycle implements ServletContextListener {
 
-    private static final @NonNull Factory FACTORY = new ServFactory();
+    private Datastore datastore;
+    private Cache cache;
 
-    private Serv serv;
-
-    private final void close(final ServletContext sc) {
-        try {
-            // We have to check for null here because contextDestroyed may be called even when
-            // contextInitialized fails.
-            if (serv != null) {
-                serv.close();
-                serv = null;
-            }
-        } catch (final Exception e) {
-            sc.log("failed to close serv", e);
-        }
+    private static @NonNull Realm newAppEngineRealm(ServletContext sc, Factory factory) {
+        return new AppEngineRealm();
     }
 
-    private static @NonNull Datastore getDatastore(ServletContext sc) {
-        Datastore datastore;
+    private static @NonNull Realm newCatalinaRealm(ServletContext sc, Factory factory) {
+        return new CatalinaRealm();
+    }
+
+    private static @NonNull Datastore newAppEngineDatastore(ServletContext sc, Factory factory) {
+        return new AppEngineDatastore(factory);
+    }
+
+    private static @NonNull Datastore newCatalinaDatastore(ServletContext sc, Factory factory) {
         final String url = sc.getInitParameter("url");
-        if (url == null || url.equals("appengine:datastore:")) {
-            // Default.
-            datastore = new AppEngineDatastore(FACTORY);
-        } else if (url.startsWith("jdbc:mysql:")) {
-            final String user = sc.getInitParameter("user");
-            final String password = sc.getInitParameter("password");
-            // Locate, load, and link the MySql Jdbc driver.
+        final String user = sc.getInitParameter("user");
+        final String password = sc.getInitParameter("password");
+        if (url.startsWith("jdbc:mysql:")) {
+            // Locate, load, and link the Mysql Jdbc driver.
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-            } catch (ClassNotFoundException e) {
+            } catch (final ClassNotFoundException e) {
                 throw new RuntimeException("mysql jdbc driver not found", e);
             }
-            datastore = new JdbcDatastore(url, user, password, FACTORY);
-        } else {
-            throw new RuntimeException("invalid datastore url: " + url);
         }
-        return datastore;
+        return new JdbcDatastore(url, user, password, factory);
     }
 
-    @SuppressWarnings("resource")
+    private static @NonNull Cache newAppEngineCache(ServletContext sc, Factory factory) {
+        return new AppEngineCache();
+    }
+
+    private static @NonNull Cache newCatalinaCache(ServletContext sc, Factory factory) {
+        try {
+            return new SpyCache(new InetSocketAddress("localhost", 11211));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private final void close(final ServletContext sc) {
+        // We have to check for null here because contextDestroyed may be called even when
+        // contextInitialized fails.
+        if (cache != null) {
+            try {
+                cache.close();
+                cache = null;
+            } catch (final Exception e) {
+                sc.log("failed to close cache", e);
+            }
+        }
+        if (datastore != null) {
+            try {
+                datastore.close();
+                datastore = null;
+            } catch (final Exception e) {
+                sc.log("failed to close datastore", e);
+            }
+        }
+    }
+
+    private final void open(ServletContext sc, @NonNull Factory factory)
+            throws InterruptedException {
+
+        Realm realm = null;
+        Datastore datastore = null;
+        Cache cache = null;
+        Rest rest = null;
+        final ServletContainer c = ServletContainer.valueOf(sc);
+        try {
+            if (c == ServletContainer.APP_ENGINE) {
+                realm = newAppEngineRealm(sc, factory);
+                datastore = newAppEngineDatastore(sc, factory);
+                cache = newAppEngineCache(sc, factory);
+            } else if (c == ServletContainer.CATALINA) {
+                realm = newCatalinaRealm(sc, factory);
+                datastore = newCatalinaDatastore(sc, factory);
+                cache = newCatalinaCache(sc, factory);
+            } else {
+                throw new RuntimeException("unsupported servlet container");
+            }
+            rest = new BackRest(datastore, cache, factory, now());
+        } finally {
+            if (rest == null) {
+                if (cache != null) {
+                    try {
+                        cache.close();
+                    } catch (final Exception e) {
+                        sc.log("failed to close cache", e);
+                    }
+                }
+                if (datastore != null) {
+                    try {
+                        datastore.close();
+                    } catch (final Exception e) {
+                        sc.log("failed to close datastore", e);
+                    }
+                }
+            }
+        }
+        // Commit.
+        this.datastore = datastore;
+        this.cache = cache;
+        RestServlet.setRealm(realm);
+        RestServlet.setRest(rest);
+    }
+
     @Override
     public final void contextInitialized(ServletContextEvent event) {
         // This will be invoked as part of a warmup request, or the first user request if no warmup
         // request was invoked.
         final ServletContext sc = event.getServletContext();
-        final Datastore datastore = getDatastore(sc);
-        AutoCloseable resource = datastore;
-        boolean success = false;
         try {
-            final long now = now();
-            Realm realm = null;
-            LockableServ serv = null;
-            if (sc.getServerInfo().startsWith("Apache Tomcat")) {
-                realm = new CatalinaRealm();
-                final AsyncDatastore asyncDatastore = new AsyncDatastoreService(datastore);
-                // AsyncDatastore owns Datastore.
-                resource = asyncDatastore;
-                try {
-                    serv = new LockableServ(asyncDatastore, FACTORY, now);
-                    // LockableServ owns AsyncDatastore.
-                    resource = serv;
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException("failed to create async datastore", e);
-                }
-            } else {
-                realm = new AppEngineRealm();
-                serv = new LockableServ(datastore, FACTORY, now);
-                // LockableServ owns Datastore.
-                resource = serv;
-            }
-            final Rest rest = new BackRest(serv);
-            // Commit.
-            RestServlet.setRealm(realm);
-            RestServlet.setRest(rest);
-            this.serv = serv;
-            success = true;
-        } finally {
-            if (!success) {
-                try {
-                    resource.close();
-                } catch (final Exception e) {
-                    sc.log("failed to close resource", e);
-                }
-            }
+            open(sc, new ServFactory());
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            sc.log("service interrupted", e);
         }
     }
 
