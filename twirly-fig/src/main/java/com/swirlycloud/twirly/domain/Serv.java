@@ -468,7 +468,7 @@ public @NonNullByDefault class Serv {
         market = newMarket(mnem, display, contr, settlDay, expiryDay, state);
         try {
             journ.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
@@ -496,7 +496,7 @@ public @NonNullByDefault class Serv {
         market.setState(state);
         try {
             journ.updateMarket(mnem, display, state);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
         return market;
@@ -563,7 +563,7 @@ public @NonNullByDefault class Serv {
             final SlNode first = trans.prepareExecList();
             journ.insertExecList(book.getMnem(), first);
             success = true;
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         } finally {
             if (!success && !order.isDone()) {
@@ -596,7 +596,7 @@ public @NonNullByDefault class Serv {
         exec.revise(lots);
         try {
             journ.insertExec(exec);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
@@ -634,7 +634,7 @@ public @NonNullByDefault class Serv {
         exec.cancel();
         try {
             journ.insertExec(exec);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
@@ -688,7 +688,7 @@ public @NonNullByDefault class Serv {
             exec.cancel();
             try {
                 journ.insertExec(exec);
-            } catch (RejectedExecutionException e) {
+            } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
 
@@ -721,7 +721,7 @@ public @NonNullByDefault class Serv {
         }
         try {
             journ.insertExecList(book.getMnem(), first);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
         // Commit phase.
@@ -744,7 +744,7 @@ public @NonNullByDefault class Serv {
         }
         try {
             journ.archiveOrder(order.getMarket(), order.getId(), now);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
@@ -785,7 +785,7 @@ public @NonNullByDefault class Serv {
             }
             try {
                 journ.archiveOrder(order.getMarket(), order.getId(), now);
-            } catch (RejectedExecutionException e) {
+            } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
 
@@ -812,7 +812,7 @@ public @NonNullByDefault class Serv {
             trade.setSlNext(cptyTrade);
             try {
                 journ.insertExecList(market.getMnem(), trade);
-            } catch (RejectedExecutionException e) {
+            } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
             sess.insertTrade(trade);
@@ -822,7 +822,7 @@ public @NonNullByDefault class Serv {
         } else {
             try {
                 journ.insertExec(trade);
-            } catch (RejectedExecutionException e) {
+            } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
             sess.insertTrade(trade);
@@ -838,7 +838,7 @@ public @NonNullByDefault class Serv {
         }
         try {
             journ.archiveTrade(trade.getMarket(), trade.getId(), now);
-        } catch (RejectedExecutionException e) {
+        } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
@@ -876,7 +876,7 @@ public @NonNullByDefault class Serv {
             }
             try {
                 journ.archiveTrade(trade.getMarket(), trade.getId(), now);
-            } catch (RejectedExecutionException e) {
+            } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
 

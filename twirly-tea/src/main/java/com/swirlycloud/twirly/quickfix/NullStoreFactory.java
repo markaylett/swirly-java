@@ -86,7 +86,7 @@ public final class NullStoreFactory implements MessageStoreFactory {
     public final MessageStore create(SessionID sessionID) {
         try {
             return new NullStore();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeError(e);
         }
     }

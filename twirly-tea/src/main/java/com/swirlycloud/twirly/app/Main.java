@@ -30,10 +30,10 @@ import quickfix.fix44.NewOrderSingle;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.ServFactory;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockDatastore;
@@ -81,7 +81,7 @@ public final class Main {
             };
             initiator.start();
             return ac;
-        } catch (ConfigError e) {
+        } catch (final ConfigError e) {
             // See comment in newAcceptor().
             e.printStackTrace();
             System.exit(1);

@@ -17,7 +17,7 @@ public final class MatrixTest {
         assertEquals(2, m.getCols());
         assertEquals(2, m.getRows());
         for (int i = 0; i < 2; ++i) {
-            for (int j = 0; i < 2; ++i) {
+            for (final int j = 0; i < 2; ++i) {
                 assertEquals(0.0, m.getValue(i, j), 0.0);
             }
         }
@@ -29,7 +29,7 @@ public final class MatrixTest {
         assertEquals(5, m.getCols());
         assertEquals(5, m.getRows());
         for (int i = 0; i < 5; ++i) {
-            for (int j = 0; i < 5; ++i) {
+            for (final int j = 0; i < 5; ++i) {
                 if (i == j) {
                     assertEquals(1.0, m.getValue(i, j), 0.0);
                 } else {

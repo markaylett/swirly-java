@@ -43,11 +43,11 @@ import quickfix.fix44.OrderCancelReject;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.domain.Trans;
@@ -83,7 +83,7 @@ public final class FixServer extends MessageCracker implements Application {
     private static void sendToTarget(Message message, SessionID sessionId) {
         try {
             Session.sendToTarget(message, sessionId);
-        } catch (SessionNotFound e) {
+        } catch (final SessionNotFound e) {
             // What else can we do?
             log.error(sessionId + ": session not found", e);
         }
@@ -197,13 +197,13 @@ public final class FixServer extends MessageCracker implements Application {
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, trans, sessionId);
             }
-        } catch (FixRejectException e) {
+        } catch (final FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());
             sendBusinessReject(message, ref, e.getMessage(), sessionId);
         } catch (BadRequestException | NotFoundException e) {
             log.warn(sessionId + ": " + e.getMessage());
             sendBusinessReject(message, ref, "invalid request: " + e.getMessage(), sessionId);
-        } catch (ServiceUnavailableException e) {
+        } catch (final ServiceUnavailableException e) {
             log.warn(sessionId + ": " + e.getMessage());
             sendBusinessReject(message, ref, "service unavailable: " + e.getMessage(), sessionId);
         } finally {
@@ -255,14 +255,14 @@ public final class FixServer extends MessageCracker implements Application {
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, trans, sessionId);
             }
-        } catch (FixRejectException e) {
+        } catch (final FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());
             sendCancelReject(ref, orderRef, orderId, e.getMessage(), sessionId);
         } catch (BadRequestException | NotFoundException e) {
             log.warn(sessionId + ": " + e.getMessage());
             assert order != null;
             sendCancelRejectLocked(ref, order, "invalid request: " + e.getMessage(), sessionId);
-        } catch (ServiceUnavailableException e) {
+        } catch (final ServiceUnavailableException e) {
             log.warn(sessionId + ": " + e.getMessage());
             assert order != null;
             sendCancelRejectLocked(ref, order, "service unavailable: " + e.getMessage(), sessionId);
@@ -314,14 +314,14 @@ public final class FixServer extends MessageCracker implements Application {
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, trans, sessionId);
             }
-        } catch (FixRejectException e) {
+        } catch (final FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());
             sendCancelReject(ref, orderRef, orderId, e.getMessage(), sessionId);
         } catch (BadRequestException | NotFoundException e) {
             log.warn(sessionId + ": " + e.getMessage());
             assert order != null;
             sendCancelRejectLocked(ref, order, "invalid request: " + e.getMessage(), sessionId);
-        } catch (ServiceUnavailableException e) {
+        } catch (final ServiceUnavailableException e) {
             log.warn(sessionId + ": " + e.getMessage());
             assert order != null;
             sendCancelRejectLocked(ref, order, "service unavailable: " + e.getMessage(), sessionId);

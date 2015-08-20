@@ -25,7 +25,7 @@ public abstract class BasicHashTable<K, V> extends HashTable<V> {
         if (isEmpty()) {
             return null;
         }
-        int i = indexFor(key.hashCode(), buckets.length);
+        final int i = indexFor(key.hashCode(), buckets.length);
         V it = getBucket(i);
         if (it == null) {
             return null;

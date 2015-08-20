@@ -25,7 +25,7 @@ public abstract class LongHashTable<V> extends HashTable<V> {
         if (isEmpty()) {
             return null;
         }
-        int i = indexFor(hashLong(key), buckets.length);
+        final int i = indexFor(hashLong(key), buckets.length);
         V it = getBucket(i);
         if (it == null) {
             return null;

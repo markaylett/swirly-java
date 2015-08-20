@@ -33,9 +33,9 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
     private final String contr;
     private final int settlDay;
     private final Ladder ladder;
-    private long lastTicks;
-    private long lastLots;
-    private long lastTime;
+    private final long lastTicks;
+    private final long lastLots;
+    private final long lastTime;
 
     public View(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
             long lastLots, long lastTime) {

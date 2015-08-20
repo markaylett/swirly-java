@@ -202,7 +202,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             final Entity entity = newMarket(mnem, display, contr, settlDay, expiryDay, state);
             datastore.put(txn, entity);
             txn.commit();
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             // FIXME: implement retry logic.
             throw e;
         } finally {
@@ -221,7 +221,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             entity.setUnindexedProperty("state", state);
             datastore.put(txn, entity);
             txn.commit();
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             // FIXME: implement retry logic.
             throw e;
         } finally {
@@ -239,7 +239,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             final Entity entity = newTrader(mnem, display, email);
             datastore.put(txn, entity);
             txn.commit();
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             // FIXME: implement retry logic.
             throw e;
         } finally {
@@ -257,7 +257,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             entity.setUnindexedProperty("display", display);
             datastore.put(txn, entity);
             txn.commit();
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             // FIXME: implement retry logic.
             throw e;
         } finally {
@@ -283,7 +283,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             datastore.put(txn, newExec(market, exec));
             datastore.put(txn, market);
             txn.commit();
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             // FIXME: implement retry logic.
             throw e;
         } finally {
@@ -330,7 +330,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
                 }
                 datastore.put(txn, market);
                 txn.commit();
-            } catch (ConcurrentModificationException e) {
+            } catch (final ConcurrentModificationException e) {
                 // FIXME: implement retry logic.
                 throw e;
             } finally {
@@ -357,7 +357,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             entity.setUnindexedProperty("modified", modified);
             datastore.put(txn, entity);
             txn.commit();
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             // FIXME: implement retry logic.
             throw e;
         } finally {
@@ -378,7 +378,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             entity.setUnindexedProperty("modified", modified);
             datastore.put(txn, entity);
             txn.commit();
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             // FIXME: implement retry logic.
             throw e;
         } finally {

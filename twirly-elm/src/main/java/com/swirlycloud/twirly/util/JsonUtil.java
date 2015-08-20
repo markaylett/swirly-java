@@ -51,7 +51,7 @@ public final class JsonUtil {
         final StringBuilder sb = new StringBuilder();
         try {
             j.toJson(PARAMS_NONE, sb);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
         return sb.toString();

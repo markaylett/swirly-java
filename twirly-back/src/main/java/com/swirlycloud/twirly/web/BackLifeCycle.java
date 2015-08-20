@@ -51,7 +51,7 @@ public final class BackLifeCycle implements ServletContextListener {
             // Locate, load, and link the Mysql Jdbc driver.
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-            } catch (ClassNotFoundException e) {
+            } catch (final ClassNotFoundException e) {
                 throw new RuntimeException("mysql jdbc driver not found", e);
             }
         }

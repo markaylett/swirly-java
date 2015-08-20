@@ -43,8 +43,9 @@ public final class MathUtil {
         final double[] y2 = new double[x.length];
         y2[0] = (y[1] - y[0]) / (x[1] - x[0]);
         y2[n] = (y[n] - y[n - 1]) / (x[n] - x[n - 1]);
-        for (int i = 1; i < n; ++i)
+        for (int i = 1; i < n; ++i) {
             y2[i] = (y[i + 1] - y[i - 1]) / (x[i + 1] - x[i - 1]);
+        }
         return y2;
     }
 
@@ -78,8 +79,9 @@ public final class MathUtil {
                     * (ypn.doubleValue() - (y[n] - y[n - 1]) / (x[n] - x[n - 1]));
         }
         y2[n] = (un - qn * u[n - 1]) / (qn * y2[n - 1] + 1.0);
-        for (int i = n - 1; 0 <= i; --i)
+        for (int i = n - 1; 0 <= i; --i) {
             y2[i] = y2[i] * y2[i + 1] + u[i];
+        }
         return y2;
     }
 

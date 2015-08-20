@@ -134,7 +134,7 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.insertMarket(mnem, display, contr, settlDay, expiryDay, state);
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to insert market", t);
                 }
             }
@@ -148,7 +148,7 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.updateMarket(mnem, display, state);
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to update market", t);
                 }
             }
@@ -162,7 +162,7 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.insertTrader(mnem, display, email);
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to insert trader", t);
                 }
             }
@@ -177,7 +177,7 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.updateTrader(mnem, display);
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to update trader", t);
                 }
             }
@@ -191,7 +191,7 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.insertExec(exec);
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to insert exec", t);
                 }
             }
@@ -206,7 +206,7 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.insertExecList(market, first);
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to insert exec-list", t);
                 }
             }
@@ -221,7 +221,7 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.archiveOrder(market, id, modified);
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to archive order", t);
                 }
             }
@@ -236,7 +236,7 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.archiveTrade(market, id, modified);
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to archive trade", t);
                 }
             }

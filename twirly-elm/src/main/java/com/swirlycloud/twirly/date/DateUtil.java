@@ -8,8 +8,6 @@ import java.util.TimeZone;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.date.GregDate;
-
 public final class DateUtil {
 
     private DateUtil() {

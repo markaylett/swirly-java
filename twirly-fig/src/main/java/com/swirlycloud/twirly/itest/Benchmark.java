@@ -10,11 +10,11 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Serv;
 import com.swirlycloud.twirly.domain.ServFactory;
+import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
@@ -75,7 +75,7 @@ public final class Benchmark {
                 serv.archiveAll(tobayl, now);
                 serv.archiveAll(emiayl, now);
 
-                long totalNanos = System.nanoTime() - startNanos;
+                final long totalNanos = System.nanoTime() - startNanos;
                 if ((i % 1000) == 0) {
                     System.out.println(totalNanos / 1000L + " usec");
                 }
