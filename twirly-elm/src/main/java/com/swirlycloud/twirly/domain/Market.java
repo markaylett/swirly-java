@@ -31,26 +31,15 @@ public @NonNullByDefault class Market extends Rec implements Financial {
     protected final int settlDay;
     protected final int expiryDay;
     protected int state;
-    protected long lastTicks;
-    protected long lastLots;
-    protected long lastTime;
-
-    private Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
-            int expiryDay, int state) {
-        this(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L);
-    }
 
     Market(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastTicks, long lastLots, long lastTime) {
+            int state) {
         super(mnem, display);
         assert (settlDay == 0) == (expiryDay == 0);
         this.contr = contr;
         this.settlDay = settlDay;
         this.expiryDay = expiryDay;
         this.state = state;
-        this.lastTicks = lastTicks;
-        this.lastLots = lastLots;
-        this.lastTime = lastTime;
     }
 
     public static Market parse(JsonParser p) throws IOException {
@@ -186,17 +175,5 @@ public @NonNullByDefault class Market extends Rec implements Financial {
 
     public final int getState() {
         return state;
-    }
-
-    public final long getLastTicks() {
-        return lastTicks;
-    }
-
-    public final long getLastLots() {
-        return lastLots;
-    }
-
-    public final long getLastTime() {
-        return lastTime;
     }
 }

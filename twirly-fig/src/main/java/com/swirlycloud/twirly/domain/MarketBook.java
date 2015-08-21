@@ -27,6 +27,9 @@ public final @NonNullByDefault class MarketBook extends Market {
      */
     private static final int DEPTH_MAX = 5;
 
+    private transient long lastTicks;
+    private transient long lastLots;
+    private transient long lastTime;
     // Two sides constitute the book.
     private final transient BookSide bidSide = new BookSide();
     private final transient BookSide offerSide = new BookSide();
@@ -39,7 +42,10 @@ public final @NonNullByDefault class MarketBook extends Market {
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
             int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
-        super(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime);
+        super(mnem, display, contr, settlDay, expiryDay, state);
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.lastTime = lastTime;
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
     }
@@ -196,6 +202,18 @@ public final @NonNullByDefault class MarketBook extends Market {
 
     final long allocExecId() {
         return ++maxExecId;
+    }
+
+    final long getLastTicks() {
+        return lastTicks;
+    }
+
+    final long getLastLots() {
+        return lastLots;
+    }
+
+    final long getLastTime() {
+        return lastTime;
     }
 
     final BookSide getBidSide() {
