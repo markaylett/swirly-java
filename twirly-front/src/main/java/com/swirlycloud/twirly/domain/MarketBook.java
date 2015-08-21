@@ -18,8 +18,7 @@ public final @NonNullByDefault class MarketBook extends Market {
     private static final long serialVersionUID = 1L;
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
-        super(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime,
-                maxOrderId, maxExecId);
+            int state, long lastTicks, long lastLots, long lastTime) {
+        super(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime);
     }
 }

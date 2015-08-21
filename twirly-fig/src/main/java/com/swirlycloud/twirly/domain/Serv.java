@@ -145,8 +145,8 @@ public @NonNullByDefault class Serv {
         return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state);
     }
 
-    private final Exec newExec(Market market, Instruct instruct, long now) {
-        return factory.newExec(market.allocExecId(), instruct, now);
+    private final Exec newExec(MarketBook book, Instruct instruct, long now) {
+        return factory.newExec(book.allocExecId(), instruct, now);
     }
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
@@ -157,7 +157,7 @@ public @NonNullByDefault class Serv {
                 : takerOrder.getTicks() - makerOrder.getTicks();
     }
 
-    private final void matchOrders(TraderSess takerSess, Market market, Order takerOrder,
+    private final void matchOrders(TraderSess takerSess, MarketBook book, Order takerOrder,
             BookSide side, Direct direct, Trans trans) {
 
         final long now = takerOrder.getCreated();
@@ -176,12 +176,12 @@ public @NonNullByDefault class Serv {
                 break;
             }
 
-            final long makerId = market.allocExecId();
-            final long takerId = market.allocExecId();
+            final long makerId = book.allocExecId();
+            final long takerId = book.allocExecId();
 
             final TraderSess makerSess = (TraderSess) traders.find(makerOrder.getTrader());
             assert makerSess != null;
-            final Posn makerPosn = makerSess.getLazyPosn(market);
+            final Posn makerPosn = makerSess.getLazyPosn(book);
 
             final Match match = new Match();
             match.makerOrder = makerOrder;
@@ -213,7 +213,7 @@ public @NonNullByDefault class Serv {
 
         if (!trans.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
-            trans.posn = takerSess.getLazyPosn(market);
+            trans.posn = takerSess.getLazyPosn(book);
             takerOrder.trade(takenLots, takenCost, lastTicks, lastLots, now);
         }
     }
@@ -807,12 +807,12 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    public final Exec createTrade(TraderSess sess, Market market, String ref, Side side,
+    public final Exec createTrade(TraderSess sess, MarketBook book, String ref, Side side,
             long ticks, long lots, @Nullable Role role, @Nullable String cpty, long created)
             throws NotFoundException, ServiceUnavailableException {
-        final Posn posn = sess.getLazyPosn(market);
-        final Exec trade = Exec.manual(market.allocExecId(), sess.getMnem(), market.getMnem(),
-                market.getContr(), market.getSettlDay(), ref, side, ticks, lots, role, cpty,
+        final Posn posn = sess.getLazyPosn(book);
+        final Exec trade = Exec.manual(book.allocExecId(), sess.getMnem(), book.getMnem(),
+                book.getContr(), book.getSettlDay(), ref, side, ticks, lots, role, cpty,
                 created);
         if (cpty != null) {
             // Create back-to-back trade if counter-party is specified.
@@ -820,11 +820,11 @@ public @NonNullByDefault class Serv {
             if (cptySess == null) {
                 throw new NotFoundException(String.format("cpty '%s' does not exist", cpty));
             }
-            final Posn cptyPosn = cptySess.getLazyPosn(market);
-            final Exec cptyTrade = trade.inverse(market.allocExecId());
+            final Posn cptyPosn = cptySess.getLazyPosn(book);
+            final Exec cptyTrade = trade.inverse(book.allocExecId());
             trade.setSlNext(cptyTrade);
             try {
-                journ.insertExecList(market.getMnem(), trade);
+                journ.insertExecList(book.getMnem(), trade);
             } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }

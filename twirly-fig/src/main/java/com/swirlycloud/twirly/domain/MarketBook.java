@@ -30,6 +30,8 @@ public final @NonNullByDefault class MarketBook extends Market {
     // Two sides constitute the book.
     private final transient BookSide bidSide = new BookSide();
     private final transient BookSide offerSide = new BookSide();
+    private transient long maxOrderId;
+    private transient long maxExecId;
 
     private final BookSide getSide(Side side) {
         return side == Side.BUY ? bidSide : offerSide;
@@ -37,8 +39,9 @@ public final @NonNullByDefault class MarketBook extends Market {
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
             int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
-        super(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime,
-                maxOrderId, maxExecId);
+        super(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime);
+        this.maxOrderId = maxOrderId;
+        this.maxExecId = maxExecId;
     }
 
     public final void toJsonView(@Nullable Params params, Appendable out) throws IOException {
@@ -187,11 +190,27 @@ public final @NonNullByDefault class MarketBook extends Market {
         lastTime = now;
     }
 
+    final long allocOrderId() {
+        return ++maxOrderId;
+    }
+
+    final long allocExecId() {
+        return ++maxExecId;
+    }
+
     final BookSide getBidSide() {
         return bidSide;
     }
 
     final BookSide getOfferSide() {
         return offerSide;
+    }
+
+    final long getMaxOrderId() {
+        return maxOrderId;
+    }
+
+    final long getMaxExecId() {
+        return maxExecId;
     }
 }

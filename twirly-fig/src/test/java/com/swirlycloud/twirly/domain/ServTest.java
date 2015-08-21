@@ -96,7 +96,7 @@ public final class ServTest {
 
     @Test
     public final void testFindMarket() throws Exception {
-        final Market actual = (Market) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
+        final MarketBook actual = (MarketBook) serv.findRec(RecType.MARKET, "EURUSD.MAR14");
 
         assertNotNull(actual);
         assertEquals("EURUSD.MAR14", actual.getMnem());

@@ -27,8 +27,9 @@ public @NonNullByDefault class BasicFactory implements Factory {
     public Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
             int expiryDay, int state, long lastTicks, long lastLots, long lastTime,
             long maxOrderId, long maxExecId) {
+        // Note that maxOrderId and maxExecId are unused in this base implementation.
         return new Market(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots,
-                lastTime, maxOrderId, maxExecId);
+                lastTime);
     }
 
     @Override
@@ -47,8 +48,8 @@ public @NonNullByDefault class BasicFactory implements Factory {
             @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
             long exec, long cost, long lastTicks, long lastLots, long minLots, long created,
             long modified) {
-        return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks, lots,
-                resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
+        return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks, lots, resd,
+                exec, cost, lastTicks, lastLots, minLots, created, modified);
     }
 
     @Override
