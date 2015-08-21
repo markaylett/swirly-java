@@ -62,11 +62,17 @@ public final @NonNullByDefault class MarketBook extends Market {
         } else {
             out.append("null");
         }
-        out.append(",\"bidTicks\":[");
+        if (lastLots != 0) {
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
+        } else {
+            out.append(",\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
+        }
 
+        out.append(",\"bidTicks\":[");
         final RbNode firstBid = bidSide.getFirstLevel();
         final RbNode firstOffer = offerSide.getFirstLevel();
-
         RbNode node = firstBid;
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -150,14 +156,7 @@ public final @NonNullByDefault class MarketBook extends Market {
                 out.append("null");
             }
         }
-        if (lastLots != 0) {
-            out.append("],\"lastTicks\":").append(String.valueOf(lastTicks));
-            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
-            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
-        } else {
-            out.append("],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
-        }
-        out.append('}');
+        out.append("]}");
     }
 
     final void insertOrder(Order order) {

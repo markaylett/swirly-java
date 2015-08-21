@@ -32,30 +32,30 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
     private final String market;
     private final String contr;
     private final int settlDay;
-    private final Ladder ladder;
     private final long lastTicks;
     private final long lastLots;
     private final long lastTime;
+    private final Ladder ladder;
 
     public MarketView(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
             long lastLots, long lastTime) {
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ladder = ladder;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
+        this.ladder = ladder;
     }
 
     public MarketView(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.ladder = ladder;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
+        this.ladder = ladder;
     }
 
     public static void parse(JsonParser p, Ladder ladder, int col) throws IOException {
@@ -81,10 +81,10 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
         String market = null;
         String contr = null;
         int settlDay = 0;
-        final Ladder ladder = new Ladder();
         long lastTicks = 0;
         long lastLots = 0;
         long lastTime = 0;
+        final Ladder ladder = new Ladder();
 
         String name = null;
         while (p.hasNext()) {
@@ -211,8 +211,14 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
         } else {
             out.append("null");
         }
+        if (lastLots != 0) {
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
+        } else {
+            out.append(",\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
+        }
         out.append(",\"bidTicks\":[");
-
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
                 out.append(',');
@@ -278,14 +284,7 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
                 out.append("null");
             }
         }
-        if (lastLots != 0) {
-            out.append("],\"lastTicks\":").append(String.valueOf(lastTicks));
-            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
-            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
-        } else {
-            out.append("],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
-        }
-        out.append('}');
+        out.append("]}");
     }
 
     @Override
@@ -306,6 +305,18 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
     @Override
     public final boolean isSettlDaySet() {
         return settlDay != 0;
+    }
+
+    public final long getLastTicks() {
+        return lastTicks;
+    }
+
+    public final long getLastLots() {
+        return lastLots;
+    }
+
+    public final long getLastTime() {
+        return lastTime;
     }
 
     public final boolean isValidBid(int row) {
@@ -338,17 +349,5 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
 
     public final long getOfferCount(int row) {
         return ladder.roundOfferCount(row);
-    }
-
-    public final long getLastTicks() {
-        return lastTicks;
-    }
-
-    public final long getLastLots() {
-        return lastLots;
-    }
-
-    public final long getLastTime() {
-        return lastTime;
     }
 }
