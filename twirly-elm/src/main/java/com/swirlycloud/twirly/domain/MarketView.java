@@ -23,7 +23,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class View implements Jsonifiable, Financial {
+public final @NonNullByDefault class MarketView implements Jsonifiable, Financial {
     /**
      * Maximum price levels in view.
      */
@@ -37,7 +37,7 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
     private final long lastLots;
     private final long lastTime;
 
-    public View(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
+    public MarketView(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
             long lastLots, long lastTime) {
         this.market = market;
         this.contr = contr;
@@ -48,7 +48,7 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
         this.lastTime = lastTime;
     }
 
-    public View(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
+    public MarketView(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
@@ -77,7 +77,7 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
         throw new IOException("end-of array not found");
     }
 
-    public static View parse(JsonParser p) throws IOException {
+    public static MarketView parse(JsonParser p) throws IOException {
         String market = null;
         String contr = null;
         int settlDay = 0;
@@ -97,7 +97,8 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new View(market, contr, settlDay, ladder, lastTicks, lastLots, lastTime);
+                return new MarketView(market, contr, settlDay, ladder, lastTicks, lastLots,
+                        lastTime);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -176,7 +177,7 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final View other = (View) obj;
+        final MarketView other = (MarketView) obj;
         if (!market.equals(other.market)) {
             return false;
         }

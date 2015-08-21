@@ -29,7 +29,7 @@ import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.domain.View;
+import com.swirlycloud.twirly.domain.MarketView;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -164,14 +164,15 @@ public final class BackUnrest {
         throw new IOException("end-of array not found");
     }
 
-    private static void parseViews(JsonParser p, Map<String, ? super View> out) throws IOException {
+    private static void parseViews(JsonParser p, Map<String, ? super MarketView> out)
+            throws IOException {
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
             case END_ARRAY:
                 return;
             case START_OBJECT:
-                final View view = View.parse(p);
+                final MarketView view = MarketView.parse(p);
                 out.put(view.getMarket(), view);
                 break;
             default:
@@ -246,7 +247,7 @@ public final class BackUnrest {
     }
 
     public static final class TransStruct {
-        public View view;
+        public MarketView view;
         public final Map<Long, Order> orders = new HashMap<>();
         public final Map<Long, Exec> execs = new HashMap<>();
         public Posn posn;
@@ -334,7 +335,7 @@ public final class BackUnrest {
                 break;
             case START_OBJECT:
                 if ("view".equals(name)) {
-                    out.view = View.parse(p);
+                    out.view = MarketView.parse(p);
                 } else if ("posn".equals(name)) {
                     out.posn = Posn.parse(p);
                 } else {
@@ -476,11 +477,11 @@ public final class BackUnrest {
         }
     }
 
-    public final Map<String, View> getView(Params params, long now) throws IOException {
+    public final Map<String, MarketView> getView(Params params, long now) throws IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getView(params, now, sb);
 
-        final Map<String, View> out = new HashMap<>();
+        final Map<String, MarketView> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartArray(p);
             parseViews(p, out);
@@ -488,14 +489,14 @@ public final class BackUnrest {
         return out;
     }
 
-    public final View getView(String mnem, Params params, long now) throws NotFoundException,
+    public final MarketView getView(String mnem, Params params, long now) throws NotFoundException,
             IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getView(mnem, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            return View.parse(p);
+            return MarketView.parse(p);
         }
     }
 

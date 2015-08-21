@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import com.swirlycloud.twirly.util.Params;
 
-public final class ViewTest {
+public final class MarketViewTest {
     @Test
     public final void testToJson() throws IOException {
         final String mnem = "EURUSD.MAR14";
@@ -37,7 +37,8 @@ public final class ViewTest {
         final long lastLots = 5;
         final long lastTime = 1414932078620L;
 
-        final View view = new View(mnem, contr, settlDay, ladder, lastTicks, lastLots, lastTime);
+        final MarketView view = new MarketView(mnem, contr, settlDay, ladder, lastTicks, lastLots,
+                lastTime);
 
         final StringBuilder sb = new StringBuilder();
 
@@ -131,12 +132,13 @@ public final class ViewTest {
         final long lastLots = 5;
         final long lastTime = 1414932078620L;
 
-        final View in = new View(mnem, contr, settlDay, ladder, lastTicks, lastLots, lastTime);
+        final MarketView in = new MarketView(mnem, contr, settlDay, ladder, lastTicks, lastLots,
+                lastTime);
 
         try (final JsonParser p = Json.createParser(new StringReader(in.toString()))) {
             assert p != null;
             parseStartObject(p);
-            final View out = View.parse(p);
+            final MarketView out = MarketView.parse(p);
 
             assertEquals(mnem, out.getMarket());
 

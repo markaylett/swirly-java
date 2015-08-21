@@ -38,7 +38,7 @@ import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.domain.View;
+import com.swirlycloud.twirly.domain.MarketView;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -148,7 +148,7 @@ public final class BackUnrestTest {
         });
     }
 
-    private static void assertView(String market, String contr, int settlDay, View actual)
+    private static void assertView(String market, String contr, int settlDay, MarketView actual)
             throws NotFoundException, IOException {
         assertNotNull(actual);
         assertEquals(market, actual.getMarket());
@@ -423,10 +423,10 @@ public final class BackUnrestTest {
 
         long now = NOW;
 
-        Map<String, View> views = unrest.getView(PARAMS_NONE, now);
+        Map<String, MarketView> views = unrest.getView(PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
             assertEquals(1, views.size());
-            final View view = views.get("EURUSD.MAR14");
+            final MarketView view = views.get("EURUSD.MAR14");
             assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, view);
             // Use now beyond expiry.
             now = jdToMillis(EXPIRY_DAY + 1);
@@ -448,7 +448,7 @@ public final class BackUnrestTest {
         } catch (final NotFoundException e) {
         }
 
-        View view = unrest.getView("EURUSD.MAR14", PARAMS_NONE, now);
+        MarketView view = unrest.getView("EURUSD.MAR14", PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
             assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, view);
             // Use now beyond expiry.
