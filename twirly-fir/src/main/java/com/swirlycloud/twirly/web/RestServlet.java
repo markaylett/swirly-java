@@ -12,6 +12,9 @@ import javax.json.stream.JsonParser;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ServException;
@@ -74,6 +77,14 @@ public abstract class RestServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(e.getNum());
+    }
+
+    protected final @NonNull String getTrader(HttpServletRequest req) {
+        final HttpSession sess = req.getSession();
+        final String trader = (String) sess.getAttribute("trader");
+        // FIXME
+        assert trader != null;
+        return trader;
     }
 
     @Override

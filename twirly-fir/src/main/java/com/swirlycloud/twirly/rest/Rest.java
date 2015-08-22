@@ -3,6 +3,7 @@ package com.swirlycloud.twirly.rest;
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -10,6 +11,9 @@ import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.util.Params;
 
 public @NonNullByDefault interface Rest {
+
+    @Nullable
+    String findTraderByEmail(String email) throws ServiceUnavailableException, IOException;
 
     void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException;

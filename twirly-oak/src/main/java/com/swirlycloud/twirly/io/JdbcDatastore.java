@@ -25,47 +25,6 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     private final PreparedStatement updateOrderStmt;
     private final PreparedStatement updateExecStmt;
 
-    private static void setParam(PreparedStatement stmt, int i, int val) throws SQLException {
-        stmt.setInt(i, val);
-    }
-
-    private static void setNullIfZero(PreparedStatement stmt, int i, int val) throws SQLException {
-        if (val != 0) {
-            stmt.setInt(i, val);
-        } else {
-            stmt.setNull(i, Types.INTEGER);
-        }
-    }
-
-    private static void setParam(PreparedStatement stmt, int i, long val) throws SQLException {
-        stmt.setLong(i, val);
-    }
-
-    private static void setNullIfZero(PreparedStatement stmt, int i, long val) throws SQLException {
-        if (val != 0) {
-            stmt.setLong(i, val);
-        } else {
-            stmt.setNull(i, Types.INTEGER);
-        }
-    }
-
-    private static void setParam(PreparedStatement stmt, int i, String val) throws SQLException {
-        stmt.setString(i, val);
-    }
-
-    private static void setNullIfEmpty(PreparedStatement stmt, int i, String val)
-            throws SQLException {
-        if (val != null && !val.isEmpty()) {
-            stmt.setString(i, val);
-        } else {
-            stmt.setNull(i, Types.CHAR);
-        }
-    }
-
-    private static void setParam(PreparedStatement stmt, int i, boolean val) throws SQLException {
-        stmt.setBoolean(i, val);
-    }
-
     public JdbcDatastore(String url, String user, String password, Factory factory) {
         super(url, user, password, factory);
         PreparedStatement insertMarketStmt = null;

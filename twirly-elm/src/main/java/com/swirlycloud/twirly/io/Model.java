@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
@@ -21,6 +22,9 @@ public interface Model extends AutoCloseable {
 
     @Nullable
     MnemRbTree selectTrader() throws InterruptedException;
+
+    @Nullable
+    String selectTraderByEmail(@NonNull String email) throws InterruptedException;
 
     @Nullable
     SlNode selectOrder() throws InterruptedException;

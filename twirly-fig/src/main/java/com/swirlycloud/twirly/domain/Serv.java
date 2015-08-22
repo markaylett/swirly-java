@@ -56,9 +56,8 @@ public @NonNullByDefault class Serv {
     }
 
     private final void insertOrder(Order order) {
-        final Trader trader = (Trader) traders.find(order.getTrader());
-        assert trader != null;
-        final TraderSess sess = getLazySess(trader);
+        final TraderSess sess = (TraderSess) traders.find(order.getTrader());
+        assert sess != null;
         sess.insertOrder(order);
         if (!order.isDone()) {
             final MarketBook book = (MarketBook) markets.find(order.getMarket());
@@ -110,9 +109,8 @@ public @NonNullByDefault class Serv {
             final Exec trade = (Exec) node;
             node = popNext(node);
 
-            final Trader trader = (Trader) traders.find(trade.getTrader());
-            assert trader != null;
-            final TraderSess sess = getLazySess(trader);
+            final TraderSess sess = (TraderSess) traders.find(trade.getTrader());
+            assert sess != null;
             sess.insertTrade(trade);
         }
     }
@@ -122,9 +120,8 @@ public @NonNullByDefault class Serv {
             final Posn posn = (Posn) node;
             node = popNext(node);
 
-            final Trader trader = (Trader) traders.find(posn.getTrader());
-            assert trader != null;
-            final TraderSess sess = getLazySess(trader);
+            final TraderSess sess = (TraderSess) traders.find(posn.getTrader());
+            assert sess != null;
             sess.insertPosn(posn);
         }
     }
@@ -446,6 +443,10 @@ public @NonNullByDefault class Serv {
         return sess;
     }
 
+    public final @Nullable TraderSess findTraderByEmail(String email) {
+        return (TraderSess) emailIdx.find(email);
+    }
+
     public final TraderSess getTraderByEmail(String email) throws NotFoundException {
         final TraderSess sess = (TraderSess) emailIdx.find(email);
         if (sess == null) {
@@ -539,10 +540,6 @@ public @NonNullByDefault class Serv {
             final TraderSess sess = (TraderSess) node;
             sess.settlPosns(busDay);
         }
-    }
-
-    public final TraderSess getLazySess(Trader trader) {
-        return (TraderSess) trader;
     }
 
     public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,

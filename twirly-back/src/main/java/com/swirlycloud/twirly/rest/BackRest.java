@@ -48,6 +48,18 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
     }
 
     @Override
+    public final @Nullable String findTraderByEmail(String email) {
+        final LockableServ serv = (LockableServ) this.serv;
+        serv.acquireRead();
+        try {
+            final Trader trader = serv.findTraderByEmail(email);
+            return trader != null ? trader.getMnem() : null;
+        } finally {
+            serv.releaseRead();
+        }
+    }
+
+    @Override
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws IOException {
         final LockableServ serv = (LockableServ) this.serv;

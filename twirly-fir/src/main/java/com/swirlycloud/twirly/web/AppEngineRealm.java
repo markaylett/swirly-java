@@ -73,6 +73,7 @@ public final class AppEngineRealm implements Realm {
         return isUserSignedIn(req) && userService.isUserAdmin();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public final boolean isUserTrader(HttpServletRequest req) {
         final User user = userService.getCurrentUser();

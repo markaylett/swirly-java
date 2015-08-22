@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -31,11 +32,9 @@ public final class AsyncDatastore implements Datastore {
     private final Datastore datastore;
     private final ExecutorService service;
 
-    private final @NonNull <T> T get(Future<T> future) throws InterruptedException {
+    private final @Nullable <T> T get(Future<T> future) throws InterruptedException {
         try {
-            final T val = future.get();
-            assert val != null;
-            return val;
+            return future.get();
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         }
@@ -57,7 +56,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull MnemRbTree selectAsset() throws InterruptedException {
+    public final @Nullable MnemRbTree selectAsset() throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
@@ -67,7 +66,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull MnemRbTree selectContr() throws InterruptedException {
+    public final @Nullable MnemRbTree selectContr() throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
@@ -77,7 +76,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull MnemRbTree selectMarket() throws InterruptedException {
+    public final @Nullable MnemRbTree selectMarket() throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
@@ -87,7 +86,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull MnemRbTree selectTrader() throws InterruptedException {
+    public final @Nullable MnemRbTree selectTrader() throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
@@ -97,7 +96,17 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull SlNode selectOrder() throws InterruptedException {
+    public final @Nullable String selectTraderByEmail(@NonNull final String email) throws InterruptedException {
+        return get(service.submit(new Callable<String>() {
+            @Override
+            public final String call() throws Exception {
+                return datastore.selectTraderByEmail(email);
+            }
+        }));
+    }
+
+    @Override
+    public final @Nullable SlNode selectOrder() throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -107,7 +116,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull SlNode selectTrade() throws InterruptedException {
+    public final @Nullable SlNode selectTrade() throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -117,7 +126,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull SlNode selectPosn(final int busDay) throws InterruptedException {
+    public final @Nullable SlNode selectPosn(final int busDay) throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {

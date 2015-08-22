@@ -28,5 +28,6 @@ public interface Realm {
 
     boolean isUserAdmin(HttpServletRequest req);
 
+    @Deprecated
     boolean isUserTrader(HttpServletRequest req);
 }

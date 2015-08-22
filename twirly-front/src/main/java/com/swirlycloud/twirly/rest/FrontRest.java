@@ -8,6 +8,7 @@ import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
@@ -57,6 +58,18 @@ public final @NonNullByDefault class FrontRest implements Rest {
 
     public FrontRest(Model model) {
         this.model = model;
+    }
+
+    @Override
+    public final @Nullable String findTraderByEmail(String email)
+            throws ServiceUnavailableException {
+        try {
+            return model.selectTraderByEmail(email);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
     }
 
     @Override

@@ -52,7 +52,9 @@ public final class PageState {
         return realm.isUserAdmin(req);
     }
 
+    @SuppressWarnings("deprecation")
     public final boolean isUserTrader() {
+        // FIXME: return req.getSession().getAttribute("trader") != null;
         return realm.isUserTrader(req);
     }
 

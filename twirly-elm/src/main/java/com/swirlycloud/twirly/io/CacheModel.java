@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
@@ -75,6 +76,12 @@ public final class CacheModel implements Model {
             cache.insert("trader", t);
         }
         return t;
+    }
+
+    @Override
+    public final @Nullable String selectTraderByEmail(@NonNull String email)
+            throws InterruptedException {
+        return model.selectTraderByEmail(email);
     }
 
     @Override
