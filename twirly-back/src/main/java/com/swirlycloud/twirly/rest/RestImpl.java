@@ -128,9 +128,9 @@ abstract @NonNullByDefault class RestImpl {
         book.toJsonView(params, out);
     }
 
-    protected final void doGetSess(String email, Params params, long now, Appendable out)
+    protected final void doGetSess(String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         out.append("{\"orders\":");
         doGetOrder(sess, params, out);
         out.append(",\"trades\":");
@@ -140,15 +140,15 @@ abstract @NonNullByDefault class RestImpl {
         out.append('}');
     }
 
-    protected final void doGetOrder(String email, Params params, long now, Appendable out)
+    protected final void doGetOrder(String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         doGetOrder(sess, params, out);
     }
 
-    protected final void doGetOrder(String email, String market, Params params, long now,
+    protected final void doGetOrder(String mnem, String market, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         out.append('[');
         RbNode node = sess.getFirstOrder();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -165,9 +165,9 @@ abstract @NonNullByDefault class RestImpl {
         out.append(']');
     }
 
-    protected final void doGetOrder(String email, String market, long id, Params params, long now,
+    protected final void doGetOrder(String mnem, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         final Order order = sess.findOrder(market, id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
@@ -175,15 +175,15 @@ abstract @NonNullByDefault class RestImpl {
         order.toJson(params, out);
     }
 
-    protected final void doGetTrade(String email, Params params, long now, Appendable out)
+    protected final void doGetTrade(String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         doGetTrade(sess, params, out);
     }
 
-    protected final void doGetTrade(String email, String market, Params params, long now,
+    protected final void doGetTrade(String mnem, String market, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         out.append('[');
         RbNode node = sess.getFirstTrade();
         for (int i = 0; node != null; node = node.rbNext()) {
@@ -200,9 +200,9 @@ abstract @NonNullByDefault class RestImpl {
         out.append(']');
     }
 
-    protected final void doGetTrade(String email, String market, long id, Params params, long now,
+    protected final void doGetTrade(String mnem, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         final Exec trade = sess.findTrade(market, id);
         if (trade == null) {
             throw new NotFoundException(String.format("trade '%d' does not exist", id));
@@ -210,21 +210,21 @@ abstract @NonNullByDefault class RestImpl {
         trade.toJson(params, out);
     }
 
-    protected final void doGetPosn(String email, Params params, long now, Appendable out)
+    protected final void doGetPosn(String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         doGetPosn(sess, params, out);
     }
 
-    protected final void doGetPosn(String email, String contr, Params params, long now,
+    protected final void doGetPosn(String mnem, String contr, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         doGetPosn(sess, contr, params, out);
     }
 
-    protected final void doGetPosn(String email, String contr, int settlDate, Params params,
+    protected final void doGetPosn(String mnem, String contr, int settlDate, Params params,
             long now, Appendable out) throws NotFoundException, IOException {
-        final TraderSess sess = serv.getTraderByEmail(email);
+        final TraderSess sess = serv.getTrader(mnem);
         final Posn posn = sess.findPosn(contr, maybeIsoToJd(settlDate));
         if (posn == null) {
             throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",

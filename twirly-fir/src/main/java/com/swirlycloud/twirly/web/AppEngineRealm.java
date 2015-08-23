@@ -4,20 +4,10 @@
 package com.swirlycloud.twirly.web;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.Filter;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -25,8 +15,6 @@ import com.google.appengine.api.utils.SystemProperty;
 
 public final class AppEngineRealm implements Realm {
     private final UserService userService;
-    // Cache of all traders.
-    private final Map<String, Boolean> traderCache = new ConcurrentHashMap<>();
 
     public AppEngineRealm() {
         userService = UserServiceFactory.getUserService();
@@ -71,31 +59,5 @@ public final class AppEngineRealm implements Realm {
     @Override
     public final boolean isUserAdmin(HttpServletRequest req) {
         return isUserSignedIn(req) && userService.isUserAdmin();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public final boolean isUserTrader(HttpServletRequest req) {
-        final User user = userService.getCurrentUser();
-        if (user == null) {
-            return false;
-        }
-        Boolean cached = traderCache.get(user.getEmail());
-        if (cached == null) {
-            final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL,
-                    user.getEmail());
-            final Query q = new Query("Trader").setFilter(filter).setKeysOnly();
-            final PreparedQuery pq = datastore.prepare(q);
-            final int traderCount = pq.countEntities(FetchOptions.Builder.withLimit(1));
-            if (traderCount == 1) {
-                // Assumption: once a trader, always a trader.
-                cached = Boolean.TRUE;
-                traderCache.put(user.getEmail(), cached);
-            } else {
-                cached = Boolean.FALSE;
-            }
-        }
-        return cached.booleanValue();
     }
 }

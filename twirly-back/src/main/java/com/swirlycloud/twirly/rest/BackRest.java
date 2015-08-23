@@ -119,120 +119,120 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
     }
 
     @Override
-    public final void getSess(String email, Params params, long now, Appendable out)
+    public final void getSess(String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetSess(email, params, now, out);
+            doGetSess(mnem, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getOrder(String email, Params params, long now, Appendable out)
+    public final void getOrder(String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetOrder(email, params, now, out);
+            doGetOrder(mnem, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getOrder(String email, String market, Params params, long now, Appendable out)
+    public final void getOrder(String mnem, String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetOrder(email, market, params, now, out);
+            doGetOrder(mnem, market, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getOrder(String email, String market, long id, Params params, long now,
+    public final void getOrder(String mnem, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetOrder(email, market, id, params, now, out);
+            doGetOrder(mnem, market, id, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getTrade(String email, Params params, long now, Appendable out)
+    public final void getTrade(String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetTrade(email, params, now, out);
+            doGetTrade(mnem, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getTrade(String email, String market, Params params, long now, Appendable out)
+    public final void getTrade(String mnem, String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetTrade(email, market, params, now, out);
+            doGetTrade(mnem, market, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getTrade(String email, String market, long id, Params params, long now,
+    public final void getTrade(String mnem, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetTrade(email, market, id, params, now, out);
+            doGetTrade(mnem, market, id, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getPosn(String email, Params params, long now, Appendable out)
+    public final void getPosn(String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetPosn(email, params, now, out);
+            doGetPosn(mnem, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getPosn(String email, String contr, Params params, long now, Appendable out)
+    public final void getPosn(String mnem, String contr, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetPosn(email, contr, params, now, out);
+            doGetPosn(mnem, contr, params, now, out);
         } finally {
             serv.releaseRead();
         }
     }
 
     @Override
-    public final void getPosn(String email, String contr, int settlDate, Params params, long now,
+    public final void getPosn(String mnem, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetPosn(email, contr, settlDate, params, now, out);
+            doGetPosn(mnem, contr, settlDate, params, now, out);
         } finally {
             serv.releaseRead();
         }
@@ -297,25 +297,25 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         }
     }
 
-    public final void deleteOrder(String email, String market, long id, long now)
+    public final void deleteOrder(String mnem, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final TraderSess sess = serv.getTraderByEmail(email);
+            final TraderSess sess = serv.getTrader(mnem);
             serv.archiveOrder(sess, market, id, now);
         } finally {
             serv.releaseWrite();
         }
     }
 
-    public final void postOrder(String email, String market, @Nullable String ref, Side side,
+    public final void postOrder(String mnem, String market, @Nullable String ref, Side side,
             long ticks, long lots, long minLots, Params params, long now, Appendable out)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final TraderSess sess = serv.getTraderByEmail(email);
+            final TraderSess sess = serv.getTrader(mnem);
             final MarketBook book = serv.getMarket(market);
             try (final Trans trans = new Trans()) {
                 serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
@@ -326,13 +326,13 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         }
     }
 
-    public final void putOrder(String email, String market, long id, long lots, Params params,
+    public final void putOrder(String mnem, String market, long id, long lots, Params params,
             long now, Appendable out) throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final TraderSess sess = serv.getTraderByEmail(email);
+            final TraderSess sess = serv.getTrader(mnem);
             final MarketBook book = serv.getMarket(market);
             try (final Trans trans = new Trans()) {
                 if (lots > 0) {
@@ -347,12 +347,12 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         }
     }
 
-    public final void deleteTrade(String email, String market, long id, long now)
+    public final void deleteTrade(String mnem, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            final TraderSess sess = serv.getTraderByEmail(email);
+            final TraderSess sess = serv.getTrader(mnem);
             serv.archiveTrade(sess, market, id, now);
         } finally {
             serv.releaseWrite();

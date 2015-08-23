@@ -13,6 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.rest.Rest;
+
 @SuppressWarnings("serial")
 public final class FrontPageServlet extends HttpServlet {
 
@@ -52,6 +55,7 @@ public final class FrontPageServlet extends HttpServlet {
     }
 
     protected static Realm realm;
+    protected static Rest rest;
 
     @Override
     protected final void doDelete(HttpServletRequest req, HttpServletResponse resp)
@@ -65,18 +69,23 @@ public final class FrontPageServlet extends HttpServlet {
 
         Page page = getPage(req);
         if (page == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "page not found");
             return;
         }
-        final PageState state = new PageState(realm, req, resp, page);
+        final PageState state = new PageState(realm, rest, req, resp, page);
 
         // Expose state to JSP page.
         if (page.isRestricted() && !state.authenticate()) {
             return;
         }
         if (page == Page.TRADE) {
-            if (!state.isUserTrader()) {
-                page = Page.SIGNUP;
+            try {
+                if (!state.isUserTrader()) {
+                    page = Page.SIGNUP;
+                }
+            } catch (final ServiceUnavailableException e) {
+                resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, e.getMessage());
+                return;
             }
         } else if (page == Page.SIGNOUT) {
             // Invalidate security token.
@@ -97,7 +106,7 @@ public final class FrontPageServlet extends HttpServlet {
             super.doPost(req, resp);
             return;
         }
-        final PageState state = new PageState(realm, req, resp, page);
+        final PageState state = new PageState(realm, rest, req, resp, page);
         req.setAttribute("state", state);
         final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(
                 page.getJspPage());
@@ -112,5 +121,9 @@ public final class FrontPageServlet extends HttpServlet {
 
     public static void setRealm(Realm realm) {
         FrontPageServlet.realm = realm;
+    }
+
+    public static void setRest(Rest rest) {
+        FrontPageServlet.rest = rest;
     }
 }

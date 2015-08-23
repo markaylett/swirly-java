@@ -112,7 +112,7 @@ OS X Daemons
 After installing mysql-server and memcached from Mac Ports, start the daemons using the following
 commands:
 
-    $ auso launchctl load -w /Library/LaunchDaemons/org.macports.mysql56-server.plist
+    $ sudo launchctl load -w /Library/LaunchDaemons/org.macports.mysql56-server.plist
     $ sudo launchctl load -w /Library/LaunchDaemons/org.macports.memcached.plist
 
 JDBC Realm

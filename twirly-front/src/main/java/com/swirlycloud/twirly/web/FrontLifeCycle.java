@@ -126,6 +126,7 @@ public final class FrontLifeCycle implements ServletContextListener {
         // Commit.
         this.model = model;
         FrontPageServlet.setRealm(realm);
+        FrontPageServlet.setRest(rest);
         RestServlet.setRealm(realm);
         RestServlet.setRest(rest);
     }

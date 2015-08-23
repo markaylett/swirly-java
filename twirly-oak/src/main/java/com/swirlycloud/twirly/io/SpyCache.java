@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.io;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import net.spy.memcached.MemcachedClient;
 
@@ -24,7 +25,7 @@ public final @NonNullByDefault class SpyCache implements Cache {
 
     @Override
     public final void close() throws Exception {
-        mc.shutdown();
+        mc.shutdown(5, TimeUnit.SECONDS);
     }
 
     @Override
@@ -40,5 +41,10 @@ public final @NonNullByDefault class SpyCache implements Cache {
     @Override
     public final void update(String key, Object val) {
         mc.set(key, EXPIRY, val);
+    }
+
+    @Override
+    public final void delete(String key) {
+        mc.delete(key);
     }
 }

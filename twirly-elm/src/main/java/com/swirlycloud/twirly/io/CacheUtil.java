@@ -28,5 +28,9 @@ public final @NonNullByDefault class CacheUtil {
         @Override
         public final void update(String key, Object val) {
         }
+
+        @Override
+        public final void delete(String key) {
+        }
     };
 }

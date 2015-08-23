@@ -35,7 +35,7 @@ public final class BackSessServlet extends SessServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = realm.getUserEmail(req);
+            final String trader = getTrader(req);
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -45,14 +45,14 @@ public final class BackSessServlet extends SessServlet {
             if (parts.length > 0) {
                 if ("order".equals(parts[TYPE_PART])) {
                     if (parts.length == 3) {
-                        rest.deleteOrder(email, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
-                                now);
+                        rest.deleteOrder(trader, parts[MARKET_PART],
+                                Long.parseLong(parts[ID_PART]), now);
                         match = true;
                     }
                 } else if ("trade".equals(parts[TYPE_PART])) {
                     if (parts.length == 3) {
-                        rest.deleteTrade(email, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
-                                now);
+                        rest.deleteTrade(trader, parts[MARKET_PART],
+                                Long.parseLong(parts[ID_PART]), now);
                         match = true;
                     }
                 }
@@ -80,7 +80,7 @@ public final class BackSessServlet extends SessServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = realm.getUserEmail(req);
+            final String trader = getTrader(req);
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -99,7 +99,7 @@ public final class BackSessServlet extends SessServlet {
                 if (!r.isValid(required, optional)) {
                     throw new BadRequestException("request fields are invalid");
                 }
-                rest.postOrder(email, market, r.getRef(), r.getSide(), r.getTicks(), r.getLots(),
+                rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getTicks(), r.getLots(),
                         r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             } else if ("trade".equals(parts[TYPE_PART])) {
 
@@ -135,7 +135,7 @@ public final class BackSessServlet extends SessServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-            final String email = realm.getUserEmail(req);
+            final String trader = getTrader(req);
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
@@ -151,7 +151,7 @@ public final class BackSessServlet extends SessServlet {
                 throw new BadRequestException("request fields are invalid");
             }
             final long now = now();
-            rest.putOrder(email, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());
+            rest.putOrder(trader, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

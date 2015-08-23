@@ -118,61 +118,61 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getSess(String email, Params params, long now, Appendable out)
+    public final void getSess(String mnem, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getSess");
     }
 
     @Override
-    public final void getOrder(String email, Params params, long now, Appendable out)
+    public final void getOrder(String mnem, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getOrder(String email, String market, Params params, long now, Appendable out)
+    public final void getOrder(String mnem, String market, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getOrder(String email, String market, long id, Params params, long now,
+    public final void getOrder(String mnem, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getTrade(String email, Params params, long now, Appendable out)
+    public final void getTrade(String mnem, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getTrade(String email, String market, Params params, long now, Appendable out)
+    public final void getTrade(String mnem, String market, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getTrade(String email, String market, long id, Params params, long now,
+    public final void getTrade(String mnem, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getPosn(String email, Params params, long now, Appendable out)
+    public final void getPosn(String mnem, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }
 
     @Override
-    public final void getPosn(String email, String contr, Params params, long now, Appendable out)
+    public final void getPosn(String mnem, String contr, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }
 
     @Override
-    public final void getPosn(String email, String contr, int settlDate, Params params, long now,
+    public final void getPosn(String mnem, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }

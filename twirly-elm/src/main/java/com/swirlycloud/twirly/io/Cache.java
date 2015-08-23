@@ -37,4 +37,12 @@ public @NonNullByDefault interface Cache extends AutoCloseable {
      *            The cache entry value.
      */
     void update(String key, Object val);
+
+    /**
+     * Delete cache entry.
+     * 
+     * @param key
+     *            The cache entry key.
+     */
+    void delete(String key);
 }

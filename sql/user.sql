@@ -55,13 +55,5 @@ INSERT INTO UserGroup_t (userId, groupId)
        )
 ;
 
-INSERT INTO Trader_t (mnem, display, email)
-       VALUES ('MARAYL', 'Mark Aylett', 'mark.aylett@gmail.com')
-;
-
-INSERT INTO Trader_t (mnem, display, email)
-       VALUES ('RAMMAC', 'Ram Macharaj', 'ram.mac@gmail.com')
-;
-
 COMMIT
 ;

@@ -92,6 +92,7 @@ public @NonNullByDefault class Serv {
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final Trader trader = (Trader) node;
             emailIdx.insert(trader);
+            cache.update("email:" + trader.getEmail(), trader.getMnem());
         }
     }
 
@@ -313,6 +314,7 @@ public @NonNullByDefault class Serv {
         traders.insert(trader);
         emailIdx.insert(trader);
         cache.update("trader", traders);
+        cache.update("email:" + email, mnem);
         return trader;
     }
 
@@ -445,14 +447,6 @@ public @NonNullByDefault class Serv {
 
     public final @Nullable TraderSess findTraderByEmail(String email) {
         return (TraderSess) emailIdx.find(email);
-    }
-
-    public final TraderSess getTraderByEmail(String email) throws NotFoundException {
-        final TraderSess sess = (TraderSess) emailIdx.find(email);
-        if (sess == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        return sess;
     }
 
     public final Market createMarket(String mnem, String display, Contr contr, int settlDay,

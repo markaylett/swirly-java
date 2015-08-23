@@ -81,7 +81,15 @@ public final class CacheModel implements Model {
     @Override
     public final @Nullable String selectTraderByEmail(@NonNull String email)
             throws InterruptedException {
-        return model.selectTraderByEmail(email);
+        final String key = "email:" + email;
+        String trader = (String) cache.select(key);
+        if (trader == null) {
+            trader = model.selectTraderByEmail(email);
+            // An empty value indicates that there is no trader with this email, as opposed to a
+            // null value, which indicates that the cache is empty.
+            cache.insert(key, trader != null ? trader : "");
+        }
+        return trader != null && !trader.isEmpty() ? trader : null;
     }
 
     @Override

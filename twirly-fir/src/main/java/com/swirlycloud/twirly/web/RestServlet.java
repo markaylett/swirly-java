@@ -12,12 +12,13 @@ import javax.json.stream.JsonParser;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.rest.Request;
 import com.swirlycloud.twirly.rest.Rest;
 import com.swirlycloud.twirly.util.Params;
@@ -79,11 +80,14 @@ public abstract class RestServlet extends HttpServlet {
         resp.setStatus(e.getNum());
     }
 
-    protected final @NonNull String getTrader(HttpServletRequest req) {
-        final HttpSession sess = req.getSession();
-        final String trader = (String) sess.getAttribute("trader");
-        // FIXME
-        assert trader != null;
+    protected final @NonNull String getTrader(HttpServletRequest req) throws NotFoundException,
+            ServiceUnavailableException, IOException {
+        final String email = realm.getUserEmail(req);
+        assert email != null;
+        final String trader = rest.findTraderByEmail(email);
+        if (trader == null) {
+            throw new NotFoundException(String.format("trader '%s' does not exist", email));
+        }
         return trader;
     }
 
