@@ -48,7 +48,6 @@ import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
@@ -96,7 +95,7 @@ public final class FixServer extends MessageCracker implements Application {
     @SuppressWarnings("null")
     private final TraderSess getTraderLocked(SessionID sessionId) throws NotFoundException {
         try {
-            return serv.getTraderByEmail(settings.getString(sessionId, "Email"));
+            return serv.getTrader(settings.getString(sessionId, "Trader"));
         } catch (ConfigError | FieldConvertError e) {
             return null;
         }
@@ -149,10 +148,9 @@ public final class FixServer extends MessageCracker implements Application {
             final Iterator<SessionID> it = settings.sectionIterator();
             while (it.hasNext()) {
                 final SessionID sessionId = it.next();
-                final String email = settings.getString(sessionId, "Email");
-                assert email != null;
-                final Trader trader = serv.getTraderByEmail(email);
-                traderIdx.put(trader.getMnem(), sessionId);
+                final String trader = settings.getString(sessionId, "Trader");
+                assert trader != null;
+                traderIdx.put(trader, sessionId);
             }
         } finally {
             serv.releaseRead();

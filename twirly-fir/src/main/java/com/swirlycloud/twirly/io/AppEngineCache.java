@@ -47,4 +47,9 @@ public final @NonNullByDefault class AppEngineCache implements Cache {
     public final void update(String key, Object val) {
         ms.put(key, val, EXPIRY, SetPolicy.SET_ALWAYS);
     }
+
+    @Override
+    public final void delete(String key) {
+        ms.delete(key);
+    }
 }

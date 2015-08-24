@@ -69,8 +69,8 @@ public final class BackRecServlet extends RecServlet {
                 }
 
                 String email = realm.getUserEmail(req);
-                if (r.isEmailSet()) {
-                    if (!email.equals(r.getEmail()) && !realm.isUserAdmin(req)) {
+                if (r.isEmailSet() && !r.getEmail().equals(email)) {
+                    if (!realm.isUserAdmin(req)) {
                         throw new ForbiddenException("user is not an admin");
                     }
                     email = r.getEmail();
@@ -131,8 +131,8 @@ public final class BackRecServlet extends RecServlet {
                 }
 
                 String email = realm.getUserEmail(req);
-                if (r.isEmailSet()) {
-                    if (!email.equals(r.getEmail()) && !realm.isUserAdmin(req)) {
+                if (r.isEmailSet() && !email.equals(r.getEmail())) {
+                    if (!realm.isUserAdmin(req)) {
                         throw new ForbiddenException("user is not an admin");
                     }
                     email = r.getEmail();

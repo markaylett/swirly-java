@@ -48,9 +48,4 @@ public final class CatalinaRealm implements Realm {
     public final boolean isUserAdmin(HttpServletRequest req) {
         return isUserSignedIn(req) && req.isUserInRole("admin");
     }
-
-    @Override
-    public final boolean isUserTrader(HttpServletRequest req) {
-        return isUserSignedIn(req) && req.isUserInRole("trader");
-    }
 }

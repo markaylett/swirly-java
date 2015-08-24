@@ -56,9 +56,8 @@ public @NonNullByDefault class Serv {
     }
 
     private final void insertOrder(Order order) {
-        final Trader trader = (Trader) traders.find(order.getTrader());
-        assert trader != null;
-        final TraderSess sess = getLazySess(trader);
+        final TraderSess sess = (TraderSess) traders.find(order.getTrader());
+        assert sess != null;
         sess.insertOrder(order);
         if (!order.isDone()) {
             final MarketBook book = (MarketBook) markets.find(order.getMarket());
@@ -93,6 +92,7 @@ public @NonNullByDefault class Serv {
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final Trader trader = (Trader) node;
             emailIdx.insert(trader);
+            cache.update("email:" + trader.getEmail(), trader.getMnem());
         }
     }
 
@@ -110,9 +110,8 @@ public @NonNullByDefault class Serv {
             final Exec trade = (Exec) node;
             node = popNext(node);
 
-            final Trader trader = (Trader) traders.find(trade.getTrader());
-            assert trader != null;
-            final TraderSess sess = getLazySess(trader);
+            final TraderSess sess = (TraderSess) traders.find(trade.getTrader());
+            assert sess != null;
             sess.insertTrade(trade);
         }
     }
@@ -122,9 +121,8 @@ public @NonNullByDefault class Serv {
             final Posn posn = (Posn) node;
             node = popNext(node);
 
-            final Trader trader = (Trader) traders.find(posn.getTrader());
-            assert trader != null;
-            final TraderSess sess = getLazySess(trader);
+            final TraderSess sess = (TraderSess) traders.find(posn.getTrader());
+            assert sess != null;
             sess.insertPosn(posn);
         }
     }
@@ -145,8 +143,8 @@ public @NonNullByDefault class Serv {
         return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state);
     }
 
-    private final Exec newExec(Market market, Instruct instruct, long now) {
-        return factory.newExec(market.allocExecId(), instruct, now);
+    private final Exec newExec(MarketBook book, Instruct instruct, long now) {
+        return factory.newExec(book.allocExecId(), instruct, now);
     }
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
@@ -157,7 +155,7 @@ public @NonNullByDefault class Serv {
                 : takerOrder.getTicks() - makerOrder.getTicks();
     }
 
-    private final void matchOrders(TraderSess takerSess, Market market, Order takerOrder,
+    private final void matchOrders(TraderSess takerSess, MarketBook book, Order takerOrder,
             BookSide side, Direct direct, Trans trans) {
 
         final long now = takerOrder.getCreated();
@@ -176,12 +174,12 @@ public @NonNullByDefault class Serv {
                 break;
             }
 
-            final long makerId = market.allocExecId();
-            final long takerId = market.allocExecId();
+            final long makerId = book.allocExecId();
+            final long takerId = book.allocExecId();
 
             final TraderSess makerSess = (TraderSess) traders.find(makerOrder.getTrader());
             assert makerSess != null;
-            final Posn makerPosn = makerSess.getLazyPosn(market);
+            final Posn makerPosn = makerSess.getLazyPosn(book);
 
             final Match match = new Match();
             match.makerOrder = makerOrder;
@@ -213,7 +211,7 @@ public @NonNullByDefault class Serv {
 
         if (!trans.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
-            trans.posn = takerSess.getLazyPosn(market);
+            trans.posn = takerSess.getLazyPosn(book);
             takerOrder.trade(takenLots, takenCost, lastTicks, lastLots, now);
         }
     }
@@ -316,6 +314,7 @@ public @NonNullByDefault class Serv {
         traders.insert(trader);
         emailIdx.insert(trader);
         cache.update("trader", traders);
+        cache.update("email:" + email, mnem);
         return trader;
     }
 
@@ -446,12 +445,8 @@ public @NonNullByDefault class Serv {
         return sess;
     }
 
-    public final TraderSess getTraderByEmail(String email) throws NotFoundException {
-        final TraderSess sess = (TraderSess) emailIdx.find(email);
-        if (sess == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
-        }
-        return sess;
+    public final @Nullable TraderSess findTraderByEmail(String email) {
+        return (TraderSess) emailIdx.find(email);
     }
 
     public final Market createMarket(String mnem, String display, Contr contr, int settlDay,
@@ -539,10 +534,6 @@ public @NonNullByDefault class Serv {
             final TraderSess sess = (TraderSess) node;
             sess.settlPosns(busDay);
         }
-    }
-
-    public final TraderSess getLazySess(Trader trader) {
-        return (TraderSess) trader;
     }
 
     public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
@@ -807,12 +798,12 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    public final Exec createTrade(TraderSess sess, Market market, String ref, Side side,
+    public final Exec createTrade(TraderSess sess, MarketBook book, String ref, Side side,
             long ticks, long lots, @Nullable Role role, @Nullable String cpty, long created)
             throws NotFoundException, ServiceUnavailableException {
-        final Posn posn = sess.getLazyPosn(market);
-        final Exec trade = Exec.manual(market.allocExecId(), sess.getMnem(), market.getMnem(),
-                market.getContr(), market.getSettlDay(), ref, side, ticks, lots, role, cpty,
+        final Posn posn = sess.getLazyPosn(book);
+        final Exec trade = Exec.manual(book.allocExecId(), sess.getMnem(), book.getMnem(),
+                book.getContr(), book.getSettlDay(), ref, side, ticks, lots, role, cpty,
                 created);
         if (cpty != null) {
             // Create back-to-back trade if counter-party is specified.
@@ -820,11 +811,11 @@ public @NonNullByDefault class Serv {
             if (cptySess == null) {
                 throw new NotFoundException(String.format("cpty '%s' does not exist", cpty));
             }
-            final Posn cptyPosn = cptySess.getLazyPosn(market);
-            final Exec cptyTrade = trade.inverse(market.allocExecId());
+            final Posn cptyPosn = cptySess.getLazyPosn(book);
+            final Exec cptyTrade = trade.inverse(book.allocExecId());
             trade.setSlNext(cptyTrade);
             try {
-                journ.insertExecList(market.getMnem(), trade);
+                journ.insertExecList(book.getMnem(), trade);
             } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }

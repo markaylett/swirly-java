@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
@@ -75,6 +76,20 @@ public final class CacheModel implements Model {
             cache.insert("trader", t);
         }
         return t;
+    }
+
+    @Override
+    public final @Nullable String selectTraderByEmail(@NonNull String email)
+            throws InterruptedException {
+        final String key = "email:" + email;
+        String trader = (String) cache.select(key);
+        if (trader == null) {
+            trader = model.selectTraderByEmail(email);
+            // An empty value indicates that there is no trader with this email, as opposed to a
+            // null value, which indicates that the cache is empty.
+            cache.insert(key, trader != null ? trader : "");
+        }
+        return trader != null && !trader.isEmpty() ? trader : null;
     }
 
     @Override

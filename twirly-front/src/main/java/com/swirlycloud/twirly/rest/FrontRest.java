@@ -8,6 +8,7 @@ import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
@@ -60,6 +61,18 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
+    public final @Nullable String findTraderByEmail(String email)
+            throws ServiceUnavailableException {
+        try {
+            return model.selectTraderByEmail(email);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+    }
+
+    @Override
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         out.append("{\"assets\":");
@@ -105,61 +118,61 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getSess(String email, Params params, long now, Appendable out)
+    public final void getSess(String mnem, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getSess");
     }
 
     @Override
-    public final void getOrder(String email, Params params, long now, Appendable out)
+    public final void getOrder(String mnem, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getOrder(String email, String market, Params params, long now, Appendable out)
+    public final void getOrder(String mnem, String market, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getOrder(String email, String market, long id, Params params, long now,
+    public final void getOrder(String mnem, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getTrade(String email, Params params, long now, Appendable out)
+    public final void getTrade(String mnem, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getTrade(String email, String market, Params params, long now, Appendable out)
+    public final void getTrade(String mnem, String market, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getTrade(String email, String market, long id, Params params, long now,
+    public final void getTrade(String mnem, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getPosn(String email, Params params, long now, Appendable out)
+    public final void getPosn(String mnem, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }
 
     @Override
-    public final void getPosn(String email, String contr, Params params, long now, Appendable out)
+    public final void getPosn(String mnem, String contr, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }
 
     @Override
-    public final void getPosn(String email, String contr, int settlDate, Params params, long now,
+    public final void getPosn(String mnem, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }

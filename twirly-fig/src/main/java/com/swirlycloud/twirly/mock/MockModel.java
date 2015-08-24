@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.mock;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
@@ -44,6 +45,11 @@ public class MockModel implements Model {
     @Override
     public MnemRbTree selectTrader() {
         return mockTrader.selectTrader();
+    }
+
+    @Override
+    public @Nullable String selectTraderByEmail(@NonNull String email) {
+        return mockTrader.selectTraderByEmail(email);
     }
 
     @Override

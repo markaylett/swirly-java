@@ -135,6 +135,16 @@ public class AppEngineModel implements Model {
     }
 
     @Override
+    public final @Nullable String selectTraderByEmail(@NonNull String email)
+            throws InterruptedException {
+        final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL, email);
+        final Query query = new Query(TRADER_KIND).setFilter(filter).setKeysOnly();
+        final PreparedQuery pq = datastore.prepare(query);
+        final Entity entity = pq.asSingleEntity();
+        return entity != null ? entity.getKey().getName() : null;
+    }
+
+    @Override
     public final @Nullable SlNode selectOrder() {
         final SlQueue q = new SlQueue();
         final Filter filter = new FilterPredicate("archive", FilterOperator.EQUAL, Boolean.FALSE);

@@ -10,8 +10,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Asset;
 import com.swirlycloud.twirly.domain.AssetType;
@@ -40,6 +42,7 @@ public class JdbcModel implements Model {
     private final PreparedStatement selectContrStmt;
     private final PreparedStatement selectMarketStmt;
     private final PreparedStatement selectTraderStmt;
+    private final PreparedStatement selectTraderByEmailStmt;
     private final PreparedStatement selectOrderStmt;
     private final PreparedStatement selectTradeStmt;
     private final PreparedStatement selectPosnStmt;
@@ -126,8 +129,8 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return factory.newOrder(id, trader, market, contr, settlDay, ref, state, side, ticks,
-                lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
+        return factory.newOrder(id, trader, market, contr, settlDay, ref, state, side, ticks, lots,
+                resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
     }
 
     private final @NonNull Exec getTrade(ResultSet rs) throws SQLException {
@@ -165,12 +168,55 @@ public class JdbcModel implements Model {
                 created);
     }
 
+    protected static void setParam(PreparedStatement stmt, int i, int val) throws SQLException {
+        stmt.setInt(i, val);
+    }
+
+    protected static void setNullIfZero(PreparedStatement stmt, int i, int val) throws SQLException {
+        if (val != 0) {
+            stmt.setInt(i, val);
+        } else {
+            stmt.setNull(i, Types.INTEGER);
+        }
+    }
+
+    protected static void setParam(PreparedStatement stmt, int i, long val) throws SQLException {
+        stmt.setLong(i, val);
+    }
+
+    protected static void setNullIfZero(PreparedStatement stmt, int i, long val)
+            throws SQLException {
+        if (val != 0) {
+            stmt.setLong(i, val);
+        } else {
+            stmt.setNull(i, Types.INTEGER);
+        }
+    }
+
+    protected static void setParam(PreparedStatement stmt, int i, String val) throws SQLException {
+        stmt.setString(i, val);
+    }
+
+    protected static void setNullIfEmpty(PreparedStatement stmt, int i, String val)
+            throws SQLException {
+        if (val != null && !val.isEmpty()) {
+            stmt.setString(i, val);
+        } else {
+            stmt.setNull(i, Types.CHAR);
+        }
+    }
+
+    protected static void setParam(PreparedStatement stmt, int i, boolean val) throws SQLException {
+        stmt.setBoolean(i, val);
+    }
+
     public JdbcModel(String url, String user, String password, Factory factory) {
         Connection conn = null;
         PreparedStatement selectAssetStmt = null;
         PreparedStatement selectContrStmt = null;
         PreparedStatement selectMarketStmt = null;
         PreparedStatement selectTraderStmt = null;
+        PreparedStatement selectTraderByEmailStmt = null;
         PreparedStatement selectOrderStmt = null;
         PreparedStatement selectTradeStmt = null;
         PreparedStatement selectPosnStmt = null;
@@ -186,6 +232,8 @@ public class JdbcModel implements Model {
                         .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM Market_v");
                 selectTraderStmt = conn
                         .prepareStatement("SELECT mnem, display, email FROM Trader_t");
+                selectTraderByEmailStmt = conn
+                        .prepareStatement("SELECT mnem FROM Trader_t WHERE email = ?");
                 selectOrderStmt = conn
                         .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
                 selectTradeStmt = conn
@@ -199,6 +247,7 @@ public class JdbcModel implements Model {
                 this.selectContrStmt = selectContrStmt;
                 this.selectMarketStmt = selectMarketStmt;
                 this.selectTraderStmt = selectTraderStmt;
+                this.selectTraderByEmailStmt = selectTraderByEmailStmt;
                 this.selectOrderStmt = selectOrderStmt;
                 this.selectTradeStmt = selectTradeStmt;
                 this.selectPosnStmt = selectPosnStmt;
@@ -213,6 +262,9 @@ public class JdbcModel implements Model {
                     }
                     if (selectOrderStmt != null) {
                         selectOrderStmt.close();
+                    }
+                    if (selectTraderByEmailStmt != null) {
+                        selectTraderByEmailStmt.close();
                     }
                     if (selectTraderStmt != null) {
                         selectTraderStmt.close();
@@ -241,6 +293,7 @@ public class JdbcModel implements Model {
         selectPosnStmt.close();
         selectTradeStmt.close();
         selectOrderStmt.close();
+        selectTraderByEmailStmt.close();
         selectTraderStmt.close();
         selectMarketStmt.close();
         selectContrStmt.close();
@@ -298,6 +351,21 @@ public class JdbcModel implements Model {
             throw new UncheckedIOException(e);
         }
         return t;
+    }
+
+    @Override
+    public final @Nullable String selectTraderByEmail(@NonNull String email) {
+        try {
+            setParam(selectTraderByEmailStmt, 1, email);
+            try (final ResultSet rs = selectTraderByEmailStmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("mnem");
+                }
+            }
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+        return null;
     }
 
     @Override

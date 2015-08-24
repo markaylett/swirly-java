@@ -23,7 +23,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class View implements Jsonifiable, Financial {
+public final @NonNullByDefault class MarketView implements Jsonifiable, Financial {
     /**
      * Maximum price levels in view.
      */
@@ -32,30 +32,30 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
     private final String market;
     private final String contr;
     private final int settlDay;
-    private final Ladder ladder;
     private final long lastTicks;
     private final long lastLots;
     private final long lastTime;
+    private final Ladder ladder;
 
-    public View(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
+    public MarketView(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
             long lastLots, long lastTime) {
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.ladder = ladder;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
+        this.ladder = ladder;
     }
 
-    public View(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
+    public MarketView(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.ladder = ladder;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
+        this.ladder = ladder;
     }
 
     public static void parse(JsonParser p, Ladder ladder, int col) throws IOException {
@@ -77,14 +77,14 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
         throw new IOException("end-of array not found");
     }
 
-    public static View parse(JsonParser p) throws IOException {
+    public static MarketView parse(JsonParser p) throws IOException {
         String market = null;
         String contr = null;
         int settlDay = 0;
-        final Ladder ladder = new Ladder();
         long lastTicks = 0;
         long lastLots = 0;
         long lastTime = 0;
+        final Ladder ladder = new Ladder();
 
         String name = null;
         while (p.hasNext()) {
@@ -97,7 +97,8 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new View(market, contr, settlDay, ladder, lastTicks, lastLots, lastTime);
+                return new MarketView(market, contr, settlDay, ladder, lastTicks, lastLots,
+                        lastTime);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -176,7 +177,7 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final View other = (View) obj;
+        final MarketView other = (MarketView) obj;
         if (!market.equals(other.market)) {
             return false;
         }
@@ -210,8 +211,14 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
         } else {
             out.append("null");
         }
+        if (lastLots != 0) {
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
+        } else {
+            out.append(",\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
+        }
         out.append(",\"bidTicks\":[");
-
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
                 out.append(',');
@@ -277,14 +284,7 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
                 out.append("null");
             }
         }
-        if (lastLots != 0) {
-            out.append("],\"lastTicks\":").append(String.valueOf(lastTicks));
-            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
-            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
-        } else {
-            out.append("],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
-        }
-        out.append('}');
+        out.append("]}");
     }
 
     @Override
@@ -305,6 +305,18 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
     @Override
     public final boolean isSettlDaySet() {
         return settlDay != 0;
+    }
+
+    public final long getLastTicks() {
+        return lastTicks;
+    }
+
+    public final long getLastLots() {
+        return lastLots;
+    }
+
+    public final long getLastTime() {
+        return lastTime;
     }
 
     public final boolean isValidBid(int row) {
@@ -337,17 +349,5 @@ public final @NonNullByDefault class View implements Jsonifiable, Financial {
 
     public final long getOfferCount(int row) {
         return ladder.roundOfferCount(row);
-    }
-
-    public final long getLastTicks() {
-        return lastTicks;
-    }
-
-    public final long getLastLots() {
-        return lastLots;
-    }
-
-    public final long getLastTime() {
-        return lastTime;
     }
 }

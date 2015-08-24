@@ -31,30 +31,15 @@ public @NonNullByDefault class Market extends Rec implements Financial {
     protected final int settlDay;
     protected final int expiryDay;
     protected int state;
-    protected long lastTicks;
-    protected long lastLots;
-    protected long lastTime;
-    protected transient long maxOrderId;
-    protected transient long maxExecId;
-
-    private Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
-            int expiryDay, int state) {
-        this(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L);
-    }
 
     Market(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
+            int state) {
         super(mnem, display);
         assert (settlDay == 0) == (expiryDay == 0);
         this.contr = contr;
         this.settlDay = settlDay;
         this.expiryDay = expiryDay;
         this.state = state;
-        this.lastTicks = lastTicks;
-        this.lastLots = lastLots;
-        this.lastTime = lastTime;
-        this.maxOrderId = maxOrderId;
-        this.maxExecId = maxExecId;
     }
 
     public static Market parse(JsonParser p) throws IOException {
@@ -144,14 +129,6 @@ public @NonNullByDefault class Market extends Rec implements Financial {
         this.contr = contr;
     }
 
-    public final long allocOrderId() {
-        return ++maxOrderId;
-    }
-
-    public final long allocExecId() {
-        return ++maxExecId;
-    }
-
     public final void setState(int state) {
         this.state = state;
     }
@@ -198,25 +175,5 @@ public @NonNullByDefault class Market extends Rec implements Financial {
 
     public final int getState() {
         return state;
-    }
-
-    public final long getLastTicks() {
-        return lastTicks;
-    }
-
-    public final long getLastLots() {
-        return lastLots;
-    }
-
-    public final long getLastTime() {
-        return lastTime;
-    }
-
-    public final long getMaxOrderId() {
-        return maxOrderId;
-    }
-
-    public final long getMaxExecId() {
-        return maxExecId;
     }
 }

@@ -27,9 +27,14 @@ public final @NonNullByDefault class MarketBook extends Market {
      */
     private static final int DEPTH_MAX = 5;
 
+    private transient long lastTicks;
+    private transient long lastLots;
+    private transient long lastTime;
     // Two sides constitute the book.
     private final transient BookSide bidSide = new BookSide();
     private final transient BookSide offerSide = new BookSide();
+    private transient long maxOrderId;
+    private transient long maxExecId;
 
     private final BookSide getSide(Side side) {
         return side == Side.BUY ? bidSide : offerSide;
@@ -37,8 +42,12 @@ public final @NonNullByDefault class MarketBook extends Market {
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
             int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
-        super(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime,
-                maxOrderId, maxExecId);
+        super(mnem, display, contr, settlDay, expiryDay, state);
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.lastTime = lastTime;
+        this.maxOrderId = maxOrderId;
+        this.maxExecId = maxExecId;
     }
 
     public final void toJsonView(@Nullable Params params, Appendable out) throws IOException {
@@ -62,11 +71,17 @@ public final @NonNullByDefault class MarketBook extends Market {
         } else {
             out.append("null");
         }
-        out.append(",\"bidTicks\":[");
+        if (lastLots != 0) {
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
+            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
+        } else {
+            out.append(",\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
+        }
 
+        out.append(",\"bidTicks\":[");
         final RbNode firstBid = bidSide.getFirstLevel();
         final RbNode firstOffer = offerSide.getFirstLevel();
-
         RbNode node = firstBid;
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -150,14 +165,7 @@ public final @NonNullByDefault class MarketBook extends Market {
                 out.append("null");
             }
         }
-        if (lastLots != 0) {
-            out.append("],\"lastTicks\":").append(String.valueOf(lastTicks));
-            out.append(",\"lastLots\":").append(String.valueOf(lastLots));
-            out.append(",\"lastTime\":").append(String.valueOf(lastTime));
-        } else {
-            out.append("],\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
-        }
-        out.append('}');
+        out.append("]}");
     }
 
     final void insertOrder(Order order) {
@@ -188,11 +196,39 @@ public final @NonNullByDefault class MarketBook extends Market {
         lastTime = now;
     }
 
+    final long allocOrderId() {
+        return ++maxOrderId;
+    }
+
+    final long allocExecId() {
+        return ++maxExecId;
+    }
+
+    final long getLastTicks() {
+        return lastTicks;
+    }
+
+    final long getLastLots() {
+        return lastLots;
+    }
+
+    final long getLastTime() {
+        return lastTime;
+    }
+
     final BookSide getBidSide() {
         return bidSide;
     }
 
     final BookSide getOfferSide() {
         return offerSide;
+    }
+
+    final long getMaxOrderId() {
+        return maxOrderId;
+    }
+
+    final long getMaxExecId() {
+        return maxExecId;
     }
 }

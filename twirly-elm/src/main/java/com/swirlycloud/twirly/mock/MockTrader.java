@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Trader;
@@ -21,6 +22,7 @@ public final class MockTrader {
     private final Factory factory;
     private final List<NullaryFunction<Trader>> list = new ArrayList<>();
     private final Map<String, NullaryFunction<Trader>> map = new HashMap<>();
+    private final Map<String, String> emailIdx = new HashMap<>();
 
     private final void put(final @NonNull String mnem, final String display,
             final @NonNull String email) {
@@ -32,6 +34,7 @@ public final class MockTrader {
         };
         list.add(fn);
         map.put(mnem, fn);
+        emailIdx.put(email, mnem);
     }
 
     public MockTrader(Factory factory) {
@@ -57,6 +60,10 @@ public final class MockTrader {
             t.insert(trader);
         }
         return t;
+    }
+
+    public final @Nullable String selectTraderByEmail(String email) {
+        return emailIdx.get(email);
     }
 
     public final void selectTrader(UnaryCallback<Trader> cb) {
