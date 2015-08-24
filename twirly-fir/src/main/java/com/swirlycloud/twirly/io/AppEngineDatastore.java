@@ -24,7 +24,7 @@ import com.swirlycloud.twirly.node.SlNode;
 
 public final class AppEngineDatastore extends AppEngineModel implements Datastore {
 
-    private final void updateMaxOrderId(Entity market, long id) {
+    private static void updateMaxOrderId(Entity market, long id) {
         Long maxOrderId = (Long) market.getProperty("maxOrderId");
         if (maxOrderId.longValue() < id) {
             maxOrderId = Long.valueOf(id);
@@ -32,7 +32,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         }
     }
 
-    private final void updateMaxExecId(Entity market, long id) {
+    private static void updateMaxExecId(Entity market, long id) {
         Long maxExecId = (Long) market.getProperty("maxExecId");
         if (maxExecId.longValue() < id) {
             maxExecId = Long.valueOf(id);
@@ -40,7 +40,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         }
     }
 
-    private final Entity newMarket(String mnem, String display, String contr, int settlDay,
+    private static Entity newMarket(String mnem, String display, String contr, int settlDay,
             int expiryDay, int state) {
         final Long zero = Long.valueOf(0);
         final Entity entity = new Entity(MARKET_KIND, mnem);
@@ -57,16 +57,16 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         return entity;
     }
 
-    private final Entity newTrader(String mnem, String display, String email) {
+    private static Entity newTrader(String mnem, String display, String email) {
         final Entity entity = new Entity(TRADER_KIND, mnem);
         entity.setUnindexedProperty("display", display);
         entity.setProperty("email", email);
         return entity;
     }
 
-    private final Entity newOrder(Entity market, Exec exec) {
+    private static Entity newOrder(Entity market, Exec exec) {
         final Entity entity = new Entity(ORDER_KIND, exec.getOrderId(), market.getKey());
-        entity.setUnindexedProperty("trader", exec.getTrader());
+        entity.setProperty("trader", exec.getTrader());
         entity.setUnindexedProperty("market", exec.getMarket());
         entity.setUnindexedProperty("contr", exec.getContr());
         entity.setUnindexedProperty("settlDay", nullIfZero(exec.getSettlDay()));
@@ -93,10 +93,10 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         return entity;
     }
 
-    private final Entity newExec(Entity market, Exec exec) {
+    private static Entity newExec(Entity market, Exec exec) {
         final Entity entity = new Entity(EXEC_KIND, exec.getId(), market.getKey());
         entity.setUnindexedProperty("orderId", nullIfZero(exec.getOrderId()));
-        entity.setUnindexedProperty("trader", exec.getTrader());
+        entity.setProperty("trader", exec.getTrader());
         entity.setUnindexedProperty("market", exec.getMarket());
         entity.setUnindexedProperty("contr", exec.getContr());
         entity.setUnindexedProperty("settlDay", nullIfZero(exec.getSettlDay()));
@@ -133,7 +133,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         return entity;
     }
 
-    private final Entity applyExec(Entity order, Exec exec) {
+    private static Entity applyExec(Entity order, Exec exec) {
         order.setProperty("state", exec.getState().name());
         order.setUnindexedProperty("lots", exec.getLots());
         order.setProperty("resd", exec.getResd());

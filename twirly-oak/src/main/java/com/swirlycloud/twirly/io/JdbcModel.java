@@ -168,6 +168,78 @@ public class JdbcModel implements Model {
                 created);
     }
 
+    private final SlNode selectOrder(PreparedStatement stmt) {
+        final SlQueue q = new SlQueue();
+        try (final ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                q.insertBack(getOrder(rs));
+            }
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+        return q.getFirst();
+    }
+
+    private final SlNode selectTrade(PreparedStatement stmt) {
+        final SlQueue q = new SlQueue();
+        try (final ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                q.insertBack(getTrade(rs));
+            }
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+        return q.getFirst();
+    }
+
+    private final SlNode selectPosn(PreparedStatement stmt, int busDay) {
+        final PosnTree posns = new PosnTree();
+        try (final ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                final String trader = rs.getString("trader");
+                final String contr = rs.getString("contr");
+                int settlDay = rs.getInt("settlDay");
+                assert trader != null;
+                assert contr != null;
+                // FIXME: Consider time-of-day.
+                if (settlDay != 0 && settlDay <= busDay) {
+                    settlDay = 0;
+                }
+                // Lazy position.
+                Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
+                if (posn == null || !posn.getTrader().equals(trader)
+                        || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
+                    final RbNode parent = posn;
+                    assert trader != null;
+                    assert contr != null;
+                    posn = factory.newPosn(trader, contr, settlDay);
+                    posns.pinsert(posn, parent);
+                }
+                final Side side = Side.valueOf(rs.getInt("sideId"));
+                final long cost = rs.getLong("cost");
+                final long lots = rs.getLong("lots");
+                if (side == Side.BUY) {
+                    posn.addBuy(cost, lots);
+                } else {
+                    assert side == Side.SELL;
+                    posn.addSell(cost, lots);
+                }
+            }
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+        final SlQueue q = new SlQueue();
+        for (;;) {
+            final Posn posn = (Posn) posns.getRoot();
+            if (posn == null) {
+                break;
+            }
+            posns.remove(posn);
+            q.insertBack(posn);
+        }
+        return q.getFirst();
+    }
+
     protected static void setParam(PreparedStatement stmt, int i, int val) throws SQLException {
         stmt.setInt(i, val);
     }
@@ -370,76 +442,16 @@ public class JdbcModel implements Model {
 
     @Override
     public final SlNode selectOrder() {
-        final SlQueue q = new SlQueue();
-        try (final ResultSet rs = selectOrderStmt.executeQuery()) {
-            while (rs.next()) {
-                q.insertBack(getOrder(rs));
-            }
-        } catch (final SQLException e) {
-            throw new UncheckedIOException(e);
-        }
-        return q.getFirst();
+        return selectOrder(selectOrderStmt);
     }
 
     @Override
     public final SlNode selectTrade() {
-        final SlQueue q = new SlQueue();
-        try (final ResultSet rs = selectTradeStmt.executeQuery()) {
-            while (rs.next()) {
-                q.insertBack(getTrade(rs));
-            }
-        } catch (final SQLException e) {
-            throw new UncheckedIOException(e);
-        }
-        return q.getFirst();
+        return selectTrade(selectTradeStmt);
     }
 
     @Override
     public final SlNode selectPosn(int busDay) {
-        final PosnTree posns = new PosnTree();
-        try (final ResultSet rs = selectPosnStmt.executeQuery()) {
-            while (rs.next()) {
-                final String trader = rs.getString("trader");
-                final String contr = rs.getString("contr");
-                int settlDay = rs.getInt("settlDay");
-                assert trader != null;
-                assert contr != null;
-                // FIXME: Consider time-of-day.
-                if (settlDay != 0 && settlDay <= busDay) {
-                    settlDay = 0;
-                }
-                // Lazy position.
-                Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
-                if (posn == null || !posn.getTrader().equals(trader)
-                        || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
-                    final RbNode parent = posn;
-                    assert trader != null;
-                    assert contr != null;
-                    posn = factory.newPosn(trader, contr, settlDay);
-                    posns.pinsert(posn, parent);
-                }
-                final Side side = Side.valueOf(rs.getInt("sideId"));
-                final long cost = rs.getLong("cost");
-                final long lots = rs.getLong("lots");
-                if (side == Side.BUY) {
-                    posn.addBuy(cost, lots);
-                } else {
-                    assert side == Side.SELL;
-                    posn.addSell(cost, lots);
-                }
-            }
-        } catch (final SQLException e) {
-            throw new UncheckedIOException(e);
-        }
-        final SlQueue q = new SlQueue();
-        for (;;) {
-            final Posn posn = (Posn) posns.getRoot();
-            if (posn == null) {
-                break;
-            }
-            posns.remove(posn);
-            q.insertBack(posn);
-        }
-        return q.getFirst();
+        return selectPosn(selectPosnStmt, busDay);
     }
 }

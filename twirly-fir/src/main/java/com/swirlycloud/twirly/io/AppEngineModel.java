@@ -67,6 +67,141 @@ public class AppEngineModel implements Model {
         }
     }
 
+    private final @Nullable SlNode selectOrder(@NonNull final Filter filter) {
+        final SlQueue q = new SlQueue();
+        foreachMarket(new UnaryCallback<Entity>() {
+            @Override
+            public final void call(Entity arg) {
+                final Query query = new Query(ORDER_KIND, arg.getKey()).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(query);
+                for (final Entity entity : pq.asIterable()) {
+                    final long id = entity.getKey().getId();
+                    final String trader = (String) entity.getProperty("trader");
+                    final String market = (String) entity.getProperty("market");
+                    final String contr = (String) entity.getProperty("contr");
+                    final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    final String ref = (String) entity.getProperty("ref");
+                    @SuppressWarnings("null")
+                    final State state = State.valueOf((String) entity.getProperty("state"));
+                    @SuppressWarnings("null")
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
+                    final long ticks = (Long) entity.getProperty("ticks");
+                    final long lots = (Long) entity.getProperty("lots");
+                    final long resd = (Long) entity.getProperty("resd");
+                    final long exec = (Long) entity.getProperty("exec");
+                    final long cost = (Long) entity.getProperty("cost");
+                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
+                    final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
+                    final long minLots = (Long) entity.getProperty("minLots");
+                    final long created = (Long) entity.getProperty("created");
+                    final long modified = (Long) entity.getProperty("modified");
+
+                    assert trader != null;
+                    assert market != null;
+                    assert contr != null;
+                    final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
+                            state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
+                            minLots, created, modified);
+                    q.insertBack(order);
+                }
+            }
+        });
+        return q.getFirst();
+    }
+
+    private final @Nullable SlNode selectTrade(@NonNull final Filter filter) {
+        final SlQueue q = new SlQueue();
+        foreachMarket(new UnaryCallback<Entity>() {
+            @Override
+            public final void call(Entity arg) {
+                final Query query = new Query(EXEC_KIND, arg.getKey()).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(query);
+                for (final Entity entity : pq.asIterable()) {
+                    final long id = entity.getKey().getId();
+                    final long orderId = (Long) entity.getProperty("orderId");
+                    final String trader = (String) entity.getProperty("trader");
+                    final String market = (String) entity.getProperty("market");
+                    final String contr = (String) entity.getProperty("contr");
+                    final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    final String ref = (String) entity.getProperty("ref");
+                    @SuppressWarnings("null")
+                    final State state = State.valueOf((String) entity.getProperty("state"));
+                    @SuppressWarnings("null")
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
+                    final long ticks = (Long) entity.getProperty("ticks");
+                    final long lots = (Long) entity.getProperty("lots");
+                    final long resd = (Long) entity.getProperty("resd");
+                    final long exec = (Long) entity.getProperty("exec");
+                    final long cost = (Long) entity.getProperty("cost");
+                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
+                    final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
+                    final long minLots = (Long) entity.getProperty("minLots");
+                    final long matchId = (Long) entity.getProperty("matchId");
+                    final String s = (String) entity.getProperty("role");
+                    final Role role = s != null ? Role.valueOf(s) : null;
+                    final String cpty = (String) entity.getProperty("cpty");
+                    final long created = (Long) entity.getProperty("created");
+
+                    assert trader != null;
+                    assert market != null;
+                    assert contr != null;
+                    final Exec trade = factory.newExec(id, orderId, trader, market, contr,
+                            settlDay, ref, state, side, ticks, lots, resd, exec, cost, lastTicks,
+                            lastLots, minLots, matchId, role, cpty, created);
+                    q.insertBack(trade);
+                }
+            }
+        });
+        return q.getFirst();
+    }
+
+    private final @Nullable SlNode selectPosn(@NonNull final Filter filter, final int busDay) {
+        final PosnTree posns = new PosnTree();
+        foreachMarket(new UnaryCallback<Entity>() {
+            @Override
+            public final void call(Entity arg) {
+                final Query query = new Query(EXEC_KIND).setFilter(filter);
+                final PreparedQuery pq = datastore.prepare(query);
+                for (final Entity entity : pq.asIterable()) {
+                    final String trader = (String) entity.getProperty("trader");
+                    final String contr = (String) entity.getProperty("contr");
+                    int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    assert trader != null;
+                    assert contr != null;
+                    // FIXME: Consider time-of-day.
+                    if (settlDay != 0 && settlDay <= busDay) {
+                        settlDay = 0;
+                    }
+                    // Lazy position.
+                    Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
+                    if (posn == null || !posn.getTrader().equals(trader)
+                            || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
+                        final RbNode parent = posn;
+                        assert trader != null;
+                        assert contr != null;
+                        posn = factory.newPosn(trader, contr, settlDay);
+                        posns.pinsert(posn, parent);
+                    }
+                    @SuppressWarnings("null")
+                    final Side side = Side.valueOf((String) entity.getProperty("side"));
+                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
+                    final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
+                    posn.addTrade(side, lastTicks, lastLots);
+                }
+            }
+        });
+        final SlQueue q = new SlQueue();
+        for (;;) {
+            final Posn posn = (Posn) posns.getRoot();
+            if (posn == null) {
+                break;
+            }
+            posns.remove(posn);
+            q.insertBack(posn);
+        }
+        return q.getFirst();
+    }
+
     public AppEngineModel(Factory factory) {
         this.factory = factory;
         mockAsset = new MockAsset(factory);
@@ -146,146 +281,24 @@ public class AppEngineModel implements Model {
 
     @Override
     public final @Nullable SlNode selectOrder() {
-        final SlQueue q = new SlQueue();
         final Filter filter = new FilterPredicate("archive", FilterOperator.EQUAL, Boolean.FALSE);
-        foreachMarket(new UnaryCallback<Entity>() {
-            @Override
-            public final void call(Entity arg) {
-                final Query query = new Query(ORDER_KIND, arg.getKey()).setFilter(filter);
-                final PreparedQuery pq = datastore.prepare(query);
-                for (final Entity entity : pq.asIterable()) {
-                    final long id = entity.getKey().getId();
-                    final String trader = (String) entity.getProperty("trader");
-                    final String market = (String) entity.getProperty("market");
-                    final String contr = (String) entity.getProperty("contr");
-                    final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
-                    final String ref = (String) entity.getProperty("ref");
-                    @SuppressWarnings("null")
-                    final State state = State.valueOf((String) entity.getProperty("state"));
-                    @SuppressWarnings("null")
-                    final Side side = Side.valueOf((String) entity.getProperty("side"));
-                    final long ticks = (Long) entity.getProperty("ticks");
-                    final long lots = (Long) entity.getProperty("lots");
-                    final long resd = (Long) entity.getProperty("resd");
-                    final long exec = (Long) entity.getProperty("exec");
-                    final long cost = (Long) entity.getProperty("cost");
-                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
-                    final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
-                    final long minLots = (Long) entity.getProperty("minLots");
-                    final long created = (Long) entity.getProperty("created");
-                    final long modified = (Long) entity.getProperty("modified");
-
-                    assert trader != null;
-                    assert market != null;
-                    assert contr != null;
-                    final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
-                            state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
-                            minLots, created, modified);
-                    q.insertBack(order);
-                }
-            }
-        });
-        return q.getFirst();
+        return selectOrder(filter);
     }
 
     @Override
     public final @Nullable SlNode selectTrade() {
-        final SlQueue q = new SlQueue();
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(stateFilter, archiveFilter);
-        foreachMarket(new UnaryCallback<Entity>() {
-            @Override
-            public final void call(Entity arg) {
-                final Query query = new Query(EXEC_KIND, arg.getKey()).setFilter(filter);
-                final PreparedQuery pq = datastore.prepare(query);
-                for (final Entity entity : pq.asIterable()) {
-                    final long id = entity.getKey().getId();
-                    final long orderId = (Long) entity.getProperty("orderId");
-                    final String trader = (String) entity.getProperty("trader");
-                    final String market = (String) entity.getProperty("market");
-                    final String contr = (String) entity.getProperty("contr");
-                    final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
-                    final String ref = (String) entity.getProperty("ref");
-                    @SuppressWarnings("null")
-                    final State state = State.valueOf((String) entity.getProperty("state"));
-                    @SuppressWarnings("null")
-                    final Side side = Side.valueOf((String) entity.getProperty("side"));
-                    final long ticks = (Long) entity.getProperty("ticks");
-                    final long lots = (Long) entity.getProperty("lots");
-                    final long resd = (Long) entity.getProperty("resd");
-                    final long exec = (Long) entity.getProperty("exec");
-                    final long cost = (Long) entity.getProperty("cost");
-                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
-                    final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
-                    final long minLots = (Long) entity.getProperty("minLots");
-                    final long matchId = (Long) entity.getProperty("matchId");
-                    final String s = (String) entity.getProperty("role");
-                    final Role role = s != null ? Role.valueOf(s) : null;
-                    final String cpty = (String) entity.getProperty("cpty");
-                    final long created = (Long) entity.getProperty("created");
-
-                    assert trader != null;
-                    assert market != null;
-                    assert contr != null;
-                    final Exec trade = factory.newExec(id, orderId, trader, market, contr,
-                            settlDay, ref, state, side, ticks, lots, resd, exec, cost, lastTicks,
-                            lastLots, minLots, matchId, role, cpty, created);
-                    q.insertBack(trade);
-                }
-            }
-        });
-        return q.getFirst();
+        assert filter != null;
+        return selectTrade(filter);
     }
 
     @Override
     public final @Nullable SlNode selectPosn(final int busDay) {
-        final PosnTree posns = new PosnTree();
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
-        foreachMarket(new UnaryCallback<Entity>() {
-            @Override
-            public final void call(Entity arg) {
-                final Query query = new Query(EXEC_KIND).setFilter(filter);
-                final PreparedQuery pq = datastore.prepare(query);
-                for (final Entity entity : pq.asIterable()) {
-                    final String trader = (String) entity.getProperty("trader");
-                    final String contr = (String) entity.getProperty("contr");
-                    int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
-                    assert trader != null;
-                    assert contr != null;
-                    // FIXME: Consider time-of-day.
-                    if (settlDay != 0 && settlDay <= busDay) {
-                        settlDay = 0;
-                    }
-                    // Lazy position.
-                    Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
-                    if (posn == null || !posn.getTrader().equals(trader)
-                            || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
-                        final RbNode parent = posn;
-                        assert trader != null;
-                        assert contr != null;
-                        posn = factory.newPosn(trader, contr, settlDay);
-                        posns.pinsert(posn, parent);
-                    }
-                    @SuppressWarnings("null")
-                    final Side side = Side.valueOf((String) entity.getProperty("side"));
-                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
-                    final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
-                    posn.addTrade(side, lastTicks, lastLots);
-                }
-            }
-        });
-        final SlQueue q = new SlQueue();
-        for (;;) {
-            final Posn posn = (Posn) posns.getRoot();
-            if (posn == null) {
-                break;
-            }
-            posns.remove(posn);
-            q.insertBack(posn);
-        }
-        return q.getFirst();
+        return selectPosn(filter, busDay);
     }
 }
