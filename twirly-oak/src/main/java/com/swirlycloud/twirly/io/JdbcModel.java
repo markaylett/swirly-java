@@ -44,8 +44,11 @@ public class JdbcModel implements Model {
     private final PreparedStatement selectTraderStmt;
     private final PreparedStatement selectTraderByEmailStmt;
     private final PreparedStatement selectOrderStmt;
+    private final PreparedStatement selectOrderByTraderStmt;
     private final PreparedStatement selectTradeStmt;
+    private final PreparedStatement selectTradeByTraderStmt;
     private final PreparedStatement selectPosnStmt;
+    private final PreparedStatement selectPosnByTraderStmt;
 
     private final @NonNull Asset getAsset(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
@@ -168,31 +171,27 @@ public class JdbcModel implements Model {
                 created);
     }
 
-    private final SlNode selectOrder(PreparedStatement stmt) {
+    private final SlNode selectOrder(PreparedStatement stmt) throws SQLException {
         final SlQueue q = new SlQueue();
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 q.insertBack(getOrder(rs));
             }
-        } catch (final SQLException e) {
-            throw new UncheckedIOException(e);
         }
         return q.getFirst();
     }
 
-    private final SlNode selectTrade(PreparedStatement stmt) {
+    private final SlNode selectTrade(PreparedStatement stmt) throws SQLException {
         final SlQueue q = new SlQueue();
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 q.insertBack(getTrade(rs));
             }
-        } catch (final SQLException e) {
-            throw new UncheckedIOException(e);
         }
         return q.getFirst();
     }
 
-    private final SlNode selectPosn(PreparedStatement stmt, int busDay) {
+    private final SlNode selectPosn(PreparedStatement stmt, int busDay) throws SQLException {
         final PosnTree posns = new PosnTree();
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -225,8 +224,6 @@ public class JdbcModel implements Model {
                     posn.addSell(cost, lots);
                 }
             }
-        } catch (final SQLException e) {
-            throw new UncheckedIOException(e);
         }
         final SlQueue q = new SlQueue();
         for (;;) {
@@ -290,8 +287,11 @@ public class JdbcModel implements Model {
         PreparedStatement selectTraderStmt = null;
         PreparedStatement selectTraderByEmailStmt = null;
         PreparedStatement selectOrderStmt = null;
+        PreparedStatement selectOrderByTraderStmt = null;
         PreparedStatement selectTradeStmt = null;
+        PreparedStatement selectTradeByTraderStmt = null;
         PreparedStatement selectPosnStmt = null;
+        PreparedStatement selectPosnByTraderStmt = null;
         boolean success = false;
         try {
             try {
@@ -308,10 +308,16 @@ public class JdbcModel implements Model {
                         .prepareStatement("SELECT mnem FROM Trader_t WHERE email = ?");
                 selectOrderStmt = conn
                         .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
+                selectOrderByTraderStmt = conn
+                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
                 selectTradeStmt = conn
                         .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
+                selectTradeByTraderStmt = conn
+                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE trader = ? AND archive = 0 AND stateId = 4");
                 selectPosnStmt = conn
                         .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v");
+                selectPosnByTraderStmt = conn
+                        .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v WHERE trader = ?");
                 // Success.
                 this.factory = factory;
                 this.conn = conn;
@@ -321,16 +327,28 @@ public class JdbcModel implements Model {
                 this.selectTraderStmt = selectTraderStmt;
                 this.selectTraderByEmailStmt = selectTraderByEmailStmt;
                 this.selectOrderStmt = selectOrderStmt;
+                this.selectOrderByTraderStmt = selectOrderByTraderStmt;
                 this.selectTradeStmt = selectTradeStmt;
+                this.selectTradeByTraderStmt = selectTradeByTraderStmt;
                 this.selectPosnStmt = selectPosnStmt;
+                this.selectPosnByTraderStmt = selectPosnByTraderStmt;
                 success = true;
             } finally {
                 if (!success) {
+                    if (selectPosnByTraderStmt != null) {
+                        selectPosnByTraderStmt.close();
+                    }
                     if (selectPosnStmt != null) {
                         selectPosnStmt.close();
                     }
+                    if (selectTradeByTraderStmt != null) {
+                        selectTradeByTraderStmt.close();
+                    }
                     if (selectTradeStmt != null) {
                         selectTradeStmt.close();
+                    }
+                    if (selectOrderByTraderStmt != null) {
+                        selectOrderByTraderStmt.close();
                     }
                     if (selectOrderStmt != null) {
                         selectOrderStmt.close();
@@ -362,8 +380,11 @@ public class JdbcModel implements Model {
 
     @Override
     public void close() throws SQLException {
+        selectPosnByTraderStmt.close();
         selectPosnStmt.close();
+        selectTradeByTraderStmt.close();
         selectTradeStmt.close();
+        selectOrderByTraderStmt.close();
         selectOrderStmt.close();
         selectTraderByEmailStmt.close();
         selectTraderStmt.close();
@@ -442,16 +463,28 @@ public class JdbcModel implements Model {
 
     @Override
     public final SlNode selectOrder() {
-        return selectOrder(selectOrderStmt);
+        try {
+            return selectOrder(selectOrderStmt);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
     public final SlNode selectTrade() {
-        return selectTrade(selectTradeStmt);
+        try {
+            return selectTrade(selectTradeStmt);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
     public final SlNode selectPosn(int busDay) {
-        return selectPosn(selectPosnStmt, busDay);
+        try {
+            return selectPosn(selectPosnStmt, busDay);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

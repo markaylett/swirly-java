@@ -265,6 +265,7 @@ CREATE TABLE Order_t (
 )
 ENGINE = InnoDB;
 
+CREATE INDEX orderTraderIdx ON Order_t (trader);
 CREATE INDEX orderResdIdx ON Order_t (resd);
 CREATE INDEX orderArchiveIdx ON Order_t (archive);
 
@@ -305,6 +306,7 @@ CREATE TABLE Exec_t (
 )
 ENGINE = InnoDB;
 
+CREATE INDEX execTraderIdx ON Exec_t (trader);
 CREATE INDEX execStateIdx ON Exec_t (stateId);
 CREATE INDEX execArchiveIdx ON Exec_t (archive);
 
