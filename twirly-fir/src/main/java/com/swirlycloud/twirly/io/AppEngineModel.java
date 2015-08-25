@@ -27,6 +27,7 @@ import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.intrusive.Container;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
@@ -67,8 +68,8 @@ public class AppEngineModel implements Model {
         }
     }
 
-    private final @Nullable SlNode selectOrder(@NonNull final Filter filter) {
-        final SlQueue q = new SlQueue();
+    private final void selectOrder(@NonNull final Filter filter,
+            @NonNull final Container<? super Order> c) {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
@@ -102,15 +103,14 @@ public class AppEngineModel implements Model {
                     final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
                             state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
                             minLots, created, modified);
-                    q.insertBack(order);
+                    c.add(order);
                 }
             }
         });
-        return q.getFirst();
     }
 
-    private final @Nullable SlNode selectTrade(@NonNull final Filter filter) {
-        final SlQueue q = new SlQueue();
+    private final void selectTrade(@NonNull final Filter filter,
+            @NonNull final Container<? super Exec> c) {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
@@ -148,14 +148,14 @@ public class AppEngineModel implements Model {
                     final Exec trade = factory.newExec(id, orderId, trader, market, contr,
                             settlDay, ref, state, side, ticks, lots, resd, exec, cost, lastTicks,
                             lastLots, minLots, matchId, role, cpty, created);
-                    q.insertBack(trade);
+                    c.add(trade);
                 }
             }
         });
-        return q.getFirst();
     }
 
-    private final @Nullable SlNode selectPosn(@NonNull final Filter filter, final int busDay) {
+    private final void selectPosn(@NonNull final Filter filter, final int busDay,
+            @NonNull final Container<? super Posn> c) {
         final PosnTree posns = new PosnTree();
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
@@ -190,16 +190,14 @@ public class AppEngineModel implements Model {
                 }
             }
         });
-        final SlQueue q = new SlQueue();
         for (;;) {
             final Posn posn = (Posn) posns.getRoot();
             if (posn == null) {
                 break;
             }
             posns.remove(posn);
-            q.insertBack(posn);
+            c.add(posn);
         }
-        return q.getFirst();
     }
 
     public AppEngineModel(Factory factory) {
@@ -282,7 +280,9 @@ public class AppEngineModel implements Model {
     @Override
     public final @Nullable SlNode selectOrder() {
         final Filter filter = new FilterPredicate("archive", FilterOperator.EQUAL, Boolean.FALSE);
-        return selectOrder(filter);
+        final SlQueue q = new SlQueue();
+        selectOrder(filter, q);
+        return q.getFirst();
     }
 
     @Override
@@ -292,7 +292,9 @@ public class AppEngineModel implements Model {
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(traderFilter, archiveFilter);
         assert filter != null;
-        return selectOrder(filter);
+        final SlQueue q = new SlQueue();
+        selectOrder(filter, q);
+        return q.getFirst();
     }
 
     @Override
@@ -303,7 +305,10 @@ public class AppEngineModel implements Model {
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(stateFilter, archiveFilter);
         assert filter != null;
-        return selectTrade(filter);
+        final SlQueue q = new SlQueue();
+        selectTrade(filter, q);
+        return q.getFirst();
+
     }
 
     @Override
@@ -315,21 +320,30 @@ public class AppEngineModel implements Model {
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter, archiveFilter);
         assert filter != null;
-        return selectTrade(filter);
+        final SlQueue q = new SlQueue();
+        selectTrade(filter, q);
+        return q.getFirst();
+
     }
 
     @Override
     public final @Nullable SlNode selectPosn(final int busDay) {
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
-        return selectPosn(filter, busDay);
+        final SlQueue q = new SlQueue();
+        selectPosn(filter, busDay, q);
+        return q.getFirst();
+
     }
 
     @Override
     public final @Nullable SlNode selectPosn(@NonNull String trader, final int busDay) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
-        final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
+        final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
+                State.TRADE.name());
         final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter);
         assert filter != null;
-        return selectPosn(filter, busDay);
+        final SlQueue q = new SlQueue();
+        selectPosn(filter, busDay, q);
+        return q.getFirst();
     }
 }

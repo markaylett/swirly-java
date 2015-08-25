@@ -28,6 +28,7 @@ import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
+import com.swirlycloud.twirly.intrusive.Container;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
@@ -37,17 +38,29 @@ import com.swirlycloud.twirly.util.Memorable;
 
 public class JdbcModel implements Model {
     private final Factory factory;
+    @NonNull
     protected final Connection conn;
+    @NonNull
     private final PreparedStatement selectAssetStmt;
+    @NonNull
     private final PreparedStatement selectContrStmt;
+    @NonNull
     private final PreparedStatement selectMarketStmt;
+    @NonNull
     private final PreparedStatement selectTraderStmt;
+    @NonNull
     private final PreparedStatement selectTraderByEmailStmt;
+    @NonNull
     private final PreparedStatement selectOrderStmt;
+    @NonNull
     private final PreparedStatement selectOrderByTraderStmt;
+    @NonNull
     private final PreparedStatement selectTradeStmt;
+    @NonNull
     private final PreparedStatement selectTradeByTraderStmt;
+    @NonNull
     private final PreparedStatement selectPosnStmt;
+    @NonNull
     private final PreparedStatement selectPosnByTraderStmt;
 
     private final @NonNull Asset getAsset(ResultSet rs) throws SQLException {
@@ -171,27 +184,26 @@ public class JdbcModel implements Model {
                 created);
     }
 
-    private final SlNode selectOrder(PreparedStatement stmt) throws SQLException {
-        final SlQueue q = new SlQueue();
+    private final void selectOrder(@NonNull PreparedStatement stmt,
+            @NonNull final Container<? super Order> c) throws SQLException {
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getOrder(rs));
+                c.add(getOrder(rs));
             }
         }
-        return q.getFirst();
     }
 
-    private final SlNode selectTrade(PreparedStatement stmt) throws SQLException {
-        final SlQueue q = new SlQueue();
+    private final void selectTrade(@NonNull PreparedStatement stmt,
+            @NonNull final Container<? super Exec> c) throws SQLException {
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                q.insertBack(getTrade(rs));
+                c.add(getTrade(rs));
             }
         }
-        return q.getFirst();
     }
 
-    private final SlNode selectPosn(PreparedStatement stmt, int busDay) throws SQLException {
+    private final void selectPosn(@NonNull PreparedStatement stmt, int busDay,
+            @NonNull final Container<? super Posn> c) throws SQLException {
         final PosnTree posns = new PosnTree();
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -225,16 +237,14 @@ public class JdbcModel implements Model {
                 }
             }
         }
-        final SlQueue q = new SlQueue();
         for (;;) {
             final Posn posn = (Posn) posns.getRoot();
             if (posn == null) {
                 break;
             }
             posns.remove(posn);
-            q.insertBack(posn);
+            c.add(posn);
         }
-        return q.getFirst();
     }
 
     protected static void setParam(PreparedStatement stmt, int i, int val) throws SQLException {
@@ -321,16 +331,27 @@ public class JdbcModel implements Model {
                 // Success.
                 this.factory = factory;
                 this.conn = conn;
+                assert selectAssetStmt != null;
                 this.selectAssetStmt = selectAssetStmt;
+                assert selectContrStmt != null;
                 this.selectContrStmt = selectContrStmt;
+                assert selectMarketStmt != null;
                 this.selectMarketStmt = selectMarketStmt;
+                assert selectTraderStmt != null;
                 this.selectTraderStmt = selectTraderStmt;
+                assert selectTraderByEmailStmt != null;
                 this.selectTraderByEmailStmt = selectTraderByEmailStmt;
+                assert selectOrderStmt != null;
                 this.selectOrderStmt = selectOrderStmt;
+                assert selectOrderByTraderStmt != null;
                 this.selectOrderByTraderStmt = selectOrderByTraderStmt;
+                assert selectTradeStmt != null;
                 this.selectTradeStmt = selectTradeStmt;
+                assert selectTradeByTraderStmt != null;
                 this.selectTradeByTraderStmt = selectTradeByTraderStmt;
+                assert selectPosnStmt != null;
                 this.selectPosnStmt = selectPosnStmt;
+                assert selectPosnByTraderStmt != null;
                 this.selectPosnByTraderStmt = selectPosnByTraderStmt;
                 success = true;
             } finally {
@@ -463,58 +484,70 @@ public class JdbcModel implements Model {
 
     @Override
     public final SlNode selectOrder() {
+        final SlQueue q = new SlQueue();
         try {
-            return selectOrder(selectOrderStmt);
+            selectOrder(selectOrderStmt, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
+        return q.getFirst();
     }
 
     @Override
     public final SlNode selectOrder(@NonNull String trader) {
+        final SlQueue q = new SlQueue();
         try {
             setParam(selectOrderByTraderStmt, 1, trader);
-            return selectOrder(selectOrderByTraderStmt);
+            selectOrder(selectOrderByTraderStmt, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
+        return q.getFirst();
     }
 
     @Override
     public final SlNode selectTrade() {
+        final SlQueue q = new SlQueue();
         try {
-            return selectTrade(selectTradeStmt);
+            selectTrade(selectTradeStmt, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
+        return q.getFirst();
     }
 
     @Override
     public final SlNode selectTrade(@NonNull String trader) {
+        final SlQueue q = new SlQueue();
         try {
             setParam(selectTradeByTraderStmt, 1, trader);
-            return selectTrade(selectTradeByTraderStmt);
+            selectTrade(selectTradeByTraderStmt, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
+        return q.getFirst();
     }
 
     @Override
     public final SlNode selectPosn(int busDay) {
+        final SlQueue q = new SlQueue();
         try {
-            return selectPosn(selectPosnStmt, busDay);
+            selectPosn(selectPosnStmt, busDay, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
+        return q.getFirst();
     }
 
     @Override
     public final SlNode selectPosn(@NonNull String trader, int busDay) {
+        final SlQueue q = new SlQueue();
         try {
             setParam(selectPosnByTraderStmt, 1, trader);
-            return selectPosn(selectPosnByTraderStmt, busDay);
+            selectPosn(selectPosnByTraderStmt, busDay, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
+        return q.getFirst();
     }
 }
