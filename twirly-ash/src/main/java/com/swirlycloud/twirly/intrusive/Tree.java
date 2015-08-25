@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -27,7 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * 
  * @author Mark Aylett
  */
-public abstract @NonNullByDefault class Tree<V> implements Serializable {
+public abstract @NonNullByDefault class Tree<V> implements Serializable, Container<V> {
 
     private static final long serialVersionUID = 1L;
 
@@ -329,8 +330,14 @@ public abstract @NonNullByDefault class Tree<V> implements Serializable {
         print(out);
     }
 
+    @Override
     public final void clear() {
         root = null;
+    }
+
+    @Override
+    public final void add(@NonNull V node) {
+        insert(node);
     }
 
     /**
@@ -433,6 +440,7 @@ public abstract @NonNullByDefault class Tree<V> implements Serializable {
         return root;
     }
 
+    @Override
     public final @Nullable V getFirst() {
         V tmp = root;
         V parent = null;
@@ -453,6 +461,7 @@ public abstract @NonNullByDefault class Tree<V> implements Serializable {
         return parent;
     }
 
+    @Override
     public final boolean isEmpty() {
         return root == null;
     }

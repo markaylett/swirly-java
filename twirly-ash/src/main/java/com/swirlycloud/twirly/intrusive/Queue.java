@@ -3,7 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-public abstract class Queue<V> {
+import org.eclipse.jdt.annotation.NonNull;
+
+public abstract class Queue<V> implements Container<V> {
     private V first;
     private V last;
 
@@ -11,9 +13,15 @@ public abstract class Queue<V> {
 
     protected abstract V next(V node);
 
+    @Override
     public final void clear() {
         first = null;
         last = null;
+    }
+
+    @Override
+    public final void add(@NonNull V node) {
+        insertBack(node);
     }
 
     public final void insertBack(V node) {
@@ -49,6 +57,7 @@ public abstract class Queue<V> {
         }
     }
 
+    @Override
     public final V getFirst() {
         return first;
     }
@@ -57,6 +66,7 @@ public abstract class Queue<V> {
         return last;
     }
 
+    @Override
     public final boolean isEmpty() {
         return first == null;
     }

@@ -3,15 +3,23 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-public abstract class Stack<V> {
+import org.eclipse.jdt.annotation.NonNull;
+
+public abstract class Stack<V> implements Container<V> {
     private V first;
 
     protected abstract void setNext(V node, V next);
 
     protected abstract V next(V node);
 
+    @Override
     public final void clear() {
         first = null;
+    }
+
+    @Override
+    public final void add(@NonNull V node) {
+        insertFront(node);
     }
 
     public final void insertFront(V node) {
@@ -33,10 +41,12 @@ public abstract class Stack<V> {
         insertFront(node);
     }
 
+    @Override
     public final V getFirst() {
         return first;
     }
 
+    @Override
     public final boolean isEmpty() {
         return first == null;
     }

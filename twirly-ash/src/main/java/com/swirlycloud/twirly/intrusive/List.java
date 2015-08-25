@@ -3,9 +3,10 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-public abstract @NonNullByDefault class List<V> {
+public abstract @NonNullByDefault class List<V> implements Container<V> {
     private final V end;
 
     protected abstract void insert(V node, V prev, V next);
@@ -29,9 +30,15 @@ public abstract @NonNullByDefault class List<V> {
         clear();
     }
 
+    @Override
     public final void clear() {
         setPrev(end, end);
         setNext(end, end);
+    }
+
+    @Override
+    public final void add(@NonNull V node) {
+        insertBack(node);
     }
 
     public final void insertFront(V node) {
@@ -64,6 +71,7 @@ public abstract @NonNullByDefault class List<V> {
         insertFront(node);
     }
 
+    @Override
     public final V getFirst() {
         return next(end);
     }
@@ -72,6 +80,7 @@ public abstract @NonNullByDefault class List<V> {
         return prev(end);
     }
 
+    @Override
     public final boolean isEmpty() {
         return next(end) == end;
     }
