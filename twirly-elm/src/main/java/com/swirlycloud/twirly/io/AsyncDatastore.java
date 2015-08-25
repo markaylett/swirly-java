@@ -19,7 +19,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedExecutionException;
+import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class AsyncDatastore implements Datastore {
@@ -117,11 +119,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable SlNode selectOrder(@NonNull final String trader)
+    public final @Nullable InstructTree selectOrder(@NonNull final String trader)
             throws InterruptedException {
-        return get(service.submit(new Callable<SlNode>() {
+        return get(service.submit(new Callable<InstructTree>() {
             @Override
-            public final SlNode call() throws Exception {
+            public final InstructTree call() throws Exception {
                 return datastore.selectOrder(trader);
             }
         }));
@@ -138,11 +140,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable SlNode selectTrade(@NonNull final String trader)
+    public final @Nullable InstructTree selectTrade(@NonNull final String trader)
             throws InterruptedException {
-        return get(service.submit(new Callable<SlNode>() {
+        return get(service.submit(new Callable<InstructTree>() {
             @Override
-            public final SlNode call() throws Exception {
+            public final InstructTree call() throws Exception {
                 return datastore.selectTrade(trader);
             }
         }));
@@ -159,11 +161,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable SlNode selectPosn(@NonNull final String trader, final int busDay)
+    public final @Nullable TraderPosnTree selectPosn(@NonNull final String trader, final int busDay)
             throws InterruptedException {
-        return get(service.submit(new Callable<SlNode>() {
+        return get(service.submit(new Callable<TraderPosnTree>() {
             @Override
-            public final SlNode call() throws Exception {
+            public final TraderPosnTree call() throws Exception {
                 return datastore.selectPosn(trader, busDay);
             }
         }));

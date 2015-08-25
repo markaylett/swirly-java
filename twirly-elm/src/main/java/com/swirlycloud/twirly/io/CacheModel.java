@@ -6,7 +6,9 @@ package com.swirlycloud.twirly.io;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class CacheModel implements Model {
@@ -98,8 +100,15 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectOrder(@NonNull String trader) throws InterruptedException {
-        return model.selectOrder(trader);
+    public final @Nullable InstructTree selectOrder(@NonNull String trader) throws InterruptedException {
+        final String key = "order:" + trader;
+        InstructTree tree = (InstructTree) cache.select(key);
+        if (tree == null) {
+            tree = model.selectOrder(trader);
+            assert tree != null;
+            cache.insert(key, tree);
+        }
+        return tree;
     }
 
     @Override
@@ -108,8 +117,15 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectTrade(@NonNull String trader) throws InterruptedException {
-        return model.selectTrade(trader);
+    public final @Nullable InstructTree selectTrade(@NonNull String trader) throws InterruptedException {
+        final String key = "trade:" + trader;
+        InstructTree tree = (InstructTree) cache.select(key);
+        if (tree == null) {
+            tree = model.selectTrade(trader);
+            assert tree != null;
+            cache.insert(key, tree);
+        }
+        return tree;
     }
 
     @Override
@@ -118,9 +134,16 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectPosn(@NonNull String trader, int busDay)
+    public final @Nullable TraderPosnTree selectPosn(@NonNull String trader, int busDay)
             throws InterruptedException {
-        return model.selectPosn(trader, busDay);
+        final String key = "posn:" + trader;
+        TraderPosnTree tree = (TraderPosnTree) cache.select(key);
+        if (tree == null) {
+            tree = model.selectPosn(trader, busDay);
+            assert tree != null;
+            cache.insert(key, tree);
+        }
+        return tree;
     }
 
     public final Cache getCache() {

@@ -28,9 +28,11 @@ import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.intrusive.Container;
+import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.node.RbNode;
@@ -286,15 +288,15 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectOrder(@NonNull String trader) {
+    public final @Nullable InstructTree selectOrder(@NonNull String trader) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(traderFilter, archiveFilter);
         assert filter != null;
-        final SlQueue q = new SlQueue();
-        selectOrder(filter, q);
-        return q.getFirst();
+        final InstructTree t = new InstructTree();
+        selectOrder(filter, t);
+        return t;
     }
 
     @Override
@@ -312,7 +314,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectTrade(@NonNull String trader) {
+    public final @Nullable InstructTree selectTrade(@NonNull String trader) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
@@ -320,9 +322,9 @@ public class AppEngineModel implements Model {
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter, archiveFilter);
         assert filter != null;
-        final SlQueue q = new SlQueue();
-        selectTrade(filter, q);
-        return q.getFirst();
+        final InstructTree t = new InstructTree();
+        selectTrade(filter, t);
+        return t;
 
     }
 
@@ -336,14 +338,14 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectPosn(@NonNull String trader, final int busDay) {
+    public final @Nullable TraderPosnTree selectPosn(@NonNull String trader, final int busDay) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
         final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter);
         assert filter != null;
-        final SlQueue q = new SlQueue();
-        selectPosn(filter, busDay, q);
-        return q.getFirst();
+        final TraderPosnTree t = new TraderPosnTree();
+        selectPosn(filter, busDay, t);
+        return t;
     }
 }

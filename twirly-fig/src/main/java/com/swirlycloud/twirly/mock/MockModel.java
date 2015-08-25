@@ -7,7 +7,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
 
@@ -58,7 +60,7 @@ public class MockModel implements Model {
     }
 
     @Override
-    public SlNode selectOrder(@NonNull String trader) {
+    public InstructTree selectOrder(@NonNull String trader) {
         return null;
     }
 
@@ -68,7 +70,7 @@ public class MockModel implements Model {
     }
 
     @Override
-    public SlNode selectTrade(@NonNull String trader) {
+    public InstructTree selectTrade(@NonNull String trader) {
         return null;
     }
 
@@ -78,7 +80,7 @@ public class MockModel implements Model {
     }
 
     @Override
-    public SlNode selectPosn(@NonNull String trader, int busDay) {
+    public TraderPosnTree selectPosn(@NonNull String trader, int busDay) {
         return null;
     }
 }

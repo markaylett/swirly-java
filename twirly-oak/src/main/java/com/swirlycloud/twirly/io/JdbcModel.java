@@ -29,9 +29,11 @@ import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.intrusive.Container;
+import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;
@@ -494,15 +496,15 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectOrder(@NonNull String trader) {
-        final SlQueue q = new SlQueue();
+    public final InstructTree selectOrder(@NonNull String trader) {
+        final InstructTree t = new InstructTree();
         try {
             setParam(selectOrderByTraderStmt, 1, trader);
-            selectOrder(selectOrderByTraderStmt, q);
+            selectOrder(selectOrderByTraderStmt, t);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
@@ -517,15 +519,15 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectTrade(@NonNull String trader) {
-        final SlQueue q = new SlQueue();
+    public final InstructTree selectTrade(@NonNull String trader) {
+        final InstructTree t = new InstructTree();
         try {
             setParam(selectTradeByTraderStmt, 1, trader);
-            selectTrade(selectTradeByTraderStmt, q);
+            selectTrade(selectTradeByTraderStmt, t);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 
     @Override
@@ -540,14 +542,14 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectPosn(@NonNull String trader, int busDay) {
-        final SlQueue q = new SlQueue();
+    public final TraderPosnTree selectPosn(@NonNull String trader, int busDay) {
+        final TraderPosnTree t = new TraderPosnTree();
         try {
             setParam(selectPosnByTraderStmt, 1, trader);
-            selectPosn(selectPosnByTraderStmt, busDay, q);
+            selectPosn(selectPosnByTraderStmt, busDay, t);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
-        return q.getFirst();
+        return t;
     }
 }
