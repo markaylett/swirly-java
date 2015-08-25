@@ -471,6 +471,16 @@ public class JdbcModel implements Model {
     }
 
     @Override
+    public final SlNode selectOrder(@NonNull String trader) {
+        try {
+            setParam(selectOrderByTraderStmt, 1, trader);
+            return selectOrder(selectOrderByTraderStmt);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
     public final SlNode selectTrade() {
         try {
             return selectTrade(selectTradeStmt);
@@ -480,9 +490,29 @@ public class JdbcModel implements Model {
     }
 
     @Override
+    public final SlNode selectTrade(@NonNull String trader) {
+        try {
+            setParam(selectTradeByTraderStmt, 1, trader);
+            return selectTrade(selectTradeByTraderStmt);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
     public final SlNode selectPosn(int busDay) {
         try {
             return selectPosn(selectPosnStmt, busDay);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public final SlNode selectPosn(@NonNull String trader, int busDay) {
+        try {
+            setParam(selectPosnByTraderStmt, 1, trader);
+            return selectPosn(selectPosnByTraderStmt, busDay);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }

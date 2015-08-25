@@ -96,7 +96,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable String selectTraderByEmail(@NonNull final String email) throws InterruptedException {
+    public final @Nullable String selectTraderByEmail(@NonNull final String email)
+            throws InterruptedException {
         return get(service.submit(new Callable<String>() {
             @Override
             public final String call() throws Exception {
@@ -116,6 +117,17 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
+    public final @Nullable SlNode selectOrder(@NonNull final String trader)
+            throws InterruptedException {
+        return get(service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectOrder(trader);
+            }
+        }));
+    }
+
+    @Override
     public final @Nullable SlNode selectTrade() throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
@@ -126,11 +138,33 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
+    public final @Nullable SlNode selectTrade(@NonNull final String trader)
+            throws InterruptedException {
+        return get(service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectTrade(trader);
+            }
+        }));
+    }
+
+    @Override
     public final @Nullable SlNode selectPosn(final int busDay) throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
                 return datastore.selectPosn(busDay);
+            }
+        }));
+    }
+
+    @Override
+    public final @Nullable SlNode selectPosn(@NonNull final String trader, final int busDay)
+            throws InterruptedException {
+        return get(service.submit(new Callable<SlNode>() {
+            @Override
+            public final SlNode call() throws Exception {
+                return datastore.selectPosn(trader, busDay);
             }
         }));
     }

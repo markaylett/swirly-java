@@ -30,8 +30,17 @@ public interface Model extends AutoCloseable {
     SlNode selectOrder() throws InterruptedException;
 
     @Nullable
+    SlNode selectOrder(@NonNull String trader) throws InterruptedException;
+
+    @Nullable
     SlNode selectTrade() throws InterruptedException;
 
     @Nullable
+    SlNode selectTrade(@NonNull String trader) throws InterruptedException;
+
+    @Nullable
     SlNode selectPosn(int busDay) throws InterruptedException;
+
+    @Nullable
+    SlNode selectPosn(@NonNull String trader, int busDay) throws InterruptedException;
 }

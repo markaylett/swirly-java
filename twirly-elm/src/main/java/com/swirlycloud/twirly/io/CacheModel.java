@@ -36,52 +36,52 @@ public final class CacheModel implements Model {
 
     @Override
     public final @Nullable MnemRbTree selectAsset() throws InterruptedException {
-        MnemRbTree t = (MnemRbTree) cache.select("asset");
-        if (t == null) {
-            t = model.selectAsset();
-            assert t != null;
-            cache.insert("asset", t);
+        MnemRbTree tree = (MnemRbTree) cache.select("asset");
+        if (tree == null) {
+            tree = model.selectAsset();
+            assert tree != null;
+            cache.insert("asset", tree);
         }
-        return t;
+        return tree;
     }
 
     @Override
     public final @Nullable MnemRbTree selectContr() throws InterruptedException {
-        MnemRbTree t = (MnemRbTree) cache.select("contr");
-        if (t == null) {
-            t = model.selectContr();
-            assert t != null;
-            cache.insert("contr", t);
+        MnemRbTree tree = (MnemRbTree) cache.select("contr");
+        if (tree == null) {
+            tree = model.selectContr();
+            assert tree != null;
+            cache.insert("contr", tree);
         }
-        return t;
+        return tree;
     }
 
     @Override
     public final @Nullable MnemRbTree selectMarket() throws InterruptedException {
-        MnemRbTree t = (MnemRbTree) cache.select("market");
-        if (t == null) {
-            t = model.selectMarket();
-            assert t != null;
-            cache.insert("market", t);
+        MnemRbTree tree = (MnemRbTree) cache.select("market");
+        if (tree == null) {
+            tree = model.selectMarket();
+            assert tree != null;
+            cache.insert("market", tree);
         }
-        return t;
+        return tree;
     }
 
     @Override
     public final @Nullable MnemRbTree selectTrader() throws InterruptedException {
-        MnemRbTree t = (MnemRbTree) cache.select("trader");
-        if (t == null) {
-            t = model.selectTrader();
-            assert t != null;
-            cache.insert("trader", t);
+        MnemRbTree tree = (MnemRbTree) cache.select("trader");
+        if (tree == null) {
+            tree = model.selectTrader();
+            assert tree != null;
+            cache.insert("trader", tree);
         }
-        return t;
+        return tree;
     }
 
     @Override
     public final @Nullable String selectTraderByEmail(@NonNull String email)
             throws InterruptedException {
-        final String key = "email:" + email;
+        final String key = "trader:" + email;
         String trader = (String) cache.select(key);
         if (trader == null) {
             trader = model.selectTraderByEmail(email);
@@ -98,13 +98,29 @@ public final class CacheModel implements Model {
     }
 
     @Override
+    public final @Nullable SlNode selectOrder(@NonNull String trader) throws InterruptedException {
+        return model.selectOrder(trader);
+    }
+
+    @Override
     public final @Nullable SlNode selectTrade() throws InterruptedException {
         return model.selectTrade();
     }
 
     @Override
+    public final @Nullable SlNode selectTrade(@NonNull String trader) throws InterruptedException {
+        return model.selectTrade(trader);
+    }
+
+    @Override
     public final @Nullable SlNode selectPosn(int busDay) throws InterruptedException {
         return model.selectPosn(busDay);
+    }
+
+    @Override
+    public final @Nullable SlNode selectPosn(@NonNull String trader, int busDay)
+            throws InterruptedException {
+        return model.selectPosn(trader, busDay);
     }
 
     public final Cache getCache() {

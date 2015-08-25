@@ -286,6 +286,16 @@ public class AppEngineModel implements Model {
     }
 
     @Override
+    public final @Nullable SlNode selectOrder(@NonNull String trader) {
+        final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
+        final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
+                Boolean.FALSE);
+        final Filter filter = CompositeFilterOperator.and(traderFilter, archiveFilter);
+        assert filter != null;
+        return selectOrder(filter);
+    }
+
+    @Override
     public final @Nullable SlNode selectTrade() {
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
@@ -297,8 +307,29 @@ public class AppEngineModel implements Model {
     }
 
     @Override
+    public final @Nullable SlNode selectTrade(@NonNull String trader) {
+        final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
+        final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
+                State.TRADE.name());
+        final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
+                Boolean.FALSE);
+        final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter, archiveFilter);
+        assert filter != null;
+        return selectTrade(filter);
+    }
+
+    @Override
     public final @Nullable SlNode selectPosn(final int busDay) {
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
+        return selectPosn(filter, busDay);
+    }
+
+    @Override
+    public final @Nullable SlNode selectPosn(@NonNull String trader, final int busDay) {
+        final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
+        final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
+        final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter);
+        assert filter != null;
         return selectPosn(filter, busDay);
     }
 }

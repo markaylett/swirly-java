@@ -58,12 +58,27 @@ public class MockModel implements Model {
     }
 
     @Override
+    public SlNode selectOrder(@NonNull String trader) {
+        return null;
+    }
+
+    @Override
     public SlNode selectTrade() {
         return null;
     }
 
     @Override
+    public SlNode selectTrade(@NonNull String trader) {
+        return null;
+    }
+
+    @Override
     public SlNode selectPosn(int busDay) {
+        return null;
+    }
+
+    @Override
+    public SlNode selectPosn(@NonNull String trader, int busDay) {
         return null;
     }
 }

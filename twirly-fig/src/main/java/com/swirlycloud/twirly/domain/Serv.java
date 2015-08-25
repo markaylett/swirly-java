@@ -92,7 +92,7 @@ public @NonNullByDefault class Serv {
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final Trader trader = (Trader) node;
             emailIdx.insert(trader);
-            cache.update("email:" + trader.getEmail(), trader.getMnem());
+            cache.update("trader:" + trader.getEmail(), trader.getMnem());
         }
     }
 
@@ -314,7 +314,7 @@ public @NonNullByDefault class Serv {
         traders.insert(trader);
         emailIdx.insert(trader);
         cache.update("trader", traders);
-        cache.update("email:" + email, mnem);
+        cache.update("trader:" + email, mnem);
         return trader;
     }
 
