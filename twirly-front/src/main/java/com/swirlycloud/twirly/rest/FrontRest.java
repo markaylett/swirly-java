@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.rest;
 
+import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
@@ -14,7 +15,9 @@ import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.util.Params;
 
@@ -23,20 +26,20 @@ public final @NonNullByDefault class FrontRest implements Rest {
     private final Model model;
 
     private final MnemRbTree getRecTree(RecType recType) throws ServiceUnavailableException {
-        MnemRbTree t = null;
+        MnemRbTree tree = null;
         try {
             switch (recType) {
             case ASSET:
-                t = model.selectAsset();
+                tree = model.selectAsset();
                 break;
             case CONTR:
-                t = model.selectContr();
+                tree = model.selectContr();
                 break;
             case MARKET:
-                t = model.selectMarket();
+                tree = model.selectMarket();
                 break;
             case TRADER:
-                t = model.selectTrader();
+                tree = model.selectTrader();
                 break;
             }
         } catch (final InterruptedException e) {
@@ -44,15 +47,72 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Thread.currentThread().interrupt();
             throw new ServiceUnavailableException("service interrupted", e);
         }
-        if (t == null) {
-            t = new MnemRbTree();
+        assert tree != null;
+        return tree;
+    }
+
+    private final InstructTree getOrderTree(String trader) throws ServiceUnavailableException {
+        InstructTree tree = null;
+        try {
+            tree = model.selectOrder(trader);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
         }
-        return t;
+        assert tree != null;
+        return tree;
+    }
+
+    private final InstructTree getTradeTree(String trader) throws ServiceUnavailableException {
+        InstructTree tree = null;
+        try {
+            tree = model.selectTrade(trader);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+        assert tree != null;
+        return tree;
+    }
+
+    private final TraderPosnTree getPosnTree(String trader, int busDay)
+            throws ServiceUnavailableException {
+        TraderPosnTree tree = null;
+        try {
+            tree = model.selectPosn(trader, busDay);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+        assert tree != null;
+        return tree;
     }
 
     private final void doGetRec(RecType recType, Params params, Appendable out)
             throws ServiceUnavailableException, IOException {
         final MnemRbTree tree = getRecTree(recType);
+        toJsonArray(tree.getFirst(), params, out);
+    }
+
+    private final void doGetOrder(String trader, Params params, Appendable out)
+            throws ServiceUnavailableException, IOException {
+        final InstructTree tree = getOrderTree(trader);
+        toJsonArray(tree.getFirst(), params, out);
+    }
+
+    private final void doGetTrade(String trader, Params params, Appendable out)
+            throws ServiceUnavailableException, IOException {
+        final InstructTree tree = getTradeTree(trader);
+        toJsonArray(tree.getFirst(), params, out);
+    }
+
+    private final void doGetPosn(String trader, Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException {
+        final int busDay = getBusDate(now).toJd();
+        final TraderPosnTree tree = getPosnTree(trader, busDay);
         toJsonArray(tree.getFirst(), params, out);
     }
 
@@ -119,8 +179,14 @@ public final @NonNullByDefault class FrontRest implements Rest {
 
     @Override
     public final void getSess(String mnem, Params params, long now, Appendable out)
-            throws NotFoundException {
-        throw new UnsupportedOperationException("getSess");
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        out.append("{\"orders\":");
+        doGetOrder(mnem, params, out);
+        out.append(",\"trades\":");
+        doGetTrade(mnem, params, out);
+        out.append(",\"posns\":");
+        doGetPosn(mnem, params, now, out);
+        out.append('}');
     }
 
     @Override

@@ -30,7 +30,7 @@ public @NonNullByDefault interface Rest {
             IOException;
 
     void getSess(String mnem, Params params, long now, Appendable out) throws NotFoundException,
-            IOException;
+            ServiceUnavailableException, IOException;
 
     void getOrder(String mnem, Params params, long now, Appendable out) throws NotFoundException,
             IOException;
