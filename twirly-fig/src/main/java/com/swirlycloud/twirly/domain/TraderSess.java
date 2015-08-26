@@ -17,9 +17,11 @@ public final @NonNullByDefault class TraderSess extends Trader {
 
     private final transient RefHashTable refIdx;
     private final transient Factory factory;
-    private final transient InstructTree orders = new InstructTree();
-    private final transient InstructTree trades = new InstructTree();
-    private final transient TraderPosnTree posns = new TraderPosnTree();
+    final transient InstructTree orders = new InstructTree();
+    final transient InstructTree trades = new InstructTree();
+    final transient TraderPosnTree posns = new TraderPosnTree();
+    @Nullable
+    transient TraderSess sessNext;
 
     TraderSess(String mnem, @Nullable String display, String email, RefHashTable refIdx,
             Factory factory) {
@@ -176,7 +178,14 @@ public final @NonNullByDefault class TraderSess extends Trader {
         return posns.isEmpty();
     }
 
-    final void settlPosns(int busDay) {
+    /**
+     * Settle positions.
+     * 
+     * @param busDay
+     * @return returns the number of positions modified.
+     */
+    final int settlPosns(int busDay) {
+        int modified = 0;
         for (RbNode node = posns.getFirst(); node != null;) {
             final Posn posn = (Posn) node;
             node = node.rbNext();
@@ -184,7 +193,9 @@ public final @NonNullByDefault class TraderSess extends Trader {
                 posns.remove(posn);
                 posn.setSettlDay(0);
                 addPosn(posn);
+                ++modified;
             }
         }
+        return modified;
     }
 }

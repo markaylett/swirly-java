@@ -24,7 +24,7 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
 
     private static final long serialVersionUID = 1L;
 
-    private transient @Nullable SlNode next;
+    private transient @Nullable SlNode slNext;
 
     private final String trader;
     private final String contr;
@@ -171,12 +171,12 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
 
     @Override
     public final void setSlNext(@Nullable SlNode next) {
-        this.next = next;
+        this.slNext = next;
     }
 
     @Override
     public final @Nullable SlNode slNext() {
-        return next;
+        return slNext;
     }
 
     final void add(Posn rhs) {
