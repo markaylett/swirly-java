@@ -3,7 +3,10 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.rest;
 
+import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
+import static com.swirlycloud.twirly.rest.RestUtil.getExpiredParam;
+import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
 
@@ -16,8 +19,12 @@ import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.MarketBook;
+import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.domain.Serv;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.domain.TraderSess;
@@ -29,12 +36,36 @@ import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
+public final @NonNullByDefault class BackRest implements Rest {
+
+    private final Serv serv;
+
+    private static void getView(@Nullable RbNode first, Params params, long now, Appendable out)
+            throws IOException {
+        final boolean withExpired = getExpiredParam(params);
+        final int busDay = getBusDate(now).toJd();
+        out.append('[');
+        int i = 0;
+        for (RbNode node = first; node != null; node = node.rbNext()) {
+            final MarketBook book = (MarketBook) node;
+            if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
+                // Ignore expired contracts.
+                continue;
+            }
+            if (i > 0) {
+                out.append(',');
+            }
+            book.toJsonView(params, out);
+            ++i;
+        }
+        out.append(']');
+    }
 
     public BackRest(LockableServ serv) {
-        super(serv);
+        this.serv = serv;
     }
 
     public BackRest(Model model, Journ journ, Cache cache, Factory factory, long now)
@@ -65,7 +96,17 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetRec(withTraders, params, now, out);
+            out.append("{\"assets\":");
+            toJsonArray(serv.getFirstRec(RecType.ASSET), params, out);
+            out.append(",\"contrs\":");
+            toJsonArray(serv.getFirstRec(RecType.CONTR), params, out);
+            out.append(",\"markets\":");
+            toJsonArray(serv.getFirstRec(RecType.MARKET), params, out);
+            if (withTraders) {
+                out.append(",\"traders\":");
+                toJsonArray(serv.getFirstRec(RecType.TRADER), params, out);
+            }
+            out.append('}');
         } finally {
             serv.releaseRead();
         }
@@ -77,7 +118,7 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetRec(recType, params, now, out);
+            toJsonArray(serv.getFirstRec(recType), params, out);
         } finally {
             serv.releaseRead();
         }
@@ -89,7 +130,11 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetRec(recType, mnem, params, now, out);
+            final Rec rec = serv.findRec(recType, mnem);
+            if (rec == null) {
+                throw new NotFoundException(String.format("record '%s' does not exist", mnem));
+            }
+            rec.toJson(params, out);
         } finally {
             serv.releaseRead();
         }
@@ -100,7 +145,7 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetView(params, now, out);
+            getView(serv.getFirstRec(RecType.MARKET), params, now, out);
         } finally {
             serv.releaseRead();
         }
@@ -112,7 +157,14 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetView(market, params, now, out);
+            final MarketBook book = serv.getMarket(market);
+            final boolean withExpired = getExpiredParam(params);
+            final int busDay = getBusDate(now).toJd();
+            if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
+                throw new NotFoundException(
+                        String.format("market '%s' has expired", book.getMnem()));
+            }
+            book.toJsonView(params, out);
         } finally {
             serv.releaseRead();
         }
@@ -124,7 +176,14 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetSess(mnem, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            out.append("{\"orders\":");
+            toJsonArray(sess.getFirstOrder(), params, out);
+            out.append(",\"trades\":");
+            toJsonArray(sess.getFirstTrade(), params, out);
+            out.append(",\"posns\":");
+            toJsonArray(sess.getFirstPosn(), params, out);
+            out.append('}');
         } finally {
             serv.releaseRead();
         }
@@ -136,7 +195,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetOrder(mnem, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            toJsonArray(sess.getFirstOrder(), params, out);
         } finally {
             serv.releaseRead();
         }
@@ -148,7 +208,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetOrder(mnem, market, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            RestUtil.getOrder(sess.getFirstOrder(), market, params, out);
         } finally {
             serv.releaseRead();
         }
@@ -160,7 +221,12 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetOrder(mnem, market, id, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            final Order order = sess.findOrder(market, id);
+            if (order == null) {
+                throw new NotFoundException(String.format("order '%d' does not exist", id));
+            }
+            order.toJson(params, out);
         } finally {
             serv.releaseRead();
         }
@@ -172,7 +238,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetTrade(mnem, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            toJsonArray(sess.getFirstTrade(), params, out);
         } finally {
             serv.releaseRead();
         }
@@ -184,7 +251,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetTrade(mnem, market, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            RestUtil.getTrade(sess.getFirstTrade(), market, params, out);
         } finally {
             serv.releaseRead();
         }
@@ -196,7 +264,12 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetTrade(mnem, market, id, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            final Exec trade = sess.findTrade(market, id);
+            if (trade == null) {
+                throw new NotFoundException(String.format("trade '%d' does not exist", id));
+            }
+            trade.toJson(params, out);
         } finally {
             serv.releaseRead();
         }
@@ -208,7 +281,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetPosn(mnem, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            toJsonArray(sess.getFirstPosn(), params, out);
         } finally {
             serv.releaseRead();
         }
@@ -220,7 +294,8 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetPosn(mnem, contr, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            RestUtil.getPosn(sess.getFirstPosn(), contr, params, out);
         } finally {
             serv.releaseRead();
         }
@@ -232,7 +307,13 @@ public final @NonNullByDefault class BackRest extends RestImpl implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            doGetPosn(mnem, contr, settlDate, params, now, out);
+            final TraderSess sess = serv.getTrader(mnem);
+            final Posn posn = sess.findPosn(contr, maybeIsoToJd(settlDate));
+            if (posn == null) {
+                throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",
+                        contr, settlDate));
+            }
+            posn.toJson(params, out);
         } finally {
             serv.releaseRead();
         }
