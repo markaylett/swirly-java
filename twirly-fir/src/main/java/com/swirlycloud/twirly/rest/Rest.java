@@ -29,33 +29,33 @@ public @NonNullByDefault interface Rest {
     void getView(String market, Params params, long now, Appendable out) throws NotFoundException,
             IOException;
 
-    void getSess(String mnem, Params params, long now, Appendable out) throws NotFoundException,
+    void getSess(String trader, Params params, long now, Appendable out) throws NotFoundException,
             ServiceUnavailableException, IOException;
 
-    void getOrder(String mnem, Params params, long now, Appendable out) throws NotFoundException,
+    void getOrder(String trader, Params params, long now, Appendable out) throws NotFoundException,
             IOException;
 
-    void getOrder(String mnem, String market, Params params, long now, Appendable out)
+    void getOrder(String trader, String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException;
 
-    void getOrder(String mnem, String market, long id, Params params, long now, Appendable out)
+    void getOrder(String trader, String market, long id, Params params, long now, Appendable out)
             throws NotFoundException, IOException;
 
-    void getTrade(String mnem, Params params, long now, Appendable out) throws NotFoundException,
+    void getTrade(String trader, Params params, long now, Appendable out) throws NotFoundException,
             IOException;
 
-    void getTrade(String mnem, String market, Params params, long now, Appendable out)
+    void getTrade(String trader, String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException;
 
-    void getTrade(String mnem, String market, long id, Params params, long now, Appendable out)
+    void getTrade(String trader, String market, long id, Params params, long now, Appendable out)
             throws NotFoundException, IOException;
 
-    void getPosn(String mnem, Params params, long now, Appendable out) throws NotFoundException,
+    void getPosn(String trader, Params params, long now, Appendable out) throws NotFoundException,
             IOException;
 
-    void getPosn(String mnem, String contr, Params params, long now, Appendable out)
+    void getPosn(String trader, String contr, Params params, long now, Appendable out)
             throws NotFoundException, IOException;
 
-    void getPosn(String mnem, String contr, int settlDate, Params params, long now, Appendable out)
+    void getPosn(String trader, String contr, int settlDate, Params params, long now, Appendable out)
             throws NotFoundException, IOException;
 }

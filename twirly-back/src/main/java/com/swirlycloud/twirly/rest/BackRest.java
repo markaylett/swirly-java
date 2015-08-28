@@ -171,12 +171,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getSess(String mnem, Params params, long now, Appendable out)
+    public final void getSess(String trader, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             out.append("{\"orders\":");
             toJsonArray(sess.getFirstOrder(), params, out);
             out.append(",\"trades\":");
@@ -190,12 +190,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getOrder(String mnem, Params params, long now, Appendable out)
+    public final void getOrder(String trader, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstOrder(), params, out);
         } finally {
             serv.releaseRead();
@@ -203,12 +203,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getOrder(String mnem, String market, Params params, long now, Appendable out)
+    public final void getOrder(String trader, String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             RestUtil.getOrder(sess.getFirstOrder(), market, params, out);
         } finally {
             serv.releaseRead();
@@ -216,12 +216,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getOrder(String mnem, String market, long id, Params params, long now,
+    public final void getOrder(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             final Order order = sess.findOrder(market, id);
             if (order == null) {
                 throw new NotFoundException(String.format("order '%d' does not exist", id));
@@ -233,12 +233,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getTrade(String mnem, Params params, long now, Appendable out)
+    public final void getTrade(String trader, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstTrade(), params, out);
         } finally {
             serv.releaseRead();
@@ -246,12 +246,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getTrade(String mnem, String market, Params params, long now, Appendable out)
+    public final void getTrade(String trader, String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             RestUtil.getTrade(sess.getFirstTrade(), market, params, out);
         } finally {
             serv.releaseRead();
@@ -259,12 +259,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getTrade(String mnem, String market, long id, Params params, long now,
+    public final void getTrade(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             final Exec trade = sess.findTrade(market, id);
             if (trade == null) {
                 throw new NotFoundException(String.format("trade '%d' does not exist", id));
@@ -276,12 +276,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getPosn(String mnem, Params params, long now, Appendable out)
+    public final void getPosn(String trader, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstPosn(), params, out);
         } finally {
             serv.releaseRead();
@@ -289,12 +289,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getPosn(String mnem, String contr, Params params, long now, Appendable out)
+    public final void getPosn(String trader, String contr, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             RestUtil.getPosn(sess.getFirstPosn(), contr, params, out);
         } finally {
             serv.releaseRead();
@@ -302,12 +302,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getPosn(String mnem, String contr, int settlDate, Params params, long now,
+    public final void getPosn(String trader, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
-            final TraderSess sess = serv.getTrader(mnem);
+            final TraderSess sess = serv.getTrader(trader);
             final Posn posn = sess.findPosn(contr, maybeIsoToJd(settlDate));
             if (posn == null) {
                 throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",

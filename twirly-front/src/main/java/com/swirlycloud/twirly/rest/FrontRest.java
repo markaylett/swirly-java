@@ -178,67 +178,67 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getSess(String mnem, Params params, long now, Appendable out)
+    public final void getSess(String trader, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException {
         out.append("{\"orders\":");
-        doGetOrder(mnem, params, out);
+        doGetOrder(trader, params, out);
         out.append(",\"trades\":");
-        doGetTrade(mnem, params, out);
+        doGetTrade(trader, params, out);
         out.append(",\"posns\":");
-        doGetPosn(mnem, params, now, out);
+        doGetPosn(trader, params, now, out);
         out.append('}');
     }
 
     @Override
-    public final void getOrder(String mnem, Params params, long now, Appendable out)
+    public final void getOrder(String trader, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getOrder(String mnem, String market, Params params, long now, Appendable out)
+    public final void getOrder(String trader, String market, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getOrder(String mnem, String market, long id, Params params, long now,
+    public final void getOrder(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getOrder");
     }
 
     @Override
-    public final void getTrade(String mnem, Params params, long now, Appendable out)
+    public final void getTrade(String trader, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getTrade(String mnem, String market, Params params, long now, Appendable out)
+    public final void getTrade(String trader, String market, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getTrade(String mnem, String market, long id, Params params, long now,
+    public final void getTrade(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getTrade");
     }
 
     @Override
-    public final void getPosn(String mnem, Params params, long now, Appendable out)
+    public final void getPosn(String trader, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }
 
     @Override
-    public final void getPosn(String mnem, String contr, Params params, long now, Appendable out)
+    public final void getPosn(String trader, String contr, Params params, long now, Appendable out)
             throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }
 
     @Override
-    public final void getPosn(String mnem, String contr, int settlDate, Params params, long now,
+    public final void getPosn(String trader, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException {
         throw new UnsupportedOperationException("getPosn");
     }
