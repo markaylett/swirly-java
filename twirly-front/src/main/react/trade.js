@@ -25,7 +25,7 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
 
-        $.getJSON('/back/sess', function(sess) {
+        $.getJSON('/front/sess', function(sess) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
 

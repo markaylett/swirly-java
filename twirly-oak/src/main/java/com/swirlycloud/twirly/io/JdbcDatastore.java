@@ -9,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Role;
@@ -17,12 +19,19 @@ import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class JdbcDatastore extends JdbcModel implements Datastore {
+    @NonNull
     private final PreparedStatement insertMarketStmt;
+    @NonNull
     private final PreparedStatement insertTraderStmt;
+    @NonNull
     private final PreparedStatement insertExecStmt;
+    @NonNull
     private final PreparedStatement updateMarketStmt;
+    @NonNull
     private final PreparedStatement updateTraderStmt;
+    @NonNull
     private final PreparedStatement updateOrderStmt;
+    @NonNull
     private final PreparedStatement updateExecStmt;
 
     public JdbcDatastore(String url, String user, String password, Factory factory) {
@@ -52,12 +61,19 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
                 updateExecStmt = conn
                         .prepareStatement("UPDATE Exec_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
                 // Success.
+                assert insertMarketStmt != null;
                 this.insertMarketStmt = insertMarketStmt;
+                assert insertTraderStmt != null;
                 this.insertTraderStmt = insertTraderStmt;
+                assert insertExecStmt != null;
                 this.insertExecStmt = insertExecStmt;
+                assert updateMarketStmt != null;
                 this.updateMarketStmt = updateMarketStmt;
+                assert updateTraderStmt != null;
                 this.updateTraderStmt = updateTraderStmt;
+                assert updateOrderStmt != null;
                 this.updateOrderStmt = updateOrderStmt;
+                assert updateExecStmt != null;
                 this.updateExecStmt = updateExecStmt;
                 success = true;
             } finally {

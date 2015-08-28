@@ -40,8 +40,8 @@ public final class Benchmark {
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;
-        final MarketBook book = (MarketBook) serv.createMarket("EURUSD.MAR14", "EURUSD March 14",
-                "EURUSD", settlDay, expiryDay, state, now());
+        final MarketBook book = serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD",
+                settlDay, expiryDay, state, now());
         assert book != null;
 
         try (final Trans trans = new Trans()) {

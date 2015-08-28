@@ -38,10 +38,10 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
     private transient DlNode dlPrev = DlUtil.NULL;
     private transient DlNode dlNext = DlUtil.NULL;
 
-    private transient @Nullable SlNode slNext = null;
+    private transient @Nullable SlNode slNext;
 
     // Internals.
-    transient @Nullable RbNode level = null;
+    transient @Nullable RbNode level;
 
     private final long id;
     /**

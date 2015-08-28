@@ -17,7 +17,7 @@ public abstract @NonNullByDefault class Rec extends BasicRbNode implements Clone
 
     private static final long serialVersionUID = 1L;
 
-    private transient @Nullable SlNode next;
+    private transient @Nullable SlNode slNext;
 
     protected final String mnem;
     protected String display;
@@ -60,7 +60,7 @@ public abstract @NonNullByDefault class Rec extends BasicRbNode implements Clone
         try {
             final Rec rec = (Rec) super.clone();
             // Nullify intrusive nodes.
-            rec.next = null;
+            rec.slNext = null;
             return rec;
         } catch (final CloneNotSupportedException e) {
             throw new RuntimeException(e);
@@ -69,12 +69,12 @@ public abstract @NonNullByDefault class Rec extends BasicRbNode implements Clone
 
     @Override
     public final void setSlNext(@Nullable SlNode next) {
-        this.next = next;
+        this.slNext = next;
     }
 
     @Override
     public final @Nullable SlNode slNext() {
-        return next;
+        return slNext;
     }
 
     public void setDisplay(@Nullable String display) {

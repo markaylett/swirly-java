@@ -6,8 +6,16 @@ package com.swirlycloud.twirly.intrusive;
 import static com.swirlycloud.twirly.math.MathUtil.nextPow2;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 
-public abstract class HashTable<V> {
+import org.eclipse.jdt.annotation.NonNull;
+
+/**
+ * @author Mark Aylett
+ *
+ * @param <V>
+ */
+public abstract class HashTable<V> implements Container<V> {
     private static final Object[] EMPTY = {};
     private static final int MIN_BUCKETS = 1 << 4;
 
@@ -79,6 +87,18 @@ public abstract class HashTable<V> {
         }
     }
 
+    @Override
+    public final void clear() {
+        Arrays.fill(buckets, null);
+        size = 0;
+    }
+
+    @Override
+    public final void add(@NonNull V node) {
+        // Replace existing by default.
+        insert(node, true);
+    }
+
     /**
      * Insert new element into hash table or optionally replace existing.
      * 
@@ -134,6 +154,13 @@ public abstract class HashTable<V> {
         return insert(node, true);
     }
 
+    @Override
+    public final V getFirst() {
+        // Arbitrarily return first entry of first bucket for unordered collection.
+        return getBucket(0);
+    }
+
+    @Override
     public final boolean isEmpty() {
         return size == 0;
     }

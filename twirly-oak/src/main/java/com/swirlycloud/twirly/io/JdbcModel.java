@@ -28,24 +28,42 @@ import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
+import com.swirlycloud.twirly.intrusive.Container;
+import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
+import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;
 
 public class JdbcModel implements Model {
     private final Factory factory;
+    @NonNull
     protected final Connection conn;
+    @NonNull
     private final PreparedStatement selectAssetStmt;
+    @NonNull
     private final PreparedStatement selectContrStmt;
+    @NonNull
     private final PreparedStatement selectMarketStmt;
+    @NonNull
     private final PreparedStatement selectTraderStmt;
+    @NonNull
     private final PreparedStatement selectTraderByEmailStmt;
+    @NonNull
     private final PreparedStatement selectOrderStmt;
+    @NonNull
+    private final PreparedStatement selectOrderByTraderStmt;
+    @NonNull
     private final PreparedStatement selectTradeStmt;
+    @NonNull
+    private final PreparedStatement selectTradeByTraderStmt;
+    @NonNull
     private final PreparedStatement selectPosnStmt;
+    @NonNull
+    private final PreparedStatement selectPosnByTraderStmt;
 
     private final @NonNull Asset getAsset(ResultSet rs) throws SQLException {
         final String mnem = rs.getString("mnem");
@@ -168,6 +186,69 @@ public class JdbcModel implements Model {
                 created);
     }
 
+    private final void selectOrder(@NonNull PreparedStatement stmt,
+            @NonNull final Container<? super Order> c) throws SQLException {
+        try (final ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                c.add(getOrder(rs));
+            }
+        }
+    }
+
+    private final void selectTrade(@NonNull PreparedStatement stmt,
+            @NonNull final Container<? super Exec> c) throws SQLException {
+        try (final ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                c.add(getTrade(rs));
+            }
+        }
+    }
+
+    private final void selectPosn(@NonNull PreparedStatement stmt, int busDay,
+            @NonNull final Container<? super Posn> c) throws SQLException {
+        final PosnTree posns = new PosnTree();
+        try (final ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                final String trader = rs.getString("trader");
+                final String contr = rs.getString("contr");
+                int settlDay = rs.getInt("settlDay");
+                assert trader != null;
+                assert contr != null;
+                // FIXME: Consider time-of-day.
+                if (settlDay != 0 && settlDay <= busDay) {
+                    settlDay = 0;
+                }
+                // Lazy position.
+                Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
+                if (posn == null || !posn.getTrader().equals(trader)
+                        || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
+                    final RbNode parent = posn;
+                    assert trader != null;
+                    assert contr != null;
+                    posn = factory.newPosn(trader, contr, settlDay);
+                    posns.pinsert(posn, parent);
+                }
+                final Side side = Side.valueOf(rs.getInt("sideId"));
+                final long cost = rs.getLong("cost");
+                final long lots = rs.getLong("lots");
+                if (side == Side.BUY) {
+                    posn.addBuy(cost, lots);
+                } else {
+                    assert side == Side.SELL;
+                    posn.addSell(cost, lots);
+                }
+            }
+        }
+        for (;;) {
+            final Posn posn = (Posn) posns.getRoot();
+            if (posn == null) {
+                break;
+            }
+            posns.remove(posn);
+            c.add(posn);
+        }
+    }
+
     protected static void setParam(PreparedStatement stmt, int i, int val) throws SQLException {
         stmt.setInt(i, val);
     }
@@ -218,8 +299,11 @@ public class JdbcModel implements Model {
         PreparedStatement selectTraderStmt = null;
         PreparedStatement selectTraderByEmailStmt = null;
         PreparedStatement selectOrderStmt = null;
+        PreparedStatement selectOrderByTraderStmt = null;
         PreparedStatement selectTradeStmt = null;
+        PreparedStatement selectTradeByTraderStmt = null;
         PreparedStatement selectPosnStmt = null;
+        PreparedStatement selectPosnByTraderStmt = null;
         boolean success = false;
         try {
             try {
@@ -236,29 +320,58 @@ public class JdbcModel implements Model {
                         .prepareStatement("SELECT mnem FROM Trader_t WHERE email = ?");
                 selectOrderStmt = conn
                         .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
+                selectOrderByTraderStmt = conn
+                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
                 selectTradeStmt = conn
                         .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
+                selectTradeByTraderStmt = conn
+                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE trader = ? AND archive = 0 AND stateId = 4");
                 selectPosnStmt = conn
                         .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v");
+                selectPosnByTraderStmt = conn
+                        .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v WHERE trader = ?");
                 // Success.
                 this.factory = factory;
                 this.conn = conn;
+                assert selectAssetStmt != null;
                 this.selectAssetStmt = selectAssetStmt;
+                assert selectContrStmt != null;
                 this.selectContrStmt = selectContrStmt;
+                assert selectMarketStmt != null;
                 this.selectMarketStmt = selectMarketStmt;
+                assert selectTraderStmt != null;
                 this.selectTraderStmt = selectTraderStmt;
+                assert selectTraderByEmailStmt != null;
                 this.selectTraderByEmailStmt = selectTraderByEmailStmt;
+                assert selectOrderStmt != null;
                 this.selectOrderStmt = selectOrderStmt;
+                assert selectOrderByTraderStmt != null;
+                this.selectOrderByTraderStmt = selectOrderByTraderStmt;
+                assert selectTradeStmt != null;
                 this.selectTradeStmt = selectTradeStmt;
+                assert selectTradeByTraderStmt != null;
+                this.selectTradeByTraderStmt = selectTradeByTraderStmt;
+                assert selectPosnStmt != null;
                 this.selectPosnStmt = selectPosnStmt;
+                assert selectPosnByTraderStmt != null;
+                this.selectPosnByTraderStmt = selectPosnByTraderStmt;
                 success = true;
             } finally {
                 if (!success) {
+                    if (selectPosnByTraderStmt != null) {
+                        selectPosnByTraderStmt.close();
+                    }
                     if (selectPosnStmt != null) {
                         selectPosnStmt.close();
                     }
+                    if (selectTradeByTraderStmt != null) {
+                        selectTradeByTraderStmt.close();
+                    }
                     if (selectTradeStmt != null) {
                         selectTradeStmt.close();
+                    }
+                    if (selectOrderByTraderStmt != null) {
+                        selectOrderByTraderStmt.close();
                     }
                     if (selectOrderStmt != null) {
                         selectOrderStmt.close();
@@ -290,8 +403,11 @@ public class JdbcModel implements Model {
 
     @Override
     public void close() throws SQLException {
+        selectPosnByTraderStmt.close();
         selectPosnStmt.close();
+        selectTradeByTraderStmt.close();
         selectTradeStmt.close();
+        selectOrderByTraderStmt.close();
         selectOrderStmt.close();
         selectTraderByEmailStmt.close();
         selectTraderStmt.close();
@@ -371,23 +487,31 @@ public class JdbcModel implements Model {
     @Override
     public final SlNode selectOrder() {
         final SlQueue q = new SlQueue();
-        try (final ResultSet rs = selectOrderStmt.executeQuery()) {
-            while (rs.next()) {
-                q.insertBack(getOrder(rs));
-            }
+        try {
+            selectOrder(selectOrderStmt, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
         return q.getFirst();
+    }
+
+    @Override
+    public final InstructTree selectOrder(@NonNull String trader) {
+        final InstructTree t = new InstructTree();
+        try {
+            setParam(selectOrderByTraderStmt, 1, trader);
+            selectOrder(selectOrderByTraderStmt, t);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+        return t;
     }
 
     @Override
     public final SlNode selectTrade() {
         final SlQueue q = new SlQueue();
-        try (final ResultSet rs = selectTradeStmt.executeQuery()) {
-            while (rs.next()) {
-                q.insertBack(getTrade(rs));
-            }
+        try {
+            selectTrade(selectTradeStmt, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
@@ -395,51 +519,37 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectPosn(int busDay) {
-        final PosnTree posns = new PosnTree();
-        try (final ResultSet rs = selectPosnStmt.executeQuery()) {
-            while (rs.next()) {
-                final String trader = rs.getString("trader");
-                final String contr = rs.getString("contr");
-                int settlDay = rs.getInt("settlDay");
-                assert trader != null;
-                assert contr != null;
-                // FIXME: Consider time-of-day.
-                if (settlDay != 0 && settlDay <= busDay) {
-                    settlDay = 0;
-                }
-                // Lazy position.
-                Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
-                if (posn == null || !posn.getTrader().equals(trader)
-                        || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
-                    final RbNode parent = posn;
-                    assert trader != null;
-                    assert contr != null;
-                    posn = factory.newPosn(trader, contr, settlDay);
-                    posns.pinsert(posn, parent);
-                }
-                final Side side = Side.valueOf(rs.getInt("sideId"));
-                final long cost = rs.getLong("cost");
-                final long lots = rs.getLong("lots");
-                if (side == Side.BUY) {
-                    posn.addBuy(cost, lots);
-                } else {
-                    assert side == Side.SELL;
-                    posn.addSell(cost, lots);
-                }
-            }
+    public final InstructTree selectTrade(@NonNull String trader) {
+        final InstructTree t = new InstructTree();
+        try {
+            setParam(selectTradeByTraderStmt, 1, trader);
+            selectTrade(selectTradeByTraderStmt, t);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
+        return t;
+    }
+
+    @Override
+    public final SlNode selectPosn(int busDay) {
         final SlQueue q = new SlQueue();
-        for (;;) {
-            final Posn posn = (Posn) posns.getRoot();
-            if (posn == null) {
-                break;
-            }
-            posns.remove(posn);
-            q.insertBack(posn);
+        try {
+            selectPosn(selectPosnStmt, busDay, q);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
         }
         return q.getFirst();
+    }
+
+    @Override
+    public final TraderPosnTree selectPosn(@NonNull String trader, int busDay) {
+        final TraderPosnTree t = new TraderPosnTree();
+        try {
+            setParam(selectPosnByTraderStmt, 1, trader);
+            selectPosn(selectPosnByTraderStmt, busDay, t);
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+        return t;
     }
 }

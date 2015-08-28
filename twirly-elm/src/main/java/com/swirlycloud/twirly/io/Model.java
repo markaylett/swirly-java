@@ -6,7 +6,9 @@ package com.swirlycloud.twirly.io;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public interface Model extends AutoCloseable {
@@ -30,8 +32,17 @@ public interface Model extends AutoCloseable {
     SlNode selectOrder() throws InterruptedException;
 
     @Nullable
+    InstructTree selectOrder(@NonNull String trader) throws InterruptedException;
+
+    @Nullable
     SlNode selectTrade() throws InterruptedException;
 
     @Nullable
+    InstructTree selectTrade(@NonNull String trader) throws InterruptedException;
+
+    @Nullable
     SlNode selectPosn(int busDay) throws InterruptedException;
+
+    @Nullable
+    TraderPosnTree selectPosn(@NonNull String trader, int busDay) throws InterruptedException;
 }

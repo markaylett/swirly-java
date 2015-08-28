@@ -92,7 +92,7 @@ public @NonNullByDefault class Serv {
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final Trader trader = (Trader) node;
             emailIdx.insert(trader);
-            cache.update("email:" + trader.getEmail(), trader.getMnem());
+            cache.update("trader:" + trader.getEmail(), trader.getMnem());
         }
     }
 
@@ -127,20 +127,20 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final Trader newTrader(String mnem, String display, String email)
+    private final TraderSess newTrader(String mnem, String display, String email)
             throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
-        return factory.newTrader(mnem, display, email);
+        return (TraderSess) factory.newTrader(mnem, display, email);
     }
 
-    private final Market newMarket(String mnem, String display, Contr contr, int settlDay,
+    private final MarketBook newMarket(String mnem, String display, Contr contr, int settlDay,
             int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
-        return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state);
+        return (MarketBook) factory.newMarket(mnem, display, contr, settlDay, expiryDay, state);
     }
 
     private final Exec newExec(MarketBook book, Instruct instruct, long now) {
@@ -232,10 +232,35 @@ public @NonNullByDefault class Serv {
         matchOrders(sess, book, order, side, direct, trans);
     }
 
+    private final void insertUnique(final TraderSess first, TraderSess next) {
+        TraderSess sess = first;
+        for (;;) {
+            assert sess != null;
+            if (sess == next) {
+                // Entry already exists.
+                break;
+            } else if (sess.sessNext == null) {
+                next.sessNext = null; // Defensive.
+                sess.sessNext = next;
+                break;
+            }
+            sess = sess.sessNext;
+        }
+    }
+
     // Assumes that maker lots have not been reduced since matching took place.
 
     private final void commitMatches(TraderSess taker, MarketBook book, long now, Trans trans) {
-        for (SlNode node = trans.matches.getFirst(); node != null; node = node.slNext()) {
+        SlNode node = trans.matches.getFirst();
+        if (node == null) {
+            // There are no matches.
+            cache.update("order:" + taker.mnem, taker.orders);
+            return;
+        }
+
+        TraderSess firstSess = taker;
+        firstSess.sessNext = null; // Defensive.
+        do {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
             assert makerOrder != null;
@@ -255,7 +280,21 @@ public @NonNullByDefault class Serv {
             assert takerTrade != null;
             taker.insertTrade(takerTrade);
             trans.posn.addTrade(takerTrade);
-        }
+            insertUnique(firstSess, maker);
+            // Next match.
+            node = node.slNext();
+        } while (node != null);
+
+        do {
+            // Pop.
+            TraderSess sess = firstSess;
+            firstSess = sess.sessNext;
+            sess.sessNext = null;
+            // Update cache.
+            cache.update("order:" + sess.mnem, sess.orders);
+            cache.update("trade:" + sess.mnem, sess.trades);
+            cache.update("posn:" + sess.mnem, sess.posns);
+        } while (firstSess != null);
     }
 
     public Serv(Model model, Journ journ, Cache cache, Factory factory, long now)
@@ -290,6 +329,13 @@ public @NonNullByDefault class Serv {
         insertOrders(model.selectOrder());
         insertTrades(model.selectTrade());
         insertPosns(model.selectPosn(getBusDate(now).toJd()));
+
+        for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
+            final TraderSess sess = (TraderSess) node;
+            cache.update("order:" + sess.mnem, sess.orders);
+            cache.update("trade:" + sess.mnem, sess.trades);
+            cache.update("posn:" + sess.mnem, sess.posns);
+        }
     }
 
     public Serv(Datastore datastore, Cache cache, Factory factory, long now)
@@ -297,7 +343,7 @@ public @NonNullByDefault class Serv {
         this(datastore, datastore, cache, factory, now);
     }
 
-    public final Trader createTrader(String mnem, String display, String email)
+    public final TraderSess createTrader(String mnem, String display, String email)
             throws BadRequestException, ServiceUnavailableException {
         if (traders.find(mnem) != null) {
             throw new BadRequestException(String.format("trader '%s' already exists", mnem));
@@ -305,33 +351,36 @@ public @NonNullByDefault class Serv {
         if (emailIdx.find(email) != null) {
             throw new BadRequestException(String.format("email '%s' is already in use", email));
         }
-        final Trader trader = newTrader(mnem, display, email);
+        final TraderSess sess = newTrader(mnem, display, email);
         try {
             journ.insertTrader(mnem, display, email);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
-        traders.insert(trader);
-        emailIdx.insert(trader);
+        traders.insert(sess);
+        emailIdx.insert(sess);
         cache.update("trader", traders);
-        cache.update("email:" + email, mnem);
-        return trader;
+        cache.update("trader:" + email, mnem);
+        cache.update("order:" + sess.mnem, sess.orders);
+        cache.update("trade:" + sess.mnem, sess.trades);
+        cache.update("posn:" + sess.mnem, sess.posns);
+        return sess;
     }
 
-    public final Trader updateTrader(String mnem, String display) throws BadRequestException,
+    public final TraderSess updateTrader(String mnem, String display) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
-        final Trader trader = (Trader) traders.find(mnem);
-        if (trader == null) {
+        final TraderSess sess = (TraderSess) traders.find(mnem);
+        if (sess == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
         }
-        trader.setDisplay(display);
+        sess.setDisplay(display);
         try {
             journ.updateTrader(mnem, display);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
         cache.update("trader", traders);
-        return trader;
+        return sess;
     }
 
     public final @Nullable Rec findRec(RecType recType, String mnem) {
@@ -449,7 +498,7 @@ public @NonNullByDefault class Serv {
         return (TraderSess) emailIdx.find(email);
     }
 
-    public final Market createMarket(String mnem, String display, Contr contr, int settlDay,
+    public final MarketBook createMarket(String mnem, String display, Contr contr, int settlDay,
             int expiryDay, int state, long now) throws BadRequestException,
             ServiceUnavailableException {
         if (settlDay != 0) {
@@ -466,26 +515,26 @@ public @NonNullByDefault class Serv {
                 throw new BadRequestException("expiry-day without settl-day");
             }
         }
-        Market market = (Market) markets.pfind(mnem);
-        if (market != null && market.getMnem().equals(mnem)) {
+        MarketBook book = (MarketBook) markets.pfind(mnem);
+        if (book != null && book.getMnem().equals(mnem)) {
             throw new BadRequestException(String.format("market '%s' already exists", mnem));
         }
-        final RbNode parent = market;
-        market = newMarket(mnem, display, contr, settlDay, expiryDay, state);
+        final RbNode parent = book;
+        book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
         try {
             journ.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
-        markets.pinsert(market, parent);
+        markets.pinsert(book, parent);
         cache.update("market", markets);
-        return market;
+        return book;
     }
 
-    public final Market createMarket(String mnem, String display, String contrMnem, int settlDay,
-            int expiryDay, int state, long now) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
+    public final MarketBook createMarket(String mnem, String display, String contrMnem,
+            int settlDay, int expiryDay, int state, long now) throws BadRequestException,
+            NotFoundException, ServiceUnavailableException {
         final Contr contr = (Contr) contrs.find(contrMnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contr '%s' does not exist", contrMnem));
@@ -493,21 +542,21 @@ public @NonNullByDefault class Serv {
         return createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
     }
 
-    public final Market updateMarket(String mnem, String display, int state, long now)
+    public final MarketBook updateMarket(String mnem, String display, int state, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        final Market market = (Market) markets.find(mnem);
-        if (market == null) {
+        final MarketBook book = (MarketBook) markets.find(mnem);
+        if (book == null) {
             throw new NotFoundException(String.format("market '%s' does not exist", mnem));
         }
-        market.setDisplay(display);
-        market.setState(state);
+        book.setDisplay(display);
+        book.setState(state);
         try {
             journ.updateMarket(mnem, display, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
         cache.update("market", markets);
-        return market;
+        return book;
     }
 
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
@@ -532,7 +581,9 @@ public @NonNullByDefault class Serv {
         }
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final TraderSess sess = (TraderSess) node;
-            sess.settlPosns(busDay);
+            if (sess.settlPosns(busDay) > 0) {
+                cache.update("posn:" + sess.mnem, sess.posns);
+            }
         }
     }
 
@@ -608,6 +659,7 @@ public @NonNullByDefault class Serv {
         book.reviseOrder(order, lots, now);
 
         trans.reset(book, order, exec);
+        cache.update("order:" + sess.mnem, sess.orders);
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, long id, long lots, long now,
@@ -646,6 +698,7 @@ public @NonNullByDefault class Serv {
         book.cancelOrder(order, now);
 
         trans.reset(book, order, exec);
+        cache.update("order:" + sess.mnem, sess.orders);
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, long id, long now, Trans trans)
@@ -699,6 +752,7 @@ public @NonNullByDefault class Serv {
             // Final commit phase cannot fail.
             book.cancelOrder(order, now);
         }
+        cache.update("order:" + sess.mnem, sess.orders);
     }
 
     public final void cancelOrders(MarketBook book, long now) throws NotFoundException,
@@ -706,38 +760,65 @@ public @NonNullByDefault class Serv {
         final BookSide bidSide = book.getBidSide();
         final BookSide offerSide = book.getOfferSide();
 
-        SlNode first = null;
+        SlNode firstExec = null;
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
             final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
-            exec.setSlNext(first);
-            first = exec;
+            exec.setSlNext(firstExec);
+            firstExec = exec;
         }
         for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
             final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
-            exec.setSlNext(first);
-            first = exec;
+            exec.setSlNext(firstExec);
+            firstExec = exec;
         }
         try {
-            journ.insertExecList(book.getMnem(), first);
+            journ.insertExecList(book.getMnem(), firstExec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
+
         // Commit phase.
+        TraderSess firstSess = null;
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd();) {
             final Order order = (Order) node;
             node = node.dlNext();
             bidSide.cancelOrder(order, now);
+
+            final TraderSess sess = (TraderSess) traders.find(order.getTrader());
+            assert sess != null;
+            if (firstSess == null) {
+                firstSess = sess;
+            } else {
+                insertUnique(firstSess, sess);
+            }
         }
         for (DlNode node = offerSide.getFirstOrder(); !node.isEnd();) {
             final Order order = (Order) node;
             node = node.dlNext();
             offerSide.cancelOrder(order, now);
+
+            final TraderSess sess = (TraderSess) traders.find(order.getTrader());
+            assert sess != null;
+            if (firstSess == null) {
+                firstSess = sess;
+            } else {
+                insertUnique(firstSess, sess);
+            }
+        }
+
+        while (firstSess != null) {
+            // Pop.
+            TraderSess sess = firstSess;
+            firstSess = sess.sessNext;
+            sess.sessNext = null;
+            // Update cache.
+            cache.update("order:" + sess.mnem, sess.orders);
         }
     }
 
@@ -754,6 +835,7 @@ public @NonNullByDefault class Serv {
 
         // No need to update timestamps on order because it is immediately freed.
         sess.removeOrder(order);
+        cache.update("order:" + sess.mnem, sess.orders);
     }
 
     public final void archiveOrder(TraderSess sess, String market, long id, long now)
@@ -796,6 +878,7 @@ public @NonNullByDefault class Serv {
             // No need to update timestamps on order because it is immediately freed.
             sess.removeOrder(order);
         }
+        cache.update("order:" + sess.mnem, sess.orders);
     }
 
     public final Exec createTrade(TraderSess sess, MarketBook book, String ref, Side side,
@@ -803,8 +886,7 @@ public @NonNullByDefault class Serv {
             throws NotFoundException, ServiceUnavailableException {
         final Posn posn = sess.getLazyPosn(book);
         final Exec trade = Exec.manual(book.allocExecId(), sess.getMnem(), book.getMnem(),
-                book.getContr(), book.getSettlDay(), ref, side, ticks, lots, role, cpty,
-                created);
+                book.getContr(), book.getSettlDay(), ref, side, ticks, lots, role, cpty, created);
         if (cpty != null) {
             // Create back-to-back trade if counter-party is specified.
             final TraderSess cptySess = (TraderSess) traders.find(cpty);
@@ -823,6 +905,9 @@ public @NonNullByDefault class Serv {
             posn.addTrade(trade);
             cptySess.insertTrade(cptyTrade);
             cptyPosn.addTrade(cptyTrade);
+            // Update counter-party cache entries.
+            cache.update("trade:" + cptySess.mnem, cptySess.trades);
+            cache.update("posn:" + cptySess.mnem, cptySess.posns);
         } else {
             try {
                 journ.insertExec(trade);
@@ -832,6 +917,8 @@ public @NonNullByDefault class Serv {
             sess.insertTrade(trade);
             posn.addTrade(trade);
         }
+        cache.update("trade:" + sess.mnem, sess.trades);
+        cache.update("posn:" + sess.mnem, sess.posns);
         return trade;
     }
 
@@ -848,6 +935,7 @@ public @NonNullByDefault class Serv {
 
         // No need to update timestamps on trade because it is immediately freed.
         sess.removeTrade(trade);
+        cache.update("trade:" + sess.mnem, sess.trades);
     }
 
     public final void archiveTrade(TraderSess sess, String market, long id, long now)
@@ -887,6 +975,7 @@ public @NonNullByDefault class Serv {
             // No need to update timestamps on trade because it is immediately freed.
             sess.removeTrade(trade);
         }
+        cache.update("trade:" + sess.mnem, sess.trades);
     }
 
     public final void archiveAll(TraderSess sess, long now) throws NotFoundException,
