@@ -24,38 +24,39 @@ public @NonNullByDefault interface Rest {
     void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    void getView(Params params, long now, Appendable out) throws IOException;
+    void getView(Params params, long now, Appendable out) throws ServiceUnavailableException,
+            IOException;
 
     void getView(String market, Params params, long now, Appendable out) throws NotFoundException,
-            IOException;
+            ServiceUnavailableException, IOException;
 
     void getSess(String trader, Params params, long now, Appendable out) throws NotFoundException,
             ServiceUnavailableException, IOException;
 
     void getOrder(String trader, Params params, long now, Appendable out) throws NotFoundException,
-            IOException;
+            ServiceUnavailableException, IOException;
 
     void getOrder(String trader, String market, Params params, long now, Appendable out)
-            throws NotFoundException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getOrder(String trader, String market, long id, Params params, long now, Appendable out)
-            throws NotFoundException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getTrade(String trader, Params params, long now, Appendable out) throws NotFoundException,
-            IOException;
+            ServiceUnavailableException, IOException;
 
     void getTrade(String trader, String market, Params params, long now, Appendable out)
-            throws NotFoundException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getTrade(String trader, String market, long id, Params params, long now, Appendable out)
-            throws NotFoundException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getPosn(String trader, Params params, long now, Appendable out) throws NotFoundException,
-            IOException;
+            ServiceUnavailableException, IOException;
 
     void getPosn(String trader, String contr, Params params, long now, Appendable out)
-            throws NotFoundException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getPosn(String trader, String contr, int settlDate, Params params, long now, Appendable out)
-            throws NotFoundException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 }

@@ -25,7 +25,7 @@ public final @NonNullByDefault class RestUtil {
     }
 
     public static void getOrder(@Nullable RbNode first, String market, Params params, Appendable out)
-            throws NotFoundException, IOException {
+            throws IOException {
         out.append('[');
         int i = 0;
         for (RbNode node = first; node != null; node = node.rbNext()) {
@@ -43,7 +43,7 @@ public final @NonNullByDefault class RestUtil {
     }
 
     public static void getTrade(@Nullable RbNode first, String market, Params params, Appendable out)
-            throws NotFoundException, IOException {
+            throws IOException {
         out.append('[');
         int i = 0;
         for (RbNode node = first; node != null; node = node.rbNext()) {

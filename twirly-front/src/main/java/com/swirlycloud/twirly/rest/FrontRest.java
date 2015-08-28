@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
+import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
@@ -11,6 +12,9 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
 import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -25,7 +29,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
 
     private final Model model;
 
-    private final MnemRbTree getRecTree(RecType recType) throws ServiceUnavailableException {
+    private final MnemRbTree selectRec(RecType recType) throws ServiceUnavailableException {
         MnemRbTree tree = null;
         try {
             switch (recType) {
@@ -51,7 +55,59 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
-    private final InstructTree getOrderTree(String trader) throws ServiceUnavailableException {
+    private final MnemRbTree selectAsset() throws ServiceUnavailableException {
+        MnemRbTree tree = null;
+        try {
+            tree = model.selectAsset();
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+        assert tree != null;
+        return tree;
+    }
+
+    private final MnemRbTree selectContr() throws ServiceUnavailableException {
+        MnemRbTree tree = null;
+        try {
+            tree = model.selectContr();
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+        assert tree != null;
+        return tree;
+    }
+
+    private final MnemRbTree selectMarket() throws ServiceUnavailableException {
+        MnemRbTree tree = null;
+        try {
+            tree = model.selectMarket();
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+        assert tree != null;
+        return tree;
+    }
+
+    private final MnemRbTree selectTrader() throws ServiceUnavailableException {
+        MnemRbTree tree = null;
+        try {
+            tree = model.selectTrader();
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+        assert tree != null;
+        return tree;
+    }
+
+    private final InstructTree selectOrder(String trader) throws ServiceUnavailableException {
         InstructTree tree = null;
         try {
             tree = model.selectOrder(trader);
@@ -64,7 +120,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
-    private final InstructTree getTradeTree(String trader) throws ServiceUnavailableException {
+    private final InstructTree selectTrade(String trader) throws ServiceUnavailableException {
         InstructTree tree = null;
         try {
             tree = model.selectTrade(trader);
@@ -77,7 +133,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
-    private final TraderPosnTree getPosnTree(String trader, int busDay)
+    private final TraderPosnTree selectPosn(String trader, int busDay)
             throws ServiceUnavailableException {
         TraderPosnTree tree = null;
         try {
@@ -89,31 +145,6 @@ public final @NonNullByDefault class FrontRest implements Rest {
         }
         assert tree != null;
         return tree;
-    }
-
-    private final void doGetRec(RecType recType, Params params, Appendable out)
-            throws ServiceUnavailableException, IOException {
-        final MnemRbTree tree = getRecTree(recType);
-        toJsonArray(tree.getFirst(), params, out);
-    }
-
-    private final void doGetOrder(String trader, Params params, Appendable out)
-            throws ServiceUnavailableException, IOException {
-        final InstructTree tree = getOrderTree(trader);
-        toJsonArray(tree.getFirst(), params, out);
-    }
-
-    private final void doGetTrade(String trader, Params params, Appendable out)
-            throws ServiceUnavailableException, IOException {
-        final InstructTree tree = getTradeTree(trader);
-        toJsonArray(tree.getFirst(), params, out);
-    }
-
-    private final void doGetPosn(String trader, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException {
-        final int busDay = getBusDate(now).toJd();
-        final TraderPosnTree tree = getPosnTree(trader, busDay);
-        toJsonArray(tree.getFirst(), params, out);
     }
 
     public FrontRest(Model model) {
@@ -136,29 +167,29 @@ public final @NonNullByDefault class FrontRest implements Rest {
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         out.append("{\"assets\":");
-        doGetRec(RecType.ASSET, params, out);
+        toJsonArray(selectAsset().getFirst(), params, out);
         out.append(",\"contrs\":");
-        doGetRec(RecType.CONTR, params, out);
+        toJsonArray(selectContr().getFirst(), params, out);
         out.append(",\"markets\":");
-        doGetRec(RecType.MARKET, params, out);
+        toJsonArray(selectMarket().getFirst(), params, out);
         if (withTraders) {
             out.append(",\"traders\":");
-            doGetRec(RecType.TRADER, params, out);
+            toJsonArray(selectTrader().getFirst(), params, out);
         }
         out.append('}');
-
     }
 
     @Override
     public final void getRec(RecType recType, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
-        doGetRec(recType, params, out);
+        final MnemRbTree tree = selectRec(recType);
+        toJsonArray(tree.getFirst(), params, out);
     }
 
     @Override
     public final void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException {
-        final MnemRbTree tree = getRecTree(recType);
+        final MnemRbTree tree = selectRec(recType);
         final Rec rec = (Rec) tree.find(mnem);
         if (rec == null) {
             throw new NotFoundException(String.format("record '%s' does not exist", mnem));
@@ -172,74 +203,92 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getView(String market, Params params, long now, Appendable out)
-            throws NotFoundException {
+    public final void getView(String market, Params params, long now, Appendable out) {
         throw new UnsupportedOperationException("getView");
     }
 
     @Override
     public final void getSess(String trader, Params params, long now, Appendable out)
-            throws NotFoundException, ServiceUnavailableException, IOException {
+            throws ServiceUnavailableException, IOException {
         out.append("{\"orders\":");
-        doGetOrder(trader, params, out);
+        toJsonArray(selectOrder(trader).getFirst(), params, out);
         out.append(",\"trades\":");
-        doGetTrade(trader, params, out);
+        toJsonArray(selectTrade(trader).getFirst(), params, out);
         out.append(",\"posns\":");
-        doGetPosn(trader, params, now, out);
+        final int busDay = getBusDate(now).toJd();
+        toJsonArray(selectPosn(trader, busDay).getFirst(), params, out);
         out.append('}');
     }
 
     @Override
     public final void getOrder(String trader, Params params, long now, Appendable out)
-            throws NotFoundException {
-        throw new UnsupportedOperationException("getOrder");
+            throws ServiceUnavailableException, IOException {
+        toJsonArray(selectOrder(trader).getFirst(), params, out);
     }
 
     @Override
     public final void getOrder(String trader, String market, Params params, long now, Appendable out)
-            throws NotFoundException {
-        throw new UnsupportedOperationException("getOrder");
+            throws ServiceUnavailableException, IOException {
+        RestUtil.getOrder(selectOrder(trader).getFirst(), market, params, out);
     }
 
     @Override
     public final void getOrder(String trader, String market, long id, Params params, long now,
-            Appendable out) throws NotFoundException {
-        throw new UnsupportedOperationException("getOrder");
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
+        final InstructTree tree = selectOrder(trader);
+        final Order order = (Order) tree.find(market, id);
+        if (order == null) {
+            throw new NotFoundException(String.format("order '%d' does not exist", id));
+        }
+        order.toJson(params, out);
     }
 
     @Override
     public final void getTrade(String trader, Params params, long now, Appendable out)
-            throws NotFoundException {
-        throw new UnsupportedOperationException("getTrade");
+            throws ServiceUnavailableException, IOException {
+        toJsonArray(selectTrade(trader).getFirst(), params, out);
     }
 
     @Override
     public final void getTrade(String trader, String market, Params params, long now, Appendable out)
-            throws NotFoundException {
-        throw new UnsupportedOperationException("getTrade");
+            throws ServiceUnavailableException, IOException {
+        RestUtil.getTrade(selectTrade(trader).getFirst(), market, params, out);
     }
 
     @Override
     public final void getTrade(String trader, String market, long id, Params params, long now,
-            Appendable out) throws NotFoundException {
-        throw new UnsupportedOperationException("getTrade");
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
+        final InstructTree tree = selectTrade(trader);
+        final Exec trade = (Exec) tree.find(market, id);
+        if (trade == null) {
+            throw new NotFoundException(String.format("trade '%d' does not exist", id));
+        }
+        trade.toJson(params, out);
     }
 
     @Override
     public final void getPosn(String trader, Params params, long now, Appendable out)
-            throws NotFoundException {
-        throw new UnsupportedOperationException("getPosn");
+            throws ServiceUnavailableException, IOException {
+        final int busDay = getBusDate(now).toJd();
+        toJsonArray(selectPosn(trader, busDay).getFirst(), params, out);
     }
 
     @Override
     public final void getPosn(String trader, String contr, Params params, long now, Appendable out)
-            throws NotFoundException {
-        throw new UnsupportedOperationException("getPosn");
+            throws ServiceUnavailableException, IOException {
+        RestUtil.getPosn(selectTrade(trader).getFirst(), contr, params, out);
     }
 
     @Override
     public final void getPosn(String trader, String contr, int settlDate, Params params, long now,
-            Appendable out) throws NotFoundException {
-        throw new UnsupportedOperationException("getPosn");
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
+        final int busDay = getBusDate(now).toJd();
+        final TraderPosnTree tree = selectPosn(trader, busDay);
+        final Posn posn = (Posn) tree.find(contr, maybeIsoToJd(settlDate));
+        if (posn == null) {
+            throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",
+                    contr, settlDate));
+        }
+        posn.toJson(params, out);
     }
 }
