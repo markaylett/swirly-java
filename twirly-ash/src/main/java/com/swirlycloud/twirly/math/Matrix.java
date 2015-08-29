@@ -128,6 +128,13 @@ public class Matrix {
         return m;
     }
 
+    public final void clear() {
+        final int len = data.length;
+        for (int i = 0; i < len; ++i) {
+            data[i] = 0;
+        }
+    }
+
     public final void setValue(int row, int col, double value) {
         // Assert only because this needs to be fast.
         assert 0 <= row && row < rows;
