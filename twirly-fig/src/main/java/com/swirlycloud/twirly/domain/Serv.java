@@ -40,6 +40,8 @@ public @NonNullByDefault class Serv {
     private final MnemRbTree markets;
     private final MnemRbTree traders;
     private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
+    @Nullable
+    private TraderSess dirtySess;
 
     private final void enrichContr(Contr contr) {
         final Asset asset = (Asset) assets.find(contr.getAsset());
@@ -232,19 +234,136 @@ public @NonNullByDefault class Serv {
         matchOrders(sess, book, order, side, direct, trans);
     }
 
-    private final void insertUnique(final TraderSess first, TraderSess next) {
-        TraderSess sess = first;
-        for (;;) {
+    private final void doCancelOrders(MarketBook book, long now) throws NotFoundException,
+            ServiceUnavailableException {
+        final BookSide bidSide = book.getBidSide();
+        final BookSide offerSide = book.getOfferSide();
+
+        SlNode firstExec = null;
+        for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
+            final Order order = (Order) node;
+            final Exec exec = newExec(book, order, now);
+            exec.cancel();
+            // Stack push.
+            exec.setSlNext(firstExec);
+            firstExec = exec;
+        }
+        for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
+            final Order order = (Order) node;
+            final Exec exec = newExec(book, order, now);
+            exec.cancel();
+            // Stack push.
+            exec.setSlNext(firstExec);
+            firstExec = exec;
+        }
+        try {
+            journ.insertExecList(book.getMnem(), firstExec);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        for (DlNode node = bidSide.getFirstOrder(); !node.isEnd();) {
+            final Order order = (Order) node;
+            node = node.dlNext();
+            bidSide.cancelOrder(order, now);
+
+            final TraderSess sess = (TraderSess) traders.find(order.getTrader());
             assert sess != null;
-            if (sess == next) {
-                // Entry already exists.
-                break;
-            } else if (sess.sessNext == null) {
-                next.sessNext = null; // Defensive.
-                sess.sessNext = next;
+            setDirty(sess, TraderSess.DIRTY_ORDER);
+        }
+
+        for (DlNode node = offerSide.getFirstOrder(); !node.isEnd();) {
+            final Order order = (Order) node;
+            node = node.dlNext();
+            offerSide.cancelOrder(order, now);
+
+            final TraderSess sess = (TraderSess) traders.find(order.getTrader());
+            assert sess != null;
+            setDirty(sess, TraderSess.DIRTY_ORDER);
+        }
+    }
+
+    private final void doArchiveOrders(TraderSess sess, long now) throws NotFoundException,
+            ServiceUnavailableException {
+
+        // Set dirty here, because the block below may throw.
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        RbNode node = sess.getFirstOrder();
+        while (node != null) {
+            final Order order = (Order) node;
+            // Move to next node before this order is unlinked.
+            node = node.rbNext();
+            if (!order.isDone()) {
+                continue;
+            }
+            try {
+                journ.archiveOrder(order.getMarket(), order.getId(), now);
+            } catch (final RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
+
+            // No need to update timestamps on order because it is immediately freed.
+            sess.removeOrder(order);
+        }
+    }
+
+    private final void doArchiveTrades(TraderSess sess, long now) throws NotFoundException,
+            ServiceUnavailableException {
+
+        // Set dirty here, because the block below may throw.
+        setDirty(sess, TraderSess.DIRTY_TRADE);
+
+        for (;;) {
+            final Exec trade = (Exec) sess.getRootTrade();
+            if (trade == null) {
                 break;
             }
-            sess = sess.sessNext;
+            try {
+                journ.archiveTrade(trade.getMarket(), trade.getId(), now);
+            } catch (final RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
+
+            // No need to update timestamps on trade because it is immediately freed.
+            sess.removeTrade(trade);
+        }
+    }
+
+    private final void flushDirty() {
+        while (dirtySess != null) {
+            final TraderSess sess = dirtySess;
+            assert sess != null;
+            sess.flushDirty(cache);
+            // Pop if flush succeeded.
+            dirtySess = sess.dirtyNext;
+            sess.dirtyNext = null;
+        }
+    }
+
+    private final void setDirty(TraderSess next, int dirty) {
+
+        next.setDirty(dirty);
+
+        TraderSess sess = dirtySess;
+        if (sess == null) {
+            next.dirtyNext = null; // Defensive.
+            dirtySess = next;
+        } else {
+            for (;;) {
+                assert sess != null;
+                if (sess == next) {
+                    // Entry already exists.
+                    break;
+                } else if (sess.dirtyNext == null) {
+                    next.dirtyNext = null; // Defensive.
+                    sess.dirtyNext = next;
+                    break;
+                }
+                sess = sess.dirtyNext;
+            }
         }
     }
 
@@ -254,12 +373,10 @@ public @NonNullByDefault class Serv {
         SlNode node = trans.matches.getFirst();
         if (node == null) {
             // There are no matches.
-            cache.update("order:" + taker.mnem, taker.orders);
+            setDirty(taker, TraderSess.DIRTY_ORDER);
             return;
         }
-
-        TraderSess firstSess = taker;
-        firstSess.sessNext = null; // Defensive.
+        setDirty(taker, TraderSess.DIRTY_ALL);
         do {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
@@ -280,21 +397,10 @@ public @NonNullByDefault class Serv {
             assert takerTrade != null;
             taker.insertTrade(takerTrade);
             trans.posn.addTrade(takerTrade);
-            insertUnique(firstSess, maker);
+            setDirty(maker, TraderSess.DIRTY_ALL);
             // Next match.
             node = node.slNext();
         } while (node != null);
-
-        do {
-            // Pop.
-            TraderSess sess = firstSess;
-            firstSess = sess.sessNext;
-            sess.sessNext = null;
-            // Update cache.
-            cache.update("order:" + sess.mnem, sess.orders);
-            cache.update("trade:" + sess.mnem, sess.trades);
-            cache.update("posn:" + sess.mnem, sess.posns);
-        } while (firstSess != null);
     }
 
     public Serv(Model model, Journ journ, Cache cache, Factory factory, long now)
@@ -332,10 +438,9 @@ public @NonNullByDefault class Serv {
 
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final TraderSess sess = (TraderSess) node;
-            cache.update("order:" + sess.mnem, sess.orders);
-            cache.update("trade:" + sess.mnem, sess.trades);
-            cache.update("posn:" + sess.mnem, sess.posns);
+            setDirty(sess, TraderSess.DIRTY_ALL);
         }
+        flushDirty();
     }
 
     public Serv(Datastore datastore, Cache cache, Factory factory, long now)
@@ -361,9 +466,8 @@ public @NonNullByDefault class Serv {
         emailIdx.insert(sess);
         cache.update("trader", traders);
         cache.update("trader:" + email, mnem);
-        cache.update("order:" + sess.mnem, sess.orders);
-        cache.update("trade:" + sess.mnem, sess.trades);
-        cache.update("posn:" + sess.mnem, sess.posns);
+        setDirty(sess, TraderSess.DIRTY_ALL);
+        flushDirty();
         return sess;
     }
 
@@ -565,9 +669,10 @@ public @NonNullByDefault class Serv {
             final MarketBook book = (MarketBook) node;
             node = node.rbNext();
             if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
-                cancelOrders(book, now);
+                doCancelOrders(book, now);
             }
         }
+        flushDirty();
     }
 
     public final void settlMarkets(long now) {
@@ -582,9 +687,10 @@ public @NonNullByDefault class Serv {
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final TraderSess sess = (TraderSess) node;
             if (sess.settlPosns(busDay) > 0) {
-                cache.update("posn:" + sess.mnem, sess.posns);
+                setDirty(sess, TraderSess.DIRTY_POSN);
             }
         }
+        flushDirty();
     }
 
     public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
@@ -630,6 +736,7 @@ public @NonNullByDefault class Serv {
         sess.insertOrder(order);
         // Commit trans to cycle and free matches.
         commitMatches(sess, book, now, trans);
+        flushDirty();
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, Order order, long lots,
@@ -659,7 +766,8 @@ public @NonNullByDefault class Serv {
         book.reviseOrder(order, lots, now);
 
         trans.reset(book, order, exec);
-        cache.update("order:" + sess.mnem, sess.orders);
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+        flushDirty();
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, long id, long lots, long now,
@@ -698,7 +806,8 @@ public @NonNullByDefault class Serv {
         book.cancelOrder(order, now);
 
         trans.reset(book, order, exec);
-        cache.update("order:" + sess.mnem, sess.orders);
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+        flushDirty();
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, long id, long now, Trans trans)
@@ -752,74 +861,14 @@ public @NonNullByDefault class Serv {
             // Final commit phase cannot fail.
             book.cancelOrder(order, now);
         }
-        cache.update("order:" + sess.mnem, sess.orders);
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+        flushDirty();
     }
 
     public final void cancelOrders(MarketBook book, long now) throws NotFoundException,
             ServiceUnavailableException {
-        final BookSide bidSide = book.getBidSide();
-        final BookSide offerSide = book.getOfferSide();
-
-        SlNode firstExec = null;
-        for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
-            final Order order = (Order) node;
-            final Exec exec = newExec(book, order, now);
-            exec.cancel();
-            // Stack push.
-            exec.setSlNext(firstExec);
-            firstExec = exec;
-        }
-        for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
-            final Order order = (Order) node;
-            final Exec exec = newExec(book, order, now);
-            exec.cancel();
-            // Stack push.
-            exec.setSlNext(firstExec);
-            firstExec = exec;
-        }
-        try {
-            journ.insertExecList(book.getMnem(), firstExec);
-        } catch (final RejectedExecutionException e) {
-            throw new ServiceUnavailableException("journal is busy", e);
-        }
-
-        // Commit phase.
-        TraderSess firstSess = null;
-        for (DlNode node = bidSide.getFirstOrder(); !node.isEnd();) {
-            final Order order = (Order) node;
-            node = node.dlNext();
-            bidSide.cancelOrder(order, now);
-
-            final TraderSess sess = (TraderSess) traders.find(order.getTrader());
-            assert sess != null;
-            if (firstSess == null) {
-                firstSess = sess;
-            } else {
-                insertUnique(firstSess, sess);
-            }
-        }
-        for (DlNode node = offerSide.getFirstOrder(); !node.isEnd();) {
-            final Order order = (Order) node;
-            node = node.dlNext();
-            offerSide.cancelOrder(order, now);
-
-            final TraderSess sess = (TraderSess) traders.find(order.getTrader());
-            assert sess != null;
-            if (firstSess == null) {
-                firstSess = sess;
-            } else {
-                insertUnique(firstSess, sess);
-            }
-        }
-
-        while (firstSess != null) {
-            // Pop.
-            TraderSess sess = firstSess;
-            firstSess = sess.sessNext;
-            sess.sessNext = null;
-            // Update cache.
-            cache.update("order:" + sess.mnem, sess.orders);
-        }
+        doCancelOrders(book, now);
+        flushDirty();
     }
 
     public final void archiveOrder(TraderSess sess, Order order, long now)
@@ -835,7 +884,9 @@ public @NonNullByDefault class Serv {
 
         // No need to update timestamps on order because it is immediately freed.
         sess.removeOrder(order);
-        cache.update("order:" + sess.mnem, sess.orders);
+
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+        flushDirty();
     }
 
     public final void archiveOrder(TraderSess sess, String market, long id, long now)
@@ -861,24 +912,8 @@ public @NonNullByDefault class Serv {
      */
     public final void archiveOrders(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
-        RbNode node = sess.getFirstOrder();
-        while (node != null) {
-            final Order order = (Order) node;
-            // Move to next node before this order is unlinked.
-            node = node.rbNext();
-            if (!order.isDone()) {
-                continue;
-            }
-            try {
-                journ.archiveOrder(order.getMarket(), order.getId(), now);
-            } catch (final RejectedExecutionException e) {
-                throw new ServiceUnavailableException("journal is busy", e);
-            }
-
-            // No need to update timestamps on order because it is immediately freed.
-            sess.removeOrder(order);
-        }
-        cache.update("order:" + sess.mnem, sess.orders);
+        doArchiveOrders(sess, now);
+        flushDirty();
     }
 
     public final Exec createTrade(TraderSess sess, MarketBook book, String ref, Side side,
@@ -906,8 +941,7 @@ public @NonNullByDefault class Serv {
             cptySess.insertTrade(cptyTrade);
             cptyPosn.addTrade(cptyTrade);
             // Update counter-party cache entries.
-            cache.update("trade:" + cptySess.mnem, cptySess.trades);
-            cache.update("posn:" + cptySess.mnem, cptySess.posns);
+            setDirty(cptySess, TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
         } else {
             try {
                 journ.insertExec(trade);
@@ -917,8 +951,8 @@ public @NonNullByDefault class Serv {
             sess.insertTrade(trade);
             posn.addTrade(trade);
         }
-        cache.update("trade:" + sess.mnem, sess.trades);
-        cache.update("posn:" + sess.mnem, sess.posns);
+        setDirty(sess, TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
+        flushDirty();
         return trade;
     }
 
@@ -935,7 +969,8 @@ public @NonNullByDefault class Serv {
 
         // No need to update timestamps on trade because it is immediately freed.
         sess.removeTrade(trade);
-        cache.update("trade:" + sess.mnem, sess.trades);
+        setDirty(sess, TraderSess.DIRTY_TRADE);
+        flushDirty();
     }
 
     public final void archiveTrade(TraderSess sess, String market, long id, long now)
@@ -961,26 +996,14 @@ public @NonNullByDefault class Serv {
      */
     public final void archiveTrades(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
-        for (;;) {
-            final Exec trade = (Exec) sess.getRootTrade();
-            if (trade == null) {
-                break;
-            }
-            try {
-                journ.archiveTrade(trade.getMarket(), trade.getId(), now);
-            } catch (final RejectedExecutionException e) {
-                throw new ServiceUnavailableException("journal is busy", e);
-            }
-
-            // No need to update timestamps on trade because it is immediately freed.
-            sess.removeTrade(trade);
-        }
-        cache.update("trade:" + sess.mnem, sess.trades);
+        doArchiveTrades(sess, now);
+        flushDirty();
     }
 
     public final void archiveAll(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
-        archiveOrders(sess, now);
-        archiveTrades(sess, now);
+        doArchiveOrders(sess, now);
+        doArchiveTrades(sess, now);
+        flushDirty();
     }
 }

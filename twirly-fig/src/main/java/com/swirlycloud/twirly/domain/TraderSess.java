@@ -9,11 +9,18 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.RefHashTable;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
+import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.node.RbNode;
 
 public final @NonNullByDefault class TraderSess extends Trader {
 
     private static final long serialVersionUID = 1L;
+
+    // Dirty bits.
+    static final int DIRTY_ORDER = 1 << 0;
+    static final int DIRTY_TRADE = 1 << 1;
+    static final int DIRTY_POSN = 1 << 2;
+    static final int DIRTY_ALL = DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN;
 
     private final transient RefHashTable refIdx;
     private final transient Factory factory;
@@ -21,7 +28,8 @@ public final @NonNullByDefault class TraderSess extends Trader {
     final transient InstructTree trades = new InstructTree();
     final transient TraderPosnTree posns = new TraderPosnTree();
     @Nullable
-    transient TraderSess sessNext;
+    transient TraderSess dirtyNext;
+    private transient int dirty;
 
     TraderSess(String mnem, @Nullable String display, String email, RefHashTable refIdx,
             Factory factory) {
@@ -197,5 +205,24 @@ public final @NonNullByDefault class TraderSess extends Trader {
             }
         }
         return modified;
+    }
+
+    final void flushDirty(Cache cache) {
+        if ((dirty & DIRTY_ORDER) != 0) {
+            cache.update("order:" + mnem, orders);
+            dirty &= ~DIRTY_ORDER;
+        }
+        if ((dirty & DIRTY_TRADE) != 0) {
+            cache.update("trade:" + mnem, trades);
+            dirty &= ~DIRTY_TRADE;
+        }
+        if ((dirty & DIRTY_POSN) != 0) {
+            cache.update("posn:" + mnem, posns);
+            dirty &= ~DIRTY_POSN;
+        }
+    }
+
+    final void setDirty(int dirty) {
+        this.dirty |= dirty;
     }
 }
