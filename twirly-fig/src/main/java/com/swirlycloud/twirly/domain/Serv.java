@@ -38,8 +38,11 @@ public @NonNullByDefault class Serv {
     private final MnemRbTree assets;
     private final MnemRbTree contrs;
     private final MnemRbTree markets;
+    private final MnemRbTree views = new MnemRbTree();
     private final MnemRbTree traders;
     private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
+    @Nullable
+    private MarketBook dirtyBook;
     @Nullable
     private TraderSess dirtySess;
 
@@ -85,8 +88,10 @@ public @NonNullByDefault class Serv {
 
     private final void enrichMarkets() {
         for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
-            final Market market = (Market) node;
-            enrichMarket(market);
+            final MarketBook book = (MarketBook) node;
+            enrichMarket(book);
+            views.insert(book.view);
+            setDirty(book, MarketBook.DIRTY_VIEW);
         }
     }
 
@@ -264,6 +269,8 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
+        setDirty(book, MarketBook.DIRTY_VIEW);
+
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd();) {
             final Order order = (Order) node;
             node = node.dlNext();
@@ -333,6 +340,7 @@ public @NonNullByDefault class Serv {
     }
 
     private final void flushDirty() {
+
         while (dirtySess != null) {
             final TraderSess sess = dirtySess;
             assert sess != null;
@@ -340,6 +348,45 @@ public @NonNullByDefault class Serv {
             // Pop if flush succeeded.
             dirtySess = sess.dirtyNext;
             sess.dirtyNext = null;
+        }
+
+        if (dirtyBook != null) {
+
+            do {
+                final MarketBook book = dirtyBook;
+                assert book != null;
+                book.flushDirty();
+                // Pop if flush succeeded.
+                dirtyBook = book.dirtyNext;
+                book.dirtyNext = null;
+            } while (dirtyBook != null);
+
+            // At least one view has changed.
+            cache.update("view", views);
+        }
+    }
+
+    private final void setDirty(MarketBook next, int dirty) {
+
+        next.setDirty(dirty);
+
+        MarketBook book = dirtyBook;
+        if (book == null) {
+            next.dirtyNext = null; // Defensive.
+            dirtyBook = next;
+        } else {
+            for (;;) {
+                assert book != null;
+                if (book == next) {
+                    // Entry already exists.
+                    break;
+                } else if (book.dirtyNext == null) {
+                    next.dirtyNext = null; // Defensive.
+                    book.dirtyNext = next;
+                    break;
+                }
+                book = book.dirtyNext;
+            }
         }
     }
 
@@ -370,13 +417,14 @@ public @NonNullByDefault class Serv {
     // Assumes that maker lots have not been reduced since matching took place.
 
     private final void commitMatches(TraderSess taker, MarketBook book, long now, Trans trans) {
+        setDirty(book, MarketBook.DIRTY_VIEW);
         SlNode node = trans.matches.getFirst();
         if (node == null) {
             // There are no matches.
             setDirty(taker, TraderSess.DIRTY_ORDER);
             return;
         }
-        setDirty(taker, TraderSess.DIRTY_ALL);
+        setDirty(taker, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
         do {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
@@ -397,7 +445,7 @@ public @NonNullByDefault class Serv {
             assert takerTrade != null;
             taker.insertTrade(takerTrade);
             trans.posn.addTrade(takerTrade);
-            setDirty(maker, TraderSess.DIRTY_ALL);
+            setDirty(maker, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
             // Next match.
             node = node.slNext();
         } while (node != null);
@@ -466,7 +514,7 @@ public @NonNullByDefault class Serv {
         emailIdx.insert(sess);
         cache.update("trader", traders);
         cache.update("trader:" + email, mnem);
-        setDirty(sess, TraderSess.DIRTY_ALL);
+        setDirty(sess, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
         flushDirty();
         return sess;
     }
@@ -632,6 +680,7 @@ public @NonNullByDefault class Serv {
         }
 
         markets.pinsert(book, parent);
+        views.insert(book.view);
         cache.update("market", markets);
         return book;
     }
@@ -678,10 +727,11 @@ public @NonNullByDefault class Serv {
     public final void settlMarkets(long now) {
         final int busDay = getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
-            final Market market = (Market) node;
+            final MarketBook book = (MarketBook) node;
             node = node.rbNext();
-            if (market.isSettlDaySet() && market.getSettlDay() <= busDay) {
-                markets.remove(market);
+            if (book.isSettlDaySet() && book.getSettlDay() <= busDay) {
+                views.remove(book.view);
+                markets.remove(book);
             }
         }
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
@@ -766,6 +816,7 @@ public @NonNullByDefault class Serv {
         book.reviseOrder(order, lots, now);
 
         trans.reset(book, order, exec);
+        setDirty(book, MarketBook.DIRTY_VIEW);
         setDirty(sess, TraderSess.DIRTY_ORDER);
         flushDirty();
     }
@@ -806,6 +857,7 @@ public @NonNullByDefault class Serv {
         book.cancelOrder(order, now);
 
         trans.reset(book, order, exec);
+        setDirty(book, MarketBook.DIRTY_VIEW);
         setDirty(sess, TraderSess.DIRTY_ORDER);
         flushDirty();
     }
@@ -859,6 +911,7 @@ public @NonNullByDefault class Serv {
             }
 
             // Final commit phase cannot fail.
+            setDirty(book, MarketBook.DIRTY_VIEW);
             book.cancelOrder(order, now);
         }
         setDirty(sess, TraderSess.DIRTY_ORDER);

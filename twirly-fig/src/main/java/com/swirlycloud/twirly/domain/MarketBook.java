@@ -22,6 +22,11 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class MarketBook extends Market {
 
     private static final long serialVersionUID = 1L;
+
+    // Dirty bits.
+    static final int DIRTY_VIEW = 1 << 0;
+    static final int DIRTY_ALL = DIRTY_VIEW;
+
     /**
      * Maximum price levels in view.
      */
@@ -33,17 +38,20 @@ public final @NonNullByDefault class MarketBook extends Market {
     // Two sides constitute the book.
     private final transient BookSide bidSide = new BookSide();
     private final transient BookSide offerSide = new BookSide();
-    @SuppressWarnings("unused")
-    private final transient MarketView view;
+    final transient MarketView view;
     private transient long maxOrderId;
     private transient long maxExecId;
+    @Nullable
+    transient MarketBook dirtyNext;
+    private transient int dirty;
 
     private final BookSide getSide(Side side) {
         return side == Side.BUY ? bidSide : offerSide;
     }
 
-    private final Ladder fillLadder(Ladder ladder) {
+    private final void fillLadder(Ladder ladder) {
 
+        view.ladder.clear();
         final int rows = ladder.getRows();
         int row = 0;
         for (RbNode node = bidSide.getFirstLevel(); node != null && row < rows; node = node
@@ -57,7 +65,6 @@ public final @NonNullByDefault class MarketBook extends Market {
             final Level level = (Level) node;
             ladder.setOfferRung(row++, level.getTicks(), level.getLots(), level.getCount());
         }
-        return ladder;
     }
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
@@ -69,15 +76,6 @@ public final @NonNullByDefault class MarketBook extends Market {
         this.view = new MarketView(mnem, contr.getMnem(), settlDay, lastTicks, lastLots, lastTime);
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
-    }
-
-    public final Ladder toLadder() {
-        return fillLadder(new Ladder());
-    }
-
-    public final Ladder toLadder(Ladder ladder) {
-        ladder.clear();
-        return fillLadder(ladder);
     }
 
     public final void toJsonView(@Nullable Params params, Appendable out) throws IOException {
@@ -260,5 +258,20 @@ public final @NonNullByDefault class MarketBook extends Market {
 
     final long getMaxExecId() {
         return maxExecId;
+    }
+
+    final void flushDirty() {
+        if ((dirty & DIRTY_VIEW) != 0) {
+            view.lastTicks = lastTicks;
+            view.lastLots = lastLots;
+            view.lastTime = lastTime;
+            fillLadder(view.ladder);
+            // Reset flag on success.
+            dirty &= ~DIRTY_VIEW;
+        }
+    }
+
+    final void setDirty(int dirty) {
+        this.dirty |= dirty;
     }
 }

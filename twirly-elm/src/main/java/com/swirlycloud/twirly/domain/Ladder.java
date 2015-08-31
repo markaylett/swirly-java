@@ -6,6 +6,9 @@ package com.swirlycloud.twirly.domain;
 import com.swirlycloud.twirly.math.Matrix;
 
 public final class Ladder extends Matrix {
+
+    private static final long serialVersionUID = 1L;
+
     /**
      * Maximum rungs in ladder.
      */

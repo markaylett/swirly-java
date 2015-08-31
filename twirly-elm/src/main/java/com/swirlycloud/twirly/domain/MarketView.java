@@ -38,10 +38,10 @@ public final @NonNullByDefault class MarketView extends BasicRbNode implements J
     private final String market;
     private final String contr;
     private final int settlDay;
-    private final long lastTicks;
-    private final long lastLots;
-    private final long lastTime;
-    private final Ladder ladder;
+    long lastTicks;
+    long lastLots;
+    long lastTime;
+    final Ladder ladder;
 
     public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
             long lastTime, Ladder ladder) {

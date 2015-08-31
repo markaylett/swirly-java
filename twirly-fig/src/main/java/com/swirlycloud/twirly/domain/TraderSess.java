@@ -210,14 +210,17 @@ public final @NonNullByDefault class TraderSess extends Trader {
     final void flushDirty(Cache cache) {
         if ((dirty & DIRTY_ORDER) != 0) {
             cache.update("order:" + mnem, orders);
+            // Reset flag on success.
             dirty &= ~DIRTY_ORDER;
         }
         if ((dirty & DIRTY_TRADE) != 0) {
             cache.update("trade:" + mnem, trades);
+            // Reset flag on success.
             dirty &= ~DIRTY_TRADE;
         }
         if ((dirty & DIRTY_POSN) != 0) {
             cache.update("posn:" + mnem, posns);
+            // Reset flag on success.
             dirty &= ~DIRTY_POSN;
         }
     }

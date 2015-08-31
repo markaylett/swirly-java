@@ -11,7 +11,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
 
