@@ -33,6 +33,8 @@ public final @NonNullByDefault class MarketBook extends Market {
     // Two sides constitute the book.
     private final transient BookSide bidSide = new BookSide();
     private final transient BookSide offerSide = new BookSide();
+    @SuppressWarnings("unused")
+    private final transient MarketView view;
     private transient long maxOrderId;
     private transient long maxExecId;
 
@@ -64,6 +66,7 @@ public final @NonNullByDefault class MarketBook extends Market {
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
+        this.view = new MarketView(mnem, contr.getMnem(), settlDay, lastTicks, lastLots, lastTime);
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
     }

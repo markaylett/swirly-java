@@ -43,8 +43,8 @@ public final @NonNullByDefault class MarketView extends BasicRbNode implements J
     private final long lastTime;
     private final Ladder ladder;
 
-    public MarketView(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
-            long lastLots, long lastTime) {
+    public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
+            long lastTime, Ladder ladder) {
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -54,7 +54,7 @@ public final @NonNullByDefault class MarketView extends BasicRbNode implements J
         this.ladder = ladder;
     }
 
-    public MarketView(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
+    public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime, Ladder ladder) {
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
@@ -62,6 +62,27 @@ public final @NonNullByDefault class MarketView extends BasicRbNode implements J
         this.lastLots = lastLots;
         this.lastTime = lastTime;
         this.ladder = ladder;
+    }
+
+    public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
+            long lastTime) {
+        this.market = market;
+        this.contr = contr;
+        this.settlDay = settlDay;
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.lastTime = lastTime;
+        this.ladder = new Ladder();
+    }
+
+    public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime) {
+        this.market = fin.getMarket();
+        this.contr = fin.getContr();
+        this.settlDay = fin.getSettlDay();
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.lastTime = lastTime;
+        this.ladder = new Ladder();
     }
 
     public static void parse(JsonParser p, Ladder ladder, int col) throws IOException {
@@ -103,8 +124,8 @@ public final @NonNullByDefault class MarketView extends BasicRbNode implements J
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new MarketView(market, contr, settlDay, ladder, lastTicks, lastLots,
-                        lastTime);
+                return new MarketView(market, contr, settlDay, lastTicks, lastLots, lastTime,
+                        ladder);
             case KEY_NAME:
                 name = p.getString();
                 break;

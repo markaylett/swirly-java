@@ -37,8 +37,8 @@ public final class MarketViewTest {
         final long lastLots = 5;
         final long lastTime = 1414932078620L;
 
-        final MarketView view = new MarketView(mnem, contr, settlDay, ladder, lastTicks, lastLots,
-                lastTime);
+        final MarketView view = new MarketView(mnem, contr, settlDay, lastTicks, lastLots, lastTime,
+                ladder);
 
         final StringBuilder sb = new StringBuilder();
 
@@ -132,8 +132,8 @@ public final class MarketViewTest {
         final long lastLots = 5;
         final long lastTime = 1414932078620L;
 
-        final MarketView in = new MarketView(mnem, contr, settlDay, ladder, lastTicks, lastLots,
-                lastTime);
+        final MarketView in = new MarketView(mnem, contr, settlDay, lastTicks, lastLots, lastTime,
+                ladder);
         System.out.println(in.toString());
         try (final JsonParser p = Json.createParser(new StringReader(in.toString()))) {
             assert p != null;
