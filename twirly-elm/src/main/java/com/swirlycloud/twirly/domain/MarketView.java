@@ -14,8 +14,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
+import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
 /**
@@ -23,7 +25,11 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class MarketView implements Jsonifiable, Financial {
+public final @NonNullByDefault class MarketView extends BasicRbNode implements Jsonifiable,
+        Memorable, Financial {
+
+    private static final long serialVersionUID = 1L;
+
     /**
      * Maximum price levels in view.
      */
@@ -285,6 +291,11 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
             }
         }
         out.append("]}");
+    }
+
+    @Override
+    public final String getMnem() {
+        return market;
     }
 
     @Override
