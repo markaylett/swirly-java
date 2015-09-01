@@ -5,7 +5,7 @@
 var TradeModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/back/view', function(views) {
+        $.getJSON('/front/view', function(views) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
             var marketMap = {};

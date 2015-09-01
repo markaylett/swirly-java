@@ -23,6 +23,11 @@
   </servlet>
 
   <servlet>
+    <servlet-name>view</servlet-name>
+    <servlet-class>com.swirlycloud.twirly.web.FrontViewServlet</servlet-class>
+  </servlet>
+
+  <servlet>
     <servlet-name>sess</servlet-name>
     <servlet-class>com.swirlycloud.twirly.web.FrontSessServlet</servlet-class>
   </servlet>
@@ -40,6 +45,11 @@
   <servlet-mapping>
     <servlet-name>rec</servlet-name>
     <url-pattern>/front/rec/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>view</servlet-name>
+    <url-pattern>/front/view/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
