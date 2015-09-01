@@ -25,8 +25,8 @@ public final @NonNullByDefault class ServFactory extends BasicFactory {
     public final MarketBook newMarket(String mnem, @Nullable String display, Memorable contr,
             int settlDay, int expiryDay, int state, long lastTicks, long lastLots, long lastTime,
             long maxOrderId, long maxExecId) {
-        return new MarketBook(mnem, display, contr, settlDay, expiryDay, state, lastTicks,
-                lastLots, lastTime, maxOrderId, maxExecId);
+        return new MarketTag(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots,
+                lastTime, maxOrderId, maxExecId);
     }
 
     /*
@@ -37,6 +37,6 @@ public final @NonNullByDefault class ServFactory extends BasicFactory {
      */
     @Override
     public final TraderSess newTrader(String mnem, @Nullable String display, String email) {
-        return new TraderSess(mnem, display, email, refIdx, this);
+        return new TraderTag(mnem, display, email, refIdx, this);
     }
 }

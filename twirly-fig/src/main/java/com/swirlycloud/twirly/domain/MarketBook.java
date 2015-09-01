@@ -19,7 +19,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class MarketBook extends Market {
+public @NonNullByDefault class MarketBook extends Market {
 
     private static final long serialVersionUID = 1L;
 

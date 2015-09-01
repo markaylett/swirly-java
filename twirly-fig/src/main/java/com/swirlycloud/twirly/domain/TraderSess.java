@@ -12,7 +12,7 @@ import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.node.RbNode;
 
-public final @NonNullByDefault class TraderSess extends Trader {
+public @NonNullByDefault class TraderSess extends Trader {
 
     private static final long serialVersionUID = 1L;
 

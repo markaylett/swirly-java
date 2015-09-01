@@ -6,16 +6,19 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.intrusive.RefHashTable;
+
 /**
- * This class is required to deserialise of {@code Trader} messages.
- * 
+ * A marker interface use for {@code Trader} serialisation.
+ *
  * @author Mark Aylett
  */
-public final @NonNullByDefault class TraderSess extends Trader {
+public final @NonNullByDefault class TraderTag extends TraderSess {
 
     private static final long serialVersionUID = 1L;
 
-    TraderSess(String mnem, @Nullable String display, String email) {
-        super(mnem, display, email);
+    TraderTag(String mnem, @Nullable String display, String email, RefHashTable refIdx,
+            Factory factory) {
+        super(mnem, display, email, refIdx, factory);
     }
 }

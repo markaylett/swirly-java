@@ -9,16 +9,17 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.util.Memorable;
 
 /**
- * This class is required to deserialise of {@code Market} messages.
- * 
+ * A marker interface use for {@code Market} serialisation.
+ *
  * @author Mark Aylett
  */
-public final @NonNullByDefault class MarketBook extends Market {
+public final @NonNullByDefault class MarketTag extends MarketBook {
 
     private static final long serialVersionUID = 1L;
 
-    MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
-            int state) {
-        super(mnem, display, contr, settlDay, expiryDay, state);
+    MarketTag(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
+            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
+        super(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime,
+                maxOrderId, maxExecId);
     }
 }
