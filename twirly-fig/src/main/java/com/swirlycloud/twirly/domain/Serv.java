@@ -457,32 +457,32 @@ public @NonNullByDefault class Serv {
         this.cache = cache;
         this.factory = factory;
 
-        MnemRbTree t = model.selectAsset();
+        MnemRbTree t = model.selectAsset(factory);
         assert t != null;
         this.assets = t;
         cache.update("asset", t);
 
-        t = model.selectContr();
+        t = model.selectContr(factory);
         assert t != null;
         this.contrs = t;
         enrichContrs();
         cache.update("contr", t);
 
-        t = model.selectMarket();
+        t = model.selectMarket(factory);
         assert t != null;
         this.markets = t;
         enrichMarkets();
         cache.update("market", t);
 
-        t = model.selectTrader();
+        t = model.selectTrader(factory);
         assert t != null;
         this.traders = t;
         updateEmailIdx();
         cache.update("trader", t);
 
-        insertOrders(model.selectOrder());
-        insertTrades(model.selectTrade());
-        insertPosns(model.selectPosn(getBusDate(now).toJd()));
+        insertOrders(model.selectOrder(factory));
+        insertTrades(model.selectTrade(factory));
+        insertPosns(model.selectPosn(getBusDate(now).toJd(), factory));
 
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final TraderSess sess = (TraderSess) node;

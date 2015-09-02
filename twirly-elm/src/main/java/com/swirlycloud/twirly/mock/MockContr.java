@@ -12,36 +12,32 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 
 public final class MockContr {
 
-    private final Factory factory;
-    private final MockAsset mockAsset;
-    private final List<NullaryFunction<Contr>> list = new ArrayList<>();
-    private final Map<String, NullaryFunction<Contr>> map = new HashMap<>();
+    private static List<UnaryFunction<Contr, Factory>> LIST = new ArrayList<>();
+    private static Map<String, UnaryFunction<Contr, Factory>> MAP = new HashMap<>();
 
-    private final void put(final @NonNull String mnem, final String display,
+    private static void put(final @NonNull String mnem, final String display,
             final @NonNull String asset, final @NonNull String ccy, final int tickNumer,
             final int tickDenom, final int lotNumer, final int lotDenom, final int pipDp,
             final long minLots, final long maxLots) {
-        final NullaryFunction<Contr> fn = new NullaryFunction<Contr>() {
+        final UnaryFunction<Contr, Factory> fn = new UnaryFunction<Contr, Factory>() {
             @Override
-            public final Contr call() {
-                return factory.newContr(mnem, display, mockAsset.newAsset(asset),
-                        mockAsset.newAsset(ccy), tickNumer, tickDenom, lotNumer, lotDenom, pipDp,
-                        minLots, maxLots);
+            public final Contr call(Factory factory) {
+                return factory.newContr(mnem, display, MockAsset.newAsset(asset, factory),
+                        MockAsset.newAsset(ccy, factory), tickNumer, tickDenom, lotNumer, lotDenom,
+                        pipDp, minLots, maxLots);
             }
         };
-        list.add(fn);
-        map.put(mnem, fn);
+        LIST.add(fn);
+        MAP.put(mnem, fn);
     }
 
-    public MockContr(Factory factory) {
-        this.factory = factory;
-        this.mockAsset = new MockAsset(factory);
+    static {
 
         // Forex.
         put("EURUSD", "EURUSD", "EUR", "USD", 1, 10000, 1000000, 1, 4, 1, 10);
@@ -61,24 +57,27 @@ public final class MockContr {
         put("WGAA", "Gelena Abaya A", "WGAA", "ETB", 1, 1, 1, 1, 0, 1, 10);
     }
 
-    @SuppressWarnings("null")
-    public final @NonNull Contr newContr(String mnem) {
-        return map.get(mnem).call();
+    private MockContr() {
     }
 
-    public final @NonNull MnemRbTree selectContr() {
+    @SuppressWarnings("null")
+    public static @NonNull Contr newContr(String mnem, Factory factory) {
+        return MAP.get(mnem).call(factory);
+    }
+
+    public static @NonNull MnemRbTree selectContr(Factory factory) {
         final MnemRbTree t = new MnemRbTree();
-        for (final NullaryFunction<Contr> entry : list) {
-            final Contr contr = entry.call();
+        for (final UnaryFunction<Contr, Factory> entry : LIST) {
+            final Contr contr = entry.call(factory);
             assert contr != null;
             t.insert(contr);
         }
         return t;
     }
 
-    public final void selectContr(UnaryCallback<Contr> cb) {
-        for (final NullaryFunction<Contr> entry : list) {
-            cb.call(entry.call());
+    public static void selectContr(Factory factory, UnaryCallback<Contr> cb) {
+        for (final UnaryFunction<Contr, Factory> entry : LIST) {
+            cb.call(entry.call(factory));
         }
     }
 }

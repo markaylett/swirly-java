@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.io;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
@@ -37,10 +38,11 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectAsset() throws InterruptedException {
+    public final @Nullable MnemRbTree selectAsset(@NonNull Factory factory)
+            throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) cache.select("asset");
         if (tree == null) {
-            tree = model.selectAsset();
+            tree = model.selectAsset(factory);
             assert tree != null;
             cache.insert("asset", tree);
         }
@@ -48,10 +50,11 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectContr() throws InterruptedException {
+    public final @Nullable MnemRbTree selectContr(@NonNull Factory factory)
+            throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) cache.select("contr");
         if (tree == null) {
-            tree = model.selectContr();
+            tree = model.selectContr(factory);
             assert tree != null;
             cache.insert("contr", tree);
         }
@@ -59,10 +62,11 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectMarket() throws InterruptedException {
+    public final @Nullable MnemRbTree selectMarket(@NonNull Factory factory)
+            throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) cache.select("market");
         if (tree == null) {
-            tree = model.selectMarket();
+            tree = model.selectMarket(factory);
             assert tree != null;
             cache.insert("market", tree);
         }
@@ -70,10 +74,11 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectTrader() throws InterruptedException {
+    public final @Nullable MnemRbTree selectTrader(@NonNull Factory factory)
+            throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) cache.select("trader");
         if (tree == null) {
-            tree = model.selectTrader();
+            tree = model.selectTrader(factory);
             assert tree != null;
             cache.insert("trader", tree);
         }
@@ -81,12 +86,12 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable String selectTraderByEmail(@NonNull String email)
-            throws InterruptedException {
+    public final @Nullable String selectTraderByEmail(@NonNull String email,
+            @NonNull Factory factory) throws InterruptedException {
         final String key = "trader:" + email;
         String trader = (String) cache.select(key);
         if (trader == null) {
-            trader = model.selectTraderByEmail(email);
+            trader = model.selectTraderByEmail(email, factory);
             // An empty value indicates that there is no trader with this email, as opposed to a
             // null value, which indicates that the cache is empty.
             cache.insert(key, trader != null ? trader : "");
@@ -95,16 +100,17 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectOrder() throws InterruptedException {
-        return model.selectOrder();
+    public final @Nullable SlNode selectOrder(@NonNull Factory factory) throws InterruptedException {
+        return model.selectOrder(factory);
     }
 
     @Override
-    public final @Nullable InstructTree selectOrder(@NonNull String trader) throws InterruptedException {
+    public final @Nullable InstructTree selectOrder(@NonNull String trader, @NonNull Factory factory)
+            throws InterruptedException {
         final String key = "order:" + trader;
         InstructTree tree = (InstructTree) cache.select(key);
         if (tree == null) {
-            tree = model.selectOrder(trader);
+            tree = model.selectOrder(trader, factory);
             assert tree != null;
             cache.insert(key, tree);
         }
@@ -112,16 +118,17 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectTrade() throws InterruptedException {
-        return model.selectTrade();
+    public final @Nullable SlNode selectTrade(@NonNull Factory factory) throws InterruptedException {
+        return model.selectTrade(factory);
     }
 
     @Override
-    public final @Nullable InstructTree selectTrade(@NonNull String trader) throws InterruptedException {
+    public final @Nullable InstructTree selectTrade(@NonNull String trader, @NonNull Factory factory)
+            throws InterruptedException {
         final String key = "trade:" + trader;
         InstructTree tree = (InstructTree) cache.select(key);
         if (tree == null) {
-            tree = model.selectTrade(trader);
+            tree = model.selectTrade(trader, factory);
             assert tree != null;
             cache.insert(key, tree);
         }
@@ -129,17 +136,18 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectPosn(int busDay) throws InterruptedException {
-        return model.selectPosn(busDay);
+    public final @Nullable SlNode selectPosn(int busDay, @NonNull Factory factory)
+            throws InterruptedException {
+        return model.selectPosn(busDay, factory);
     }
 
     @Override
-    public final @Nullable TraderPosnTree selectPosn(@NonNull String trader, int busDay)
-            throws InterruptedException {
+    public final @Nullable TraderPosnTree selectPosn(@NonNull String trader, int busDay,
+            @NonNull Factory factory) throws InterruptedException {
         final String key = "posn:" + trader;
         TraderPosnTree tree = (TraderPosnTree) cache.select(key);
         if (tree == null) {
-            tree = model.selectPosn(trader, busDay);
+            tree = model.selectPosn(trader, busDay, factory);
             assert tree != null;
             cache.insert(key, tree);
         }

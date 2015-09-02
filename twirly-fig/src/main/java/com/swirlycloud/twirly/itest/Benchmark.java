@@ -85,7 +85,7 @@ public final class Benchmark {
     }
 
     public static void main(String[] args) throws Exception {
-        try (final Datastore datastore = new MockDatastore(FACTORY)) {
+        try (final Datastore datastore = new MockDatastore()) {
             final Serv serv = new Serv(datastore, NO_CACHE, FACTORY, now());
             run(serv);
         }

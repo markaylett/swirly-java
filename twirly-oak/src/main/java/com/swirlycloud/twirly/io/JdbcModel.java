@@ -39,7 +39,6 @@ import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Memorable;
 
 public class JdbcModel implements Model {
-    private final Factory factory;
     @NonNull
     protected final Connection conn;
     @NonNull
@@ -65,7 +64,8 @@ public class JdbcModel implements Model {
     @NonNull
     private final PreparedStatement selectPosnByTraderStmt;
 
-    private final @NonNull Asset getAsset(ResultSet rs) throws SQLException {
+    private static @NonNull Asset getAsset(@NonNull ResultSet rs, @NonNull Factory factory)
+            throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final AssetType assetType = AssetType.valueOf(rs.getInt("typeId"));
@@ -74,7 +74,8 @@ public class JdbcModel implements Model {
         return factory.newAsset(mnem, display, assetType);
     }
 
-    private final @NonNull Contr getContr(ResultSet rs) throws SQLException {
+    private static @NonNull Contr getContr(@NonNull ResultSet rs, @NonNull Factory factory)
+            throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         @SuppressWarnings("null")
@@ -94,7 +95,8 @@ public class JdbcModel implements Model {
                 lotDenom, pipDp, minLots, maxLots);
     }
 
-    private final @NonNull Market getMarket(ResultSet rs) throws SQLException {
+    private static @NonNull Market getMarket(@NonNull ResultSet rs, @NonNull Factory factory)
+            throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         @SuppressWarnings("null")
@@ -115,7 +117,8 @@ public class JdbcModel implements Model {
                 lastLots, lastTime, maxOrderId, maxExecId);
     }
 
-    private final @NonNull Trader getTrader(ResultSet rs) throws SQLException {
+    private static @NonNull Trader getTrader(@NonNull ResultSet rs, @NonNull Factory factory)
+            throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
         final String email = rs.getString("email");
@@ -125,7 +128,8 @@ public class JdbcModel implements Model {
         return factory.newTrader(mnem, display, email);
     }
 
-    private final @NonNull Order getOrder(ResultSet rs) throws SQLException {
+    private static @NonNull Order getOrder(@NonNull ResultSet rs, @NonNull Factory factory)
+            throws SQLException {
         final long id = rs.getLong("id");
         final String trader = rs.getString("trader");
         final String market = rs.getString("market");
@@ -151,7 +155,8 @@ public class JdbcModel implements Model {
                 resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
     }
 
-    private final @NonNull Exec getTrade(ResultSet rs) throws SQLException {
+    private static @NonNull Exec getTrade(@NonNull ResultSet rs, @NonNull Factory factory)
+            throws SQLException {
         final long id = rs.getLong("id");
         // getLong() returns zero if value is null.
         final long orderId = rs.getLong("orderId");
@@ -186,26 +191,26 @@ public class JdbcModel implements Model {
                 created);
     }
 
-    private final void selectOrder(@NonNull PreparedStatement stmt,
+    private static void selectOrder(@NonNull PreparedStatement stmt, @NonNull Factory factory,
             @NonNull final Container<? super Order> c) throws SQLException {
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                c.add(getOrder(rs));
+                c.add(getOrder(rs, factory));
             }
         }
     }
 
-    private final void selectTrade(@NonNull PreparedStatement stmt,
+    private final void selectTrade(@NonNull PreparedStatement stmt, @NonNull Factory factory,
             @NonNull final Container<? super Exec> c) throws SQLException {
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                c.add(getTrade(rs));
+                c.add(getTrade(rs, factory));
             }
         }
     }
 
     private final void selectPosn(@NonNull PreparedStatement stmt, int busDay,
-            @NonNull final Container<? super Posn> c) throws SQLException {
+            @NonNull Factory factory, @NonNull final Container<? super Posn> c) throws SQLException {
         final PosnTree posns = new PosnTree();
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -291,7 +296,7 @@ public class JdbcModel implements Model {
         stmt.setBoolean(i, val);
     }
 
-    public JdbcModel(String url, String user, String password, Factory factory) {
+    public JdbcModel(String url, String user, String password) {
         Connection conn = null;
         PreparedStatement selectAssetStmt = null;
         PreparedStatement selectContrStmt = null;
@@ -331,7 +336,6 @@ public class JdbcModel implements Model {
                 selectPosnByTraderStmt = conn
                         .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v WHERE trader = ?");
                 // Success.
-                this.factory = factory;
                 this.conn = conn;
                 assert selectAssetStmt != null;
                 this.selectAssetStmt = selectAssetStmt;
@@ -418,11 +422,11 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final MnemRbTree selectAsset() {
+    public final MnemRbTree selectAsset(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectAssetStmt.executeQuery()) {
             while (rs.next()) {
-                t.insert(getAsset(rs));
+                t.insert(getAsset(rs, factory));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
@@ -431,11 +435,11 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final MnemRbTree selectContr() {
+    public final MnemRbTree selectContr(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectContrStmt.executeQuery()) {
             while (rs.next()) {
-                t.insert(getContr(rs));
+                t.insert(getContr(rs, factory));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
@@ -444,11 +448,11 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final MnemRbTree selectMarket() {
+    public final MnemRbTree selectMarket(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectMarketStmt.executeQuery()) {
             while (rs.next()) {
-                t.insert(getMarket(rs));
+                t.insert(getMarket(rs, factory));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
@@ -457,11 +461,11 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final MnemRbTree selectTrader() {
+    public final MnemRbTree selectTrader(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectTraderStmt.executeQuery()) {
             while (rs.next()) {
-                t.insert(getTrader(rs));
+                t.insert(getTrader(rs, factory));
             }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
@@ -470,7 +474,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @Nullable String selectTraderByEmail(@NonNull String email) {
+    public final @Nullable String selectTraderByEmail(@NonNull String email,
+            @NonNull Factory factory) {
         try {
             setParam(selectTraderByEmailStmt, 1, email);
             try (final ResultSet rs = selectTraderByEmailStmt.executeQuery()) {
@@ -485,10 +490,10 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectOrder() {
+    public final SlNode selectOrder(@NonNull Factory factory) {
         final SlQueue q = new SlQueue();
         try {
-            selectOrder(selectOrderStmt, q);
+            selectOrder(selectOrderStmt, factory, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
@@ -496,11 +501,11 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final InstructTree selectOrder(@NonNull String trader) {
+    public final InstructTree selectOrder(@NonNull String trader, @NonNull Factory factory) {
         final InstructTree t = new InstructTree();
         try {
             setParam(selectOrderByTraderStmt, 1, trader);
-            selectOrder(selectOrderByTraderStmt, t);
+            selectOrder(selectOrderByTraderStmt, factory, t);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
@@ -508,10 +513,10 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectTrade() {
+    public final SlNode selectTrade(@NonNull Factory factory) {
         final SlQueue q = new SlQueue();
         try {
-            selectTrade(selectTradeStmt, q);
+            selectTrade(selectTradeStmt, factory, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
@@ -519,11 +524,11 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final InstructTree selectTrade(@NonNull String trader) {
+    public final InstructTree selectTrade(@NonNull String trader, @NonNull Factory factory) {
         final InstructTree t = new InstructTree();
         try {
             setParam(selectTradeByTraderStmt, 1, trader);
-            selectTrade(selectTradeByTraderStmt, t);
+            selectTrade(selectTradeByTraderStmt, factory, t);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
@@ -531,10 +536,10 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final SlNode selectPosn(int busDay) {
+    public final SlNode selectPosn(int busDay, @NonNull Factory factory) {
         final SlQueue q = new SlQueue();
         try {
-            selectPosn(selectPosnStmt, busDay, q);
+            selectPosn(selectPosnStmt, busDay, factory, q);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }
@@ -542,11 +547,12 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final TraderPosnTree selectPosn(@NonNull String trader, int busDay) {
+    public final TraderPosnTree selectPosn(@NonNull String trader, int busDay,
+            @NonNull Factory factory) {
         final TraderPosnTree t = new TraderPosnTree();
         try {
             setParam(selectPosnByTraderStmt, 1, trader);
-            selectPosn(selectPosnByTraderStmt, busDay, t);
+            selectPosn(selectPosnByTraderStmt, busDay, factory, t);
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }

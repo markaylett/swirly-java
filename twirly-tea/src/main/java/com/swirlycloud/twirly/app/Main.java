@@ -180,7 +180,7 @@ public final class Main {
 
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
-        try (final Datastore datastore = new MockDatastore(FACTORY)) {
+        try (final Datastore datastore = new MockDatastore()) {
             final LockableServ serv = new LockableServ(datastore, NO_CACHE, FACTORY, now());
             run(serv);
         }

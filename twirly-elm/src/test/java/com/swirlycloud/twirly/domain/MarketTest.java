@@ -15,13 +15,12 @@ import com.swirlycloud.twirly.mock.MockContr;
 public final class MarketTest {
 
     private static final Factory FACTORY = new BasicFactory();
-    private static final MockContr MOCK_CONTR = new MockContr(FACTORY);
 
     @Test
     public final void testToJson() throws IOException {
         final String mnem = "EURUSD.MAR14";
         final String display = "EURUSD March 14";
-        final Contr contr = MOCK_CONTR.newContr("EURUSD");
+        final Contr contr = MockContr.newContr("EURUSD", FACTORY);
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;

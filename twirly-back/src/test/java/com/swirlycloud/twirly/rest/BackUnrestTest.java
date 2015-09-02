@@ -29,6 +29,7 @@ import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Market;
+import com.swirlycloud.twirly.domain.MarketView;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Rec;
@@ -38,7 +39,6 @@ import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.domain.MarketView;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -56,9 +56,6 @@ import com.swirlycloud.twirly.rest.BackUnrest.TransStruct;
 public final class BackUnrestTest {
 
     private static final @NonNull Factory FACTORY = new BasicFactory();
-    private static final MockAsset MOCK_ASSET = new MockAsset(FACTORY);
-    private static final MockContr MOCK_CONTR = new MockContr(FACTORY);
-    private static final MockTrader MOCK_TRADER = new MockTrader(FACTORY);
 
     private static final String TRADER = "MARAYL";
     private static final int TODAY = ymdToJd(2014, 2, 11);
@@ -66,6 +63,8 @@ public final class BackUnrestTest {
     private static final int EXPIRY_DAY = TODAY + 1;
 
     private static final long NOW = jdToMillis(TODAY);
+
+    private BackUnrest unrest;
 
     private static void assertAsset(Asset expected, Asset actual) {
         assertNotNull(actual);
@@ -76,11 +75,11 @@ public final class BackUnrestTest {
 
     private static void assertAsset(String mnem, Asset actual) {
         assertNotNull(actual);
-        assertAsset(MOCK_ASSET.newAsset(mnem), actual);
+        assertAsset(MockAsset.newAsset(mnem, FACTORY), actual);
     }
 
     private static void assertAssets(final Map<String, ? super Asset> assets) {
-        MOCK_ASSET.selectAsset(new UnaryCallback<Asset>() {
+        MockAsset.selectAsset(FACTORY, new UnaryCallback<Asset>() {
             @Override
             public final void call(Asset arg) {
                 assertAsset(arg, (Asset) assets.get(arg.getMnem()));
@@ -103,11 +102,11 @@ public final class BackUnrestTest {
 
     private static void assertContr(String mnem, Contr actual) {
         assertNotNull(actual);
-        assertContr(MOCK_CONTR.newContr(mnem), actual);
+        assertContr(MockContr.newContr(mnem, FACTORY), actual);
     }
 
     private static void assertContrs(final Map<String, ? super Contr> contrs) {
-        MOCK_CONTR.selectContr(new UnaryCallback<Contr>() {
+        MockContr.selectContr(FACTORY, new UnaryCallback<Contr>() {
             @Override
             public final void call(Contr arg) {
                 assertEquals(arg, contrs.get(arg.getMnem()));
@@ -135,14 +134,14 @@ public final class BackUnrestTest {
 
     private static void assertTrader(String mnem, Trader actual) {
         assertNotNull(actual);
-        assertTrader(MOCK_TRADER.newTrader(mnem), actual);
+        assertTrader(MockTrader.newTrader(mnem, FACTORY), actual);
     }
 
     private static void assertTraders(final Map<String, ? super Trader> traders) {
-        MOCK_TRADER.selectTrader(new UnaryCallback<Trader>() {
+        MockTrader.selectTrader(FACTORY, new UnaryCallback<Trader>() {
             @Override
             public final void call(Trader arg) {
-                assertEquals(arg, traders.get(arg.getMnem()));
+                 assertEquals(arg, traders.get(arg.getMnem()));
             }
         });
     }
@@ -223,8 +222,6 @@ public final class BackUnrestTest {
         assertEquals(sellLots, actual.getSellLots());
     }
 
-    private BackUnrest unrest;
-
     private final Trader postTrader(String mnem, String display, String email)
             throws BadRequestException, ServiceUnavailableException, IOException {
         return unrest.postTrader(mnem, display, email, PARAMS_NONE, NOW);
@@ -267,8 +264,8 @@ public final class BackUnrestTest {
         return unrest.putOrder(TRADER, market, id, lots, PARAMS_NONE, NOW);
     }
 
-    private final void deleteTrade(String mnem, String market, long id)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+    private final void deleteTrade(String mnem, String market, long id) throws BadRequestException,
+            NotFoundException, ServiceUnavailableException {
         unrest.deleteTrade(mnem, market, id, NOW);
     }
 
@@ -276,9 +273,8 @@ public final class BackUnrestTest {
     @Before
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, InterruptedException, IOException {
-        final Factory factory = new ServFactory();
-        final Datastore datastore = new MockDatastore(factory);
-        final BackUnrest unrest = new BackUnrest(datastore, NO_CACHE, factory, NOW);
+        final Datastore datastore = new MockDatastore();
+        final BackUnrest unrest = new BackUnrest(datastore, NO_CACHE, new ServFactory(), NOW);
         this.unrest = unrest;
         boolean success = false;
         try {
