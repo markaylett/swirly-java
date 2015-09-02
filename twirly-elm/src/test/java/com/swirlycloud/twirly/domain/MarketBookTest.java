@@ -20,7 +20,7 @@ public final class MarketBookTest {
 
     @Before
     public final void setUp() {
-        factory = new ServFactory();
+        factory = new BookFactory();
     }
 
     @Test
