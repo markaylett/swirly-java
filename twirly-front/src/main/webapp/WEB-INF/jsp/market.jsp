@@ -6,14 +6,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <jsp:include page="head.jsp"/>
+  <%@ include file="head.jsp"%>
 
   <body>
 
-    <jsp:include page="navbar.jsp"/>
+    <%@ include file="navbar.jsp"%>
     <div id="module" class="container">
     </div>
-    <jsp:include page="footer.jsp"/>
+    <%@ include file="footer.jsp"%>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->
