@@ -490,6 +490,12 @@ public class JdbcModel implements Model {
     }
 
     @Override
+    public final @Nullable MnemRbTree selectView(@NonNull Factory factory)
+            throws InterruptedException {
+        return ModelUtil.selectView(this, factory);
+    }
+
+    @Override
     public final SlNode selectOrder(@NonNull Factory factory) {
         final SlQueue q = new SlQueue();
         try {

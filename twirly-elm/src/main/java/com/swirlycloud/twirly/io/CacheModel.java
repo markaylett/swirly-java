@@ -100,6 +100,18 @@ public final class CacheModel implements Model {
     }
 
     @Override
+    public final @Nullable MnemRbTree selectView(@NonNull Factory factory)
+            throws InterruptedException {
+        MnemRbTree tree = (MnemRbTree) cache.select("view");
+        if (tree == null) {
+            tree = model.selectView(factory);
+            assert tree != null;
+            cache.insert("view", tree);
+        }
+        return tree;
+    }
+
+    @Override
     public final @Nullable SlNode selectOrder(@NonNull Factory factory) throws InterruptedException {
         return model.selectOrder(factory);
     }

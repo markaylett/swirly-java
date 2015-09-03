@@ -196,7 +196,7 @@ public @NonNullByDefault class MarketBook extends Market {
         out.append("]}");
     }
 
-    final void insertOrder(Order order) {
+    public final void insertOrder(Order order) {
         getSide(order.getSide()).insertOrder(order);
     }
 
@@ -250,6 +250,10 @@ public @NonNullByDefault class MarketBook extends Market {
 
     final BookSide getOfferSide() {
         return offerSide;
+    }
+
+    public final MarketView getView() {
+        return view;
     }
 
     final long getMaxOrderId() {

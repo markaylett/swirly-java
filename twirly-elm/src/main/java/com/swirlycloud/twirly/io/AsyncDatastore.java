@@ -110,6 +110,17 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
+    public final @Nullable MnemRbTree selectView(@NonNull final Factory factory)
+            throws InterruptedException {
+        return get(service.submit(new Callable<MnemRbTree>() {
+            @Override
+            public final MnemRbTree call() throws Exception {
+                return datastore.selectView(factory);
+            }
+        }));
+    }
+
+    @Override
     public final @Nullable SlNode selectOrder(@NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override

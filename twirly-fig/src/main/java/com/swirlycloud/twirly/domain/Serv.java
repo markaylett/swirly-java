@@ -38,8 +38,8 @@ public @NonNullByDefault class Serv {
     private final MnemRbTree assets;
     private final MnemRbTree contrs;
     private final MnemRbTree markets;
-    private final MnemRbTree views = new MnemRbTree();
     private final MnemRbTree traders;
+    private final MnemRbTree views = new MnemRbTree();
     private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
     @Nullable
     private MarketBook dirtyBook;

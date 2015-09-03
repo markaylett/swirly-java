@@ -46,13 +46,19 @@ public class MockModel implements Model {
     }
 
     @Override
+    public final @Nullable MnemRbTree selectView(@NonNull Factory factory)
+            throws InterruptedException {
+        return new MnemRbTree();
+    }
+
+    @Override
     public SlNode selectOrder(@NonNull final Factory factory) {
         return null;
     }
 
     @Override
     public InstructTree selectOrder(@NonNull String trader, @NonNull final Factory factory) {
-        return null;
+        return new InstructTree();
     }
 
     @Override
@@ -62,7 +68,7 @@ public class MockModel implements Model {
 
     @Override
     public InstructTree selectTrade(@NonNull String trader, @NonNull final Factory factory) {
-        return null;
+        return new InstructTree();
     }
 
     @Override
@@ -73,6 +79,6 @@ public class MockModel implements Model {
     @Override
     public TraderPosnTree selectPosn(@NonNull String trader, int busDay,
             @NonNull final Factory factory) {
-        return null;
+        return new TraderPosnTree();
     }
 }

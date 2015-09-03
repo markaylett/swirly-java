@@ -31,6 +31,9 @@ public interface Model extends AutoCloseable {
             throws InterruptedException;
 
     @Nullable
+    MnemRbTree selectView(@NonNull Factory factory) throws InterruptedException;
+
+    @Nullable
     SlNode selectOrder(@NonNull Factory factory) throws InterruptedException;
 
     @Nullable

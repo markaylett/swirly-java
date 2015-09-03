@@ -270,6 +270,12 @@ public class AppEngineModel implements Model {
     }
 
     @Override
+    public final @Nullable MnemRbTree selectView(@NonNull Factory factory)
+            throws InterruptedException {
+        return ModelUtil.selectView(this, factory);
+    }
+
+    @Override
     public final @Nullable SlNode selectOrder(@NonNull Factory factory) {
         final Filter filter = new FilterPredicate("archive", FilterOperator.EQUAL, Boolean.FALSE);
         final SlQueue q = new SlQueue();
