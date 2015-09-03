@@ -264,14 +264,18 @@ public @NonNullByDefault class MarketBook extends Market {
         return maxExecId;
     }
 
+    public final void flush() {
+        view.lastTicks = lastTicks;
+        view.lastLots = lastLots;
+        view.lastTime = lastTime;
+        fillLadder(view.ladder);
+        // Reset flag on success.
+        dirty &= ~DIRTY_VIEW;
+    }
+
     final void flushDirty() {
         if ((dirty & DIRTY_VIEW) != 0) {
-            view.lastTicks = lastTicks;
-            view.lastLots = lastLots;
-            view.lastTime = lastTime;
-            fillLadder(view.ladder);
-            // Reset flag on success.
-            dirty &= ~DIRTY_VIEW;
+            flush();
         }
     }
 

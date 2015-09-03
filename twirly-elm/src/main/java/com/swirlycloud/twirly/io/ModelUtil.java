@@ -46,6 +46,12 @@ public final @NonNullByDefault class ModelUtil {
                 }
             }
         }
+
+        for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
+            final MarketBook book = (MarketBook) node;
+            book.flush();
+        }
+
         return views;
     }
 }

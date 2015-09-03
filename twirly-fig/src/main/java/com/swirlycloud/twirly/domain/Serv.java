@@ -682,6 +682,7 @@ public @NonNullByDefault class Serv {
         markets.pinsert(book, parent);
         views.insert(book.view);
         cache.update("market", markets);
+        cache.update("view", views);
         return book;
     }
 

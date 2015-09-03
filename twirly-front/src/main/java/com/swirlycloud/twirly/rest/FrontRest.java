@@ -109,6 +109,19 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
+    private final MnemRbTree selectView() throws ServiceUnavailableException {
+        MnemRbTree tree = null;
+        try {
+            tree = model.selectView(factory);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+        assert tree != null;
+        return tree;
+    }
+
     private final InstructTree selectOrder(String trader) throws ServiceUnavailableException {
         InstructTree tree = null;
         try {
@@ -201,13 +214,15 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getView(Params params, long now, Appendable out) {
-        throw new UnsupportedOperationException("getView");
+    public final void getView(Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException {
+        toJsonArray(selectView().getFirst(), params, out);
     }
 
     @Override
-    public final void getView(String market, Params params, long now, Appendable out) {
-        throw new UnsupportedOperationException("getView");
+    public final void getView(String market, Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException {
+        RestUtil.getView(selectView().getFirst(), market, params, out);
     }
 
     @Override
