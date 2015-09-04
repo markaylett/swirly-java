@@ -4,7 +4,7 @@
   <module>backend</module>
   <version>1</version>
   <threadsafe>true</threadsafe>
-  <instance-class>B2</instance-class>
+  <instance-class>B1</instance-class>
   <manual-scaling>
     <instances>1</instances>
   </manual-scaling>
