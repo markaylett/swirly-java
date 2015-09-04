@@ -29,19 +29,19 @@ public final class FrontLifeCycle implements ServletContextListener {
 
     private Model model;
 
-    private static @NonNull Realm newAppEngineRealm(ServletContext sc, Factory factory) {
+    private static @NonNull Realm newAppEngineRealm(ServletContext sc) {
         return new AppEngineRealm();
     }
 
-    private static @NonNull Realm newCatalinaRealm(ServletContext sc, Factory factory) {
+    private static @NonNull Realm newCatalinaRealm(ServletContext sc) {
         return new CatalinaRealm();
     }
 
-    private static @NonNull Model newAppEngineModel(ServletContext sc, Factory factory) {
-        return new AppEngineModel(factory);
+    private static @NonNull Model newAppEngineModel(ServletContext sc) {
+        return new AppEngineModel();
     }
 
-    private static @NonNull Model newCatalinaModel(ServletContext sc, Factory factory) {
+    private static @NonNull Model newCatalinaModel(ServletContext sc) {
         final String url = sc.getInitParameter("url");
         final String user = sc.getInitParameter("user");
         final String password = sc.getInitParameter("password");
@@ -53,14 +53,14 @@ public final class FrontLifeCycle implements ServletContextListener {
                 throw new RuntimeException("mysql jdbc driver not found", e);
             }
         }
-        return new JdbcModel(url, user, password, factory);
+        return new JdbcModel(url, user, password);
     }
 
-    private static @NonNull Cache newAppEngineCache(ServletContext sc, Factory factory) {
+    private static @NonNull Cache newAppEngineCache(ServletContext sc) {
         return new AppEngineCache();
     }
 
-    private static @NonNull Cache newCatalinaCache(ServletContext sc, Factory factory) {
+    private static @NonNull Cache newCatalinaCache(ServletContext sc) {
         try {
             return new SpyCache(new InetSocketAddress("localhost", 11211));
         } catch (final IOException e) {
@@ -91,20 +91,20 @@ public final class FrontLifeCycle implements ServletContextListener {
         final ServletContainer c = ServletContainer.valueOf(sc);
         try {
             if (c == ServletContainer.APP_ENGINE) {
-                realm = newAppEngineRealm(sc, factory);
-                model = newAppEngineModel(sc, factory);
-                cache = newAppEngineCache(sc, factory);
+                realm = newAppEngineRealm(sc);
+                model = newAppEngineModel(sc);
+                cache = newAppEngineCache(sc);
             } else if (c == ServletContainer.CATALINA) {
-                realm = newCatalinaRealm(sc, factory);
-                model = newCatalinaModel(sc, factory);
-                cache = newCatalinaCache(sc, factory);
+                realm = newCatalinaRealm(sc);
+                model = newCatalinaModel(sc);
+                cache = newCatalinaCache(sc);
             } else {
                 throw new RuntimeException("unsupported servlet container");
             }
             model = new CacheModel(model, cache);
             // Model now owns cache.
             cache = null;
-            rest = new FrontRest(model);
+            rest = new FrontRest(model, factory);
         } finally {
             if (rest == null) {
                 if (cache != null) {

@@ -6,6 +6,11 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.rec.Asset;
+import com.swirlycloud.twirly.rec.AssetType;
+import com.swirlycloud.twirly.rec.Contr;
+import com.swirlycloud.twirly.rec.Market;
+import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.util.Memorable;
 
 public @NonNullByDefault interface Factory {

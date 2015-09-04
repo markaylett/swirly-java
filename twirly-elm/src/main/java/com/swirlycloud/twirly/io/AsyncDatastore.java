@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedExecutionException;
 import com.swirlycloud.twirly.intrusive.InstructTree;
@@ -58,115 +59,127 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectAsset() throws InterruptedException {
+    public final @Nullable MnemRbTree selectAsset(@NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
-            public final MnemRbTree call() throws Exception {
-                return datastore.selectAsset();
+            public final @Nullable MnemRbTree call() throws Exception {
+                return datastore.selectAsset(factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable MnemRbTree selectContr() throws InterruptedException {
+    public final @Nullable MnemRbTree selectContr(@NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
-                return datastore.selectContr();
+                return datastore.selectContr(factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable MnemRbTree selectMarket() throws InterruptedException {
+    public final @Nullable MnemRbTree selectMarket(@NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
-                return datastore.selectMarket();
+                return datastore.selectMarket(factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable MnemRbTree selectTrader() throws InterruptedException {
+    public final @Nullable MnemRbTree selectTrader(@NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
-                return datastore.selectTrader();
+                return datastore.selectTrader(factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable String selectTraderByEmail(@NonNull final String email)
+    public final @Nullable String selectTraderByEmail(@NonNull final String email, @NonNull final Factory factory)
             throws InterruptedException {
         return get(service.submit(new Callable<String>() {
             @Override
             public final String call() throws Exception {
-                return datastore.selectTraderByEmail(email);
+                return datastore.selectTraderByEmail(email, factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable SlNode selectOrder() throws InterruptedException {
+    public final @Nullable MnemRbTree selectView(@NonNull final Factory factory)
+            throws InterruptedException {
+        return get(service.submit(new Callable<MnemRbTree>() {
+            @Override
+            public final MnemRbTree call() throws Exception {
+                return datastore.selectView(factory);
+            }
+        }));
+    }
+
+    @Override
+    public final @Nullable SlNode selectOrder(@NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
-                return datastore.selectOrder();
+                return datastore.selectOrder(factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable InstructTree selectOrder(@NonNull final String trader)
+    public final @Nullable InstructTree selectOrder(@NonNull final String trader, @NonNull final Factory factory)
             throws InterruptedException {
         return get(service.submit(new Callable<InstructTree>() {
             @Override
             public final InstructTree call() throws Exception {
-                return datastore.selectOrder(trader);
+                return datastore.selectOrder(trader, factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable SlNode selectTrade() throws InterruptedException {
+    public final @Nullable SlNode selectTrade(@NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
-                return datastore.selectTrade();
+                return datastore.selectTrade(factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable InstructTree selectTrade(@NonNull final String trader)
+    public final @Nullable InstructTree selectTrade(@NonNull final String trader, @NonNull final Factory factory)
             throws InterruptedException {
         return get(service.submit(new Callable<InstructTree>() {
             @Override
             public final InstructTree call() throws Exception {
-                return datastore.selectTrade(trader);
+                return datastore.selectTrade(trader, factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable SlNode selectPosn(final int busDay) throws InterruptedException {
+    public final @Nullable SlNode selectPosn(final int busDay, @NonNull final Factory factory)
+            throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
-                return datastore.selectPosn(busDay);
+                return datastore.selectPosn(busDay, factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable TraderPosnTree selectPosn(@NonNull final String trader, final int busDay)
-            throws InterruptedException {
+    public final @Nullable TraderPosnTree selectPosn(@NonNull final String trader,
+            final int busDay, @NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<TraderPosnTree>() {
             @Override
             public final TraderPosnTree call() throws Exception {
-                return datastore.selectPosn(trader, busDay);
+                return datastore.selectPosn(trader, busDay, factory);
             }
         }));
     }

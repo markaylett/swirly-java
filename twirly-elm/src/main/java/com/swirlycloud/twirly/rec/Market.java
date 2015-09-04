@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.rec;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
+import com.swirlycloud.twirly.domain.Financial;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
@@ -32,7 +33,7 @@ public @NonNullByDefault class Market extends Rec implements Financial {
     protected final int expiryDay;
     protected int state;
 
-    Market(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
+    public Market(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
             int state) {
         super(mnem, display);
         assert (settlDay == 0) == (expiryDay == 0);

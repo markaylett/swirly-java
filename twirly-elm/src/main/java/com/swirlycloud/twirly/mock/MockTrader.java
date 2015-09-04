@@ -12,33 +12,31 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Trader;
-import com.swirlycloud.twirly.function.NullaryFunction;
 import com.swirlycloud.twirly.function.UnaryCallback;
+import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.rec.Trader;
 
 public final class MockTrader {
 
-    private final Factory factory;
-    private final List<NullaryFunction<Trader>> list = new ArrayList<>();
-    private final Map<String, NullaryFunction<Trader>> map = new HashMap<>();
-    private final Map<String, String> emailIdx = new HashMap<>();
+    private static List<UnaryFunction<Trader, Factory>> LIST = new ArrayList<>();
+    private static Map<String, UnaryFunction<Trader, Factory>> MAP = new HashMap<>();
+    private static Map<String, String> EMAIL_IDX = new HashMap<>();
 
-    private final void put(final @NonNull String mnem, final String display,
+    private static void put(final @NonNull String mnem, final String display,
             final @NonNull String email) {
-        final NullaryFunction<Trader> fn = new NullaryFunction<Trader>() {
+        final UnaryFunction<Trader, Factory> fn = new UnaryFunction<Trader, Factory>() {
             @Override
-            public final Trader call() {
+            public final Trader call(Factory factory) {
                 return factory.newTrader(mnem, display, email);
             }
         };
-        list.add(fn);
-        map.put(mnem, fn);
-        emailIdx.put(email, mnem);
+        LIST.add(fn);
+        MAP.put(mnem, fn);
+        EMAIL_IDX.put(email, mnem);
     }
 
-    public MockTrader(Factory factory) {
-        this.factory = factory;
+    static {
         put("MARAYL", "Mark Aylett", "mark.aylett@gmail.com");
         put("GOSAYL", "Goska Aylett", "goska.aylett@gmail.com");
         put("TOBAYL", "Toby Aylett", "toby.aylett@gmail.com");
@@ -47,28 +45,31 @@ public final class MockTrader {
         put("RAMMAC", "Ram Macharaj", "ram.mac@gmail.com");
     }
 
-    @SuppressWarnings("null")
-    public final @NonNull Trader newTrader(String mnem) {
-        return map.get(mnem).call();
+    private MockTrader() {
     }
 
-    public final @NonNull MnemRbTree selectTrader() {
+    @SuppressWarnings("null")
+    public static @NonNull Trader newTrader(String mnem, Factory factory) {
+        return MAP.get(mnem).call(factory);
+    }
+
+    public static @NonNull MnemRbTree selectTrader(Factory factory) {
         final MnemRbTree t = new MnemRbTree();
-        for (final NullaryFunction<Trader> entry : list) {
-            final Trader trader = entry.call();
+        for (final UnaryFunction<Trader, Factory> entry : LIST) {
+            final Trader trader = entry.call(factory);
             assert trader != null;
             t.insert(trader);
         }
         return t;
     }
 
-    public final @Nullable String selectTraderByEmail(String email) {
-        return emailIdx.get(email);
+    public static @Nullable String selectTraderByEmail(String email, Factory factory) {
+        return EMAIL_IDX.get(email);
     }
 
-    public final void selectTrader(UnaryCallback<Trader> cb) {
-        for (final NullaryFunction<Trader> entry : list) {
-            cb.call(entry.call());
+    public static void selectTrader(Factory factory, UnaryCallback<Trader> cb) {
+        for (final UnaryFunction<Trader, Factory> entry : LIST) {
+            cb.call(entry.call(factory));
         }
     }
 }

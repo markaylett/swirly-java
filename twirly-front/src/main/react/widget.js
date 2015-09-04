@@ -128,7 +128,7 @@ var RecWidget = React.createClass({
 var ViewWidget = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/back/view', function(views) {
+        $.getJSON('/front/view', function(views) {
             var contrMap = this.props.contrMap;
             views.forEach(enrichView.bind(undefined, contrMap));
             this.setState({

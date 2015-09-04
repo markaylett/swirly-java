@@ -32,7 +32,6 @@ import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -180,7 +179,7 @@ public final class Main {
 
     public static void main(String[] args) throws Exception {
         PropertyConfigurator.configure(readProperties("log4j.properties"));
-        try (final Datastore datastore = new MockDatastore(FACTORY)) {
+        try (final Datastore datastore = new MockDatastore()) {
             final LockableServ serv = new LockableServ(datastore, NO_CACHE, FACTORY, now());
             run(serv);
         }

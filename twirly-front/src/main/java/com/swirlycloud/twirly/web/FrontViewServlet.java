@@ -4,5 +4,5 @@
 package com.swirlycloud.twirly.web;
 
 @SuppressWarnings("serial")
-public final class FrontViewServlet extends RestServlet {
+public final class FrontViewServlet extends ViewServlet {
 }

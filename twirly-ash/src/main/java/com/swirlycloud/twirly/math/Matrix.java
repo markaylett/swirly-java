@@ -3,10 +3,15 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.math;
 
+import java.io.Serializable;
+
 import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
-public class Matrix {
+public class Matrix implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final int rows;
     private final int cols;
     private final double[] data;
@@ -126,6 +131,13 @@ public class Matrix {
             }
         }
         return m;
+    }
+
+    public final void clear() {
+        final int len = data.length;
+        for (int i = 0; i < len; ++i) {
+            data[i] = 0;
+        }
     }
 
     public final void setValue(int row, int col, double value) {

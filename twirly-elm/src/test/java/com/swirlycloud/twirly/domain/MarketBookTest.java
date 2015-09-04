@@ -12,24 +12,23 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.mock.MockContr;
+import com.swirlycloud.twirly.rec.Contr;
 import com.swirlycloud.twirly.util.Params;
 
 public final class MarketBookTest {
 
     private Factory factory;
-    private MockContr mockContr;
 
     @Before
     public final void setUp() {
-        factory = new ServFactory();
-        mockContr = new MockContr(factory);
+        factory = new BookFactory();
     }
 
     @Test
     public final void testToJsonView() throws IOException {
         final String mnem = "EURUSD.MAR14";
         final String display = "EURUSD March 14";
-        final Contr contr = mockContr.newContr("EURUSD");
+        final Contr contr = MockContr.newContr("EURUSD", factory);
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;

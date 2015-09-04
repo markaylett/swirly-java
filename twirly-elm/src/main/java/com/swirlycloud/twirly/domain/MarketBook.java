@@ -11,6 +11,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.node.RbNode;
+import com.swirlycloud.twirly.rec.Market;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
@@ -19,9 +20,14 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class MarketBook extends Market {
+public @NonNullByDefault class MarketBook extends Market {
 
     private static final long serialVersionUID = 1L;
+
+    // Dirty bits.
+    public static final int DIRTY_VIEW = 1 << 0;
+    public static final int DIRTY_ALL = DIRTY_VIEW;
+
     /**
      * Maximum price levels in view.
      */
@@ -33,11 +39,33 @@ public final @NonNullByDefault class MarketBook extends Market {
     // Two sides constitute the book.
     private final transient BookSide bidSide = new BookSide();
     private final transient BookSide offerSide = new BookSide();
+    private final transient MarketView view;
     private transient long maxOrderId;
     private transient long maxExecId;
+    @Nullable
+    private transient MarketBook dirtyNext;
+    private transient int dirty;
 
     private final BookSide getSide(Side side) {
         return side == Side.BUY ? bidSide : offerSide;
+    }
+
+    private final void fillLadder(Ladder ladder) {
+
+        view.ladder.clear();
+        final int rows = ladder.getRows();
+        int row = 0;
+        for (RbNode node = bidSide.getFirstLevel(); node != null && row < rows; node = node
+                .rbNext()) {
+            final Level level = (Level) node;
+            ladder.setBidRung(row++, level.getTicks(), level.getLots(), level.getCount());
+        }
+        row = 0;
+        for (RbNode node = offerSide.getFirstLevel(); node != null && row < rows; node = node
+                .rbNext()) {
+            final Level level = (Level) node;
+            ladder.setOfferRung(row++, level.getTicks(), level.getLots(), level.getCount());
+        }
     }
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
@@ -46,6 +74,7 @@ public final @NonNullByDefault class MarketBook extends Market {
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
+        this.view = new MarketView(mnem, contr.getMnem(), settlDay, lastTicks, lastLots, lastTime);
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
     }
@@ -168,27 +197,27 @@ public final @NonNullByDefault class MarketBook extends Market {
         out.append("]}");
     }
 
-    final void insertOrder(Order order) {
+    public final void insertOrder(Order order) {
         getSide(order.getSide()).insertOrder(order);
     }
 
-    final void removeOrder(Order order) {
+    public final void removeOrder(Order order) {
         getSide(order.getSide()).removeOrder(order);
     }
 
-    final void placeOrder(Order order, long now) {
+    public final void placeOrder(Order order, long now) {
         getSide(order.getSide()).placeOrder(order, now);
     }
 
-    final void reviseOrder(Order order, long lots, long now) {
+    public final void reviseOrder(Order order, long lots, long now) {
         getSide(order.getSide()).reviseOrder(order, lots, now);
     }
 
-    final void cancelOrder(Order order, long now) {
+    public final void cancelOrder(Order order, long now) {
         getSide(order.getSide()).cancelOrder(order, now);
     }
 
-    final void takeOrder(Order order, long lots, long now) {
+    public final void takeOrder(Order order, long lots, long now) {
         final BookSide side = getSide(order.getSide());
         side.takeOrder(order, lots, now);
         lastTicks = order.getTicks();
@@ -196,39 +225,90 @@ public final @NonNullByDefault class MarketBook extends Market {
         lastTime = now;
     }
 
-    final long allocOrderId() {
+    public final long allocOrderId() {
         return ++maxOrderId;
     }
 
-    final long allocExecId() {
+    public final long allocExecId() {
         return ++maxExecId;
     }
 
-    final long getLastTicks() {
+    public final long getLastTicks() {
         return lastTicks;
     }
 
-    final long getLastLots() {
+    public final long getLastLots() {
         return lastLots;
     }
 
-    final long getLastTime() {
+    public final long getLastTime() {
         return lastTime;
     }
 
-    final BookSide getBidSide() {
+    public final BookSide getBidSide() {
         return bidSide;
     }
 
-    final BookSide getOfferSide() {
+    public final BookSide getOfferSide() {
         return offerSide;
     }
 
-    final long getMaxOrderId() {
+    public final MarketView getView() {
+        return view;
+    }
+
+    public final long getMaxOrderId() {
         return maxOrderId;
     }
 
-    final long getMaxExecId() {
+    public final long getMaxExecId() {
         return maxExecId;
+    }
+
+    public static MarketBook insertDirty(@Nullable final MarketBook first, MarketBook next) {
+        if (first == null) {
+            next.dirtyNext = null; // Defensive.
+            return next;
+        }
+
+        MarketBook node = first;
+        for (;;) {
+            assert node != null;
+            if (node == next) {
+                // Entry already exists.
+                break;
+            } else if (node.dirtyNext == null) {
+                next.dirtyNext = null; // Defensive.
+                node.dirtyNext = next;
+                break;
+            }
+            node = node.dirtyNext;
+        }
+        return first;
+    }
+
+    public final @Nullable MarketBook popDirty() {
+        final MarketBook next = dirtyNext;
+        dirtyNext = null;
+        return next;
+    }
+
+    public final void flush() {
+        view.lastTicks = lastTicks;
+        view.lastLots = lastLots;
+        view.lastTime = lastTime;
+        fillLadder(view.ladder);
+        // Reset flag on success.
+        dirty &= ~DIRTY_VIEW;
+    }
+
+    public final void flushDirty() {
+        if ((dirty & DIRTY_VIEW) != 0) {
+            flush();
+        }
+    }
+
+    public final void setDirty(int dirty) {
+        this.dirty |= dirty;
     }
 }

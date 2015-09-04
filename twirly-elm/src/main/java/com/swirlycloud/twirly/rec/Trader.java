@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.rec;
 
 import java.io.IOException;
 
@@ -18,7 +18,7 @@ public @NonNullByDefault class Trader extends Rec {
     private static final long serialVersionUID = 1L;
     protected final String email;
 
-    Trader(String mnem, @Nullable String display, String email) {
+    public Trader(String mnem, @Nullable String display, String email) {
         super(mnem, display);
         this.email = email;
     }

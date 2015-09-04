@@ -13,10 +13,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.swirlycloud.twirly.app.Serv;
+import com.swirlycloud.twirly.app.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -24,11 +27,10 @@ import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.rec.RecType;
 
 @SuppressWarnings("null")
 public final class ServTest {
-
-    private static final Factory FACTORY = new ServFactory();
 
     private static final double DELTA = 0.1;
     private static final String TRADER = "MARAYL";
@@ -41,24 +43,24 @@ public final class ServTest {
 
     private Serv serv;
 
-    private static Datastore newDatastore(Factory factory) {
-        return new MockDatastore(factory) {
+    private static Datastore newDatastore() {
+        return new MockDatastore() {
 
             @Override
-            public final MnemRbTree selectMarket() {
+            public final MnemRbTree selectMarket(@NonNull Factory factory) {
                 final MnemRbTree t = new MnemRbTree();
-                t.insert(FACTORY.newMarket("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"),
+                t.insert(factory.newMarket("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"),
                         SETTL_DAY, EXPIRY_DAY, STATE, 12345, 10, NOW - 2, 3, 2));
                 return t;
             }
 
             @Override
-            public final SlNode selectOrder() {
-                final Order first = FACTORY.newOrder(1, TRADER, "EURUSD.MAR14", "EURUSD",
+            public final SlNode selectOrder(@NonNull Factory factory) {
+                final Order first = factory.newOrder(1, TRADER, "EURUSD.MAR14", "EURUSD",
                         SETTL_DAY, "first", Side.BUY, 12344, 11, 1, NOW - 5);
-                final Order second = FACTORY.newOrder(2, TRADER, "EURUSD.MAR14", "EURUSD",
+                final Order second = factory.newOrder(2, TRADER, "EURUSD.MAR14", "EURUSD",
                         SETTL_DAY, "second", Side.BUY, 12345, 10, 1, NOW - 4);
-                final Order third = FACTORY.newOrder(3, TRADER, "EURUSD.MAR14", "EURUSD",
+                final Order third = factory.newOrder(3, TRADER, "EURUSD.MAR14", "EURUSD",
                         SETTL_DAY, "third", Side.SELL, 12346, 10, 1, NOW - 3);
                 // Fully fill second order.
                 second.trade(12345, 10, NOW - 2);
@@ -70,11 +72,11 @@ public final class ServTest {
             }
 
             @Override
-            public final SlNode selectTrade() {
-                final Exec second = FACTORY.newExec(1, 2, TRADER, "EURUSD.MAR14", "EURUSD",
+            public final SlNode selectTrade(@NonNull Factory factory) {
+                final Exec second = factory.newExec(1, 2, TRADER, "EURUSD.MAR14", "EURUSD",
                         SETTL_DAY, "second", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
                         12345, 10, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
-                final Exec third = FACTORY.newExec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD",
+                final Exec third = factory.newExec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD",
                         SETTL_DAY, "third", State.TRADE, Side.SELL, 12346, 10, 3, 7, 86422, 12346,
                         7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
                 second.setSlNext(third);
@@ -85,7 +87,8 @@ public final class ServTest {
 
     @Before
     public final void setUp() throws Exception {
-        serv = new Serv(newDatastore(FACTORY), NO_CACHE, FACTORY, NOW);
+        final Factory factory = new ServFactory();
+        serv = new Serv(newDatastore(), NO_CACHE, factory, NOW);
     }
 
     @After

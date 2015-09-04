@@ -12,7 +12,6 @@ import java.sql.Types;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
@@ -34,8 +33,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     @NonNull
     private final PreparedStatement updateExecStmt;
 
-    public JdbcDatastore(String url, String user, String password, Factory factory) {
-        super(url, user, password, factory);
+    public JdbcDatastore(String url, String user, String password) {
+        super(url, user, password);
         PreparedStatement insertMarketStmt = null;
         PreparedStatement insertTraderStmt = null;
         PreparedStatement insertExecStmt = null;

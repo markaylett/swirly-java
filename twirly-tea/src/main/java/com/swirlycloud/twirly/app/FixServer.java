@@ -44,12 +44,10 @@ import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
 import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.TraderSess;
-import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.FixRejectException;
 import com.swirlycloud.twirly.exception.NotFoundException;

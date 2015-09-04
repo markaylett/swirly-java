@@ -7,11 +7,11 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <jsp:include page="head.jsp"/>
+  <%@ include file="head.jsp"%>
 
   <body>
 
-    <jsp:include page="navbar.jsp"/>
+    <%@ include file="navbar.jsp"%>
 
     <div class="container" style="margin-top: 32px; margin-bottom: 80px">
 
@@ -42,7 +42,7 @@
 
     </div>
 
-    <jsp:include page="footer.jsp"/>
+    <%@ include file="footer.jsp"%>
 
     <!-- Bootstrap core JavaScript
          ================================================== -->

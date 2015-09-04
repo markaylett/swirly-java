@@ -18,17 +18,15 @@ public final class TraderSessTest {
     private static final int SETTL_DAY = TODAY + 2;
 
     private Factory factory;
-    private MockTrader mockTrader;
 
     @Before
     public final void setUp() {
         factory = new ServFactory();
-        mockTrader = new MockTrader(factory);
     }
 
     @Test
     public final void testAdd() {
-        final TraderSess sess = (TraderSess) mockTrader.newTrader("MARAYL");
+        final TraderSess sess = (TraderSess) MockTrader.newTrader("MARAYL", factory);
         final Posn posn1 = factory.newPosn(sess.getMnem(), "EURUSD", SETTL_DAY);
         posn1.addBuy(12344 * 10, 10);
         posn1.addSell(12346 * 15, 15);

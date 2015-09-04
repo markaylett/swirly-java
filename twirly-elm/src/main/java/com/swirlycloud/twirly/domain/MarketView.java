@@ -14,8 +14,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
+import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
 /**
@@ -23,7 +25,11 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class MarketView implements Jsonifiable, Financial {
+public final @NonNullByDefault class MarketView extends BasicRbNode implements Jsonifiable,
+        Memorable, Financial {
+
+    private static final long serialVersionUID = 1L;
+
     /**
      * Maximum price levels in view.
      */
@@ -32,13 +38,13 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
     private final String market;
     private final String contr;
     private final int settlDay;
-    private final long lastTicks;
-    private final long lastLots;
-    private final long lastTime;
-    private final Ladder ladder;
+    long lastTicks;
+    long lastLots;
+    long lastTime;
+    final Ladder ladder;
 
-    public MarketView(String market, String contr, int settlDay, Ladder ladder, long lastTicks,
-            long lastLots, long lastTime) {
+    public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
+            long lastTime, Ladder ladder) {
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -48,7 +54,7 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
         this.ladder = ladder;
     }
 
-    public MarketView(Financial fin, Ladder ladder, long lastTicks, long lastLots, long lastTime) {
+    public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime, Ladder ladder) {
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
@@ -56,6 +62,27 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
         this.lastLots = lastLots;
         this.lastTime = lastTime;
         this.ladder = ladder;
+    }
+
+    public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
+            long lastTime) {
+        this.market = market;
+        this.contr = contr;
+        this.settlDay = settlDay;
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.lastTime = lastTime;
+        this.ladder = new Ladder();
+    }
+
+    public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime) {
+        this.market = fin.getMarket();
+        this.contr = fin.getContr();
+        this.settlDay = fin.getSettlDay();
+        this.lastTicks = lastTicks;
+        this.lastLots = lastLots;
+        this.lastTime = lastTime;
+        this.ladder = new Ladder();
     }
 
     public static void parse(JsonParser p, Ladder ladder, int col) throws IOException {
@@ -97,8 +124,8 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new MarketView(market, contr, settlDay, ladder, lastTicks, lastLots,
-                        lastTime);
+                return new MarketView(market, contr, settlDay, lastTicks, lastLots, lastTime,
+                        ladder);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -285,6 +312,11 @@ public final @NonNullByDefault class MarketView implements Jsonifiable, Financia
             }
         }
         out.append("]}");
+    }
+
+    @Override
+    public final String getMnem() {
+        return market;
     }
 
     @Override

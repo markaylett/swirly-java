@@ -204,7 +204,7 @@ public final @NonNullByDefault class Posn extends BasicRbNode implements Jsonifi
         }
     }
 
-    final void addTrade(Exec trade) {
+    public final void addTrade(Exec trade) {
         addTrade(trade.getSide(), trade.getLastTicks(), trade.getLastLots());
     }
 

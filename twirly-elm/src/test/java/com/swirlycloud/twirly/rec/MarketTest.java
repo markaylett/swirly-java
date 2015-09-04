@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.rec;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
@@ -10,18 +10,21 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.domain.BasicFactory;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.mock.MockContr;
+import com.swirlycloud.twirly.rec.Contr;
+import com.swirlycloud.twirly.rec.Market;
 
 public final class MarketTest {
 
     private static final Factory FACTORY = new BasicFactory();
-    private static final MockContr MOCK_CONTR = new MockContr(FACTORY);
 
     @Test
     public final void testToJson() throws IOException {
         final String mnem = "EURUSD.MAR14";
         final String display = "EURUSD March 14";
-        final Contr contr = MOCK_CONTR.newContr("EURUSD");
+        final Contr contr = MockContr.newContr("EURUSD", FACTORY);
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;

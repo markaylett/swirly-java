@@ -4,16 +4,11 @@
 package com.swirlycloud.twirly.mock;
 
 import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.node.SlNode;
 
 public class MockDatastore extends MockModel implements Datastore {
-
-    public MockDatastore(Factory factory) {
-        super(factory);
-    }
 
     @Override
     public void insertMarket(String mnem, String display, String contr, int settlDay,
