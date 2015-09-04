@@ -11,6 +11,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.node.RbNode;
+import com.swirlycloud.twirly.rec.Market;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
@@ -24,8 +25,8 @@ public @NonNullByDefault class MarketBook extends Market {
     private static final long serialVersionUID = 1L;
 
     // Dirty bits.
-    static final int DIRTY_VIEW = 1 << 0;
-    static final int DIRTY_ALL = DIRTY_VIEW;
+    public static final int DIRTY_VIEW = 1 << 0;
+    public static final int DIRTY_ALL = DIRTY_VIEW;
 
     /**
      * Maximum price levels in view.
@@ -38,11 +39,11 @@ public @NonNullByDefault class MarketBook extends Market {
     // Two sides constitute the book.
     private final transient BookSide bidSide = new BookSide();
     private final transient BookSide offerSide = new BookSide();
-    final transient MarketView view;
+    private final transient MarketView view;
     private transient long maxOrderId;
     private transient long maxExecId;
     @Nullable
-    transient MarketBook dirtyNext;
+    private transient MarketBook dirtyNext;
     private transient int dirty;
 
     private final BookSide getSide(Side side) {
@@ -200,23 +201,23 @@ public @NonNullByDefault class MarketBook extends Market {
         getSide(order.getSide()).insertOrder(order);
     }
 
-    final void removeOrder(Order order) {
+    public final void removeOrder(Order order) {
         getSide(order.getSide()).removeOrder(order);
     }
 
-    final void placeOrder(Order order, long now) {
+    public final void placeOrder(Order order, long now) {
         getSide(order.getSide()).placeOrder(order, now);
     }
 
-    final void reviseOrder(Order order, long lots, long now) {
+    public final void reviseOrder(Order order, long lots, long now) {
         getSide(order.getSide()).reviseOrder(order, lots, now);
     }
 
-    final void cancelOrder(Order order, long now) {
+    public final void cancelOrder(Order order, long now) {
         getSide(order.getSide()).cancelOrder(order, now);
     }
 
-    final void takeOrder(Order order, long lots, long now) {
+    public final void takeOrder(Order order, long lots, long now) {
         final BookSide side = getSide(order.getSide());
         side.takeOrder(order, lots, now);
         lastTicks = order.getTicks();
@@ -224,31 +225,31 @@ public @NonNullByDefault class MarketBook extends Market {
         lastTime = now;
     }
 
-    final long allocOrderId() {
+    public final long allocOrderId() {
         return ++maxOrderId;
     }
 
-    final long allocExecId() {
+    public final long allocExecId() {
         return ++maxExecId;
     }
 
-    final long getLastTicks() {
+    public final long getLastTicks() {
         return lastTicks;
     }
 
-    final long getLastLots() {
+    public final long getLastLots() {
         return lastLots;
     }
 
-    final long getLastTime() {
+    public final long getLastTime() {
         return lastTime;
     }
 
-    final BookSide getBidSide() {
+    public final BookSide getBidSide() {
         return bidSide;
     }
 
-    final BookSide getOfferSide() {
+    public final BookSide getOfferSide() {
         return offerSide;
     }
 
@@ -256,12 +257,40 @@ public @NonNullByDefault class MarketBook extends Market {
         return view;
     }
 
-    final long getMaxOrderId() {
+    public final long getMaxOrderId() {
         return maxOrderId;
     }
 
-    final long getMaxExecId() {
+    public final long getMaxExecId() {
         return maxExecId;
+    }
+
+    public static MarketBook insertDirty(@Nullable final MarketBook first, MarketBook next) {
+        if (first == null) {
+            next.dirtyNext = null; // Defensive.
+            return next;
+        }
+
+        MarketBook node = first;
+        for (;;) {
+            assert node != null;
+            if (node == next) {
+                // Entry already exists.
+                break;
+            } else if (node.dirtyNext == null) {
+                next.dirtyNext = null; // Defensive.
+                node.dirtyNext = next;
+                break;
+            }
+            node = node.dirtyNext;
+        }
+        return first;
+    }
+
+    public final @Nullable MarketBook popDirty() {
+        final MarketBook next = dirtyNext;
+        dirtyNext = null;
+        return next;
     }
 
     public final void flush() {
@@ -273,13 +302,13 @@ public @NonNullByDefault class MarketBook extends Market {
         dirty &= ~DIRTY_VIEW;
     }
 
-    final void flushDirty() {
+    public final void flushDirty() {
         if ((dirty & DIRTY_VIEW) != 0) {
             flush();
         }
     }
 
-    final void setDirty(int dirty) {
+    public final void setDirty(int dirty) {
         this.dirty |= dirty;
     }
 }

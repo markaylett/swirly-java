@@ -10,11 +10,11 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.function.UnaryFunction;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.rec.Contr;
 
 public final class MockContr {
 

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.rec;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
@@ -10,7 +10,11 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.domain.BasicFactory;
+import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.mock.MockContr;
+import com.swirlycloud.twirly.rec.Contr;
+import com.swirlycloud.twirly.rec.Market;
 
 public final class MarketTest {
 

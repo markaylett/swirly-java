@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.rec;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,6 +9,9 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.domain.BasicFactory;
+import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.SerializableTest;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.mock.MockContr;
 

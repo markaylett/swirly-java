@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.rec;
 
 import static com.swirlycloud.twirly.domain.Conv.fractToReal;
 import static com.swirlycloud.twirly.domain.Conv.realToDp;
@@ -40,7 +40,7 @@ public final @NonNullByDefault class Contr extends Rec {
     private final long minLots;
     private final long maxLots;
 
-    Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
+    public Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
             int tickNumer, int tickDenom, int lotNumer, int lotDenom, int pipDp, long minLots,
             long maxLots) {
         super(mnem, display);

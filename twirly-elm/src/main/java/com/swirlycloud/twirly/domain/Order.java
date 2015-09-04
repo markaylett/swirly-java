@@ -381,7 +381,7 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         modified = now;
     }
 
-    final void trade(long takenLots, long takenCost, long lastTicks, long lastLots, long now) {
+    public final void trade(long takenLots, long takenCost, long lastTicks, long lastLots, long now) {
         state = State.TRADE;
         resd -= takenLots;
         this.exec += takenLots;

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.rec;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ public final @NonNullByDefault class Asset extends Rec {
     private static final long serialVersionUID = 1L;
     private final AssetType type;
 
-    Asset(String mnem, @Nullable String display, AssetType type) {
+    public Asset(String mnem, @Nullable String display, AssetType type) {
         super(mnem, display);
         this.type = type;
     }

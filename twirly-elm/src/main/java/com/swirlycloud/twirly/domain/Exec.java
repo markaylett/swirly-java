@@ -379,7 +379,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         return transNext;
     }
 
-    final void revise(long lots) {
+    public final void revise(long lots) {
         state = State.REVISE;
         final long delta = this.lots - lots;
         assert delta >= 0;
@@ -387,12 +387,12 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         resd -= delta;
     }
 
-    final void cancel() {
+    public final void cancel() {
         state = State.CANCEL;
         resd = 0;
     }
 
-    final void trade(long sumLots, long sumCost, long lastTicks, long lastLots, long matchId,
+    public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots, long matchId,
             Role role, String cpty) {
         state = State.TRADE;
         resd -= sumLots;
@@ -405,7 +405,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         this.cpty = cpty;
     }
 
-    final void trade(long lastTicks, long lastLots, long matchId, Role role, String cpty) {
+    public final void trade(long lastTicks, long lastLots, long matchId, Role role, String cpty) {
         trade(lastLots, lastLots * lastTicks, lastTicks, lastLots, matchId, role, cpty);
     }
 

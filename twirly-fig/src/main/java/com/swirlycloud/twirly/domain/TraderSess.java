@@ -11,16 +11,18 @@ import com.swirlycloud.twirly.intrusive.RefHashTable;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.node.RbNode;
+import com.swirlycloud.twirly.rec.Market;
+import com.swirlycloud.twirly.rec.Trader;
 
 public @NonNullByDefault class TraderSess extends Trader {
 
     private static final long serialVersionUID = 1L;
 
     // Dirty bits.
-    static final int DIRTY_ORDER = 1 << 0;
-    static final int DIRTY_TRADE = 1 << 1;
-    static final int DIRTY_POSN = 1 << 2;
-    static final int DIRTY_ALL = DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN;
+    public static final int DIRTY_ORDER = 1 << 0;
+    public static final int DIRTY_TRADE = 1 << 1;
+    public static final int DIRTY_POSN = 1 << 2;
+    public static final int DIRTY_ALL = DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN;
 
     private final transient RefHashTable refIdx;
     private final transient Factory factory;
@@ -28,7 +30,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     final transient InstructTree trades = new InstructTree();
     final transient TraderPosnTree posns = new TraderPosnTree();
     @Nullable
-    transient TraderSess dirtyNext;
+    private transient TraderSess dirtyNext;
     private transient int dirty;
 
     TraderSess(String mnem, @Nullable String display, String email, RefHashTable refIdx,
@@ -38,7 +40,7 @@ public @NonNullByDefault class TraderSess extends Trader {
         this.factory = factory;
     }
 
-    final void insertOrder(Order order) {
+    public final void insertOrder(Order order) {
         final RbNode unused = orders.insert(order);
         assert unused == null;
         if (order.getRef() != null) {
@@ -46,7 +48,7 @@ public @NonNullByDefault class TraderSess extends Trader {
         }
     }
 
-    final void removeOrder(Order order) {
+    public final void removeOrder(Order order) {
         assert order.getTrader().equals(mnem);
         orders.remove(order);
         if (order.getRef() != null) {
@@ -54,7 +56,7 @@ public @NonNullByDefault class TraderSess extends Trader {
         }
     }
 
-    final @Nullable Order removeOrder(String market, long id) {
+    public final @Nullable Order removeOrder(String market, long id) {
         final RbNode node = orders.find(market, id);
         if (node == null) {
             return null;
@@ -64,7 +66,7 @@ public @NonNullByDefault class TraderSess extends Trader {
         return order;
     }
 
-    final @Nullable Order removeOrder(String ref) {
+    public final @Nullable Order removeOrder(String ref) {
         final Order order = (Order) refIdx.remove(mnem, ref);
         if (order != null) {
             orders.remove(order);
@@ -97,16 +99,16 @@ public @NonNullByDefault class TraderSess extends Trader {
         return orders.isEmpty();
     }
 
-    final void insertTrade(Exec trade) {
+    public final void insertTrade(Exec trade) {
         final RbNode unused = trades.insert(trade);
         assert unused == null;
     }
 
-    final void removeTrade(Exec trade) {
+    public final void removeTrade(Exec trade) {
         trades.remove(trade);
     }
 
-    final boolean removeTrade(String market, long id) {
+    public final boolean removeTrade(String market, long id) {
         final RbNode node = trades.find(market, id);
         if (node == null) {
             return false;
@@ -135,12 +137,12 @@ public @NonNullByDefault class TraderSess extends Trader {
         return trades.isEmpty();
     }
 
-    final void insertPosn(Posn posn) {
+    public final void insertPosn(Posn posn) {
         final RbNode unused = posns.insert(posn);
         assert unused == null;
     }
 
-    final Posn addPosn(Posn posn) {
+    public final Posn addPosn(Posn posn) {
         final String contr = posn.getContr();
         final int settlDay = posn.getSettlDay();
         final Posn exist = (Posn) posns.pfind(contr, settlDay);
@@ -155,7 +157,7 @@ public @NonNullByDefault class TraderSess extends Trader {
         return posn;
     }
 
-    final Posn getLazyPosn(Market market) {
+    public final Posn getLazyPosn(Market market) {
         Posn posn = (Posn) posns.pfind(market.getContr(), market.getSettlDay());
         if (posn == null || !posn.getContr().equals(market.getContr())
                 || posn.getSettlDay() != market.getSettlDay()) {
@@ -192,7 +194,7 @@ public @NonNullByDefault class TraderSess extends Trader {
      * @param busDay
      * @return returns the number of positions modified.
      */
-    final int settlPosns(int busDay) {
+    public final int settlPosns(int busDay) {
         int modified = 0;
         for (RbNode node = posns.getFirst(); node != null;) {
             final Posn posn = (Posn) node;
@@ -207,7 +209,35 @@ public @NonNullByDefault class TraderSess extends Trader {
         return modified;
     }
 
-    final void flushDirty(Cache cache) {
+    public static TraderSess insertDirty(@Nullable final TraderSess first, TraderSess next) {
+        if (first == null) {
+            next.dirtyNext = null; // Defensive.
+            return next;
+        }
+
+        TraderSess node = first;
+        for (;;) {
+            assert node != null;
+            if (node == next) {
+                // Entry already exists.
+                break;
+            } else if (node.dirtyNext == null) {
+                next.dirtyNext = null; // Defensive.
+                node.dirtyNext = next;
+                break;
+            }
+            node = node.dirtyNext;
+        }
+        return first;
+    }
+
+    public final @Nullable TraderSess popDirty() {
+        final TraderSess next = dirtyNext;
+        dirtyNext = null;
+        return next;
+    }
+
+    public final void flushDirty(Cache cache) {
         if ((dirty & DIRTY_ORDER) != 0) {
             cache.update("order:" + mnem, orders);
             // Reset flag on success.
@@ -225,7 +255,7 @@ public @NonNullByDefault class TraderSess extends Trader {
         }
     }
 
-    final void setDirty(int dirty) {
+    public final void setDirty(int dirty) {
         this.dirty |= dirty;
     }
 }

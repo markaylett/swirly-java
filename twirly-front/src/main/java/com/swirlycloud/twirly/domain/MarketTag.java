@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.rec.Market;
 import com.swirlycloud.twirly.util.Memorable;
 
 /**

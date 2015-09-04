@@ -3,8 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.rec.Trader;
 
 public final class EmailHashTable extends BasicSlHashTable<String> {
 

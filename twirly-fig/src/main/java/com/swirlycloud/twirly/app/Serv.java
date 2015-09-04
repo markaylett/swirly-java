@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
@@ -13,6 +13,18 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.domain.BookSide;
+import com.swirlycloud.twirly.domain.Direct;
+import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.Instruct;
+import com.swirlycloud.twirly.domain.MarketBook;
+import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -25,6 +37,12 @@ import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.rec.Asset;
+import com.swirlycloud.twirly.rec.Contr;
+import com.swirlycloud.twirly.rec.Market;
+import com.swirlycloud.twirly.rec.Rec;
+import com.swirlycloud.twirly.rec.RecType;
+import com.swirlycloud.twirly.rec.Trader;
 
 public @NonNullByDefault class Serv {
 
@@ -90,7 +108,7 @@ public @NonNullByDefault class Serv {
         for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
             final MarketBook book = (MarketBook) node;
             enrichMarket(book);
-            views.insert(book.view);
+            views.insert(book.getView());
             setDirty(book, MarketBook.DIRTY_VIEW);
         }
     }
@@ -346,8 +364,7 @@ public @NonNullByDefault class Serv {
             assert sess != null;
             sess.flushDirty(cache);
             // Pop if flush succeeded.
-            dirtySess = sess.dirtyNext;
-            sess.dirtyNext = null;
+            dirtySess = sess.popDirty();
         }
 
         if (dirtyBook != null) {
@@ -357,8 +374,7 @@ public @NonNullByDefault class Serv {
                 assert book != null;
                 book.flushDirty();
                 // Pop if flush succeeded.
-                dirtyBook = book.dirtyNext;
-                book.dirtyNext = null;
+                dirtyBook = book.popDirty();
             } while (dirtyBook != null);
 
             // At least one view has changed.
@@ -367,51 +383,13 @@ public @NonNullByDefault class Serv {
     }
 
     private final void setDirty(MarketBook next, int dirty) {
-
+        dirtyBook = MarketBook.insertDirty(dirtyBook, next);
         next.setDirty(dirty);
-
-        MarketBook book = dirtyBook;
-        if (book == null) {
-            next.dirtyNext = null; // Defensive.
-            dirtyBook = next;
-        } else {
-            for (;;) {
-                assert book != null;
-                if (book == next) {
-                    // Entry already exists.
-                    break;
-                } else if (book.dirtyNext == null) {
-                    next.dirtyNext = null; // Defensive.
-                    book.dirtyNext = next;
-                    break;
-                }
-                book = book.dirtyNext;
-            }
-        }
     }
 
     private final void setDirty(TraderSess next, int dirty) {
-
+        dirtySess = TraderSess.insertDirty(dirtySess, next);
         next.setDirty(dirty);
-
-        TraderSess sess = dirtySess;
-        if (sess == null) {
-            next.dirtyNext = null; // Defensive.
-            dirtySess = next;
-        } else {
-            for (;;) {
-                assert sess != null;
-                if (sess == next) {
-                    // Entry already exists.
-                    break;
-                } else if (sess.dirtyNext == null) {
-                    next.dirtyNext = null; // Defensive.
-                    sess.dirtyNext = next;
-                    break;
-                }
-                sess = sess.dirtyNext;
-            }
-        }
     }
 
     // Assumes that maker lots have not been reduced since matching took place.
@@ -680,7 +658,7 @@ public @NonNullByDefault class Serv {
         }
 
         markets.pinsert(book, parent);
-        views.insert(book.view);
+        views.insert(book.getView());
         cache.update("market", markets);
         cache.update("view", views);
         return book;
@@ -731,7 +709,7 @@ public @NonNullByDefault class Serv {
             final MarketBook book = (MarketBook) node;
             node = node.rbNext();
             if (book.isSettlDaySet() && book.getSettlDay() <= busDay) {
-                views.remove(book.view);
+                views.remove(book.getView());
                 markets.remove(book);
             }
         }

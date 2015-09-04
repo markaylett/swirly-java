@@ -15,18 +15,13 @@ import java.sql.Types;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Asset;
-import com.swirlycloud.twirly.domain.AssetType;
-import com.swirlycloud.twirly.domain.Contr;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Market;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.domain.Trader;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.intrusive.Container;
 import com.swirlycloud.twirly.intrusive.InstructTree;
@@ -36,6 +31,11 @@ import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.rec.Asset;
+import com.swirlycloud.twirly.rec.AssetType;
+import com.swirlycloud.twirly.rec.Contr;
+import com.swirlycloud.twirly.rec.Market;
+import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.util.Memorable;
 
 public class JdbcModel implements Model {

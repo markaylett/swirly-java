@@ -32,7 +32,6 @@ import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
 
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.LockableServ;
 import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.exception.NotFoundException;

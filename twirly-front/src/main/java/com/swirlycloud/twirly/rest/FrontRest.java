@@ -16,14 +16,14 @@ import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.domain.Rec;
-import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.rec.Rec;
+import com.swirlycloud.twirly.rec.RecType;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class FrontRest implements Rest {

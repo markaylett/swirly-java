@@ -6,6 +6,8 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.rec.Trader;
+
 /**
  * A marker interface use for {@code Trader} serialisation.
  *

@@ -11,11 +11,11 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.swirlycloud.twirly.domain.RecType;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
+import com.swirlycloud.twirly.rec.RecType;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")

@@ -11,13 +11,13 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.app.Serv;
+import com.swirlycloud.twirly.app.Trans;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
-import com.swirlycloud.twirly.domain.Serv;
 import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.TraderSess;
-import com.swirlycloud.twirly.domain.Trans;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
