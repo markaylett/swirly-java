@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.rest;
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.twirly.rest.RestUtil.getExpiredParam;
+import static com.swirlycloud.twirly.rest.RestUtil.getViewsParam;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
@@ -183,6 +184,10 @@ public final @NonNullByDefault class BackRest implements Rest {
             toJsonArray(sess.getFirstTrade(), params, out);
             out.append(",\"posns\":");
             toJsonArray(sess.getFirstPosn(), params, out);
+            if (getViewsParam(params)) {
+                out.append(",\"views\":");
+                getView(serv.getFirstRec(RecType.MARKET), params, now, out);
+            }
             out.append('}');
         } finally {
             serv.releaseRead();

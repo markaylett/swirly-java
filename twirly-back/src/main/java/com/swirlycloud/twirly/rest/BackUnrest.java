@@ -500,8 +500,8 @@ public final class BackUnrest {
         }
     }
 
-    public final SessStruct getSess(String mnem, Params params, long now)
-            throws NotFoundException, IOException {
+    public final SessStruct getSess(String mnem, Params params, long now) throws NotFoundException,
+            IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getSess(mnem, params, now, sb);
 
