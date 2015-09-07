@@ -133,3 +133,12 @@ Memcached
 
     $ cp spymemcached-x.y.z.jar $CATALINA_HOME/lib/
     $ cp javax.json-x.y.z.jar $CATALINA_HOME/lib/
+
+Environments
+------------
+
+1. Create a project... Show advanced options... App Engine location
+2. Permissions => Add Member
+3. Compute => App Engine => Settings
+  1. Application settings => Logs retention
+  2. Custom domains => Add a custom domain

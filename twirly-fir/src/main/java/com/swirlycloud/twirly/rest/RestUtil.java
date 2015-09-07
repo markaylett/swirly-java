@@ -24,6 +24,11 @@ public final @NonNullByDefault class RestUtil {
         return val == null ? false : val.booleanValue();
     }
 
+    public static boolean getViewsParam(Params params) {
+        final Boolean val = params.getParam("views", Boolean.class);
+        return val == null ? false : val.booleanValue();
+    }
+
     public static void getView(@Nullable RbNode first, String market, Params params, Appendable out)
             throws IOException {
         out.append('[');

@@ -39,7 +39,8 @@ public abstract class RestServlet extends HttpServlet {
                 if (s != null) {
                     if ("depth".equals(name)) {
                         val = Integer.valueOf(s);
-                    } else if ("expired".equals(name) || "internal".equals(name)) {
+                    } else if ("expired".equals(name) || "internal".equals(name)
+                            || "views".equals(name)) {
                         val = Boolean.valueOf(s);
                     } else {
                         val = s;

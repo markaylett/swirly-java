@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
+import static com.swirlycloud.twirly.rest.RestUtil.getViewsParam;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
@@ -235,6 +236,10 @@ public final @NonNullByDefault class FrontRest implements Rest {
         out.append(",\"posns\":");
         final int busDay = getBusDate(now).toJd();
         toJsonArray(selectPosn(trader, busDay).getFirst(), params, out);
+        if (getViewsParam(params)) {
+            out.append(",\"views\":");
+            toJsonArray(selectView().getFirst(), params, out);
+        }
         out.append('}');
     }
 

@@ -7,17 +7,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.node.BasicRbNode;
-import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Memorable;
 
-public abstract @NonNullByDefault class Rec extends BasicRbNode implements Cloneable,
-        Jsonifiable, SlNode, Memorable {
+public abstract @NonNullByDefault class Rec extends BasicRbNode implements Jsonifiable, Memorable {
 
     private static final long serialVersionUID = 1L;
-
-    private transient @Nullable SlNode slNext;
 
     protected final String mnem;
     protected String display;
@@ -53,28 +49,6 @@ public abstract @NonNullByDefault class Rec extends BasicRbNode implements Clone
     @Override
     public final String toString() {
         return JsonUtil.toJson(this);
-    }
-
-    @Override
-    public final Rec clone() {
-        try {
-            final Rec rec = (Rec) super.clone();
-            // Nullify intrusive nodes.
-            rec.slNext = null;
-            return rec;
-        } catch (final CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public final void setSlNext(@Nullable SlNode next) {
-        this.slNext = next;
-    }
-
-    @Override
-    public final @Nullable SlNode slNext() {
-        return slNext;
     }
 
     public void setDisplay(@Nullable String display) {
