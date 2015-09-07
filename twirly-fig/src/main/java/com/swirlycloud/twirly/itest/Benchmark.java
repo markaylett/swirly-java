@@ -3,7 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.itest;
 
-import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
@@ -37,11 +36,7 @@ public final class Benchmark {
         final TraderSess tobayl = serv.getTrader("TOBAYL");
         final TraderSess emiayl = serv.getTrader("EMIAYL");
 
-        final int settlDay = ymdToJd(2014, 2, 14);
-        final int expiryDay = ymdToJd(2014, 2, 12);
-        final int state = 0x01;
-        final MarketBook book = serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD",
-                settlDay, expiryDay, state, now());
+        final MarketBook book = serv.createMarket("EURUSD", "EURUSD", "EURUSD", 0, 0, 0, now());
         assert book != null;
 
         try (final Trans trans = new Trans()) {
