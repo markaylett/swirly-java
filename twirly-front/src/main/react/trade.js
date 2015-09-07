@@ -5,29 +5,17 @@
 var TradeModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/front/view', function(views) {
+        $.getJSON('/front/sess?views=true', function(sess) {
             var contrMap = this.props.contrMap;
             var staging = this.staging;
             var marketMap = {};
 
             staging.views.clear();
-            views.forEach(function(view) {
+            sess.views.forEach(function(view) {
                 enrichView(contrMap, view);
                 marketMap[view.market] = view.contr;
                 staging.views.set(view.key, view);
             });
-
-            this.setState({
-                marketMap: marketMap,
-                views: staging.views.toSortedArray()
-            });
-        }.bind(this)).fail(function(xhr, status, err) {
-            this.onReportError(parseError(xhr));
-        }.bind(this));
-
-        $.getJSON('/front/sess', function(sess) {
-            var contrMap = this.props.contrMap;
-            var staging = this.staging;
 
             staging.working.clear();
             staging.done.clear();
@@ -50,6 +38,8 @@ var TradeModuleImpl = React.createClass({
             });
 
             this.setState({
+                marketMap: marketMap,
+                views: staging.views.toSortedArray(),
                 sess: {
                     working: staging.working.toSortedArray(),
                     done: staging.done.toSortedArray(),
