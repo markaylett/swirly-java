@@ -489,10 +489,10 @@ public final class BackUnrest {
         return out;
     }
 
-    public final MarketView getView(String mnem, Params params, long now) throws NotFoundException,
-            IOException {
+    public final MarketView getView(String market, Params params, long now)
+            throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getView(mnem, params, now, sb);
+        rest.getView(market, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -500,10 +500,10 @@ public final class BackUnrest {
         }
     }
 
-    public final SessStruct getSess(String mnem, Params params, long now) throws NotFoundException,
-            IOException {
+    public final SessStruct getSess(String trader, Params params, long now)
+            throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getSess(mnem, params, now, sb);
+        rest.getSess(trader, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -511,15 +511,15 @@ public final class BackUnrest {
         }
     }
 
-    public final void deleteOrder(String mnem, String market, long id, long now)
+    public final void deleteOrder(String trader, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        rest.deleteOrder(mnem, market, id, now);
+        rest.deleteOrder(trader, market, id, now);
     }
 
-    public final Map<Long, Order> getOrder(String mnem, Params params, long now)
+    public final Map<Long, Order> getOrder(String trader, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(mnem, params, now, sb);
+        rest.getOrder(trader, params, now, sb);
 
         final Map<Long, Order> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -529,10 +529,10 @@ public final class BackUnrest {
         return out;
     }
 
-    public final Map<Long, Order> getOrder(String mnem, String market, Params params, long now)
+    public final Map<Long, Order> getOrder(String trader, String market, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(mnem, market, params, now, sb);
+        rest.getOrder(trader, market, params, now, sb);
 
         final Map<Long, Order> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -542,10 +542,10 @@ public final class BackUnrest {
         return out;
     }
 
-    public final Order getOrder(String mnem, String market, long id, Params params, long now)
+    public final Order getOrder(String trader, String market, long id, Params params, long now)
             throws IOException, NotFoundException {
         final StringBuilder sb = new StringBuilder();
-        rest.getOrder(mnem, market, id, params, now, sb);
+        rest.getOrder(trader, market, id, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -553,11 +553,11 @@ public final class BackUnrest {
         }
     }
 
-    public final TransStruct postOrder(String mnem, String market, String ref, Side side,
+    public final TransStruct postOrder(String trader, String market, String ref, Side side,
             long ticks, long lots, long minLots, Params params, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postOrder(mnem, market, ref, side, ticks, lots, minLots, params, now, sb);
+        rest.postOrder(trader, market, ref, side, ticks, lots, minLots, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -565,11 +565,11 @@ public final class BackUnrest {
         }
     }
 
-    public final TransStruct putOrder(String mnem, String market, long id, long lots,
+    public final TransStruct putOrder(String trader, String market, long id, long lots,
             Params params, long now) throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.putOrder(mnem, market, id, lots, params, now, sb);
+        rest.putOrder(trader, market, id, lots, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -577,15 +577,15 @@ public final class BackUnrest {
         }
     }
 
-    public final void deleteTrade(String mnem, String market, long id, long now)
+    public final void deleteTrade(String trader, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        rest.deleteTrade(mnem, market, id, now);
+        rest.deleteTrade(trader, market, id, now);
     }
 
-    public final Map<Long, Exec> getTrade(String mnem, Params params, long now)
+    public final Map<Long, Exec> getTrade(String trader, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getTrade(mnem, params, now, sb);
+        rest.getTrade(trader, params, now, sb);
 
         final Map<Long, Exec> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -595,10 +595,10 @@ public final class BackUnrest {
         return out;
     }
 
-    public final Map<Long, Exec> getTrade(String mnem, String market, Params params, long now)
+    public final Map<Long, Exec> getTrade(String trader, String market, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getTrade(mnem, market, params, now, sb);
+        rest.getTrade(trader, market, params, now, sb);
 
         final Map<Long, Exec> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -608,10 +608,10 @@ public final class BackUnrest {
         return out;
     }
 
-    public final Exec getTrade(String mnem, String market, long id, Params params, long now)
+    public final Exec getTrade(String trader, String market, long id, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getTrade(mnem, market, id, params, now, sb);
+        rest.getTrade(trader, market, id, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -630,10 +630,10 @@ public final class BackUnrest {
         }
     }
 
-    public final Map<PosnKey, Posn> getPosn(String mnem, Params params, long now)
+    public final Map<PosnKey, Posn> getPosn(String trader, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getPosn(mnem, params, now, sb);
+        rest.getPosn(trader, params, now, sb);
 
         final Map<PosnKey, Posn> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -643,10 +643,10 @@ public final class BackUnrest {
         return out;
     }
 
-    public final Posn getPosn(String mnem, String contr, int settlDay, Params params, long now)
+    public final Posn getPosn(String trader, String contr, int settlDay, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getPosn(mnem, contr, maybeJdToIso(settlDay), params, now, sb);
+        rest.getPosn(trader, contr, maybeJdToIso(settlDay), params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
