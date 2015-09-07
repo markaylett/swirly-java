@@ -11,11 +11,16 @@ import javax.json.stream.JsonParser.Event;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Params;
 
-public @NonNullByDefault class Trader extends Rec {
+public @NonNullByDefault class Trader extends Rec implements SlNode {
 
     private static final long serialVersionUID = 1L;
+
+    // Used by EmailIdx.
+    private transient @Nullable SlNode slNext;
+
     protected final String email;
 
     public Trader(String mnem, @Nullable String display, String email) {
@@ -59,6 +64,16 @@ public @NonNullByDefault class Trader extends Rec {
             }
         }
         throw new IOException("end-of object not found");
+    }
+
+    @Override
+    public final void setSlNext(@Nullable SlNode next) {
+        this.slNext = next;
+    }
+
+    @Override
+    public final @Nullable SlNode slNext() {
+        return slNext;
     }
 
     @Override
