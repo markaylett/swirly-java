@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import javax.json.stream.JsonParser;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Side;
 
 public final class RequestTest {
@@ -35,10 +37,35 @@ public final class RequestTest {
     }
 
     @Test
+    public final void testArray() throws IOException {
+        final Request r = parse("{\"ids\":[101, 202, 303]}");
+        assertEquals(Request.IDS, r.getFields());
+
+        // First.
+        MarketId mid = (MarketId) r.getIds();
+        assertNotNull(mid);
+        assertEquals(303, mid.getId());
+
+        // Second.
+        mid = (MarketId) mid.slNext();
+        assertNotNull(mid);
+        assertEquals(202, mid.getId());
+
+        // Third.
+        mid = (MarketId) mid.slNext();
+        assertNotNull(mid);
+        assertEquals(101, mid.getId());
+
+        // End.
+        mid = (MarketId) mid.slNext();
+        assertNull(mid);
+    }
+
+    @Test
     public final void testLong() throws IOException {
-        final Request r = parse("{\"id\":101}");
-        assertEquals(Request.ID, r.getFields());
-        assertEquals(101, r.getId());
+        final Request r = parse("{\"ticks\":12345}");
+        assertEquals(Request.TICKS, r.getFields());
+        assertEquals(12345, r.getTicks());
     }
 
     @Test
@@ -81,7 +108,7 @@ public final class RequestTest {
     }
 
     @Test(expected = IOException.class)
-    public final void testArray() throws IOException {
+    public final void testBadObject() throws IOException {
         parse("[{\"ticks\":101}]");
     }
 }
