@@ -306,6 +306,9 @@ public @NonNullByDefault class Serv {
             exec.setSlNext(firstExec);
             firstExec = exec;
         }
+        if (firstExec == null) {
+            return;
+        }
 
         try {
             journ.insertExecList(firstExec);
@@ -353,6 +356,9 @@ public @NonNullByDefault class Serv {
             // Stack push.
             exec.setSlNext(firstExec);
             firstExec = exec;
+        }
+        if (firstExec == null) {
+            return;
         }
 
         try {
@@ -817,6 +823,7 @@ public @NonNullByDefault class Serv {
         boolean success = false;
         try {
             final SlNode first = trans.prepareExecList();
+            assert first != null;
             journ.insertExecList(book.getMnem(), first);
             success = true;
         } catch (final RejectedExecutionException e) {

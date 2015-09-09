@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Role;
@@ -119,8 +120,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay, int state) {
+    public final void insertMarket(@NonNull String mnem, @Nullable String display,
+            @NonNull String contr, int settlDay, int expiryDay, int state) {
         try {
             int i = 1;
             setParam(insertMarketStmt, i++, mnem);
@@ -136,7 +137,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void updateMarket(String mnem, String display, int state) {
+    public final void updateMarket(@NonNull String mnem, @Nullable String display, int state) {
         try {
             int i = 1;
             setParam(updateMarketStmt, i++, display);
@@ -149,7 +150,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertTrader(String mnem, String display, String email) {
+    public final void insertTrader(@NonNull String mnem, @Nullable String display,
+            @NonNull String email) {
         try {
             int i = 1;
             setParam(insertTraderStmt, i++, mnem);
@@ -162,7 +164,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) throws NotFoundException {
+    public final void updateTrader(@NonNull String mnem, @Nullable String display)
+            throws NotFoundException {
         try {
             int i = 1;
             setParam(updateTraderStmt, i++, display);
@@ -174,7 +177,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertExec(Exec exec) {
+    public final void insertExec(@NonNull Exec exec) {
         try {
             int i = 1;
             setParam(insertExecStmt, i++, exec.getId());
@@ -217,13 +220,13 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertExecList(String market, SlNode first) {
+    public final void insertExecList(@NonNull String market, @NonNull SlNode first) {
         // The market parameter is ignored in the Jdbc implementation.
         insertExecList(first);
     }
 
     @Override
-    public final void insertExecList(SlNode first) {
+    public final void insertExecList(@NonNull SlNode first) {
         SlNode node = first;
         try {
             conn.setAutoCommit(false);
@@ -254,7 +257,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void archiveOrder(String market, long id, long modified) {
+    public final void archiveOrder(@NonNull String market, long id, long modified) {
         try {
             int i = 1;
             setParam(updateOrderStmt, i++, modified);
@@ -267,7 +270,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void archiveTrade(String market, long id, long modified) {
+    public final void archiveTrade(@NonNull String market, long id, long modified) {
         try {
             int i = 1;
             setParam(updateExecStmt, i++, modified);

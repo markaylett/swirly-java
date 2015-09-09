@@ -191,8 +191,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertMarket(final String mnem, final String display, final String contr,
-            final int settlDay, final int expiryDay, final int state) {
+    public final void insertMarket(final @NonNull String mnem, final @Nullable String display,
+            final @NonNull String contr, final int settlDay, final int expiryDay, final int state) {
         service.submit(new Runnable() {
             @Override
             public final void run() {
@@ -206,7 +206,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void updateMarket(final String mnem, final String display, final int state) {
+    public final void updateMarket(final @NonNull String mnem, final @Nullable String display,
+            final int state) {
         service.submit(new Runnable() {
             @Override
             public final void run() {
@@ -220,7 +221,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertTrader(final String mnem, final String display, final String email) {
+    public final void insertTrader(final @NonNull String mnem, final @Nullable String display,
+            final @NonNull String email) {
         service.submit(new Runnable() {
             @Override
             public final void run() {
@@ -234,7 +236,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void updateTrader(final String mnem, final String display)
+    public final void updateTrader(final @NonNull String mnem, final @Nullable String display)
             throws NotFoundException {
         service.submit(new Runnable() {
             @Override
@@ -249,7 +251,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertExec(final Exec exec) throws NotFoundException {
+    public final void insertExec(final @NonNull Exec exec) throws NotFoundException {
         service.submit(new Runnable() {
             @Override
             public final void run() {
@@ -263,7 +265,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertExecList(final String market, final SlNode first)
+    public final void insertExecList(final @NonNull String market, final @NonNull SlNode first)
             throws NotFoundException {
         service.submit(new Runnable() {
             @Override
@@ -278,7 +280,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertExecList(final SlNode first) throws NotFoundException {
+    public final void insertExecList(final @NonNull SlNode first) throws NotFoundException {
         service.submit(new Runnable() {
             @Override
             public final void run() {
@@ -292,7 +294,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void archiveOrder(final String market, final long id, final long modified)
+    public final void archiveOrder(final @NonNull String market, final long id, final long modified)
             throws NotFoundException {
         service.submit(new Runnable() {
             @Override
@@ -307,7 +309,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void archiveTrade(final String market, final long id, final long modified)
+    public final void archiveTrade(final @NonNull String market, final long id, final long modified)
             throws NotFoundException {
         service.submit(new Runnable() {
             @Override

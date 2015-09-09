@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
@@ -191,8 +194,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay, int state) {
+    public final void insertMarket(@NonNull String mnem, @Nullable String display,
+            @NonNull String contr, int settlDay, int expiryDay, int state) {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity entity = newMarket(mnem, display, contr, settlDay, expiryDay, state);
@@ -209,7 +212,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void updateMarket(String mnem, String display, int state) throws NotFoundException {
+    public final void updateMarket(@NonNull String mnem, @Nullable String display, int state)
+            throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity entity = getMarket(txn, mnem);
@@ -228,7 +232,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertTrader(String mnem, String display, String email) {
+    public final void insertTrader(@NonNull String mnem, @Nullable String display,
+            @NonNull String email) {
         final Transaction txn = datastore.beginTransaction();
         try {
             // Trader entities have common ancestor for strong consistency.
@@ -246,7 +251,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) throws NotFoundException {
+    public final void updateTrader(@NonNull String mnem, @Nullable String display)
+            throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity entity = getTrader(txn, mnem);
@@ -264,7 +270,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExec(Exec exec) throws NotFoundException {
+    public final void insertExec(@NonNull Exec exec) throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, exec.getMarket());
@@ -290,7 +296,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExecList(String marketMnem, SlNode first) throws NotFoundException {
+    public final void insertExecList(@NonNull String marketMnem, @NonNull SlNode first)
+            throws NotFoundException {
         SlNode node = first;
         try {
             // N.B. the approach I used previously on a traditional RDMS was quite different, in
@@ -343,7 +350,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExecList(SlNode first) throws NotFoundException {
+    public final void insertExecList(@NonNull SlNode first) throws NotFoundException {
 
         // Partition nodes by market.
 
@@ -369,12 +376,16 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         // Execution transaction for each market.
 
         for (final Entry<String, SlNode> entry : map.entrySet()) {
-            insertExecList(entry.getKey(), entry.getValue());
+            final String key = entry.getKey();
+            final SlNode value = entry.getValue();
+            assert key != null;
+            assert value != null;
+            insertExecList(key, value);
         }
     }
 
     @Override
-    public final void archiveOrder(String marketMnem, long id, long modified)
+    public final void archiveOrder(@NonNull String marketMnem, long id, long modified)
             throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -395,7 +406,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void archiveTrade(String marketMnem, long id, long modified)
+    public final void archiveTrade(@NonNull String marketMnem, long id, long modified)
             throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
