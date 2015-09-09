@@ -9,6 +9,7 @@ import static com.swirlycloud.twirly.util.NullUtil.nullIfZero;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
@@ -338,6 +339,37 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             while (node != null) {
                 node = popNext(node);
             }
+        }
+    }
+
+    @Override
+    public final void insertExecList(SlNode first) throws NotFoundException {
+
+        // Partition nodes by market.
+
+        final HashMap<String, SlNode> map;
+        SlNode node = first;
+        try {
+            map = new HashMap<>();
+            do {
+                final Exec exec = (Exec) node;
+                node = popNext(node);
+
+                final String market = exec.getMarket();
+                exec.setSlNext(map.get(market));
+                map.put(market, exec);
+            } while (node != null);
+        } finally {
+            // Clear nodes to ensure no unwanted retention.
+            while (node != null) {
+                node = popNext(node);
+            }
+        }
+
+        // Execution transaction for each market.
+
+        for (final Entry<String, SlNode> entry : map.entrySet()) {
+            insertExecList(entry.getKey(), entry.getValue());
         }
     }
 

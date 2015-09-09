@@ -287,10 +287,55 @@ public @NonNullByDefault class Serv {
         matchOrders(sess, book, order, side, direct, trans);
     }
 
+    private final void doCancelOrders(TraderSess sess, long now) throws NotFoundException,
+            ServiceUnavailableException {
+
+        // Build list of cancel executions.
+
+        SlNode firstExec = null;
+        for (RbNode node = sess.getFirstOrder(); node != null; node = node.rbNext()) {
+            final Order order = (Order) sess.getRootOrder();
+            assert order != null;
+
+            final MarketBook book = (MarketBook) markets.find(order.getMarket());
+            assert book != null;
+
+            final Exec exec = newExec(book, order, now);
+            exec.cancel();
+            // Stack push.
+            exec.setSlNext(firstExec);
+            firstExec = exec;
+        }
+
+        try {
+            journ.insertExecList(firstExec);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        for (;;) {
+            final Order order = (Order) sess.getRootOrder();
+            if (order == null) {
+                break;
+            }
+            final MarketBook book = (MarketBook) markets.find(order.getMarket());
+            assert book != null;
+
+            setDirty(book);
+            book.cancelOrder(order, now);
+        }
+    }
+
     private final void doCancelOrders(MarketBook book, long now) throws NotFoundException,
             ServiceUnavailableException {
         final BookSide bidSide = book.getBidSide();
         final BookSide offerSide = book.getOfferSide();
+
+        // Build list of cancel executions.
 
         SlNode firstExec = null;
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
@@ -309,6 +354,7 @@ public @NonNullByDefault class Serv {
             exec.setSlNext(firstExec);
             firstExec = exec;
         }
+
         try {
             journ.insertExecList(book.getMnem(), firstExec);
         } catch (final RejectedExecutionException e) {
@@ -882,8 +928,6 @@ public @NonNullByDefault class Serv {
     /**
      * Cancels all orders.
      * 
-     * This method is not executed atomically, so it may partially fail.
-     * 
      * @param sess
      *            The session.
      * @param now
@@ -893,27 +937,7 @@ public @NonNullByDefault class Serv {
      */
     public final void cancelOrders(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
-        for (;;) {
-            final Order order = (Order) sess.getRootOrder();
-            if (order == null) {
-                break;
-            }
-            final MarketBook book = (MarketBook) markets.find(order.getMarket());
-            assert book != null;
-
-            final Exec exec = newExec(book, order, now);
-            exec.cancel();
-            try {
-                journ.insertExec(exec);
-            } catch (final RejectedExecutionException e) {
-                throw new ServiceUnavailableException("journal is busy", e);
-            }
-
-            // Final commit phase cannot fail.
-            setDirty(book);
-            book.cancelOrder(order, now);
-        }
-        setDirty(sess, TraderSess.DIRTY_ORDER);
+        doCancelOrders(sess, now);
         updateDirty();
     }
 

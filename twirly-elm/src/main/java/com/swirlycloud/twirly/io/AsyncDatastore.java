@@ -59,7 +59,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectAsset(@NonNull final Factory factory) throws InterruptedException {
+    public final @Nullable MnemRbTree selectAsset(@NonNull final Factory factory)
+            throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final @Nullable MnemRbTree call() throws Exception {
@@ -69,7 +70,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectContr(@NonNull final Factory factory) throws InterruptedException {
+    public final @Nullable MnemRbTree selectContr(@NonNull final Factory factory)
+            throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
@@ -79,7 +81,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectMarket(@NonNull final Factory factory) throws InterruptedException {
+    public final @Nullable MnemRbTree selectMarket(@NonNull final Factory factory)
+            throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
@@ -89,7 +92,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectTrader(@NonNull final Factory factory) throws InterruptedException {
+    public final @Nullable MnemRbTree selectTrader(@NonNull final Factory factory)
+            throws InterruptedException {
         return get(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
@@ -99,8 +103,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable String selectTraderByEmail(@NonNull final String email, @NonNull final Factory factory)
-            throws InterruptedException {
+    public final @Nullable String selectTraderByEmail(@NonNull final String email,
+            @NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<String>() {
             @Override
             public final String call() throws Exception {
@@ -121,7 +125,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable SlNode selectOrder(@NonNull final Factory factory) throws InterruptedException {
+    public final @Nullable SlNode selectOrder(@NonNull final Factory factory)
+            throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -131,8 +136,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable InstructTree selectOrder(@NonNull final String trader, @NonNull final Factory factory)
-            throws InterruptedException {
+    public final @Nullable InstructTree selectOrder(@NonNull final String trader,
+            @NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<InstructTree>() {
             @Override
             public final InstructTree call() throws Exception {
@@ -142,7 +147,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable SlNode selectTrade(@NonNull final Factory factory) throws InterruptedException {
+    public final @Nullable SlNode selectTrade(@NonNull final Factory factory)
+            throws InterruptedException {
         return get(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
@@ -152,8 +158,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable InstructTree selectTrade(@NonNull final String trader, @NonNull final Factory factory)
-            throws InterruptedException {
+    public final @Nullable InstructTree selectTrade(@NonNull final String trader,
+            @NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<InstructTree>() {
             @Override
             public final InstructTree call() throws Exception {
@@ -264,6 +270,20 @@ public final class AsyncDatastore implements Datastore {
             public final void run() {
                 try {
                     datastore.insertExecList(market, first);
+                } catch (final Throwable t) {
+                    log.log(Level.SEVERE, "failed to insert exec-list", t);
+                }
+            }
+        });
+    }
+
+    @Override
+    public final void insertExecList(final SlNode first) throws NotFoundException {
+        service.submit(new Runnable() {
+            @Override
+            public final void run() {
+                try {
+                    datastore.insertExecList(first);
                 } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to insert exec-list", t);
                 }

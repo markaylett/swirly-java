@@ -218,6 +218,12 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
 
     @Override
     public final void insertExecList(String market, SlNode first) {
+        // The market parameter is ignored in the Jdbc implementation.
+        insertExecList(first);
+    }
+
+    @Override
+    public final void insertExecList(SlNode first) {
         SlNode node = first;
         try {
             conn.setAutoCommit(false);

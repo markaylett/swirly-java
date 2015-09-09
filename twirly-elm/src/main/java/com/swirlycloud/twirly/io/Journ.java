@@ -27,6 +27,15 @@ public interface Journ extends AutoCloseable {
 
     void insertExecList(String market, SlNode first) throws NotFoundException;
 
+    /**
+     * This overload may be less efficient than the ones that are market-specific.
+     * 
+     * @param first
+     *            The first exec.
+     * @throws NotFoundException
+     */
+    void insertExecList(SlNode first) throws NotFoundException;
+
     void archiveOrder(String market, long id, long modified) throws NotFoundException;
 
     void archiveTrade(String market, long id, long modified) throws NotFoundException;

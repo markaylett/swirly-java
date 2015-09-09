@@ -36,6 +36,10 @@ public class MockDatastore extends MockModel implements Datastore {
     }
 
     @Override
+    public void insertExecList(SlNode first) {
+    }
+
+    @Override
     public void archiveOrder(String market, long id, long modified) {
     }
 
