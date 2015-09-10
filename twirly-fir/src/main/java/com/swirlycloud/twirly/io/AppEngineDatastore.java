@@ -298,6 +298,13 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     @Override
     public final void insertExecList(@NonNull String marketMnem, @NonNull SlNode first)
             throws NotFoundException {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            insertExec((Exec) first);
+            return;
+        }
+
         SlNode node = first;
         try {
             // N.B. the approach I used previously on a traditional RDMS was quite different, in
@@ -353,6 +360,12 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
 
     @Override
     public final void insertExecList(@NonNull SlNode first) throws NotFoundException {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            insertExec((Exec) first);
+            return;
+        }
 
         // Partition nodes by market.
 

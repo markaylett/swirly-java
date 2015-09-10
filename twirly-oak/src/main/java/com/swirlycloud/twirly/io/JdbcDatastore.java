@@ -227,6 +227,13 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
 
     @Override
     public final void insertExecList(@NonNull SlNode first) {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            insertExec((Exec) first);
+            return;
+        }
+
         SlNode node = first;
         try {
             conn.setAutoCommit(false);
