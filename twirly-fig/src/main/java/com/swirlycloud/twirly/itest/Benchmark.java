@@ -66,10 +66,14 @@ public final class Benchmark {
                 // Taker buy-side.
                 serv.placeOrder(emiayl, book, "", Side.BUY, 12348, 30, 1, now, trans);
 
-                serv.archiveAll(marayl, now);
-                serv.archiveAll(gosayl, now);
-                serv.archiveAll(tobayl, now);
-                serv.archiveAll(emiayl, now);
+                serv.archiveOrders(marayl, now);
+                serv.archiveTrades(marayl, now);
+                serv.archiveOrders(gosayl, now);
+                serv.archiveTrades(gosayl, now);
+                serv.archiveOrders(tobayl, now);
+                serv.archiveTrades(tobayl, now);
+                serv.archiveOrders(emiayl, now);
+                serv.archiveTrades(emiayl, now);
 
                 final long totalNanos = System.nanoTime() - startNanos;
                 if ((i % 1000) == 0) {

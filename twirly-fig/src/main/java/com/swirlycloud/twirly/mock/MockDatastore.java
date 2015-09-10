@@ -48,6 +48,24 @@ public class MockDatastore extends MockModel implements Datastore {
     }
 
     @Override
+    public void archiveOrderList(@NonNull String market, @NonNull SlNode first, long modified)
+            throws NotFoundException {
+    }
+
+    @Override
+    public void archiveOrderList(@NonNull SlNode first, long modified) throws NotFoundException {
+    }
+
+    @Override
     public void archiveTrade(@NonNull String market, long id, long modified) {
+    }
+
+    @Override
+    public void archiveTradeList(@NonNull String market, @NonNull SlNode first, long modified)
+            throws NotFoundException {
+    }
+
+    @Override
+    public void archiveTradeList(@NonNull SlNode first, long modified) throws NotFoundException {
     }
 }

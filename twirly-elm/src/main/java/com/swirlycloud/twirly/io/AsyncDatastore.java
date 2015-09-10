@@ -309,6 +309,36 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
+    public final void archiveOrderList(@NonNull final String market, @NonNull final SlNode first,
+            final long modified) throws NotFoundException {
+        service.submit(new Runnable() {
+            @Override
+            public final void run() {
+                try {
+                    datastore.archiveOrderList(market, first, modified);
+                } catch (final Throwable t) {
+                    log.log(Level.SEVERE, "failed to archive order-list", t);
+                }
+            }
+        });
+    }
+
+    @Override
+    public final void archiveOrderList(@NonNull final SlNode first, final long modified)
+            throws NotFoundException {
+        service.submit(new Runnable() {
+            @Override
+            public final void run() {
+                try {
+                    datastore.archiveOrderList(first, modified);
+                } catch (final Throwable t) {
+                    log.log(Level.SEVERE, "failed to archive order-list", t);
+                }
+            }
+        });
+    }
+
+    @Override
     public final void archiveTrade(final @NonNull String market, final long id, final long modified)
             throws NotFoundException {
         service.submit(new Runnable() {
@@ -318,6 +348,36 @@ public final class AsyncDatastore implements Datastore {
                     datastore.archiveTrade(market, id, modified);
                 } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to archive trade", t);
+                }
+            }
+        });
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull final String market, @NonNull final SlNode first,
+            final long modified) throws NotFoundException {
+        service.submit(new Runnable() {
+            @Override
+            public final void run() {
+                try {
+                    datastore.archiveTradeList(market, first, modified);
+                } catch (final Throwable t) {
+                    log.log(Level.SEVERE, "failed to archive trade-list", t);
+                }
+            }
+        });
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull final SlNode first, final long modified)
+            throws NotFoundException {
+        service.submit(new Runnable() {
+            @Override
+            public final void run() {
+                try {
+                    datastore.archiveTradeList(first, modified);
+                } catch (final Throwable t) {
+                    log.log(Level.SEVERE, "failed to archive trade-list", t);
                 }
             }
         });

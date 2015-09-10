@@ -13,6 +13,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
@@ -278,6 +279,48 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
+    public final void archiveOrderList(@NonNull String market, @NonNull SlNode first, long modified)
+            throws NotFoundException {
+        // The market parameter is ignored in the Jdbc implementation.
+        archiveOrderList(first, modified);
+    }
+
+    @Override
+    public final void archiveOrderList(@NonNull SlNode first, long modified)
+            throws NotFoundException {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveOrder(mid.getMarket(), mid.getId(), modified);
+            return;
+        }
+
+        SlNode node = first;
+        try {
+            conn.setAutoCommit(false);
+            boolean success = false;
+            try {
+                do {
+                    final MarketId mid = (MarketId) node;
+                    node = node.slNext();
+
+                    archiveOrder(mid.getMarket(), mid.getId(), modified);
+                } while (node != null);
+                conn.commit();
+                success = true;
+            } finally {
+                if (!success) {
+                    conn.rollback();
+                }
+                conn.setAutoCommit(true);
+            }
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
     public final void archiveTrade(@NonNull String market, long id, long modified) {
         try {
             int i = 1;
@@ -285,6 +328,48 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
             setParam(updateExecStmt, i++, market);
             setParam(updateExecStmt, i++, id);
             updateExecStmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull String market, @NonNull SlNode first, long modified)
+            throws NotFoundException {
+        // The market parameter is ignored in the Jdbc implementation.
+        archiveTradeList(first, modified);
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull SlNode first, long modified)
+            throws NotFoundException {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveTrade(mid.getMarket(), mid.getId(), modified);
+            return;
+        }
+
+        SlNode node = first;
+        try {
+            conn.setAutoCommit(false);
+            boolean success = false;
+            try {
+                do {
+                    final MarketId mid = (MarketId) node;
+                    node = node.slNext();
+
+                    archiveTrade(mid.getMarket(), mid.getId(), modified);
+                } while (node != null);
+                conn.commit();
+                success = true;
+            } finally {
+                if (!success) {
+                    conn.rollback();
+                }
+                conn.setAutoCommit(true);
+            }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }

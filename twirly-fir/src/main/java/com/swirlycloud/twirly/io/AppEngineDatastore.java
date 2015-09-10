@@ -20,6 +20,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -421,6 +422,77 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
+    public final void archiveOrderList(@NonNull String marketMnem, @NonNull SlNode first,
+            long modified) throws NotFoundException {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveOrder(marketMnem, mid.getId(), modified);
+            return;
+        }
+
+        SlNode node = first;
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity market = getMarket(txn, marketMnem);
+            do {
+                final MarketId mid = (MarketId) node;
+                node = node.slNext();
+
+                assert marketMnem.equals(mid.getMarket());
+                final Entity entity = getOrder(txn, market.getKey(), mid.getId());
+                entity.setProperty("archive", Boolean.TRUE);
+                entity.setUnindexedProperty("modified", modified);
+                datastore.put(txn, entity);
+            } while (node != null);
+            txn.commit();
+        } catch (final ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void archiveOrderList(@NonNull SlNode first, long modified)
+            throws NotFoundException {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveOrder(mid.getMarket(), mid.getId(), modified);
+            return;
+        }
+
+        // Partition nodes by market.
+
+        final HashMap<String, SlNode> map = new HashMap<>();
+        SlNode node = first;
+        do {
+            final MarketId mid = (MarketId) node;
+            node = node.slNext();
+
+            final String market = mid.getMarket();
+            mid.setSlNext(map.get(market));
+            map.put(market, mid);
+        } while (node != null);
+
+        // Execution transaction for each market.
+
+        for (final Entry<String, SlNode> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final SlNode value = entry.getValue();
+            assert key != null;
+            assert value != null;
+            archiveOrderList(key, value, modified);
+        }
+    }
+
+    @Override
     public final void archiveTrade(@NonNull String marketMnem, long id, long modified)
             throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
@@ -438,6 +510,77 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             if (txn.isActive()) {
                 txn.rollback();
             }
+        }
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull String marketMnem, @NonNull SlNode first,
+            long modified) throws NotFoundException {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveTrade(marketMnem, mid.getId(), modified);
+            return;
+        }
+
+        SlNode node = first;
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity market = getMarket(txn, marketMnem);
+            do {
+                final MarketId mid = (MarketId) node;
+                node = node.slNext();
+
+                assert marketMnem.equals(mid.getMarket());
+                final Entity entity = getExec(txn, market.getKey(), mid.getId());
+                entity.setProperty("archive", Boolean.TRUE);
+                entity.setUnindexedProperty("modified", modified);
+                datastore.put(txn, entity);
+            } while (node != null);
+            txn.commit();
+        } catch (final ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull SlNode first, long modified)
+            throws NotFoundException {
+
+        if (first.slNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveTrade(mid.getMarket(), mid.getId(), modified);
+            return;
+        }
+
+        // Partition nodes by market.
+
+        final HashMap<String, SlNode> map = new HashMap<>();
+        SlNode node = first;
+        do {
+            final MarketId mid = (MarketId) node;
+            node = node.slNext();
+
+            final String market = mid.getMarket();
+            mid.setSlNext(map.get(market));
+            map.put(market, mid);
+        } while (node != null);
+
+        // Execution transaction for each market.
+
+        for (final Entry<String, SlNode> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final SlNode value = entry.getValue();
+            assert key != null;
+            assert value != null;
+            archiveTradeList(key, value, modified);
         }
     }
 }

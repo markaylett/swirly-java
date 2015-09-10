@@ -42,5 +42,29 @@ public interface Journ extends AutoCloseable {
 
     void archiveOrder(@NonNull String market, long id, long modified) throws NotFoundException;
 
+    void archiveOrderList(@NonNull String market, @NonNull SlNode first, long modified)
+            throws NotFoundException;
+
+    /**
+     * This overload may be less efficient than the ones that are market-specific.
+     * 
+     * @param first
+     *            The first id-node.
+     * @throws NotFoundException
+     */
+    void archiveOrderList(@NonNull SlNode first, long modified) throws NotFoundException;
+
     void archiveTrade(@NonNull String market, long id, long modified) throws NotFoundException;
+
+    void archiveTradeList(@NonNull String market, @NonNull SlNode first, long modified)
+            throws NotFoundException;
+
+    /**
+     * This overload may be less efficient than the ones that are market-specific.
+     * 
+     * @param first
+     *            The first id-node.
+     * @throws NotFoundException
+     */
+    void archiveTradeList(@NonNull SlNode first, long modified) throws NotFoundException;
 }
