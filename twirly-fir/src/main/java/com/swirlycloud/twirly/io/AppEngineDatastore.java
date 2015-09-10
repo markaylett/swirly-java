@@ -306,10 +306,11 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             final Transaction txn = datastore.beginTransaction();
             try {
                 final Entity market = getMarket(txn, marketMnem);
-                while (node != null) {
+                do {
                     final Exec exec = (Exec) node;
                     node = popNext(node);
 
+                    assert marketMnem.equals(exec.getMarket());
                     final long orderId = exec.getOrderId();
                     if (orderId != 0) {
                         if (exec.getState() == State.NEW) {
@@ -327,7 +328,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
                         }
                     }
                     datastore.put(txn, newExec(market, exec));
-                }
+                } while (node != null);
+
                 if (!orders.isEmpty()) {
                     datastore.put(txn, orders.values());
                 }

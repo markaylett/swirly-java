@@ -232,12 +232,13 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
             conn.setAutoCommit(false);
             boolean success = false;
             try {
-                while (node != null) {
+                do {
                     final Exec exec = (Exec) node;
+                    assert exec != null;
                     node = popNext(node);
 
                     insertExec(exec);
-                }
+                } while (node != null);
                 conn.commit();
                 success = true;
             } finally {
