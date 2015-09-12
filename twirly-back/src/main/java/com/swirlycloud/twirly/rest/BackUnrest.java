@@ -16,14 +16,17 @@ import javax.json.Json;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.MarketView;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.MarketView;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -31,6 +34,7 @@ import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.rec.Asset;
 import com.swirlycloud.twirly.rec.Contr;
 import com.swirlycloud.twirly.rec.Market;
@@ -40,7 +44,7 @@ import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("null")
-public final class BackUnrest {
+public final @NonNullByDefault class BackUnrest {
     public static final class PosnKey {
         private final String contr;
         private final int settlDay;
@@ -61,7 +65,7 @@ public final class BackUnrest {
         }
 
         @Override
-        public final boolean equals(Object obj) {
+        public final boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -247,10 +251,10 @@ public final class BackUnrest {
     }
 
     public static final class TransStruct {
-        public MarketView view;
+        public @Nullable MarketView view;
         public final Map<Long, Order> orders = new HashMap<>();
         public final Map<Long, Exec> execs = new HashMap<>();
-        public Posn posn;
+        public @Nullable Posn posn;
     }
 
     private static final RecStruct parseRecStruct(JsonParser p) throws IOException {
@@ -370,10 +374,13 @@ public final class BackUnrest {
         this(new LockableServ(datastore, cache, factory, now));
     }
 
+    public final @Nullable String findTraderByEmail(String email) {
+        return rest.findTraderByEmail(email);
+    }
+
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(withTraders, params, now, sb);
-
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
             return parseRecStruct(p);
@@ -429,52 +436,8 @@ public final class BackUnrest {
                 break;
             }
         }
+        assert rec != null;
         return rec;
-    }
-
-    public final Trader postTrader(String mnem, String display, String email, Params params,
-            long now) throws BadRequestException, ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.postTrader(mnem, display, email, params, now, sb);
-
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return Trader.parse(p);
-        }
-    }
-
-    public final Trader putTrader(String mnem, String display, Params params, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.putTrader(mnem, display, params, now, sb);
-
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return Trader.parse(p);
-        }
-    }
-
-    public final Market postMarket(String mnem, String display, String contr, int settlDate,
-            int expiryDate, int state, Params params, long now) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.postMarket(mnem, display, contr, settlDate, expiryDate, state, params, now, sb);
-
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return Market.parse(p);
-        }
-    }
-
-    public final Market putMarket(String mnem, String display, int state, Params params, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.putMarket(mnem, display, state, params, now, sb);
-
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return Market.parse(p);
-        }
     }
 
     public final Map<String, MarketView> getView(Params params, long now) throws IOException {
@@ -509,11 +472,6 @@ public final class BackUnrest {
             parseStartObject(p);
             return parseSessStruct(p);
         }
-    }
-
-    public final void deleteOrder(String trader, String market, long id, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        rest.deleteOrder(trader, market, id, now);
     }
 
     public final Map<Long, Order> getOrder(String trader, Params params, long now)
@@ -553,35 +511,6 @@ public final class BackUnrest {
         }
     }
 
-    public final TransStruct postOrder(String trader, String market, String ref, Side side,
-            long ticks, long lots, long minLots, Params params, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.postOrder(trader, market, ref, side, ticks, lots, minLots, params, now, sb);
-
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return parseTransStruct(p);
-        }
-    }
-
-    public final TransStruct putOrder(String trader, String market, long id, long lots,
-            Params params, long now) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.putOrder(trader, market, id, lots, params, now, sb);
-
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return parseTransStruct(p);
-        }
-    }
-
-    public final void deleteTrade(String trader, String market, long id, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        rest.deleteTrade(trader, market, id, now);
-    }
-
     public final Map<Long, Exec> getTrade(String trader, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
@@ -619,17 +548,6 @@ public final class BackUnrest {
         }
     }
 
-    public final Exec postTrade(String trader, String market, String ref, Side side, long ticks,
-            long lots, Role role, String cpty, Params params, long now) throws NotFoundException,
-            ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.postTrade(trader, market, ref, side, ticks, lots, role, cpty, params, now, sb);
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return Exec.parse(p);
-        }
-    }
-
     public final Map<PosnKey, Posn> getPosn(String trader, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
@@ -643,6 +561,17 @@ public final class BackUnrest {
         return out;
     }
 
+    public final Posn getPosn(String trader, String contr, Params params, long now)
+            throws NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getPosn(trader, contr, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Posn.parse(p);
+        }
+    }
+
     public final Posn getPosn(String trader, String contr, int settlDay, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
@@ -651,6 +580,108 @@ public final class BackUnrest {
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
             return Posn.parse(p);
+        }
+    }
+
+    public final Trader postTrader(String mnem, @Nullable String display, String email,
+            Params params, long now) throws BadRequestException, ServiceUnavailableException,
+            IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.postTrader(mnem, display, email, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Trader.parse(p);
+        }
+    }
+
+    public final Trader putTrader(String mnem, @Nullable String display, Params params, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.putTrader(mnem, display, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Trader.parse(p);
+        }
+    }
+
+    public final Market postMarket(String mnem, @Nullable String display, String contr,
+            int settlDate, int expiryDate, int state, Params params, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.postMarket(mnem, display, contr, settlDate, expiryDate, state, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Market.parse(p);
+        }
+    }
+
+    public final Market putMarket(String mnem, @Nullable String display, int state, Params params,
+            long now) throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.putMarket(mnem, display, state, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Market.parse(p);
+        }
+    }
+
+    public final void deleteOrder(String trader, String market, long id, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        rest.deleteOrder(trader, market, id, now);
+    }
+
+    public final void deleteOrder(String trader, String market, SlNode first, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        rest.deleteOrder(trader, market, first, now);
+    }
+
+    public final TransStruct postOrder(String trader, String market, @Nullable String ref,
+            Side side, long ticks, long lots, long minLots, Params params, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.postOrder(trader, market, ref, side, ticks, lots, minLots, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return parseTransStruct(p);
+        }
+    }
+
+    public final TransStruct putOrder(String trader, String market, long id, long lots,
+            Params params, long now) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.putOrder(trader, market, id, lots, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return parseTransStruct(p);
+        }
+    }
+
+    public final void deleteTrade(String trader, String market, long id, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        rest.deleteTrade(trader, market, id, now);
+    }
+
+    public final void deleteTrade(String trader, String market, SlNode first, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        rest.deleteTrade(trader, market, first, now);
+    }
+
+    public final Exec postTrade(String trader, String market, String ref, Side side, long ticks,
+            long lots, Role role, String cpty, Params params, long now) throws NotFoundException,
+            ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.postTrade(trader, market, ref, side, ticks, lots, role, cpty, params, now, sb);
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Exec.parse(p);
         }
     }
 

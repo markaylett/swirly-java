@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.BasicFactory;
@@ -42,6 +43,7 @@ import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.mock.MockTrader;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.rec.Asset;
 import com.swirlycloud.twirly.rec.Contr;
 import com.swirlycloud.twirly.rec.Market;
@@ -57,7 +59,7 @@ public final class BackUnrestTest {
 
     private static final @NonNull Factory FACTORY = new BasicFactory();
 
-    private static final String TRADER = "MARAYL";
+    private static final @NonNull String TRADER = "MARAYL";
     private static final int TODAY = ymdToJd(2014, 2, 11);
     private static final int SETTL_DAY = TODAY + 2;
     private static final int EXPIRY_DAY = TODAY + 1;
@@ -141,7 +143,7 @@ public final class BackUnrestTest {
         MockTrader.selectTrader(FACTORY, new UnaryCallback<Trader>() {
             @Override
             public final void call(Trader arg) {
-                 assertEquals(arg, traders.get(arg.getMnem()));
+                assertEquals(arg, traders.get(arg.getMnem()));
             }
         });
     }
@@ -222,51 +224,66 @@ public final class BackUnrestTest {
         assertEquals(sellLots, actual.getSellLots());
     }
 
-    private final Trader postTrader(String mnem, String display, String email)
+    private final Trader postTrader(@NonNull String mnem, String display, @NonNull String email)
             throws BadRequestException, ServiceUnavailableException, IOException {
         return unrest.postTrader(mnem, display, email, PARAMS_NONE, NOW);
     }
 
-    private final Trader putTrader(String mnem, String display, String email)
+    private final Trader putTrader(@NonNull String mnem, String display, String email)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         return unrest.putTrader(mnem, display, PARAMS_NONE, NOW);
     }
 
-    private final Market postMarket(String mnem, String display, String contr, int state)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+    private final Market postMarket(@NonNull String mnem, String display, @NonNull String contr,
+            int state) throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         return unrest.postMarket(mnem, display, contr, 0, 0, state, PARAMS_NONE, NOW);
     }
 
-    private final Market postMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay, int state) throws BadRequestException, NotFoundException,
+    private final Market postMarket(@NonNull String mnem, String display, @NonNull String contr,
+            int settlDay, int expiryDay, int state) throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         return unrest.postMarket(mnem, display, contr, maybeJdToIso(settlDay),
                 maybeJdToIso(expiryDay), state, PARAMS_NONE, NOW);
     }
 
-    private final Market putMarket(String mnem, String display, int state)
+    private final Market putMarket(@NonNull String mnem, String display, int state)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         return unrest.putMarket(mnem, display, state, PARAMS_NONE, NOW);
     }
 
-    private final void deleteOrder(String market, long id) throws BadRequestException,
+    private final void deleteOrder(@NonNull String market, long id) throws BadRequestException,
             NotFoundException, ServiceUnavailableException, IOException {
         unrest.deleteOrder(TRADER, market, id, NOW);
     }
 
-    private final TransStruct postOrder(String market, Side side, long ticks, long lots)
+    @SuppressWarnings("unused")
+    private final void deleteOrder(@NonNull String market, @NonNull SlNode first)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        unrest.deleteOrder(TRADER, market, first, NOW);
+    }
+
+    private final TransStruct postOrder(@NonNull String market, @NonNull Side side, long ticks,
+            long lots) throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         return unrest.postOrder(TRADER, market, null, side, ticks, lots, 1, PARAMS_NONE, NOW);
     }
 
-    private final TransStruct putOrder(String market, long id, long lots)
+    private final TransStruct putOrder(@NonNull String market, long id, long lots)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         return unrest.putOrder(TRADER, market, id, lots, PARAMS_NONE, NOW);
     }
 
-    private final void deleteTrade(String mnem, String market, long id) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException {
+    private final void deleteTrade(@NonNull String mnem, @NonNull String market, long id)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         unrest.deleteTrade(mnem, market, id, NOW);
+    }
+
+    @SuppressWarnings("unused")
+    private final void deleteTrade(@NonNull String mnem, @NonNull String market,
+            @NonNull SlNode first) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException {
+        unrest.deleteTrade(mnem, market, first, NOW);
     }
 
     @SuppressWarnings("resource")
@@ -293,6 +310,12 @@ public final class BackUnrestTest {
     public final void tearDown() throws Exception {
         // Assumption: MockDatastore need not be closed because it does not acquire resources.
         unrest = null;
+    }
+
+    @Ignore("not implemented")
+    @Test
+    public final void testFindTraderByEmail() {
+        // FIXME
     }
 
     @Test
@@ -374,46 +397,6 @@ public final class BackUnrestTest {
     }
 
     @Test
-    public final void testPostTrader() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-
-        Trader trader = postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com");
-        for (int i = 0; i < 2; ++i) {
-            assertNotNull(trader);
-            assertEquals("MARAYL2", trader.getMnem());
-            assertEquals("Mark Aylett", trader.getDisplay());
-            assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
-            trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL2", PARAMS_NONE, NOW);
-        }
-
-        // Duplicate mnemonic.
-        try {
-            postTrader(TRADER, "Mark Aylett", "mark.aylett@swirlycloud.com");
-            fail("Expected exception");
-        } catch (final BadRequestException e) {
-        }
-
-        // Duplicate email.
-        try {
-            postTrader("MARAYL3", "Mark Aylett", "mark.aylett@gmail.com");
-            fail("Expected exception");
-        } catch (final BadRequestException e) {
-        }
-    }
-
-    @Test
-    public final void testPutTrader() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-
-        Trader trader = postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com");
-        trader = putTrader("MARAYL2", "Mark Aylettx", "mark.aylett@swirlycloud.com");
-        assertNotNull(trader);
-        assertEquals("MARAYL2", trader.getMnem());
-        assertEquals("Mark Aylettx", trader.getDisplay());
-        assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
-    }
-
-    @Test
     public final void testGetView() throws BadRequestException, NotFoundException, IOException {
 
         long now = NOW;
@@ -433,7 +416,8 @@ public final class BackUnrestTest {
     }
 
     @Test
-    public final void testGetViewMnem() throws BadRequestException, NotFoundException, IOException {
+    public final void testGetViewMarket() throws BadRequestException, NotFoundException,
+            IOException {
 
         long now = NOW;
 
@@ -453,38 +437,6 @@ public final class BackUnrestTest {
     }
 
     @Test
-    public final void testPostMarket() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1, market);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1,
-                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
-    }
-
-    @Test
-    public final void testPostMarketSettl() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
-                EXPIRY_DAY, 0x1);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
-                market);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
-                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
-    }
-
-    @Test
-    public final void testPutMarket() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
-                EXPIRY_DAY, 0x1);
-        market = putMarket("GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
-                market);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
-                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
-    }
-
-    @Test
     public final void testGetSess() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
@@ -500,25 +452,6 @@ public final class BackUnrestTest {
                 "EURUSD", SETTL_DAY, Role.TAKER, out.trades.get(Long.valueOf(4)));
         assertPosn("EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
                 out.posns.get(new PosnKey("EURUSD", SETTL_DAY)));
-    }
-
-    @Test
-    public final void testDeleteOrder() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        putOrder("EURUSD.MAR14", 1, 0);
-        assertNotNull(unrest.getOrder(TRADER, "EURUSD.MAR14", 1, PARAMS_NONE, NOW));
-        deleteOrder("EURUSD.MAR14", 1);
-        try {
-            unrest.getOrder(TRADER, "EURUSD.MAR14", 1, PARAMS_NONE, NOW);
-            fail("Expected exception");
-        } catch (final NotFoundException e) {
-        }
-        try {
-            deleteOrder("EURUSD.MAR14", 1);
-            fail("Expected exception");
-        } catch (final NotFoundException e) {
-        }
     }
 
     @Test
@@ -548,41 +481,6 @@ public final class BackUnrestTest {
         assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0, out);
         try {
             unrest.getOrder(TRADER, "EURUSD.MAR14", 2, PARAMS_NONE, NOW);
-            fail("Expected exception");
-        } catch (final NotFoundException e) {
-        }
-    }
-
-    @Test
-    public final void testPostOrder() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        final TransStruct out = postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
-                out.orders.get(Long.valueOf(1)));
-    }
-
-    @Test
-    public final void testPutOrder() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        TransStruct out = postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
-                out.orders.get(Long.valueOf(1)));
-        out = putOrder("EURUSD.MAR14", 1, 5);
-        assertOrder("EURUSD.MAR14", State.REVISE, Side.SELL, 12345, 5, 5, 0, 0, 0, 0,
-                out.orders.get(Long.valueOf(1)));
-    }
-
-    @Test
-    public final void testDeleteTrade() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
-        final Exec trade = unrest.getTrade(TRADER, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.MAKER, trade);
-        deleteTrade(TRADER, "EURUSD.MAR14", 3);
-        try {
-            unrest.getTrade(TRADER, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -636,15 +534,6 @@ public final class BackUnrestTest {
     }
 
     @Test
-    public final void testPostTrade() throws NotFoundException, ServiceUnavailableException,
-            IOException {
-        final Exec exec = unrest.postTrade(TRADER, "EURUSD.MAR14", "", Side.BUY, 12345, 10,
-                Role.MAKER, TRADER, PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.MAKER, exec);
-    }
-
-    @Test
     public final void testGetPosn() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
@@ -654,8 +543,14 @@ public final class BackUnrestTest {
                 out.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
+    @Ignore("not implemented")
     @Test
-    public final void testGetPosnMarket() throws BadRequestException, NotFoundException,
+    public final void testGetPosnContr() {
+        // FIXME
+    }
+
+    @Test
+    public final void testGetPosnContrSettlDay() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
         postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
@@ -669,6 +564,155 @@ public final class BackUnrestTest {
     }
 
     @Test
+    public final void testPostTrader() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+
+        Trader trader = postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com");
+        for (int i = 0; i < 2; ++i) {
+            assertNotNull(trader);
+            assertEquals("MARAYL2", trader.getMnem());
+            assertEquals("Mark Aylett", trader.getDisplay());
+            assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
+            trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL2", PARAMS_NONE, NOW);
+        }
+
+        // Duplicate mnemonic.
+        try {
+            postTrader(TRADER, "Mark Aylett", "mark.aylett@swirlycloud.com");
+            fail("Expected exception");
+        } catch (final BadRequestException e) {
+        }
+
+        // Duplicate email.
+        try {
+            postTrader("MARAYL3", "Mark Aylett", "mark.aylett@gmail.com");
+            fail("Expected exception");
+        } catch (final BadRequestException e) {
+        }
+    }
+
+    @Test
+    public final void testPutTrader() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+
+        Trader trader = postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com");
+        trader = putTrader("MARAYL2", "Mark Aylettx", "mark.aylett@swirlycloud.com");
+        assertNotNull(trader);
+        assertEquals("MARAYL2", trader.getMnem());
+        assertEquals("Mark Aylettx", trader.getDisplay());
+        assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
+    }
+
+    @Test
+    public final void testPostMarket() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1, market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1,
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+    }
+
+    @Test
+    public final void testPostMarketSettl() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
+                EXPIRY_DAY, 0x1);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
+                market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+    }
+
+    @Test
+    public final void testPutMarket() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
+                EXPIRY_DAY, 0x1);
+        market = putMarket("GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
+                market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+    }
+
+    @Test
+    public final void testDeleteOrder() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
+        putOrder("EURUSD.MAR14", 1, 0);
+        assertNotNull(unrest.getOrder(TRADER, "EURUSD.MAR14", 1, PARAMS_NONE, NOW));
+        deleteOrder("EURUSD.MAR14", 1);
+        try {
+            unrest.getOrder(TRADER, "EURUSD.MAR14", 1, PARAMS_NONE, NOW);
+            fail("Expected exception");
+        } catch (final NotFoundException e) {
+        }
+        try {
+            deleteOrder("EURUSD.MAR14", 1);
+            fail("Expected exception");
+        } catch (final NotFoundException e) {
+        }
+    }
+
+    @Ignore("not implemented")
+    @Test
+    public final void testDeleteOrderList() {
+        // FIXME
+    }
+
+    @Test
+    public final void testPostOrder() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        final TransStruct out = postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
+        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
+                out.orders.get(Long.valueOf(1)));
+    }
+
+    @Test
+    public final void testPutOrder() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        TransStruct out = postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
+        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
+                out.orders.get(Long.valueOf(1)));
+        out = putOrder("EURUSD.MAR14", 1, 5);
+        assertOrder("EURUSD.MAR14", State.REVISE, Side.SELL, 12345, 5, 5, 0, 0, 0, 0,
+                out.orders.get(Long.valueOf(1)));
+    }
+
+    @Test
+    public final void testDeleteTrade() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
+        final Exec trade = unrest.getTrade(TRADER, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
+        assertExec("EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", SETTL_DAY, Role.MAKER, trade);
+        deleteTrade(TRADER, "EURUSD.MAR14", 3);
+        try {
+            unrest.getTrade(TRADER, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
+            fail("Expected exception");
+        } catch (final NotFoundException e) {
+        }
+    }
+
+    @Ignore("not implemented")
+    @Test
+    public final void testDeleteTradeList() {
+        // FIXME
+    }
+
+    @Test
+    public final void testPostTrade() throws NotFoundException, ServiceUnavailableException,
+            IOException {
+        final Exec exec = unrest.postTrade(TRADER, "EURUSD.MAR14", "", Side.BUY, 12345, 10,
+                Role.MAKER, TRADER, PARAMS_NONE, NOW);
+        assertExec("EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
+                "EURUSD", SETTL_DAY, Role.MAKER, exec);
+    }
+
+    @Ignore("not implemented")
+    @Test
     public final void testGetEndOfDay() {
+        // FIXME
     }
 }

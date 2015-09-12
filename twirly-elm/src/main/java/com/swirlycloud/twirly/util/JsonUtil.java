@@ -31,14 +31,14 @@ public final class JsonUtil {
         };
     }
 
-    public static final Params PARAMS_NONE = new Params() {
+    public static final @NonNull Params PARAMS_NONE = new Params() {
         @Override
         public final <T> T getParam(String name, Class<T> clazz) {
             return null;
         }
     };
 
-    public static final Params PARAMS_EXPIRED = new Params() {
+    public static final @NonNull Params PARAMS_EXPIRED = new Params() {
         @SuppressWarnings("unchecked")
         @Override
         public final <T> T getParam(String name, Class<T> clazz) {

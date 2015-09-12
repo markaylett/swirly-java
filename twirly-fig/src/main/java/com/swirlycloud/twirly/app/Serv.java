@@ -183,7 +183,7 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final TraderSess newTrader(String mnem, String display, String email)
+    private final TraderSess newTrader(String mnem, @Nullable String display, String email)
             throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
@@ -191,7 +191,7 @@ public @NonNullByDefault class Serv {
         return (TraderSess) factory.newTrader(mnem, display, email);
     }
 
-    private final MarketBook newMarket(String mnem, String display, Contr contr, int settlDay,
+    private final MarketBook newMarket(String mnem, @Nullable String display, Contr contr, int settlDay,
             int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
@@ -452,7 +452,7 @@ public @NonNullByDefault class Serv {
         this(datastore, datastore, cache, factory, now);
     }
 
-    public final TraderSess createTrader(String mnem, String display, String email)
+    public final TraderSess createTrader(String mnem, @Nullable String display, String email)
             throws BadRequestException, ServiceUnavailableException {
         if (traders.find(mnem) != null) {
             throw new BadRequestException(String.format("trader '%s' already exists", mnem));
@@ -474,7 +474,7 @@ public @NonNullByDefault class Serv {
         return sess;
     }
 
-    public final TraderSess updateTrader(String mnem, String display) throws BadRequestException,
+    public final TraderSess updateTrader(String mnem, @Nullable String display) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
         final TraderSess sess = (TraderSess) traders.find(mnem);
         if (sess == null) {
@@ -606,7 +606,7 @@ public @NonNullByDefault class Serv {
         return (TraderSess) emailIdx.find(email);
     }
 
-    public final MarketBook createMarket(String mnem, String display, Contr contr, int settlDay,
+    public final MarketBook createMarket(String mnem, @Nullable String display, Contr contr, int settlDay,
             int expiryDay, int state, long now) throws BadRequestException,
             ServiceUnavailableException {
         if (settlDay != 0) {
@@ -642,7 +642,7 @@ public @NonNullByDefault class Serv {
         return book;
     }
 
-    public final MarketBook createMarket(String mnem, String display, String contrMnem,
+    public final MarketBook createMarket(String mnem, @Nullable String display, String contrMnem,
             int settlDay, int expiryDay, int state, long now) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
         final Contr contr = (Contr) contrs.find(contrMnem);
@@ -652,7 +652,7 @@ public @NonNullByDefault class Serv {
         return createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
     }
 
-    public final MarketBook updateMarket(String mnem, String display, int state, long now)
+    public final MarketBook updateMarket(String mnem, @Nullable String display, int state, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final MarketBook book = (MarketBook) markets.find(mnem);
         if (book == null) {

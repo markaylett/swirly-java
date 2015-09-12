@@ -33,6 +33,7 @@ import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.RbNode;
+import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.rec.Contr;
 import com.swirlycloud.twirly.rec.Market;
 import com.swirlycloud.twirly.rec.Rec;
@@ -324,9 +325,9 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void postTrader(String mnem, String display, String email, Params params,
-            long now, Appendable out) throws BadRequestException, ServiceUnavailableException,
-            IOException {
+    public final void postTrader(String mnem, @Nullable String display, String email,
+            Params params, long now, Appendable out) throws BadRequestException,
+            ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -337,8 +338,9 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void putTrader(String mnem, String display, Params params, long now, Appendable out)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+    public final void putTrader(String mnem, @Nullable String display, Params params, long now,
+            Appendable out) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -349,8 +351,8 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void postMarket(String mnem, String display, String contrMnem, int settlDate,
-            int expiryDate, int state, Params params, long now, Appendable out)
+    public final void postMarket(String mnem, @Nullable String display, String contrMnem,
+            int settlDate, int expiryDate, int state, Params params, long now, Appendable out)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
@@ -370,8 +372,8 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void putMarket(String mnem, String display, int state, Params params, long now,
-            Appendable out) throws BadRequestException, NotFoundException,
+    public final void putMarket(String mnem, @Nullable String display, int state, Params params,
+            long now, Appendable out) throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
@@ -390,6 +392,18 @@ public final @NonNullByDefault class BackRest implements Rest {
         try {
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveOrder(sess, market, id, now);
+        } finally {
+            serv.releaseWrite();
+        }
+    }
+
+    public final void deleteOrder(String trader, String market, SlNode first, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        serv.acquireWrite();
+        try {
+            final TraderSess sess = serv.getTrader(trader);
+            serv.archiveOrders(sess, market, first, now);
         } finally {
             serv.releaseWrite();
         }
@@ -440,6 +454,18 @@ public final @NonNullByDefault class BackRest implements Rest {
         try {
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveTrade(sess, market, id, now);
+        } finally {
+            serv.releaseWrite();
+        }
+    }
+
+    public final void deleteTrade(String trader, String market, SlNode first, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        final LockableServ serv = (LockableServ) this.serv;
+        serv.acquireWrite();
+        try {
+            final TraderSess sess = serv.getTrader(trader);
+            serv.archiveTrades(sess, market, first, now);
         } finally {
             serv.releaseWrite();
         }
