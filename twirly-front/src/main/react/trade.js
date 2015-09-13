@@ -160,11 +160,11 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('order-id not specified'));
             return;
         }
-        var key = market + '/' + zeroPad(id);
         $.ajax({
             type: 'delete',
-            url: '/back/sess/order/' + key
+            url: '/back/sess/order/' + market + '/' + id
         }).done(function(unused) {
+            var key = market + '/' + zeroPad(id);
             var done = this.staging.done;
             var sess = this.state.sess;
             done.delete(key);
@@ -190,11 +190,11 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('trade-id not specified'));
             return;
         }
-        var key = market + '/' + zeroPad(id);
         $.ajax({
             type: 'delete',
-            url: '/back/sess/trade/' + key
+            url: '/back/sess/trade/' + market + '/' + id
         }).done(function(unused) {
+            var key = market + '/' + zeroPad(id);
             var trades = this.staging.trades;
             var sess = this.state.sess;
             trades.delete(key);
