@@ -446,6 +446,9 @@ var TradeModule = React.createClass({
                 error: parseError(xhr)
             });
         }.bind(this));
+        // App Engine work-around: this deliberate "ping" to the back-end ensures that it is alive
+        // and ready to service trade requests.
+        $.getJSON('/back/rec/asset/USD', function(asset) { });
     },
     // DOM Events.
     // Lifecycle.
