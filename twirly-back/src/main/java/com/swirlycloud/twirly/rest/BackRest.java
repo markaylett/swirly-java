@@ -446,6 +446,26 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
+    public final void putOrder(String trader, String market, JslNode first, long lots,
+            Params params, long now, Appendable out) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        serv.acquireWrite();
+        try {
+            final TraderSess sess = serv.getTrader(trader);
+            final MarketBook book = serv.getMarket(market);
+            if (lots > 0) {
+                serv.reviseOrder(sess, book, first, lots, now, trans);
+            } else {
+                serv.cancelOrder(sess, book, first, now, trans);
+            }
+            trans.toJson(params, out);
+        } finally {
+            trans.clear();
+            serv.releaseWrite();
+        }
+    }
+
     public final void deleteTrade(String trader, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final LockableServ serv = (LockableServ) this.serv;

@@ -274,6 +274,12 @@ public final class BackUnrestTest {
         return unrest.putOrder(TRADER, market, id, lots, PARAMS_NONE, NOW);
     }
 
+    @SuppressWarnings("unused")
+    private final TransStruct putOrder(@NonNull String market, @NonNull JslNode first, long lots)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        return unrest.putOrder(TRADER, market, first, lots, PARAMS_NONE, NOW);
+    }
+
     private final void deleteTrade(@NonNull String mnem, @NonNull String market, long id)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         unrest.deleteTrade(mnem, market, id, NOW);
@@ -677,6 +683,11 @@ public final class BackUnrestTest {
         out = putOrder("EURUSD.MAR14", 1, 5);
         assertOrder("EURUSD.MAR14", State.REVISE, Side.SELL, 12345, 5, 5, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
+    }
+
+    @Test
+    public final void testPutOrderList() {
+        // FIXME
     }
 
     @Test

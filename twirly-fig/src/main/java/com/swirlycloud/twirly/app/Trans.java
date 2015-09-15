@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.app;
 
 import java.io.IOException;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
@@ -19,9 +19,9 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Trans implements AutoCloseable, Jsonifiable {
-    private String trader;
-    private MarketBook book;
+public final @NonNullByDefault class Trans implements AutoCloseable, Jsonifiable {
+    private @Nullable String trader;
+    private @Nullable MarketBook book;
     final SlQueue orders = new SlQueue();
     final SlQueue matches = new SlQueue();
     /**
@@ -31,13 +31,17 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     /**
      * Optional taker position.
      */
+    @Nullable
     Posn posn;
 
-    final void reset(@NonNull String trader, @NonNull MarketBook book, @NonNull Order order,
-            @NonNull Exec exec) {
+    final void reset(String trader, MarketBook book) {
         this.trader = trader;
         this.book = book;
         clear();
+    }
+
+    final void reset(String trader, MarketBook book, Order order, Exec exec) {
+        reset(trader, book);
         orders.insertBack(order);
         execs.insertBack(exec);
     }
@@ -47,7 +51,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
      * 
      * @return the cloned slNode list.
      */
-    final JslNode prepareExecList() {
+    final @Nullable JslNode prepareExecList() {
         final Exec first = (Exec) execs.getFirst();
         Exec node = first;
         while (node != null) {
@@ -69,8 +73,10 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     }
 
     @Override
-    public final void toJson(@Nullable Params params, @NonNull Appendable out) throws IOException {
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"view\":");
+        final MarketBook book = this.book;
+        assert book != null;
         book.toJsonView(params, out);
         // Multiple orders may be updated if one trades with one's self.
         out.append(",\"orders\":[");
@@ -100,6 +106,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
             ++i;
         }
         out.append("],\"posn\":");
+        final Posn posn = this.posn;
         if (posn != null) {
             posn.toJson(params, out);
         } else {
@@ -115,11 +122,11 @@ public final class Trans implements AutoCloseable, Jsonifiable {
         posn = null;
     }
 
-    public final SlNode getFirstOrder() {
+    public final @Nullable SlNode getFirstOrder() {
         return orders.getFirst();
     }
 
-    public final SlNode getFirstExec() {
+    public final @Nullable SlNode getFirstExec() {
         return execs.getFirst();
     }
 
@@ -131,7 +138,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
         return execs.isEmpty();
     }
 
-    public final Posn getPosn() {
+    public final @Nullable Posn getPosn() {
         return posn;
     }
 }

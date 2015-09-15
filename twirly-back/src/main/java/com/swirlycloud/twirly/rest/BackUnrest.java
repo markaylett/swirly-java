@@ -664,6 +664,18 @@ public final @NonNullByDefault class BackUnrest {
         }
     }
 
+    public final TransStruct putOrder(String trader, String market, JslNode first, long lots,
+            Params params, long now) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.putOrder(trader, market, first, lots, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return parseTransStruct(p);
+        }
+    }
+
     public final void deleteTrade(String trader, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         rest.deleteTrade(trader, market, id, now);
