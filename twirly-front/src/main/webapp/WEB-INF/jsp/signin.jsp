@@ -1,6 +1,6 @@
 <%-- -*- html -*- --%>
 <%--
-   Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+   Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
 --%>
 <%@ page contentType="text/html;charset=utf-8" language="java"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
