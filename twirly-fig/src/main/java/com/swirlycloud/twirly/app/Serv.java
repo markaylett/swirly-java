@@ -191,8 +191,8 @@ public @NonNullByDefault class Serv {
         return (TraderSess) factory.newTrader(mnem, display, email);
     }
 
-    private final MarketBook newMarket(String mnem, @Nullable String display, Contr contr, int settlDay,
-            int expiryDay, int state) throws BadRequestException {
+    private final MarketBook newMarket(String mnem, @Nullable String display, Contr contr,
+            int settlDay, int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
@@ -461,32 +461,44 @@ public @NonNullByDefault class Serv {
             throw new BadRequestException(String.format("email '%s' is already in use", email));
         }
         final TraderSess sess = newTrader(mnem, display, email);
+
         try {
             journ.insertTrader(mnem, display, email);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
-        traders.insert(sess);
-        emailIdx.insert(sess);
+
+        // Commit phase.
+
         dirty |= DIRTY_TRADER;
         setDirty(sess, TraderSess.DIRTY_ALL);
+
+        traders.insert(sess);
+        emailIdx.insert(sess);
+
         updateDirty();
         return sess;
     }
 
-    public final TraderSess updateTrader(String mnem, @Nullable String display) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException {
+    public final TraderSess updateTrader(String mnem, @Nullable String display)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final TraderSess sess = (TraderSess) traders.find(mnem);
         if (sess == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
         }
-        sess.setDisplay(display);
+
         try {
             journ.updateTrader(mnem, display);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
+
+        // Commit phase.
+
         dirty |= DIRTY_TRADER;
+
+        sess.setDisplay(display);
+
         updateDirty();
         return sess;
     }
@@ -606,8 +618,8 @@ public @NonNullByDefault class Serv {
         return (TraderSess) emailIdx.find(email);
     }
 
-    public final MarketBook createMarket(String mnem, @Nullable String display, Contr contr, int settlDay,
-            int expiryDay, int state, long now) throws BadRequestException,
+    public final MarketBook createMarket(String mnem, @Nullable String display, Contr contr,
+            int settlDay, int expiryDay, int state, long now) throws BadRequestException,
             ServiceUnavailableException {
         if (settlDay != 0) {
             // busDay <= expiryDay <= settlDay.
@@ -629,15 +641,20 @@ public @NonNullByDefault class Serv {
         }
         final RbNode parent = book;
         book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
+
         try {
             journ.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
+        // Commit phase.
+
+        dirty |= (DIRTY_MARKET | DIRTY_VIEW);
+
         markets.pinsert(book, parent);
         views.insert(book.getView());
-        dirty |= (DIRTY_MARKET | DIRTY_VIEW);
+
         updateDirty();
         return book;
     }
@@ -658,18 +675,32 @@ public @NonNullByDefault class Serv {
         if (book == null) {
             throw new NotFoundException(String.format("market '%s' does not exist", mnem));
         }
-        book.setDisplay(display);
-        book.setState(state);
+
         try {
             journ.updateMarket(mnem, display, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
+
+        // Commit phase.
+
         dirty |= DIRTY_MARKET;
+
+        book.setDisplay(display);
+        book.setState(state);
+
         updateDirty();
         return book;
     }
 
+    /**
+     * This method may partially fail.
+     * 
+     * @param now
+     *            The current time.
+     * @throws NotFoundException
+     * @throws ServiceUnavailableException
+     */
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
@@ -742,10 +773,13 @@ public @NonNullByDefault class Serv {
                 book.removeOrder(order);
             }
         }
-        // Final commit phase cannot fail.
+
+        // Commit phase.
+
         sess.insertOrder(order);
         // Commit trans to cycle and free matches.
         commitMatches(sess, book, now, trans);
+
         updateDirty();
     }
 
@@ -772,12 +806,14 @@ public @NonNullByDefault class Serv {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
-        // Final commit phase cannot fail.
-        book.reviseOrder(order, lots, now);
+        // Commit phase.
 
-        trans.reset(book, order, exec);
         setDirty(book);
         setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        book.reviseOrder(order, lots, now);
+        trans.reset(book, order, exec);
+
         updateDirty();
     }
 
@@ -807,18 +843,21 @@ public @NonNullByDefault class Serv {
         }
         final Exec exec = newExec(book, order, now);
         exec.cancel();
+
         try {
             journ.insertExec(exec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
-        // Final commit phase cannot fail.
-        book.cancelOrder(order, now);
+        // Commit phase.
 
-        trans.reset(book, order, exec);
         setDirty(book);
         setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        book.cancelOrder(order, now);
+        trans.reset(book, order, exec);
+
         updateDirty();
     }
 
@@ -920,10 +959,13 @@ public @NonNullByDefault class Serv {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
         // No need to update timestamps on order because it is immediately freed.
         sess.removeOrder(order);
 
-        setDirty(sess, TraderSess.DIRTY_ORDER);
         updateDirty();
     }
 
@@ -1040,6 +1082,7 @@ public @NonNullByDefault class Serv {
         final Exec trade = Exec.manual(book.allocExecId(), sess.getMnem(), book.getMnem(),
                 book.getContr(), book.getSettlDay(), ref, side, ticks, lots, role, cpty, created);
         if (cpty != null) {
+
             // Create back-to-back trade if counter-party is specified.
             final TraderSess cptySess = (TraderSess) traders.find(cpty);
             if (cptySess == null) {
@@ -1048,23 +1091,33 @@ public @NonNullByDefault class Serv {
             final Posn cptyPosn = cptySess.getLazyPosn(book);
             final Exec cptyTrade = trade.inverse(book.allocExecId());
             trade.setSlNext(cptyTrade);
+
             try {
                 journ.insertExecList(book.getMnem(), trade);
             } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
+
+            // Commit phase.
+
+            // Update counter-party cache entries.
+            setDirty(cptySess, TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
+
             sess.insertTrade(trade);
             posn.addTrade(trade);
             cptySess.insertTrade(cptyTrade);
             cptyPosn.addTrade(cptyTrade);
-            // Update counter-party cache entries.
-            setDirty(cptySess, TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
+
         } else {
+
             try {
                 journ.insertExec(trade);
             } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
+
+            // Commit phase.
+
             sess.insertTrade(trade);
             posn.addTrade(trade);
         }
@@ -1084,9 +1137,13 @@ public @NonNullByDefault class Serv {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_TRADE);
+
         // No need to update timestamps on trade because it is immediately freed.
         sess.removeTrade(trade);
-        setDirty(sess, TraderSess.DIRTY_TRADE);
+
         updateDirty();
     }
 
