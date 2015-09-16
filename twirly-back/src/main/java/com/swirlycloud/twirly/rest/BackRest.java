@@ -44,6 +44,7 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class BackRest implements Rest {
 
     private final Serv serv;
+    private final Trans trans = new Trans();
 
     private static void getView(@Nullable RbNode first, Params params, long now, Appendable out)
             throws IOException {
@@ -417,11 +418,10 @@ public final @NonNullByDefault class BackRest implements Rest {
         try {
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            try (final Trans trans = new Trans()) {
-                serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
-                trans.toJson(params, out);
-            }
+            serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
+            trans.toJson(params, out);
         } finally {
+            trans.clear();
             serv.releaseWrite();
         }
     }
@@ -434,15 +434,14 @@ public final @NonNullByDefault class BackRest implements Rest {
         try {
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            try (final Trans trans = new Trans()) {
-                if (lots > 0) {
-                    serv.reviseOrder(sess, book, id, lots, now, trans);
-                } else {
-                    serv.cancelOrder(sess, book, id, now, trans);
-                }
-                trans.toJson(params, out);
+            if (lots > 0) {
+                serv.reviseOrder(sess, book, id, lots, now, trans);
+            } else {
+                serv.cancelOrder(sess, book, id, now, trans);
             }
+            trans.toJson(params, out);
         } finally {
+            trans.clear();
             serv.releaseWrite();
         }
     }
