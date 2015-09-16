@@ -55,6 +55,15 @@ public final class MockContr {
         put("WWNA", "Wenago A", "WWNA", "ETB", 1, 1, 1, 1, 0, 1, 10);
         put("WKCA", "Kochere A", "WKCA", "ETB", 1, 1, 1, 1, 0, 1, 10);
         put("WGAA", "Gelena Abaya A", "WGAA", "ETB", 1, 1, 1, 1, 0, 1, 10);
+        // US Corporates.
+        put("CSCO", "Cisco Systems Inc", "CSCO", "USD", 1, 1000, 1, 1, 3, 1, 10);
+        put("DIS", "Walt Disney", "DIS", "USD", 1, 1000, 1, 1, 3, 1, 10);
+        put("IBM", "Ibm Corp", "IBM", "USD", 1, 1000, 1, 1, 3, 1, 10);
+        put("INTC", "Intel Corp", "INTC", "USD", 1, 1000, 1, 1, 3, 1, 10);
+        put("MSFT", "Microsoft Corp", "MSFT", "USD", 1, 1000, 1, 1, 3, 1, 10);
+        put("VIA", "Viacom Inc", "VIA", "USD", 1, 1000, 1, 1, 3, 1, 10);
+        put("VOD", "Vodafone Group Plc", "VOD", "USD", 1, 1000, 1, 1, 3, 1, 10);
+        put("VZ", "Verizon Com", "VZ", "USD", 1, 1000, 1, 1, 3, 1, 10);
     }
 
     private MockContr() {

@@ -54,7 +54,16 @@ public final class MockAsset {
         put("WWNA", "Wenago A", AssetType.COMMODITY);
         put("WKCA", "Kochere A", AssetType.COMMODITY);
         put("WGAA", "Gelena Abaya A", AssetType.COMMODITY);
-    }
+        // US Corporates.
+        put("CSCO", "Cisco Systems Inc", AssetType.CORPORATE);
+        put("DIS", "Walt Disney", AssetType.CORPORATE);
+        put("IBM", "Ibm Corp", AssetType.CORPORATE);
+        put("INTC", "Intel Corp", AssetType.CORPORATE);
+        put("MSFT", "Microsoft Corp", AssetType.CORPORATE);
+        put("VIA", "Viacom Inc", AssetType.CORPORATE);
+        put("VOD", "Vodafone Group Plc", AssetType.CORPORATE);
+        put("VZ", "Verizon Com", AssetType.CORPORATE);
+     }
 
     private MockAsset() {
     }
