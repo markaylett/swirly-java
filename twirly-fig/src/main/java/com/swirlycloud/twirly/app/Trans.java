@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
+import static com.swirlycloud.twirly.node.SlUtil.popNext;
+
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -13,9 +15,8 @@ import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.intrusive.TransQueue;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.node.TransNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
@@ -27,7 +28,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     /**
      * All executions referenced in matches.
      */
-    final TransQueue execs = new TransQueue();
+    final SlQueue execs = new SlQueue();
     /**
      * Optional taker position.
      */
@@ -49,10 +50,13 @@ public final class Trans implements AutoCloseable, Jsonifiable {
      * 
      * @return the cloned slNode list.
      */
-    final SlNode prepareExecList() {
-        final TransNode first = execs.getFirst();
-        for (TransNode node = first; node != null;) {
-            node.setSlNext(node = node.transNext());
+    final JslNode prepareExecList() {
+        final Exec first = (Exec) execs.getFirst();
+        Exec node = first;
+        while (node != null) {
+            Exec next = (Exec) node.slNext();
+            node.setJslNext(next);
+            node = next;
         }
         return first;
     }
@@ -85,7 +89,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
         }
         out.append("],\"execs\":[");
         int i = 0;
-        for (TransNode node = execs.getFirst(); node != null; node = node.transNext()) {
+        for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
             if (!exec.getTrader().equals(trader)) {
                 continue;
@@ -106,11 +110,9 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     }
 
     public final void clear() {
-        TransNode node = execs.getFirst();
+        SlNode node = execs.getFirst();
         while (node != null) {
-            final TransNode tmp = node;
-            node = node.transNext();
-            tmp.setTransNext(null);
+            node = popNext(node);
         }
         matches.clear();
         execs.clear();
@@ -120,7 +122,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
         return order;
     }
 
-    public final TransNode getFirstExec() {
+    public final SlNode getFirstExec() {
         return execs.getFirst();
     }
 

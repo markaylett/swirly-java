@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
-import static com.swirlycloud.twirly.node.SlUtil.popNext;
+import static com.swirlycloud.twirly.node.JslUtil.popNext;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -17,7 +17,7 @@ import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 
 public final class JdbcDatastore extends JdbcModel implements Datastore {
     @NonNull
@@ -221,21 +221,21 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertExecList(@NonNull String market, @NonNull SlNode first) {
+    public final void insertExecList(@NonNull String market, @NonNull JslNode first) {
         // The market parameter is ignored in the Jdbc implementation.
         insertExecList(first);
     }
 
     @Override
-    public final void insertExecList(@NonNull SlNode first) {
+    public final void insertExecList(@NonNull JslNode first) {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             insertExec((Exec) first);
             return;
         }
 
-        SlNode node = first;
+        JslNode node = first;
         try {
             conn.setAutoCommit(false);
             boolean success = false;
@@ -279,31 +279,31 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void archiveOrderList(@NonNull String market, @NonNull SlNode first, long modified)
+    public final void archiveOrderList(@NonNull String market, @NonNull JslNode first, long modified)
             throws NotFoundException {
         // The market parameter is ignored in the Jdbc implementation.
         archiveOrderList(first, modified);
     }
 
     @Override
-    public final void archiveOrderList(@NonNull SlNode first, long modified)
+    public final void archiveOrderList(@NonNull JslNode first, long modified)
             throws NotFoundException {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             final MarketId mid = (MarketId) first;
             archiveOrder(mid.getMarket(), mid.getId(), modified);
             return;
         }
 
-        SlNode node = first;
+        JslNode node = first;
         try {
             conn.setAutoCommit(false);
             boolean success = false;
             try {
                 do {
                     final MarketId mid = (MarketId) node;
-                    node = node.slNext();
+                    node = node.jslNext();
 
                     archiveOrder(mid.getMarket(), mid.getId(), modified);
                 } while (node != null);
@@ -334,31 +334,31 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void archiveTradeList(@NonNull String market, @NonNull SlNode first, long modified)
+    public final void archiveTradeList(@NonNull String market, @NonNull JslNode first, long modified)
             throws NotFoundException {
         // The market parameter is ignored in the Jdbc implementation.
         archiveTradeList(first, modified);
     }
 
     @Override
-    public final void archiveTradeList(@NonNull SlNode first, long modified)
+    public final void archiveTradeList(@NonNull JslNode first, long modified)
             throws NotFoundException {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             final MarketId mid = (MarketId) first;
             archiveTrade(mid.getMarket(), mid.getId(), modified);
             return;
         }
 
-        SlNode node = first;
+        JslNode node = first;
         try {
             conn.setAutoCommit(false);
             boolean success = false;
             try {
                 do {
                     final MarketId mid = (MarketId) node;
-                    node = node.slNext();
+                    node = node.jslNext();
 
                     archiveTrade(mid.getMarket(), mid.getId(), modified);
                 } while (node != null);

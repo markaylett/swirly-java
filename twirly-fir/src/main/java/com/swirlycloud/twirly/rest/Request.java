@@ -11,7 +11,7 @@ import javax.json.stream.JsonParser.Event;
 import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 
 public final class Request {
 
@@ -60,7 +60,7 @@ public final class Request {
                 return firstMid;
             case VALUE_NUMBER:
                 final MarketId mid = new MarketId(p.getLong());
-                mid.setSlNext(firstMid);
+                mid.setJslNext(firstMid);
                 firstMid = mid;
                 break;
             default:
@@ -217,7 +217,7 @@ public final class Request {
         return (fields & IDS) != 0;
     }
 
-    public final SlNode getIds() {
+    public final JslNode getIds() {
         return ids;
     }
 

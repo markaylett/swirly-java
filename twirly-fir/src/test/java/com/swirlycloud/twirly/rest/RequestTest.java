@@ -47,17 +47,17 @@ public final class RequestTest {
         assertEquals(303, mid.getId());
 
         // Second.
-        mid = (MarketId) mid.slNext();
+        mid = (MarketId) mid.jslNext();
         assertNotNull(mid);
         assertEquals(202, mid.getId());
 
         // Third.
-        mid = (MarketId) mid.slNext();
+        mid = (MarketId) mid.jslNext();
         assertNotNull(mid);
         assertEquals(101, mid.getId());
 
         // End.
-        mid = (MarketId) mid.slNext();
+        mid = (MarketId) mid.jslNext();
         assertNull(mid);
     }
 

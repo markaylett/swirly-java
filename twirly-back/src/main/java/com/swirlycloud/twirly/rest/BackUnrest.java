@@ -34,7 +34,7 @@ import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.rec.Asset;
 import com.swirlycloud.twirly.rec.Contr;
 import com.swirlycloud.twirly.rec.Market;
@@ -635,7 +635,7 @@ public final @NonNullByDefault class BackUnrest {
         rest.deleteOrder(trader, market, id, now);
     }
 
-    public final void deleteOrder(String trader, String market, SlNode first, long now)
+    public final void deleteOrder(String trader, String market, JslNode first, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         rest.deleteOrder(trader, market, first, now);
     }
@@ -669,7 +669,7 @@ public final @NonNullByDefault class BackUnrest {
         rest.deleteTrade(trader, market, id, now);
     }
 
-    public final void deleteTrade(String trader, String market, SlNode first, long now)
+    public final void deleteTrade(String trader, String market, JslNode first, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         rest.deleteTrade(trader, market, first, now);
     }

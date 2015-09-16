@@ -6,9 +6,8 @@ package com.swirlycloud.twirly.intrusive;
 import static com.swirlycloud.twirly.util.NullUtil.emptyIfNull;
 
 import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.node.SlNode;
 
-public final class RefHashTable extends HashTable<SlNode> {
+public final class RefHashTable extends HashTable<Order> {
 
     private static int hashKeyDirect(String trader, String ref) {
         final int prime = 31;
@@ -18,45 +17,41 @@ public final class RefHashTable extends HashTable<SlNode> {
         return result;
     }
 
-    private static boolean equalKeyDirect(SlNode lhs, String trader, String ref) {
-        final Order lorder = (Order) lhs;
-        return lorder.getTrader().equals(trader) && emptyIfNull(lorder.getRef()).equals(ref);
+    private static boolean equalKeyDirect(Order lhs, String trader, String ref) {
+        return lhs.getTrader().equals(trader) && emptyIfNull(lhs.getRef()).equals(ref);
     }
 
     @Override
-    protected final void setNext(SlNode node, SlNode next) {
-        node.setSlNext(next);
+    protected final void setNext(Order node, Order next) {
+        node.setRefNext(next);
     }
 
     @Override
-    protected final SlNode next(SlNode node) {
-        return node.slNext();
+    protected final Order next(Order node) {
+        return node.refNext();
     }
 
     @Override
-    protected final int hashKey(SlNode node) {
-        final Order order = (Order) node;
-        return hashKeyDirect(order.getTrader(), order.getRef());
+    protected final int hashKey(Order node) {
+        return hashKeyDirect(node.getTrader(), node.getRef());
     }
 
     @Override
-    protected final boolean equalKey(SlNode lhs, SlNode rhs) {
-        final Order lorder = (Order) lhs;
-        final Order rorder = (Order) rhs;
-        return lorder.getTrader().equals(rorder.getTrader())
-                && emptyIfNull(lorder.getRef()).equals(rorder.getRef());
+    protected final boolean equalKey(Order lhs, Order rhs) {
+        return lhs.getTrader().equals(rhs.getTrader())
+                && emptyIfNull(lhs.getRef()).equals(rhs.getRef());
     }
 
     public RefHashTable(int capacity) {
         super(capacity);
     }
 
-    public final SlNode remove(String trader, String ref) {
+    public final Order remove(String trader, String ref) {
         if (isEmpty()) {
             return null;
         }
         final int i = indexFor(hashKeyDirect(trader, ref), buckets.length);
-        SlNode it = getBucket(i);
+        Order it = getBucket(i);
         if (it == null) {
             return null;
         }
@@ -67,7 +62,7 @@ public final class RefHashTable extends HashTable<SlNode> {
             return it;
         }
         // Check if a subsequent element in the bucket has an equivalent key.
-        for (SlNode next; (next = next(it)) != null; it = next) {
+        for (Order next; (next = next(it)) != null; it = next) {
             if (equalKeyDirect(next, trader, ref)) {
                 setNext(it, next(next));
                 --size;
@@ -77,12 +72,12 @@ public final class RefHashTable extends HashTable<SlNode> {
         return null;
     }
 
-    public final SlNode find(String trader, String ref) {
+    public final Order find(String trader, String ref) {
         if (isEmpty()) {
             return null;
         }
         final int i = indexFor(hashKeyDirect(trader, ref), buckets.length);
-        for (SlNode it = getBucket(i); it != null; it = next(it)) {
+        for (Order it = getBucket(i); it != null; it = next(it)) {
             if (equalKeyDirect(it, trader, ref)) {
                 return it;
             }

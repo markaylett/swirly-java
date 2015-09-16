@@ -68,7 +68,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     }
 
     public final @Nullable Order removeOrder(String ref) {
-        final Order order = (Order) refIdx.remove(mnem, ref);
+        final Order order = refIdx.remove(mnem, ref);
         if (order != null) {
             orders.remove(order);
         }
@@ -80,8 +80,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     }
 
     public final @Nullable Order findOrder(String ref) {
-        assert ref != null;
-        return (Order) refIdx.find(mnem, ref);
+        return refIdx.find(mnem, ref);
     }
 
     public final @Nullable RbNode getRootOrder() {

@@ -36,6 +36,7 @@ import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.DlNode;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.rec.Asset;
@@ -295,13 +296,13 @@ public @NonNullByDefault class Serv {
 
         // Build list of cancel executions.
 
-        SlNode firstExec = null;
+        JslNode firstExec = null;
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
             final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
-            exec.setSlNext(firstExec);
+            exec.setJslNext(firstExec);
             firstExec = exec;
         }
         for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
@@ -309,7 +310,7 @@ public @NonNullByDefault class Serv {
             final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
-            exec.setSlNext(firstExec);
+            exec.setJslNext(firstExec);
             firstExec = exec;
         }
         if (firstExec == null) {
@@ -761,7 +762,7 @@ public @NonNullByDefault class Serv {
         // any unfilled quantity.
         boolean success = false;
         try {
-            final SlNode first = trans.prepareExecList();
+            final JslNode first = trans.prepareExecList();
             assert first != null;
             journ.insertExecList(book.getMnem(), first);
             success = true;
@@ -894,7 +895,7 @@ public @NonNullByDefault class Serv {
 
         // Build list of cancel executions.
 
-        SlNode firstExec = null;
+        JslNode firstExec = null;
         for (RbNode node = sess.getFirstOrder(); node != null; node = node.rbNext()) {
             final Order order = (Order) sess.getRootOrder();
             assert order != null;
@@ -907,7 +908,7 @@ public @NonNullByDefault class Serv {
             final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
-            exec.setSlNext(firstExec);
+            exec.setJslNext(firstExec);
             firstExec = exec;
         }
         if (firstExec == null) {
@@ -998,7 +999,7 @@ public @NonNullByDefault class Serv {
                 continue;
             }
             final MarketId mid = new MarketId(order.getId(), order.getMarket());
-            mid.setSlNext(firstMid);
+            mid.setJslNext(firstMid);
             firstMid = mid;
         }
         if (firstMid == null) {
@@ -1030,13 +1031,13 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void archiveOrders(TraderSess sess, String market, SlNode first, long now)
+    public final void archiveOrders(TraderSess sess, String market, JslNode first, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
-        SlNode node = first;
+        JslNode node = first;
         do {
             final MarketId mid = (MarketId) node;
-            node = node.slNext();
+            node = node.jslNext();
 
             final long id = mid.getId();
             final Order order = sess.findOrder(market, id);
@@ -1060,10 +1061,11 @@ public @NonNullByDefault class Serv {
 
         setDirty(sess, TraderSess.DIRTY_ORDER);
 
+        // The list can be safely traversed here because the archive operation will not modify it.
         node = first;
         do {
             final MarketId mid = (MarketId) node;
-            node = node.slNext();
+            node = node.jslNext();
 
             final long id = mid.getId();
             final Order order = sess.findOrder(market, id);
@@ -1173,7 +1175,7 @@ public @NonNullByDefault class Serv {
         for (RbNode node = sess.getFirstTrade(); node != null; node = node.rbNext()) {
             final Exec trade = (Exec) node;
             final MarketId mid = new MarketId(trade.getId(), trade.getMarket());
-            mid.setSlNext(firstMid);
+            mid.setJslNext(firstMid);
             firstMid = mid;
         }
         if (firstMid == null) {
@@ -1202,13 +1204,13 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void archiveTrades(TraderSess sess, String market, SlNode first, long now)
+    public final void archiveTrades(TraderSess sess, String market, JslNode first, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
-        SlNode node = first;
+        JslNode node = first;
         do {
             final MarketId mid = (MarketId) node;
-            node = node.slNext();
+            node = node.jslNext();
 
             final long id = mid.getId();
             final Exec trade = sess.findTrade(market, id);
@@ -1228,10 +1230,11 @@ public @NonNullByDefault class Serv {
 
         setDirty(sess, TraderSess.DIRTY_TRADE);
 
+        // The list can be safely traversed here because the archive operation will not modify it.
         node = first;
         do {
             final MarketId mid = (MarketId) node;
-            node = node.slNext();
+            node = node.jslNext();
 
             final long id = mid.getId();
             final Exec trade = sess.findTrade(market, id);

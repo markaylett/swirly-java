@@ -9,7 +9,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 
 public class MockDatastore extends MockModel implements Datastore {
 
@@ -36,11 +36,11 @@ public class MockDatastore extends MockModel implements Datastore {
     }
 
     @Override
-    public void insertExecList(@NonNull String market, @NonNull SlNode first) {
+    public void insertExecList(@NonNull String market, @NonNull JslNode first) {
     }
 
     @Override
-    public void insertExecList(@NonNull SlNode first) {
+    public void insertExecList(@NonNull JslNode first) {
     }
 
     @Override
@@ -48,12 +48,12 @@ public class MockDatastore extends MockModel implements Datastore {
     }
 
     @Override
-    public void archiveOrderList(@NonNull String market, @NonNull SlNode first, long modified)
+    public void archiveOrderList(@NonNull String market, @NonNull JslNode first, long modified)
             throws NotFoundException {
     }
 
     @Override
-    public void archiveOrderList(@NonNull SlNode first, long modified) throws NotFoundException {
+    public void archiveOrderList(@NonNull JslNode first, long modified) throws NotFoundException {
     }
 
     @Override
@@ -61,11 +61,11 @@ public class MockDatastore extends MockModel implements Datastore {
     }
 
     @Override
-    public void archiveTradeList(@NonNull String market, @NonNull SlNode first, long modified)
+    public void archiveTradeList(@NonNull String market, @NonNull JslNode first, long modified)
             throws NotFoundException {
     }
 
     @Override
-    public void archiveTradeList(@NonNull SlNode first, long modified) throws NotFoundException {
+    public void archiveTradeList(@NonNull JslNode first, long modified) throws NotFoundException {
     }
 }

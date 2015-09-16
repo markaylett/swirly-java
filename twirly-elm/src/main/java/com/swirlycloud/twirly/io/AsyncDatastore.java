@@ -23,6 +23,7 @@ import com.swirlycloud.twirly.exception.UncheckedExecutionException;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class AsyncDatastore implements Datastore {
@@ -265,7 +266,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertExecList(final @NonNull String market, final @NonNull SlNode first)
+    public final void insertExecList(final @NonNull String market, final @NonNull JslNode first)
             throws NotFoundException {
         service.submit(new Runnable() {
             @Override
@@ -280,7 +281,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertExecList(final @NonNull SlNode first) throws NotFoundException {
+    public final void insertExecList(final @NonNull JslNode first) throws NotFoundException {
         service.submit(new Runnable() {
             @Override
             public final void run() {
@@ -309,7 +310,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void archiveOrderList(@NonNull final String market, @NonNull final SlNode first,
+    public final void archiveOrderList(@NonNull final String market, @NonNull final JslNode first,
             final long modified) throws NotFoundException {
         service.submit(new Runnable() {
             @Override
@@ -324,7 +325,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void archiveOrderList(@NonNull final SlNode first, final long modified)
+    public final void archiveOrderList(@NonNull final JslNode first, final long modified)
             throws NotFoundException {
         service.submit(new Runnable() {
             @Override
@@ -354,7 +355,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void archiveTradeList(@NonNull final String market, @NonNull final SlNode first,
+    public final void archiveTradeList(@NonNull final String market, @NonNull final JslNode first,
             final long modified) throws NotFoundException {
         service.submit(new Runnable() {
             @Override
@@ -369,7 +370,7 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void archiveTradeList(@NonNull final SlNode first, final long modified)
+    public final void archiveTradeList(@NonNull final JslNode first, final long modified)
             throws NotFoundException {
         service.submit(new Runnable() {
             @Override

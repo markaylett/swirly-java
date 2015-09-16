@@ -39,6 +39,8 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
     private transient DlNode dlNext = DlUtil.NULL;
 
     private transient @Nullable SlNode slNext;
+    // Singly-linked node for RefHashTable.
+    private transient @Nullable Order refNext;
 
     // Internals.
     transient @Nullable RbNode level;
@@ -352,6 +354,14 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
     @Override
     public final @Nullable SlNode slNext() {
         return slNext;
+    }
+
+    public final void setRefNext(@Nullable Order next) {
+        this.refNext = next;
+    }
+
+    public final @Nullable Order refNext() {
+        return refNext;
     }
 
     final void place(long now) {

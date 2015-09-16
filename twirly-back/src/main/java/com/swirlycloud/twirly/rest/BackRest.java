@@ -32,8 +32,8 @@ import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.rec.Contr;
 import com.swirlycloud.twirly.rec.Market;
 import com.swirlycloud.twirly.rec.Rec;
@@ -398,7 +398,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void deleteOrder(String trader, String market, SlNode first, long now)
+    public final void deleteOrder(String trader, String market, JslNode first, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
@@ -458,7 +458,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void deleteTrade(String trader, String market, SlNode first, long now)
+    public final void deleteTrade(String trader, String market, JslNode first, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();

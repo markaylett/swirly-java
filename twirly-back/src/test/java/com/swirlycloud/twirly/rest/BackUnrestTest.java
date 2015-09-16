@@ -43,7 +43,7 @@ import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.mock.MockTrader;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.rec.Asset;
 import com.swirlycloud.twirly.rec.Contr;
 import com.swirlycloud.twirly.rec.Market;
@@ -258,7 +258,7 @@ public final class BackUnrestTest {
     }
 
     @SuppressWarnings("unused")
-    private final void deleteOrder(@NonNull String market, @NonNull SlNode first)
+    private final void deleteOrder(@NonNull String market, @NonNull JslNode first)
             throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
         unrest.deleteOrder(TRADER, market, first, NOW);
     }
@@ -281,7 +281,7 @@ public final class BackUnrestTest {
 
     @SuppressWarnings("unused")
     private final void deleteTrade(@NonNull String mnem, @NonNull String market,
-            @NonNull SlNode first) throws BadRequestException, NotFoundException,
+            @NonNull JslNode first) throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
         unrest.deleteTrade(mnem, market, first, NOW);
     }

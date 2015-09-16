@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
-import static com.swirlycloud.twirly.node.SlUtil.popNext;
+import static com.swirlycloud.twirly.node.JslUtil.popNext;
 import static com.swirlycloud.twirly.util.NullUtil.nullIfZero;
 
 import java.util.ConcurrentModificationException;
@@ -24,7 +24,7 @@ import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 
 public final class AppEngineDatastore extends AppEngineModel implements Datastore {
 
@@ -297,16 +297,16 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExecList(@NonNull String marketMnem, @NonNull SlNode first)
+    public final void insertExecList(@NonNull String marketMnem, @NonNull JslNode first)
             throws NotFoundException {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             insertExec((Exec) first);
             return;
         }
 
-        SlNode node = first;
+        JslNode node = first;
         try {
             // N.B. the approach I used previously on a traditional RDMS was quite different, in
             // that order revisions were managed as triggers on the exec table.
@@ -360,9 +360,9 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExecList(@NonNull SlNode first) throws NotFoundException {
+    public final void insertExecList(@NonNull JslNode first) throws NotFoundException {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             insertExec((Exec) first);
             return;
@@ -370,8 +370,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
 
         // Partition nodes by market.
 
-        final HashMap<String, SlNode> map;
-        SlNode node = first;
+        final HashMap<String, JslNode> map;
+        JslNode node = first;
         try {
             map = new HashMap<>();
             do {
@@ -379,7 +379,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
                 node = popNext(node);
 
                 final String market = exec.getMarket();
-                exec.setSlNext(map.get(market));
+                exec.setJslNext(map.get(market));
                 map.put(market, exec);
             } while (node != null);
         } finally {
@@ -391,9 +391,9 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
 
         // Execution transaction for each market.
 
-        for (final Entry<String, SlNode> entry : map.entrySet()) {
+        for (final Entry<String, JslNode> entry : map.entrySet()) {
             final String key = entry.getKey();
-            final SlNode value = entry.getValue();
+            final JslNode value = entry.getValue();
             assert key != null;
             assert value != null;
             insertExecList(key, value);
@@ -422,23 +422,23 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void archiveOrderList(@NonNull String marketMnem, @NonNull SlNode first,
+    public final void archiveOrderList(@NonNull String marketMnem, @NonNull JslNode first,
             long modified) throws NotFoundException {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             final MarketId mid = (MarketId) first;
             archiveOrder(marketMnem, mid.getId(), modified);
             return;
         }
 
-        SlNode node = first;
+        JslNode node = first;
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, marketMnem);
             do {
                 final MarketId mid = (MarketId) node;
-                node = node.slNext();
+                node = node.jslNext();
 
                 assert marketMnem.equals(mid.getMarket());
                 final Entity entity = getOrder(txn, market.getKey(), mid.getId());
@@ -458,10 +458,10 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void archiveOrderList(@NonNull SlNode first, long modified)
+    public final void archiveOrderList(@NonNull JslNode first, long modified)
             throws NotFoundException {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             final MarketId mid = (MarketId) first;
             archiveOrder(mid.getMarket(), mid.getId(), modified);
@@ -470,22 +470,22 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
 
         // Partition nodes by market.
 
-        final HashMap<String, SlNode> map = new HashMap<>();
-        SlNode node = first;
+        final HashMap<String, JslNode> map = new HashMap<>();
+        JslNode node = first;
         do {
             final MarketId mid = (MarketId) node;
-            node = node.slNext();
+            node = node.jslNext();
 
             final String market = mid.getMarket();
-            mid.setSlNext(map.get(market));
+            mid.setJslNext(map.get(market));
             map.put(market, mid);
         } while (node != null);
 
         // Execution transaction for each market.
 
-        for (final Entry<String, SlNode> entry : map.entrySet()) {
+        for (final Entry<String, JslNode> entry : map.entrySet()) {
             final String key = entry.getKey();
-            final SlNode value = entry.getValue();
+            final JslNode value = entry.getValue();
             assert key != null;
             assert value != null;
             archiveOrderList(key, value, modified);
@@ -514,23 +514,23 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void archiveTradeList(@NonNull String marketMnem, @NonNull SlNode first,
+    public final void archiveTradeList(@NonNull String marketMnem, @NonNull JslNode first,
             long modified) throws NotFoundException {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             final MarketId mid = (MarketId) first;
             archiveTrade(marketMnem, mid.getId(), modified);
             return;
         }
 
-        SlNode node = first;
+        JslNode node = first;
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, marketMnem);
             do {
                 final MarketId mid = (MarketId) node;
-                node = node.slNext();
+                node = node.jslNext();
 
                 assert marketMnem.equals(mid.getMarket());
                 final Entity entity = getExec(txn, market.getKey(), mid.getId());
@@ -550,10 +550,10 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void archiveTradeList(@NonNull SlNode first, long modified)
+    public final void archiveTradeList(@NonNull JslNode first, long modified)
             throws NotFoundException {
 
-        if (first.slNext() == null) {
+        if (first.jslNext() == null) {
             // Singleton list.
             final MarketId mid = (MarketId) first;
             archiveTrade(mid.getMarket(), mid.getId(), modified);
@@ -562,22 +562,22 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
 
         // Partition nodes by market.
 
-        final HashMap<String, SlNode> map = new HashMap<>();
-        SlNode node = first;
+        final HashMap<String, JslNode> map = new HashMap<>();
+        JslNode node = first;
         do {
             final MarketId mid = (MarketId) node;
-            node = node.slNext();
+            node = node.jslNext();
 
             final String market = mid.getMarket();
-            mid.setSlNext(map.get(market));
+            mid.setJslNext(map.get(market));
             map.put(market, mid);
         } while (node != null);
 
         // Execution transaction for each market.
 
-        for (final Entry<String, SlNode> entry : map.entrySet()) {
+        for (final Entry<String, JslNode> entry : map.entrySet()) {
             final String key = entry.getKey();
-            final SlNode value = entry.getValue();
+            final JslNode value = entry.getValue();
             assert key != null;
             assert value != null;
             archiveTradeList(key, value, modified);

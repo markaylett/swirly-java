@@ -8,7 +8,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 
 /**
  * Transaction journal.
@@ -29,42 +29,80 @@ public interface Journ extends AutoCloseable {
 
     void insertExec(@NonNull Exec exec) throws NotFoundException;
 
-    void insertExecList(@NonNull String market, @NonNull SlNode first) throws NotFoundException;
-
     /**
-     * This overload may be less efficient than the ones that are market-specific.
+     * Archive list of executions. The list may be modified asynchronously by this operation.
      * 
+     * @param market
+     *            The market.
      * @param first
-     *            The first exec.
+     *            The first execution.
      * @throws NotFoundException
      */
-    void insertExecList(@NonNull SlNode first) throws NotFoundException;
+    void insertExecList(@NonNull String market, @NonNull JslNode first) throws NotFoundException;
+
+    /**
+     * This overload may be less efficient than the ones that are market-specific. The list may be
+     * modified asynchronously by this operation.
+     * 
+     * @param first
+     *            The first execution.
+     * @throws NotFoundException
+     */
+    void insertExecList(@NonNull JslNode first) throws NotFoundException;
 
     void archiveOrder(@NonNull String market, long id, long modified) throws NotFoundException;
 
-    void archiveOrderList(@NonNull String market, @NonNull SlNode first, long modified)
+    /**
+     * Archive list of orders. The list must not be modified by this operation.
+     * 
+     * @param market
+     *            The market.
+     * @param first
+     *            The first market-id.
+     * @param modified
+     *            The modification time.
+     * @throws NotFoundException
+     */
+    void archiveOrderList(@NonNull String market, @NonNull JslNode first, long modified)
             throws NotFoundException;
 
     /**
-     * This overload may be less efficient than the ones that are market-specific.
+     * This overload may be less efficient than the ones that are market-specific. The list must not
+     * be modified by this operation.
      * 
      * @param first
-     *            The first id-node.
+     *            The first market-id node.
+     * @param modified
+     *            The modification time.
      * @throws NotFoundException
      */
-    void archiveOrderList(@NonNull SlNode first, long modified) throws NotFoundException;
+    void archiveOrderList(@NonNull JslNode first, long modified) throws NotFoundException;
 
     void archiveTrade(@NonNull String market, long id, long modified) throws NotFoundException;
 
-    void archiveTradeList(@NonNull String market, @NonNull SlNode first, long modified)
+    /**
+     * Archive list of trades. The list must not be modified by this operation.
+     * 
+     * @param market
+     *            The market.
+     * @param first
+     *            The first market-id node.
+     * @param modified
+     *            The modification time.
+     * @throws NotFoundException
+     */
+    void archiveTradeList(@NonNull String market, @NonNull JslNode first, long modified)
             throws NotFoundException;
 
     /**
-     * This overload may be less efficient than the ones that are market-specific.
+     * This overload may be less efficient than the ones that are market-specific. The list must not
+     * be modified by this operation.
      * 
      * @param first
-     *            The first id-node.
+     *            The first market-id node.
+     * @param modified
+     *            The modification time.
      * @throws NotFoundException
      */
-    void archiveTradeList(@NonNull SlNode first, long modified) throws NotFoundException;
+    void archiveTradeList(@NonNull JslNode first, long modified) throws NotFoundException;
 }
