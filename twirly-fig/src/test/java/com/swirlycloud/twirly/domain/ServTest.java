@@ -277,7 +277,7 @@ public final class ServTest {
 
         try (final Trans trans = new Trans()) {
             serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, trans);
-            final Order order = trans.getOrder();
+            final Order order = (Order) trans.getFirstOrder();
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());
@@ -307,7 +307,7 @@ public final class ServTest {
 
         try (final Trans trans = new Trans()) {
             serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, trans);
-            final Order order = trans.getOrder();
+            final Order order = (Order) trans.getFirstOrder();
             serv.reviseOrder(sess, book, order, 4, NOW + 1, trans);
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());
@@ -338,7 +338,7 @@ public final class ServTest {
 
         try (final Trans trans = new Trans()) {
             serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, trans);
-            final Order order = trans.getOrder();
+            final Order order = (Order) trans.getFirstOrder();
             serv.cancelOrder(sess, book, order, NOW + 1, trans);
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());

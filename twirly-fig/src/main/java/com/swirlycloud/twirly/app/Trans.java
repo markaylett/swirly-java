@@ -3,8 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import static com.swirlycloud.twirly.node.SlUtil.popNext;
-
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -22,8 +20,9 @@ import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
 public final class Trans implements AutoCloseable, Jsonifiable {
+    private String trader;
     private MarketBook book;
-    private Order order;
+    final SlQueue orders = new SlQueue();
     final SlQueue matches = new SlQueue();
     /**
      * All executions referenced in matches.
@@ -34,15 +33,13 @@ public final class Trans implements AutoCloseable, Jsonifiable {
      */
     Posn posn;
 
-    final void reset(MarketBook book, Order order, Exec exec) {
-        assert book != null;
-        assert order != null;
-        assert exec != null;
+    final void reset(@NonNull String trader, @NonNull MarketBook book, @NonNull Order order,
+            @NonNull Exec exec) {
+        this.trader = trader;
         this.book = book;
-        this.order = order;
         clear();
+        orders.insertBack(order);
         execs.insertBack(exec);
-        posn = null;
     }
 
     /**
@@ -73,12 +70,14 @@ public final class Trans implements AutoCloseable, Jsonifiable {
 
     @Override
     public final void toJson(@Nullable Params params, @NonNull Appendable out) throws IOException {
-        final String trader = order.getTrader();
         out.append("{\"view\":");
         book.toJsonView(params, out);
         // Multiple orders may be updated if one trades with one's self.
         out.append(",\"orders\":[");
-        order.toJson(params, out);
+        for (SlNode node = orders.getFirst(); node != null; node = node.slNext()) {
+            final Order order = (Order) node;
+            order.toJson(params, out);
+        }
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             if (!match.makerOrder.getTrader().equals(trader)) {
@@ -110,20 +109,22 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     }
 
     public final void clear() {
-        SlNode node = execs.getFirst();
-        while (node != null) {
-            node = popNext(node);
-        }
+        orders.clearAll();
         matches.clear();
-        execs.clear();
+        execs.clearAll();
+        posn = null;
     }
 
-    public final Order getOrder() {
-        return order;
+    public final SlNode getFirstOrder() {
+        return orders.getFirst();
     }
 
     public final SlNode getFirstExec() {
         return execs.getFirst();
+    }
+
+    public final boolean isEmptyOrder() {
+        return orders.isEmpty();
     }
 
     public final boolean isEmptyExec() {

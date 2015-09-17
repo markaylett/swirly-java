@@ -750,7 +750,7 @@ public @NonNullByDefault class Serv {
                 minLots, now);
         final Exec exec = newExec(book, order, now);
 
-        trans.reset(book, order, exec);
+        trans.reset(sess.getMnem(), book, order, exec);
         // Order fields are updated on match.
         matchOrders(sess, book, order, trans);
         // Place incomplete order in market.
@@ -813,7 +813,7 @@ public @NonNullByDefault class Serv {
         setDirty(sess, TraderSess.DIRTY_ORDER);
 
         book.reviseOrder(order, lots, now);
-        trans.reset(book, order, exec);
+        trans.reset(sess.getMnem(), book, order, exec);
 
         updateDirty();
     }
@@ -857,7 +857,7 @@ public @NonNullByDefault class Serv {
         setDirty(sess, TraderSess.DIRTY_ORDER);
 
         book.cancelOrder(order, now);
-        trans.reset(book, order, exec);
+        trans.reset(sess.getMnem(), book, order, exec);
 
         updateDirty();
     }
