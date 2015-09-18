@@ -59,7 +59,6 @@ public final class BackUnrestTest {
 
     private static final @NonNull Factory FACTORY = new BasicFactory();
 
-    private static final @NonNull String TRADER = "MARAYL";
     private static final int TODAY = ymdToJd(2014, 2, 11);
     private static final int SETTL_DAY = TODAY + 2;
     private static final int EXPIRY_DAY = TODAY + 1;
@@ -168,10 +167,11 @@ public final class BackUnrestTest {
         assertEquals(0, actual.getLastTime());
     }
 
-    private static void assertOrder(String market, State state, Side side, long ticks, long lots,
-            long resd, long exec, long cost, long lastTicks, long lastLots, Order actual) {
+    private static void assertOrder(String trader, String market, State state, Side side,
+            long ticks, long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
+            Order actual) {
         assertNotNull(actual);
-        assertEquals(TRADER, actual.getTrader());
+        assertEquals(trader, actual.getTrader());
         assertEquals(market, actual.getMarket());
         assertNull(actual.getRef());
         assertEquals(state, actual.getState());
@@ -188,11 +188,11 @@ public final class BackUnrestTest {
         assertEquals(NOW, actual.getModified());
     }
 
-    private static void assertExec(String market, State state, Side side, long ticks, long lots,
-            long resd, long exec, long cost, long lastTicks, long lastLots, String contr,
-            int settlDay, Role role, Exec actual) {
+    private static void assertExec(String trader, String market, State state, Side side,
+            long ticks, long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
+            String contr, int settlDay, Role role, String cpty, Exec actual) {
         assertNotNull(actual);
-        assertEquals(TRADER, actual.getTrader());
+        assertEquals(trader, actual.getTrader());
         assertEquals(market, actual.getMarket());
         assertNull(actual.getRef());
         assertEquals(state, actual.getState());
@@ -208,14 +208,14 @@ public final class BackUnrestTest {
         assertEquals(contr, actual.getContr());
         assertEquals(settlDay, actual.getSettlDay());
         assertEquals(role, actual.getRole());
-        assertEquals(TRADER, actual.getCpty());
+        assertEquals(cpty, actual.getCpty());
         assertEquals(NOW, actual.getCreated());
     }
 
-    private static void assertPosn(String market, String contr, int settlDay, long buyCost,
-            long buyLots, long sellCost, long sellLots, Posn actual) {
+    private static void assertPosn(String trader, String market, String contr, int settlDay,
+            long buyCost, long buyLots, long sellCost, long sellLots, Posn actual) {
         assertNotNull(actual);
-        assertEquals(TRADER, actual.getTrader());
+        assertEquals(trader, actual.getTrader());
         assertEquals(contr, actual.getContr());
         assertEquals(settlDay, actual.getSettlDay());
         assertEquals(buyCost, actual.getBuyCost());
@@ -247,37 +247,41 @@ public final class BackUnrestTest {
                 maybeJdToIso(expiryDay), state, PARAMS_NONE, NOW);
     }
 
-    private final Market putMarket(@NonNull String mnem, String display, int state)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+    private final Market putMarket(@NonNull String trader, @NonNull String mnem, String display,
+            int state) throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         return unrest.putMarket(mnem, display, state, PARAMS_NONE, NOW);
     }
 
-    private final void deleteOrder(@NonNull String market, long id) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException, IOException {
-        unrest.deleteOrder(TRADER, market, id, NOW);
+    private final void deleteOrder(@NonNull String trader, @NonNull String market, long id)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+        unrest.deleteOrder(trader, market, id, NOW);
     }
 
     @SuppressWarnings("unused")
-    private final void deleteOrder(@NonNull String market, @NonNull JslNode first)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        unrest.deleteOrder(TRADER, market, first, NOW);
+    private final void deleteOrder(@NonNull String trader, @NonNull String market,
+            @NonNull JslNode first) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        unrest.deleteOrder(trader, market, first, NOW);
     }
 
-    private final TransStruct postOrder(@NonNull String market, @NonNull Side side, long ticks,
+    private final TransStruct postOrder(@NonNull String trader, @NonNull String market,
+            @NonNull Side side, long ticks, long lots) throws BadRequestException,
+            NotFoundException, ServiceUnavailableException, IOException {
+        return unrest.postOrder(trader, market, null, side, ticks, lots, 1, PARAMS_NONE, NOW);
+    }
+
+    private final TransStruct putOrder(@NonNull String trader, @NonNull String market, long id,
             long lots) throws BadRequestException, NotFoundException, ServiceUnavailableException,
             IOException {
-        return unrest.postOrder(TRADER, market, null, side, ticks, lots, 1, PARAMS_NONE, NOW);
-    }
-
-    private final TransStruct putOrder(@NonNull String market, long id, long lots)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        return unrest.putOrder(TRADER, market, id, lots, PARAMS_NONE, NOW);
+        return unrest.putOrder(trader, market, id, lots, PARAMS_NONE, NOW);
     }
 
     @SuppressWarnings("unused")
-    private final TransStruct putOrder(@NonNull String market, @NonNull JslNode first, long lots)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
-        return unrest.putOrder(TRADER, market, first, lots, PARAMS_NONE, NOW);
+    private final TransStruct putOrder(@NonNull String trader, @NonNull String market,
+            @NonNull JslNode first, long lots) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        return unrest.putOrder(trader, market, first, lots, PARAMS_NONE, NOW);
     }
 
     private final void deleteTrade(@NonNull String mnem, @NonNull String market, long id)
@@ -393,8 +397,8 @@ public final class BackUnrestTest {
         } catch (final NotFoundException e) {
         }
 
-        final Trader trader = (Trader) unrest.getRec(RecType.TRADER, TRADER, PARAMS_NONE, NOW);
-        assertTrader(TRADER, trader);
+        final Trader trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL", PARAMS_NONE, NOW);
+        assertTrader("MARAYL", trader);
         try {
             unrest.getRec(RecType.TRADER, "MARAYLx", PARAMS_NONE, NOW);
             fail("Expected exception");
@@ -445,48 +449,50 @@ public final class BackUnrestTest {
     @Test
     public final void testGetSess() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
-        final SessStruct out = unrest.getSess(TRADER, PARAMS_NONE, NOW);
-        assertOrder("EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                out.orders.get(Long.valueOf(1)));
-        assertOrder("EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                out.orders.get(Long.valueOf(2)));
-        assertExec("EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.MAKER, out.trades.get(Long.valueOf(3)));
-        assertExec("EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.TAKER, out.trades.get(Long.valueOf(4)));
-        assertPosn("EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        final SessStruct out = unrest.getSess("MARAYL", PARAMS_NONE, NOW);
+        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
+                12345, 10, out.orders.get(Long.valueOf(1)));
+        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
+                12345, 10, out.orders.get(Long.valueOf(2)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL",
+                out.trades.get(Long.valueOf(3)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL",
+                out.trades.get(Long.valueOf(4)));
+        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
                 out.posns.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
     @Test
     public final void testGetOrder() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        final Map<Long, Order> out = unrest.getOrder(TRADER, PARAMS_NONE, NOW);
-        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        final Map<Long, Order> out = unrest.getOrder("MARAYL", PARAMS_NONE, NOW);
+        assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
                 out.get(Long.valueOf(1)));
     }
 
     @Test
     public final void testGetOrderMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        final Map<Long, Order> out = unrest.getOrder(TRADER, "EURUSD.MAR14", PARAMS_NONE, NOW);
-        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        final Map<Long, Order> out = unrest.getOrder("MARAYL", "EURUSD.MAR14", PARAMS_NONE, NOW);
+        assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
                 out.get(Long.valueOf(1)));
-        assertTrue(unrest.getOrder(TRADER, "USDJPY.MAR14", PARAMS_NONE, NOW).isEmpty());
+        assertTrue(unrest.getOrder("MARAYL", "USDJPY.MAR14", PARAMS_NONE, NOW).isEmpty());
     }
 
     @Test
     public final void testGetOrderMarketId() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        final Order out = unrest.getOrder(TRADER, "EURUSD.MAR14", 1, PARAMS_NONE, NOW);
-        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0, out);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        final Order out = unrest.getOrder("MARAYL", "EURUSD.MAR14", 1, PARAMS_NONE, NOW);
+        assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0, out);
         try {
-            unrest.getOrder(TRADER, "EURUSD.MAR14", 2, PARAMS_NONE, NOW);
+            unrest.getOrder("MARAYL", "EURUSD.MAR14", 2, PARAMS_NONE, NOW);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -495,45 +501,45 @@ public final class BackUnrestTest {
     @Test
     public final void testGetTrade() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
-        final Map<Long, Exec> out = unrest.getTrade(TRADER, PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.MAKER, out.get(Long.valueOf(3)));
-        assertExec("EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.TAKER, out.get(Long.valueOf(4)));
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        final Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
     }
 
     @Test
     public final void testGetTradeMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
-        final Map<Long, Exec> out = unrest.getTrade(TRADER, "EURUSD.MAR14", PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.MAKER, out.get(Long.valueOf(3)));
-        assertExec("EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.TAKER, out.get(Long.valueOf(4)));
-        assertTrue(unrest.getTrade(TRADER, "USDJPY.MAR14", PARAMS_NONE, NOW).isEmpty());
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        final Map<Long, Exec> out = unrest.getTrade("MARAYL", "EURUSD.MAR14", PARAMS_NONE, NOW);
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
+        assertTrue(unrest.getTrade("MARAYL", "USDJPY.MAR14", PARAMS_NONE, NOW).isEmpty());
     }
 
     @Test
     public final void testGetTradeMarketId() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
-        final Map<Long, Exec> out = unrest.getTrade(TRADER, "EURUSD.MAR14", PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.MAKER, out.get(Long.valueOf(3)));
-        assertExec("EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.TAKER, out.get(Long.valueOf(4)));
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        final Map<Long, Exec> out = unrest.getTrade("MARAYL", "EURUSD.MAR14", PARAMS_NONE, NOW);
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
         try {
-            unrest.getOrder(TRADER, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
+            unrest.getOrder("MARAYL", "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
         try {
-            unrest.getOrder(TRADER, "EURUSD.MAR14", 4, PARAMS_NONE, NOW);
+            unrest.getOrder("MARAYL", "EURUSD.MAR14", 4, PARAMS_NONE, NOW);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -542,10 +548,10 @@ public final class BackUnrestTest {
     @Test
     public final void testGetPosn() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
-        final Map<PosnKey, Posn> out = unrest.getPosn(TRADER, PARAMS_NONE, NOW);
-        assertPosn("EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        final Map<PosnKey, Posn> out = unrest.getPosn("MARAYL", PARAMS_NONE, NOW);
+        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
                 out.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
@@ -558,12 +564,12 @@ public final class BackUnrestTest {
     @Test
     public final void testGetPosnContrSettlDay() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
-        final Posn posn = unrest.getPosn(TRADER, "EURUSD", SETTL_DAY, PARAMS_NONE, NOW);
-        assertPosn("EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10, posn);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        final Posn posn = unrest.getPosn("MARAYL", "EURUSD", SETTL_DAY, PARAMS_NONE, NOW);
+        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10, posn);
         try {
-            unrest.getPosn(TRADER, "USDJPY", SETTL_DAY, PARAMS_NONE, NOW);
+            unrest.getPosn("MARAYL", "USDJPY", SETTL_DAY, PARAMS_NONE, NOW);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -584,7 +590,7 @@ public final class BackUnrestTest {
 
         // Duplicate mnemonic.
         try {
-            postTrader(TRADER, "Mark Aylett", "mark.aylett@swirlycloud.com");
+            postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com");
             fail("Expected exception");
         } catch (final BadRequestException e) {
         }
@@ -634,7 +640,7 @@ public final class BackUnrestTest {
             ServiceUnavailableException, IOException {
         Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
                 EXPIRY_DAY, 0x1);
-        market = putMarket("GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
+        market = putMarket("MARAYL", "GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
                 market);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
@@ -644,17 +650,17 @@ public final class BackUnrestTest {
     @Test
     public final void testDeleteOrder() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        putOrder("EURUSD.MAR14", 1, 0);
-        assertNotNull(unrest.getOrder(TRADER, "EURUSD.MAR14", 1, PARAMS_NONE, NOW));
-        deleteOrder("EURUSD.MAR14", 1);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        putOrder("MARAYL", "EURUSD.MAR14", 1, 0);
+        assertNotNull(unrest.getOrder("MARAYL", "EURUSD.MAR14", 1, PARAMS_NONE, NOW));
+        deleteOrder("MARAYL", "EURUSD.MAR14", 1);
         try {
-            unrest.getOrder(TRADER, "EURUSD.MAR14", 1, PARAMS_NONE, NOW);
+            unrest.getOrder("MARAYL", "EURUSD.MAR14", 1, PARAMS_NONE, NOW);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
         try {
-            deleteOrder("EURUSD.MAR14", 1);
+            deleteOrder("MARAYL", "EURUSD.MAR14", 1);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -669,19 +675,19 @@ public final class BackUnrestTest {
     @Test
     public final void testPostOrder() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        final TransStruct out = postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
+        final TransStruct out = postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
     }
 
     @Test
     public final void testPutOrder() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        TransStruct out = postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        assertOrder("EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
+        TransStruct out = postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 12345, 10, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
-        out = putOrder("EURUSD.MAR14", 1, 5);
-        assertOrder("EURUSD.MAR14", State.REVISE, Side.SELL, 12345, 5, 5, 0, 0, 0, 0,
+        out = putOrder("MARAYL", "EURUSD.MAR14", 1, 5);
+        assertOrder("MARAYL", "EURUSD.MAR14", State.REVISE, Side.SELL, 12345, 5, 5, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
     }
 
@@ -693,14 +699,14 @@ public final class BackUnrestTest {
     @Test
     public final void testDeleteTrade() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("EURUSD.MAR14", Side.BUY, 12345, 10);
-        final Exec trade = unrest.getTrade(TRADER, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.MAKER, trade);
-        deleteTrade(TRADER, "EURUSD.MAR14", 3);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        final Exec trade = unrest.getTrade("MARAYL", "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", trade);
+        deleteTrade("MARAYL", "EURUSD.MAR14", 3);
         try {
-            unrest.getTrade(TRADER, "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
+            unrest.getTrade("MARAYL", "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -715,10 +721,10 @@ public final class BackUnrestTest {
     @Test
     public final void testPostTrade() throws NotFoundException, ServiceUnavailableException,
             IOException {
-        final Exec exec = unrest.postTrade(TRADER, "EURUSD.MAR14", "", Side.BUY, 12345, 10,
-                Role.MAKER, TRADER, PARAMS_NONE, NOW);
-        assertExec("EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345, 10,
-                "EURUSD", SETTL_DAY, Role.MAKER, exec);
+        final Exec exec = unrest.postTrade("MARAYL", "EURUSD.MAR14", "", Side.BUY, 12345, 10,
+                Role.MAKER, "MARAYL", PARAMS_NONE, NOW);
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
+                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", exec);
     }
 
     @Ignore("not implemented")
