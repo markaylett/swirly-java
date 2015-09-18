@@ -561,15 +561,17 @@ public final @NonNullByDefault class BackUnrest {
         return out;
     }
 
-    public final Posn getPosn(String trader, String contr, Params params, long now)
+    public final Map<PosnKey, Posn> getPosn(String trader, String contr, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getPosn(trader, contr, params, now, sb);
 
+        final Map<PosnKey, Posn> out = new HashMap<>();
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return Posn.parse(p);
+            parseStartArray(p);
+            parsePosns(p, out);
         }
+        return out;
     }
 
     public final Posn getPosn(String trader, String contr, int settlDay, Params params, long now)

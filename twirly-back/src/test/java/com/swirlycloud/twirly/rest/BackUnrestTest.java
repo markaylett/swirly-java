@@ -306,6 +306,7 @@ public final class BackUnrestTest {
         boolean success = false;
         try {
             postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
+            postMarket("USDJPY.MAR14", "USDJPY March 14", "USDJPY", SETTL_DAY, EXPIRY_DAY, 0x1);
             success = true;
         } finally {
             if (!success) {
@@ -322,10 +323,14 @@ public final class BackUnrestTest {
         unrest = null;
     }
 
-    @Ignore("not implemented")
     @Test
     public final void testFindTraderByEmail() {
-        // FIXME
+
+        String trader = unrest.findTraderByEmail("mark.aylett@gmail.com");
+        assertEquals("MARAYL", trader);
+
+        trader = unrest.findTraderByEmail("mark.aylett@gmail.comx");
+        assertNull(trader);
     }
 
     @Test
@@ -335,18 +340,22 @@ public final class BackUnrestTest {
         RecStruct st = unrest.getRec(true, PARAMS_NONE, NOW);
         assertAssets(st.assets);
         assertContrs(st.contrs);
-        assertEquals(1, st.markets.size());
+        assertEquals(2, st.markets.size());
         assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 st.markets.get("EURUSD.MAR14"));
+        assertMarket("USDJPY.MAR14", "USDJPY March 14", "USDJPY", SETTL_DAY, EXPIRY_DAY, 0x1,
+                st.markets.get("USDJPY.MAR14"));
         assertTraders(st.traders);
 
         // Without traders.
         st = unrest.getRec(false, PARAMS_NONE, NOW);
         assertAssets(st.assets);
         assertContrs(st.contrs);
-        assertEquals(1, st.markets.size());
+        assertEquals(2, st.markets.size());
         assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 st.markets.get("EURUSD.MAR14"));
+        assertMarket("USDJPY.MAR14", "USDJPY March 14", "USDJPY", SETTL_DAY, EXPIRY_DAY, 0x1,
+                st.markets.get("USDJPY.MAR14"));
         assertTrue(st.traders.isEmpty());
     }
 
@@ -360,9 +369,11 @@ public final class BackUnrestTest {
         assertContrs(recs);
 
         recs = unrest.getRec(RecType.MARKET, PARAMS_NONE, NOW);
-        assertEquals(1, recs.size());
+        assertEquals(2, recs.size());
         assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 (Market) recs.get("EURUSD.MAR14"));
+        assertMarket("USDJPY.MAR14", "USDJPY March 14", "USDJPY", SETTL_DAY, EXPIRY_DAY, 0x1,
+                (Market) recs.get("USDJPY.MAR14"));
 
         recs = unrest.getRec(RecType.TRADER, PARAMS_NONE, NOW);
         assertTraders(recs);
@@ -413,9 +424,11 @@ public final class BackUnrestTest {
 
         Map<String, MarketView> views = unrest.getView(PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
-            assertEquals(1, views.size());
-            final MarketView view = views.get("EURUSD.MAR14");
+            assertEquals(2, views.size());
+            MarketView view = views.get("EURUSD.MAR14");
             assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, view);
+            view = views.get("USDJPY.MAR14");
+            assertView("USDJPY.MAR14", "USDJPY", SETTL_DAY, view);
             // Use now beyond expiry.
             now = jdToMillis(EXPIRY_DAY + 1);
             views = unrest.getView(PARAMS_EXPIRED, now);
@@ -432,7 +445,7 @@ public final class BackUnrestTest {
         long now = NOW;
 
         try {
-            unrest.getView("USDJPY.MAR14", PARAMS_NONE, now);
+            unrest.getView("USDCHF.MAR14", PARAMS_NONE, now);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -550,15 +563,27 @@ public final class BackUnrestTest {
             ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
         postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "USDJPY.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "USDJPY.MAR14", Side.BUY, 12345, 10);
         final Map<PosnKey, Posn> out = unrest.getPosn("MARAYL", PARAMS_NONE, NOW);
+        assertEquals(out.size(), 2);
         assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
                 out.get(new PosnKey("EURUSD", SETTL_DAY)));
+        assertPosn("MARAYL", "USDJPY.MAR14", "USDJPY", SETTL_DAY, 123450, 10, 123450, 10,
+                out.get(new PosnKey("USDJPY", SETTL_DAY)));
     }
 
-    @Ignore("not implemented")
     @Test
-    public final void testGetPosnContr() {
-        // FIXME
+    public final void testGetPosnContr() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "USDJPY.MAR14", Side.SELL, 12345, 10);
+        postOrder("MARAYL", "USDJPY.MAR14", Side.BUY, 12345, 10);
+        final Map<PosnKey, Posn> out = unrest.getPosn("MARAYL", "EURUSD", PARAMS_NONE, NOW);
+        assertEquals(out.size(), 1);
+        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
+                out.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
     @Test
