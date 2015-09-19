@@ -1,6 +1,6 @@
 <%-- -*- html -*- --%>
 <%--
-   Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+   Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
 --%>
 <%@ page contentType="text/html;charset=utf-8" language="java"%>
 <!DOCTYPE html>
@@ -24,8 +24,8 @@
             </div>
             <div class="col-sm-10">
               <h2>Swirly Cloud</h2>
-              <p>We aim to build an Internet-scale trading application in the Cloud, where people
-              can trade on exciting new markets.</p>
+              <p>Our aim is to host an electronic order-book in the Cloud, where people can trade on
+              exciting new markets.</p>
               <p><a href="/page/trade" class="btn btn-primary btn-lg" role="button">Try the demo now &raquo;</a></p>
             </div>
           </div>

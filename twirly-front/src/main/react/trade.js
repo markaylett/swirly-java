@@ -160,11 +160,11 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('order-id not specified'));
             return;
         }
-        var key = market + '/' + zeroPad(id);
         $.ajax({
             type: 'delete',
-            url: '/back/sess/order/' + key
+            url: '/back/sess/order/' + market + '/' + id
         }).done(function(unused) {
+            var key = market + '/' + zeroPad(id);
             var done = this.staging.done;
             var sess = this.state.sess;
             done.delete(key);
@@ -190,11 +190,11 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('trade-id not specified'));
             return;
         }
-        var key = market + '/' + zeroPad(id);
         $.ajax({
             type: 'delete',
-            url: '/back/sess/trade/' + key
+            url: '/back/sess/trade/' + market + '/' + id
         }).done(function(unused) {
+            var key = market + '/' + zeroPad(id);
             var trades = this.staging.trades;
             var sess = this.state.sess;
             trades.delete(key);
@@ -446,6 +446,9 @@ var TradeModule = React.createClass({
                 error: parseError(xhr)
             });
         }.bind(this));
+        // App Engine work-around: this deliberate "ping" to the back-end ensures that it is alive
+        // and ready to service trade requests.
+        $.getJSON('/back/rec/asset/USD', function(asset) { });
     },
     // DOM Events.
     // Lifecycle.

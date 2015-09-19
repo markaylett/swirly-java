@@ -3,43 +3,69 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.mock;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 
 public class MockDatastore extends MockModel implements Datastore {
 
     @Override
-    public void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay, int state) {
+    public void insertMarket(@NonNull String mnem, @Nullable String display, @NonNull String contr,
+            int settlDay, int expiryDay, int state) {
     }
 
     @Override
-    public void updateMarket(String mnem, String display, int state) {
+    public void updateMarket(@NonNull String mnem, @Nullable String display, int state) {
     }
 
     @Override
-    public void insertTrader(String mnem, String display, String email) {
+    public void insertTrader(@NonNull String mnem, @Nullable String display, @NonNull String email) {
     }
 
     @Override
-    public void updateTrader(String mnem, String display) throws NotFoundException {
+    public void updateTrader(@NonNull String mnem, @Nullable String display)
+            throws NotFoundException {
     }
 
     @Override
-    public void insertExec(Exec exec) {
+    public void insertExec(@NonNull Exec exec) {
     }
 
     @Override
-    public void insertExecList(String market, SlNode first) {
+    public void insertExecList(@NonNull String market, @NonNull JslNode first) {
     }
 
     @Override
-    public void archiveOrder(String market, long id, long modified) {
+    public void insertExecList(@NonNull JslNode first) {
     }
 
     @Override
-    public void archiveTrade(String market, long id, long modified) {
+    public void archiveOrder(@NonNull String market, long id, long modified) {
+    }
+
+    @Override
+    public void archiveOrderList(@NonNull String market, @NonNull JslNode first, long modified)
+            throws NotFoundException {
+    }
+
+    @Override
+    public void archiveOrderList(@NonNull JslNode first, long modified) throws NotFoundException {
+    }
+
+    @Override
+    public void archiveTrade(@NonNull String market, long id, long modified) {
+    }
+
+    @Override
+    public void archiveTradeList(@NonNull String market, @NonNull JslNode first, long modified)
+            throws NotFoundException {
+    }
+
+    @Override
+    public void archiveTradeList(@NonNull JslNode first, long modified) throws NotFoundException {
     }
 }

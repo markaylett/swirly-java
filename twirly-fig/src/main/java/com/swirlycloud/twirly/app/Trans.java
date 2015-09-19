@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.app;
 
 import java.io.IOException;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
@@ -13,35 +13,37 @@ import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.intrusive.TransQueue;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.node.TransNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final class Trans implements AutoCloseable, Jsonifiable {
-    private MarketBook book;
-    private Order order;
+public final @NonNullByDefault class Trans implements AutoCloseable, Jsonifiable {
+    private @Nullable String trader;
+    private @Nullable MarketBook book;
+    final SlQueue orders = new SlQueue();
     final SlQueue matches = new SlQueue();
     /**
      * All executions referenced in matches.
      */
-    final TransQueue execs = new TransQueue();
+    final SlQueue execs = new SlQueue();
     /**
      * Optional taker position.
      */
+    @Nullable
     Posn posn;
 
-    final void reset(MarketBook book, Order order, Exec exec) {
-        assert book != null;
-        assert order != null;
-        assert exec != null;
+    final void reset(String trader, MarketBook book) {
+        this.trader = trader;
         this.book = book;
-        this.order = order;
         clear();
+    }
+
+    final void reset(String trader, MarketBook book, Order order, Exec exec) {
+        reset(trader, book);
+        orders.insertBack(order);
         execs.insertBack(exec);
-        posn = null;
     }
 
     /**
@@ -49,10 +51,13 @@ public final class Trans implements AutoCloseable, Jsonifiable {
      * 
      * @return the cloned slNode list.
      */
-    final SlNode prepareExecList() {
-        final TransNode first = execs.getFirst();
-        for (TransNode node = first; node != null;) {
-            node.setSlNext(node = node.transNext());
+    final @Nullable JslNode prepareExecList() {
+        final Exec first = (Exec) execs.getFirst();
+        Exec node = first;
+        while (node != null) {
+            Exec next = (Exec) node.slNext();
+            node.setJslNext(next);
+            node = next;
         }
         return first;
     }
@@ -68,13 +73,17 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     }
 
     @Override
-    public final void toJson(@Nullable Params params, @NonNull Appendable out) throws IOException {
-        final String trader = order.getTrader();
+    public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"view\":");
+        final MarketBook book = this.book;
+        assert book != null;
         book.toJsonView(params, out);
         // Multiple orders may be updated if one trades with one's self.
         out.append(",\"orders\":[");
-        order.toJson(params, out);
+        for (SlNode node = orders.getFirst(); node != null; node = node.slNext()) {
+            final Order order = (Order) node;
+            order.toJson(params, out);
+        }
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
             if (!match.makerOrder.getTrader().equals(trader)) {
@@ -85,7 +94,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
         }
         out.append("],\"execs\":[");
         int i = 0;
-        for (TransNode node = execs.getFirst(); node != null; node = node.transNext()) {
+        for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
             if (!exec.getTrader().equals(trader)) {
                 continue;
@@ -97,6 +106,7 @@ public final class Trans implements AutoCloseable, Jsonifiable {
             ++i;
         }
         out.append("],\"posn\":");
+        final Posn posn = this.posn;
         if (posn != null) {
             posn.toJson(params, out);
         } else {
@@ -106,29 +116,29 @@ public final class Trans implements AutoCloseable, Jsonifiable {
     }
 
     public final void clear() {
-        TransNode node = execs.getFirst();
-        while (node != null) {
-            final TransNode tmp = node;
-            node = node.transNext();
-            tmp.setTransNext(null);
-        }
+        orders.clearAll();
         matches.clear();
-        execs.clear();
+        execs.clearAll();
+        posn = null;
     }
 
-    public final Order getOrder() {
-        return order;
+    public final @Nullable SlNode getFirstOrder() {
+        return orders.getFirst();
     }
 
-    public final TransNode getFirstExec() {
+    public final @Nullable SlNode getFirstExec() {
         return execs.getFirst();
+    }
+
+    public final boolean isEmptyOrder() {
+        return orders.isEmpty();
     }
 
     public final boolean isEmptyExec() {
         return execs.isEmpty();
     }
 
-    public final Posn getPosn() {
+    public final @Nullable Posn getPosn() {
         return posn;
     }
 }

@@ -8,12 +8,14 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
+import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.node.JslNode;
 
 public final class Request {
 
-    public static final int ID = 1 << 0;
+    public static final int IDS = 1 << 0;
     public static final int MNEM = 1 << 1;
     public static final int DISPLAY = 1 << 2;
     public static final int EMAIL = 1 << 3;
@@ -32,7 +34,7 @@ public final class Request {
 
     private int fields;
 
-    private long id;
+    private MarketId ids;
     private String mnem;
     private String display;
     private String email;
@@ -49,9 +51,28 @@ public final class Request {
     private Role role;
     private String cpty;
 
+    private static MarketId parseArray(JsonParser p) throws IOException {
+        MarketId firstMid = null;
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_ARRAY:
+                return firstMid;
+            case VALUE_NUMBER:
+                final MarketId mid = new MarketId(p.getLong());
+                mid.setJslNext(firstMid);
+                firstMid = mid;
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of array not found");
+    }
+
     public final void clear() {
         fields = 0;
-        id = 0;
+        ids = null;
         mnem = null;
         display = null;
         email = null;
@@ -78,6 +99,14 @@ public final class Request {
                 break;
             case KEY_NAME:
                 name = p.getString();
+                break;
+            case START_ARRAY:
+                if ("ids".equals(name)) {
+                    fields |= IDS;
+                    ids = parseArray(p);
+                } else {
+                    throw new IOException(String.format("unexpected array field '%s'", name));
+                }
                 break;
             case VALUE_NULL:
                 if ("mnem".equals(name)) {
@@ -118,10 +147,7 @@ public final class Request {
                 }
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
-                    fields |= ID;
-                    id = p.getLong();
-                } else if ("settlDate".equals(name)) {
+                if ("settlDate".equals(name)) {
                     fields |= SETTL_DATE;
                     settlDate = p.getInt();
                 } else if ("expiryDate".equals(name)) {
@@ -187,12 +213,12 @@ public final class Request {
         return fields;
     }
 
-    public final boolean isIdSet() {
-        return (fields & ID) != 0;
+    public final boolean isIdsSet() {
+        return (fields & IDS) != 0;
     }
 
-    public final long getId() {
-        return id;
+    public final JslNode getIds() {
+        return ids;
     }
 
     public final boolean isMnemSet() {

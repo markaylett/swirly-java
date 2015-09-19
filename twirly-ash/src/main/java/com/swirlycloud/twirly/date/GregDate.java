@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2013, 2014 Swirly Cloud Limited. All rights reserved.
+ * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 package com.swirlycloud.twirly.date;
 
@@ -11,6 +11,9 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 /**
  * Gregorian date.
@@ -186,5 +189,20 @@ public final class GregDate implements Comparable<GregDate> {
     public static GregDate valueOf(Calendar c) {
         return new GregDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH),
                 c.get(Calendar.DAY_OF_MONTH));
+    }
+
+    @NonNull
+    public static GregDate valueOf(DateTime dt) {
+        return new GregDate(dt.getYear(), dt.getMonthOfYear() - 1, dt.getDayOfMonth());
+    }
+
+    @NonNull
+    public static GregDate valueOf(LocalDateTime dt) {
+        return new GregDate(dt.getYear(), dt.getMonthOfYear() - 1, dt.getDayOfMonth());
+    }
+
+    @NonNull
+    public static GregDate valueOf(LocalDate d) {
+        return new GregDate(d.getYear(), d.getMonthOfYear() - 1, d.getDayOfMonth());
     }
 }

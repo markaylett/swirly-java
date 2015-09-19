@@ -19,10 +19,11 @@ public @NonNullByDefault class TraderSess extends Trader {
     private static final long serialVersionUID = 1L;
 
     // Dirty bits.
-    public static final int DIRTY_ORDER = 1 << 0;
-    public static final int DIRTY_TRADE = 1 << 1;
-    public static final int DIRTY_POSN = 1 << 2;
-    public static final int DIRTY_ALL = DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN;
+    public static final int DIRTY_EMAIL = 1 << 0;
+    public static final int DIRTY_ORDER = 1 << 1;
+    public static final int DIRTY_TRADE = 1 << 2;
+    public static final int DIRTY_POSN = 1 << 3;
+    public static final int DIRTY_ALL = DIRTY_EMAIL | DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN;
 
     private final transient RefHashTable refIdx;
     private final transient Factory factory;
@@ -67,7 +68,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     }
 
     public final @Nullable Order removeOrder(String ref) {
-        final Order order = (Order) refIdx.remove(mnem, ref);
+        final Order order = refIdx.remove(mnem, ref);
         if (order != null) {
             orders.remove(order);
         }
@@ -79,8 +80,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     }
 
     public final @Nullable Order findOrder(String ref) {
-        assert ref != null;
-        return (Order) refIdx.find(mnem, ref);
+        return refIdx.find(mnem, ref);
     }
 
     public final @Nullable RbNode getRootOrder() {
@@ -209,7 +209,11 @@ public @NonNullByDefault class TraderSess extends Trader {
         return modified;
     }
 
-    public static TraderSess insertDirty(@Nullable final TraderSess first, TraderSess next) {
+    public static TraderSess insertDirty(@Nullable final TraderSess first, TraderSess next,
+            int dirty) {
+
+        next.dirty |= dirty;
+
         if (first == null) {
             next.dirtyNext = null; // Defensive.
             return next;
@@ -237,7 +241,12 @@ public @NonNullByDefault class TraderSess extends Trader {
         return next;
     }
 
-    public final void flushDirty(Cache cache) {
+    public final void updateCache(Cache cache) {
+        if ((dirty & DIRTY_EMAIL) != 0) {
+            cache.update("trader:" + email, mnem);
+            // Reset flag on success.
+            dirty &= ~DIRTY_EMAIL;
+        }
         if ((dirty & DIRTY_ORDER) != 0) {
             cache.update("order:" + mnem, orders);
             // Reset flag on success.
@@ -253,9 +262,5 @@ public @NonNullByDefault class TraderSess extends Trader {
             // Reset flag on success.
             dirty &= ~DIRTY_POSN;
         }
-    }
-
-    public final void setDirty(int dirty) {
-        this.dirty |= dirty;
     }
 }

@@ -43,6 +43,25 @@ public final @NonNullByDefault class MarketView extends BasicRbNode implements J
     long lastTime;
     final Ladder ladder;
 
+    private static void parseArray(JsonParser p, Ladder ladder, int col) throws IOException {
+        for (int row = 0; p.hasNext(); ++row) {
+            final Event event = p.next();
+            switch (event) {
+            case END_ARRAY:
+                return;
+            case VALUE_NULL:
+                ladder.setValue(row, col, 0);
+                break;
+            case VALUE_NUMBER:
+                ladder.setValue(row, col, p.getLong());
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of array not found");
+    }
+
     public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
             long lastTime, Ladder ladder) {
         this.market = market;
@@ -85,25 +104,6 @@ public final @NonNullByDefault class MarketView extends BasicRbNode implements J
         this.ladder = new Ladder();
     }
 
-    public static void parse(JsonParser p, Ladder ladder, int col) throws IOException {
-        for (int row = 0; p.hasNext(); ++row) {
-            final Event event = p.next();
-            switch (event) {
-            case END_ARRAY:
-                return;
-            case VALUE_NULL:
-                ladder.setValue(row, col, 0);
-                break;
-            case VALUE_NUMBER:
-                ladder.setValue(row, col, p.getLong());
-                break;
-            default:
-                throw new IOException(String.format("unexpected json token '%s'", event));
-            }
-        }
-        throw new IOException("end-of array not found");
-    }
-
     public static MarketView parse(JsonParser p) throws IOException {
         String market = null;
         String contr = null;
@@ -131,17 +131,17 @@ public final @NonNullByDefault class MarketView extends BasicRbNode implements J
                 break;
             case START_ARRAY:
                 if ("bidTicks".equals(name)) {
-                    parse(p, ladder, Ladder.BID_TICKS);
+                    parseArray(p, ladder, Ladder.BID_TICKS);
                 } else if ("bidLots".equals(name)) {
-                    parse(p, ladder, Ladder.BID_LOTS);
+                    parseArray(p, ladder, Ladder.BID_LOTS);
                 } else if ("bidCount".equals(name)) {
-                    parse(p, ladder, Ladder.BID_COUNT);
+                    parseArray(p, ladder, Ladder.BID_COUNT);
                 } else if ("offerTicks".equals(name)) {
-                    parse(p, ladder, Ladder.OFFER_TICKS);
+                    parseArray(p, ladder, Ladder.OFFER_TICKS);
                 } else if ("offerLots".equals(name)) {
-                    parse(p, ladder, Ladder.OFFER_LOTS);
+                    parseArray(p, ladder, Ladder.OFFER_LOTS);
                 } else if ("offerCount".equals(name)) {
-                    parse(p, ladder, Ladder.OFFER_COUNT);
+                    parseArray(p, ladder, Ladder.OFFER_COUNT);
                 } else {
                     throw new IOException(String.format("unexpected array field '%s'", name));
                 }

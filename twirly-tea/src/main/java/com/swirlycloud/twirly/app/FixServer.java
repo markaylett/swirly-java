@@ -52,7 +52,7 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.FixRejectException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.node.TransNode;
+import com.swirlycloud.twirly.node.SlNode;
 
 public final class FixServer extends MessageCracker implements Application {
 
@@ -124,7 +124,7 @@ public final class FixServer extends MessageCracker implements Application {
         final FixBuilder builder = getBuilder(new ExecutionReport());
         String targetTrader = sess.getMnem();
         SessionID targetSessionId = sessionId;
-        for (TransNode node = trans.getFirstExec(); node != null; node = node.transNext()) {
+        for (SlNode node = trans.getFirstExec(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
             if (!exec.getTrader().equals(targetTrader)) {
                 targetTrader = exec.getTrader();

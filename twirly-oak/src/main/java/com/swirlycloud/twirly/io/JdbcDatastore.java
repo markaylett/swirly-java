@@ -3,19 +3,21 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
-import static com.swirlycloud.twirly.node.SlUtil.popNext;
+import static com.swirlycloud.twirly.node.JslUtil.popNext;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 
 public final class JdbcDatastore extends JdbcModel implements Datastore {
     @NonNull
@@ -119,8 +121,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay, int state) {
+    public final void insertMarket(@NonNull String mnem, @Nullable String display,
+            @NonNull String contr, int settlDay, int expiryDay, int state) {
         try {
             int i = 1;
             setParam(insertMarketStmt, i++, mnem);
@@ -136,7 +138,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void updateMarket(String mnem, String display, int state) {
+    public final void updateMarket(@NonNull String mnem, @Nullable String display, int state) {
         try {
             int i = 1;
             setParam(updateMarketStmt, i++, display);
@@ -149,7 +151,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertTrader(String mnem, String display, String email) {
+    public final void insertTrader(@NonNull String mnem, @Nullable String display,
+            @NonNull String email) {
         try {
             int i = 1;
             setParam(insertTraderStmt, i++, mnem);
@@ -162,7 +165,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) throws NotFoundException {
+    public final void updateTrader(@NonNull String mnem, @Nullable String display)
+            throws NotFoundException {
         try {
             int i = 1;
             setParam(updateTraderStmt, i++, display);
@@ -174,7 +178,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertExec(Exec exec) {
+    public final void insertExec(@NonNull Exec exec) {
         try {
             int i = 1;
             setParam(insertExecStmt, i++, exec.getId());
@@ -217,18 +221,32 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertExecList(String market, SlNode first) {
-        SlNode node = first;
+    public final void insertExecList(@NonNull String market, @NonNull JslNode first) {
+        // The market parameter is ignored in the Jdbc implementation.
+        insertExecList(first);
+    }
+
+    @Override
+    public final void insertExecList(@NonNull JslNode first) {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            insertExec((Exec) first);
+            return;
+        }
+
+        JslNode node = first;
         try {
             conn.setAutoCommit(false);
             boolean success = false;
             try {
-                while (node != null) {
+                do {
                     final Exec exec = (Exec) node;
+                    assert exec != null;
                     node = popNext(node);
 
                     insertExec(exec);
-                }
+                } while (node != null);
                 conn.commit();
                 success = true;
             } finally {
@@ -248,7 +266,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void archiveOrder(String market, long id, long modified) {
+    public final void archiveOrder(@NonNull String market, long id, long modified) {
         try {
             int i = 1;
             setParam(updateOrderStmt, i++, modified);
@@ -261,13 +279,97 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void archiveTrade(String market, long id, long modified) {
+    public final void archiveOrderList(@NonNull String market, @NonNull JslNode first, long modified)
+            throws NotFoundException {
+        // The market parameter is ignored in the Jdbc implementation.
+        archiveOrderList(first, modified);
+    }
+
+    @Override
+    public final void archiveOrderList(@NonNull JslNode first, long modified)
+            throws NotFoundException {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveOrder(mid.getMarket(), mid.getId(), modified);
+            return;
+        }
+
+        JslNode node = first;
+        try {
+            conn.setAutoCommit(false);
+            boolean success = false;
+            try {
+                do {
+                    final MarketId mid = (MarketId) node;
+                    node = node.jslNext();
+
+                    archiveOrder(mid.getMarket(), mid.getId(), modified);
+                } while (node != null);
+                conn.commit();
+                success = true;
+            } finally {
+                if (!success) {
+                    conn.rollback();
+                }
+                conn.setAutoCommit(true);
+            }
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public final void archiveTrade(@NonNull String market, long id, long modified) {
         try {
             int i = 1;
             setParam(updateExecStmt, i++, modified);
             setParam(updateExecStmt, i++, market);
             setParam(updateExecStmt, i++, id);
             updateExecStmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull String market, @NonNull JslNode first, long modified)
+            throws NotFoundException {
+        // The market parameter is ignored in the Jdbc implementation.
+        archiveTradeList(first, modified);
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull JslNode first, long modified)
+            throws NotFoundException {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveTrade(mid.getMarket(), mid.getId(), modified);
+            return;
+        }
+
+        JslNode node = first;
+        try {
+            conn.setAutoCommit(false);
+            boolean success = false;
+            try {
+                do {
+                    final MarketId mid = (MarketId) node;
+                    node = node.jslNext();
+
+                    archiveTrade(mid.getMarket(), mid.getId(), modified);
+                } while (node != null);
+                conn.commit();
+                success = true;
+            } finally {
+                if (!success) {
+                    conn.rollback();
+                }
+                conn.setAutoCommit(true);
+            }
         } catch (final SQLException e) {
             throw new UncheckedIOException(e);
         }

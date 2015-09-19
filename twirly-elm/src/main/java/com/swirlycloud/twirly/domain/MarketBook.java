@@ -24,10 +24,6 @@ public @NonNullByDefault class MarketBook extends Market {
 
     private static final long serialVersionUID = 1L;
 
-    // Dirty bits.
-    public static final int DIRTY_VIEW = 1 << 0;
-    public static final int DIRTY_ALL = DIRTY_VIEW;
-
     /**
      * Maximum price levels in view.
      */
@@ -44,7 +40,6 @@ public @NonNullByDefault class MarketBook extends Market {
     private transient long maxExecId;
     @Nullable
     private transient MarketBook dirtyNext;
-    private transient int dirty;
 
     private final BookSide getSide(Side side) {
         return side == Side.BUY ? bidSide : offerSide;
@@ -293,22 +288,10 @@ public @NonNullByDefault class MarketBook extends Market {
         return next;
     }
 
-    public final void flush() {
+    public final void updateView() {
         view.lastTicks = lastTicks;
         view.lastLots = lastLots;
         view.lastTime = lastTime;
         fillLadder(view.ladder);
-        // Reset flag on success.
-        dirty &= ~DIRTY_VIEW;
-    }
-
-    public final void flushDirty() {
-        if ((dirty & DIRTY_VIEW) != 0) {
-            flush();
-        }
-    }
-
-    public final void setDirty(int dirty) {
-        this.dirty |= dirty;
     }
 }

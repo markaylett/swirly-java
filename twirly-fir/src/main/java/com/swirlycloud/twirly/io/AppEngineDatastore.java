@@ -3,12 +3,16 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
-import static com.swirlycloud.twirly.node.SlUtil.popNext;
+import static com.swirlycloud.twirly.node.JslUtil.popNext;
 import static com.swirlycloud.twirly.util.NullUtil.nullIfZero;
 
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
@@ -16,10 +20,11 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.JslNode;
 
 public final class AppEngineDatastore extends AppEngineModel implements Datastore {
 
@@ -190,8 +195,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertMarket(String mnem, String display, String contr, int settlDay,
-            int expiryDay, int state) {
+    public final void insertMarket(@NonNull String mnem, @Nullable String display,
+            @NonNull String contr, int settlDay, int expiryDay, int state) {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity entity = newMarket(mnem, display, contr, settlDay, expiryDay, state);
@@ -208,7 +213,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void updateMarket(String mnem, String display, int state) throws NotFoundException {
+    public final void updateMarket(@NonNull String mnem, @Nullable String display, int state)
+            throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity entity = getMarket(txn, mnem);
@@ -227,7 +233,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertTrader(String mnem, String display, String email) {
+    public final void insertTrader(@NonNull String mnem, @Nullable String display,
+            @NonNull String email) {
         final Transaction txn = datastore.beginTransaction();
         try {
             // Trader entities have common ancestor for strong consistency.
@@ -245,7 +252,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void updateTrader(String mnem, String display) throws NotFoundException {
+    public final void updateTrader(@NonNull String mnem, @Nullable String display)
+            throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity entity = getTrader(txn, mnem);
@@ -263,7 +271,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExec(Exec exec) throws NotFoundException {
+    public final void insertExec(@NonNull Exec exec) throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, exec.getMarket());
@@ -289,8 +297,16 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExecList(String marketMnem, SlNode first) throws NotFoundException {
-        SlNode node = first;
+    public final void insertExecList(@NonNull String marketMnem, @NonNull JslNode first)
+            throws NotFoundException {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            insertExec((Exec) first);
+            return;
+        }
+
+        JslNode node = first;
         try {
             // N.B. the approach I used previously on a traditional RDMS was quite different, in
             // that order revisions were managed as triggers on the exec table.
@@ -298,10 +314,11 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             final Transaction txn = datastore.beginTransaction();
             try {
                 final Entity market = getMarket(txn, marketMnem);
-                while (node != null) {
+                do {
                     final Exec exec = (Exec) node;
                     node = popNext(node);
 
+                    assert marketMnem.equals(exec.getMarket());
                     final long orderId = exec.getOrderId();
                     if (orderId != 0) {
                         if (exec.getState() == State.NEW) {
@@ -319,7 +336,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
                         }
                     }
                     datastore.put(txn, newExec(market, exec));
-                }
+                } while (node != null);
+
                 if (!orders.isEmpty()) {
                     datastore.put(txn, orders.values());
                 }
@@ -342,7 +360,48 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void archiveOrder(String marketMnem, long id, long modified)
+    public final void insertExecList(@NonNull JslNode first) throws NotFoundException {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            insertExec((Exec) first);
+            return;
+        }
+
+        // Partition nodes by market.
+
+        final HashMap<String, JslNode> map;
+        JslNode node = first;
+        try {
+            map = new HashMap<>();
+            do {
+                final Exec exec = (Exec) node;
+                node = popNext(node);
+
+                final String market = exec.getMarket();
+                exec.setJslNext(map.get(market));
+                map.put(market, exec);
+            } while (node != null);
+        } finally {
+            // Clear nodes to ensure no unwanted retention.
+            while (node != null) {
+                node = popNext(node);
+            }
+        }
+
+        // Execution transaction for each market.
+
+        for (final Entry<String, JslNode> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final JslNode value = entry.getValue();
+            assert key != null;
+            assert value != null;
+            insertExecList(key, value);
+        }
+    }
+
+    @Override
+    public final void archiveOrder(@NonNull String marketMnem, long id, long modified)
             throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -363,7 +422,78 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void archiveTrade(String marketMnem, long id, long modified)
+    public final void archiveOrderList(@NonNull String marketMnem, @NonNull JslNode first,
+            long modified) throws NotFoundException {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveOrder(marketMnem, mid.getId(), modified);
+            return;
+        }
+
+        JslNode node = first;
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity market = getMarket(txn, marketMnem);
+            do {
+                final MarketId mid = (MarketId) node;
+                node = node.jslNext();
+
+                assert marketMnem.equals(mid.getMarket());
+                final Entity entity = getOrder(txn, market.getKey(), mid.getId());
+                entity.setProperty("archive", Boolean.TRUE);
+                entity.setUnindexedProperty("modified", modified);
+                datastore.put(txn, entity);
+            } while (node != null);
+            txn.commit();
+        } catch (final ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void archiveOrderList(@NonNull JslNode first, long modified)
+            throws NotFoundException {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveOrder(mid.getMarket(), mid.getId(), modified);
+            return;
+        }
+
+        // Partition nodes by market.
+
+        final HashMap<String, JslNode> map = new HashMap<>();
+        JslNode node = first;
+        do {
+            final MarketId mid = (MarketId) node;
+            node = node.jslNext();
+
+            final String market = mid.getMarket();
+            mid.setJslNext(map.get(market));
+            map.put(market, mid);
+        } while (node != null);
+
+        // Execution transaction for each market.
+
+        for (final Entry<String, JslNode> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final JslNode value = entry.getValue();
+            assert key != null;
+            assert value != null;
+            archiveOrderList(key, value, modified);
+        }
+    }
+
+    @Override
+    public final void archiveTrade(@NonNull String marketMnem, long id, long modified)
             throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -380,6 +510,77 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             if (txn.isActive()) {
                 txn.rollback();
             }
+        }
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull String marketMnem, @NonNull JslNode first,
+            long modified) throws NotFoundException {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveTrade(marketMnem, mid.getId(), modified);
+            return;
+        }
+
+        JslNode node = first;
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity market = getMarket(txn, marketMnem);
+            do {
+                final MarketId mid = (MarketId) node;
+                node = node.jslNext();
+
+                assert marketMnem.equals(mid.getMarket());
+                final Entity entity = getExec(txn, market.getKey(), mid.getId());
+                entity.setProperty("archive", Boolean.TRUE);
+                entity.setUnindexedProperty("modified", modified);
+                datastore.put(txn, entity);
+            } while (node != null);
+            txn.commit();
+        } catch (final ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
+        }
+    }
+
+    @Override
+    public final void archiveTradeList(@NonNull JslNode first, long modified)
+            throws NotFoundException {
+
+        if (first.jslNext() == null) {
+            // Singleton list.
+            final MarketId mid = (MarketId) first;
+            archiveTrade(mid.getMarket(), mid.getId(), modified);
+            return;
+        }
+
+        // Partition nodes by market.
+
+        final HashMap<String, JslNode> map = new HashMap<>();
+        JslNode node = first;
+        do {
+            final MarketId mid = (MarketId) node;
+            node = node.jslNext();
+
+            final String market = mid.getMarket();
+            mid.setJslNext(map.get(market));
+            map.put(market, mid);
+        } while (node != null);
+
+        // Execution transaction for each market.
+
+        for (final Entry<String, JslNode> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final JslNode value = entry.getValue();
+            assert key != null;
+            assert value != null;
+            archiveTradeList(key, value, modified);
         }
     }
 }

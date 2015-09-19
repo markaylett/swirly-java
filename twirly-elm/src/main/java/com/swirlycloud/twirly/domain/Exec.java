@@ -16,8 +16,8 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.node.TransNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
@@ -29,13 +29,13 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, TransNode,
-        Instruct {
+public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, SlNode,
+        JslNode, Instruct {
 
     private static final long serialVersionUID = 1L;
 
     private transient @Nullable SlNode slNext;
-    private transient @Nullable TransNode transNext;
+    private transient @Nullable JslNode jslNext;
 
     private final long id;
     private final long orderId;
@@ -370,13 +370,13 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
     }
 
     @Override
-    public final void setTransNext(@Nullable TransNode next) {
-        this.transNext = next;
+    public final void setJslNext(@Nullable JslNode next) {
+        this.jslNext = next;
     }
 
     @Override
-    public final @Nullable TransNode transNext() {
-        return transNext;
+    public final @Nullable JslNode jslNext() {
+        return jslNext;
     }
 
     public final void revise(long lots) {
@@ -392,8 +392,8 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         resd = 0;
     }
 
-    public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots, long matchId,
-            Role role, String cpty) {
+    public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots,
+            long matchId, Role role, String cpty) {
         state = State.TRADE;
         resd -= sumLots;
         exec += sumLots;

@@ -19,6 +19,7 @@ import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Instruct;
 import com.swirlycloud.twirly.domain.MarketBook;
+import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Role;
@@ -35,6 +36,7 @@ import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.DlNode;
+import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.rec.Asset;
@@ -42,11 +44,20 @@ import com.swirlycloud.twirly.rec.Contr;
 import com.swirlycloud.twirly.rec.Market;
 import com.swirlycloud.twirly.rec.Rec;
 import com.swirlycloud.twirly.rec.RecType;
-import com.swirlycloud.twirly.rec.Trader;
 
 public @NonNullByDefault class Serv {
 
     private static final int CAPACITY = 1 << 5; // 64
+
+    // Dirty bits.
+    private static final int DIRTY_ASSET = 1 << 0;
+    private static final int DIRTY_CONTR = 1 << 1;
+    private static final int DIRTY_MARKET = 1 << 2;
+    private static final int DIRTY_TRADER = 1 << 3;
+    private static final int DIRTY_VIEW = 1 << 4;
+    private static final int DIRTY_ALL = DIRTY_ASSET | DIRTY_CONTR | DIRTY_MARKET | DIRTY_TRADER
+            | DIRTY_VIEW;
+
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
@@ -59,10 +70,70 @@ public @NonNullByDefault class Serv {
     private final MnemRbTree traders;
     private final MnemRbTree views = new MnemRbTree();
     private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
-    @Nullable
-    private MarketBook dirtyBook;
+    private transient int dirty;
     @Nullable
     private TraderSess dirtySess;
+    @Nullable
+    private MarketBook dirtyBook;
+
+    private final void setDirty(TraderSess next, int dirty) {
+        dirtySess = TraderSess.insertDirty(dirtySess, next, dirty);
+    }
+
+    private final void setDirty(MarketBook next) {
+        dirtyBook = MarketBook.insertDirty(dirtyBook, next);
+        // Implies dirty view.
+        dirty |= DIRTY_VIEW;
+    }
+
+    private final void updateDirty() {
+
+        if ((dirty & DIRTY_ASSET) != 0) {
+            cache.update("asset", assets);
+            // Reset flag on success.
+            dirty &= ~DIRTY_ASSET;
+        }
+
+        if ((dirty & DIRTY_CONTR) != 0) {
+            cache.update("contr", contrs);
+            // Reset flag on success.
+            dirty &= ~DIRTY_CONTR;
+        }
+
+        if ((dirty & DIRTY_MARKET) != 0) {
+            cache.update("market", markets);
+            // Reset flag on success.
+            dirty &= ~DIRTY_MARKET;
+        }
+
+        if ((dirty & DIRTY_TRADER) != 0) {
+            cache.update("trader", traders);
+            // Reset flag on success.
+            dirty &= ~DIRTY_TRADER;
+        }
+
+        while (dirtySess != null) {
+            final TraderSess sess = dirtySess;
+            assert sess != null;
+            sess.updateCache(cache);
+            // Pop if flush succeeded.
+            dirtySess = sess.popDirty();
+        }
+
+        while (dirtyBook != null) {
+            final MarketBook book = dirtyBook;
+            assert book != null;
+            book.updateView();
+            // Pop if flush succeeded.
+            dirtyBook = book.popDirty();
+        }
+
+        if ((dirty & DIRTY_VIEW) != 0) {
+            cache.update("view", views);
+            // Reset flag on success.
+            dirty &= ~DIRTY_VIEW;
+        }
+    }
 
     private final void enrichContr(Contr contr) {
         final Asset asset = (Asset) assets.find(contr.getAsset());
@@ -78,25 +149,6 @@ public @NonNullByDefault class Serv {
         market.enrich(contr);
     }
 
-    private final void insertOrder(Order order) {
-        final TraderSess sess = (TraderSess) traders.find(order.getTrader());
-        assert sess != null;
-        sess.insertOrder(order);
-        if (!order.isDone()) {
-            final MarketBook book = (MarketBook) markets.find(order.getMarket());
-            boolean success = false;
-            try {
-                assert book != null;
-                book.insertOrder(order);
-                success = true;
-            } finally {
-                if (!success) {
-                    sess.removeOrder(order);
-                }
-            }
-        }
-    }
-
     private final void enrichContrs() {
         for (RbNode node = contrs.getFirst(); node != null; node = node.rbNext()) {
             final Contr contr = (Contr) node;
@@ -109,50 +161,30 @@ public @NonNullByDefault class Serv {
             final MarketBook book = (MarketBook) node;
             enrichMarket(book);
             views.insert(book.getView());
-            setDirty(book, MarketBook.DIRTY_VIEW);
         }
     }
 
-    private final void updateEmailIdx() {
-        for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
-            final Trader trader = (Trader) node;
-            emailIdx.insert(trader);
-            cache.update("trader:" + trader.getEmail(), trader.getMnem());
+    private final void insertOrder(Order order) {
+        final TraderSess sess = (TraderSess) traders.find(order.getTrader());
+        assert sess != null;
+        sess.insertOrder(order);
+        if (!order.isDone()) {
+            final MarketBook book = (MarketBook) markets.find(order.getMarket());
+            boolean success = false;
+            try {
+                assert book != null;
+                book.insertOrder(order);
+                setDirty(book);
+                success = true;
+            } finally {
+                if (!success) {
+                    sess.removeOrder(order);
+                }
+            }
         }
     }
 
-    private final void insertOrders(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
-            final Order order = (Order) node;
-            node = popNext(node);
-
-            insertOrder(order);
-        }
-    }
-
-    private final void insertTrades(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
-            final Exec trade = (Exec) node;
-            node = popNext(node);
-
-            final TraderSess sess = (TraderSess) traders.find(trade.getTrader());
-            assert sess != null;
-            sess.insertTrade(trade);
-        }
-    }
-
-    private final void insertPosns(@Nullable SlNode first) {
-        for (SlNode node = first; node != null;) {
-            final Posn posn = (Posn) node;
-            node = popNext(node);
-
-            final TraderSess sess = (TraderSess) traders.find(posn.getTrader());
-            assert sess != null;
-            sess.insertPosn(posn);
-        }
-    }
-
-    private final TraderSess newTrader(String mnem, String display, String email)
+    private final TraderSess newTrader(String mnem, @Nullable String display, String email)
             throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
@@ -160,8 +192,8 @@ public @NonNullByDefault class Serv {
         return (TraderSess) factory.newTrader(mnem, display, email);
     }
 
-    private final MarketBook newMarket(String mnem, String display, Contr contr, int settlDay,
-            int expiryDay, int state) throws BadRequestException {
+    private final MarketBook newMarket(String mnem, @Nullable String display, Contr contr,
+            int settlDay, int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
         }
@@ -262,13 +294,15 @@ public @NonNullByDefault class Serv {
         final BookSide bidSide = book.getBidSide();
         final BookSide offerSide = book.getOfferSide();
 
-        SlNode firstExec = null;
+        // Build list of cancel executions.
+
+        JslNode firstExec = null;
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
             final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
-            exec.setSlNext(firstExec);
+            exec.setJslNext(firstExec);
             firstExec = exec;
         }
         for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
@@ -276,9 +310,13 @@ public @NonNullByDefault class Serv {
             final Exec exec = newExec(book, order, now);
             exec.cancel();
             // Stack push.
-            exec.setSlNext(firstExec);
+            exec.setJslNext(firstExec);
             firstExec = exec;
         }
+        if (firstExec == null) {
+            return;
+        }
+
         try {
             journ.insertExecList(book.getMnem(), firstExec);
         } catch (final RejectedExecutionException e) {
@@ -287,7 +325,7 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
-        setDirty(book, MarketBook.DIRTY_VIEW);
+        setDirty(book);
 
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd();) {
             final Order order = (Order) node;
@@ -310,92 +348,10 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final void doArchiveOrders(TraderSess sess, long now) throws NotFoundException,
-            ServiceUnavailableException {
-
-        // Set dirty here, because the block below may throw.
-        setDirty(sess, TraderSess.DIRTY_ORDER);
-
-        RbNode node = sess.getFirstOrder();
-        while (node != null) {
-            final Order order = (Order) node;
-            // Move to next node before this order is unlinked.
-            node = node.rbNext();
-            if (!order.isDone()) {
-                continue;
-            }
-            try {
-                journ.archiveOrder(order.getMarket(), order.getId(), now);
-            } catch (final RejectedExecutionException e) {
-                throw new ServiceUnavailableException("journal is busy", e);
-            }
-
-            // No need to update timestamps on order because it is immediately freed.
-            sess.removeOrder(order);
-        }
-    }
-
-    private final void doArchiveTrades(TraderSess sess, long now) throws NotFoundException,
-            ServiceUnavailableException {
-
-        // Set dirty here, because the block below may throw.
-        setDirty(sess, TraderSess.DIRTY_TRADE);
-
-        for (;;) {
-            final Exec trade = (Exec) sess.getRootTrade();
-            if (trade == null) {
-                break;
-            }
-            try {
-                journ.archiveTrade(trade.getMarket(), trade.getId(), now);
-            } catch (final RejectedExecutionException e) {
-                throw new ServiceUnavailableException("journal is busy", e);
-            }
-
-            // No need to update timestamps on trade because it is immediately freed.
-            sess.removeTrade(trade);
-        }
-    }
-
-    private final void flushDirty() {
-
-        while (dirtySess != null) {
-            final TraderSess sess = dirtySess;
-            assert sess != null;
-            sess.flushDirty(cache);
-            // Pop if flush succeeded.
-            dirtySess = sess.popDirty();
-        }
-
-        if (dirtyBook != null) {
-
-            do {
-                final MarketBook book = dirtyBook;
-                assert book != null;
-                book.flushDirty();
-                // Pop if flush succeeded.
-                dirtyBook = book.popDirty();
-            } while (dirtyBook != null);
-
-            // At least one view has changed.
-            cache.update("view", views);
-        }
-    }
-
-    private final void setDirty(MarketBook next, int dirty) {
-        dirtyBook = MarketBook.insertDirty(dirtyBook, next);
-        next.setDirty(dirty);
-    }
-
-    private final void setDirty(TraderSess next, int dirty) {
-        dirtySess = TraderSess.insertDirty(dirtySess, next);
-        next.setDirty(dirty);
-    }
-
     // Assumes that maker lots have not been reduced since matching took place.
 
     private final void commitMatches(TraderSess taker, MarketBook book, long now, Trans trans) {
-        setDirty(book, MarketBook.DIRTY_VIEW);
+        setDirty(book);
         SlNode node = trans.matches.getFirst();
         if (node == null) {
             // There are no matches.
@@ -422,7 +378,9 @@ public @NonNullByDefault class Serv {
             final Exec takerTrade = match.takerTrade;
             assert takerTrade != null;
             taker.insertTrade(takerTrade);
-            trans.posn.addTrade(takerTrade);
+            final Posn posn = trans.posn;
+            assert posn != null;
+            posn.addTrade(takerTrade);
             setDirty(maker, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
             // Next match.
             node = node.slNext();
@@ -434,39 +392,62 @@ public @NonNullByDefault class Serv {
         this.journ = journ;
         this.cache = cache;
         this.factory = factory;
+        this.dirty = DIRTY_ALL;
 
         MnemRbTree t = model.selectAsset(factory);
         assert t != null;
         this.assets = t;
-        cache.update("asset", t);
 
         t = model.selectContr(factory);
         assert t != null;
         this.contrs = t;
         enrichContrs();
-        cache.update("contr", t);
 
         t = model.selectMarket(factory);
         assert t != null;
         this.markets = t;
         enrichMarkets();
-        cache.update("market", t);
 
         t = model.selectTrader(factory);
         assert t != null;
         this.traders = t;
-        updateEmailIdx();
-        cache.update("trader", t);
 
-        insertOrders(model.selectOrder(factory));
-        insertTrades(model.selectTrade(factory));
-        insertPosns(model.selectPosn(getBusDate(now).toJd(), factory));
+        final SlNode firstOrder = model.selectOrder(factory);
+        for (SlNode node = firstOrder; node != null;) {
+            final Order order = (Order) node;
+            node = popNext(node);
+
+            // This method will mark the book as dirty.
+            insertOrder(order);
+        }
+
+        final SlNode firstTrade = model.selectTrade(factory);
+        for (SlNode node = firstTrade; node != null;) {
+            final Exec trade = (Exec) node;
+            node = popNext(node);
+
+            final TraderSess sess = (TraderSess) traders.find(trade.getTrader());
+            assert sess != null;
+            sess.insertTrade(trade);
+        }
+
+        final SlNode firstPosn = model.selectPosn(getBusDate(now).toJd(), factory);
+        for (SlNode node = firstPosn; node != null;) {
+            final Posn posn = (Posn) node;
+            node = popNext(node);
+
+            final TraderSess sess = (TraderSess) traders.find(posn.getTrader());
+            assert sess != null;
+            sess.insertPosn(posn);
+        }
 
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
             final TraderSess sess = (TraderSess) node;
+            emailIdx.insert(sess);
             setDirty(sess, TraderSess.DIRTY_ALL);
         }
-        flushDirty();
+
+        updateDirty();
     }
 
     public Serv(Datastore datastore, Cache cache, Factory factory, long now)
@@ -474,7 +455,7 @@ public @NonNullByDefault class Serv {
         this(datastore, datastore, cache, factory, now);
     }
 
-    public final TraderSess createTrader(String mnem, String display, String email)
+    public final TraderSess createTrader(String mnem, @Nullable String display, String email)
             throws BadRequestException, ServiceUnavailableException {
         if (traders.find(mnem) != null) {
             throw new BadRequestException(String.format("trader '%s' already exists", mnem));
@@ -483,33 +464,45 @@ public @NonNullByDefault class Serv {
             throw new BadRequestException(String.format("email '%s' is already in use", email));
         }
         final TraderSess sess = newTrader(mnem, display, email);
+
         try {
             journ.insertTrader(mnem, display, email);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
+
+        // Commit phase.
+
+        dirty |= DIRTY_TRADER;
+        setDirty(sess, TraderSess.DIRTY_ALL);
+
         traders.insert(sess);
         emailIdx.insert(sess);
-        cache.update("trader", traders);
-        cache.update("trader:" + email, mnem);
-        setDirty(sess, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
-        flushDirty();
+
+        updateDirty();
         return sess;
     }
 
-    public final TraderSess updateTrader(String mnem, String display) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException {
+    public final TraderSess updateTrader(String mnem, @Nullable String display)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final TraderSess sess = (TraderSess) traders.find(mnem);
         if (sess == null) {
             throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
         }
-        sess.setDisplay(display);
+
         try {
             journ.updateTrader(mnem, display);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
-        cache.update("trader", traders);
+
+        // Commit phase.
+
+        dirty |= DIRTY_TRADER;
+
+        sess.setDisplay(display);
+
+        updateDirty();
         return sess;
     }
 
@@ -628,8 +621,8 @@ public @NonNullByDefault class Serv {
         return (TraderSess) emailIdx.find(email);
     }
 
-    public final MarketBook createMarket(String mnem, String display, Contr contr, int settlDay,
-            int expiryDay, int state, long now) throws BadRequestException,
+    public final MarketBook createMarket(String mnem, @Nullable String display, Contr contr,
+            int settlDay, int expiryDay, int state, long now) throws BadRequestException,
             ServiceUnavailableException {
         if (settlDay != 0) {
             // busDay <= expiryDay <= settlDay.
@@ -651,20 +644,25 @@ public @NonNullByDefault class Serv {
         }
         final RbNode parent = book;
         book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
+
         try {
             journ.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
+        // Commit phase.
+
+        dirty |= (DIRTY_MARKET | DIRTY_VIEW);
+
         markets.pinsert(book, parent);
         views.insert(book.getView());
-        cache.update("market", markets);
-        cache.update("view", views);
+
+        updateDirty();
         return book;
     }
 
-    public final MarketBook createMarket(String mnem, String display, String contrMnem,
+    public final MarketBook createMarket(String mnem, @Nullable String display, String contrMnem,
             int settlDay, int expiryDay, int state, long now) throws BadRequestException,
             NotFoundException, ServiceUnavailableException {
         final Contr contr = (Contr) contrs.find(contrMnem);
@@ -674,23 +672,38 @@ public @NonNullByDefault class Serv {
         return createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
     }
 
-    public final MarketBook updateMarket(String mnem, String display, int state, long now)
+    public final MarketBook updateMarket(String mnem, @Nullable String display, int state, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final MarketBook book = (MarketBook) markets.find(mnem);
         if (book == null) {
             throw new NotFoundException(String.format("market '%s' does not exist", mnem));
         }
-        book.setDisplay(display);
-        book.setState(state);
+
         try {
             journ.updateMarket(mnem, display, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
-        cache.update("market", markets);
+
+        // Commit phase.
+
+        dirty |= DIRTY_MARKET;
+
+        book.setDisplay(display);
+        book.setState(state);
+
+        updateDirty();
         return book;
     }
 
+    /**
+     * This method may partially fail.
+     * 
+     * @param now
+     *            The current time.
+     * @throws NotFoundException
+     * @throws ServiceUnavailableException
+     */
     public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
@@ -700,7 +713,7 @@ public @NonNullByDefault class Serv {
                 doCancelOrders(book, now);
             }
         }
-        flushDirty();
+        updateDirty();
     }
 
     public final void settlMarkets(long now) {
@@ -711,6 +724,7 @@ public @NonNullByDefault class Serv {
             if (book.isSettlDaySet() && book.getSettlDay() <= busDay) {
                 views.remove(book.getView());
                 markets.remove(book);
+                dirty |= (DIRTY_MARKET | DIRTY_VIEW);
             }
         }
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
@@ -719,7 +733,7 @@ public @NonNullByDefault class Serv {
                 setDirty(sess, TraderSess.DIRTY_POSN);
             }
         }
-        flushDirty();
+        updateDirty();
     }
 
     public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
@@ -736,9 +750,9 @@ public @NonNullByDefault class Serv {
         final long orderId = book.allocOrderId();
         final Order order = factory.newOrder(orderId, sess.getMnem(), book, ref, side, ticks, lots,
                 minLots, now);
-        final Exec exec = newExec(book, order, now);
 
-        trans.reset(book, order, exec);
+        final Exec exec = newExec(book, order, now);
+        trans.reset(sess.getMnem(), book, order, exec);
         // Order fields are updated on match.
         matchOrders(sess, book, order, trans);
         // Place incomplete order in market.
@@ -750,8 +764,9 @@ public @NonNullByDefault class Serv {
         // any unfilled quantity.
         boolean success = false;
         try {
-            final SlNode first = trans.prepareExecList();
-            journ.insertExecList(book.getMnem(), first);
+            final JslNode firstExec = trans.prepareExecList();
+            assert firstExec != null;
+            journ.insertExecList(book.getMnem(), firstExec);
             success = true;
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
@@ -761,11 +776,14 @@ public @NonNullByDefault class Serv {
                 book.removeOrder(order);
             }
         }
-        // Final commit phase cannot fail.
+
+        // Commit phase.
+
         sess.insertOrder(order);
         // Commit trans to cycle and free matches.
         commitMatches(sess, book, now, trans);
-        flushDirty();
+
+        updateDirty();
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, Order order, long lots,
@@ -785,19 +803,21 @@ public @NonNullByDefault class Serv {
 
         final Exec exec = newExec(book, order, now);
         exec.revise(lots);
+        trans.reset(sess.getMnem(), book, order, exec);
         try {
             journ.insertExec(exec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
-        // Final commit phase cannot fail.
+        // Commit phase.
+
+        setDirty(book);
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
         book.reviseOrder(order, lots, now);
 
-        trans.reset(book, order, exec);
-        setDirty(book, MarketBook.DIRTY_VIEW);
-        setDirty(sess, TraderSess.DIRTY_ORDER);
-        flushDirty();
+        updateDirty();
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, long id, long lots, long now,
@@ -819,26 +839,96 @@ public @NonNullByDefault class Serv {
         reviseOrder(sess, book, order, lots, now, trans);
     }
 
+    public final void reviseOrder(TraderSess sess, MarketBook book, JslNode first, long lots,
+            long now, Trans trans) throws BadRequestException, NotFoundException,
+            ServiceUnavailableException {
+
+        trans.reset(sess.getMnem(), book);
+
+        final String market = book.getMarket();
+        JslNode jslNode = first;
+        do {
+            final MarketId mid = (MarketId) jslNode;
+            jslNode = jslNode.jslNext();
+
+            final long id = mid.getId();
+
+            final Order order = sess.findOrder(market, id);
+            if (order == null) {
+                throw new NotFoundException(String.format("order '%d' does not exist", id));
+            }
+            if (order.isDone()) {
+                throw new BadRequestException(String.format("order '%d' is done", id));
+            }
+            // Revised lots must not be:
+            // 1. less than min lots;
+            // 2. less than executed lots;
+            // 3. greater than original lots.
+            if (lots == 0 || lots < order.getMinLots() || lots < order.getExec()
+                    || lots > order.getLots()) {
+                throw new BadRequestException(String.format("invalid lots '%d'", lots));
+            }
+
+            final Exec exec = newExec(book, order, now);
+            exec.revise(lots);
+
+            trans.orders.insertBack(order);
+            trans.execs.insertBack(exec);
+
+        } while (jslNode != null);
+
+        try {
+            final JslNode firstExec = trans.prepareExecList();
+            assert firstExec != null;
+            journ.insertExecList(book.getMnem(), firstExec);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(book);
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        SlNode node = trans.getFirstExec();
+        assert node != null;
+        do {
+            final Exec exec = (Exec) node;
+            node = node.slNext();
+
+            final Order order = sess.findOrder(market, exec.getOrderId());
+            assert order != null;
+
+            book.reviseOrder(order, lots, now);
+
+        } while (node != null);
+
+        updateDirty();
+    }
+
     public final void cancelOrder(TraderSess sess, MarketBook book, Order order, long now,
             Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
+
         final Exec exec = newExec(book, order, now);
         exec.cancel();
+        trans.reset(sess.getMnem(), book, order, exec);
         try {
             journ.insertExec(exec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
-        // Final commit phase cannot fail.
+        // Commit phase.
+
+        setDirty(book);
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
         book.cancelOrder(order, now);
 
-        trans.reset(book, order, exec);
-        setDirty(book, MarketBook.DIRTY_VIEW);
-        setDirty(sess, TraderSess.DIRTY_ORDER);
-        flushDirty();
+        updateDirty();
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, long id, long now, Trans trans)
@@ -859,10 +949,65 @@ public @NonNullByDefault class Serv {
         cancelOrder(sess, book, order, now, trans);
     }
 
+    public final void cancelOrder(TraderSess sess, MarketBook book, JslNode first, long now,
+            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
+
+        trans.reset(sess.getMnem(), book);
+
+        final String market = book.getMarket();
+        JslNode jslNode = first;
+        do {
+            final MarketId mid = (MarketId) jslNode;
+            jslNode = jslNode.jslNext();
+
+            final long id = mid.getId();
+            final Order order = sess.findOrder(market, id);
+            if (order == null) {
+                throw new NotFoundException(String.format("order '%d' does not exist", id));
+            }
+            if (order.isDone()) {
+                throw new BadRequestException(String.format("order '%d' is done", id));
+            }
+
+            final Exec exec = newExec(book, order, now);
+            exec.cancel();
+
+            trans.orders.insertBack(order);
+            trans.execs.insertBack(exec);
+
+        } while (jslNode != null);
+
+        try {
+            final JslNode firstExec = trans.prepareExecList();
+            assert firstExec != null;
+            journ.insertExecList(book.getMnem(), firstExec);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(book);
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        SlNode node = trans.getFirstExec();
+        assert node != null;
+        do {
+            final Exec exec = (Exec) node;
+            node = node.slNext();
+
+            final Order order = sess.findOrder(market, exec.getOrderId());
+            assert order != null;
+
+            book.cancelOrder(order, now);
+
+        } while (node != null);
+
+        updateDirty();
+    }
+
     /**
      * Cancels all orders.
-     * 
-     * This method is not executed atomically, so it may partially fail.
      * 
      * @param sess
      *            The session.
@@ -873,34 +1018,61 @@ public @NonNullByDefault class Serv {
      */
     public final void cancelOrders(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
-        for (;;) {
+
+        // Build list of cancel executions.
+
+        JslNode firstExec = null;
+        for (RbNode node = sess.getFirstOrder(); node != null; node = node.rbNext()) {
             final Order order = (Order) sess.getRootOrder();
-            if (order == null) {
-                break;
+            assert order != null;
+            if (!order.isDone()) {
+                continue;
             }
             final MarketBook book = (MarketBook) markets.find(order.getMarket());
             assert book != null;
 
             final Exec exec = newExec(book, order, now);
             exec.cancel();
-            try {
-                journ.insertExec(exec);
-            } catch (final RejectedExecutionException e) {
-                throw new ServiceUnavailableException("journal is busy", e);
-            }
+            // Stack push.
+            exec.setJslNext(firstExec);
+            firstExec = exec;
+        }
+        if (firstExec == null) {
+            return;
+        }
 
-            // Final commit phase cannot fail.
-            setDirty(book, MarketBook.DIRTY_VIEW);
+        try {
+            journ.insertExecList(firstExec);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        for (;;) {
+            final Order order = (Order) sess.getRootOrder();
+            if (order == null) {
+                break;
+            }
+            if (!order.isDone()) {
+                continue;
+            }
+            final MarketBook book = (MarketBook) markets.find(order.getMarket());
+            assert book != null;
+
+            setDirty(book);
             book.cancelOrder(order, now);
         }
-        setDirty(sess, TraderSess.DIRTY_ORDER);
-        flushDirty();
+
+        updateDirty();
     }
 
     public final void cancelOrders(MarketBook book, long now) throws NotFoundException,
             ServiceUnavailableException {
         doCancelOrders(book, now);
-        flushDirty();
+        updateDirty();
     }
 
     public final void archiveOrder(TraderSess sess, Order order, long now)
@@ -914,11 +1086,14 @@ public @NonNullByDefault class Serv {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
         // No need to update timestamps on order because it is immediately freed.
         sess.removeOrder(order);
 
-        setDirty(sess, TraderSess.DIRTY_ORDER);
-        flushDirty();
+        updateDirty();
     }
 
     public final void archiveOrder(TraderSess sess, String market, long id, long now)
@@ -933,8 +1108,6 @@ public @NonNullByDefault class Serv {
     /**
      * Archive all orders.
      * 
-     * This method is not updated atomically, so it may partially fail.
-     * 
      * @param sess
      *            The session.
      * @param now
@@ -944,8 +1117,90 @@ public @NonNullByDefault class Serv {
      */
     public final void archiveOrders(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
-        doArchiveOrders(sess, now);
-        flushDirty();
+
+        MarketId firstMid = null;
+        for (RbNode node = sess.getFirstOrder(); node != null; node = node.rbNext()) {
+            final Order order = (Order) node;
+            if (!order.isDone()) {
+                continue;
+            }
+            final MarketId mid = new MarketId(order.getId(), order.getMarket());
+            mid.setJslNext(firstMid);
+            firstMid = mid;
+        }
+        if (firstMid == null) {
+            return;
+        }
+
+        try {
+            journ.archiveOrderList(firstMid, now);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        RbNode node = sess.getFirstOrder();
+        while (node != null) {
+            final Order order = (Order) node;
+            // Move to next node before this order is unlinked.
+            node = node.rbNext();
+            if (!order.isDone()) {
+                continue;
+            }
+            // No need to update timestamps on order because it is immediately freed.
+            sess.removeOrder(order);
+        }
+
+        updateDirty();
+    }
+
+    public final void archiveOrders(TraderSess sess, String market, JslNode first, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+
+        JslNode node = first;
+        do {
+            final MarketId mid = (MarketId) node;
+            node = node.jslNext();
+
+            final long id = mid.getId();
+            final Order order = sess.findOrder(market, id);
+            if (order == null) {
+                throw new NotFoundException(String.format("order '%d' does not exist", id));
+            }
+            if (!order.isDone()) {
+                throw new BadRequestException(
+                        String.format("order '%d' is not done", order.getId()));
+            }
+            mid.setMarket(market);
+        } while (node != null);
+
+        try {
+            journ.archiveOrderList(market, first, now);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_ORDER);
+
+        // The list can be safely traversed here because the archive operation will not modify it.
+        node = first;
+        do {
+            final MarketId mid = (MarketId) node;
+            node = node.jslNext();
+
+            final long id = mid.getId();
+            final Order order = sess.findOrder(market, id);
+            assert order != null;
+            // No need to update timestamps on order because it is immediately freed.
+            sess.removeOrder(order);
+        } while (node != null);
+
+        updateDirty();
     }
 
     public final Exec createTrade(TraderSess sess, MarketBook book, String ref, Side side,
@@ -955,6 +1210,7 @@ public @NonNullByDefault class Serv {
         final Exec trade = Exec.manual(book.allocExecId(), sess.getMnem(), book.getMnem(),
                 book.getContr(), book.getSettlDay(), ref, side, ticks, lots, role, cpty, created);
         if (cpty != null) {
+
             // Create back-to-back trade if counter-party is specified.
             final TraderSess cptySess = (TraderSess) traders.find(cpty);
             if (cptySess == null) {
@@ -963,28 +1219,38 @@ public @NonNullByDefault class Serv {
             final Posn cptyPosn = cptySess.getLazyPosn(book);
             final Exec cptyTrade = trade.inverse(book.allocExecId());
             trade.setSlNext(cptyTrade);
+
             try {
                 journ.insertExecList(book.getMnem(), trade);
             } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
+
+            // Commit phase.
+
+            // Update counter-party cache entries.
+            setDirty(cptySess, TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
+
             sess.insertTrade(trade);
             posn.addTrade(trade);
             cptySess.insertTrade(cptyTrade);
             cptyPosn.addTrade(cptyTrade);
-            // Update counter-party cache entries.
-            setDirty(cptySess, TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
+
         } else {
+
             try {
                 journ.insertExec(trade);
             } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
+
+            // Commit phase.
+
             sess.insertTrade(trade);
             posn.addTrade(trade);
         }
         setDirty(sess, TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
-        flushDirty();
+        updateDirty();
         return trade;
     }
 
@@ -999,10 +1265,14 @@ public @NonNullByDefault class Serv {
             throw new ServiceUnavailableException("journal is busy", e);
         }
 
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_TRADE);
+
         // No need to update timestamps on trade because it is immediately freed.
         sess.removeTrade(trade);
-        setDirty(sess, TraderSess.DIRTY_TRADE);
-        flushDirty();
+
+        updateDirty();
     }
 
     public final void archiveTrade(TraderSess sess, String market, long id, long now)
@@ -1017,8 +1287,6 @@ public @NonNullByDefault class Serv {
     /**
      * Archive all trades.
      * 
-     * This method is not executed atomically, so it may partially fail.
-     * 
      * @param sess
      *            The session.
      * @param now
@@ -1028,14 +1296,79 @@ public @NonNullByDefault class Serv {
      */
     public final void archiveTrades(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
-        doArchiveTrades(sess, now);
-        flushDirty();
+
+        MarketId firstMid = null;
+        for (RbNode node = sess.getFirstTrade(); node != null; node = node.rbNext()) {
+            final Exec trade = (Exec) node;
+            final MarketId mid = new MarketId(trade.getId(), trade.getMarket());
+            mid.setJslNext(firstMid);
+            firstMid = mid;
+        }
+        if (firstMid == null) {
+            return;
+        }
+
+        try {
+            journ.archiveTradeList(firstMid, now);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_TRADE);
+
+        for (;;) {
+            final Exec trade = (Exec) sess.getRootTrade();
+            if (trade == null) {
+                break;
+            }
+            // No need to update timestamps on trade because it is immediately freed.
+            sess.removeTrade(trade);
+        }
+
+        updateDirty();
     }
 
-    public final void archiveAll(TraderSess sess, long now) throws NotFoundException,
-            ServiceUnavailableException {
-        doArchiveOrders(sess, now);
-        doArchiveTrades(sess, now);
-        flushDirty();
+    public final void archiveTrades(TraderSess sess, String market, JslNode first, long now)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+
+        JslNode node = first;
+        do {
+            final MarketId mid = (MarketId) node;
+            node = node.jslNext();
+
+            final long id = mid.getId();
+            final Exec trade = sess.findTrade(market, id);
+            if (trade == null) {
+                throw new NotFoundException(String.format("trade '%d' does not exist", id));
+            }
+            mid.setMarket(market);
+        } while (node != null);
+
+        try {
+            journ.archiveTradeList(market, first, now);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(sess, TraderSess.DIRTY_TRADE);
+
+        // The list can be safely traversed here because the archive operation will not modify it.
+        node = first;
+        do {
+            final MarketId mid = (MarketId) node;
+            node = node.jslNext();
+
+            final long id = mid.getId();
+            final Exec trade = sess.findTrade(market, id);
+            assert trade != null;
+            // No need to update timestamps on order because it is immediately freed.
+            sess.removeTrade(trade);
+        } while (node != null);
+
+        updateDirty();
     }
 }
