@@ -404,7 +404,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         serv.acquireWrite();
         try {
             final TraderSess sess = serv.getTrader(trader);
-            serv.archiveOrders(sess, market, first, now);
+            serv.archiveOrder(sess, market, first, now);
         } finally {
             serv.releaseWrite();
         }
@@ -484,7 +484,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         serv.acquireWrite();
         try {
             final TraderSess sess = serv.getTrader(trader);
-            serv.archiveTrades(sess, market, first, now);
+            serv.archiveTrade(sess, market, first, now);
         } finally {
             serv.releaseWrite();
         }
@@ -512,8 +512,8 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
-            serv.expireMarkets(now);
-            serv.settlMarkets(now);
+            serv.expireEndOfDay(now);
+            serv.settlEndOfDay(now);
         } finally {
             serv.releaseWrite();
         }

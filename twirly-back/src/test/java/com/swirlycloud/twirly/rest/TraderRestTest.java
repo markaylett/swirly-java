@@ -7,7 +7,6 @@ import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
@@ -26,8 +25,10 @@ import com.swirlycloud.twirly.rest.BackUnrest.SessStruct;
 
 public final class TraderRestTest extends RestTest {
 
+    // Find Trader.
+
     @Test
-    public final void testFindTraderByEmail() {
+    public final void testFindByEmail() {
 
         String trader = unrest.findTraderByEmail("mark.aylett@gmail.com");
         assertEquals("MARAYL", trader);
@@ -36,8 +37,10 @@ public final class TraderRestTest extends RestTest {
         assertNull(trader);
     }
 
+    // Get Trader.
+
     @Test
-    public final void testGetSess() throws BadRequestException, NotFoundException,
+    public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
         postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
@@ -56,8 +59,10 @@ public final class TraderRestTest extends RestTest {
                 out.posns.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
+    // Create Trader.
+
     @Test
-    public final void testPostTrader() throws BadRequestException, NotFoundException,
+    public final void testCreate() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
 
         Trader trader = postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com");
@@ -68,24 +73,24 @@ public final class TraderRestTest extends RestTest {
             assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
             trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL2", PARAMS_NONE, NOW);
         }
-
-        // Duplicate mnemonic.
-        try {
-            postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com");
-            fail("Expected exception");
-        } catch (final BadRequestException e) {
-        }
-
-        // Duplicate email.
-        try {
-            postTrader("MARAYL3", "Mark Aylett", "mark.aylett@gmail.com");
-            fail("Expected exception");
-        } catch (final BadRequestException e) {
-        }
     }
 
+    @Test(expected = BadRequestException.class)
+    public final void testCreateDupMnem() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        postTrader("MARAYL", "Mark Aylett", "mark.aylett@swirlycloud.com");
+    }
+
+    @Test(expected = BadRequestException.class)
+    public final void testCreateDupEmail() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        postTrader("MARAYL2", "Mark Aylett", "mark.aylett@gmail.com");
+    }
+
+    // Update Trader.
+
     @Test
-    public final void testPutTrader() throws BadRequestException, NotFoundException,
+    public final void testUpdate() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
 
         Trader trader = postTrader("MARAYL2", "Mark Aylett", "mark.aylett@swirlycloud.com");

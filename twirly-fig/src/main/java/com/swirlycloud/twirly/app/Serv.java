@@ -704,7 +704,8 @@ public @NonNullByDefault class Serv {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void expireMarkets(long now) throws NotFoundException, ServiceUnavailableException {
+    public final void expireEndOfDay(long now) throws NotFoundException,
+            ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final MarketBook book = (MarketBook) node;
@@ -716,7 +717,7 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void settlMarkets(long now) {
+    public final void settlEndOfDay(long now) {
         final int busDay = getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final MarketBook book = (MarketBook) node;
@@ -1016,7 +1017,7 @@ public @NonNullByDefault class Serv {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void cancelOrders(TraderSess sess, long now) throws NotFoundException,
+    public final void cancelOrder(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
 
         // Build list of cancel executions.
@@ -1069,7 +1070,7 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void cancelOrders(MarketBook book, long now) throws NotFoundException,
+    public final void cancelOrder(MarketBook book, long now) throws NotFoundException,
             ServiceUnavailableException {
         doCancelOrders(book, now);
         updateDirty();
@@ -1115,7 +1116,7 @@ public @NonNullByDefault class Serv {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void archiveOrders(TraderSess sess, long now) throws NotFoundException,
+    public final void archiveOrder(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
 
         MarketId firstMid = null;
@@ -1157,7 +1158,7 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void archiveOrders(TraderSess sess, String market, JslNode first, long now)
+    public final void archiveOrder(TraderSess sess, String market, JslNode first, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
         JslNode node = first;
@@ -1294,7 +1295,7 @@ public @NonNullByDefault class Serv {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void archiveTrades(TraderSess sess, long now) throws NotFoundException,
+    public final void archiveTrade(TraderSess sess, long now) throws NotFoundException,
             ServiceUnavailableException {
 
         MarketId firstMid = null;
@@ -1330,7 +1331,7 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void archiveTrades(TraderSess sess, String market, JslNode first, long now)
+    public final void archiveTrade(TraderSess sess, String market, JslNode first, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
         JslNode node = first;

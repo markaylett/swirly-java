@@ -21,8 +21,10 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 
 public final class ViewRestTest extends RestTest {
 
+    // Get View.
+
     @Test
-    public final void testGetView() throws BadRequestException, NotFoundException, IOException {
+    public final void testGetAll() throws BadRequestException, NotFoundException, IOException {
 
         long now = NOW;
 
@@ -43,7 +45,7 @@ public final class ViewRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetViewMarket() throws BadRequestException, NotFoundException,
+    public final void testGetByMarket() throws BadRequestException, NotFoundException,
             IOException {
 
         long now = NOW;
