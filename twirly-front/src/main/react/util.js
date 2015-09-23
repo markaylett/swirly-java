@@ -98,6 +98,13 @@ function Map() {
     this.delete = function(k) {
         delete map[k];
     }
+    this.push = function(k, v) {
+        if (map.hasOwnProperty(k)) {
+            map[k].push(v);
+        } else {
+            map[k] = [v];
+        }
+    }
     this.set = function(k, v) {
         map[k] = v;
     }

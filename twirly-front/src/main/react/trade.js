@@ -122,14 +122,14 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    putOrder: function(market, id, lots) {
-        console.debug('putOrder: market=' + market + ', id=' + id + ', lots=' + lots);
+    putOrder: function(market, ids, lots) {
+        console.debug('putOrder: market=' + market + ', ids=[' + ids + '], lots=' + lots);
         var req = {};
         if (!isSpecified(market)) {
             this.onReportError(internalError('market not specified'));
             return;
         }
-        if (!isSpecified(id)) {
+        if (!Array.isArray(ids) || ids.length === 0) {
             this.onReportError(internalError('order-id not specified'));
             return;
         }
@@ -139,10 +139,10 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('lots not specified'));
             return;
         }
-
+        req.ids = ids;
         $.ajax({
             type: 'put',
-            url: '/back/sess/order/' + market + '/' + id,
+            url: '/back/sess/order/' + market + '/batch',
             data: JSON.stringify(req)
         }).done(function(trans) {
             this.applyTrans(trans);
@@ -150,24 +150,27 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    deleteOrder: function(market, id) {
-        console.debug('deleteOrder: market=' + market + ', id=' + id);
+    deleteOrder: function(market, ids) {
+        console.debug('deleteOrder: market=' + market + ', id=' + ids);
         if (!isSpecified(market)) {
             this.onReportError(internalError('market not specified'));
             return;
         }
-        if (!isSpecified(id)) {
+        if (!Array.isArray(ids) || ids.length === 0) {
             this.onReportError(internalError('order-id not specified'));
             return;
         }
         $.ajax({
             type: 'delete',
-            url: '/back/sess/order/' + market + '/' + id
+            url: '/back/sess/order/' + market + '/batch',
+            data: JSON.stringify({ ids: ids })
         }).done(function(unused) {
-            var key = market + '/' + zeroPad(id);
             var done = this.staging.done;
             var sess = this.state.sess;
-            done.delete(key);
+            ids.forEach(function(id) {
+                var key = market + '/' + zeroPad(id);
+                done.delete(key);
+            }.bind(this));
             this.setState({
                 sess: {
                     working: sess.working,
@@ -180,24 +183,27 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    deleteTrade: function(market, id) {
-        console.debug('deleteTrade: market=' + market + ', id=' + id);
+    deleteTrade: function(market, ids) {
+        console.debug('deleteTrade: market=' + market + ', ids=[' + ids + ']');
         if (!isSpecified(market)) {
             this.onReportError(internalError('market not specified'));
             return;
         }
-        if (!isSpecified(id)) {
+        if (!Array.isArray(ids) || ids.length === 0) {
             this.onReportError(internalError('trade-id not specified'));
             return;
         }
         $.ajax({
             type: 'delete',
-            url: '/back/sess/trade/' + market + '/' + id
+            url: '/back/sess/trade/' + market + '/batch',
+            data: JSON.stringify({ ids: ids })
         }).done(function(unused) {
-            var key = market + '/' + zeroPad(id);
             var trades = this.staging.trades;
             var sess = this.state.sess;
-            trades.delete(key);
+            ids.forEach(function(id) {
+                var key = market + '/' + zeroPad(id);
+                trades.delete(key);
+            }.bind(this));
             this.setState({
                 sess: {
                     working: sess.working,
@@ -320,26 +326,42 @@ var TradeModuleImpl = React.createClass({
     },
     onReviseAll: function(lots) {
         if (this.staging.context === 'working') {
+            var batches = new Map();
             this.staging.selectedWorking.forEach(function(key, order) {
-                this.putOrder(order.market, order.id, lots);
+                batches.push(order.market, order.id);
+            }.bind(this));
+            batches.forEach(function(market, ids) {
+                this.putOrder(market, ids, lots);
             }.bind(this));
         }
     },
     onCancelAll: function() {
         if (this.staging.context === 'working') {
+            var batches = new Map();
             this.staging.selectedWorking.forEach(function(key, order) {
-                this.putOrder(order.market, order.id, 0);
+                batches.push(order.market, order.id);
+            }.bind(this));
+            batches.forEach(function(market, ids) {
+                this.putOrder(market, ids, 0);
             }.bind(this));
         }
     },
     onArchiveAll: function() {
         if (this.staging.context === 'done') {
+            var batches = new Map();
             this.staging.selectedDone.forEach(function(key, order) {
-                this.deleteOrder(order.market, order.id);
+                batches.push(order.market, order.id);
+            }.bind(this));
+            batches.forEach(function(market, ids) {
+                this.deleteOrder(market, ids);
             }.bind(this));
         } else if (this.staging.context === 'trades') {
+            var batches = new Map();
             this.staging.selectedTrades.forEach(function(key, trade) {
-                this.deleteTrade(trade.market, trade.id);
+                batches.push(trade.market, trade.id);
+            }.bind(this));
+            batches.forEach(function(market, ids) {
+                this.deleteTrade(market, ids);
             }.bind(this));
         }
     },
