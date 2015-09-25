@@ -1,8 +1,0 @@
-@startsalt
-{
-  Market   | "ARIBICA.SEP15"
-  Price    | "10.50        "
-  Lots     | "5            "
-  [ Buy  ] | [ Sell ]
-}
-@endsalt
