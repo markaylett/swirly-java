@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.fx.EcbRates;
 import com.swirlycloud.twirly.rest.BackRest;
@@ -30,29 +30,26 @@ public final class BackCronServlet extends RestServlet {
         try {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+
+            if (parts.length != 1) {
+                throw new MethodNotAllowedException("not allowed on this resource");
+            }
             final long now = now();
 
-            boolean match = false;
-            if (parts.length > 0) {
-                if ("endofday".equals(parts[JOB_PART])) {
-                    log("processing end-of-day");
-                    rest.getEndOfDay(now);
-                    match = true;
-                } else if ("ecbrates".equals(parts[JOB_PART])) {
-                    log("processing ecb-rates");
-                    final EcbRates ecbRates = new EcbRates();
-                    try {
-                        ecbRates.parse();
-                        log("EURUSD: " + ecbRates.getRate("EUR", "USD"));
-                    } catch (final Throwable t) {
-                        log("error: " + t.getLocalizedMessage());
-                    }
-                    match = true;
+            if ("endofday".equals(parts[JOB_PART])) {
+                log("processing end-of-day");
+                rest.getEndOfDay(now);
+            } else if ("ecbrates".equals(parts[JOB_PART])) {
+                log("processing ecb-rates");
+                final EcbRates ecbRates = new EcbRates();
+                try {
+                    ecbRates.parse();
+                    log("EURUSD: " + ecbRates.getRate("EUR", "USD"));
+                } catch (final Throwable t) {
+                    log("error: " + t.getLocalizedMessage());
                 }
-            }
-
-            if (!match) {
-                throw new NotFoundException("resource does not exist");
+            } else {
+                throw new MethodNotAllowedException("not allowed on this resource");
             }
             resp.setHeader("Cache-Control", "no-cache");
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);

@@ -21,8 +21,10 @@ import com.swirlycloud.twirly.rest.BackUnrest.PosnKey;
 
 public final class PosnRestTest extends RestTest {
 
+    // Get Posn.
+
     @Test
-    public final void testGetPosn() throws BadRequestException, NotFoundException,
+    public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
         postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
@@ -37,7 +39,7 @@ public final class PosnRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetPosnContr() throws BadRequestException, NotFoundException,
+    public final void testGetByContr() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
         postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
@@ -50,7 +52,7 @@ public final class PosnRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetPosnContrSettlDay() throws BadRequestException, NotFoundException,
+    public final void testGetByContrSettlDay() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
         postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);

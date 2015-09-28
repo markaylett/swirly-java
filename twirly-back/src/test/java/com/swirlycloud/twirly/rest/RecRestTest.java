@@ -24,8 +24,10 @@ import com.swirlycloud.twirly.rest.BackUnrest.RecStruct;
 
 public final class RecRestTest extends RestTest {
 
+    // Get Rec.
+
     @Test
-    public final void testGetRec() throws IOException {
+    public final void testGetAll() throws IOException {
 
         // With traders.
         RecStruct st = unrest.getRec(true, PARAMS_NONE, NOW);
@@ -51,7 +53,7 @@ public final class RecRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetRecType() throws IOException {
+    public final void testGetByRecType() throws IOException {
 
         Map<String, Rec> recs = unrest.getRec(RecType.ASSET, PARAMS_NONE, NOW);
         assertAssets(recs);
@@ -71,7 +73,7 @@ public final class RecRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetRecTypeMnem() throws NotFoundException, IOException {
+    public final void testGetByTypeMnem() throws NotFoundException, IOException {
 
         final Asset asset = (Asset) unrest.getRec(RecType.ASSET, "JPY", PARAMS_NONE, NOW);
         assertAsset("JPY", asset);

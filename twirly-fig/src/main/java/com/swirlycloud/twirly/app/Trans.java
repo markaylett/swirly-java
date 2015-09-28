@@ -80,9 +80,14 @@ public final @NonNullByDefault class Trans implements AutoCloseable, Jsonifiable
         book.toJsonView(params, out);
         // Multiple orders may be updated if one trades with one's self.
         out.append(",\"orders\":[");
+        int i = 0;
         for (SlNode node = orders.getFirst(); node != null; node = node.slNext()) {
             final Order order = (Order) node;
+            if (i > 0) {
+                out.append(',');
+            }
             order.toJson(params, out);
+            ++i;
         }
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
@@ -93,7 +98,7 @@ public final @NonNullByDefault class Trans implements AutoCloseable, Jsonifiable
             match.makerOrder.toJson(params, out);
         }
         out.append("],\"execs\":[");
-        int i = 0;
+        i = 0;
         for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
             if (!exec.getTrader().equals(trader)) {

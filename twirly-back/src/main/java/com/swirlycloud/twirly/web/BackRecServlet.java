@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ForbiddenException;
 import com.swirlycloud.twirly.exception.MethodNotAllowedException;
-import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.rest.BackRest;
@@ -41,7 +40,7 @@ public final class BackRecServlet extends RecServlet {
             final String[] parts = splitPath(pathInfo);
 
             if (parts.length != 1) {
-                throw new MethodNotAllowedException("post is not allowed on this resource");
+                throw new MethodNotAllowedException("not allowed on this resource");
             }
 
             final Request r = parseRequest(req);
@@ -80,7 +79,7 @@ public final class BackRecServlet extends RecServlet {
                         resp.getWriter());
 
             } else {
-                throw new NotFoundException("resource does not exist");
+                throw new MethodNotAllowedException("not allowed on this resource");
             }
             sendJsonResponse(resp);
         } catch (final ServException e) {
@@ -104,7 +103,7 @@ public final class BackRecServlet extends RecServlet {
             final String[] parts = splitPath(pathInfo);
 
             if (parts.length != 1) {
-                throw new MethodNotAllowedException("put is not allowed on this resource");
+                throw new MethodNotAllowedException("not allowed on this resource");
             }
 
             final Request r = parseRequest(req);
@@ -141,7 +140,7 @@ public final class BackRecServlet extends RecServlet {
                 rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now, resp.getWriter());
 
             } else {
-                throw new NotFoundException("resource does not exist");
+                throw new MethodNotAllowedException("not allowed on this resource");
             }
             sendJsonResponse(resp);
         } catch (final ServException e) {

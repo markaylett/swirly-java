@@ -22,6 +22,7 @@ import org.junit.Before;
 import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.MarketView;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
@@ -281,6 +282,17 @@ public abstract class RestTest {
             @NonNull JslNode first) throws BadRequestException, NotFoundException,
             ServiceUnavailableException {
         unrest.deleteTrade(mnem, market, first, NOW);
+    }
+
+    protected final @NonNull JslNode jslList(Long... ids) {
+        MarketId firstMid = null;
+        for (long id : ids) {
+            final MarketId mid = new MarketId(id);
+            mid.setJslNext(firstMid);
+            firstMid = mid;
+        }
+        assert firstMid != null;
+        return firstMid;
     }
 
     @SuppressWarnings("resource")

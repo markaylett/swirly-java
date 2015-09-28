@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.MethodNotAllowedException;
-import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.rest.BackRest;
@@ -39,27 +38,34 @@ public final class BackSessServlet extends SessServlet {
 
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
+
+            if (parts.length != 3) {
+                throw new MethodNotAllowedException("not allowed on this resource");
+            }
+            final String market = parts[MARKET_PART];
             final long now = now();
 
-            boolean match = false;
-            if (parts.length > 0) {
-                if ("order".equals(parts[TYPE_PART])) {
-                    if (parts.length == 3) {
-                        rest.deleteOrder(trader, parts[MARKET_PART],
-                                Long.parseLong(parts[ID_PART]), now);
-                        match = true;
-                    }
-                } else if ("trade".equals(parts[TYPE_PART])) {
-                    if (parts.length == 3) {
-                        rest.deleteTrade(trader, parts[MARKET_PART],
-                                Long.parseLong(parts[ID_PART]), now);
-                        match = true;
-                    }
+            if ("batch".equals(parts[ID_PART])) {
+                final Request r = parseRequest(req);
+                if (!r.isIdsSet()) {
+                    throw new BadRequestException("request fields are invalid");
                 }
-            }
-
-            if (!match) {
-                throw new NotFoundException("resource does not exist");
+                if ("order".equals(parts[TYPE_PART])) {
+                    rest.deleteOrder(trader, market, r.getIds(), now);
+                } else if ("trade".equals(parts[TYPE_PART])) {
+                    rest.deleteTrade(trader, market, r.getIds(), now);
+                } else {
+                    throw new MethodNotAllowedException("not allowed on this resource");
+                }
+            } else {
+                final long id = Long.parseLong(parts[ID_PART]);
+                if ("order".equals(parts[TYPE_PART])) {
+                    rest.deleteOrder(trader, market, id, now);
+                } else if ("trade".equals(parts[TYPE_PART])) {
+                    rest.deleteTrade(trader, market, id, now);
+                } else {
+                    throw new MethodNotAllowedException("not allowed on this resource");
+                }
             }
             resp.setHeader("Cache-Control", "no-cache");
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -86,7 +92,7 @@ public final class BackSessServlet extends SessServlet {
             final String[] parts = splitPath(pathInfo);
 
             if (parts.length != 2) {
-                throw new MethodNotAllowedException("post is not allowed on this resource");
+                throw new MethodNotAllowedException("not allowed on this resource");
             }
             final String market = parts[MARKET_PART];
             final long now = now();
@@ -115,7 +121,7 @@ public final class BackSessServlet extends SessServlet {
                 rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(), r.getTicks(),
                         r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
             } else {
-                throw new NotFoundException("resource does not exist");
+                throw new MethodNotAllowedException("not allowed on this resource");
             }
             sendJsonResponse(resp);
         } catch (final ServException e) {
@@ -144,14 +150,24 @@ public final class BackSessServlet extends SessServlet {
                 throw new MethodNotAllowedException("put is not allowed on this resource");
             }
             final String market = parts[MARKET_PART];
-            final long id = Long.parseLong(parts[ID_PART]);
+            final long now = now();
 
             final Request r = parseRequest(req);
-            if (!r.isLotsSet()) {
-                throw new BadRequestException("request fields are invalid");
+            if ("batch".equals(parts[ID_PART])) {
+                final int required = Request.IDS | Request.LOTS;
+                if (!r.isValid(required)) {
+                    throw new BadRequestException("request fields are invalid");
+                }
+                rest.putOrder(trader, market, r.getIds(), r.getLots(), PARAMS_NONE, now,
+                        resp.getWriter());
+            } else {
+                if (!r.isLotsSet()) {
+                    throw new BadRequestException("request fields are invalid");
+                }
+                final long id = Long.parseLong(parts[ID_PART]);
+                rest.putOrder(trader, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());
             }
-            final long now = now();
-            rest.putOrder(trader, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());
+
             sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);

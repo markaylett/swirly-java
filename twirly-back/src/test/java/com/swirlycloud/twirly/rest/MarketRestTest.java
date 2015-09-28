@@ -18,17 +18,12 @@ import com.swirlycloud.twirly.rec.RecType;
 
 public final class MarketRestTest extends RestTest {
 
-    @Test
-    public final void testPostMarket() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
-        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1, market);
-        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1,
-                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
-    }
+    // Get Market.
+
+    // Create Market.
 
     @Test
-    public final void testPostMarketSettl() throws BadRequestException, NotFoundException,
+    public final void testCreateWithSettl() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
                 EXPIRY_DAY, 0x1);
@@ -39,7 +34,18 @@ public final class MarketRestTest extends RestTest {
     }
 
     @Test
-    public final void testPutMarket() throws BadRequestException, NotFoundException,
+    public final void testCreateWithoutSettl() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1, market);
+        assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1,
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+    }
+
+    // Update Market.
+
+    @Test
+    public final void testUpdate() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
                 EXPIRY_DAY, 0x1);
@@ -50,9 +56,11 @@ public final class MarketRestTest extends RestTest {
                 (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
     }
 
+    // End-of-day.
+
     @Ignore("not implemented")
     @Test
-    public final void testGetEndOfDay() {
+    public final void testEndOfDay() {
         // FIXME
     }
 }
