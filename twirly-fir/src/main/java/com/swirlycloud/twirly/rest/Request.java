@@ -8,33 +8,29 @@ import java.io.IOException;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.node.JslNode;
 
 public final class Request {
 
-    public static final int IDS = 1 << 0;
-    public static final int MNEM = 1 << 1;
-    public static final int DISPLAY = 1 << 2;
-    public static final int EMAIL = 1 << 3;
-    public static final int TRADER = 1 << 4;
-    public static final int CONTR = 1 << 5;
-    public static final int SETTL_DATE = 1 << 6;
-    public static final int EXPIRY_DATE = 1 << 7;
-    public static final int STATE = 1 << 8;
-    public static final int REF = 1 << 9;
-    public static final int SIDE = 1 << 10;
-    public static final int TICKS = 1 << 11;
-    public static final int LOTS = 1 << 12;
-    public static final int MIN_LOTS = 1 << 13;
-    public static final int ROLE = 1 << 14;
-    public static final int CPTY = 1 << 15;
+    public static final int MNEM = 1 << 0;
+    public static final int DISPLAY = 1 << 1;
+    public static final int EMAIL = 1 << 2;
+    public static final int TRADER = 1 << 3;
+    public static final int CONTR = 1 << 4;
+    public static final int SETTL_DATE = 1 << 5;
+    public static final int EXPIRY_DATE = 1 << 6;
+    public static final int STATE = 1 << 7;
+    public static final int REF = 1 << 8;
+    public static final int SIDE = 1 << 9;
+    public static final int TICKS = 1 << 10;
+    public static final int LOTS = 1 << 11;
+    public static final int MIN_LOTS = 1 << 12;
+    public static final int ROLE = 1 << 13;
+    public static final int CPTY = 1 << 14;
 
     private int fields;
 
-    private MarketId ids;
     private String mnem;
     private String display;
     private String email;
@@ -51,28 +47,8 @@ public final class Request {
     private Role role;
     private String cpty;
 
-    private static MarketId parseArray(JsonParser p) throws IOException {
-        MarketId firstMid = null;
-        while (p.hasNext()) {
-            final Event event = p.next();
-            switch (event) {
-            case END_ARRAY:
-                return firstMid;
-            case VALUE_NUMBER:
-                final MarketId mid = new MarketId(p.getLong());
-                mid.setJslNext(firstMid);
-                firstMid = mid;
-                break;
-            default:
-                throw new IOException(String.format("unexpected json token '%s'", event));
-            }
-        }
-        throw new IOException("end-of array not found");
-    }
-
     public final void clear() {
         fields = 0;
-        ids = null;
         mnem = null;
         display = null;
         email = null;
@@ -99,14 +75,6 @@ public final class Request {
                 break;
             case KEY_NAME:
                 name = p.getString();
-                break;
-            case START_ARRAY:
-                if ("ids".equals(name)) {
-                    fields |= IDS;
-                    ids = parseArray(p);
-                } else {
-                    throw new IOException(String.format("unexpected array field '%s'", name));
-                }
                 break;
             case VALUE_NULL:
                 if ("mnem".equals(name)) {
@@ -211,14 +179,6 @@ public final class Request {
 
     public final int getFields() {
         return fields;
-    }
-
-    public final boolean isIdsSet() {
-        return (fields & IDS) != 0;
-    }
-
-    public final JslNode getIds() {
-        return ids;
     }
 
     public final boolean isMnemSet() {

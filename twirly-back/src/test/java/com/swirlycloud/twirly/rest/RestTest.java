@@ -284,10 +284,10 @@ public abstract class RestTest {
         unrest.deleteTrade(mnem, market, first, NOW);
     }
 
-    protected final @NonNull JslNode jslList(Long... ids) {
+    protected final @NonNull JslNode jslList(@NonNull String market, Long... ids) {
         MarketId firstMid = null;
         for (long id : ids) {
-            final MarketId mid = new MarketId(id);
+            final MarketId mid = new MarketId(market, id);
             mid.setJslNext(firstMid);
             firstMid = mid;
         }
