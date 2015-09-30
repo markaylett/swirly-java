@@ -6,26 +6,33 @@ package com.swirlycloud.twirly.app;
 import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import quickfix.Acceptor;
 import quickfix.Application;
 import quickfix.ConfigError;
+import quickfix.DefaultMessageFactory;
 import quickfix.DoNotSend;
 import quickfix.FieldConvertError;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
+import quickfix.LogFactory;
 import quickfix.Message;
 import quickfix.RejectLogon;
 import quickfix.Session;
 import quickfix.SessionID;
 import quickfix.SessionNotFound;
 import quickfix.SessionSettings;
+import quickfix.SocketAcceptor;
 import quickfix.UnsupportedMessageType;
 import quickfix.field.ClOrdID;
 import quickfix.field.MinQty;
@@ -53,10 +60,11 @@ import com.swirlycloud.twirly.exception.FixRejectException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 
-public final class FixServer extends MessageCracker implements Application {
+public final class FixServ extends MessageCracker implements AutoCloseable, Application {
 
-    private final static Logger log = LoggerFactory.getLogger(FixServer.class);
+    private final static Logger log = LoggerFactory.getLogger(FixServ.class);
     private static final ThreadLocal<FixBuilder> builderTls = new ThreadLocal<FixBuilder>() {
         @Override
         protected final FixBuilder initialValue() {
@@ -67,6 +75,7 @@ public final class FixServer extends MessageCracker implements Application {
     private final SessionSettings settings;
     // Guarded by serv lock.
     private final LockableServ serv;
+    private Acceptor acceptor;
     private final boolean nowFromTransactTime;
     // Guarded by serv lock.
     private final Map<String, SessionID> traderIdx = new HashMap<>();
@@ -77,7 +86,7 @@ public final class FixServer extends MessageCracker implements Application {
         return builder;
     }
 
-    private static void sendToTarget(Message message, SessionID sessionId) {
+    private static void sendToTarget(@NonNull Message message, @NonNull SessionID sessionId) {
         try {
             Session.sendToTarget(message, sessionId);
         } catch (final SessionNotFound e) {
@@ -86,12 +95,12 @@ public final class FixServer extends MessageCracker implements Application {
         }
     }
 
-    private final long getNow(Message message) throws FieldNotFound {
+    private final long getNow(@NonNull Message message) throws FieldNotFound {
         return nowFromTransactTime ? message.getUtcTimeStamp(TransactTime.FIELD).getTime() : now();
     }
 
     @SuppressWarnings("null")
-    private final TraderSess getTraderLocked(SessionID sessionId) throws NotFoundException {
+    private final TraderSess getTraderLocked(@NonNull SessionID sessionId) throws NotFoundException {
         try {
             return serv.getTrader(settings.getString(sessionId, "Trader"));
         } catch (ConfigError | FieldConvertError e) {
@@ -99,28 +108,35 @@ public final class FixServer extends MessageCracker implements Application {
         }
     }
 
-    private final void sendBusinessReject(Message refMsg, String refId, String text,
-            SessionID sessionId) throws FieldNotFound {
+    private final void sendBusinessReject(@NonNull Message refMsg, @Nullable String refId,
+            @Nullable String text, @NonNull SessionID sessionId) throws FieldNotFound {
         final FixBuilder builder = getBuilder(new BusinessMessageReject());
-        builder.setBusinessReject(refMsg, text, refId);
-        sendToTarget(builder.getMessage(), sessionId);
+        builder.setBusinessReject(refMsg, refId, text);
+        final Message message = builder.getMessage();
+        assert message != null;
+        sendToTarget(message, sessionId);
     }
 
-    private final void sendCancelRejectLocked(String ref, Order order, String text,
-            SessionID sessionId) {
+    private final void sendCancelRejectLocked(@NonNull String ref, @NonNull Order order,
+            @Nullable String text, @NonNull SessionID sessionId) {
         final FixBuilder builder = getBuilder(new OrderCancelReject());
         builder.setCancelReject(ref, order, text);
-        sendToTarget(builder.getMessage(), sessionId);
+        final Message message = builder.getMessage();
+        assert message != null;
+        sendToTarget(message, sessionId);
     }
 
-    private final void sendCancelReject(String ref, String orderRef, Long orderId, String text,
-            SessionID sessionId) {
+    private final void sendCancelReject(@NonNull String ref, @NonNull String orderRef,
+            @Nullable Long orderId, @Nullable String text, @NonNull SessionID sessionId) {
         final FixBuilder builder = getBuilder(new OrderCancelReject());
         builder.setCancelReject(ref, orderRef, orderId, text);
-        sendToTarget(builder.getMessage(), sessionId);
+        final Message message = builder.getMessage();
+        assert message != null;
+        sendToTarget(message, sessionId);
     }
 
-    private final void sendTransLocked(TraderSess sess, Trans trans, SessionID sessionId) {
+    private final void sendTransLocked(TraderSess sess, String ref, Trans trans,
+            @NonNull SessionID sessionId) {
         final FixBuilder builder = getBuilder(new ExecutionReport());
         String targetTrader = sess.getMnem();
         SessionID targetSessionId = sessionId;
@@ -130,12 +146,16 @@ public final class FixServer extends MessageCracker implements Application {
                 targetTrader = exec.getTrader();
                 targetSessionId = traderIdx.get(targetTrader);
             }
-            builder.setExec(exec);
-            sendToTarget(builder.getMessage(), targetSessionId);
+            if (targetSessionId != null) {
+                builder.setExec(exec, ref);
+                final Message message = builder.getMessage();
+                assert message != null;
+                sendToTarget(message, targetSessionId);
+            }
         }
     }
 
-    public FixServer(SessionSettings settings, LockableServ serv) throws ConfigError,
+    private FixServ(SessionSettings settings, LockableServ serv) throws ConfigError,
             FieldConvertError, NotFoundException {
         this.settings = settings;
         this.serv = serv;
@@ -153,6 +173,23 @@ public final class FixServer extends MessageCracker implements Application {
         } finally {
             serv.releaseRead();
         }
+    }
+
+    public static FixServ create(final SessionSettings settings, LockableServ serv,
+            final LogFactory logFactory) throws ConfigError, FieldConvertError, NotFoundException,
+            IOException {
+        final FixServ server = new FixServ(settings, serv);
+        final Acceptor acceptor = new SocketAcceptor(server, new NullStoreFactory(), settings,
+                logFactory, new DefaultMessageFactory());
+        // Transfer owndership.
+        server.acceptor = acceptor;
+        acceptor.start();
+        return server;
+    }
+
+    @Override
+    public final void close() throws Exception {
+        acceptor.stop();
     }
 
     @Override
@@ -173,6 +210,7 @@ public final class FixServer extends MessageCracker implements Application {
         final long minLots = (long) message.getDouble(MinQty.FIELD);
         final long now = getNow(message);
 
+        // FIXME.
         assert market != null;
         assert side != null;
 
@@ -191,7 +229,7 @@ public final class FixServer extends MessageCracker implements Application {
             try (final Trans trans = new Trans()) {
                 serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
                 log.info(sessionId + ": " + trans);
-                sendTransLocked(sess, trans, sessionId);
+                sendTransLocked(sess, null, trans, sessionId);
             }
         } catch (final FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());
@@ -223,7 +261,9 @@ public final class FixServer extends MessageCracker implements Application {
         final long now = getNow(message);
         Order order = null;
 
+        // FIXME.
         assert market != null;
+        assert ref != null;
         assert orderRef != null;
 
         serv.acquireWrite();
@@ -249,7 +289,7 @@ public final class FixServer extends MessageCracker implements Application {
             try (final Trans trans = new Trans()) {
                 serv.reviseOrder(sess, book, order, lots, now, trans);
                 log.info(sessionId + ": " + trans);
-                sendTransLocked(sess, trans, sessionId);
+                sendTransLocked(sess, ref, trans, sessionId);
             }
         } catch (final FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());
@@ -282,7 +322,9 @@ public final class FixServer extends MessageCracker implements Application {
         final long now = getNow(message);
         Order order = null;
 
+        // FIXME.
         assert market != null;
+        assert ref != null;
         assert orderRef != null;
 
         serv.acquireWrite();
@@ -308,7 +350,7 @@ public final class FixServer extends MessageCracker implements Application {
             try (final Trans trans = new Trans()) {
                 serv.cancelOrder(sess, book, order, now, trans);
                 log.info(sessionId + ": " + trans);
-                sendTransLocked(sess, trans, sessionId);
+                sendTransLocked(sess, ref, trans, sessionId);
             }
         } catch (final FixRejectException e) {
             log.warn(sessionId + ": " + e.getMessage());

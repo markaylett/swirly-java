@@ -6,7 +6,23 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 public @NonNullByDefault enum State {
-    PENDING(0), NEW(1), REVISE(2), CANCEL(3), TRADE(4);
+    NONE(0),
+    /**
+     * Initial state of a resting order placed in the order-book.
+     */
+    NEW(1),
+    /**
+     * State of a resting order that has been revised.
+     */
+    REVISE(2),
+    /**
+     * State of a resting order that has been cancelled.
+     */
+    CANCEL(3),
+    /**
+     * State of an order that has been partially or fully filled.
+     */
+    TRADE(4);
     private final int id;
 
     private State(int id) {
@@ -24,7 +40,7 @@ public @NonNullByDefault enum State {
         State val;
         switch (id) {
         case 0:
-            val = State.PENDING;
+            val = State.NONE;
             break;
         case 1:
             val = State.NEW;

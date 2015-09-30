@@ -41,14 +41,14 @@ public final class BookSideTest {
                 JulianDay.isoToJd(20140314), "orange", Side.BUY, 12345, 20, 0, now);
         final BookSide side = new BookSide();
 
-        apple.state = State.PENDING;
+        apple.state = State.NONE;
         apple.resd = -1;
         apple.exec = -1;
         apple.cost = -1;
         apple.lastTicks = -1;
         apple.lastLots = -1;
 
-        orange.state = State.PENDING;
+        orange.state = State.NONE;
         orange.resd = -1;
         orange.exec = -1;
         orange.cost = -1;

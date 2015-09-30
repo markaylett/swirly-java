@@ -17,6 +17,9 @@ import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import quickfix.FieldNotFound;
 import quickfix.Group;
 import quickfix.IncorrectTagValue;
@@ -192,7 +195,7 @@ public final class FixBuilder {
         message.setChar(OrdType.FIELD, OrdType.LIMIT);
     }
 
-    // ClOrdId(41)
+    // OrigClOrdId(41)
 
     public final void setOrigClOrdId(String ref) {
         message.setString(OrigClOrdID.FIELD, ref);
@@ -347,8 +350,8 @@ public final class FixBuilder {
      *            Optional textual information.
      * @throws FieldNotFound
      */
-    public final void setBusinessReject(Message refMsg, String refId, String text)
-            throws FieldNotFound {
+    public final void setBusinessReject(@NonNull Message refMsg, @Nullable String refId,
+            @Nullable String text) throws FieldNotFound {
         final Header header = refMsg.getHeader();
         message.setString(RefMsgType.FIELD, header.getString(MsgType.FIELD));
         message.setInt(RefSeqNum.FIELD, header.getInt(MsgSeqNum.FIELD));
@@ -361,7 +364,8 @@ public final class FixBuilder {
         }
     }
 
-    public final void setCancelReject(String ref, Order order, String text) {
+    public final void setCancelReject(@NonNull String ref, @NonNull Order order,
+            @Nullable String text) {
         setClOrdId(ref);
         setOrigClOrdId(order.getRef());
         setOrderId(order.getId());
@@ -383,7 +387,8 @@ public final class FixBuilder {
      * @param text
      *            Optional textual information.
      */
-    public final void setCancelReject(String ref, String orderRef, Long orderId, String text) {
+    public final void setCancelReject(@NonNull String ref, @NonNull String orderRef,
+            @Nullable Long orderId, @Nullable String text) {
         setClOrdId(ref);
         setOrigClOrdId(orderRef);
         // If CxlRejReason="Unknown order", specify "NONE".
@@ -396,14 +401,19 @@ public final class FixBuilder {
         }
     }
 
-    public final void setInstruct(Instruct instruct) {
+    public final void setInstruct(@NonNull Instruct instruct, @Nullable String ref) {
         setExecId(instruct.getId());
         setOrderId(instruct.getOrderId());
         setAccount(instruct.getTrader());
         setSymbol(instruct.getMarket());
         setContract(instruct.getContr());
         setFutSettDate(instruct.getSettlDay());
-        setClOrdId(instruct.getRef());
+        if (ref != null) {
+            setClOrdId(ref);
+            setOrigClOrdId(instruct.getRef());
+        } else {
+            setClOrdId(instruct.getRef());
+        }
         setExecType(instruct.getState(), instruct.getResd());
         setOrdStatus(instruct.getState(), instruct.getResd());
         setSide(instruct.getSide());
@@ -421,8 +431,8 @@ public final class FixBuilder {
         setMinQty(instruct.getMinLots());
     }
 
-    public final void setExec(Exec exec) {
-        setInstruct(exec);
+    public final void setExec(@NonNull Exec exec, @Nullable String ref) {
+        setInstruct(exec, ref);
         if (exec.getMatchId() != 0) {
             setMatchId(exec.getMatchId());
         }
@@ -435,8 +445,8 @@ public final class FixBuilder {
         setTransactTime(exec.getCreated());
     }
 
-    public final void setNewOrderSingle(String market, String ref, Side side, long ticks,
-            long lots, long minLots, long now) {
+    public final void setNewOrderSingle(@NonNull String market, @NonNull String ref,
+            @NonNull Side side, long ticks, long lots, long minLots, long now) {
         setSymbol(market);
         setClOrdId(ref);
         setSide(side);
@@ -447,8 +457,8 @@ public final class FixBuilder {
         setTransactTime(now);
     }
 
-    public final void setOrderCancelReplaceRequest(String market, String ref, String orderRef,
-            long lots, long now) {
+    public final void setOrderCancelReplaceRequest(@NonNull String market, @NonNull String ref,
+            @NonNull String orderRef, long lots, long now) {
         setSymbol(market);
         setClOrdId(ref);
         setOrigClOrdId(orderRef);
@@ -458,17 +468,23 @@ public final class FixBuilder {
         setTransactTime(now);
     }
 
-    public final void setOrderCancelReplaceRequest(String market, String ref, long orderId,
-            long lots, long now) {
+    public final void setOrderCancelReplaceRequest(@NonNull String market, @NonNull String ref,
+            long orderId, long lots, long now) {
         setOrderCancelReplaceRequest(market, ref, "NONE", lots, now);
         setOrderId(orderId);
     }
 
-    public final void setOrderCancelRequest(String market, String ref, String orderRef, long now) {
-        setOrderCancelReplaceRequest(market, ref, orderRef, 0, now);
+    public final void setOrderCancelRequest(@NonNull String market, @NonNull String ref,
+            @NonNull String orderRef, long now) {
+        setSymbol(market);
+        setClOrdId(ref);
+        setOrigClOrdId(orderRef);
+        message.setChar(quickfix.field.Side.FIELD, quickfix.field.Side.UNDISCLOSED);
+        setTransactTime(now);
     }
 
-    public final void setOrderCancelRequest(String market, String ref, long orderId, long now) {
+    public final void setOrderCancelRequest(@NonNull String market, @NonNull String ref,
+            long orderId, long now) {
         setOrderCancelRequest(market, ref, "NONE", now);
         setOrderId(orderId);
     }
