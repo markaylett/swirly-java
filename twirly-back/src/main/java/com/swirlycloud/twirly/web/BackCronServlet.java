@@ -46,7 +46,7 @@ public final class BackCronServlet extends RestServlet {
                     ecbRates.parse();
                     log("EURUSD: " + ecbRates.getRate("EUR", "USD"));
                 } catch (final Throwable t) {
-                    log("error: " + t.getLocalizedMessage());
+                    log("error: " + t.getMessage());
                 }
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");

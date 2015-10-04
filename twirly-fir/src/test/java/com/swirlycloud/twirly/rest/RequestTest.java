@@ -5,7 +5,6 @@ package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.util.JsonUtil.parseStartObject;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
@@ -16,7 +15,6 @@ import javax.json.stream.JsonParser;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Side;
 
 public final class RequestTest {
@@ -34,31 +32,6 @@ public final class RequestTest {
         final Request r = parse("{\"mnem\":null}");
         assertEquals(Request.MNEM, r.getFields());
         assertNull(r.getMnem());
-    }
-
-    @Test
-    public final void testArray() throws IOException {
-        final Request r = parse("{\"ids\":[101, 202, 303]}");
-        assertEquals(Request.IDS, r.getFields());
-
-        // First.
-        MarketId mid = (MarketId) r.getIds();
-        assertNotNull(mid);
-        assertEquals(303, mid.getId());
-
-        // Second.
-        mid = (MarketId) mid.jslNext();
-        assertNotNull(mid);
-        assertEquals(202, mid.getId());
-
-        // Third.
-        mid = (MarketId) mid.jslNext();
-        assertNotNull(mid);
-        assertEquals(101, mid.getId());
-
-        // End.
-        mid = (MarketId) mid.jslNext();
-        assertNull(mid);
     }
 
     @Test

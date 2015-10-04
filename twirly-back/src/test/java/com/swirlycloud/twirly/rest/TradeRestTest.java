@@ -124,7 +124,8 @@ public final class TradeRestTest extends RestTest {
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12346, 20, 0, 20, 246910,
                 12346, 10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(7)));
         deleteTrade("MARAYL", "EURUSD.MAR14",
-                jslList(Long.valueOf(4), Long.valueOf(5), Long.valueOf(6), Long.valueOf(7)));
+                jslList("EURUSD.MAR14", Long.valueOf(4), Long.valueOf(5), Long.valueOf(6),
+                        Long.valueOf(7)));
         try {
             unrest.getTrade("MARAYL", "EURUSD.MAR14", 4, PARAMS_NONE, NOW);
             fail("Expected exception");

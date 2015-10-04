@@ -139,10 +139,9 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('lots not specified'));
             return;
         }
-        req.ids = ids;
         $.ajax({
             type: 'put',
-            url: '/back/sess/order/' + market + '/batch',
+            url: '/back/sess/order/' + market + '/' + ids,
             data: JSON.stringify(req)
         }).done(function(trans) {
             this.applyTrans(trans);
@@ -162,8 +161,7 @@ var TradeModuleImpl = React.createClass({
         }
         $.ajax({
             type: 'delete',
-            url: '/back/sess/order/' + market + '/batch',
-            data: JSON.stringify({ ids: ids })
+            url: '/back/sess/order/' + market + '/' + ids
         }).done(function(unused) {
             var done = this.staging.done;
             var sess = this.state.sess;
@@ -195,8 +193,7 @@ var TradeModuleImpl = React.createClass({
         }
         $.ajax({
             type: 'delete',
-            url: '/back/sess/trade/' + market + '/batch',
-            data: JSON.stringify({ ids: ids })
+            url: '/back/sess/trade/' + market + '/' + ids
         }).done(function(unused) {
             var trades = this.staging.trades;
             var sess = this.state.sess;

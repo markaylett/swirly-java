@@ -44,6 +44,7 @@ public final class BackRecServlet extends RecServlet {
             }
 
             final Request r = parseRequest(req);
+            final long now = now();
             if ("market".equals(parts[TYPE_PART])) {
 
                 final int required = Request.MNEM | Request.DISPLAY | Request.CONTR;
@@ -55,7 +56,6 @@ public final class BackRecServlet extends RecServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new BadRequestException("user is not an admin");
                 }
-                final long now = now();
                 rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(), r.getSettlDate(),
                         r.getExpiryDate(), r.getState(), PARAMS_NONE, now, resp.getWriter());
 
@@ -74,7 +74,6 @@ public final class BackRecServlet extends RecServlet {
                     }
                     email = r.getEmail();
                 }
-                final long now = now();
                 rest.postTrader(r.getMnem(), r.getDisplay(), email, PARAMS_NONE, now,
                         resp.getWriter());
 
@@ -107,6 +106,7 @@ public final class BackRecServlet extends RecServlet {
             }
 
             final Request r = parseRequest(req);
+            final long now = now();
             if ("market".equals(parts[TYPE_PART])) {
 
                 final int required = Request.MNEM | Request.DISPLAY | Request.STATE;
@@ -117,7 +117,6 @@ public final class BackRecServlet extends RecServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new BadRequestException("user is not an admin");
                 }
-                final long now = now();
                 rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE, now,
                         resp.getWriter());
 
@@ -136,7 +135,6 @@ public final class BackRecServlet extends RecServlet {
                     }
                     email = r.getEmail();
                 }
-                final long now = now();
                 rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now, resp.getWriter());
 
             } else {

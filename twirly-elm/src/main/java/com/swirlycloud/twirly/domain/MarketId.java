@@ -11,17 +11,38 @@ import com.swirlycloud.twirly.util.Identifiable;
 
 public final @NonNullByDefault class MarketId extends BasicJslNode implements Identifiable {
 
+    private final String market;
     private final long id;
-    private String market;
 
-    public MarketId(long id) {
+    public MarketId(String market, long id) {
+        this.market = market;
         this.id = id;
-        this.market = "";
     }
 
-    public MarketId(long id, String market) {
-        this.id = id;
-        this.market = market;
+    /**
+     * Parse comma-delimited string.
+     * 
+     * @param ids
+     *            Comma-delimited string.
+     * @return Linked-list.
+     */
+    public static @Nullable MarketId parse(String market, String ids) {
+        MarketId firstMid = null;
+        int i = 0, j = 0;
+        for (; j < ids.length(); ++j) {
+            if (ids.charAt(j) == ',') {
+                final MarketId mid = new MarketId(market, Long.valueOf(ids.substring(i, j)));
+                mid.setJslNext(firstMid);
+                firstMid = mid;
+                i = j + 1;
+            }
+        }
+        if (i != j) {
+            final MarketId mid = new MarketId(market, Long.valueOf(ids.substring(i, j)));
+            mid.setJslNext(firstMid);
+            firstMid = mid;
+        }
+        return firstMid;
     }
 
     @Override
@@ -54,16 +75,12 @@ public final @NonNullByDefault class MarketId extends BasicJslNode implements Id
         return true;
     }
 
-    public final void setMarket(String market) {
-        this.market = market;
+    public final String getMarket() {
+        return market;
     }
 
     @Override
     public final long getId() {
         return id;
-    }
-
-    public final String getMarket() {
-        return market;
     }
 }

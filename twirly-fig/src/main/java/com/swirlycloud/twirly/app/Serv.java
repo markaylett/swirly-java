@@ -1125,7 +1125,7 @@ public @NonNullByDefault class Serv {
             if (!order.isDone()) {
                 continue;
             }
-            final MarketId mid = new MarketId(order.getId(), order.getMarket());
+            final MarketId mid = new MarketId(order.getMarket(), order.getId());
             mid.setJslNext(firstMid);
             firstMid = mid;
         }
@@ -1175,7 +1175,6 @@ public @NonNullByDefault class Serv {
                 throw new BadRequestException(
                         String.format("order '%d' is not done", order.getId()));
             }
-            mid.setMarket(market);
         } while (node != null);
 
         try {
@@ -1301,7 +1300,7 @@ public @NonNullByDefault class Serv {
         MarketId firstMid = null;
         for (RbNode node = sess.getFirstTrade(); node != null; node = node.rbNext()) {
             final Exec trade = (Exec) node;
-            final MarketId mid = new MarketId(trade.getId(), trade.getMarket());
+            final MarketId mid = new MarketId(trade.getMarket(), trade.getId());
             mid.setJslNext(firstMid);
             firstMid = mid;
         }
@@ -1344,7 +1343,6 @@ public @NonNullByDefault class Serv {
             if (trade == null) {
                 throw new NotFoundException(String.format("trade '%d' does not exist", id));
             }
-            mid.setMarket(market);
         } while (node != null);
 
         try {

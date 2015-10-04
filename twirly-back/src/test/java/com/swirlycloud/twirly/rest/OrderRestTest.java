@@ -97,7 +97,7 @@ public final class OrderRestTest extends RestTest {
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 12347, 10, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(3)));
         out = putOrder("MARAYL", "EURUSD.MAR14",
-                jslList(Long.valueOf(1), Long.valueOf(2), Long.valueOf(3)), 5);
+                jslList("EURUSD.MAR14", Long.valueOf(1), Long.valueOf(2), Long.valueOf(3)), 5);
         assertOrder("MARAYL", "EURUSD.MAR14", State.REVISE, Side.SELL, 12345, 5, 5, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         assertOrder("MARAYL", "EURUSD.MAR14", State.REVISE, Side.SELL, 12346, 5, 5, 0, 0, 0, 0,
@@ -132,7 +132,7 @@ public final class OrderRestTest extends RestTest {
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 12347, 10, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(3)));
         out = putOrder("MARAYL", "EURUSD.MAR14",
-                jslList(Long.valueOf(1), Long.valueOf(2), Long.valueOf(3)), 0);
+                jslList("EURUSD.MAR14", Long.valueOf(1), Long.valueOf(2), Long.valueOf(3)), 0);
         assertOrder("MARAYL", "EURUSD.MAR14", State.CANCEL, Side.SELL, 12345, 10, 0, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         assertOrder("MARAYL", "EURUSD.MAR14", State.CANCEL, Side.SELL, 12346, 10, 0, 0, 0, 0, 0,
@@ -176,7 +176,8 @@ public final class OrderRestTest extends RestTest {
         out = postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12347, 10);
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 12347, 10, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(3)));
-        final JslNode ids = jslList(Long.valueOf(1), Long.valueOf(2), Long.valueOf(3));
+        final JslNode ids = jslList("EURUSD.MAR14", Long.valueOf(1), Long.valueOf(2),
+                Long.valueOf(3));
         out = putOrder("MARAYL", "EURUSD.MAR14", ids, 0);
         assertOrder("MARAYL", "EURUSD.MAR14", State.CANCEL, Side.SELL, 12345, 10, 0, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));

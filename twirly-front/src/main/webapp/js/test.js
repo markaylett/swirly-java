@@ -317,7 +317,8 @@ $.each(['back', 'front'], function(index, module) {
 module('Order');
 
 asyncTest('POST /back/sess/order/EURUSD', function() {
-    expect(1);
+    expect(5);
+    var req = {"side":"BUY","ticks":12345,"lots":1}
     var res = {
         "view":{"market":"EURUSD","contr":"EURUSD","settlDate":null,
                 "lastTicks":null,"lastLots":null,"lastTime":null,
@@ -332,11 +333,10 @@ asyncTest('POST /back/sess/order/EURUSD', function() {
                    "resd":1,"exec":0,"cost":0,"lastTicks":null,"lastLots":null,"minLots":0}],
         "execs":[{"trader":"MARAYL","market":"EURUSD","contr":"EURUSD",
                   "settlDate":null,"ref":null,"state":"NEW","side":"BUY","ticks":12345,"lots":1,
-                  "resd":1,"exec":0,"cost":0,"lastTicks":null,"lastLots":null, "minLots":0,
+                  "resd":1,"exec":0,"cost":0,"lastTicks":null,"lastLots":null,"minLots":0,
                   "matchId":null,"role":null,"cpty":null}],
         "posn":null
     };
-    var req = {"side":"BUY","ticks":12345,"lots":1}
     $.ajax({
         type: 'post',
         url: '/back/sess/order/EURUSD',
@@ -363,6 +363,8 @@ asyncTest('POST /back/sess/order/EURUSD', function() {
         deepEqual(trans.posn, res.posn, 'posn');
 
         cancelAndArchive('EURUSD', id);
+    }).always(function() {
+        start();
     });
 });
 
