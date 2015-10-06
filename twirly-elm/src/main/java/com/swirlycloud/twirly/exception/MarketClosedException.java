@@ -3,49 +3,34 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
-import java.io.IOException;
-
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
-
 import com.swirlycloud.twirly.fix.BusinessRejectReason;
 import com.swirlycloud.twirly.fix.CancelRejectReason;
 import com.swirlycloud.twirly.fix.OrderRejectReason;
-import com.swirlycloud.twirly.util.Jsonifiable;
-import com.swirlycloud.twirly.util.Params;
 
-public abstract class ServException extends Exception implements Jsonifiable {
+public class MarketClosedException extends NotFoundException {
 
     private static final long serialVersionUID = 1L;
 
-    public ServException(String msg) {
+    public MarketClosedException(String msg) {
         super(msg);
     }
 
-    public ServException(String msg, Throwable cause) {
+    public MarketClosedException(String msg, Throwable cause) {
         super(msg, cause);
     }
 
     @Override
-    public final void toJson(@Nullable Params params, @NonNull Appendable out) throws IOException {
-        out.append("{\"num\":");
-        out.append(String.valueOf(getHttpStatus()));
-        out.append(",\"msg\":\"");
-        out.append(getMessage());
-        out.append("\"}");
-    }
-
-    public abstract int getHttpStatus();
-
     public int getBusinessRejectReason() {
         return BusinessRejectReason.OTHER;
     }
 
+    @Override
     public int getCancelRejectReason() {
         return CancelRejectReason.OTHER;
     }
 
+    @Override
     public int getOrderRejectReason() {
-        return OrderRejectReason.OTHER;
+        return OrderRejectReason.EXCHANGE_CLOSED;
     }
 }

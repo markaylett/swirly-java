@@ -78,7 +78,7 @@ public abstract class RestServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
-        resp.setStatus(e.getNum());
+        resp.setStatus(e.getHttpStatus());
     }
 
     protected final @NonNull String getTrader(HttpServletRequest req)

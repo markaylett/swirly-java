@@ -12,7 +12,7 @@ import javax.annotation.concurrent.GuardedBy;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.twirly.concurrent.FutureValue;
-import com.swirlycloud.twirly.exception.DuplicateException;
+import com.swirlycloud.twirly.exception.AlreadyExistsException;
 
 import quickfix.FieldNotFound;
 import quickfix.Message;
@@ -60,14 +60,14 @@ final @NonNullByDefault class FixCache {
     }
 
     // Unit testing.
-    final Future<Message> putRequest(String ref, int seqNum) throws DuplicateException {
+    final Future<Message> putRequest(String ref, int seqNum) throws AlreadyExistsException {
         final Response res = new Response(ref, seqNum);
         synchronized (this) {
             if (refIdx.containsKey(ref)) {
-                throw new DuplicateException("duplicate ref: " + ref);
+                throw new AlreadyExistsException("duplicate ref: " + ref);
             }
             if (seqNumIdx.containsKey(seqNum)) {
-                throw new DuplicateException("duplicate seq-num: " + seqNum);
+                throw new AlreadyExistsException("duplicate seq-num: " + seqNum);
             }
             put(res);
         }
@@ -75,10 +75,10 @@ final @NonNullByDefault class FixCache {
     }
 
     final Future<Message> sendRequest(String ref, Message message)
-            throws DuplicateException, SessionNotFound {
+            throws AlreadyExistsException, SessionNotFound {
         synchronized (this) {
             if (refIdx.containsKey(ref)) {
-                throw new DuplicateException("duplicate ref: " + ref);
+                throw new AlreadyExistsException("duplicate ref: " + ref);
             }
             // Assumption: seq-num cannot be duplicated.
             Session.sendToTarget(message, sessionId);

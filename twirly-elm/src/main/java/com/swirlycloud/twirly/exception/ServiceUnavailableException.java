@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
+import com.swirlycloud.twirly.fix.BusinessRejectReason;
+
 /**
  * The server is currently unavailable (because it is overloaded or down for maintenance).
  * Generally, this is a temporary state.
@@ -12,13 +14,22 @@ package com.swirlycloud.twirly.exception;
 public final class ServiceUnavailableException extends ServException {
 
     private static final long serialVersionUID = 1L;
-    private static final int NUM = 503;
 
     public ServiceUnavailableException(String msg) {
-        super(NUM, msg);
+        super(msg);
     }
 
     public ServiceUnavailableException(String msg, Throwable cause) {
-        super(NUM, msg, cause);
+        super(msg, cause);
+    }
+
+    @Override
+    public int getHttpStatus() {
+        return 503;
+    }
+
+    @Override
+    public int getBusinessRejectReason() {
+        return BusinessRejectReason.APPLICATION_NOT_AVAILABLE;
     }
 }

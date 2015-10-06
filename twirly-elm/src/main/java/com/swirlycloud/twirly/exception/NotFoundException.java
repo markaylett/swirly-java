@@ -3,22 +3,33 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
+import com.swirlycloud.twirly.fix.BusinessRejectReason;
+
 /**
  * The requested resource could not be found but may be available again in the future. Subsequent
  * requests by the client are permissible.
  * 
  * @author Mark Aylett
  */
-public final class NotFoundException extends ServException {
+public class NotFoundException extends ServException {
 
     private static final long serialVersionUID = 1L;
-    private static final int NUM = 404;
 
     public NotFoundException(String msg) {
-        super(NUM, msg);
+        super(msg);
     }
 
     public NotFoundException(String msg, Throwable cause) {
-        super(NUM, msg, cause);
+        super(msg, cause);
+    }
+
+    @Override
+    public int getHttpStatus() {
+        return 404;
+    }
+
+    @Override
+    public int getBusinessRejectReason() {
+        return BusinessRejectReason.UNKNOWN_ID;
     }
 }

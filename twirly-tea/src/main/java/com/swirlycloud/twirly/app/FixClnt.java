@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.exception.DuplicateException;
+import com.swirlycloud.twirly.exception.AlreadyExistsException;
 import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 
 import quickfix.Application;
@@ -192,7 +192,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendNewOrderSingle(@NonNull String market, @NonNull String ref,
             @NonNull Side side, long ticks, long lots, long minLots, long now,
-            @NonNull SessionID sessionId) throws DuplicateException, SessionNotFound {
+            @NonNull SessionID sessionId) throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new NewOrderSingle());
         builder.setNewOrderSingle(market, ref, side, ticks, lots, minLots, now);
@@ -203,7 +203,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendOrderCancelReplaceRequest(@NonNull String market,
             @NonNull String ref, @NonNull String orderRef, long lots, long now,
-            @NonNull SessionID sessionId) throws DuplicateException, SessionNotFound {
+            @NonNull SessionID sessionId) throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new OrderCancelReplaceRequest());
         builder.setOrderCancelReplaceRequest(market, ref, orderRef, lots, now);
@@ -214,7 +214,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendOrderCancelReplaceRequest(@NonNull String market,
             @NonNull String ref, long orderId, long lots, long now, @NonNull SessionID sessionId)
-                    throws DuplicateException, SessionNotFound {
+                    throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new OrderCancelReplaceRequest());
         builder.setOrderCancelReplaceRequest(market, ref, orderId, lots, now);
@@ -225,7 +225,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendOrderCancelRequest(@NonNull String market, @NonNull String ref,
             @NonNull String orderRef, long now, @NonNull SessionID sessionId)
-                    throws DuplicateException, SessionNotFound {
+                    throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new OrderCancelRequest());
         builder.setOrderCancelRequest(market, ref, orderRef, now);
@@ -236,7 +236,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendOrderCancelRequest(@NonNull String market, @NonNull String ref,
             long orderId, long now, @NonNull SessionID sessionId)
-                    throws DuplicateException, SessionNotFound {
+                    throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new OrderCancelRequest());
         builder.setOrderCancelRequest(market, ref, orderId, now);

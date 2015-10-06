@@ -4,32 +4,27 @@
 package com.swirlycloud.twirly.exception;
 
 import com.swirlycloud.twirly.fix.BusinessRejectReason;
+import com.swirlycloud.twirly.fix.OrderRejectReason;
 
-/**
- * Similar to 403 Forbidden, but specifically for use when authentication is required and has failed
- * or has not yet been provided.
- * 
- * @author Mark Aylett
- */
-public final class UnauthorizedException extends ServException {
+public class MarketNotFoundException extends NotFoundException {
 
     private static final long serialVersionUID = 1L;
 
-    public UnauthorizedException(String msg) {
+    public MarketNotFoundException(String msg) {
         super(msg);
     }
 
-    public UnauthorizedException(String msg, Throwable cause) {
+    public MarketNotFoundException(String msg, Throwable cause) {
         super(msg, cause);
     }
 
     @Override
-    public int getHttpStatus() {
-        return 403;
+    public int getBusinessRejectReason() {
+        return BusinessRejectReason.UNKNOWN_SECURITY;
     }
 
     @Override
-    public int getBusinessRejectReason() {
-        return BusinessRejectReason.NOT_AUTHORIZED;
+    public int getOrderRejectReason() {
+        return OrderRejectReason.UNKNOWN_SYMBOL;
     }
 }

@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.exception.DuplicateException;
+import com.swirlycloud.twirly.exception.AlreadyExistsException;
 
 import quickfix.Message;
 import quickfix.SessionID;
@@ -36,12 +36,12 @@ final @NonNullByDefault class FixClntCache {
     }
 
     final Future<Message> putRequest(String ref, int seqNum, SessionID sessionId)
-            throws DuplicateException {
+            throws AlreadyExistsException {
         return get(sessionId).putRequest(ref, seqNum);
     }
 
     final Future<Message> sendRequest(String ref, Message message, SessionID sessionId)
-            throws DuplicateException, SessionNotFound {
+            throws AlreadyExistsException, SessionNotFound {
         return get(sessionId).sendRequest(ref, message);
     }
 

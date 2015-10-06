@@ -3,26 +3,22 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
-/**
- * The request was a valid request, but the server is refusing to respond to it. Unlike a 401
- * Unauthorized response, authenticating will make no difference.
- * 
- * @author Mark Aylett
- */
-public final class ForbiddenException extends ServException {
+import com.swirlycloud.twirly.fix.OrderRejectReason;
+
+public class InvalidLotsException extends InvalidException {
 
     private static final long serialVersionUID = 1L;
 
-    public ForbiddenException(String msg) {
+    public InvalidLotsException(String msg) {
         super(msg);
     }
 
-    public ForbiddenException(String msg, Throwable cause) {
+    public InvalidLotsException(String msg, Throwable cause) {
         super(msg, cause);
     }
 
     @Override
-    public int getHttpStatus() {
-        return 403;
+    public int getOrderRejectReason() {
+        return OrderRejectReason.INCORRECT_QUANTITY;
     }
 }
