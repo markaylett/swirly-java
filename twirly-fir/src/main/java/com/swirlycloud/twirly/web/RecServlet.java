@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.ForbiddenException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
@@ -71,7 +71,7 @@ public class RecServlet extends RestServlet {
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
                 if (!realm.isUserAdmin(req)) {
-                    throw new BadRequestException("user is not an admin");
+                    throw new ForbiddenException("user is not an admin");
                 }
                 if (parts.length == 1) {
                     rest.getRec(RecType.TRADER, params, now, resp.getWriter());

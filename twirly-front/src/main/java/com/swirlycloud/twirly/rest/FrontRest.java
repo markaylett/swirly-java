@@ -18,6 +18,7 @@ import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
@@ -261,7 +262,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final InstructTree tree = selectOrder(trader);
         final Order order = (Order) tree.find(market, id);
         if (order == null) {
-            throw new NotFoundException(String.format("order '%d' does not exist", id));
+            throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
         }
         order.toJson(params, out);
     }

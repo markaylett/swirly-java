@@ -26,7 +26,9 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.MarketClosedException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
@@ -164,7 +166,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             final boolean withExpired = getExpiredParam(params);
             final int busDay = getBusDate(now).toJd();
             if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
-                throw new NotFoundException(
+                throw new MarketClosedException(
                         String.format("market '%s' has expired", book.getMnem()));
             }
             book.toJsonView(params, out);
@@ -231,7 +233,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             final TraderSess sess = serv.getTrader(trader);
             final Order order = sess.findOrder(market, id);
             if (order == null) {
-                throw new NotFoundException(String.format("order '%d' does not exist", id));
+                throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
             order.toJson(params, out);
         } finally {

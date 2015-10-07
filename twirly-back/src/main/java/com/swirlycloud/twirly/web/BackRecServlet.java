@@ -12,8 +12,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.ForbiddenException;
+import com.swirlycloud.twirly.exception.InvalidException;
 import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
@@ -50,11 +50,11 @@ public final class BackRecServlet extends RecServlet {
                 final int required = Request.MNEM | Request.DISPLAY | Request.CONTR;
                 final int optional = Request.SETTL_DATE | Request.EXPIRY_DATE | Request.STATE;
                 if (!r.isValid(required, optional)) {
-                    throw new BadRequestException("request fields are invalid");
+                    throw new InvalidException("request fields are invalid");
                 }
 
                 if (!realm.isUserAdmin(req)) {
-                    throw new BadRequestException("user is not an admin");
+                    throw new ForbiddenException("user is not an admin");
                 }
                 rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(), r.getSettlDate(),
                         r.getExpiryDate(), r.getState(), PARAMS_NONE, now, resp.getWriter());
@@ -64,7 +64,7 @@ public final class BackRecServlet extends RecServlet {
                 final int required = Request.MNEM | Request.DISPLAY;
                 final int optional = Request.EMAIL;
                 if (!r.isValid(required, optional)) {
-                    throw new BadRequestException("request fields are invalid");
+                    throw new InvalidException("request fields are invalid");
                 }
 
                 String email = realm.getUserEmail(req);
@@ -112,11 +112,11 @@ public final class BackRecServlet extends RecServlet {
 
                 final int required = Request.MNEM | Request.DISPLAY | Request.STATE;
                 if (!r.isValid(required)) {
-                    throw new BadRequestException("request fields are invalid");
+                    throw new InvalidException("request fields are invalid");
                 }
 
                 if (!realm.isUserAdmin(req)) {
-                    throw new BadRequestException("user is not an admin");
+                    throw new ForbiddenException("user is not an admin");
                 }
                 rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE, now,
                         resp.getWriter());
@@ -126,7 +126,7 @@ public final class BackRecServlet extends RecServlet {
                 final int required = Request.MNEM | Request.DISPLAY;
                 final int optional = Request.EMAIL;
                 if (!r.isValid(required, optional)) {
-                    throw new BadRequestException("request fields are invalid");
+                    throw new InvalidException("request fields are invalid");
                 }
 
                 String email = realm.getUserEmail(req);

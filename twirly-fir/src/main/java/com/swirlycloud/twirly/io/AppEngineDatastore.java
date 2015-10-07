@@ -23,7 +23,10 @@ import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.exception.MarketNotFoundException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.OrderNotFoundException;
+import com.swirlycloud.twirly.exception.TraderNotFoundException;
 import com.swirlycloud.twirly.node.JslNode;
 
 public final class AppEngineDatastore extends AppEngineModel implements Datastore {
@@ -156,7 +159,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         try {
             return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            throw new NotFoundException(
+            throw new MarketNotFoundException(
                     String.format("market '%s' does not exist in datastore", market));
         }
     }
@@ -166,7 +169,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         try {
             return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            throw new NotFoundException(
+            throw new TraderNotFoundException(
                     String.format("trader '%s' does not exist in datastore", trader));
         }
     }
@@ -176,7 +179,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         try {
             return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            throw new NotFoundException(
+            throw new OrderNotFoundException(
                     String.format("order '%d' does not exist in datastore", id));
         }
     }

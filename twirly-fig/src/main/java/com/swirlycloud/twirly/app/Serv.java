@@ -26,9 +26,17 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.domain.TraderSess;
+import com.swirlycloud.twirly.exception.AlreadyExistsException;
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.InvalidException;
+import com.swirlycloud.twirly.exception.InvalidLotsException;
+import com.swirlycloud.twirly.exception.MarketClosedException;
+import com.swirlycloud.twirly.exception.MarketNotFoundException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.exception.TooLateException;
+import com.swirlycloud.twirly.exception.TraderNotFoundException;
 import com.swirlycloud.twirly.intrusive.EmailHashTable;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.io.Cache;
@@ -187,7 +195,7 @@ public @NonNullByDefault class Serv {
     private final TraderSess newTrader(String mnem, @Nullable String display, String email)
             throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
-            throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
+            throw new InvalidException(String.format("invalid mnem '%s'", mnem));
         }
         return (TraderSess) factory.newTrader(mnem, display, email);
     }
@@ -195,7 +203,7 @@ public @NonNullByDefault class Serv {
     private final MarketBook newMarket(String mnem, @Nullable String display, Contr contr,
             int settlDay, int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
-            throw new BadRequestException(String.format("invalid mnem '%s'", mnem));
+            throw new InvalidException(String.format("invalid mnem '%s'", mnem));
         }
         return (MarketBook) factory.newMarket(mnem, display, contr, settlDay, expiryDay, state);
     }
@@ -459,10 +467,10 @@ public @NonNullByDefault class Serv {
     public final TraderSess createTrader(String mnem, @Nullable String display, String email)
             throws BadRequestException, ServiceUnavailableException {
         if (traders.find(mnem) != null) {
-            throw new BadRequestException(String.format("trader '%s' already exists", mnem));
+            throw new AlreadyExistsException(String.format("trader '%s' already exists", mnem));
         }
         if (emailIdx.find(email) != null) {
-            throw new BadRequestException(String.format("email '%s' is already in use", email));
+            throw new AlreadyExistsException(String.format("email '%s' is already in use", email));
         }
         final TraderSess sess = newTrader(mnem, display, email);
 
@@ -488,7 +496,7 @@ public @NonNullByDefault class Serv {
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final TraderSess sess = (TraderSess) traders.find(mnem);
         if (sess == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
+            throw new TraderNotFoundException(String.format("trader '%s' does not exist", mnem));
         }
 
         try {
@@ -605,7 +613,7 @@ public @NonNullByDefault class Serv {
     public final MarketBook getMarket(String mnem) throws NotFoundException {
         final MarketBook book = (MarketBook) markets.find(mnem);
         if (book == null) {
-            throw new NotFoundException(String.format("market '%s' does not exist", mnem));
+            throw new MarketNotFoundException(String.format("market '%s' does not exist", mnem));
         }
         return book;
     }
@@ -613,7 +621,7 @@ public @NonNullByDefault class Serv {
     public final TraderSess getTrader(String mnem) throws NotFoundException {
         final TraderSess sess = (TraderSess) traders.find(mnem);
         if (sess == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", mnem));
+            throw new TraderNotFoundException(String.format("trader '%s' does not exist", mnem));
         }
         return sess;
     }
@@ -629,19 +637,19 @@ public @NonNullByDefault class Serv {
             // busDay <= expiryDay <= settlDay.
             final int busDay = getBusDate(now).toJd();
             if (settlDay < expiryDay) {
-                throw new BadRequestException("settl-day before expiry-day");
+                throw new InvalidException("settl-day before expiry-day");
             }
             if (expiryDay < busDay) {
-                throw new BadRequestException("expiry-day before bus-day");
+                throw new InvalidException("expiry-day before bus-day");
             }
         } else {
             if (expiryDay != 0) {
-                throw new BadRequestException("expiry-day without settl-day");
+                throw new InvalidException("expiry-day without settl-day");
             }
         }
         MarketBook book = (MarketBook) markets.pfind(mnem);
         if (book != null && book.getMnem().equals(mnem)) {
-            throw new BadRequestException(String.format("market '%s' already exists", mnem));
+            throw new AlreadyExistsException(String.format("market '%s' already exists", mnem));
         }
         final RbNode parent = book;
         book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
@@ -677,7 +685,7 @@ public @NonNullByDefault class Serv {
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final MarketBook book = (MarketBook) markets.find(mnem);
         if (book == null) {
-            throw new NotFoundException(String.format("market '%s' does not exist", mnem));
+            throw new MarketNotFoundException(String.format("market '%s' does not exist", mnem));
         }
 
         try {
@@ -743,11 +751,11 @@ public @NonNullByDefault class Serv {
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
-            throw new NotFoundException(String.format("market for '%s' on '%d' has expired",
+            throw new MarketClosedException(String.format("market for '%s' on '%d' has expired",
                     book.getContrRich().getMnem(), maybeJdToIso(book.getSettlDay())));
         }
         if (lots == 0 || lots < minLots) {
-            throw new BadRequestException(String.format("invalid lots '%d'", lots));
+            throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = book.allocOrderId();
         final Order order = factory.newOrder(orderId, sess.getMnem(), book, ref, side, ticks, lots,
@@ -792,7 +800,7 @@ public @NonNullByDefault class Serv {
             long now, Trans trans)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
-            throw new BadRequestException(String.format("order '%d' is done", order.getId()));
+            throw new TooLateException(String.format("order '%d' is done", order.getId()));
         }
         // Revised lots must not be:
         // 1. less than min lots;
@@ -800,7 +808,7 @@ public @NonNullByDefault class Serv {
         // 3. greater than original lots.
         if (lots == 0 || lots < order.getMinLots() || lots < order.getExec()
                 || lots > order.getLots()) {
-            throw new BadRequestException(String.format("invalid lots '%d'", lots));
+            throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
         }
 
         final Exec exec = newExec(book, order, now);
@@ -827,7 +835,7 @@ public @NonNullByDefault class Serv {
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(book.getMnem(), id);
         if (order == null) {
-            throw new NotFoundException(String.format("order '%d' does not exist", id));
+            throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
         }
         reviseOrder(sess, book, order, lots, now, trans);
     }
@@ -837,7 +845,7 @@ public @NonNullByDefault class Serv {
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
-            throw new NotFoundException(String.format("order '%s' does not exist", ref));
+            throw new OrderNotFoundException(String.format("order '%s' does not exist", ref));
         }
         reviseOrder(sess, book, order, lots, now, trans);
     }
@@ -858,10 +866,10 @@ public @NonNullByDefault class Serv {
 
             final Order order = sess.findOrder(market, id);
             if (order == null) {
-                throw new NotFoundException(String.format("order '%d' does not exist", id));
+                throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
             if (order.isDone()) {
-                throw new BadRequestException(String.format("order '%d' is done", id));
+                throw new TooLateException(String.format("order '%d' is done", id));
             }
             // Revised lots must not be:
             // 1. less than min lots;
@@ -869,7 +877,7 @@ public @NonNullByDefault class Serv {
             // 3. greater than original lots.
             if (lots == 0 || lots < order.getMinLots() || lots < order.getExec()
                     || lots > order.getLots()) {
-                throw new BadRequestException(String.format("invalid lots '%d'", lots));
+                throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
             }
 
             final Exec exec = newExec(book, order, now);
@@ -913,7 +921,7 @@ public @NonNullByDefault class Serv {
             Trans trans)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
-            throw new BadRequestException(String.format("order '%d' is done", order.getId()));
+            throw new TooLateException(String.format("order '%d' is done", order.getId()));
         }
 
         final Exec exec = newExec(book, order, now);
@@ -939,7 +947,7 @@ public @NonNullByDefault class Serv {
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(book.getMnem(), id);
         if (order == null) {
-            throw new NotFoundException(String.format("order '%d' does not exist", id));
+            throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
         }
         cancelOrder(sess, book, order, now, trans);
     }
@@ -949,7 +957,7 @@ public @NonNullByDefault class Serv {
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
-            throw new NotFoundException(String.format("order '%s' does not exist", ref));
+            throw new OrderNotFoundException(String.format("order '%s' does not exist", ref));
         }
         cancelOrder(sess, book, order, now, trans);
     }
@@ -969,10 +977,10 @@ public @NonNullByDefault class Serv {
             final long id = mid.getId();
             final Order order = sess.findOrder(market, id);
             if (order == null) {
-                throw new NotFoundException(String.format("order '%d' does not exist", id));
+                throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
             if (order.isDone()) {
-                throw new BadRequestException(String.format("order '%d' is done", id));
+                throw new TooLateException(String.format("order '%d' is done", id));
             }
 
             final Exec exec = newExec(book, order, now);
@@ -1084,7 +1092,7 @@ public @NonNullByDefault class Serv {
     public final void archiveOrder(TraderSess sess, Order order, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (!order.isDone()) {
-            throw new BadRequestException(String.format("order '%d' is not done", order.getId()));
+            throw new InvalidException(String.format("order '%d' is not done", order.getId()));
         }
         try {
             journ.archiveOrder(order.getMarket(), order.getId(), now);
@@ -1106,7 +1114,7 @@ public @NonNullByDefault class Serv {
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(market, id);
         if (order == null) {
-            throw new NotFoundException(String.format("order '%d' does not exist", id));
+            throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
         }
         archiveOrder(sess, order, now);
     }
@@ -1174,11 +1182,10 @@ public @NonNullByDefault class Serv {
             final long id = mid.getId();
             final Order order = sess.findOrder(market, id);
             if (order == null) {
-                throw new NotFoundException(String.format("order '%d' does not exist", id));
+                throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
             if (!order.isDone()) {
-                throw new BadRequestException(
-                        String.format("order '%d' is not done", order.getId()));
+                throw new InvalidException(String.format("order '%d' is not done", order.getId()));
             }
         } while (node != null);
 
@@ -1262,7 +1269,7 @@ public @NonNullByDefault class Serv {
     public final void archiveTrade(TraderSess sess, Exec trade, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (trade.getState() != State.TRADE) {
-            throw new BadRequestException(String.format("exec '%d' is not a trade", trade.getId()));
+            throw new InvalidException(String.format("exec '%d' is not a trade", trade.getId()));
         }
         try {
             journ.archiveTrade(trade.getMarket(), trade.getId(), now);

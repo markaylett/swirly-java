@@ -14,7 +14,7 @@ import com.swirlycloud.twirly.fix.OrderRejectReason;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public abstract class ServException extends Exception implements Jsonifiable {
+public class ServException extends Exception implements Jsonifiable {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,7 +35,10 @@ public abstract class ServException extends Exception implements Jsonifiable {
         out.append("\"}");
     }
 
-    public abstract int getHttpStatus();
+    public int getHttpStatus() {
+        // Internal Server Error.
+        return 500;
+    }
 
     public int getBusinessRejectReason() {
         return BusinessRejectReason.OTHER;

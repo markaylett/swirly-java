@@ -14,7 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.swirlycloud.twirly.domain.MarketId;
-import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.ForbiddenException;
+import com.swirlycloud.twirly.exception.InvalidException;
 import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
@@ -46,7 +47,7 @@ public final class BackSessServlet extends SessServlet {
             final String market = parts[MARKET_PART];
             final MarketId ids = MarketId.parse(market, parts[ID_PART]);
             if (ids == null) {
-                throw new BadRequestException("id not specified");
+                throw new InvalidException("id not specified");
             }
             final long now = now();
             if (ids.jslNext() != null) {
@@ -102,7 +103,7 @@ public final class BackSessServlet extends SessServlet {
                 final int required = Request.SIDE | Request.TICKS | Request.LOTS;
                 final int optional = Request.REF | Request.MIN_LOTS;
                 if (!r.isValid(required, optional)) {
-                    throw new BadRequestException("request fields are invalid");
+                    throw new InvalidException("request fields are invalid");
                 }
                 rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getTicks(), r.getLots(),
                         r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
@@ -111,11 +112,11 @@ public final class BackSessServlet extends SessServlet {
                 final int required = Request.TRADER | Request.SIDE | Request.TICKS | Request.LOTS;
                 final int optional = Request.REF | Request.ROLE | Request.CPTY;
                 if (!r.isValid(required, optional)) {
-                    throw new BadRequestException("request fields are invalid");
+                    throw new InvalidException("request fields are invalid");
                 }
 
                 if (!realm.isUserAdmin(req)) {
-                    throw new BadRequestException("user is not an admin");
+                    throw new ForbiddenException("user is not an admin");
                 }
                 rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(), r.getTicks(),
                         r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
@@ -151,11 +152,11 @@ public final class BackSessServlet extends SessServlet {
             final String market = parts[MARKET_PART];
             final MarketId ids = MarketId.parse(market, parts[ID_PART]);
             if (ids == null) {
-                throw new BadRequestException("id not specified");
+                throw new InvalidException("id not specified");
             }
             final Request r = parseRequest(req);
             if (!r.isLotsSet()) {
-                throw new BadRequestException("request fields are invalid");
+                throw new InvalidException("request fields are invalid");
             }
             final long now = now();
             if (ids.jslNext() != null) {
