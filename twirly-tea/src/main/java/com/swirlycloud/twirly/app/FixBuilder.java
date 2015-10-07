@@ -185,6 +185,10 @@ public final class FixBuilder {
         message.setChar(OrdStatus.FIELD, stateToOrdStatus(state, resd));
     }
 
+    public final void setOrdStatus(char ordStatus) {
+        message.setChar(OrdStatus.FIELD, ordStatus);
+    }
+
     public final State getOrdStatus() throws FieldNotFound, IncorrectTagValue {
         return ordStatusToState(message.getChar(OrdStatus.FIELD));
     }
@@ -203,6 +207,16 @@ public final class FixBuilder {
 
     public final String getOrigClOrdId() throws FieldNotFound {
         return message.getString(OrigClOrdID.FIELD);
+    }
+
+    // RefSeqNum(45)
+
+    public final void setRefSeqNum(int refSeqNum) throws FieldNotFound {
+        message.setInt(RefSeqNum.FIELD, refSeqNum);
+    }
+
+    public final int getRefSeqNum() throws FieldNotFound {
+        return message.getInt(RefSeqNum.FIELD);
     }
 
     // Price(44)
@@ -235,6 +249,16 @@ public final class FixBuilder {
         return message.getString(Symbol.FIELD);
     }
 
+    // Text(58)
+
+    public final void setText(String text) {
+        message.setString(Text.FIELD, text);
+    }
+
+    public final String getText() throws FieldNotFound {
+        return message.getString(Text.FIELD);
+    }
+
     // TransactTime(60)
 
     public final void setTransactTime(long millis) {
@@ -253,6 +277,16 @@ public final class FixBuilder {
 
     public final int getFutSettDate() throws FieldNotFound {
         return maybeIsoToJd(message.getInt(FutSettDate.FIELD));
+    }
+
+    // CxlRejReason(102)
+
+    public final void setCxlRejReason(int reason) {
+        message.setInt(CxlRejReason.FIELD, reason);
+    }
+
+    public final int getCxlRejReason() throws FieldNotFound {
+        return message.getInt(CxlRejReason.FIELD);
     }
 
     // MinQty(110)
@@ -285,6 +319,16 @@ public final class FixBuilder {
         return getLong(LeavesQty.FIELD);
     }
 
+    // RefMsgType(372)
+
+    public final void setRefMsgType(String refMsgType) {
+        message.setString(RefMsgType.FIELD, refMsgType);
+    }
+
+    public final String getRefMsgType() throws FieldNotFound {
+        return message.getString(RefMsgType.FIELD);
+    }
+
     // ContraBroker(375)
 
     public final void setContraBroker(String cpty) {
@@ -299,6 +343,36 @@ public final class FixBuilder {
             throw new FieldNotFound(NoContraBrokers.FIELD);
         }
         return groups.get(0).getString(ContraBroker.FIELD);
+    }
+
+    // BusinessRejectRefID(379)
+
+    public final void setBusinessRejectRefId(String refId) {
+        message.setString(BusinessRejectRefID.FIELD, refId);
+    }
+
+    public final String getBusinessRejectRefId() throws FieldNotFound {
+        return message.getString(BusinessRejectRefID.FIELD);
+    }
+
+    // BusinessRejectReason(380)
+
+    public final void setBusinessRejectReason(int reason) {
+        message.setInt(BusinessRejectReason.FIELD, reason);
+    }
+
+    public final int getBusinessRejectReason() throws FieldNotFound {
+        return message.getInt(BusinessRejectReason.FIELD);
+    }
+
+    // CxlRejResponseTo(434)
+
+    public final void setCxlRejResponseTo(char cxlRejResponseTo) {
+        message.setChar(CxlRejResponseTo.FIELD, cxlRejResponseTo);
+    }
+
+    public final char getCxlRejResponseTo() throws FieldNotFound {
+        return message.getChar(CxlRejResponseTo.FIELD);
     }
 
     // LastLiquidityInd(851)
@@ -346,34 +420,23 @@ public final class FixBuilder {
      *            The message being rejected.
      * @param refId
      *            Optional id or reference from the message being rejected.
+     * @param reason
+     *            BusinessRejectReason code.
      * @param text
      *            Optional textual information.
      * @throws FieldNotFound
      */
-    public final void setBusinessReject(@NonNull Message refMsg, @Nullable String refId,
+    public final void setBusinessReject(@NonNull Message refMsg, @Nullable String refId, int reason,
             @Nullable String text) throws FieldNotFound {
         final Header header = refMsg.getHeader();
-        message.setString(RefMsgType.FIELD, header.getString(MsgType.FIELD));
-        message.setInt(RefSeqNum.FIELD, header.getInt(MsgSeqNum.FIELD));
+        setRefMsgType(header.getString(MsgType.FIELD));
+        setRefSeqNum(header.getInt(MsgSeqNum.FIELD));
         if (refId != null) {
-            message.setString(BusinessRejectRefID.FIELD, refId);
+            setBusinessRejectRefId(refId);
         }
-        message.setInt(BusinessRejectReason.FIELD, BusinessRejectReason.OTHER);
+        setBusinessRejectReason(reason);
         if (text != null) {
-            message.setString(Text.FIELD, text);
-        }
-    }
-
-    public final void setCancelReject(@NonNull String ref, @NonNull Order order,
-            @Nullable String text) {
-        setClOrdId(ref);
-        setOrigClOrdId(order.getRef());
-        setOrderId(order.getId());
-        setOrdStatus(order.getState(), order.getResd());
-        message.setChar(CxlRejResponseTo.FIELD, CxlRejResponseTo.ORDER_CANCEL_REQUEST);
-        message.setInt(CxlRejReason.FIELD, CxlRejReason.OTHER);
-        if (text != null) {
-            message.setString(Text.FIELD, text);
+            setText(text);
         }
     }
 
@@ -382,22 +445,36 @@ public final class FixBuilder {
      *            The cancel-request's reference.
      * @param orderRef
      *            The reference of the order attempting to be cancelled.
-     * @param orderId
-     *            Optional id of the order attempting to be cancelled.
+     * @param responseTo
+     *            The message-type being responded to.
+     * @param reason
+     *            CxlRejReason code.
      * @param text
      *            Optional textual information.
      */
     public final void setCancelReject(@NonNull String ref, @NonNull String orderRef,
-            @Nullable Long orderId, @Nullable String text) {
+            char responseTo, int reason, @Nullable String text) {
         setClOrdId(ref);
         setOrigClOrdId(orderRef);
-        // If CxlRejReason="Unknown order", specify "NONE".
-        message.setString(OrderID.FIELD, orderId != null ? orderId.toString() : "NONE");
-        message.setChar(OrdStatus.FIELD, OrdStatus.REJECTED);
-        message.setChar(CxlRejResponseTo.FIELD, CxlRejResponseTo.ORDER_CANCEL_REQUEST);
-        message.setInt(CxlRejReason.FIELD, CxlRejReason.UNKNOWN_ORDER);
+        message.setString(OrderID.FIELD, "NONE");
+        setOrdStatus(OrdStatus.REJECTED);
+        setCxlRejResponseTo(responseTo);
+        setCxlRejReason(reason);
         if (text != null) {
-            message.setString(Text.FIELD, text);
+            setText(text);
+        }
+    }
+
+    public final void setCancelReject(@NonNull String ref, @NonNull Order order, char responseTo,
+            int reason, @Nullable String text) {
+        setClOrdId(ref);
+        setOrigClOrdId(order.getRef());
+        setOrderId(order.getId());
+        setOrdStatus(order.getState(), order.getResd());
+        setCxlRejResponseTo(responseTo);
+        setCxlRejReason(reason);
+        if (text != null) {
+            setText(text);
         }
     }
 
