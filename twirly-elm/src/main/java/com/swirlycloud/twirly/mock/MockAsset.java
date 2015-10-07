@@ -63,7 +63,7 @@ public final class MockAsset {
         put("VIA", "Viacom Inc", AssetType.CORPORATE);
         put("VOD", "Vodafone Group Plc", AssetType.CORPORATE);
         put("VZ", "Verizon Com", AssetType.CORPORATE);
-     }
+    }
 
     private MockAsset() {
     }

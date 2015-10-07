@@ -21,7 +21,8 @@ import org.eclipse.jdt.annotation.Nullable;
  * <li>The root is black. (This rule is sometimes omitted. Since the root can always be changed from
  * red to black, but not necessarily vice versa, this rule has little effect on analysis).</li>
  * <li>All leaves (NIL) are black. All leaves are of the same color as the root.</li>
- * <li>Every red node must have two black child nodes, and therefore it must have a black parent.</li>
+ * <li>Every red node must have two black child nodes, and therefore it must have a black parent.
+ * </li>
  * <li>Every path from a given node to any of its descendant NIL nodes contains the same number of
  * black nodes.</li>
  * </ol>

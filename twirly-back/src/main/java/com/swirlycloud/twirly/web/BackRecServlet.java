@@ -88,7 +88,8 @@ public final class BackRecServlet extends RecServlet {
 
     @SuppressWarnings("null")
     @Override
-    protected final void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         final BackRest rest = (BackRest) RestServlet.rest;
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");

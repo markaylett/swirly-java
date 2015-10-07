@@ -91,8 +91,8 @@ public class JdbcModel implements Model {
         final int maxLots = rs.getInt("maxLots");
 
         assert mnem != null;
-        return factory.newContr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer,
-                lotDenom, pipDp, minLots, maxLots);
+        return factory.newContr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom,
+                pipDp, minLots, maxLots);
     }
 
     private static @NonNull Market getMarket(@NonNull ResultSet rs, @NonNull Factory factory)
@@ -210,7 +210,8 @@ public class JdbcModel implements Model {
     }
 
     private final void selectPosn(@NonNull PreparedStatement stmt, int busDay,
-            @NonNull Factory factory, @NonNull final Container<? super Posn> c) throws SQLException {
+            @NonNull Factory factory, @NonNull final Container<? super Posn> c)
+                    throws SQLException {
         final PosnTree posns = new PosnTree();
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -258,7 +259,8 @@ public class JdbcModel implements Model {
         stmt.setInt(i, val);
     }
 
-    protected static void setNullIfZero(PreparedStatement stmt, int i, int val) throws SQLException {
+    protected static void setNullIfZero(PreparedStatement stmt, int i, int val)
+            throws SQLException {
         if (val != 0) {
             stmt.setInt(i, val);
         } else {
@@ -315,26 +317,26 @@ public class JdbcModel implements Model {
                 conn = DriverManager.getConnection(url, user, password);
                 selectAssetStmt = conn
                         .prepareStatement("SELECT mnem, display, typeId FROM Asset_t");
-                selectContrStmt = conn
-                        .prepareStatement("SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM Contr_v");
-                selectMarketStmt = conn
-                        .prepareStatement("SELECT mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM Market_v");
+                selectContrStmt = conn.prepareStatement(
+                        "SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM Contr_v");
+                selectMarketStmt = conn.prepareStatement(
+                        "SELECT mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM Market_v");
                 selectTraderStmt = conn
                         .prepareStatement("SELECT mnem, display, email FROM Trader_t");
                 selectTraderByEmailStmt = conn
                         .prepareStatement("SELECT mnem FROM Trader_t WHERE email = ?");
-                selectOrderStmt = conn
-                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
-                selectOrderByTraderStmt = conn
-                        .prepareStatement("SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
-                selectTradeStmt = conn
-                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
-                selectTradeByTraderStmt = conn
-                        .prepareStatement("SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE trader = ? AND archive = 0 AND stateId = 4");
-                selectPosnStmt = conn
-                        .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v");
-                selectPosnByTraderStmt = conn
-                        .prepareStatement("SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v WHERE trader = ?");
+                selectOrderStmt = conn.prepareStatement(
+                        "SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
+                selectOrderByTraderStmt = conn.prepareStatement(
+                        "SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
+                selectTradeStmt = conn.prepareStatement(
+                        "SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
+                selectTradeByTraderStmt = conn.prepareStatement(
+                        "SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE trader = ? AND archive = 0 AND stateId = 4");
+                selectPosnStmt = conn.prepareStatement(
+                        "SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v");
+                selectPosnByTraderStmt = conn.prepareStatement(
+                        "SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v WHERE trader = ?");
                 // Success.
                 this.conn = conn;
                 assert selectAssetStmt != null;

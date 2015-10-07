@@ -22,8 +22,8 @@ public @NonNullByDefault interface Factory {
             long maxLots);
 
     Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
-            int expiryDay, int state, long lastTicks, long lastLots, long lastTime,
-            long maxOrderId, long maxExecId);
+            int expiryDay, int state, long lastTicks, long lastLots, long lastTime, long maxOrderId,
+            long maxExecId);
 
     Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
             int expiryDay, int state);

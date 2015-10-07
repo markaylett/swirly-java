@@ -206,8 +206,8 @@ public @NonNullByDefault class Serv {
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
         return direct == Direct.PAID
-        // Paid when the taker lifts the offer.
-        ? makerOrder.getTicks() - takerOrder.getTicks()
+                // Paid when the taker lifts the offer.
+                ? makerOrder.getTicks() - takerOrder.getTicks()
                 // Given when the taker hits the bid.
                 : takerOrder.getTicks() - makerOrder.getTicks();
     }
@@ -289,8 +289,8 @@ public @NonNullByDefault class Serv {
         matchOrders(sess, book, order, side, direct, trans);
     }
 
-    private final void doCancelOrders(MarketBook book, long now) throws NotFoundException,
-            ServiceUnavailableException {
+    private final void doCancelOrders(MarketBook book, long now)
+            throws NotFoundException, ServiceUnavailableException {
         final BookSide bidSide = book.getBidSide();
         final BookSide offerSide = book.getOfferSide();
 
@@ -381,7 +381,8 @@ public @NonNullByDefault class Serv {
             final Posn posn = trans.posn;
             assert posn != null;
             posn.addTrade(takerTrade);
-            setDirty(maker, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
+            setDirty(maker,
+                    TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
             // Next match.
             node = node.slNext();
         } while (node != null);
@@ -622,8 +623,8 @@ public @NonNullByDefault class Serv {
     }
 
     public final MarketBook createMarket(String mnem, @Nullable String display, Contr contr,
-            int settlDay, int expiryDay, int state, long now) throws BadRequestException,
-            ServiceUnavailableException {
+            int settlDay, int expiryDay, int state, long now)
+                    throws BadRequestException, ServiceUnavailableException {
         if (settlDay != 0) {
             // busDay <= expiryDay <= settlDay.
             final int busDay = getBusDate(now).toJd();
@@ -663,8 +664,8 @@ public @NonNullByDefault class Serv {
     }
 
     public final MarketBook createMarket(String mnem, @Nullable String display, String contrMnem,
-            int settlDay, int expiryDay, int state, long now) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException {
+            int settlDay, int expiryDay, int state, long now)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Contr contr = (Contr) contrs.find(contrMnem);
         if (contr == null) {
             throw new NotFoundException(String.format("contr '%s' does not exist", contrMnem));
@@ -704,8 +705,8 @@ public @NonNullByDefault class Serv {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void expireEndOfDay(long now) throws NotFoundException,
-            ServiceUnavailableException {
+    public final void expireEndOfDay(long now)
+            throws NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final MarketBook book = (MarketBook) node;
@@ -738,12 +739,12 @@ public @NonNullByDefault class Serv {
     }
 
     public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
-            long ticks, long lots, long minLots, long now, Trans trans) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException {
+            long ticks, long lots, long minLots, long now, Trans trans)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
-            throw new NotFoundException(String.format("market for '%s' on '%d' has expired", book
-                    .getContrRich().getMnem(), maybeJdToIso(book.getSettlDay())));
+            throw new NotFoundException(String.format("market for '%s' on '%d' has expired",
+                    book.getContrRich().getMnem(), maybeJdToIso(book.getSettlDay())));
         }
         if (lots == 0 || lots < minLots) {
             throw new BadRequestException(String.format("invalid lots '%d'", lots));
@@ -788,8 +789,8 @@ public @NonNullByDefault class Serv {
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, Order order, long lots,
-            long now, Trans trans) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
+            long now, Trans trans)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
@@ -822,7 +823,8 @@ public @NonNullByDefault class Serv {
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, long id, long lots, long now,
-            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
+            Trans trans)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(book.getMnem(), id);
         if (order == null) {
             throw new NotFoundException(String.format("order '%d' does not exist", id));
@@ -830,9 +832,9 @@ public @NonNullByDefault class Serv {
         reviseOrder(sess, book, order, lots, now, trans);
     }
 
-    public final void reviseOrder(TraderSess sess, MarketBook book, String ref, long lots,
-            long now, Trans trans) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
+    public final void reviseOrder(TraderSess sess, MarketBook book, String ref, long lots, long now,
+            Trans trans)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
@@ -841,8 +843,8 @@ public @NonNullByDefault class Serv {
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, JslNode first, long lots,
-            long now, Trans trans) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
+            long now, Trans trans)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
         trans.reset(sess.getMnem(), book);
 
@@ -908,7 +910,8 @@ public @NonNullByDefault class Serv {
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, Order order, long now,
-            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
+            Trans trans)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new BadRequestException(String.format("order '%d' is done", order.getId()));
         }
@@ -942,7 +945,8 @@ public @NonNullByDefault class Serv {
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, String ref, long now,
-            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
+            Trans trans)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new NotFoundException(String.format("order '%s' does not exist", ref));
@@ -951,7 +955,8 @@ public @NonNullByDefault class Serv {
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, JslNode first, long now,
-            Trans trans) throws BadRequestException, NotFoundException, ServiceUnavailableException {
+            Trans trans)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
         trans.reset(sess.getMnem(), book);
 
@@ -1017,8 +1022,8 @@ public @NonNullByDefault class Serv {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void cancelOrder(TraderSess sess, long now) throws NotFoundException,
-            ServiceUnavailableException {
+    public final void cancelOrder(TraderSess sess, long now)
+            throws NotFoundException, ServiceUnavailableException {
 
         // Build list of cancel executions.
 
@@ -1070,8 +1075,8 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void cancelOrder(MarketBook book, long now) throws NotFoundException,
-            ServiceUnavailableException {
+    public final void cancelOrder(MarketBook book, long now)
+            throws NotFoundException, ServiceUnavailableException {
         doCancelOrders(book, now);
         updateDirty();
     }
@@ -1116,8 +1121,8 @@ public @NonNullByDefault class Serv {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void archiveOrder(TraderSess sess, long now) throws NotFoundException,
-            ServiceUnavailableException {
+    public final void archiveOrder(TraderSess sess, long now)
+            throws NotFoundException, ServiceUnavailableException {
 
         MarketId firstMid = null;
         for (RbNode node = sess.getFirstOrder(); node != null; node = node.rbNext()) {
@@ -1205,7 +1210,7 @@ public @NonNullByDefault class Serv {
 
     public final Exec createTrade(TraderSess sess, MarketBook book, String ref, Side side,
             long ticks, long lots, @Nullable Role role, @Nullable String cpty, long created)
-            throws NotFoundException, ServiceUnavailableException {
+                    throws NotFoundException, ServiceUnavailableException {
         final Posn posn = sess.getLazyPosn(book);
         final Exec trade = Exec.manual(book.allocExecId(), sess.getMnem(), book.getMnem(),
                 book.getContr(), book.getSettlDay(), ref, side, ticks, lots, role, cpty, created);
@@ -1294,8 +1299,8 @@ public @NonNullByDefault class Serv {
      * @throws NotFoundException
      * @throws ServiceUnavailableException
      */
-    public final void archiveTrade(TraderSess sess, long now) throws NotFoundException,
-            ServiceUnavailableException {
+    public final void archiveTrade(TraderSess sess, long now)
+            throws NotFoundException, ServiceUnavailableException {
 
         MarketId firstMid = null;
         for (RbNode node = sess.getFirstTrade(); node != null; node = node.rbNext()) {

@@ -250,8 +250,8 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getOrder(String trader, String market, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException {
+    public final void getOrder(String trader, String market, Params params, long now,
+            Appendable out) throws ServiceUnavailableException, IOException {
         RestUtil.getOrder(selectOrder(trader).getFirst(), market, params, out);
     }
 
@@ -273,8 +273,8 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getTrade(String trader, String market, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException {
+    public final void getTrade(String trader, String market, Params params, long now,
+            Appendable out) throws ServiceUnavailableException, IOException {
         RestUtil.getTrade(selectTrade(trader).getFirst(), market, params, out);
     }
 
@@ -309,8 +309,8 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final TraderPosnTree tree = selectPosn(trader, busDay);
         final Posn posn = (Posn) tree.find(contr, maybeIsoToJd(settlDate));
         if (posn == null) {
-            throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",
-                    contr, settlDate));
+            throw new NotFoundException(
+                    String.format("posn for '%s' on '%d' does not exist", contr, settlDate));
         }
         posn.toJson(params, out);
     }

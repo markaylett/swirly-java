@@ -25,8 +25,7 @@ public final class JsonUtil {
             @Override
             public final <T> T getParam(String name, Class<T> clazz) {
                 return "expired".equals(name) //
-                ? (T) Boolean.TRUE
-                        : params.getParam(name, clazz);
+                        ? (T) Boolean.TRUE : params.getParam(name, clazz);
             }
         };
     }

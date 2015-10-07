@@ -40,10 +40,10 @@ public final class RbUtil {
 
     public static RbNode rbNext(@NonNull RbNode node) {
         RbNode tmp = node;
-        final RbNode right = tmp.getRight(); 
+        final RbNode right = tmp.getRight();
         if (right != null) {
             tmp = right;
-            RbNode left = tmp.getLeft(); 
+            RbNode left = tmp.getLeft();
             while (left != null) {
                 tmp = left;
                 left = tmp.getLeft();
@@ -65,7 +65,7 @@ public final class RbUtil {
 
     public static RbNode rbPrev(@NonNull RbNode node) {
         RbNode tmp = node;
-        final RbNode left = tmp.getLeft(); 
+        final RbNode left = tmp.getLeft();
         if (left != null) {
             tmp = left;
             RbNode right = tmp.getRight();

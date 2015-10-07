@@ -135,7 +135,8 @@ public final class FrontProxyServlet extends HttpServlet {
     }
 
     @Override
-    protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         proxy(req, resp, HTTPMethod.GET, module);
     }
 
@@ -146,7 +147,8 @@ public final class FrontProxyServlet extends HttpServlet {
     }
 
     @Override
-    protected final void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doPut(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         proxy(req, resp, HTTPMethod.PUT, module);
     }
 }

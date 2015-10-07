@@ -112,13 +112,14 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectOrder(@NonNull Factory factory) throws InterruptedException {
+    public final @Nullable SlNode selectOrder(@NonNull Factory factory)
+            throws InterruptedException {
         return model.selectOrder(factory);
     }
 
     @Override
-    public final @Nullable InstructTree selectOrder(@NonNull String trader, @NonNull Factory factory)
-            throws InterruptedException {
+    public final @Nullable InstructTree selectOrder(@NonNull String trader,
+            @NonNull Factory factory) throws InterruptedException {
         final String key = "order:" + trader;
         InstructTree tree = (InstructTree) cache.select(key);
         if (tree == null) {
@@ -130,13 +131,14 @@ public final class CacheModel implements Model {
     }
 
     @Override
-    public final @Nullable SlNode selectTrade(@NonNull Factory factory) throws InterruptedException {
+    public final @Nullable SlNode selectTrade(@NonNull Factory factory)
+            throws InterruptedException {
         return model.selectTrade(factory);
     }
 
     @Override
-    public final @Nullable InstructTree selectTrade(@NonNull String trader, @NonNull Factory factory)
-            throws InterruptedException {
+    public final @Nullable InstructTree selectTrade(@NonNull String trader,
+            @NonNull Factory factory) throws InterruptedException {
         final String key = "trade:" + trader;
         InstructTree tree = (InstructTree) cache.select(key);
         if (tree == null) {

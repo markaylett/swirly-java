@@ -100,7 +100,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     @SuppressWarnings("null")
-    private final TraderSess getTraderLocked(@NonNull SessionID sessionId) throws NotFoundException {
+    private final TraderSess getTraderLocked(@NonNull SessionID sessionId)
+            throws NotFoundException {
         try {
             return serv.getTrader(settings.getString(sessionId, "Trader"));
         } catch (ConfigError | FieldConvertError e) {
@@ -155,8 +156,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         }
     }
 
-    private FixServ(SessionSettings settings, LockableServ serv) throws ConfigError,
-            FieldConvertError, NotFoundException {
+    private FixServ(SessionSettings settings, LockableServ serv)
+            throws ConfigError, FieldConvertError, NotFoundException {
         this.settings = settings;
         this.serv = serv;
         this.nowFromTransactTime = settings.getBool("NowFromTransactTime");
@@ -176,8 +177,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     public static FixServ create(final SessionSettings settings, LockableServ serv,
-            final LogFactory logFactory) throws ConfigError, FieldConvertError, NotFoundException,
-            IOException {
+            final LogFactory logFactory)
+                    throws ConfigError, FieldConvertError, NotFoundException, IOException {
         final FixServ server = new FixServ(settings, serv);
         final Acceptor acceptor = new SocketAcceptor(server, new NullStoreFactory(), settings,
                 logFactory, new DefaultMessageFactory());
@@ -198,8 +199,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     @Override
-    public final void onMessage(NewOrderSingle message, SessionID sessionId) throws FieldNotFound,
-            IncorrectTagValue {
+    public final void onMessage(NewOrderSingle message, SessionID sessionId)
+            throws FieldNotFound, IncorrectTagValue {
         log.info(sessionId.getTargetCompID() + ": NewOrderSingle: " + message);
 
         final String market = message.getString(Symbol.FIELD);
@@ -282,8 +283,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
             } else {
                 order = sess.findOrder(orderRef);
                 if (order == null) {
-                    throw new FixRejectException(String.format("order '%s' does not exist",
-                            orderRef));
+                    throw new FixRejectException(
+                            String.format("order '%s' does not exist", orderRef));
                 }
             }
             try (final Trans trans = new Trans()) {
@@ -343,8 +344,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
             } else {
                 order = sess.findOrder(orderRef);
                 if (order == null) {
-                    throw new FixRejectException(String.format("order '%s' does not exist",
-                            orderRef));
+                    throw new FixRejectException(
+                            String.format("order '%s' does not exist", orderRef));
                 }
             }
             try (final Trans trans = new Trans()) {
@@ -397,8 +398,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     @Override
-    public final void fromAdmin(Message message, SessionID sessionId) throws FieldNotFound,
-            IncorrectDataFormat, IncorrectTagValue, RejectLogon {
+    public final void fromAdmin(Message message, SessionID sessionId)
+            throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, RejectLogon {
         if (log.isDebugEnabled()) {
             log.debug(sessionId + ": fromAdmin: " + message);
         }
@@ -412,8 +413,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     @Override
-    public final void fromApp(Message message, SessionID sessionId) throws FieldNotFound,
-            IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
+    public final void fromApp(Message message, SessionID sessionId)
+            throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
         if (log.isDebugEnabled()) {
             log.debug(sessionId + ": fromApp: " + message);
         }

@@ -260,14 +260,14 @@ public final class IrCurve {
         return factory.newSAXParser();
     }
 
-    public final void parse(InputStream is) throws ParserConfigurationException, SAXException,
-            IOException {
+    public final void parse(InputStream is)
+            throws ParserConfigurationException, SAXException, IOException {
         final SAXParser parser = newSaxParser();
         parser.parse(is, new Handler());
     }
 
-    public final void parse(String uri) throws ParserConfigurationException, SAXException,
-            IOException {
+    public final void parse(String uri)
+            throws ParserConfigurationException, SAXException, IOException {
         final SAXParser parser = newSaxParser();
         parser.parse(uri, new Handler());
     }
@@ -277,17 +277,17 @@ public final class IrCurve {
         parser.parse(f, new Handler());
     }
 
-    public final void parse(InputSource is) throws ParserConfigurationException, SAXException,
-            IOException {
+    public final void parse(InputSource is)
+            throws ParserConfigurationException, SAXException, IOException {
         final SAXParser parser = newSaxParser();
         parser.parse(is, new Handler());
     }
 
-    public final boolean parse(String ccy, GregDate gd) throws IOException,
-            ParserConfigurationException, SAXException {
+    public final boolean parse(String ccy, GregDate gd)
+            throws IOException, ParserConfigurationException, SAXException {
         boolean success = false;
-        final URL url = new URL(String.format(
-                "https://www.markit.com/news/InterestRates_%s_%d.zip", ccy, gd.toIso()));
+        final URL url = new URL(String.format("https://www.markit.com/news/InterestRates_%s_%d.zip",
+                ccy, gd.toIso()));
         try (final ZipInputStream is = new ZipInputStream(url.openStream())) {
             ZipEntry entry = is.getNextEntry();
             while (entry != null) {

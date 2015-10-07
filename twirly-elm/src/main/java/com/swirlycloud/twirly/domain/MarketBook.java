@@ -50,21 +50,22 @@ public @NonNullByDefault class MarketBook extends Market {
         view.ladder.clear();
         final int rows = ladder.getRows();
         int row = 0;
-        for (RbNode node = bidSide.getFirstLevel(); node != null && row < rows; node = node
-                .rbNext()) {
+        for (RbNode node = bidSide.getFirstLevel(); node != null
+                && row < rows; node = node.rbNext()) {
             final Level level = (Level) node;
             ladder.setBidRung(row++, level.getTicks(), level.getLots(), level.getCount());
         }
         row = 0;
-        for (RbNode node = offerSide.getFirstLevel(); node != null && row < rows; node = node
-                .rbNext()) {
+        for (RbNode node = offerSide.getFirstLevel(); node != null
+                && row < rows; node = node.rbNext()) {
             final Level level = (Level) node;
             ladder.setOfferRung(row++, level.getTicks(), level.getLots(), level.getCount());
         }
     }
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId, long maxExecId) {
+            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId,
+            long maxExecId) {
         super(mnem, display, contr, settlDay, expiryDay, state);
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;

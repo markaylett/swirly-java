@@ -30,8 +30,8 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Order extends BasicRbNode implements Jsonifiable, DlNode,
-        SlNode, Instruct {
+public final @NonNullByDefault class Order extends BasicRbNode
+        implements Jsonifiable, DlNode, SlNode, Instruct {
 
     private static final long serialVersionUID = 1L;
 
@@ -146,8 +146,8 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
                 if (side == null) {
                     throw new IOException("side is null");
                 }
-                return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks,
-                        lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
+                return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks, lots,
+                        resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -391,7 +391,8 @@ public final @NonNullByDefault class Order extends BasicRbNode implements Jsonif
         modified = now;
     }
 
-    public final void trade(long takenLots, long takenCost, long lastTicks, long lastLots, long now) {
+    public final void trade(long takenLots, long takenCost, long lastTicks, long lastLots,
+            long now) {
         state = State.TRADE;
         resd -= takenLots;
         this.exec += takenLots;

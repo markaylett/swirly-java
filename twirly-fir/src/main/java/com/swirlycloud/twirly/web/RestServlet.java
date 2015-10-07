@@ -81,8 +81,8 @@ public abstract class RestServlet extends HttpServlet {
         resp.setStatus(e.getNum());
     }
 
-    protected final @NonNull String getTrader(HttpServletRequest req) throws NotFoundException,
-            ServiceUnavailableException, IOException {
+    protected final @NonNull String getTrader(HttpServletRequest req)
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final String email = realm.getUserEmail(req);
         assert email != null;
         final String trader = rest.findTraderByEmail(email);

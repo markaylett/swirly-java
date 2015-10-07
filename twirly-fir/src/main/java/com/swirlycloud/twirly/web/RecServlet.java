@@ -26,7 +26,8 @@ public class RecServlet extends RestServlet {
 
     @SuppressWarnings("null")
     @Override
-    protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
@@ -34,12 +35,12 @@ public class RecServlet extends RestServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-    
+
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
             final long now = now();
-    
+
             boolean match = false;
             if (parts.length == 0) {
                 rest.getRec(realm.isUserAdmin(req), params, now, resp.getWriter());
@@ -80,7 +81,7 @@ public class RecServlet extends RestServlet {
                     match = true;
                 }
             }
-    
+
             if (!match) {
                 throw new NotFoundException("resource does not exist");
             }

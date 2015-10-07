@@ -181,8 +181,8 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @Nullable TraderPosnTree selectPosn(@NonNull final String trader,
-            final int busDay, @NonNull final Factory factory) throws InterruptedException {
+    public final @Nullable TraderPosnTree selectPosn(@NonNull final String trader, final int busDay,
+            @NonNull final Factory factory) throws InterruptedException {
         return get(service.submit(new Callable<TraderPosnTree>() {
             @Override
             public final TraderPosnTree call() throws Exception {

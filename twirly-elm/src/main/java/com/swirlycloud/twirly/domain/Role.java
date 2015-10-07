@@ -9,7 +9,8 @@ public enum Role implements Invertible<Role> {
     /**
      * Passive buyer or seller that receives the spread.
      */
-    MAKER(1), /**
+    MAKER(1),
+    /**
      * Aggressive buyer or seller that crosses the market and pays the spread.
      */
     TAKER(2);

@@ -159,8 +159,7 @@ public final class BackSessServlet extends SessServlet {
             }
             final long now = now();
             if (ids.jslNext() != null) {
-                rest.putOrder(trader, market, ids, r.getLots(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.putOrder(trader, market, ids, r.getLots(), PARAMS_NONE, now, resp.getWriter());
             } else {
                 final long id = ids.getId();
                 rest.putOrder(trader, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());

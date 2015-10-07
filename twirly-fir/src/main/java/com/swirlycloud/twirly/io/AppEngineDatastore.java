@@ -156,8 +156,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         try {
             return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            throw new NotFoundException(String.format("market '%s' does not exist in datastore",
-                    market));
+            throw new NotFoundException(
+                    String.format("market '%s' does not exist in datastore", market));
         }
     }
 
@@ -166,8 +166,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         try {
             return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            throw new NotFoundException(String.format("trader '%s' does not exist in datastore",
-                    trader));
+            throw new NotFoundException(
+                    String.format("trader '%s' does not exist in datastore", trader));
         }
     }
 
@@ -176,7 +176,8 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         try {
             return datastore.get(txn, key);
         } catch (final EntityNotFoundException e) {
-            throw new NotFoundException(String.format("order '%d' does not exist in datastore", id));
+            throw new NotFoundException(
+                    String.format("order '%d' does not exist in datastore", id));
         }
     }
 

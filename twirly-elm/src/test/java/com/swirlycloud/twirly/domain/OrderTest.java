@@ -20,8 +20,8 @@ public final class OrderTest {
     private static final long NOW = jdToMillis(TODAY);
 
     private static Order newOrder() {
-        return FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test",
-                Side.BUY, 12345, 10, 1, NOW);
+        return FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test", Side.BUY,
+                12345, 10, 1, NOW);
     }
 
     @Test

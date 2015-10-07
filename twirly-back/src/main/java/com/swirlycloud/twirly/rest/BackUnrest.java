@@ -220,7 +220,8 @@ public final @NonNullByDefault class BackUnrest {
         throw new IOException("end-of array not found");
     }
 
-    private static void parsePosns(JsonParser p, Map<PosnKey, ? super Posn> out) throws IOException {
+    private static void parsePosns(JsonParser p, Map<PosnKey, ? super Posn> out)
+            throws IOException {
         while (p.hasNext()) {
             final Event event = p.next();
             switch (event) {
@@ -586,8 +587,8 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Trader postTrader(String mnem, @Nullable String display, String email,
-            Params params, long now) throws BadRequestException, ServiceUnavailableException,
-            IOException {
+            Params params, long now)
+                    throws BadRequestException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postTrader(mnem, display, email, params, now, sb);
 
@@ -598,7 +599,8 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Trader putTrader(String mnem, @Nullable String display, Params params, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         final StringBuilder sb = new StringBuilder();
         rest.putTrader(mnem, display, params, now, sb);
 
@@ -610,7 +612,8 @@ public final @NonNullByDefault class BackUnrest {
 
     public final Market postMarket(String mnem, @Nullable String display, String contr,
             int settlDate, int expiryDate, int state, Params params, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException,
+                    IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postMarket(mnem, display, contr, settlDate, expiryDate, state, params, now, sb);
 
@@ -622,7 +625,7 @@ public final @NonNullByDefault class BackUnrest {
 
     public final Market putMarket(String mnem, @Nullable String display, int state, Params params,
             long now) throws BadRequestException, NotFoundException, ServiceUnavailableException,
-            IOException {
+                    IOException {
         final StringBuilder sb = new StringBuilder();
         rest.putMarket(mnem, display, state, params, now, sb);
 
@@ -633,18 +636,21 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final void deleteOrder(String trader, String market, long id, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         rest.deleteOrder(trader, market, id, now);
     }
 
     public final void deleteOrder(String trader, String market, JslNode first, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         rest.deleteOrder(trader, market, first, now);
     }
 
     public final TransStruct postOrder(String trader, String market, @Nullable String ref,
             Side side, long ticks, long lots, long minLots, Params params, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException,
+                    IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postOrder(trader, market, ref, side, ticks, lots, minLots, params, now, sb);
 
@@ -656,7 +662,7 @@ public final @NonNullByDefault class BackUnrest {
 
     public final TransStruct putOrder(String trader, String market, long id, long lots,
             Params params, long now) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.putOrder(trader, market, id, lots, params, now, sb);
 
@@ -668,7 +674,7 @@ public final @NonNullByDefault class BackUnrest {
 
     public final TransStruct putOrder(String trader, String market, JslNode first, long lots,
             Params params, long now) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.putOrder(trader, market, first, lots, params, now, sb);
 
@@ -689,8 +695,8 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Exec postTrade(String trader, String market, String ref, Side side, long ticks,
-            long lots, Role role, String cpty, Params params, long now) throws NotFoundException,
-            ServiceUnavailableException, IOException {
+            long lots, Role role, String cpty, Params params, long now)
+                    throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postTrade(trader, market, ref, side, ticks, lots, role, cpty, params, now, sb);
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {

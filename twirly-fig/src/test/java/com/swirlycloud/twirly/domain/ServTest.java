@@ -56,12 +56,12 @@ public final class ServTest {
 
             @Override
             public final SlNode selectOrder(@NonNull Factory factory) {
-                final Order first = factory.newOrder(1, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "first", Side.BUY, 12344, 11, 1, NOW - 5);
+                final Order first = factory.newOrder(1, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
+                        "first", Side.BUY, 12344, 11, 1, NOW - 5);
                 final Order second = factory.newOrder(2, TRADER, "EURUSD.MAR14", "EURUSD",
                         SETTL_DAY, "second", Side.BUY, 12345, 10, 1, NOW - 4);
-                final Order third = factory.newOrder(3, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "third", Side.SELL, 12346, 10, 1, NOW - 3);
+                final Order third = factory.newOrder(3, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
+                        "third", Side.SELL, 12346, 10, 1, NOW - 3);
                 // Fully fill second order.
                 second.trade(12345, 10, NOW - 2);
                 // Partially fill third order.
@@ -74,8 +74,8 @@ public final class ServTest {
             @Override
             public final SlNode selectTrade(@NonNull Factory factory) {
                 final Exec second = factory.newExec(1, 2, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "second", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
-                        12345, 10, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
+                        SETTL_DAY, "second", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
+                        10, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
                 final Exec third = factory.newExec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD",
                         SETTL_DAY, "third", State.TRADE, Side.SELL, 12346, 10, 3, 7, 86422, 12346,
                         7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
@@ -260,15 +260,15 @@ public final class ServTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public final void testDuplicateMarket() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
-        serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY,
-                STATE, NOW);
+    public final void testDuplicateMarket()
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, STATE,
+                NOW);
     }
 
     @Test
-    public final void testPlace() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
+    public final void testPlace()
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
@@ -298,8 +298,8 @@ public final class ServTest {
     }
 
     @Test
-    public final void testRevise() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
+    public final void testRevise()
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 
@@ -330,8 +330,8 @@ public final class ServTest {
     }
 
     @Test
-    public final void testCancel() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
+    public final void testCancel()
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);
 

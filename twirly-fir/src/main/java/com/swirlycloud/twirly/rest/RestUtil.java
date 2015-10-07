@@ -47,8 +47,8 @@ public final @NonNullByDefault class RestUtil {
         out.append(']');
     }
 
-    public static void getOrder(@Nullable RbNode first, String market, Params params, Appendable out)
-            throws IOException {
+    public static void getOrder(@Nullable RbNode first, String market, Params params,
+            Appendable out) throws IOException {
         out.append('[');
         int i = 0;
         for (RbNode node = first; node != null; node = node.rbNext()) {
@@ -65,8 +65,8 @@ public final @NonNullByDefault class RestUtil {
         out.append(']');
     }
 
-    public static void getTrade(@Nullable RbNode first, String market, Params params, Appendable out)
-            throws IOException {
+    public static void getTrade(@Nullable RbNode first, String market, Params params,
+            Appendable out) throws IOException {
         out.append('[');
         int i = 0;
         for (RbNode node = first; node != null; node = node.rbNext()) {
