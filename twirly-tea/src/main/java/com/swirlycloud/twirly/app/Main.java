@@ -84,7 +84,7 @@ public final class Main {
 
             try (final FixClnt fixClient = startFixClient("FixClnt.conf")) {
 
-                Thread.sleep(1000);
+                fixClient.waitForLogon();
 
                 final SessionID marayl = new SessionID("FIX.4.4", "MarkAylett", "Twirly");
                 final SessionID gosayl = new SessionID("FIX.4.4", "GoskaAylett", "Twirly");

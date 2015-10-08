@@ -56,6 +56,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
     private final SessionSettings settings;
     private Initiator initiator;
     private final FixClntCache cache = new FixClntCache();
+    private boolean logon = false;
 
     private FixClnt(final SessionSettings settings) throws ConfigError, FieldConvertError {
         this.settings = settings;
@@ -128,12 +129,19 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
         if (log.isInfoEnabled()) {
             log.info(sessionId + ": onLogon: " + sessionId);
         }
+        synchronized (this) {
+            logon = true;
+            this.notifyAll();
+        }
     }
 
     @Override
     public final void onLogout(SessionID sessionId) {
         if (log.isInfoEnabled()) {
             log.info(sessionId + ": onLogout: " + sessionId);
+        }
+        synchronized (this) {
+            logon = false;
         }
     }
 
@@ -226,5 +234,13 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
         final Message message = builder.getMessage();
         assert message != null;
         return cache.sendRequest(ref, message, sessionId);
+    }
+
+    public final void waitForLogon() throws InterruptedException {
+        synchronized (this) {
+            while (!logon) {
+                wait();
+            }
+        }
     }
 }
