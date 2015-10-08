@@ -3,6 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
+import static com.swirlycloud.twirly.app.FixUtility.readSettings;
+
+import java.io.IOException;
 import java.util.concurrent.Future;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -71,6 +74,12 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
         client.initiator = initiator;
         initiator.start();
         return client;
+    }
+
+    public static FixClnt create(final String path, final LogFactory logFactory)
+            throws ConfigError, FieldConvertError, IOException {
+        final SessionSettings settings = readSettings(path);
+        return create(settings, logFactory);
     }
 
     @Override

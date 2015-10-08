@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.app;
 
 import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
+import static com.swirlycloud.twirly.app.FixUtility.readSettings;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
@@ -178,7 +179,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
 
     public static FixServ create(final SessionSettings settings, LockableServ serv,
             final LogFactory logFactory)
-                    throws ConfigError, FieldConvertError, NotFoundException, IOException {
+                    throws ConfigError, FieldConvertError, NotFoundException {
         final FixServ server = new FixServ(settings, serv);
         final Acceptor acceptor = new SocketAcceptor(server, new NullStoreFactory(), settings,
                 logFactory, new DefaultMessageFactory());
@@ -186,6 +187,12 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         server.acceptor = acceptor;
         acceptor.start();
         return server;
+    }
+
+    public static FixServ create(final String path, LockableServ serv, final LogFactory logFactory)
+            throws ConfigError, FieldConvertError, NotFoundException, IOException {
+        final SessionSettings settings = readSettings(path);
+        return create(settings, serv, logFactory);
     }
 
     @Override
