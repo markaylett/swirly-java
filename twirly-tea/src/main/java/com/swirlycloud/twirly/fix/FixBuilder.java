@@ -1,18 +1,18 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.fix;
 
-import static com.swirlycloud.twirly.app.FixUtility.execTypeToState;
-import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
-import static com.swirlycloud.twirly.app.FixUtility.lastLiquidityIndToRole;
-import static com.swirlycloud.twirly.app.FixUtility.ordStatusToState;
-import static com.swirlycloud.twirly.app.FixUtility.roleToLastLiquidityInd;
-import static com.swirlycloud.twirly.app.FixUtility.sideToFix;
-import static com.swirlycloud.twirly.app.FixUtility.stateToExecType;
-import static com.swirlycloud.twirly.app.FixUtility.stateToOrdStatus;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
+import static com.swirlycloud.twirly.fix.FixUtility.execTypeToState;
+import static com.swirlycloud.twirly.fix.FixUtility.fixToSide;
+import static com.swirlycloud.twirly.fix.FixUtility.lastLiquidityIndToRole;
+import static com.swirlycloud.twirly.fix.FixUtility.ordStatusToState;
+import static com.swirlycloud.twirly.fix.FixUtility.roleToLastLiquidityInd;
+import static com.swirlycloud.twirly.fix.FixUtility.sideToFix;
+import static com.swirlycloud.twirly.fix.FixUtility.stateToExecType;
+import static com.swirlycloud.twirly.fix.FixUtility.stateToOrdStatus;
 
 import java.util.Date;
 import java.util.List;

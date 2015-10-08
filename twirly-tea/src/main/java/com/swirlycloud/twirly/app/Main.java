@@ -3,9 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import static com.swirlycloud.twirly.app.FixUtility.readProperties;
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
+import static com.swirlycloud.twirly.fix.FixUtility.readProperties;
 import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
@@ -15,6 +15,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.fix.FixClnt;
+import com.swirlycloud.twirly.fix.FixServ;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.quickfix.Slf4jLogFactory;

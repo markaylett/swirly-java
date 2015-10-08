@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.fix;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.exception.AlreadyExistsException;
+import com.swirlycloud.twirly.fix.FixCache;
 
 import quickfix.Message;
 import quickfix.SessionID;

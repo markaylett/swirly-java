@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.fix;
 
-import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
-import static com.swirlycloud.twirly.app.FixUtility.readSettings;
+import static com.swirlycloud.twirly.fix.FixUtility.fixToSide;
+import static com.swirlycloud.twirly.fix.FixUtility.readSettings;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
@@ -17,6 +17,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.swirlycloud.twirly.app.LockableServ;
+import com.swirlycloud.twirly.app.Trans;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;

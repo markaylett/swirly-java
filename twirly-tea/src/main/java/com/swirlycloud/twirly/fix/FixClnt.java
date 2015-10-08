@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.fix;
 
-import static com.swirlycloud.twirly.app.FixUtility.readSettings;
+import static com.swirlycloud.twirly.fix.FixUtility.readSettings;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
