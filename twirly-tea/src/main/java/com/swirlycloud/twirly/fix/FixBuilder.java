@@ -159,6 +159,18 @@ public final class FixBuilder {
         return getLong(LastQty.FIELD);
     }
 
+    // MsgType(35)
+
+    public final void setMsgType(String msgType) {
+        final Header header = message.getHeader();
+        header.setString(MsgType.FIELD, msgType);
+    }
+
+    public final String getMsgType() throws FieldNotFound {
+        final Header header = message.getHeader();
+        return header.getString(MsgType.FIELD);
+    }
+    
     // OrderId(37)
 
     public final void setOrderId(long id) {
