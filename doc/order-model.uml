@@ -1,0 +1,14 @@
+@startuml
+
+participant Consumer
+participant Market
+participant Producer
+Producer -> Market: Bid Order
+Producer -> Market: Offer Order
+Market -> Consumer: Market-Data
+Consumer -> Market: Order
+activate Market
+Market -> Consumer: Trade
+deactivate Market
+
+@enduml

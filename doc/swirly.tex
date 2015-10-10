@@ -1,0 +1,583 @@
+\documentclass[12pt,a4paper,notitlepage,bibliography=totoc]{scrreprt}
+
+\usepackage{hyperref}
+\hypersetup{
+  bookmarks=true,
+  pdftitle={Swirly Cloud},
+  pdfauthor={Mark Aylett},
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  filecolor=blue,
+  urlcolor=blue
+}
+
+\usepackage{draftwatermark}
+\SetWatermarkLightness{0.9}
+\SetWatermarkText{Confidential}
+\SetWatermarkScale{3}
+
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage[titletoc,title,toc]{appendix}
+\usepackage[acronym,toc,xindy]{glossaries}
+\makeglossaries
+
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+
+\newcommand{\swirly}{Swirly Cloud}
+\newcommand{\s}{\textsterling}
+
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{bbo}{BBO}{Best Bid and Offer}
+\newacronym{clob}{CLOB}{Central Limit Order-Book}
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym{ecn}{ECN}{Electronic Communication Network}
+\newacronym{fok}{FOK}{Fill Or Kill}
+\newacronym{gtc}{GTC}{Good `Till Cancelled}
+\newacronym{json}{JSON}{Java-Script Object Notation}
+\newacronym{hft}{HFT}{High-Frequency Trading}
+\newacronym{http}{HTTP}{Hyper-Text Transfer Protocol}
+\newacronym{ip}{IP}{Intellectual Property}
+\newacronym{mis}{MIS}{Market Information Services}
+\newacronym{mtm}{MTM}{Mark To Market}
+\newacronym{otc}{OTC}{Over The Counter}
+\newacronym{poc}{POC}{Proof Of Concept}
+\newacronym{rca}{RCA}{Root Cause Analysis}
+\newacronym{rest}{REST}{REpresentational State Transfer}
+\newacronym{tco}{TCO}{Total Cost of Ownership}
+\newacronym{ttl}{TTL}{Time To Live}
+\newacronym{tvm}{TVM}{Time Value of Money}
+\newacronym{tob}{TOB}{Top Of Book}
+\newacronym{ui}{UI}{User Interface}
+\newacronym{vwap}{VWAP}{Volume Weighted Average Price}
+\newacronym{www}{WWW}{World Wide Web}
+
+\newglossaryentry{appengine}{name={App Engine}, description={application services running on
+    Google's Cloud platform}}
+
+\newglossaryentry{arbitrage}{name={arbitrage}, description={the simultaneous purchase and sale on
+    different markets, of the same or equivalent financial instruments to profit from price or
+    currency differentials}}
+
+\newglossaryentry{asset}{name={asset}, description={an item of value}}
+
+\newglossaryentry{auction}{name={auction}, description={a market where goods or services are sold to
+    the highest bidder}}
+
+\newglossaryentry{bid}{name={bid}, description={the price and quantity at which a market participant
+    is willing to buy}}
+
+\newglossaryentry{cloud}{name={Cloud}, description={a network of remote servers hosted on the
+    Internet to store, manage, and process data}}
+
+\newglossaryentry{contract}{name={contract}, description={a specification that stipulates the terms
+    and conditions of sale}}
+
+\newglossaryentry{e-commerce}{name={e-commerce}, description={commercial transactions conducted
+    electronically on the Internet.}}
+
+\newglossaryentry{exchange}{name={exchange}, description={a place where buyers and sellers meet to
+    exchange goods or services}}
+
+\newglossaryentry{execution}{name={execution}, description={a transaction that occurs as an order
+    transitions through a workflow}}
+
+\newglossaryentry{expiry date}{name={expiry date}, description={the last date that a contract can be
+    traded on a specific market}}
+
+\newglossaryentry{given}{name={given}, description={when the taker hits the bid}}
+
+\newglossaryentry{price-level}{name={price-level}, description={a price level is the sum of all
+    orders in the book at the same price}}
+
+\newglossaryentry{limit order}{name={limit order}, description={an order to buy or sell at a
+    specific price or better}}
+
+\newglossaryentry{limit price}{name={limit price}, description={the price on a limit order}}
+
+\newglossaryentry{liquid market}{name={liquid market}, description={the ability of a market to
+    accept large transactions with minimal impact on price stability}}
+
+\newglossaryentry{liquidity}{name={liquidity}, description={refers the bids and offers available in
+    a market}}
+
+\newglossaryentry{lot}{name={lot}, description={a unit of measure that represents the smallest
+    amount that can be bought or sold}}
+
+\newglossaryentry{maker}{name={maker}, description={passive buyer or seller that receives the spread}}
+
+\newglossaryentry{market}{name={market}, description={a place where buyers and sellers come together
+    to exchange goods or services}}
+
+\newglossaryentry{market-maker}{name={market-maker}, description={a market-maker quotes both bids
+    and offers, aiming to profit from the bid-offer spread}}
+
+\newglossaryentry{market order}{name={market order}, description={an order to buy or sell at the
+    current market price}}
+
+\newglossaryentry{market-place}{name={market-place}, description={a venue comprising many markets}}
+
+\newglossaryentry{matching engine}{name={matching engine}, description={the software component in a
+    trading application responsible for matching buy and sell orders to form a trade}}
+
+\newglossaryentry{merchant}{name={merchant}, description={a person or company involved in wholesale
+    trade, especially one dealing with foreign countries or supplying goods to a particular trade.}}
+
+\newglossaryentry{order-book}{name={order-book}, description={the software component in a trading
+    application responsible for managing resting orders in a two-sided market}}
+
+\newglossaryentry{offer}{name={offer}, description={the price and quantity at which a market
+    partipant is willing to sell}}
+
+\newglossaryentry{order}{name={order}, description={an instruction to buy or sell goods or
+    services}}
+
+\newglossaryentry{order-driven}{name={order-driven}, description={a financial market where the
+    orders for both buyers and sellers are displayed along with their price and quantity}}
+
+\newglossaryentry{paid}{name={paid}, description={when the taker lifts the offer}}
+
+\newglossaryentry{quote}{name={quote}, description={the price offered by a market-maker to buy or
+    sell a specific quantity of goods}}
+
+\newglossaryentry{quote-driven}{name={quote-driven}, description={a financial market where
+    market-makers send quotes to interested parties that guarantee order execution.}}
+
+\newglossaryentry{restful}{name={restful}, description={a software architecture for building
+    scalable web services}}
+
+\newglossaryentry{resting-order}{name={resting-order}, description={an order that is sitting in the
+    order-book waiting to be matched}}
+
+\newglossaryentry{settlement date}{name={settlement date}, description={the date on which a trade is
+    settled between counter-parties}}
+
+\newglossaryentry{spread}{name={spread}, description={the difference between the best bid and
+    offer}}
+
+\newglossaryentry{taker}{name={taker}, description={aggressive buyer or seller that pays the spread}}
+
+\newglossaryentry{tick}{name={tick}, description={a unit of measure that represents the smallest
+    price movement}}
+
+\newglossaryentry{trade}{name={trade}, description={the exchange of goods or services between
+    counter-parties}}
+
+\newglossaryentry{trade date}{name={trade date}, description={the date on which a trade takes place}}
+
+\newglossaryentry{volume}{name={volume}, description={total quantity}}
+
+\newglossaryentry{web}{name={Web}, description={the World Wide Web}}
+
+\glsaddall
+
+\begin{document}
+
+\title{Swirly Cloud}
+\subtitle{scalable and transparent quoting}
+\author{Mark Aylett}
+\date{\today\\Version 0.1}
+\maketitle
+
+\begin{abstract}
+
+In this paper, we will argue that \gls{order-driven} systems are better suited to modern financial
+\glspl{market} than their \gls{quote-driven} counterparts, while acknowledging that
+\gls{quote-driven} \glspl{market} still play an important role in guaranteeing \gls{order} execution
+in the retail sector. We then show how \swirly{} combines the best of both systems to deliver
+scalable and transparent retail quoting.
+
+\end{abstract}
+
+\tableofcontents
+
+\chapter{Introduction}
+
+In this chapter, we will see how many of the key concepts used by large financial \glspl{exchange},
+apply equally well to more familiar experiences with online retailers, \glspl{auction}, and
+price comparison websites. This introduction will also serve to orient the reader with the
+nomenclature used later in this document.
+
+We have chosen to use coffee beans in our introductory examples, because coffee is an important
+commodity, and a great way to get started!
+
+\section{Online Retailer}
+
+A retail consumer in the UK might decide to purchase coffee beans direct from an online
+retailer. Suppose that an online retailer called ``eMarket'' in selling coffee beans at \s10.00 per
+bag, and they currently have 12 bags in stock. This can be depicted as follows:
+
+\vspace{5mm}
+\begin{tabular}{rr}
+\multicolumn{2}{c}{eMarket Coffee Beans}\\
+Offer Price&Offer Lots\\
+\hline
+\texttt{10.00}&\texttt{12}\\
+\end{tabular}
+\vspace{5mm}
+
+Each ``\gls{lot}'' in this example represents a large bag of Coffee Beans. (Note that we have yet to
+specify the exact type and quality of the beans.) If we decide to buy 5 of the 12 \glspl{lot} on
+``\gls{offer}'', then only 7 will remain. The online retailer may then, perhaps questionably, decide
+to raise the price if they believe that their supply is insufficient to meet demand:
+
+\vspace{5mm}
+\begin{tabular}{rr}
+\multicolumn{2}{c}{eMarket Coffee Beans}\\
+Offer Price&Offer Lots\\
+\hline
+\texttt{10.50}&\texttt{7}\\
+\end{tabular}
+\vspace{5mm}
+
+\section{Online Auction}
+
+The price is offered by the online retailer is presumably non-negotiable, so we have to either
+``take'' it or leave it. But what if we could negotiate, or ``\gls{bid}'' for the remaining
+\glspl{lot}? You would then have a system similar to an online ``\gls{auction}'', such as
+eBay\cite{ebay}, where the \gls{offer} of \s10.50 is effectively the ``Buy Now'' price. Let's say we
+place a \gls{bid} to buy 3 more \glspl{lot} of eMarket Coffee Beans at \s10.20:
+
+\vspace{5mm}
+\begin{tabular}{rrrrr}
+\multicolumn{5}{c}{eMarket Coffee Beans}\\
+Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{3}&\texttt{10.20}&\texttt{0.30}&\texttt{10.50}&\texttt{7}\\
+\end{tabular}
+\vspace{5mm}
+
+There are now two sides of the \gls{market}: the \gls{bid}- and \gls{offer}-side. The difference
+between the \gls{bid} and \gls{offer} price is 30 pence, which is known as the ``\gls{spread}''. In
+an online \gls{auction}, another buyer may compete by raising the ``best'' \gls{bid} to ``buy 2
+\glspl{lot} at \s10.30'':
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{eMarket Coffee Beans}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{2}&\texttt{10.30}&\texttt{0.20}&\texttt{10.50}&\texttt{7}\\
+\texttt{2}&\texttt{3}&\texttt{10.20}&\texttt{-}&\texttt{-}&\texttt{-}\\
+\end{tabular}
+\vspace{5mm}
+
+The \gls{bid}-side of the \gls{market} now has two ``\glspl{price-level}'', while the
+\gls{offer}-side has just one. A collection of \glspl{order} organised by side and \gls{price-level}
+in this way is known as an ``\gls{order-book}''. The best \gls{price-level} on each side of the
+\gls{order-book} is \gls{tob}.
+
+Our \gls{order} is said to be ``resting'' at the second \gls{price-level}, beneath \gls{tob}. The
+\gls{spread} on the first \gls{price-level} has now been reduced to 20 pence. (There is no
+\gls{spread} on the second level, because there is no \gls{offer} at this level.)
+
+Note also at this point that the average price the seller can expect to receive for 5 of the 7
+\glspl{lot} they are offering is \s10.24:
+
+\[
+\frac{1}{n}\sum_{i=1}^{n}p_iq_i = \frac{2\times10.30+3\times10.20}{5} = 10.24
+\]
+
+Where $p$ is price, $q$ is \glspl{lot}, and $n$ is total \glspl{lot} (or ``\gls{volume}''). This is
+known as the \gls{vwap}.
+
+If this new buyer then decides to ``revise'' their \gls{bid} with a more ``aggressive'' price of
+\s10.50, then their \gls{bid} will ``cross the \gls{spread}'' and match the \gls{offer} to create a
+trade, which will reduce the remaining supply down to 5 \glspl{lot}. The buyer effectively decided
+to ``buy now''. The \gls{offer} of \s10.20 will once again rise to be \gls{tob}:
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{eMarket Coffee Beans}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{3}&\texttt{10.20}&\texttt{0.30}&\texttt{10.50}&\texttt{5}\\
+\texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{-}\\
+\end{tabular}
+\vspace{5mm}
+
+All manner of goods can be sold in an online \gls{auction}. Oftentimes, the items on sale are one of
+a kind. If would be difficult, for example, to \gls{offer} many second-hand bicycles of the exact
+same specification, so each would have to be sold separately in its own \gls{market}.
+
+\section{Price Comparison}
+
+It is interesting to contrast the idea of an online \gls{auction} with a price-comparison
+website. Perhaps, as prospective buyers, we're interested in finding the best price for the latest
+smart phone:
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{Smart Phone Model XYZ}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{419.99}&\texttt{5}\\
+\texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{429.99}&\texttt{12}\\
+\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{449.99}&\texttt{20}\\
+\end{tabular}
+\vspace{5mm}
+
+Here there are 3 \glspl{price-level} in this \gls{order-book}, and we can see that, unsurprisingly,
+more smart phones are available at a higher prices. An \gls{order-book} is slightly different to a
+price comparison website, however, because an \gls{order-book} aggregates \glspl{order}
+(\glspl{offer} in this case) at each \gls{price-level}, rather than by each supplier. The 20
+\glspl{lot} available at the third \gls{price-level}, for example, may comprise \glspl{order} from
+many suppliers, so attempting to take all 20 \glspl{lot} may result in trades with more than one
+supplier.
+
+We could use this same system to compare prices from coffee bean suppliers, but we'd need to be more
+specific about the exact type and quality of the beans, and how and when they would be
+delivered. This information would form the basis of a ``\gls{contract}'':
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{Aribica Coffee Beans per Kilo}\\
+\multicolumn{6}{c}{September 2015}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{10.50}&\texttt{5}\\
+\texttt{2}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{10.60}&\texttt{12}\\
+\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{10.80}&\texttt{25}\\
+\end{tabular}
+\vspace{5mm}
+
+\section{Wholesale Market}
+
+If we combine the notion of an online \gls{auction} with a price comparison website, then we end up
+with something much more reminiscent of a wholesale \gls{market} on an \gls{exchange}, where there
+are many active buyers and sellers:
+
+\vspace{5mm}
+\begin{tabular}{r|rrrrr}
+\multicolumn{6}{c}{Aribica Coffee Beans per Kilo}\\
+\multicolumn{6}{c}{September 2015}\\
+Level&Bid Lots&Bid Price&Spread&Offer Price&Offer Lots\\
+\hline
+\texttt{1}&\texttt{10}&\texttt{10.40}&\texttt{0.10}&\texttt{10.50}&\texttt{5}\\
+\texttt{2}&\texttt{15}&\texttt{10.25}&\texttt{0.35}&\texttt{10.60}&\texttt{12}\\
+\texttt{3}&\texttt{-}&\texttt{-}&\texttt{-}&\texttt{10.80}&\texttt{25}\\
+\end{tabular}
+\vspace{5mm}
+
+A larger number of \gls{market} participants generally helps to improve the \gls{market}'s
+efficiency and stability. This is known as a ``\gls{liquid market}''. \Gls{market} participants
+would typically enter electronic \glspl{order} via \gls{ui} similar to the following:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{order-entry.eps}
+\caption{Order Entry}
+\end{figure}
+
+Financial organisations use such systems to trade a wide range of products spanning different
+\gls{asset}-classes.
+
+In this chapter, we've seen how \glspl{order-book} can represent different kinds of
+\gls{market-place}, including online \glspl{auction}, price comparison websites, and wholesale
+\glspl{market}.
+
+\chapter{Market Mechanics}
+
+\section{Quote Driven Markets}
+
+A \gls{quote-driven} \gls{market} is a financial \gls{market} where \glspl{market-maker} send
+\glspl{quote} to interested parties that guarantee order execution.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{quote-model.eps}
+\caption{Quote Model}
+\end{figure}
+
+\section{Order Driven Markets}
+
+An \gls{order-driven} \gls{market} is a financial \gls{market} where the \glspl{order} for both
+buyers and sellers are displayed along with their price and quantity.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{order-model.eps}
+\caption{Order Model}
+\end{figure}
+
+\chapter{Swirly Cloud}
+
+\swirly{} is a retail quoting-engine backed by an \gls{order-driven} wholesale \gls{exchange}. By
+combining the generality of \glspl{order-book} with the pervasiveness of mobile and \gls{web}
+platforms, \swirly{} benefits the entire value-chain from retail \gls{e-commerce} \glspl{merchant}
+to wholesale \glspl{market-maker}.
+
+\section{Overview}
+
+\Glspl{market-maker} generate \gls{liquidity} by placing \gls{gtc} \glspl{order} into \swirly{}'s
+\gls{clob}. \swirly{}'s Quoting-Engine then uses this \gls{liquidity} to generate two-sided
+\glspl{quote} for retail customers. (A two-sided \gls{quote} is a \gls{quote} with a \gls{bid} and
+\gls{offer} price.) \swirly{}'s system for managing retail \glspl{quote} on behalf of wholesale
+\glspl{market-maker} leads to more efficient, fair and transparent \glspl{market}, which are
+essential for regulatory compliance.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{hybrid-model.eps}
+\caption{Hybrid Model}
+\end{figure}
+
+\section{Retail Quotes}
+
+\Glspl{quote} are generated in response to \gls{quote} requests sent by the customer for a specific
+\gls{market} and quantity. \Glspl{quote} have a \gls{ttl}, after which they are implicitly cancelled
+by \swirly{}. A customer may choose to \gls{trade} on a \gls{quote}, by submitting a ``previously
+quoted'' \gls{order} to \swirly{}'s \gls{matching engine}. These previously quoted \glspl{order} are
+similar to \gls{fok} \glspl{order}, in that they are either fully filled or Cancelled
+immediately. Specifically, previously quoted \glspl{order} cannot be partially filled, and they are
+further guaranteed to be filled by exactly one \gls{market-maker}, which simplifies the retail
+settlement process.
+
+\section{Order Cancellation}
+
+An \gls{order} is said to be ``Quoted'' when some of its residual quantity is referenced by one or
+more unexpired \glspl{quote}. If the \gls{market-maker} attempts to Cancel a quoted \gls{order},
+then the \gls{order} will be marked as Pending-Cancel until all of its \glspl{quote} have Expired,
+at which point, the \gls{order} will be Cancelled. Although Pending-Cancel \glspl{order} are
+withdrawn from the \gls{clob} immediately, they may still Execute with existing \glspl{quote} for up
+to \gls{ttl} seconds (until all \glspl{quote} have Expired). \Glspl{market-maker} are expected to
+compensate for this in their \gls{limit order} prices.
+
+\section{Quoting Model}
+
+\swirly{} \glspl{order} have an ``Available'' quantity in addition to the quantities normally
+associated with \gls{order-driven} \glspl{market}, such as \gls{order}, Residual, Executed and
+Last-Traded. The Available quantity is used to track the sum of all unexpired \glspl{quote}
+associated with an \gls{order}.
+
+When the \gls{matching engine} receives a \gls{quote} Request, it searches each side of the
+\gls{order-book} in Price-Time priority for an \gls{order} that meets the following requirements:
+
+\begin{enumerate}
+  \item has an Available quantity greater than or equal to the \gls{quote} request quantity;
+  \item does not have the Pending-Cancel flag set.
+\end{enumerate}
+
+If such an \gls{order} exists, then the Available quantity is reduced on the \gls{order} by the
+quantity specified on the \gls{quote} request, and that side of the \gls{quote} is set to the
+\gls{order}['s] \gls{limit price}. A \gls{quote} is sent back to the customer if an \gls{order} is
+found for at least one side of the \gls{market}. Otherwise, a \gls{quote} response is sent back to
+the customer indicating a lack of available \gls{liquidity}.
+
+\begin{appendices}
+
+\chapter{API Specification}
+
+\section{Order Management}
+
+\subsection{Place Order}
+
+\vspace{5mm}
+\begin{tabular}{ll|ll|ll}
+\multicolumn{2}{c}{Rest API}&\multicolumn{2}{c}{Fix API}\\
+Name&Type&Tag&Field&Req'd&Description\\
+\hline
+Market&String&55&Symbol&Y&Market mnemonic\\
+Ref&String&11&ClOrdId&Y&Client reference\\
+Action&Enum&54&Side&Y&``Buy'' or ``Sell''\\
+-&-&40&OrdType&Y&Always ``LIMIT''\\
+Ticks&Long&44&Price&Y&Price in ticks\\
+Lots&Long&38&OrderQty&Y&Quantity in lots\\
+MinLots&Long&110&MinQty&Y&Minimum quantity in lots\\
+-&-&60&TransactTime&Y&Current time\\
+\end{tabular}
+\vspace{5mm}
+
+\subsection{Revise Order}
+
+\vspace{5mm}
+\begin{tabular}{ll|ll|ll}
+\multicolumn{2}{c}{Rest API}&\multicolumn{2}{c}{Fix API}\\
+Name&Type&Tag&Field&Req'd&Description\\
+\hline
+Market&String&55&Symbol&Y&Market mnemonic\\
+-&-&11&ClOrdId&Y&Client reference\\
+Id&Long&37&OrderId&Y&Order identifier\\
+-&-&41&OrigClOrdId&Y&Original client reference\\
+-&-&54&Side&Y&Always ``Undisclosed''\\
+-&-&40&OrdType&Y&Always ``LIMIT''\\
+Lots&Long&38&OrderQty&Y&Quantity in lots\\
+-&-&60&TransactTime&Y&Current time\\
+\end{tabular}
+\vspace{5mm}
+
+\subsection{Cancel Order}
+
+\vspace{5mm}
+\begin{tabular}{ll|ll|ll}
+\multicolumn{2}{c}{Rest API}&\multicolumn{2}{c}{Fix API}\\
+Name&Type&Tag&Field&Req'd&Description\\
+\hline
+Market&String&55&Symbol&Y&Market mnemonic\\
+-&-&11&ClOrdId&Y&Client reference\\
+Id&Long&37&OrderId&Y&Order identifier\\
+-&-&41&OrigClOrdId&Y&Original client reference\\
+-&-&54&Side&Y&Always ``Undisclosed''\\
+-&-&38&OrderQty&Y&Always zero. Ignored by server-side\\
+-&-&60&TransactTime&Y&Current time\\
+\end{tabular}
+\vspace{5mm}
+
+\subsection{Order Execution}
+
+\vspace{5mm}
+\begin{tabular}{ll|ll|ll}
+\multicolumn{2}{c}{Rest API}&\multicolumn{2}{c}{Fix API}\\
+Name&Type&Tag&Field&Req'd&Description\\
+\hline
+Id&Long&17&ExecId&Y&-\\
+OrderId&Long&37&OrderId&Y&-\\
+Trader&String&1&Account&Y&-\\
+Market&String&55&Symbol&Y&-\\
+Contr&String&20000&Contract&Y&-\\
+SettlDay&Int&64&FutSettDate&Y&-\\
+Ref&String&11&ClOrdId&Y&-\\
+State&State&150&ExecType&Y&-\\
+-&-&39&OrdStatus&Y&-\\
+Action&Enum&54&Side&Y&``Buy'' or ``Sell''\\
+-&-&40&OrdType&Y&Always ``LIMIT''\\
+Ticks&Long&44&Price&Y&Price in ticks\\
+Lots&Long&38&OrderQty&Y&Quantity in lots\\
+Resd&Long&151&LeavesQty&Y&-\\
+Exec&Long&14&CumQty&Y&-\\
+Cost&Long&20001&Cost&Y&-\\
+-&-&6&AvgPx&Y&-\\
+LastTicks&Long&31&LastPx&C&-\\
+LastLots&Long&32&LastQty&C&-\\
+MinLots&Long&110&MinQty&Y&-\\
+MatchId&Long&20002&MatchId&C&-\\
+Role&Role&851&LastLiquidityInd&C&-\\
+Cpty&String&375&ContraBroker&C&-\\
+Created&Long&60&TransactTime&Y&-\\
+\end{tabular}
+\vspace{5mm}
+
+\chapter{Conversions}
+
+\section{Rounding}
+
+The \texttt{roundHalfAway} function is defined as follows:
+
+\[r(x) = \left\{\begin{array}{ll}
+  0 & \mbox{if $x = 0$};\\
+  \ceil{x-0.5} & \mbox{if $x < 0$};\\
+  \floor{x+0.5} & \mbox{if $x > 0$}.\\
+\end{array}\right.
+\]
+
+\end{appendices}
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{swirly}
+\printglossaries
+
+\end{document}

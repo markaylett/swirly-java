@@ -1,0 +1,13 @@
+@startuml
+
+participant Consumer
+participant Producer
+
+Consumer -> Producer: Quote Request
+activate Producer
+Producer -> Consumer: Quote
+Consumer -> Producer: Order
+Producer -> Consumer: Trade
+deactivate Producer
+
+@enduml
