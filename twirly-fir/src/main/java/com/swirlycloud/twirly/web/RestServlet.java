@@ -19,6 +19,7 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.exception.TraderNotFoundException;
 import com.swirlycloud.twirly.rest.Request;
 import com.swirlycloud.twirly.rest.Rest;
 import com.swirlycloud.twirly.util.Params;
@@ -78,16 +79,16 @@ public abstract class RestServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
-        resp.setStatus(e.getNum());
+        resp.setStatus(e.getHttpStatus());
     }
 
-    protected final @NonNull String getTrader(HttpServletRequest req) throws NotFoundException,
-            ServiceUnavailableException, IOException {
+    protected final @NonNull String getTrader(HttpServletRequest req)
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final String email = realm.getUserEmail(req);
         assert email != null;
         final String trader = rest.findTraderByEmail(email);
         if (trader == null) {
-            throw new NotFoundException(String.format("trader '%s' does not exist", email));
+            throw new TraderNotFoundException(String.format("trader '%s' does not exist", email));
         }
         return trader;
     }

@@ -8,35 +8,47 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.fix.BusinessRejectReason;
+import com.swirlycloud.twirly.fix.CancelRejectReason;
+import com.swirlycloud.twirly.fix.OrderRejectReason;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public abstract class ServException extends Exception implements Jsonifiable {
+public class ServException extends Exception implements Jsonifiable {
 
     private static final long serialVersionUID = 1L;
 
-    private final int num;
-
-    public ServException(int num, String msg) {
+    public ServException(String msg) {
         super(msg);
-        this.num = num;
     }
 
-    public ServException(int num, String msg, Throwable cause) {
+    public ServException(String msg, Throwable cause) {
         super(msg, cause);
-        this.num = num;
     }
 
     @Override
     public final void toJson(@Nullable Params params, @NonNull Appendable out) throws IOException {
         out.append("{\"num\":");
-        out.append(String.valueOf(num));
+        out.append(String.valueOf(getHttpStatus()));
         out.append(",\"msg\":\"");
         out.append(getMessage());
         out.append("\"}");
     }
 
-    public final int getNum() {
-        return num;
+    public int getHttpStatus() {
+        // Internal Server Error.
+        return 500;
+    }
+
+    public int getBusinessRejectReason() {
+        return BusinessRejectReason.OTHER;
+    }
+
+    public int getCancelRejectReason() {
+        return CancelRejectReason.OTHER;
+    }
+
+    public int getOrderRejectReason() {
+        return OrderRejectReason.OTHER;
     }
 }

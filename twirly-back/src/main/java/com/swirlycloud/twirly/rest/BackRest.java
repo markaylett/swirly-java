@@ -26,7 +26,9 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.TraderSess;
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.MarketClosedException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
@@ -164,7 +166,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             final boolean withExpired = getExpiredParam(params);
             final int busDay = getBusDate(now).toJd();
             if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
-                throw new NotFoundException(
+                throw new MarketClosedException(
                         String.format("market '%s' has expired", book.getMnem()));
             }
             book.toJsonView(params, out);
@@ -210,8 +212,8 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getOrder(String trader, String market, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+    public final void getOrder(String trader, String market, Params params, long now,
+            Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
@@ -231,7 +233,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             final TraderSess sess = serv.getTrader(trader);
             final Order order = sess.findOrder(market, id);
             if (order == null) {
-                throw new NotFoundException(String.format("order '%d' does not exist", id));
+                throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
             order.toJson(params, out);
         } finally {
@@ -253,8 +255,8 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getTrade(String trader, String market, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+    public final void getTrade(String trader, String market, Params params, long now,
+            Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireRead();
         try {
@@ -317,8 +319,8 @@ public final @NonNullByDefault class BackRest implements Rest {
             final TraderSess sess = serv.getTrader(trader);
             final Posn posn = sess.findPosn(contr, maybeIsoToJd(settlDate));
             if (posn == null) {
-                throw new NotFoundException(String.format("posn for '%s' on '%d' does not exist",
-                        contr, settlDate));
+                throw new NotFoundException(
+                        String.format("posn for '%s' on '%d' does not exist", contr, settlDate));
             }
             posn.toJson(params, out);
         } finally {
@@ -326,9 +328,9 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void postTrader(String mnem, @Nullable String display, String email,
-            Params params, long now, Appendable out) throws BadRequestException,
-            ServiceUnavailableException, IOException {
+    public final void postTrader(String mnem, @Nullable String display, String email, Params params,
+            long now, Appendable out)
+                    throws BadRequestException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -341,7 +343,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     public final void putTrader(String mnem, @Nullable String display, Params params, long now,
             Appendable out) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -354,7 +356,8 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     public final void postMarket(String mnem, @Nullable String display, String contrMnem,
             int settlDate, int expiryDate, int state, Params params, long now, Appendable out)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException,
+                    IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -375,7 +378,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     public final void putMarket(String mnem, @Nullable String display, int state, Params params,
             long now, Appendable out) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -387,7 +390,8 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     public final void deleteOrder(String trader, String market, long id, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -399,7 +403,8 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     public final void deleteOrder(String trader, String market, JslNode first, long now)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -412,7 +417,8 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     public final void postOrder(String trader, String market, @Nullable String ref, Side side,
             long ticks, long lots, long minLots, Params params, long now, Appendable out)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException,
+                    IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -428,7 +434,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     public final void putOrder(String trader, String market, long id, long lots, Params params,
             long now, Appendable out) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -448,7 +454,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     public final void putOrder(String trader, String market, JslNode first, long lots,
             Params params, long now, Appendable out) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
@@ -492,14 +498,14 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     public final void postTrade(String trader, String market, String ref, Side side, long ticks,
             long lots, Role role, String cpty, Params params, long now, Appendable out)
-            throws NotFoundException, ServiceUnavailableException, IOException {
+                    throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         serv.acquireWrite();
         try {
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            final Exec trade = serv
-                    .createTrade(sess, book, ref, side, ticks, lots, role, cpty, now);
+            final Exec trade = serv.createTrade(sess, book, ref, side, ticks, lots, role, cpty,
+                    now);
             trade.toJson(params, out);
         } finally {
             serv.releaseWrite();

@@ -22,7 +22,8 @@ public final class BackCronServlet extends RestServlet {
     private static final int JOB_PART = 0;
 
     @Override
-    protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         final BackRest rest = (BackRest) RestServlet.rest;
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");

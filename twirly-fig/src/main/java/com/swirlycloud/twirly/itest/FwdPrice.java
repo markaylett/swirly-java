@@ -18,8 +18,8 @@ import com.swirlycloud.twirly.fx.IrCalc;
 import com.swirlycloud.twirly.fx.IrCurve;
 
 public final class FwdPrice {
-    private static IrCurve parseCurve(String ccy, GregDate gd) throws IOException,
-            ParserConfigurationException, SAXException {
+    private static IrCurve parseCurve(String ccy, GregDate gd)
+            throws IOException, ParserConfigurationException, SAXException {
         final IrCurve irc = new IrCurve();
         for (;;) {
             if (irc.parse(ccy, gd)) {
@@ -53,8 +53,8 @@ public final class FwdPrice {
             final double usdFv = usdCurve.fv(spotDate, settlDate, IrCalc.SIMPLE_INTEREST);
             final double usdFr = usdCurve.fr(spotDate, settlDate, IrCalc.SIMPLE_INTEREST);
             final double fwdPrice = fwdPrice(spotPrice, gbpFv, usdFv);
-            System.out.printf("%2dM: %.6f/%.6f => %.6f\n", i + 1, gbpFr, usdFr, fwdPrice
-                    - spotPrice);
+            System.out.printf("%2dM: %.6f/%.6f => %.6f\n", i + 1, gbpFr, usdFr,
+                    fwdPrice - spotPrice);
         }
     }
 }

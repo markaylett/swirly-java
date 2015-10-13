@@ -3,15 +3,15 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
-public final class DuplicateException extends Exception {
+public class AlreadyExistsException extends BadRequestException {
 
     private static final long serialVersionUID = 1L;
 
-    public DuplicateException(String message) {
-        super(message);
+    public AlreadyExistsException(String msg) {
+        super(msg);
     }
 
-    public DuplicateException(String message, Throwable cause) {
-        super(message, cause);
+    public AlreadyExistsException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

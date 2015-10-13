@@ -22,7 +22,7 @@ public @NonNullByDefault interface Financial {
     int getSettlDay();
 
     /**
-     * @return true if settlement-day is non-zero. 
+     * @return true if settlement-day is non-zero.
      */
     boolean isSettlDaySet();
 }

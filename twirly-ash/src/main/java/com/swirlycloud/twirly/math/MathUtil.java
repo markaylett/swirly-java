@@ -65,9 +65,9 @@ public final class MathUtil {
             final double p = sig * y2[i - 1] + 2.0;
             y2[i] = (sig - 1.0) / p;
             u[i] = (6.0
-                    * ((y[i + 1] - y[i]) / (x[i + 1] - x[i]) - (y[i] - y[i - 1])
-                            / (x[i] - x[i - 1])) / (x[i + 1] - x[i - 1]) - sig * u[i - 1])
-                    / p;
+                    * ((y[i + 1] - y[i]) / (x[i + 1] - x[i])
+                            - (y[i] - y[i - 1]) / (x[i] - x[i - 1]))
+                    / (x[i + 1] - x[i - 1]) - sig * u[i - 1]) / p;
         }
         double qn, un;
         if (null == ypn) {
@@ -112,8 +112,8 @@ public final class MathUtil {
         }
         final double a = (xs[hi] - x) / h;
         final double b = (x - xs[lo]) / h;
-        return a * ys[lo] + b * ys[hi] + ((a * a * a - a) * y2[lo] + (b * b * b - b) * y2[hi]) * h
-                * h / 6.0;
+        return a * ys[lo] + b * ys[hi]
+                + ((a * a * a - a) * y2[lo] + (b * b * b - b) * y2[hi]) * h * h / 6.0;
     }
 
 }

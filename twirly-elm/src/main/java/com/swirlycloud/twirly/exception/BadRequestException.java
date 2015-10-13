@@ -10,16 +10,20 @@ package com.swirlycloud.twirly.exception;
  * 
  * @author Mark Aylett
  */
-public final class BadRequestException extends ServException {
+public class BadRequestException extends ServException {
 
     private static final long serialVersionUID = 1L;
-    private static final int NUM = 400;
 
     public BadRequestException(String msg) {
-        super(NUM, msg);
+        super(msg);
     }
 
     public BadRequestException(String msg, Throwable cause) {
-        super(NUM, msg, cause);
+        super(msg, cause);
+    }
+
+    @Override
+    public int getHttpStatus() {
+        return 400;
     }
 }

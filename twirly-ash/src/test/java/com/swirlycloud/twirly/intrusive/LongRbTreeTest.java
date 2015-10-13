@@ -71,9 +71,10 @@ public final class LongRbTreeTest {
 
     /**
      * <li>Every red node must have two black child nodes, and therefore it must have a black
-     * parent.</li> <li>
-     * Every path from a given node to any of its descendant NIL nodes contains the same number of
-     * black nodes.</li> </ol>
+     * parent.</li>
+     * <li>Every path from a given node to any of its descendant NIL nodes contains the same number
+     * of black nodes.</li>
+     * </ol>
      */
 
     /**

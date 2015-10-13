@@ -47,20 +47,20 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
         boolean success = false;
         try {
             try {
-                insertMarketStmt = conn
-                        .prepareStatement("INSERT INTO Market_t (mnem, display, contr, settlDay, expiryDay, state) VALUES (?, ?, ?, ?, ?, ?)");
-                insertTraderStmt = conn
-                        .prepareStatement("INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
-                insertExecStmt = conn
-                        .prepareStatement("INSERT INTO Exec_t (id, orderId, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                updateMarketStmt = conn
-                        .prepareStatement("UPDATE Market_t SET display = ?, state = ? WHERE mnem = ?");
+                insertMarketStmt = conn.prepareStatement(
+                        "INSERT INTO Market_t (mnem, display, contr, settlDay, expiryDay, state) VALUES (?, ?, ?, ?, ?, ?)");
+                insertTraderStmt = conn.prepareStatement(
+                        "INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
+                insertExecStmt = conn.prepareStatement(
+                        "INSERT INTO Exec_t (id, orderId, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                updateMarketStmt = conn.prepareStatement(
+                        "UPDATE Market_t SET display = ?, state = ? WHERE mnem = ?");
                 updateTraderStmt = conn
                         .prepareStatement("UPDATE Trader_t SET display = ? WHERE mnem = ?");
-                updateOrderStmt = conn
-                        .prepareStatement("UPDATE Order_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
-                updateExecStmt = conn
-                        .prepareStatement("UPDATE Exec_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
+                updateOrderStmt = conn.prepareStatement(
+                        "UPDATE Order_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
+                updateExecStmt = conn.prepareStatement(
+                        "UPDATE Exec_t SET archive = 1, modified = ? WHERE market = ? AND id = ?");
                 // Success.
                 assert insertMarketStmt != null;
                 this.insertMarketStmt = insertMarketStmt;
@@ -279,8 +279,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void archiveOrderList(@NonNull String market, @NonNull JslNode first, long modified)
-            throws NotFoundException {
+    public final void archiveOrderList(@NonNull String market, @NonNull JslNode first,
+            long modified) throws NotFoundException {
         // The market parameter is ignored in the Jdbc implementation.
         archiveOrderList(first, modified);
     }
@@ -334,8 +334,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void archiveTradeList(@NonNull String market, @NonNull JslNode first, long modified)
-            throws NotFoundException {
+    public final void archiveTradeList(@NonNull String market, @NonNull JslNode first,
+            long modified) throws NotFoundException {
         // The market parameter is ignored in the Jdbc implementation.
         archiveTradeList(first, modified);
     }

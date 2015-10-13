@@ -52,9 +52,8 @@ public final class TraderRestTest extends RestTest {
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
                 12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL",
                 out.trades.get(Long.valueOf(3)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
-                12345, 10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL",
-                out.trades.get(Long.valueOf(4)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
+                10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.trades.get(Long.valueOf(4)));
         assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
                 out.posns.get(new PosnKey("EURUSD", SETTL_DAY)));
     }

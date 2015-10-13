@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.util;
 
 public final class CollectionUtil {
     private CollectionUtil() {
-        
+
     }
 
     public static int compareInt(int lhs, int rhs) {

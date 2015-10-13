@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
+import com.swirlycloud.twirly.fix.BusinessRejectReason;
+
 /**
  * Similar to 403 Forbidden, but specifically for use when authentication is required and has failed
  * or has not yet been provided.
@@ -12,13 +14,22 @@ package com.swirlycloud.twirly.exception;
 public final class UnauthorizedException extends ServException {
 
     private static final long serialVersionUID = 1L;
-    private static final int NUM = 403;
 
     public UnauthorizedException(String msg) {
-        super(NUM, msg);
+        super(msg);
     }
 
     public UnauthorizedException(String msg, Throwable cause) {
-        super(NUM, msg, cause);
+        super(msg, cause);
+    }
+
+    @Override
+    public int getHttpStatus() {
+        return 403;
+    }
+
+    @Override
+    public int getBusinessRejectReason() {
+        return BusinessRejectReason.NOT_AUTHORIZED;
     }
 }

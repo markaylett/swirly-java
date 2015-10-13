@@ -1,9 +1,10 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.fix;
 
-import static com.swirlycloud.twirly.app.FixUtility.fixToSide;
+import static com.swirlycloud.twirly.fix.FixUtility.fixToSide;
+import static com.swirlycloud.twirly.fix.FixUtility.readSettings;
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 
 import java.io.IOException;
@@ -15,6 +16,19 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.swirlycloud.twirly.app.LockableServ;
+import com.swirlycloud.twirly.app.Trans;
+import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.MarketBook;
+import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.domain.TraderSess;
+import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.OrderNotFoundException;
+import com.swirlycloud.twirly.exception.ServException;
+import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 
 import quickfix.Acceptor;
 import quickfix.Application;
@@ -35,6 +49,7 @@ import quickfix.SessionSettings;
 import quickfix.SocketAcceptor;
 import quickfix.UnsupportedMessageType;
 import quickfix.field.ClOrdID;
+import quickfix.field.CxlRejResponseTo;
 import quickfix.field.MinQty;
 import quickfix.field.OrderID;
 import quickfix.field.OrderQty;
@@ -49,18 +64,6 @@ import quickfix.fix44.NewOrderSingle;
 import quickfix.fix44.OrderCancelReject;
 import quickfix.fix44.OrderCancelReplaceRequest;
 import quickfix.fix44.OrderCancelRequest;
-
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.MarketBook;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.TraderSess;
-import com.swirlycloud.twirly.exception.BadRequestException;
-import com.swirlycloud.twirly.exception.FixRejectException;
-import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 
 public final class FixServ extends MessageCracker implements AutoCloseable, Application {
 
@@ -100,7 +103,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     @SuppressWarnings("null")
-    private final TraderSess getTraderLocked(@NonNull SessionID sessionId) throws NotFoundException {
+    private final TraderSess getTraderLocked(@NonNull SessionID sessionId)
+            throws NotFoundException {
         try {
             return serv.getTrader(settings.getString(sessionId, "Trader"));
         } catch (ConfigError | FieldConvertError e) {
@@ -109,27 +113,28 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     private final void sendBusinessReject(@NonNull Message refMsg, @Nullable String refId,
-            @Nullable String text, @NonNull SessionID sessionId) throws FieldNotFound {
+            @NonNull ServException e, @NonNull SessionID sessionId) throws FieldNotFound {
         final FixBuilder builder = getBuilder(new BusinessMessageReject());
-        builder.setBusinessReject(refMsg, refId, text);
-        final Message message = builder.getMessage();
-        assert message != null;
-        sendToTarget(message, sessionId);
-    }
-
-    private final void sendCancelRejectLocked(@NonNull String ref, @NonNull Order order,
-            @Nullable String text, @NonNull SessionID sessionId) {
-        final FixBuilder builder = getBuilder(new OrderCancelReject());
-        builder.setCancelReject(ref, order, text);
+        builder.setBusinessReject(refMsg, refId, e.getBusinessRejectReason(), e.getMessage());
         final Message message = builder.getMessage();
         assert message != null;
         sendToTarget(message, sessionId);
     }
 
     private final void sendCancelReject(@NonNull String ref, @NonNull String orderRef,
-            @Nullable Long orderId, @Nullable String text, @NonNull SessionID sessionId) {
+            char responseTo, @NonNull ServException e, @NonNull SessionID sessionId) {
         final FixBuilder builder = getBuilder(new OrderCancelReject());
-        builder.setCancelReject(ref, orderRef, orderId, text);
+        builder.setCancelReject(ref, orderRef, responseTo, e.getCancelRejectReason(),
+                e.getMessage());
+        final Message message = builder.getMessage();
+        assert message != null;
+        sendToTarget(message, sessionId);
+    }
+
+    private final void sendCancelRejectLocked(@NonNull String ref, @NonNull Order order,
+            char responseTo, @NonNull ServException e, @NonNull SessionID sessionId) {
+        final FixBuilder builder = getBuilder(new OrderCancelReject());
+        builder.setCancelReject(ref, order, responseTo, e.getCancelRejectReason(), e.getMessage());
         final Message message = builder.getMessage();
         assert message != null;
         sendToTarget(message, sessionId);
@@ -155,8 +160,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         }
     }
 
-    private FixServ(SessionSettings settings, LockableServ serv) throws ConfigError,
-            FieldConvertError, NotFoundException {
+    private FixServ(SessionSettings settings, LockableServ serv)
+            throws ConfigError, FieldConvertError, NotFoundException {
         this.settings = settings;
         this.serv = serv;
         this.nowFromTransactTime = settings.getBool("NowFromTransactTime");
@@ -176,8 +181,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     public static FixServ create(final SessionSettings settings, LockableServ serv,
-            final LogFactory logFactory) throws ConfigError, FieldConvertError, NotFoundException,
-            IOException {
+            final LogFactory logFactory)
+                    throws ConfigError, FieldConvertError, NotFoundException {
         final FixServ server = new FixServ(settings, serv);
         final Acceptor acceptor = new SocketAcceptor(server, new NullStoreFactory(), settings,
                 logFactory, new DefaultMessageFactory());
@@ -185,6 +190,12 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         server.acceptor = acceptor;
         acceptor.start();
         return server;
+    }
+
+    public static FixServ create(final String path, LockableServ serv, final LogFactory logFactory)
+            throws ConfigError, FieldConvertError, NotFoundException, IOException {
+        final SessionSettings settings = readSettings(path);
+        return create(settings, serv, logFactory);
     }
 
     @Override
@@ -198,8 +209,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     @Override
-    public final void onMessage(NewOrderSingle message, SessionID sessionId) throws FieldNotFound,
-            IncorrectTagValue {
+    public final void onMessage(NewOrderSingle message, SessionID sessionId)
+            throws FieldNotFound, IncorrectTagValue {
         log.info(sessionId.getTargetCompID() + ": NewOrderSingle: " + message);
 
         final String market = message.getString(Symbol.FIELD);
@@ -223,7 +234,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new FixRejectException("session misconfigured");
+                throw new ServException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             try (final Trans trans = new Trans()) {
@@ -231,15 +242,9 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, null, trans, sessionId);
             }
-        } catch (final FixRejectException e) {
+        } catch (final ServException e) {
             log.warn(sessionId + ": " + e.getMessage());
-            sendBusinessReject(message, ref, e.getMessage(), sessionId);
-        } catch (BadRequestException | NotFoundException e) {
-            log.warn(sessionId + ": " + e.getMessage());
-            sendBusinessReject(message, ref, "invalid request: " + e.getMessage(), sessionId);
-        } catch (final ServiceUnavailableException e) {
-            log.warn(sessionId + ": " + e.getMessage());
-            sendBusinessReject(message, ref, "service unavailable: " + e.getMessage(), sessionId);
+            sendBusinessReject(message, ref, e, sessionId);
         } finally {
             serv.releaseWrite();
         }
@@ -270,20 +275,20 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new FixRejectException("session misconfigured");
+                throw new ServException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             if (orderId != null) {
                 order = sess.findOrder(market, orderId);
                 if (order == null) {
-                    throw new FixRejectException(
+                    throw new OrderNotFoundException(
                             String.format("order '%d' does not exist", orderId));
                 }
             } else {
                 order = sess.findOrder(orderRef);
                 if (order == null) {
-                    throw new FixRejectException(String.format("order '%s' does not exist",
-                            orderRef));
+                    throw new OrderNotFoundException(
+                            String.format("order '%s' does not exist", orderRef));
                 }
             }
             try (final Trans trans = new Trans()) {
@@ -291,17 +296,15 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, ref, trans, sessionId);
             }
-        } catch (final FixRejectException e) {
+        } catch (final ServException e) {
             log.warn(sessionId + ": " + e.getMessage());
-            sendCancelReject(ref, orderRef, orderId, e.getMessage(), sessionId);
-        } catch (BadRequestException | NotFoundException e) {
-            log.warn(sessionId + ": " + e.getMessage());
-            assert order != null;
-            sendCancelRejectLocked(ref, order, "invalid request: " + e.getMessage(), sessionId);
-        } catch (final ServiceUnavailableException e) {
-            log.warn(sessionId + ": " + e.getMessage());
-            assert order != null;
-            sendCancelRejectLocked(ref, order, "service unavailable: " + e.getMessage(), sessionId);
+            if (order == null) {
+                sendCancelReject(ref, orderRef, CxlRejResponseTo.ORDER_CANCEL_REPLACE_REQUEST, e,
+                        sessionId);
+            } else {
+                sendCancelRejectLocked(ref, order, CxlRejResponseTo.ORDER_CANCEL_REPLACE_REQUEST, e,
+                        sessionId);
+            }
         } finally {
             serv.releaseWrite();
         }
@@ -331,20 +334,20 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new FixRejectException("session misconfigured");
+                throw new ServException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             if (orderId != null) {
                 order = sess.findOrder(market, orderId);
                 if (order == null) {
-                    throw new FixRejectException(
+                    throw new OrderNotFoundException(
                             String.format("order '%d' does not exist", orderId));
                 }
             } else {
                 order = sess.findOrder(orderRef);
                 if (order == null) {
-                    throw new FixRejectException(String.format("order '%s' does not exist",
-                            orderRef));
+                    throw new OrderNotFoundException(
+                            String.format("order '%s' does not exist", orderRef));
                 }
             }
             try (final Trans trans = new Trans()) {
@@ -352,17 +355,15 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                 log.info(sessionId + ": " + trans);
                 sendTransLocked(sess, ref, trans, sessionId);
             }
-        } catch (final FixRejectException e) {
+        } catch (final ServException e) {
             log.warn(sessionId + ": " + e.getMessage());
-            sendCancelReject(ref, orderRef, orderId, e.getMessage(), sessionId);
-        } catch (BadRequestException | NotFoundException e) {
-            log.warn(sessionId + ": " + e.getMessage());
-            assert order != null;
-            sendCancelRejectLocked(ref, order, "invalid request: " + e.getMessage(), sessionId);
-        } catch (final ServiceUnavailableException e) {
-            log.warn(sessionId + ": " + e.getMessage());
-            assert order != null;
-            sendCancelRejectLocked(ref, order, "service unavailable: " + e.getMessage(), sessionId);
+            if (order == null) {
+                sendCancelReject(ref, orderRef, CxlRejResponseTo.ORDER_CANCEL_REQUEST, e,
+                        sessionId);
+            } else {
+                sendCancelRejectLocked(ref, order, CxlRejResponseTo.ORDER_CANCEL_REQUEST, e,
+                        sessionId);
+            }
         } finally {
             serv.releaseWrite();
         }
@@ -397,8 +398,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     @Override
-    public final void fromAdmin(Message message, SessionID sessionId) throws FieldNotFound,
-            IncorrectDataFormat, IncorrectTagValue, RejectLogon {
+    public final void fromAdmin(Message message, SessionID sessionId)
+            throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, RejectLogon {
         if (log.isDebugEnabled()) {
             log.debug(sessionId + ": fromAdmin: " + message);
         }
@@ -412,8 +413,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     @Override
-    public final void fromApp(Message message, SessionID sessionId) throws FieldNotFound,
-            IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
+    public final void fromApp(Message message, SessionID sessionId)
+            throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
         if (log.isDebugEnabled()) {
             log.debug(sessionId + ": fromApp: " + message);
         }

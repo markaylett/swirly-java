@@ -23,7 +23,8 @@ public class MockDatastore extends MockModel implements Datastore {
     }
 
     @Override
-    public void insertTrader(@NonNull String mnem, @Nullable String display, @NonNull String email) {
+    public void insertTrader(@NonNull String mnem, @Nullable String display,
+            @NonNull String email) {
     }
 
     @Override

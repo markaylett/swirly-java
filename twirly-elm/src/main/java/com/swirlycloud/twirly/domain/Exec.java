@@ -29,8 +29,8 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifiable, SlNode,
-        JslNode, Instruct {
+public final @NonNullByDefault class Exec extends BasicRbNode
+        implements Jsonifiable, SlNode, JslNode, Instruct {
 
     private static final long serialVersionUID = 1L;
 
@@ -119,8 +119,8 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         final long lastLots = lots;
         final long minLots = 1;
         final long matchId = 0;
-        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, side, ticks,
-                lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
+        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, side, ticks, lots,
+                resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
     }
 
     public static Exec parse(JsonParser p) throws IOException {
@@ -392,8 +392,8 @@ public final @NonNullByDefault class Exec extends BasicRbNode implements Jsonifi
         resd = 0;
     }
 
-    public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots,
-            long matchId, Role role, String cpty) {
+    public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots, long matchId,
+            Role role, String cpty) {
         state = State.TRADE;
         resd -= sumLots;
         exec += sumLots;

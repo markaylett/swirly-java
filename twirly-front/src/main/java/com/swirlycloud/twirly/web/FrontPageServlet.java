@@ -92,8 +92,8 @@ public final class FrontPageServlet extends HttpServlet {
             req.logout();
         }
         req.setAttribute("state", state);
-        final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(
-                page.getJspPage());
+        final RequestDispatcher dispatcher = getServletContext()
+                .getRequestDispatcher(page.getJspPage());
         dispatcher.forward(req, resp);
     }
 
@@ -108,8 +108,8 @@ public final class FrontPageServlet extends HttpServlet {
         }
         final PageState state = new PageState(realm, rest, req, resp, page);
         req.setAttribute("state", state);
-        final RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(
-                page.getJspPage());
+        final RequestDispatcher dispatcher = getServletContext()
+                .getRequestDispatcher(page.getJspPage());
         dispatcher.forward(req, resp);
     }
 

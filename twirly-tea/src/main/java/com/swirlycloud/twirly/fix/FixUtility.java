@@ -1,12 +1,18 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.fix;
 
+import quickfix.ConfigError;
 import quickfix.IncorrectTagValue;
+import quickfix.SessionSettings;
 import quickfix.field.ExecType;
 import quickfix.field.LastLiquidityInd;
 import quickfix.field.OrdStatus;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
@@ -174,4 +180,19 @@ public final class FixUtility {
         return out;
     }
 
+    public static Properties readProperties(String path) throws IOException {
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(path)) {
+            final Properties props = new Properties();
+            props.load(is);
+            return props;
+        }
+    }
+
+    public static SessionSettings readSettings(String path) throws ConfigError, IOException {
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(path)) {
+            return new SessionSettings(is);
+        }
+    }
 }

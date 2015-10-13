@@ -1,8 +1,11 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.app;
+package com.swirlycloud.twirly.fix;
 
+import static com.swirlycloud.twirly.fix.FixUtility.readSettings;
+
+import java.io.IOException;
 import java.util.concurrent.Future;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -10,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.exception.DuplicateException;
+import com.swirlycloud.twirly.exception.AlreadyExistsException;
 import com.swirlycloud.twirly.quickfix.NullStoreFactory;
 
 import quickfix.Application;
@@ -56,6 +59,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
     private final SessionSettings settings;
     private Initiator initiator;
     private final FixClntCache cache = new FixClntCache();
+    private boolean logon = false;
 
     private FixClnt(final SessionSettings settings) throws ConfigError, FieldConvertError {
         this.settings = settings;
@@ -70,6 +74,12 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
         client.initiator = initiator;
         initiator.start();
         return client;
+    }
+
+    public static FixClnt create(final String path, final LogFactory logFactory)
+            throws ConfigError, FieldConvertError, IOException {
+        final SessionSettings settings = readSettings(path);
+        return create(settings, logFactory);
     }
 
     @Override
@@ -128,12 +138,19 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
         if (log.isInfoEnabled()) {
             log.info(sessionId + ": onLogon: " + sessionId);
         }
+        synchronized (this) {
+            logon = true;
+            this.notifyAll();
+        }
     }
 
     @Override
     public final void onLogout(SessionID sessionId) {
         if (log.isInfoEnabled()) {
             log.info(sessionId + ": onLogout: " + sessionId);
+        }
+        synchronized (this) {
+            logon = false;
         }
     }
 
@@ -175,7 +192,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendNewOrderSingle(@NonNull String market, @NonNull String ref,
             @NonNull Side side, long ticks, long lots, long minLots, long now,
-            @NonNull SessionID sessionId) throws DuplicateException, SessionNotFound {
+            @NonNull SessionID sessionId) throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new NewOrderSingle());
         builder.setNewOrderSingle(market, ref, side, ticks, lots, minLots, now);
@@ -186,7 +203,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendOrderCancelReplaceRequest(@NonNull String market,
             @NonNull String ref, @NonNull String orderRef, long lots, long now,
-            @NonNull SessionID sessionId) throws DuplicateException, SessionNotFound {
+            @NonNull SessionID sessionId) throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new OrderCancelReplaceRequest());
         builder.setOrderCancelReplaceRequest(market, ref, orderRef, lots, now);
@@ -197,7 +214,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendOrderCancelReplaceRequest(@NonNull String market,
             @NonNull String ref, long orderId, long lots, long now, @NonNull SessionID sessionId)
-                    throws DuplicateException, SessionNotFound {
+                    throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new OrderCancelReplaceRequest());
         builder.setOrderCancelReplaceRequest(market, ref, orderId, lots, now);
@@ -208,7 +225,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendOrderCancelRequest(@NonNull String market, @NonNull String ref,
             @NonNull String orderRef, long now, @NonNull SessionID sessionId)
-                    throws DuplicateException, SessionNotFound {
+                    throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new OrderCancelRequest());
         builder.setOrderCancelRequest(market, ref, orderRef, now);
@@ -219,12 +236,20 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
 
     public final Future<Message> sendOrderCancelRequest(@NonNull String market, @NonNull String ref,
             long orderId, long now, @NonNull SessionID sessionId)
-                    throws DuplicateException, SessionNotFound {
+                    throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new OrderCancelRequest());
         builder.setOrderCancelRequest(market, ref, orderId, now);
         final Message message = builder.getMessage();
         assert message != null;
         return cache.sendRequest(ref, message, sessionId);
+    }
+
+    public final void waitForLogon() throws InterruptedException {
+        synchronized (this) {
+            while (!logon) {
+                wait();
+            }
+        }
     }
 }

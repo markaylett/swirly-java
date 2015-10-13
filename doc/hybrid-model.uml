@@ -1,0 +1,26 @@
+@startuml
+
+actor "eCustomer" as Taker
+participant "eMerchant" as Merchant
+participant "Swirly Cloud" as Exchange
+participant "Market Maker" as Maker
+
+Maker -> Exchange: 1. Bid Order
+activate Maker
+Maker -> Exchange: 2. Ask Order
+Taker -> Merchant: 3. Checkout
+activate Merchant
+Merchant -> Exchange: 4. Quote Request
+activate Exchange
+Exchange -> Merchant: 5. Quote
+Merchant -> Taker: 6. Rate
+Taker -> Merchant: 7. Accept
+Merchant -> Exchange: 8. Order
+Exchange -> Maker: 9. Trade
+deactivate Maker
+Exchange -> Merchant: 10. Trade
+deactivate Exchange
+Merchant -> Taker: 11. Confirm
+deactivate Merchant
+
+@enduml

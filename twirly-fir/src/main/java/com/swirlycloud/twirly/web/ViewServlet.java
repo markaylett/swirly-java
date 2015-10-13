@@ -23,7 +23,8 @@ public class ViewServlet extends RestServlet {
 
     @SuppressWarnings("null")
     @Override
-    protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
@@ -31,12 +32,12 @@ public class ViewServlet extends RestServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-    
+
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
             final long now = now();
-    
+
             if (parts.length == 0) {
                 rest.getView(params, now, resp.getWriter());
             } else if (parts.length == 1) {

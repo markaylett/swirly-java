@@ -143,9 +143,9 @@ public class AppEngineModel implements Model {
                     assert trader != null;
                     assert market != null;
                     assert contr != null;
-                    final Exec trade = factory.newExec(id, orderId, trader, market, contr,
-                            settlDay, ref, state, side, ticks, lots, resd, exec, cost, lastTicks,
-                            lastLots, minLots, matchId, role, cpty, created);
+                    final Exec trade = factory.newExec(id, orderId, trader, market, contr, settlDay,
+                            ref, state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
+                            minLots, matchId, role, cpty, created);
                     c.add(trade);
                 }
             }
@@ -284,7 +284,8 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable InstructTree selectOrder(@NonNull String trader, @NonNull Factory factory) {
+    public final @Nullable InstructTree selectOrder(@NonNull String trader,
+            @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
                 Boolean.FALSE);
@@ -310,7 +311,8 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable InstructTree selectTrade(@NonNull String trader, @NonNull Factory factory) {
+    public final @Nullable InstructTree selectTrade(@NonNull String trader,
+            @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
@@ -326,7 +328,8 @@ public class AppEngineModel implements Model {
 
     @Override
     public final @Nullable SlNode selectPosn(final int busDay, @NonNull Factory factory) {
-        final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL, State.TRADE.name());
+        final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL,
+                State.TRADE.name());
         final SlQueue q = new SlQueue();
         selectPosn(filter, busDay, factory, q);
         return q.getFirst();

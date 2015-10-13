@@ -21,8 +21,8 @@ public final class MockIrCurve {
     private MockIrCurve() {
     }
 
-    public static IrCurve newIrCurve(String ccy) throws ParserConfigurationException, SAXException,
-            IOException {
+    public static IrCurve newIrCurve(String ccy)
+            throws ParserConfigurationException, SAXException, IOException {
         String xml;
         if ("EUR".equals(ccy)) {
             xml = MOCK_EUR;

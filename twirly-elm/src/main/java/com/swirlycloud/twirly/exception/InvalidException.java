@@ -3,15 +3,15 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.exception;
 
-public final class FixRejectException extends Exception {
+public class InvalidException extends BadRequestException {
 
     private static final long serialVersionUID = 1L;
 
-    public FixRejectException(String message) {
-        super(message);
+    public InvalidException(String msg) {
+        super(msg);
     }
 
-    public FixRejectException(String message, Throwable cause) {
-        super(message, cause);
+    public InvalidException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

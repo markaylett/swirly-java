@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.ForbiddenException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
@@ -26,7 +26,8 @@ public class RecServlet extends RestServlet {
 
     @SuppressWarnings("null")
     @Override
-    protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         if (realm.isDevServer(req)) {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
@@ -34,12 +35,12 @@ public class RecServlet extends RestServlet {
             if (!realm.isUserSignedIn(req)) {
                 throw new UnauthorizedException("user is not logged-in");
             }
-    
+
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
             final long now = now();
-    
+
             boolean match = false;
             if (parts.length == 0) {
                 rest.getRec(realm.isUserAdmin(req), params, now, resp.getWriter());
@@ -70,7 +71,7 @@ public class RecServlet extends RestServlet {
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
                 if (!realm.isUserAdmin(req)) {
-                    throw new BadRequestException("user is not an admin");
+                    throw new ForbiddenException("user is not an admin");
                 }
                 if (parts.length == 1) {
                     rest.getRec(RecType.TRADER, params, now, resp.getWriter());
@@ -80,7 +81,7 @@ public class RecServlet extends RestServlet {
                     match = true;
                 }
             }
-    
+
             if (!match) {
                 throw new NotFoundException("resource does not exist");
             }

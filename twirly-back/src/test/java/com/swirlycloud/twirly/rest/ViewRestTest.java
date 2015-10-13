@@ -45,8 +45,7 @@ public final class ViewRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetByMarket() throws BadRequestException, NotFoundException,
-            IOException {
+    public final void testGetByMarket() throws BadRequestException, NotFoundException, IOException {
 
         long now = NOW;
 

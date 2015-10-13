@@ -221,55 +221,57 @@ public abstract class RestTest {
     }
 
     protected final Trader putTrader(@NonNull String mnem, String display, String email)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         return unrest.putTrader(mnem, display, PARAMS_NONE, NOW);
     }
 
     protected final Market postMarket(@NonNull String mnem, String display, @NonNull String contr,
             int state) throws BadRequestException, NotFoundException, ServiceUnavailableException,
-            IOException {
+                    IOException {
         return unrest.postMarket(mnem, display, contr, 0, 0, state, PARAMS_NONE, NOW);
     }
 
     protected final Market postMarket(@NonNull String mnem, String display, @NonNull String contr,
             int settlDay, int expiryDay, int state) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         return unrest.postMarket(mnem, display, contr, maybeJdToIso(settlDay),
                 maybeJdToIso(expiryDay), state, PARAMS_NONE, NOW);
     }
 
     protected final Market putMarket(@NonNull String trader, @NonNull String mnem, String display,
             int state) throws BadRequestException, NotFoundException, ServiceUnavailableException,
-            IOException {
+                    IOException {
         return unrest.putMarket(mnem, display, state, PARAMS_NONE, NOW);
     }
 
     protected final void deleteOrder(@NonNull String trader, @NonNull String market, long id)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         unrest.deleteOrder(trader, market, id, NOW);
     }
 
     protected final void deleteOrder(@NonNull String trader, @NonNull String market,
             @NonNull JslNode first) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         unrest.deleteOrder(trader, market, first, NOW);
     }
 
     protected final TransStruct postOrder(@NonNull String trader, @NonNull String market,
             @NonNull Side side, long ticks, long lots) throws BadRequestException,
-            NotFoundException, ServiceUnavailableException, IOException {
+                    NotFoundException, ServiceUnavailableException, IOException {
         return unrest.postOrder(trader, market, null, side, ticks, lots, 1, PARAMS_NONE, NOW);
     }
 
     protected final TransStruct putOrder(@NonNull String trader, @NonNull String market, long id,
             long lots) throws BadRequestException, NotFoundException, ServiceUnavailableException,
-            IOException {
+                    IOException {
         return unrest.putOrder(trader, market, id, lots, PARAMS_NONE, NOW);
     }
 
     protected final TransStruct putOrder(@NonNull String trader, @NonNull String market,
             @NonNull JslNode first, long lots) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+                    ServiceUnavailableException, IOException {
         return unrest.putOrder(trader, market, first, lots, PARAMS_NONE, NOW);
     }
 
@@ -279,8 +281,8 @@ public abstract class RestTest {
     }
 
     protected final void deleteTrade(@NonNull String mnem, @NonNull String market,
-            @NonNull JslNode first) throws BadRequestException, NotFoundException,
-            ServiceUnavailableException {
+            @NonNull JslNode first)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         unrest.deleteTrade(mnem, market, first, NOW);
     }
 

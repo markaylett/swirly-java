@@ -25,8 +25,8 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class MarketView extends BasicRbNode implements Jsonifiable,
-        Memorable, Financial {
+public final @NonNullByDefault class MarketView extends BasicRbNode
+        implements Jsonifiable, Memorable, Financial {
 
     private static final long serialVersionUID = 1L;
 
