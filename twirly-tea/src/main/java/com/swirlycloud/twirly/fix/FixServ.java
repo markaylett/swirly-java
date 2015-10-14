@@ -166,7 +166,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         this.serv = serv;
         this.nowFromTransactTime = settings.getBool("NowFromTransactTime");
 
-        serv.acquireRead();
+        final int lock = serv.readLock();
         try {
             final Iterator<SessionID> it = settings.sectionIterator();
             while (it.hasNext()) {
@@ -176,7 +176,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                 traderIdx.put(trader, sessionId);
             }
         } finally {
-            serv.releaseRead();
+            serv.unlock(lock);
         }
     }
 
@@ -230,7 +230,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
             throw new IncorrectTagValue(ClOrdID.FIELD, ref);
         }
 
-        serv.acquireWrite();
+        final int lock = serv.writeLock();
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
@@ -246,7 +246,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
             log.warn(sessionId + ": " + e.getMessage());
             sendBusinessReject(message, ref, e, sessionId);
         } finally {
-            serv.releaseWrite();
+            serv.unlock(lock);
         }
     }
 
@@ -271,7 +271,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         assert ref != null;
         assert orderRef != null;
 
-        serv.acquireWrite();
+        final int lock = serv.writeLock();
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
@@ -306,7 +306,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                         sessionId);
             }
         } finally {
-            serv.releaseWrite();
+            serv.unlock(lock);
         }
     }
 
@@ -330,7 +330,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         assert ref != null;
         assert orderRef != null;
 
-        serv.acquireWrite();
+        final int lock = serv.writeLock();
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
@@ -365,7 +365,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                         sessionId);
             }
         } finally {
-            serv.releaseWrite();
+            serv.unlock(lock);
         }
     }
 
