@@ -39,7 +39,7 @@ public final class BackCronServlet extends RestServlet {
 
             if ("endofday".equals(parts[JOB_PART])) {
                 log("processing end-of-day");
-                rest.getEndOfDay(now);
+                rest.endOfDay(now);
             } else if ("ecbrates".equals(parts[JOB_PART])) {
                 log("processing ecb-rates");
                 final EcbRates ecbRates = new EcbRates();

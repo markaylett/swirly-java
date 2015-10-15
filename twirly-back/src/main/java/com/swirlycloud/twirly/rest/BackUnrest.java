@@ -706,6 +706,6 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final void getEndOfDay(long now) throws NotFoundException, ServiceUnavailableException {
-        rest.getEndOfDay(now);
+        rest.endOfDay(now);
     }
 }

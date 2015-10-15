@@ -86,8 +86,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     @Override
     public final @Nullable String findTraderByEmail(String email) {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final Trader trader = serv.findTraderByEmail(email);
             return trader != null ? trader.getMnem() : null;
         } finally {
@@ -99,8 +101,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             out.append("{\"assets\":");
             toJsonArray(serv.getFirstRec(RecType.ASSET), params, out);
             out.append(",\"contrs\":");
@@ -121,8 +125,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getRec(RecType recType, Params params, long now, Appendable out)
             throws IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             toJsonArray(serv.getFirstRec(recType), params, out);
         } finally {
             serv.unlock(lock);
@@ -133,8 +139,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final Rec rec = serv.findRec(recType, mnem);
             if (rec == null) {
                 throw new NotFoundException(String.format("record '%s' does not exist", mnem));
@@ -148,8 +156,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     @Override
     public final void getView(Params params, long now, Appendable out) throws IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             getView(serv.getFirstRec(RecType.MARKET), params, now, out);
         } finally {
             serv.unlock(lock);
@@ -160,8 +170,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getView(String market, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final MarketBook book = serv.getMarket(market);
             final boolean withExpired = getExpiredParam(params);
             final int busDay = getBusDate(now).toJd();
@@ -179,8 +191,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getSess(String trader, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             out.append("{\"orders\":");
             toJsonArray(sess.getFirstOrder(), params, out);
@@ -202,8 +216,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getOrder(String trader, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstOrder(), params, out);
         } finally {
@@ -215,8 +231,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getOrder(String trader, String market, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             RestUtil.getOrder(sess.getFirstOrder(), market, params, out);
         } finally {
@@ -228,8 +246,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getOrder(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             final Order order = sess.findOrder(market, id);
             if (order == null) {
@@ -245,8 +265,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getTrade(String trader, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstTrade(), params, out);
         } finally {
@@ -258,8 +280,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getTrade(String trader, String market, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             RestUtil.getTrade(sess.getFirstTrade(), market, params, out);
         } finally {
@@ -271,8 +295,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getTrade(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             final Exec trade = sess.findTrade(market, id);
             if (trade == null) {
@@ -288,8 +314,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getPosn(String trader, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstPosn(), params, out);
         } finally {
@@ -301,8 +329,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getPosn(String trader, String contr, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             RestUtil.getPosn(sess.getFirstPosn(), contr, params, out);
         } finally {
@@ -314,8 +344,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public final void getPosn(String trader, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.readLock();
+        int lock = serv.writeLock();
         try {
+            serv.poll();
+            lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             final Posn posn = sess.findPosn(contr, maybeIsoToJd(settlDate));
             if (posn == null) {
@@ -334,6 +366,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final Trader trader = serv.createTrader(mnem, display, email);
             trader.toJson(params, out);
         } finally {
@@ -347,6 +380,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final Trader trader = serv.updateTrader(mnem, display);
             trader.toJson(params, out);
         } finally {
@@ -361,6 +395,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final Contr contr = (Contr) serv.findRec(RecType.CONTR, contrMnem);
             if (contr == null) {
                 throw new NotFoundException(
@@ -382,6 +417,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final Market market = serv.updateMarket(mnem, display, state, now);
             market.toJson(params, out);
         } finally {
@@ -395,6 +431,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveOrder(sess, market, id, now);
         } finally {
@@ -408,6 +445,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveOrder(sess, market, first, now);
         } finally {
@@ -422,6 +460,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
@@ -438,6 +477,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             if (lots > 0) {
@@ -458,6 +498,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             if (lots > 0) {
@@ -477,6 +518,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveTrade(sess, market, id, now);
         } finally {
@@ -489,6 +531,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveTrade(sess, market, first, now);
         } finally {
@@ -502,6 +545,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             final Exec trade = serv.createTrade(sess, book, ref, side, ticks, lots, role, cpty,
@@ -514,10 +558,11 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     // Cron jobs.
 
-    public final void getEndOfDay(long now) throws NotFoundException, ServiceUnavailableException {
+    public final void endOfDay(long now) throws NotFoundException, ServiceUnavailableException {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll();
             serv.expireEndOfDay(now);
             serv.settlEndOfDay(now);
         } finally {
