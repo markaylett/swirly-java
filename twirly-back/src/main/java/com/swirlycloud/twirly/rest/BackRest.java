@@ -69,10 +69,6 @@ public final @NonNullByDefault class BackRest implements Rest {
         out.append(']');
     }
 
-    public BackRest(LockableServ serv) {
-        this.serv = serv;
-    }
-
     public BackRest(Model model, Journ journ, Cache cache, Factory factory, long now)
             throws InterruptedException {
         this(new LockableServ(model, journ, cache, factory, now));
@@ -81,6 +77,10 @@ public final @NonNullByDefault class BackRest implements Rest {
     public BackRest(Datastore datastore, Cache cache, Factory factory, long now)
             throws InterruptedException {
         this(new LockableServ(datastore, cache, factory, now));
+    }
+
+    public BackRest(LockableServ serv) {
+        this.serv = serv;
     }
 
     @Override

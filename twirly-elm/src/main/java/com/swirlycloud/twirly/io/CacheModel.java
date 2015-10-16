@@ -18,8 +18,7 @@ public final class CacheModel implements Model {
     private final Cache cache;
 
     /**
-     * Ownership and responsibility for closing the cache and model will transferred to the new
-     * instance.
+     * Take ownership of the model, but not the cache.
      * 
      * @param model
      *            The underlying model.
@@ -33,7 +32,6 @@ public final class CacheModel implements Model {
 
     @Override
     public final void close() throws Exception {
-        cache.close();
         model.close();
     }
 
@@ -166,9 +164,5 @@ public final class CacheModel implements Model {
             cache.insert(key, tree);
         }
         return tree;
-    }
-
-    public final Cache getCache() {
-        return cache;
     }
 }
