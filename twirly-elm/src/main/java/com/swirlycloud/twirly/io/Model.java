@@ -53,4 +53,6 @@ public interface Model extends AutoCloseable {
     @Nullable
     TraderPosnTree selectPosn(@NonNull String trader, int busDay, @NonNull Factory factory)
             throws InterruptedException;
+
+    long selectTimeout() throws InterruptedException;
 }

@@ -50,25 +50,26 @@ public final class BackSessServlet extends SessServlet {
                 throw new InvalidException("id not specified");
             }
             final long now = now();
+            long timeout;
             if (ids.jslNext() != null) {
                 if ("order".equals(parts[TYPE_PART])) {
-                    rest.deleteOrder(trader, market, ids, now);
+                    timeout = rest.deleteOrder(trader, market, ids, now);
                 } else if ("trade".equals(parts[TYPE_PART])) {
-                    rest.deleteTrade(trader, market, ids, now);
+                    timeout = rest.deleteTrade(trader, market, ids, now);
                 } else {
                     throw new MethodNotAllowedException("not allowed on this resource");
                 }
             } else {
                 final long id = ids.getId();
                 if ("order".equals(parts[TYPE_PART])) {
-                    rest.deleteOrder(trader, market, id, now);
+                    timeout = rest.deleteOrder(trader, market, id, now);
                 } else if ("trade".equals(parts[TYPE_PART])) {
-                    rest.deleteTrade(trader, market, id, now);
+                    timeout = rest.deleteTrade(trader, market, id, now);
                 } else {
                     throw new MethodNotAllowedException("not allowed on this resource");
                 }
             }
-            setNoContent(resp);
+            setNoContent(resp, timeout);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

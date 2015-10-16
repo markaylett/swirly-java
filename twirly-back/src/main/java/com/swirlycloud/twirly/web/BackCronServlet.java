@@ -36,10 +36,10 @@ public final class BackCronServlet extends RestServlet {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
             final long now = now();
-
+            long timeout;
             if ("endofday".equals(parts[JOB_PART])) {
                 log("processing end-of-day");
-                rest.endOfDay(now);
+                timeout = rest.endOfDay(now);
             } else if ("ecbrates".equals(parts[JOB_PART])) {
                 log("processing ecb-rates");
                 final EcbRates ecbRates = new EcbRates();
@@ -49,10 +49,11 @@ public final class BackCronServlet extends RestServlet {
                 } catch (final Throwable t) {
                     log("error: " + t.getMessage());
                 }
+                timeout = rest.poll();
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            setNoContent(resp);
+            setNoContent(resp, timeout);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

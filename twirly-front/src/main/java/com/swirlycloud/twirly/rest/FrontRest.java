@@ -119,7 +119,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getRec(boolean withTraders, Params params, long now, Appendable out)
+    public final long getRec(boolean withTraders, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             out.append("{\"assets\":");
@@ -133,6 +133,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 toJsonArray(selectTrader().getFirst(), params, out);
             }
             out.append('}');
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -141,11 +142,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getRec(RecType recType, Params params, long now, Appendable out)
+    public final long getRec(RecType recType, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             final MnemRbTree tree = selectRec(recType);
             toJsonArray(tree.getFirst(), params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -155,7 +157,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
+    public final long getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException {
         try {
             final MnemRbTree tree = selectRec(recType);
@@ -164,6 +166,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 throw new NotFoundException(String.format("record '%s' does not exist", mnem));
             }
             rec.toJson(params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -173,10 +176,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getView(Params params, long now, Appendable out)
+    public final long getView(Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             toJsonArray(selectView().getFirst(), params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -185,10 +189,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getView(String market, Params params, long now, Appendable out)
+    public final long getView(String market, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             RestUtil.getView(selectView().getFirst(), market, params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -197,7 +202,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getSess(String trader, Params params, long now, Appendable out)
+    public final long getSess(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             out.append("{\"orders\":");
@@ -212,6 +217,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 toJsonArray(selectView().getFirst(), params, out);
             }
             out.append('}');
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -220,10 +226,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getOrder(String trader, Params params, long now, Appendable out)
+    public final long getOrder(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             toJsonArray(selectOrder(trader).getFirst(), params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -232,10 +239,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getOrder(String trader, String market, Params params, long now,
+    public final long getOrder(String trader, String market, Params params, long now,
             Appendable out) throws ServiceUnavailableException, IOException {
         try {
             RestUtil.getOrder(selectOrder(trader).getFirst(), market, params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -244,7 +252,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getOrder(String trader, String market, long id, Params params, long now,
+    public final long getOrder(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
         try {
             final InstructTree tree = selectOrder(trader);
@@ -253,6 +261,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
             order.toJson(params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -261,10 +270,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getTrade(String trader, Params params, long now, Appendable out)
+    public final long getTrade(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             toJsonArray(selectTrade(trader).getFirst(), params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -273,10 +283,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getTrade(String trader, String market, Params params, long now,
+    public final long getTrade(String trader, String market, Params params, long now,
             Appendable out) throws ServiceUnavailableException, IOException {
         try {
             RestUtil.getTrade(selectTrade(trader).getFirst(), market, params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -285,7 +296,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getTrade(String trader, String market, long id, Params params, long now,
+    public final long getTrade(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
         try {
             final InstructTree tree = selectTrade(trader);
@@ -294,6 +305,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 throw new NotFoundException(String.format("trade '%d' does not exist", id));
             }
             trade.toJson(params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -302,11 +314,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getPosn(String trader, Params params, long now, Appendable out)
+    public final long getPosn(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             final int busDay = getBusDate(now).toJd();
             toJsonArray(selectPosn(trader, busDay).getFirst(), params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -315,10 +328,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getPosn(String trader, String contr, Params params, long now, Appendable out)
+    public final long getPosn(String trader, String contr, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
         try {
             RestUtil.getPosn(selectTrade(trader).getFirst(), contr, params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -327,7 +341,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getPosn(String trader, String contr, int settlDate, Params params, long now,
+    public final long getPosn(String trader, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
         try {
             final int busDay = getBusDate(now).toJd();
@@ -338,6 +352,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
                         String.format("posn for '%s' on '%d' does not exist", contr, settlDate));
             }
             posn.toJson(params, out);
+            return model.selectTimeout();
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();

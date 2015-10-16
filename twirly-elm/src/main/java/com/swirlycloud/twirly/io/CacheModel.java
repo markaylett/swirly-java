@@ -165,4 +165,9 @@ public final class CacheModel implements Model {
         }
         return tree;
     }
+
+    @Override
+    public final long selectTimeout() {
+        return 0;
+    }
 }

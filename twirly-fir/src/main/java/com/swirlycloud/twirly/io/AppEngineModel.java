@@ -348,4 +348,9 @@ public class AppEngineModel implements Model {
         selectPosn(filter, busDay, factory, t);
         return t;
     }
+
+    @Override
+    public final long selectTimeout() {
+        return 0;
+    }
 }

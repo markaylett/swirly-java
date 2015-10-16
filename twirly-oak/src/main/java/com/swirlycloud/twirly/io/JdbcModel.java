@@ -566,4 +566,9 @@ public class JdbcModel implements Model {
         }
         return t;
     }
+
+    @Override
+    public final long selectTimeout() {
+        return 0;
+    }
 }

@@ -192,6 +192,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
+    public final long selectTimeout() {
+        return 0;
+    }
+
+    @Override
     public final void insertMarket(final @NonNull String mnem, final @Nullable String display,
             final @NonNull String contr, final int settlDay, final int expiryDay, final int state) {
         service.submit(new Runnable() {

@@ -81,4 +81,9 @@ public class MockModel implements Model {
             @NonNull final Factory factory) {
         return new TraderPosnTree();
     }
+
+    @Override
+    public final long selectTimeout() {
+        return 0;
+    }
 }

@@ -82,7 +82,7 @@ public abstract class RestServlet extends HttpServlet {
         resp.setStatus(e.getHttpStatus());
     }
 
-    protected final void setNoContent(HttpServletResponse resp) {
+    protected final void setNoContent(HttpServletResponse resp, long timeout) {
         resp.setHeader("Cache-Control", "no-cache");
         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
