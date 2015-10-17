@@ -82,6 +82,11 @@ public abstract class RestServlet extends HttpServlet {
         resp.setStatus(e.getHttpStatus());
     }
 
+    protected final void setNoContent(HttpServletResponse resp) {
+        resp.setHeader("Cache-Control", "no-cache");
+        resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+    }
+
     protected final @NonNull String getTrader(HttpServletRequest req)
             throws NotFoundException, ServiceUnavailableException, IOException {
         final String email = realm.getUserEmail(req);

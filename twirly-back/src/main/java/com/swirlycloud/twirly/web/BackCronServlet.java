@@ -52,8 +52,7 @@ public final class BackCronServlet extends RestServlet {
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            resp.setHeader("Cache-Control", "no-cache");
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            setNoContent(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
