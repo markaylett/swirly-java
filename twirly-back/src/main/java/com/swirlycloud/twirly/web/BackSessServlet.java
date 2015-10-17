@@ -98,6 +98,7 @@ public final class BackSessServlet extends SessServlet {
             final String market = parts[MARKET_PART];
             final Request r = parseRequest(req);
             final long now = now();
+            long timeout;
             if ("order".equals(parts[TYPE_PART])) {
 
                 final int required = Request.SIDE | Request.TICKS | Request.LOTS;
@@ -105,8 +106,8 @@ public final class BackSessServlet extends SessServlet {
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
-                rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getTicks(), r.getLots(),
-                        r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
+                timeout = rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getTicks(),
+                        r.getLots(), r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             } else if ("trade".equals(parts[TYPE_PART])) {
 
                 final int required = Request.TRADER | Request.SIDE | Request.TICKS | Request.LOTS;
@@ -118,12 +119,13 @@ public final class BackSessServlet extends SessServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new ForbiddenException("user is not an admin");
                 }
-                rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(), r.getTicks(),
-                        r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
+                timeout = rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(),
+                        r.getTicks(), r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now,
+                        resp.getWriter());
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            sendJsonResponse(resp);
+            sendJsonResponse(resp, timeout);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
@@ -159,14 +161,17 @@ public final class BackSessServlet extends SessServlet {
                 throw new InvalidException("request fields are invalid");
             }
             final long now = now();
+            long timeout;
             if (ids.jslNext() != null) {
-                rest.putOrder(trader, market, ids, r.getLots(), PARAMS_NONE, now, resp.getWriter());
+                timeout = rest.putOrder(trader, market, ids, r.getLots(), PARAMS_NONE, now,
+                        resp.getWriter());
             } else {
                 final long id = ids.getId();
-                rest.putOrder(trader, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());
+                timeout = rest.putOrder(trader, market, id, r.getLots(), PARAMS_NONE, now,
+                        resp.getWriter());
             }
 
-            sendJsonResponse(resp);
+            sendJsonResponse(resp, timeout);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
