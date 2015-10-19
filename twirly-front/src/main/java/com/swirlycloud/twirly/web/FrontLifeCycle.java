@@ -18,7 +18,6 @@ import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineModel;
 import com.swirlycloud.twirly.io.Cache;
-import com.swirlycloud.twirly.io.CacheModel;
 import com.swirlycloud.twirly.io.JdbcModel;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.io.SpyCache;
@@ -113,8 +112,6 @@ public final class FrontLifeCycle implements ServletContextListener {
             } else {
                 throw new RuntimeException("unsupported servlet container");
             }
-            // CacheModel owns Model.
-            model = new CacheModel(model, cache);
             rest = new FrontRest(model, cache, factory);
         } finally {
             if (rest == null) {

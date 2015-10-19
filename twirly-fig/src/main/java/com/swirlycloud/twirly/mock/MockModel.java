@@ -25,17 +25,17 @@ public class MockModel implements Model {
     }
 
     @Override
-    public MnemRbTree selectContr(@NonNull final Factory factory) {
+    public @NonNull MnemRbTree selectContr(@NonNull final Factory factory) {
         return MockContr.selectContr(factory);
     }
 
     @Override
-    public MnemRbTree selectMarket(@NonNull final Factory factory) {
+    public @NonNull MnemRbTree selectMarket(@NonNull final Factory factory) {
         return new MnemRbTree();
     }
 
     @Override
-    public MnemRbTree selectTrader(@NonNull final Factory factory) {
+    public @NonNull MnemRbTree selectTrader(@NonNull final Factory factory) {
         return MockTrader.selectTrader(factory);
     }
 
@@ -46,7 +46,7 @@ public class MockModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectView(@NonNull Factory factory)
+    public final @NonNull MnemRbTree selectView(@NonNull Factory factory)
             throws InterruptedException {
         return new MnemRbTree();
     }
@@ -57,7 +57,8 @@ public class MockModel implements Model {
     }
 
     @Override
-    public InstructTree selectOrder(@NonNull String trader, @NonNull final Factory factory) {
+    public @NonNull InstructTree selectOrder(@NonNull String trader,
+            @NonNull final Factory factory) {
         return new InstructTree();
     }
 
@@ -67,7 +68,8 @@ public class MockModel implements Model {
     }
 
     @Override
-    public InstructTree selectTrade(@NonNull String trader, @NonNull final Factory factory) {
+    public @NonNull InstructTree selectTrade(@NonNull String trader,
+            @NonNull final Factory factory) {
         return new InstructTree();
     }
 
@@ -77,7 +79,7 @@ public class MockModel implements Model {
     }
 
     @Override
-    public TraderPosnTree selectPosn(@NonNull String trader, int busDay,
+    public @NonNull TraderPosnTree selectPosn(@NonNull String trader, int busDay,
             @NonNull final Factory factory) {
         return new TraderPosnTree();
     }

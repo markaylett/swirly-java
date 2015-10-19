@@ -9,6 +9,7 @@ import static com.swirlycloud.twirly.rest.RestUtil.getViewsParam;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -20,6 +21,7 @@ import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.exception.UncheckedExecutionException;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
@@ -32,76 +34,123 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class FrontRest implements Rest {
 
     private final Model model;
-    @SuppressWarnings("unused")
     private final Cache cache;
     private final Factory factory;
 
-    private final MnemRbTree selectRec(RecType recType) throws InterruptedException {
+    private final MnemRbTree selectAsset() throws ExecutionException, InterruptedException {
+        MnemRbTree tree = (MnemRbTree) cache.select("asset").get();
+        if (tree == null) {
+            tree = model.selectAsset(factory);
+            cache.insert("asset", tree);
+        }
+        return tree;
+    }
+
+    private final MnemRbTree selectContr() throws ExecutionException, InterruptedException {
+        MnemRbTree tree = (MnemRbTree) cache.select("contr").get();
+        if (tree == null) {
+            tree = model.selectContr(factory);
+            cache.insert("contr", tree);
+        }
+        return tree;
+    }
+
+    private final MnemRbTree selectMarket() throws ExecutionException, InterruptedException {
+        MnemRbTree tree = (MnemRbTree) cache.select("market").get();
+        if (tree == null) {
+            tree = model.selectMarket(factory);
+            cache.insert("market", tree);
+        }
+        return tree;
+    }
+
+    private final MnemRbTree selectTrader() throws ExecutionException, InterruptedException {
+        MnemRbTree tree = (MnemRbTree) cache.select("trader").get();
+        if (tree == null) {
+            tree = model.selectTrader(factory);
+            cache.insert("trader", tree);
+        }
+        return tree;
+    }
+
+    private final MnemRbTree selectRec(RecType recType)
+            throws ExecutionException, InterruptedException {
         MnemRbTree tree = null;
         switch (recType) {
         case ASSET:
-            tree = model.selectAsset(factory);
+            tree = selectAsset();
             break;
         case CONTR:
-            tree = model.selectContr(factory);
+            tree = selectContr();
             break;
         case MARKET:
-            tree = model.selectMarket(factory);
+            tree = selectMarket();
             break;
         case TRADER:
-            tree = model.selectTrader(factory);
+            tree = selectTrader();
             break;
         }
         assert tree != null;
         return tree;
     }
 
-    private final MnemRbTree selectAsset() throws InterruptedException {
-        final MnemRbTree tree = model.selectAsset(factory);
-        assert tree != null;
+    private final @Nullable String selectTraderByEmail(String email)
+            throws ExecutionException, InterruptedException {
+        final String key = "trader:" + email;
+        String trader = (String) cache.select(key).get();
+        if (trader == null) {
+            trader = model.selectTraderByEmail(email, factory);
+            // An empty value indicates that there is no trader with this email, as opposed to a
+            // null value, which indicates that the cache is empty.
+            cache.insert(key, trader != null ? trader : "");
+        }
+        return trader != null && !trader.isEmpty() ? trader : null;
+    }
+
+    private final MnemRbTree selectView() throws ExecutionException, InterruptedException {
+        MnemRbTree tree = (MnemRbTree) cache.select("view").get();
+        if (tree == null) {
+            tree = model.selectView(factory);
+            cache.insert("view", tree);
+        }
         return tree;
     }
 
-    private final MnemRbTree selectContr() throws InterruptedException {
-        final MnemRbTree tree = model.selectContr(factory);
-        assert tree != null;
+    private final InstructTree selectOrder(String trader)
+            throws ExecutionException, InterruptedException {
+        final String key = "order:" + trader;
+        InstructTree tree = (InstructTree) cache.select(key).get();
+        if (tree == null) {
+            tree = model.selectOrder(trader, factory);
+            cache.insert(key, tree);
+        }
         return tree;
     }
 
-    private final MnemRbTree selectMarket() throws InterruptedException {
-        final MnemRbTree tree = model.selectMarket(factory);
-        assert tree != null;
+    private final InstructTree selectTrade(String trader)
+            throws ExecutionException, InterruptedException {
+        final String key = "trade:" + trader;
+        InstructTree tree = (InstructTree) cache.select(key).get();
+        if (tree == null) {
+            tree = model.selectTrade(trader, factory);
+            cache.insert(key, tree);
+        }
         return tree;
     }
 
-    private final MnemRbTree selectTrader() throws InterruptedException {
-        final MnemRbTree tree = model.selectTrader(factory);
-        assert tree != null;
+    private final TraderPosnTree selectPosn(String trader, int busDay)
+            throws ExecutionException, InterruptedException {
+        final String key = "posn:" + trader;
+        TraderPosnTree tree = (TraderPosnTree) cache.select(key).get();
+        if (tree == null) {
+            tree = model.selectPosn(trader, busDay, factory);
+            cache.insert(key, tree);
+        }
         return tree;
     }
 
-    private final MnemRbTree selectView() throws InterruptedException {
-        final MnemRbTree tree = model.selectView(factory);
-        assert tree != null;
-        return tree;
-    }
-
-    private final InstructTree selectOrder(String trader) throws InterruptedException {
-        final InstructTree tree = model.selectOrder(trader, factory);
-        assert tree != null;
-        return tree;
-    }
-
-    private final InstructTree selectTrade(String trader) throws InterruptedException {
-        final InstructTree tree = model.selectTrade(trader, factory);
-        assert tree != null;
-        return tree;
-    }
-
-    private final TraderPosnTree selectPosn(String trader, int busDay) throws InterruptedException {
-        final TraderPosnTree tree = model.selectPosn(trader, busDay, factory);
-        assert tree != null;
-        return tree;
+    private final long selectTimeout() {
+        return 0;
     }
 
     public FrontRest(Model model, Cache cache, Factory factory) {
@@ -114,7 +163,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
     public final @Nullable String findTraderByEmail(String email)
             throws ServiceUnavailableException {
         try {
-            return model.selectTraderByEmail(email, factory);
+            return selectTraderByEmail(email);
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -137,7 +188,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 toJsonArray(selectTrader().getFirst(), params, out);
             }
             out.append('}');
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -151,13 +204,14 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final MnemRbTree tree = selectRec(recType);
             toJsonArray(tree.getFirst(), params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
             throw new ServiceUnavailableException("service interrupted", e);
         }
-
     }
 
     @Override
@@ -170,13 +224,14 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 throw new NotFoundException(String.format("record '%s' does not exist", mnem));
             }
             rec.toJson(params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
             throw new ServiceUnavailableException("service interrupted", e);
         }
-
     }
 
     @Override
@@ -184,7 +239,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
         try {
             toJsonArray(selectView().getFirst(), params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -197,7 +254,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
         try {
             RestUtil.getView(selectView().getFirst(), market, params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -221,7 +280,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 toJsonArray(selectView().getFirst(), params, out);
             }
             out.append('}');
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -234,7 +295,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
         try {
             toJsonArray(selectOrder(trader).getFirst(), params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -247,7 +310,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws ServiceUnavailableException, IOException {
         try {
             RestUtil.getOrder(selectOrder(trader).getFirst(), market, params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -265,7 +330,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
             order.toJson(params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -278,7 +345,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
         try {
             toJsonArray(selectTrade(trader).getFirst(), params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -291,7 +360,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws ServiceUnavailableException, IOException {
         try {
             RestUtil.getTrade(selectTrade(trader).getFirst(), market, params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -309,7 +380,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 throw new NotFoundException(String.format("trade '%d' does not exist", id));
             }
             trade.toJson(params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -323,7 +396,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final int busDay = getBusDate(now).toJd();
             toJsonArray(selectPosn(trader, busDay).getFirst(), params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -336,7 +411,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
         try {
             RestUtil.getPosn(selectTrade(trader).getFirst(), contr, params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();
@@ -356,7 +433,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
                         String.format("posn for '%s' on '%d' does not exist", contr, settlDate));
             }
             posn.toJson(params, out);
-            return model.selectTimeout();
+            return selectTimeout();
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();

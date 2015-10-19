@@ -209,13 +209,13 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectContr(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree selectContr(@NonNull Factory factory) {
         // TODO: migrate to datastore.
         return MockContr.selectContr(factory);
     }
 
     @Override
-    public final @Nullable MnemRbTree selectMarket(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree selectMarket(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         final Query query = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(query);
@@ -242,7 +242,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectTrader(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree selectTrader(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         final Query query = new Query(TRADER_KIND);
         final PreparedQuery pq = datastore.prepare(query);
@@ -270,7 +270,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectView(@NonNull Factory factory)
+    public final @NonNull MnemRbTree selectView(@NonNull Factory factory)
             throws InterruptedException {
         return ModelUtil.selectView(this, factory);
     }
@@ -284,7 +284,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable InstructTree selectOrder(@NonNull String trader,
+    public final @NonNull InstructTree selectOrder(@NonNull String trader,
             @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
@@ -307,11 +307,10 @@ public class AppEngineModel implements Model {
         final SlQueue q = new SlQueue();
         selectTrade(filter, factory, q);
         return q.getFirst();
-
     }
 
     @Override
-    public final @Nullable InstructTree selectTrade(@NonNull String trader,
+    public final @NonNull InstructTree selectTrade(@NonNull String trader,
             @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
@@ -323,7 +322,6 @@ public class AppEngineModel implements Model {
         final InstructTree t = new InstructTree();
         selectTrade(filter, factory, t);
         return t;
-
     }
 
     @Override
@@ -333,11 +331,10 @@ public class AppEngineModel implements Model {
         final SlQueue q = new SlQueue();
         selectPosn(filter, busDay, factory, q);
         return q.getFirst();
-
     }
 
     @Override
-    public final @Nullable TraderPosnTree selectPosn(@NonNull String trader, final int busDay,
+    public final @NonNull TraderPosnTree selectPosn(@NonNull String trader, final int busDay,
             @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,

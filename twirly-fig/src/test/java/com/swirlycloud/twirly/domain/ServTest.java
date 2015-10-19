@@ -47,7 +47,7 @@ public final class ServTest {
         return new MockDatastore() {
 
             @Override
-            public final MnemRbTree selectMarket(@NonNull Factory factory) {
+            public final @NonNull MnemRbTree selectMarket(@NonNull Factory factory) {
                 final MnemRbTree t = new MnemRbTree();
                 t.insert(factory.newMarket("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"),
                         SETTL_DAY, EXPIRY_DAY, STATE, 12345, 10, NOW - 2, 3, 2));

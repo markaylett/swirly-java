@@ -424,7 +424,7 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final MnemRbTree selectAsset(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree selectAsset(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectAssetStmt.executeQuery()) {
             while (rs.next()) {
@@ -437,7 +437,7 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final MnemRbTree selectContr(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree selectContr(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectContrStmt.executeQuery()) {
             while (rs.next()) {
@@ -450,7 +450,7 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final MnemRbTree selectMarket(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree selectMarket(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectMarketStmt.executeQuery()) {
             while (rs.next()) {
@@ -463,7 +463,7 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final MnemRbTree selectTrader(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree selectTrader(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         try (final ResultSet rs = selectTraderStmt.executeQuery()) {
             while (rs.next()) {
@@ -492,7 +492,7 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @Nullable MnemRbTree selectView(@NonNull Factory factory)
+    public final @NonNull MnemRbTree selectView(@NonNull Factory factory)
             throws InterruptedException {
         return ModelUtil.selectView(this, factory);
     }
@@ -509,7 +509,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final InstructTree selectOrder(@NonNull String trader, @NonNull Factory factory) {
+    public final @NonNull InstructTree selectOrder(@NonNull String trader,
+            @NonNull Factory factory) {
         final InstructTree t = new InstructTree();
         try {
             setParam(selectOrderByTraderStmt, 1, trader);
@@ -532,7 +533,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final InstructTree selectTrade(@NonNull String trader, @NonNull Factory factory) {
+    public final @NonNull InstructTree selectTrade(@NonNull String trader,
+            @NonNull Factory factory) {
         final InstructTree t = new InstructTree();
         try {
             setParam(selectTradeByTraderStmt, 1, trader);
@@ -555,7 +557,7 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final TraderPosnTree selectPosn(@NonNull String trader, int busDay,
+    public final @NonNull TraderPosnTree selectPosn(@NonNull String trader, int busDay,
             @NonNull Factory factory) {
         final TraderPosnTree t = new TraderPosnTree();
         try {

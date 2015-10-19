@@ -6,7 +6,6 @@ package com.swirlycloud.twirly.io;
 import static com.swirlycloud.twirly.node.SlUtil.popNext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.BookFactory;
 import com.swirlycloud.twirly.domain.Factory;
@@ -21,8 +20,7 @@ public final @NonNullByDefault class ModelUtil {
     private ModelUtil() {
     }
 
-    public static @Nullable MnemRbTree selectView(Model model, Factory factory)
-            throws InterruptedException {
+    public static MnemRbTree selectView(Model model, Factory factory) throws InterruptedException {
 
         final MnemRbTree views = new MnemRbTree();
 

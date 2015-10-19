@@ -14,43 +14,43 @@ import com.swirlycloud.twirly.node.SlNode;
 
 public interface Model extends AutoCloseable {
 
-    @Nullable
+    @NonNull
     MnemRbTree selectAsset(@NonNull Factory factory) throws InterruptedException;
 
-    @Nullable
+    @NonNull
     MnemRbTree selectContr(@NonNull Factory factory) throws InterruptedException;
 
-    @Nullable
+    @NonNull
     MnemRbTree selectMarket(@NonNull Factory factory) throws InterruptedException;
 
-    @Nullable
+    @NonNull
     MnemRbTree selectTrader(@NonNull Factory factory) throws InterruptedException;
 
     @Nullable
     String selectTraderByEmail(@NonNull String email, @NonNull Factory factory)
             throws InterruptedException;
 
-    @Nullable
+    @NonNull
     MnemRbTree selectView(@NonNull Factory factory) throws InterruptedException;
 
     @Nullable
     SlNode selectOrder(@NonNull Factory factory) throws InterruptedException;
 
-    @Nullable
+    @NonNull
     InstructTree selectOrder(@NonNull String trader, @NonNull Factory factory)
             throws InterruptedException;
 
     @Nullable
     SlNode selectTrade(@NonNull Factory factory) throws InterruptedException;
 
-    @Nullable
+    @NonNull
     InstructTree selectTrade(@NonNull String trader, @NonNull Factory factory)
             throws InterruptedException;
 
     @Nullable
     SlNode selectPosn(int busDay, @NonNull Factory factory) throws InterruptedException;
 
-    @Nullable
+    @NonNull
     TraderPosnTree selectPosn(@NonNull String trader, int busDay, @NonNull Factory factory)
             throws InterruptedException;
 
