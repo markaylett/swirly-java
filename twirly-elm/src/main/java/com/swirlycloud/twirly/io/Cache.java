@@ -3,8 +3,11 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Future;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 public @NonNullByDefault interface Cache extends AutoCloseable {
 
@@ -15,8 +18,9 @@ public @NonNullByDefault interface Cache extends AutoCloseable {
      *            The cache entry key.
      * @return The cache entry value or null if it does not exist.
      */
-    @Nullable
-    Object select(String key);
+    Future<?> select(String key);
+
+    Future<Map<String, Object>> select(Collection<String> keys);
 
     /**
      * Insert cache entry if it does not already exist.

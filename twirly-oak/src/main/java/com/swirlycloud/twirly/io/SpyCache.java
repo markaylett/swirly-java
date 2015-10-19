@@ -5,12 +5,15 @@ package com.swirlycloud.twirly.io;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import net.spy.memcached.MemcachedClient;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
+
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.BulkFuture;
 
 public final @NonNullByDefault class SpyCache implements Cache {
 
@@ -29,8 +32,17 @@ public final @NonNullByDefault class SpyCache implements Cache {
     }
 
     @Override
-    public final @Nullable Object select(String key) {
-        return mc.get(key);
+    public final Future<?> select(String key) {
+        final Future<?> fut = mc.asyncGet(key);
+        assert fut != null;
+        return fut;
+    }
+
+    @Override
+    public final Future<Map<String, Object>> select(Collection<String> keys) {
+        final BulkFuture<Map<String, Object>> fut = mc.asyncGetBulk(keys);
+        assert fut != null;
+        return fut;        
     }
 
     @Override

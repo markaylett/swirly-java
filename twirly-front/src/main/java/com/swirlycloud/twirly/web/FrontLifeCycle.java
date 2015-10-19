@@ -115,7 +115,7 @@ public final class FrontLifeCycle implements ServletContextListener {
             }
             // CacheModel owns Model.
             model = new CacheModel(model, cache);
-            rest = new FrontRest(model, factory);
+            rest = new FrontRest(model, cache, factory);
         } finally {
             if (rest == null) {
                 try {

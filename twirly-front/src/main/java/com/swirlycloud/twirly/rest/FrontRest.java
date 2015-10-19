@@ -23,6 +23,7 @@ import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
+import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.rec.Rec;
 import com.swirlycloud.twirly.rec.RecType;
@@ -31,6 +32,8 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class FrontRest implements Rest {
 
     private final Model model;
+    @SuppressWarnings("unused")
+    private final Cache cache;
     private final Factory factory;
 
     private final MnemRbTree selectRec(RecType recType) throws InterruptedException {
@@ -101,8 +104,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
-    public FrontRest(Model model, Factory factory) {
+    public FrontRest(Model model, Cache cache, Factory factory) {
         this.model = model;
+        this.cache = cache;
         this.factory = factory;
     }
 
