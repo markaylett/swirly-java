@@ -5,7 +5,8 @@
 var TradeModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/front/sess?views=true', function(sess) {
+        $.getJSON('/front/sess?views=true', function(sess, status, xhr) {
+            this.resetTimeout(xhr);
             var contrMap = this.props.contrMap;
             var staging = this.staging;
             var marketMap = {};
@@ -116,7 +117,8 @@ var TradeModuleImpl = React.createClass({
             type: 'post',
             url: '/back/sess/order/' + market,
             data: JSON.stringify(req)
-        }).done(function(trans) {
+        }).done(function(trans, status, xhr) {
+            this.resetTimeout(xhr);
             this.applyTrans(trans);
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
@@ -143,7 +145,8 @@ var TradeModuleImpl = React.createClass({
             type: 'put',
             url: '/back/sess/order/' + market + '/' + ids,
             data: JSON.stringify(req)
-        }).done(function(trans) {
+        }).done(function(trans, status, xhr) {
+            this.resetTimeout(xhr);
             this.applyTrans(trans);
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
@@ -162,7 +165,8 @@ var TradeModuleImpl = React.createClass({
         $.ajax({
             type: 'delete',
             url: '/back/sess/order/' + market + '/' + ids
-        }).done(function(unused) {
+        }).done(function(unused, status, xhr) {
+            this.resetTimeout(xhr);
             var done = this.staging.done;
             var sess = this.state.sess;
             ids.forEach(function(id) {
@@ -194,7 +198,8 @@ var TradeModuleImpl = React.createClass({
         $.ajax({
             type: 'delete',
             url: '/back/sess/trade/' + market + '/' + ids
-        }).done(function(unused) {
+        }).done(function(unused, status, xhr) {
+            this.resetTimeout(xhr);
             var trades = this.staging.trades;
             var sess = this.state.sess;
             ids.forEach(function(id) {
@@ -435,6 +440,19 @@ var TradeModuleImpl = React.createClass({
             </div>
         );
     },
+    resetTimeout: function(xhr) {
+        var timeout = parseInt(xhr.getResponseHeader('Twirly-Timeout'));
+        clearTimeout(this.timeout);
+        if (timeout !== 0) {
+            var delta = timeout - Date.now();
+            this.timeout = setTimeout(function() {
+                console.debug('timeout');
+                $.getJSON('/back/task/poll', function(data, status, xhr) {
+                    this.resetTimeout(xhr);
+                }.bind(this));
+            }.bind(this), delta);
+        }
+    },
     staging: {
         errors: new Tail(5),
         views: new Map(),
@@ -445,13 +463,14 @@ var TradeModuleImpl = React.createClass({
         selectedWorking: new Map(),
         selectedDone: new Map(),
         selectedTrades: new Map()
-    }
+    },
+    timeout: undefined
 });
 
 var TradeModule = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/front/rec/contr', function(contrs) {
+        $.getJSON('/front/rec/contr', function(contrs, status, xhr) {
             var contrMap = {};
             contrs.forEach(function(contr) {
                 enrichContr(contr);
@@ -467,7 +486,7 @@ var TradeModule = React.createClass({
         }.bind(this));
         // App Engine work-around: this deliberate "ping" to the back-end ensures that it is alive
         // and ready to service trade requests.
-        $.getJSON('/back/rec/asset/USD', function(asset) { });
+        $.getJSON('/back/task/poll', function(data) { });
     },
     // DOM Events.
     // Lifecycle.

@@ -3,8 +3,14 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Future;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
+
+import com.swirlycloud.twirly.concurrent.FutureAdapter;
 
 public final @NonNullByDefault class CacheUtil {
 
@@ -17,8 +23,17 @@ public final @NonNullByDefault class CacheUtil {
         }
 
         @Override
-        public final @Nullable Object select(String key) {
-            return null;
+        public final Future<?> select(String key) {
+            return new FutureAdapter<>(null);
+        }
+
+        @Override
+        public final Future<Map<String, Object>> select(Collection<String> keys) {
+            final Map<String, Object> m = new HashMap<>();
+            for (final String key : keys) {
+                m.put(key, null);
+            }
+            return new FutureAdapter<>(m);
         }
 
         @Override

@@ -17,9 +17,9 @@ import com.swirlycloud.twirly.fx.EcbRates;
 import com.swirlycloud.twirly.rest.BackRest;
 
 @SuppressWarnings("serial")
-public final class BackCronServlet extends RestServlet {
+public final class BackTaskServlet extends RestServlet {
 
-    private static final int JOB_PART = 0;
+    private static final int TASK_PART = 0;
 
     @Override
     protected final void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -36,11 +36,11 @@ public final class BackCronServlet extends RestServlet {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
             final long now = now();
-
-            if ("endofday".equals(parts[JOB_PART])) {
+            long timeout;
+            if ("endofday".equals(parts[TASK_PART])) {
                 log("processing end-of-day");
-                rest.getEndOfDay(now);
-            } else if ("ecbrates".equals(parts[JOB_PART])) {
+                timeout = rest.endOfDay(now);
+            } else if ("ecbrates".equals(parts[TASK_PART])) {
                 log("processing ecb-rates");
                 final EcbRates ecbRates = new EcbRates();
                 try {
@@ -49,11 +49,13 @@ public final class BackCronServlet extends RestServlet {
                 } catch (final Throwable t) {
                     log("error: " + t.getMessage());
                 }
+                timeout = rest.poll(now);
+            } else if ("poll".equals(parts[TASK_PART])) {
+                timeout = rest.poll(now);
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            resp.setHeader("Cache-Control", "no-cache");
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            setNoContent(resp, timeout);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

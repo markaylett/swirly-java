@@ -38,8 +38,8 @@
   </servlet>
 
   <servlet>
-    <servlet-name>cron</servlet-name>
-    <servlet-class>com.swirlycloud.twirly.web.BackCronServlet</servlet-class>
+    <servlet-name>task</servlet-name>
+    <servlet-class>com.swirlycloud.twirly.web.BackTaskServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
@@ -58,8 +58,8 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>cron</servlet-name>
-    <url-pattern>/cron/*</url-pattern>
+    <servlet-name>task</servlet-name>
+    <url-pattern>/task/*</url-pattern>
   </servlet-mapping>
 
   <error-page>
@@ -94,8 +94,8 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>cron</web-resource-name>
-      <url-pattern>/cron/*</url-pattern>
+      <web-resource-name>task</web-resource-name>
+      <url-pattern>/task/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>

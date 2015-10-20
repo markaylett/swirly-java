@@ -53,12 +53,12 @@ public final class FixTest {
         @SuppressWarnings("resource")
         final Datastore datastore = new MockDatastore();
         final LockableServ serv = new LockableServ(datastore, NO_CACHE, new ServFactory(), NOW);
-        serv.acquireWrite();
+        final int lock = serv.writeLock();
         try {
             serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0,
                     NOW);
         } finally {
-            serv.releaseWrite();
+            serv.unlock(lock);
         }
 
         final LogFactory logFactory = new NullLogFactory();

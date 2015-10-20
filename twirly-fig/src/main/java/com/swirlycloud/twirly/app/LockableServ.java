@@ -33,19 +33,23 @@ public final @NonNullByDefault class LockableServ extends Serv {
         super(datastore, cache, factory, now);
     }
 
-    public final void acquireRead() {
+    public final int readLock() {
         sem.acquireUninterruptibly(1);
+        return 1;
     }
 
-    public final void releaseRead() {
-        sem.release(1);
-    }
-
-    public final void acquireWrite() {
+    public final int writeLock() {
         sem.acquireUninterruptibly(PERMITS);
+        return PERMITS;
+    }
+    
+    public final int demoteLock() {
+        final int permits = PERMITS - 1;
+        sem.release(permits);
+        return permits;
     }
 
-    public final void releaseWrite() {
-        sem.release(PERMITS);
+    public final void unlock(int permits) {
+        sem.release(permits);
     }
 }

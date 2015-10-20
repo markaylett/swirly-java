@@ -18,7 +18,6 @@ import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineModel;
 import com.swirlycloud.twirly.io.Cache;
-import com.swirlycloud.twirly.io.CacheModel;
 import com.swirlycloud.twirly.io.JdbcModel;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.io.SpyCache;
@@ -28,6 +27,7 @@ import com.swirlycloud.twirly.rest.Rest;
 public final class FrontLifeCycle implements ServletContextListener {
 
     private Model model;
+    private Cache cache;
 
     private static @NonNull Realm newAppEngineRealm(ServletContext sc) {
         return new AppEngineRealm();
@@ -69,15 +69,26 @@ public final class FrontLifeCycle implements ServletContextListener {
     }
 
     private final void close(final ServletContext sc) {
+        // We have to check for null here because contextDestroyed may be called even when
+        // contextInitialized fails.
         try {
-            // We have to check for null here because contextDestroyed may be called even when
-            // contextInitialized fails.
-            if (model != null) {
-                model.close();
-                model = null;
+            if (cache != null) {
+                try {
+                    cache.close();
+                    cache = null;
+                } catch (final Exception e) {
+                    sc.log("failed to close cache", e);
+                }
             }
-        } catch (final Exception e) {
-            sc.log("failed to close model", e);
+        } finally {
+            if (model != null) {
+                try {
+                    model.close();
+                    model = null;
+                } catch (final Exception e) {
+                    sc.log("failed to close model", e);
+                }
+            }
         }
     }
 
@@ -101,30 +112,31 @@ public final class FrontLifeCycle implements ServletContextListener {
             } else {
                 throw new RuntimeException("unsupported servlet container");
             }
-            model = new CacheModel(model, cache);
-            // Model now owns cache.
-            cache = null;
-            rest = new FrontRest(model, factory);
+            rest = new FrontRest(model, cache, factory);
         } finally {
             if (rest == null) {
-                if (cache != null) {
-                    try {
-                        cache.close();
-                    } catch (final Exception e) {
-                        sc.log("failed to close cache", e);
+                try {
+                    if (cache != null) {
+                        try {
+                            cache.close();
+                        } catch (final Exception e) {
+                            sc.log("failed to close cache", e);
+                        }
                     }
-                }
-                if (model != null) {
-                    try {
-                        model.close();
-                    } catch (final Exception e) {
-                        sc.log("failed to close model", e);
+                } finally {
+                    if (model != null) {
+                        try {
+                            model.close();
+                        } catch (final Exception e) {
+                            sc.log("failed to close model", e);
+                        }
                     }
                 }
             }
         }
         // Commit.
         this.model = model;
+        this.cache = cache;
         FrontPageServlet.setRealm(realm);
         FrontPageServlet.setRest(rest);
         RestServlet.setRealm(realm);

@@ -3,15 +3,16 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.ErrorHandlers;
 import com.google.appengine.api.memcache.Expiration;
-import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
@@ -21,17 +22,12 @@ public final @NonNullByDefault class AppEngineCache implements Cache {
     @SuppressWarnings("null")
     private static final Expiration EXPIRY = Expiration.byDeltaSeconds(24 * 60 * 60);
 
-    private final MemcacheService ms;
     private final AsyncMemcacheService ams;
 
     public AppEngineCache() {
-        final MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
-        assert ms != null;
-        ms.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
         final AsyncMemcacheService ams = MemcacheServiceFactory.getAsyncMemcacheService();
         assert ams != null;
         ams.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
-        this.ms = ms;
         this.ams = ams;
     }
 
@@ -40,8 +36,17 @@ public final @NonNullByDefault class AppEngineCache implements Cache {
     }
 
     @Override
-    public final @Nullable Object select(String key) {
-        return ms.get(key);
+    public final Future<?> select(String key) {
+        final Future<?> fut = ams.get(key);
+        assert fut != null;
+        return fut;
+    }
+
+    @Override
+    public final Future<Map<String, Object>> select(Collection<String> keys) {
+        final Future<Map<String, Object>> fut = ams.getAll(keys);
+        assert fut != null;
+        return fut;
     }
 
     @Override

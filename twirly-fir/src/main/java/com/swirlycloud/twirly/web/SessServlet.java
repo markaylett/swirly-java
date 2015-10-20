@@ -42,54 +42,43 @@ public class SessServlet extends RestServlet {
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
             final long now = now();
-
-            boolean match = false;
+            long timeout = -1;
             if (parts.length == 0) {
-                rest.getSess(trader, params, now, resp.getWriter());
-                match = true;
+                timeout = rest.getSess(trader, params, now, resp.getWriter());
             } else if ("order".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getOrder(trader, params, now, resp.getWriter());
-                    match = true;
+                    timeout = rest.getOrder(trader, params, now, resp.getWriter());
                 } else if (parts.length == 2) {
-                    rest.getOrder(trader, parts[MARKET_PART], params, now, resp.getWriter());
-                    match = true;
+                    timeout = rest.getOrder(trader, parts[MARKET_PART], params, now, resp.getWriter());
                 } else if (parts.length == 3) {
-                    rest.getOrder(trader, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
+                    timeout = rest.getOrder(trader, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
                             params, now, resp.getWriter());
-                    match = true;
                 }
             } else if ("trade".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getTrade(trader, params, now, resp.getWriter());
-                    match = true;
+                    timeout = rest.getTrade(trader, params, now, resp.getWriter());
                 } else if (parts.length == 2) {
-                    rest.getTrade(trader, parts[MARKET_PART], params, now, resp.getWriter());
-                    match = true;
+                    timeout = rest.getTrade(trader, parts[MARKET_PART], params, now, resp.getWriter());
                 } else if (parts.length == 3) {
-                    rest.getTrade(trader, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
+                    timeout = rest.getTrade(trader, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
                             params, now, resp.getWriter());
-                    match = true;
                 }
             } else if ("posn".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    rest.getPosn(trader, params, now, resp.getWriter());
-                    match = true;
+                    timeout = rest.getPosn(trader, params, now, resp.getWriter());
                 } else if (parts.length == 2) {
-                    rest.getPosn(trader, parts[CONTR_PART], params, now, resp.getWriter());
-                    match = true;
+                    timeout = rest.getPosn(trader, parts[CONTR_PART], params, now, resp.getWriter());
                 } else if (parts.length == 3) {
-                    rest.getPosn(trader, parts[CONTR_PART],
+                    timeout = rest.getPosn(trader, parts[CONTR_PART],
                             Integer.parseInt(parts[SETTL_DATE_PART]), params, now,
                             resp.getWriter());
-                    match = true;
                 }
             }
 
-            if (!match) {
+            if (timeout == -1) {
                 throw new NotFoundException("resource does not exist");
             }
-            sendJsonResponse(resp);
+            sendJsonResponse(resp, timeout);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

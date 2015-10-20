@@ -705,47 +705,6 @@ public @NonNullByDefault class Serv {
         return book;
     }
 
-    /**
-     * This method may partially fail.
-     * 
-     * @param now
-     *            The current time.
-     * @throws NotFoundException
-     * @throws ServiceUnavailableException
-     */
-    public final void expireEndOfDay(long now)
-            throws NotFoundException, ServiceUnavailableException {
-        final int busDay = getBusDate(now).toJd();
-        for (RbNode node = markets.getFirst(); node != null;) {
-            final MarketBook book = (MarketBook) node;
-            node = node.rbNext();
-            if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
-                doCancelOrders(book, now);
-            }
-        }
-        updateDirty();
-    }
-
-    public final void settlEndOfDay(long now) {
-        final int busDay = getBusDate(now).toJd();
-        for (RbNode node = markets.getFirst(); node != null;) {
-            final MarketBook book = (MarketBook) node;
-            node = node.rbNext();
-            if (book.isSettlDaySet() && book.getSettlDay() <= busDay) {
-                views.remove(book.getView());
-                markets.remove(book);
-                dirty |= (DIRTY_MARKET | DIRTY_VIEW);
-            }
-        }
-        for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
-            final TraderSess sess = (TraderSess) node;
-            if (sess.settlPosns(busDay) > 0) {
-                setDirty(sess, TraderSess.DIRTY_POSN);
-            }
-        }
-        updateDirty();
-    }
-
     public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
             long ticks, long lots, long minLots, long now, Trans trans)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
@@ -1381,5 +1340,50 @@ public @NonNullByDefault class Serv {
         } while (node != null);
 
         updateDirty();
+    }
+
+    /**
+     * This method may partially fail.
+     * 
+     * @param now
+     *            The current time.
+     * @throws NotFoundException
+     * @throws ServiceUnavailableException
+     */
+    public final void expireEndOfDay(long now)
+            throws NotFoundException, ServiceUnavailableException {
+        final int busDay = getBusDate(now).toJd();
+        for (RbNode node = markets.getFirst(); node != null;) {
+            final MarketBook book = (MarketBook) node;
+            node = node.rbNext();
+            if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
+                doCancelOrders(book, now);
+            }
+        }
+        updateDirty();
+    }
+
+    public final void settlEndOfDay(long now) {
+        final int busDay = getBusDate(now).toJd();
+        for (RbNode node = markets.getFirst(); node != null;) {
+            final MarketBook book = (MarketBook) node;
+            node = node.rbNext();
+            if (book.isSettlDaySet() && book.getSettlDay() <= busDay) {
+                views.remove(book.getView());
+                markets.remove(book);
+                dirty |= (DIRTY_MARKET | DIRTY_VIEW);
+            }
+        }
+        for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
+            final TraderSess sess = (TraderSess) node;
+            if (sess.settlPosns(busDay) > 0) {
+                setDirty(sess, TraderSess.DIRTY_POSN);
+            }
+        }
+        updateDirty();
+    }
+
+    public final long poll(long now) {
+        return 0;
     }
 }

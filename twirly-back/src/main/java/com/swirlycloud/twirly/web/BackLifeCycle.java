@@ -73,24 +73,28 @@ public final class BackLifeCycle implements ServletContextListener {
     private final void close(final ServletContext sc) {
         // We have to check for null here because contextDestroyed may be called even when
         // contextInitialized fails.
-        if (cache != null) {
-            try {
-                cache.close();
-                cache = null;
-            } catch (final Exception e) {
-                sc.log("failed to close cache", e);
+        try {
+            if (cache != null) {
+                try {
+                    cache.close();
+                    cache = null;
+                } catch (final Exception e) {
+                    sc.log("failed to close cache", e);
+                }
             }
-        }
-        if (datastore != null) {
-            try {
-                datastore.close();
-                datastore = null;
-            } catch (final Exception e) {
-                sc.log("failed to close datastore", e);
+        } finally {
+            if (datastore != null) {
+                try {
+                    datastore.close();
+                    datastore = null;
+                } catch (final Exception e) {
+                    sc.log("failed to close datastore", e);
+                }
             }
         }
     }
 
+    @SuppressWarnings("resource")
     private final void open(ServletContext sc, @NonNull Factory factory)
             throws InterruptedException {
 
@@ -114,18 +118,21 @@ public final class BackLifeCycle implements ServletContextListener {
             rest = new BackRest(datastore, cache, factory, now());
         } finally {
             if (rest == null) {
-                if (cache != null) {
-                    try {
-                        cache.close();
-                    } catch (final Exception e) {
-                        sc.log("failed to close cache", e);
+                try {
+                    if (cache != null) {
+                        try {
+                            cache.close();
+                        } catch (final Exception e) {
+                            sc.log("failed to close cache", e);
+                        }
                     }
-                }
-                if (datastore != null) {
-                    try {
-                        datastore.close();
-                    } catch (final Exception e) {
-                        sc.log("failed to close datastore", e);
+                } finally {
+                    if (datastore != null) {
+                        try {
+                            datastore.close();
+                        } catch (final Exception e) {
+                            sc.log("failed to close datastore", e);
+                        }
                     }
                 }
             }
