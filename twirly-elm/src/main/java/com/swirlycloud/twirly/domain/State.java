@@ -22,7 +22,11 @@ public @NonNullByDefault enum State {
     /**
      * State of an order that has been partially or fully filled.
      */
-    TRADE(4);
+    TRADE(4),
+    /**
+     * State of a resting order that is pending cancel.
+     */
+    PECAN(5);
     private final int id;
 
     private State(int id) {
@@ -53,6 +57,9 @@ public @NonNullByDefault enum State {
             break;
         case 4:
             val = State.TRADE;
+            break;
+        case 5:
+            val = State.PECAN;
             break;
         default:
             throw new IllegalArgumentException("invalid state");
