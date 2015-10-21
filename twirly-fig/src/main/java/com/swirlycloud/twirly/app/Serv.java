@@ -326,7 +326,7 @@ public @NonNullByDefault class Serv {
         }
 
         try {
-            journ.insertExecList(book.getMnem(), firstExec);
+            journ.createExecList(book.getMnem(), firstExec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -403,25 +403,25 @@ public @NonNullByDefault class Serv {
         this.factory = factory;
         this.dirty = DIRTY_ALL;
 
-        MnemRbTree t = model.selectAsset(factory);
+        MnemRbTree t = model.readAsset(factory);
         assert t != null;
         this.assets = t;
 
-        t = model.selectContr(factory);
+        t = model.readContr(factory);
         assert t != null;
         this.contrs = t;
         enrichContrs();
 
-        t = model.selectMarket(factory);
+        t = model.readMarket(factory);
         assert t != null;
         this.markets = t;
         enrichMarkets();
 
-        t = model.selectTrader(factory);
+        t = model.readTrader(factory);
         assert t != null;
         this.traders = t;
 
-        final SlNode firstOrder = model.selectOrder(factory);
+        final SlNode firstOrder = model.readOrder(factory);
         for (SlNode node = firstOrder; node != null;) {
             final Order order = (Order) node;
             node = popNext(node);
@@ -430,7 +430,7 @@ public @NonNullByDefault class Serv {
             insertOrder(order);
         }
 
-        final SlNode firstTrade = model.selectTrade(factory);
+        final SlNode firstTrade = model.readTrade(factory);
         for (SlNode node = firstTrade; node != null;) {
             final Exec trade = (Exec) node;
             node = popNext(node);
@@ -440,7 +440,7 @@ public @NonNullByDefault class Serv {
             sess.insertTrade(trade);
         }
 
-        final SlNode firstPosn = model.selectPosn(getBusDate(now).toJd(), factory);
+        final SlNode firstPosn = model.readPosn(getBusDate(now).toJd(), factory);
         for (SlNode node = firstPosn; node != null;) {
             final Posn posn = (Posn) node;
             node = popNext(node);
@@ -475,7 +475,7 @@ public @NonNullByDefault class Serv {
         final TraderSess sess = newTrader(mnem, display, email);
 
         try {
-            journ.insertTrader(mnem, display, email);
+            journ.createTrader(mnem, display, email);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -655,7 +655,7 @@ public @NonNullByDefault class Serv {
         book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
 
         try {
-            journ.insertMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
+            journ.createMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -735,7 +735,7 @@ public @NonNullByDefault class Serv {
         try {
             final JslNode firstExec = trans.prepareExecList();
             assert firstExec != null;
-            journ.insertExecList(book.getMnem(), firstExec);
+            journ.createExecList(book.getMnem(), firstExec);
             success = true;
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
@@ -774,7 +774,7 @@ public @NonNullByDefault class Serv {
         exec.revise(lots);
         trans.reset(sess.getMnem(), book, order, exec);
         try {
-            journ.insertExec(exec);
+            journ.createExec(exec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -850,7 +850,7 @@ public @NonNullByDefault class Serv {
         try {
             final JslNode firstExec = trans.prepareExecList();
             assert firstExec != null;
-            journ.insertExecList(book.getMnem(), firstExec);
+            journ.createExecList(book.getMnem(), firstExec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -887,7 +887,7 @@ public @NonNullByDefault class Serv {
         exec.cancel();
         trans.reset(sess.getMnem(), book, order, exec);
         try {
-            journ.insertExec(exec);
+            journ.createExec(exec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -953,7 +953,7 @@ public @NonNullByDefault class Serv {
         try {
             final JslNode firstExec = trans.prepareExecList();
             assert firstExec != null;
-            journ.insertExecList(book.getMnem(), firstExec);
+            journ.createExecList(book.getMnem(), firstExec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -1015,7 +1015,7 @@ public @NonNullByDefault class Serv {
         }
 
         try {
-            journ.insertExecList(firstExec);
+            journ.createExecList(firstExec);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -1192,7 +1192,7 @@ public @NonNullByDefault class Serv {
             trade.setSlNext(cptyTrade);
 
             try {
-                journ.insertExecList(book.getMnem(), trade);
+                journ.createExecList(book.getMnem(), trade);
             } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }
@@ -1210,7 +1210,7 @@ public @NonNullByDefault class Serv {
         } else {
 
             try {
-                journ.insertExec(trade);
+                journ.createExec(trade);
             } catch (final RejectedExecutionException e) {
                 throw new ServiceUnavailableException("journal is busy", e);
             }

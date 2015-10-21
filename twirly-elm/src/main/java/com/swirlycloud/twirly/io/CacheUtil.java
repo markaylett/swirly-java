@@ -23,12 +23,12 @@ public final @NonNullByDefault class CacheUtil {
         }
 
         @Override
-        public final Future<?> select(String key) {
+        public final Future<?> read(String key) {
             return new FutureAdapter<>(null);
         }
 
         @Override
-        public final Future<Map<String, Object>> select(Collection<String> keys) {
+        public final Future<Map<String, Object>> read(Collection<String> keys) {
             final Map<String, Object> m = new HashMap<>();
             for (final String key : keys) {
                 m.put(key, null);
@@ -37,7 +37,7 @@ public final @NonNullByDefault class CacheUtil {
         }
 
         @Override
-        public final void insert(String key, Object val) {
+        public final void create(String key, Object val) {
         }
 
         @Override

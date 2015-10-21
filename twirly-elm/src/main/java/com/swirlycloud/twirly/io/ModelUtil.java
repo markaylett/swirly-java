@@ -20,11 +20,11 @@ public final @NonNullByDefault class ModelUtil {
     private ModelUtil() {
     }
 
-    public static MnemRbTree selectView(Model model, Factory factory) throws InterruptedException {
+    public static MnemRbTree readView(Model model, Factory factory) throws InterruptedException {
 
         final MnemRbTree views = new MnemRbTree();
 
-        final MnemRbTree markets = model.selectMarket(new BookFactory());
+        final MnemRbTree markets = model.readMarket(new BookFactory());
         assert markets != null;
 
         for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
@@ -32,7 +32,7 @@ public final @NonNullByDefault class ModelUtil {
             views.insert(book.getView());
         }
 
-        final SlNode firstOrder = model.selectOrder(factory);
+        final SlNode firstOrder = model.readOrder(factory);
         for (SlNode node = firstOrder; node != null;) {
             final Order order = (Order) node;
             node = popNext(node);

@@ -36,21 +36,21 @@ public final @NonNullByDefault class AppEngineCache implements Cache {
     }
 
     @Override
-    public final Future<?> select(String key) {
+    public final Future<?> read(String key) {
         final Future<?> fut = ams.get(key);
         assert fut != null;
         return fut;
     }
 
     @Override
-    public final Future<Map<String, Object>> select(Collection<String> keys) {
+    public final Future<Map<String, Object>> read(Collection<String> keys) {
         final Future<Map<String, Object>> fut = ams.getAll(keys);
         assert fut != null;
         return fut;
     }
 
     @Override
-    public final void insert(String key, Object val) {
+    public final void create(String key, Object val) {
         ams.put(key, val, EXPIRY, SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
     }
 

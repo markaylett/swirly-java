@@ -15,44 +15,42 @@ import com.swirlycloud.twirly.node.SlNode;
 public interface Model extends AutoCloseable {
 
     @NonNull
-    MnemRbTree selectAsset(@NonNull Factory factory) throws InterruptedException;
+    MnemRbTree readAsset(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    MnemRbTree selectContr(@NonNull Factory factory) throws InterruptedException;
+    MnemRbTree readContr(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    MnemRbTree selectMarket(@NonNull Factory factory) throws InterruptedException;
+    MnemRbTree readMarket(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    MnemRbTree selectTrader(@NonNull Factory factory) throws InterruptedException;
+    MnemRbTree readTrader(@NonNull Factory factory) throws InterruptedException;
 
     @Nullable
-    String selectTraderByEmail(@NonNull String email, @NonNull Factory factory)
+    String readTraderByEmail(@NonNull String email, @NonNull Factory factory)
             throws InterruptedException;
 
     @NonNull
-    MnemRbTree selectView(@NonNull Factory factory) throws InterruptedException;
+    MnemRbTree readView(@NonNull Factory factory) throws InterruptedException;
 
     @Nullable
-    SlNode selectOrder(@NonNull Factory factory) throws InterruptedException;
+    SlNode readOrder(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    InstructTree selectOrder(@NonNull String trader, @NonNull Factory factory)
+    InstructTree readOrder(@NonNull String trader, @NonNull Factory factory)
             throws InterruptedException;
 
     @Nullable
-    SlNode selectTrade(@NonNull Factory factory) throws InterruptedException;
+    SlNode readTrade(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    InstructTree selectTrade(@NonNull String trader, @NonNull Factory factory)
+    InstructTree readTrade(@NonNull String trader, @NonNull Factory factory)
             throws InterruptedException;
 
     @Nullable
-    SlNode selectPosn(int busDay, @NonNull Factory factory) throws InterruptedException;
+    SlNode readPosn(int busDay, @NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    TraderPosnTree selectPosn(@NonNull String trader, int busDay, @NonNull Factory factory)
+    TraderPosnTree readPosn(@NonNull String trader, int busDay, @NonNull Factory factory)
             throws InterruptedException;
-
-    long selectTimeout() throws InterruptedException;
 }

@@ -20,72 +20,67 @@ public class MockModel implements Model {
     }
 
     @Override
-    public @NonNull MnemRbTree selectAsset(@NonNull final Factory factory) {
-        return MockAsset.selectAsset(factory);
+    public @NonNull MnemRbTree readAsset(@NonNull final Factory factory) {
+        return MockAsset.readAsset(factory);
     }
 
     @Override
-    public @NonNull MnemRbTree selectContr(@NonNull final Factory factory) {
-        return MockContr.selectContr(factory);
+    public @NonNull MnemRbTree readContr(@NonNull final Factory factory) {
+        return MockContr.readContr(factory);
     }
 
     @Override
-    public @NonNull MnemRbTree selectMarket(@NonNull final Factory factory) {
+    public @NonNull MnemRbTree readMarket(@NonNull final Factory factory) {
         return new MnemRbTree();
     }
 
     @Override
-    public @NonNull MnemRbTree selectTrader(@NonNull final Factory factory) {
-        return MockTrader.selectTrader(factory);
+    public @NonNull MnemRbTree readTrader(@NonNull final Factory factory) {
+        return MockTrader.readTrader(factory);
     }
 
     @Override
-    public @Nullable String selectTraderByEmail(@NonNull String email,
+    public @Nullable String readTraderByEmail(@NonNull String email,
             @NonNull final Factory factory) {
-        return MockTrader.selectTraderByEmail(email, factory);
+        return MockTrader.readTraderByEmail(email, factory);
     }
 
     @Override
-    public final @NonNull MnemRbTree selectView(@NonNull Factory factory)
+    public final @NonNull MnemRbTree readView(@NonNull Factory factory)
             throws InterruptedException {
         return new MnemRbTree();
     }
 
     @Override
-    public SlNode selectOrder(@NonNull final Factory factory) {
+    public SlNode readOrder(@NonNull final Factory factory) {
         return null;
     }
 
     @Override
-    public @NonNull InstructTree selectOrder(@NonNull String trader,
+    public @NonNull InstructTree readOrder(@NonNull String trader,
             @NonNull final Factory factory) {
         return new InstructTree();
     }
 
     @Override
-    public SlNode selectTrade(@NonNull final Factory factory) {
+    public SlNode readTrade(@NonNull final Factory factory) {
         return null;
     }
 
     @Override
-    public @NonNull InstructTree selectTrade(@NonNull String trader,
+    public @NonNull InstructTree readTrade(@NonNull String trader,
             @NonNull final Factory factory) {
         return new InstructTree();
     }
 
     @Override
-    public SlNode selectPosn(int busDay, @NonNull final Factory factory) {
+    public SlNode readPosn(int busDay, @NonNull final Factory factory) {
         return null;
     }
 
     @Override
-    public @NonNull TraderPosnTree selectPosn(@NonNull String trader, int busDay,
+    public @NonNull TraderPosnTree readPosn(@NonNull String trader, int busDay,
             @NonNull final Factory factory) {
         return new TraderPosnTree();
-    }
-
-    @Override
-    public final long selectTimeout() {
-        return 0;
     }
 }

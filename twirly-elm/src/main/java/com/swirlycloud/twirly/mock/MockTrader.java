@@ -53,7 +53,7 @@ public final class MockTrader {
         return MAP.get(mnem).call(factory);
     }
 
-    public static @NonNull MnemRbTree selectTrader(Factory factory) {
+    public static @NonNull MnemRbTree readTrader(Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         for (final UnaryFunction<Trader, Factory> entry : LIST) {
             final Trader trader = entry.call(factory);
@@ -63,11 +63,11 @@ public final class MockTrader {
         return t;
     }
 
-    public static @Nullable String selectTraderByEmail(String email, Factory factory) {
+    public static @Nullable String readTraderByEmail(String email, Factory factory) {
         return EMAIL_IDX.get(email);
     }
 
-    public static void selectTrader(Factory factory, UnaryCallback<Trader> cb) {
+    public static void readTrader(Factory factory, UnaryCallback<Trader> cb) {
         for (final UnaryFunction<Trader, Factory> entry : LIST) {
             cb.call(entry.call(factory));
         }

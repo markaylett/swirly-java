@@ -73,7 +73,7 @@ public final class MockAsset {
         return MAP.get(mnem).call(factory);
     }
 
-    public static @NonNull MnemRbTree selectAsset(Factory factory) {
+    public static @NonNull MnemRbTree readAsset(Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         for (final UnaryFunction<Asset, Factory> entry : LIST) {
             final Asset asset = entry.call(factory);
@@ -83,7 +83,7 @@ public final class MockAsset {
         return t;
     }
 
-    public static void selectAsset(Factory factory, UnaryCallback<Asset> cb) {
+    public static void readAsset(Factory factory, UnaryCallback<Asset> cb) {
         for (final UnaryFunction<Asset, Factory> entry : LIST) {
             cb.call(entry.call(factory));
         }

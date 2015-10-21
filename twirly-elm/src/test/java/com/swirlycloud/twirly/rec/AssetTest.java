@@ -28,7 +28,7 @@ public final class AssetTest extends SerializableTest {
 
     @Test
     public final void testSerializable() throws ClassNotFoundException, IOException {
-        final MnemRbTree t = MockAsset.selectAsset(FACTORY);
+        final MnemRbTree t = MockAsset.readAsset(FACTORY);
         final MnemRbTree u = writeAndRead(t);
 
         assertEquals(toJsonString(t.getFirst()), toJsonString(u.getFirst()));

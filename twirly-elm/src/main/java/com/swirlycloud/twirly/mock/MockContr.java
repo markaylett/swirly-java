@@ -74,7 +74,7 @@ public final class MockContr {
         return MAP.get(mnem).call(factory);
     }
 
-    public static @NonNull MnemRbTree selectContr(Factory factory) {
+    public static @NonNull MnemRbTree readContr(Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         for (final UnaryFunction<Contr, Factory> entry : LIST) {
             final Contr contr = entry.call(factory);
@@ -84,7 +84,7 @@ public final class MockContr {
         return t;
     }
 
-    public static void selectContr(Factory factory, UnaryCallback<Contr> cb) {
+    public static void readContr(Factory factory, UnaryCallback<Contr> cb) {
         for (final UnaryFunction<Contr, Factory> entry : LIST) {
             cb.call(entry.call(factory));
         }

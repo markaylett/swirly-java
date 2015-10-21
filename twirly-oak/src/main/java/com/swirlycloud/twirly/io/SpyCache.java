@@ -32,21 +32,21 @@ public final @NonNullByDefault class SpyCache implements Cache {
     }
 
     @Override
-    public final Future<?> select(String key) {
+    public final Future<?> read(String key) {
         final Future<?> fut = mc.asyncGet(key);
         assert fut != null;
         return fut;
     }
 
     @Override
-    public final Future<Map<String, Object>> select(Collection<String> keys) {
+    public final Future<Map<String, Object>> read(Collection<String> keys) {
         final BulkFuture<Map<String, Object>> fut = mc.asyncGetBulk(keys);
         assert fut != null;
         return fut;        
     }
 
     @Override
-    public final void insert(String key, Object val) {
+    public final void create(String key, Object val) {
         mc.add(key, EXPIRY, val);
     }
 

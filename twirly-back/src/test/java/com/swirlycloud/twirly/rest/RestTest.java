@@ -71,7 +71,7 @@ public abstract class RestTest {
     }
 
     protected static void assertAssets(final Map<String, ? super Asset> assets) {
-        MockAsset.selectAsset(FACTORY, new UnaryCallback<Asset>() {
+        MockAsset.readAsset(FACTORY, new UnaryCallback<Asset>() {
             @Override
             public final void call(Asset arg) {
                 assertAsset(arg, (Asset) assets.get(arg.getMnem()));
@@ -98,7 +98,7 @@ public abstract class RestTest {
     }
 
     protected static void assertContrs(final Map<String, ? super Contr> contrs) {
-        MockContr.selectContr(FACTORY, new UnaryCallback<Contr>() {
+        MockContr.readContr(FACTORY, new UnaryCallback<Contr>() {
             @Override
             public final void call(Contr arg) {
                 assertEquals(arg, contrs.get(arg.getMnem()));
@@ -130,7 +130,7 @@ public abstract class RestTest {
     }
 
     protected static void assertTraders(final Map<String, ? super Trader> traders) {
-        MockTrader.selectTrader(FACTORY, new UnaryCallback<Trader>() {
+        MockTrader.readTrader(FACTORY, new UnaryCallback<Trader>() {
             @Override
             public final void call(Trader arg) {
                 assertEquals(arg, traders.get(arg.getMnem()));

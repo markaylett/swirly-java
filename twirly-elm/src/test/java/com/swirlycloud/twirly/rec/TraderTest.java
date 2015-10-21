@@ -28,7 +28,7 @@ public final class TraderTest extends SerializableTest {
 
     @Test
     public final void testSerializable() throws ClassNotFoundException, IOException {
-        final MnemRbTree t = MockTrader.selectTrader(FACTORY);
+        final MnemRbTree t = MockTrader.readTrader(FACTORY);
         final MnemRbTree u = writeAndRead(t);
 
         assertEquals(toJsonString(t.getFirst()), toJsonString(u.getFirst()));
