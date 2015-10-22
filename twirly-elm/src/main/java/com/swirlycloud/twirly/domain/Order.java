@@ -79,6 +79,7 @@ public final @NonNullByDefault class Order extends BasicRbNode
      * Minimum to be filled by this
      */
     private final long minLots;
+    transient long quot;
     private boolean pecan;
     long created;
     long modified;
@@ -400,9 +401,13 @@ public final @NonNullByDefault class Order extends BasicRbNode
     }
 
     final void cancel(long now) {
-        state = State.CANCEL;
-        // Note that executed lots is not affected.
-        resd = 0;
+        if (quot == 0) {
+            state = State.CANCEL;
+            // Note that executed lots is not affected.
+            resd = 0;
+        } else {
+            state = State.PECAN;
+        }
         modified = now;
     }
 
@@ -514,6 +519,10 @@ public final @NonNullByDefault class Order extends BasicRbNode
     @Override
     public final long getMinLots() {
         return minLots;
+    }
+
+    public final long getQuot() {
+        return quot;
     }
 
     @Override
