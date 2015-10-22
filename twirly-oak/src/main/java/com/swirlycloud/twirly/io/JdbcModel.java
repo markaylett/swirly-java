@@ -146,13 +146,14 @@ public class JdbcModel implements Model {
         final long lastTicks = rs.getLong("lastTicks");
         final long lastLots = rs.getLong("lastLots");
         final long minLots = rs.getLong("minLots");
+        final boolean pecan = rs.getBoolean("pecan");
         final long created = rs.getLong("created");
         final long modified = rs.getLong("modified");
         assert trader != null;
         assert market != null;
         assert contr != null;
         return factory.newOrder(id, trader, market, contr, settlDay, ref, state, side, ticks, lots,
-                resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
+                resd, exec, cost, lastTicks, lastLots, minLots, pecan, created, modified);
     }
 
     private static @NonNull Exec getTrade(@NonNull ResultSet rs, @NonNull Factory factory)
@@ -326,9 +327,9 @@ public class JdbcModel implements Model {
                 selectTraderByEmailStmt = conn
                         .prepareStatement("SELECT mnem FROM Trader_t WHERE email = ?");
                 selectOrderStmt = conn.prepareStatement(
-                        "SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
+                        "SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, pecan, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
                 selectOrderByTraderStmt = conn.prepareStatement(
-                        "SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
+                        "SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, pecan, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
                 selectTradeStmt = conn.prepareStatement(
                         "SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
                 selectTradeByTraderStmt = conn.prepareStatement(

@@ -50,33 +50,33 @@ public @NonNullByDefault class BasicFactory implements Factory {
     @Override
     public Order newOrder(long id, String trader, String market, String contr, int settlDay,
             @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
-            long exec, long cost, long lastTicks, long lastLots, long minLots, long created,
-            long modified) {
+            long exec, long cost, long lastTicks, long lastLots, long minLots, boolean pecan,
+            long created, long modified) {
         return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks, lots, resd,
-                exec, cost, lastTicks, lastLots, minLots, created, modified);
+                exec, cost, lastTicks, lastLots, minLots, pecan, created, modified);
     }
 
     @Override
     public final Order newOrder(long id, String trader, Financial fin, @Nullable String ref,
             State state, Side side, long ticks, long lots, long resd, long exec, long cost,
-            long lastTicks, long lastLots, long minLots, long created, long modified) {
+            long lastTicks, long lastLots, long minLots, boolean pecan, long created, long modified) {
         return newOrder(id, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), ref, state,
-                side, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, created,
-                modified);
+                side, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, pecan,
+                created, modified);
     }
 
     @Override
     public final Order newOrder(long id, String trader, String market, String contr, int settlDay,
             @Nullable String ref, Side side, long ticks, long lots, long minLots, long created) {
         return newOrder(id, trader, market, contr, settlDay, ref, State.NEW, side, ticks, lots,
-                lots, 0, 0, 0, 0, minLots, created, created);
+                lots, 0, 0, 0, 0, minLots, false, created, created);
     }
 
     @Override
     public final Order newOrder(long id, String trader, Financial fin, @Nullable String ref,
             Side side, long ticks, long lots, long minLots, long created) {
         return newOrder(id, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), ref,
-                State.NEW, side, ticks, lots, lots, 0, 0, 0, 0, minLots, created, created);
+                State.NEW, side, ticks, lots, lots, 0, 0, 0, 0, minLots, false, created, created);
     }
 
     @Override

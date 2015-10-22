@@ -92,6 +92,7 @@ public class AppEngineModel implements Model {
                     final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
                     final long minLots = (Long) entity.getProperty("minLots");
+                    final boolean pecan = (Boolean) entity.getProperty("pecan");
                     final long created = (Long) entity.getProperty("created");
                     final long modified = (Long) entity.getProperty("modified");
 
@@ -100,7 +101,7 @@ public class AppEngineModel implements Model {
                     assert contr != null;
                     final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
                             state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
-                            minLots, created, modified);
+                            minLots, pecan, created, modified);
                     c.add(order);
                 }
             }

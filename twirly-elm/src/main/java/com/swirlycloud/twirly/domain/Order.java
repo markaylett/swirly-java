@@ -79,12 +79,14 @@ public final @NonNullByDefault class Order extends BasicRbNode
      * Minimum to be filled by this
      */
     private final long minLots;
+    private boolean pecan;
     long created;
     long modified;
 
     Order(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
             State state, Side side, long ticks, long lots, long resd, long exec, long cost,
-            long lastTicks, long lastLots, long minLots, long created, long modified) {
+            long lastTicks, long lastLots, long minLots, boolean pecan, long created,
+            long modified) {
         assert lots > 0 && lots >= minLots;
         this.id = id;
         this.trader = trader;
@@ -102,6 +104,7 @@ public final @NonNullByDefault class Order extends BasicRbNode
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.minLots = minLots;
+        this.pecan = pecan;
         this.created = created;
         this.modified = modified;
     }
@@ -123,6 +126,7 @@ public final @NonNullByDefault class Order extends BasicRbNode
         long lastTicks = 0;
         long lastLots = 0;
         long minLots = 0;
+        boolean pecan = false;
         long created = 0;
         long modified = 0;
 
@@ -147,9 +151,14 @@ public final @NonNullByDefault class Order extends BasicRbNode
                     throw new IOException("side is null");
                 }
                 return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks, lots,
-                        resd, exec, cost, lastTicks, lastLots, minLots, created, modified);
+                        resd, exec, cost, lastTicks, lastLots, minLots, pecan, created, modified);
             case KEY_NAME:
                 name = p.getString();
+                break;
+            case VALUE_FALSE:
+                if ("pecan".equals(name)) {
+                    pecan = false;
+                }
                 break;
             case VALUE_NULL:
                 if ("settlDate".equals(name)) {
@@ -212,6 +221,11 @@ public final @NonNullByDefault class Order extends BasicRbNode
                     side = Side.valueOf(s);
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
+                }
+                break;
+            case VALUE_TRUE:
+                if ("pecan".equals(name)) {
+                    pecan = true;
                 }
                 break;
             default:
@@ -288,6 +302,7 @@ public final @NonNullByDefault class Order extends BasicRbNode
             out.append(",\"lastTicks\":null,\"lastLots\":null");
         }
         out.append(",\"minLots\":").append(String.valueOf(minLots));
+        out.append(",\"pecan\":").append(String.valueOf(pecan));
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"modified\":").append(String.valueOf(modified));
         out.append("}");
@@ -504,6 +519,10 @@ public final @NonNullByDefault class Order extends BasicRbNode
     @Override
     public final boolean isDone() {
         return resd == 0;
+    }
+
+    public final boolean isPecan() {
+        return pecan;
     }
 
     public final long getCreated() {

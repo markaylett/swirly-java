@@ -94,6 +94,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         }
         entity.setUnindexedProperty("minLots", exec.getMinLots());
         entity.setProperty("archive", Boolean.FALSE);
+        entity.setProperty("pecan", exec.getState() == State.PECAN);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
         updateMaxOrderId(market, exec.getOrderId());
@@ -149,6 +150,9 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         if (exec.getLastLots() > 0) {
             order.setUnindexedProperty("lastTicks", exec.getLastTicks());
             order.setUnindexedProperty("lastLots", exec.getLastLots());
+        }
+        if (exec.getState() == State.PECAN) {
+            order.setProperty("pecan", true);
         }
         order.setUnindexedProperty("modified", exec.getCreated());
         return order;
