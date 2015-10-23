@@ -201,8 +201,8 @@ public @NonNullByDefault class MarketBook extends Market {
         getSide(order.getSide()).removeOrder(order);
     }
 
-    public final void placeOrder(Order order, long now) {
-        getSide(order.getSide()).placeOrder(order, now);
+    public final void createOrder(Order order, long now) {
+        getSide(order.getSide()).createOrder(order, now);
     }
 
     public final void reviseOrder(Order order, long lots, long now) {

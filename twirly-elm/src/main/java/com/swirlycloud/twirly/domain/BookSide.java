@@ -123,8 +123,8 @@ public final class BookSide {
         order.level = null;
     }
 
-    public final void placeOrder(Order order, long now) {
-        order.place(now);
+    public final void createOrder(Order order, long now) {
+        order.create(now);
         insertOrder(order);
     }
 

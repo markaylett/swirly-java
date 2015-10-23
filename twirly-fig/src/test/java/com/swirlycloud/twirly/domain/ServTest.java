@@ -276,7 +276,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
+            serv.createOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             assertEquals(sess.getMnem(), order.getTrader());
@@ -307,7 +307,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
+            serv.createOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             serv.reviseOrder(sess, book, order, 4, NOW + 1, result);
@@ -339,7 +339,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.placeOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
+            serv.createOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             serv.cancelOrder(sess, book, order, NOW + 1, result);

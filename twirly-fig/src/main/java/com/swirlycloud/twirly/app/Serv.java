@@ -705,7 +705,7 @@ public @NonNullByDefault class Serv {
         return book;
     }
 
-    public final void placeOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
+    public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
             long ticks, long lots, long minLots, long now, Result result)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
@@ -902,8 +902,9 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void cancelOrder(TraderSess sess, MarketBook book, long id, long now, Result result)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+    public final void cancelOrder(TraderSess sess, MarketBook book, long id, long now,
+            Result result)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(book.getMnem(), id);
         if (order == null) {
             throw new OrderNotFoundException(String.format("order '%d' does not exist", id));

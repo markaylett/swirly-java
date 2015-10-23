@@ -57,8 +57,8 @@ public final class BookSideTest {
 
         // Place orders.
         ++now;
-        side.placeOrder(apple, now);
-        side.placeOrder(orange, now);
+        side.createOrder(apple, now);
+        side.createOrder(orange, now);
 
         assertEquals(State.NEW, apple.getState());
         assertEquals(10, apple.getResd());
@@ -149,9 +149,9 @@ public final class BookSideTest {
                 JulianDay.isoToJd(20140314), "pear", Side.BUY, 12346, 25, 0, now);
         final BookSide side = new BookSide();
 
-        side.placeOrder(apple, now);
-        side.placeOrder(orange, now);
-        side.placeOrder(pear, now);
+        side.createOrder(apple, now);
+        side.createOrder(orange, now);
+        side.createOrder(pear, now);
 
         assertEquals(2, size(side.getFirstLevel()));
         assertEquals(3, size(side.getFirstOrder()));

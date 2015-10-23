@@ -482,7 +482,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             final long timeout = serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, result);
+            serv.createOrder(sess, book, ref, side, ticks, lots, minLots, now, result);
             result.toJson(params, out);
             return timeout;
         } finally {

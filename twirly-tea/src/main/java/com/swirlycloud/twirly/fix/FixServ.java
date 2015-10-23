@@ -238,7 +238,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
             }
             final MarketBook book = serv.getMarket(market);
             try (final Result result = new Result()) {
-                serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, result);
+                serv.createOrder(sess, book, ref, side, ticks, lots, minLots, now, result);
                 log.info(sessionId + ": " + result);
                 sendResultLocked(sess, null, result, sessionId);
             }
