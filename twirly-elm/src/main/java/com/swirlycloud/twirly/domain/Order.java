@@ -534,6 +534,7 @@ public final @NonNullByDefault class Order extends BasicRbNode
         return pecan;
     }
 
+    @Override
     public final long getCreated() {
         return created;
     }

@@ -59,10 +59,11 @@ public @NonNullByDefault class BasicFactory implements Factory {
     @Override
     public final Order newOrder(long id, String trader, Financial fin, @Nullable String ref,
             State state, Side side, long ticks, long lots, long resd, long exec, long cost,
-            long lastTicks, long lastLots, long minLots, boolean pecan, long created, long modified) {
+            long lastTicks, long lastLots, long minLots, boolean pecan, long created,
+            long modified) {
         return newOrder(id, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), ref, state,
-                side, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, pecan,
-                created, modified);
+                side, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, pecan, created,
+                modified);
     }
 
     @Override
@@ -116,5 +117,21 @@ public @NonNullByDefault class BasicFactory implements Factory {
     @Override
     public final Posn newPosn(String trader, String contr, int settlDay) {
         return newPosn(trader, contr, settlDay, 0, 0, 0, 0);
+    }
+
+    @Override
+    public final Quote newQuote(long id, String trader, String market, String contr, int settlDay,
+            @Nullable String ref, long bidTicks, long bidLots, long offerTicks, long offerLots,
+            long created, long expiry) {
+        return new Quote(id, trader, market, contr, settlDay, ref, bidTicks, bidLots, offerTicks,
+                offerLots, created, expiry);
+    }
+
+    @Override
+    public final Quote newQuote(long id, String trader, Financial fin, @Nullable String ref,
+            long bidTicks, long bidLots, long offerTicks, long offerLots, long created,
+            long expiry) {
+        return new Quote(id, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), ref,
+                bidTicks, bidLots, offerTicks, offerLots, created, expiry);
     }
 }

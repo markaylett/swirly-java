@@ -7,20 +7,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.util.Identifiable;
 
 /**
  * Fields common to both Order and Exec.
  * 
  * @author Mark Aylett
  */
-public @NonNullByDefault interface Instruct extends RbNode, Identifiable, Financial {
+public @NonNullByDefault interface Instruct extends RbNode, Request {
 
     /**
      * @return order-id or zero if there is no associated order.
      */
     long getOrderId();
 
+    @Override
     String getTrader();
 
     @Override
@@ -32,6 +32,7 @@ public @NonNullByDefault interface Instruct extends RbNode, Identifiable, Financ
     @Override
     int getSettlDay();
 
+    @Override
     @Nullable
     String getRef();
 
@@ -76,4 +77,7 @@ public @NonNullByDefault interface Instruct extends RbNode, Identifiable, Financ
      * @return true if resd equals zero.
      */
     boolean isDone();
+
+    @Override
+    long getCreated();
 }
