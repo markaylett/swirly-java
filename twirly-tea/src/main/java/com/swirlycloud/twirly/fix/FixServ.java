@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.app.Trans;
+import com.swirlycloud.twirly.app.Result;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
@@ -140,12 +140,12 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         sendToTarget(message, sessionId);
     }
 
-    private final void sendTransLocked(TraderSess sess, String ref, Trans trans,
+    private final void sendResultLocked(TraderSess sess, String ref, Result result,
             @NonNull SessionID sessionId) {
         final FixBuilder builder = getBuilder(new ExecutionReport());
         String targetTrader = sess.getMnem();
         SessionID targetSessionId = sessionId;
-        for (SlNode node = trans.getFirstExec(); node != null; node = node.slNext()) {
+        for (SlNode node = result.getFirstExec(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
             if (!exec.getTrader().equals(targetTrader)) {
                 targetTrader = exec.getTrader();
@@ -237,10 +237,10 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                 throw new ServException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
-            try (final Trans trans = new Trans()) {
-                serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, trans);
-                log.info(sessionId + ": " + trans);
-                sendTransLocked(sess, null, trans, sessionId);
+            try (final Result result = new Result()) {
+                serv.placeOrder(sess, book, ref, side, ticks, lots, minLots, now, result);
+                log.info(sessionId + ": " + result);
+                sendResultLocked(sess, null, result, sessionId);
             }
         } catch (final ServException e) {
             log.warn(sessionId + ": " + e.getMessage());
@@ -291,10 +291,10 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                             String.format("order '%s' does not exist", orderRef));
                 }
             }
-            try (final Trans trans = new Trans()) {
-                serv.reviseOrder(sess, book, order, lots, now, trans);
-                log.info(sessionId + ": " + trans);
-                sendTransLocked(sess, ref, trans, sessionId);
+            try (final Result result = new Result()) {
+                serv.reviseOrder(sess, book, order, lots, now, result);
+                log.info(sessionId + ": " + result);
+                sendResultLocked(sess, ref, result, sessionId);
             }
         } catch (final ServException e) {
             log.warn(sessionId + ": " + e.getMessage());
@@ -350,10 +350,10 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
                             String.format("order '%s' does not exist", orderRef));
                 }
             }
-            try (final Trans trans = new Trans()) {
-                serv.cancelOrder(sess, book, order, now, trans);
-                log.info(sessionId + ": " + trans);
-                sendTransLocked(sess, ref, trans, sessionId);
+            try (final Result result = new Result()) {
+                serv.cancelOrder(sess, book, order, now, result);
+                log.info(sessionId + ": " + result);
+                sendResultLocked(sess, ref, result, sessionId);
             }
         } catch (final ServException e) {
             log.warn(sessionId + ": " + e.getMessage());
