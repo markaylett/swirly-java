@@ -41,19 +41,19 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
     long lastTicks;
     long lastLots;
     long lastTime;
-    final Ladder ladder;
+    final MarketData data;
 
-    private static void parseArray(JsonParser p, Ladder ladder, int col) throws IOException {
+    private static void parseArray(JsonParser p, MarketData data, int col) throws IOException {
         for (int row = 0; p.hasNext(); ++row) {
             final Event event = p.next();
             switch (event) {
             case END_ARRAY:
                 return;
             case VALUE_NULL:
-                ladder.setValue(row, col, 0);
+                data.setValue(row, col, 0);
                 break;
             case VALUE_NUMBER:
-                ladder.setValue(row, col, p.getLong());
+                data.setValue(row, col, p.getLong());
                 break;
             default:
                 throw new IOException(String.format("unexpected json token '%s'", event));
@@ -63,24 +63,25 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
     }
 
     public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
-            long lastTime, Ladder ladder) {
+            long lastTime, MarketData data) {
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
-        this.ladder = ladder;
+        this.data = data;
     }
 
-    public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime, Ladder ladder) {
+    public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime,
+            MarketData data) {
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
-        this.ladder = ladder;
+        this.data = data;
     }
 
     public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
@@ -91,7 +92,7 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
-        this.ladder = new Ladder();
+        this.data = new MarketData();
     }
 
     public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime) {
@@ -101,7 +102,7 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.lastTime = lastTime;
-        this.ladder = new Ladder();
+        this.data = new MarketData();
     }
 
     public static MarketView parse(JsonParser p) throws IOException {
@@ -111,7 +112,7 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
         long lastTicks = 0;
         long lastLots = 0;
         long lastTime = 0;
-        final Ladder ladder = new Ladder();
+        final MarketData data = new MarketData();
 
         String name = null;
         while (p.hasNext()) {
@@ -125,23 +126,23 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
                     throw new IOException("contr is null");
                 }
                 return new MarketView(market, contr, settlDay, lastTicks, lastLots, lastTime,
-                        ladder);
+                        data);
             case KEY_NAME:
                 name = p.getString();
                 break;
             case START_ARRAY:
                 if ("bidTicks".equals(name)) {
-                    parseArray(p, ladder, Ladder.BID_TICKS);
+                    parseArray(p, data, MarketData.BID_TICKS);
                 } else if ("bidLots".equals(name)) {
-                    parseArray(p, ladder, Ladder.BID_LOTS);
+                    parseArray(p, data, MarketData.BID_LOTS);
                 } else if ("bidCount".equals(name)) {
-                    parseArray(p, ladder, Ladder.BID_COUNT);
+                    parseArray(p, data, MarketData.BID_COUNT);
                 } else if ("offerTicks".equals(name)) {
-                    parseArray(p, ladder, Ladder.OFFER_TICKS);
+                    parseArray(p, data, MarketData.OFFER_TICKS);
                 } else if ("offerLots".equals(name)) {
-                    parseArray(p, ladder, Ladder.OFFER_LOTS);
+                    parseArray(p, data, MarketData.OFFER_LOTS);
                 } else if ("offerCount".equals(name)) {
-                    parseArray(p, ladder, Ladder.OFFER_COUNT);
+                    parseArray(p, data, MarketData.OFFER_COUNT);
                 } else {
                     throw new IOException(String.format("unexpected array field '%s'", name));
                 }
@@ -352,34 +353,34 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
     }
 
     public final boolean isValidBid(int row) {
-        return ladder.isValidBid(row);
+        return data.isValidBid(row);
     }
 
     public final long getBidTicks(int row) {
-        return ladder.roundBidTicks(row);
+        return data.getBidTicks(row);
     }
 
     public final long getBidLots(int row) {
-        return ladder.roundBidLots(row);
+        return data.getBidLots(row);
     }
 
     public final long getBidCount(int row) {
-        return ladder.roundBidCount(row);
+        return data.getBidCount(row);
     }
 
     public final boolean isValidOffer(int row) {
-        return ladder.isValidOffer(row);
+        return data.isValidOffer(row);
     }
 
     public final long getOfferTicks(int row) {
-        return ladder.roundOfferTicks(row);
+        return data.getOfferTicks(row);
     }
 
     public final long getOfferLots(int row) {
-        return ladder.roundOfferLots(row);
+        return data.getOfferLots(row);
     }
 
     public final long getOfferCount(int row) {
-        return ladder.roundOfferCount(row);
+        return data.getOfferCount(row);
     }
 }

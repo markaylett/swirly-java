@@ -23,22 +23,22 @@ public final class MarketViewTest {
         final String mnem = "EURUSD.MAR14";
         final String contr = "EURUSD";
         final int settlDay = ymdToJd(2014, 2, 14);
-        final Ladder ladder = new Ladder();
+        final MarketData data = new MarketData();
 
-        ladder.setOfferRung(2, 12348, 30, 3);
-        ladder.setOfferRung(1, 12347, 20, 2);
-        ladder.setOfferRung(0, 12346, 10, 1);
+        data.setOfferLevel(2, 12348, 30, 3);
+        data.setOfferLevel(1, 12347, 20, 2);
+        data.setOfferLevel(0, 12346, 10, 1);
 
-        ladder.setBidRung(0, 12344, 10, 1);
-        ladder.setBidRung(1, 12343, 20, 2);
-        ladder.setBidRung(2, 12342, 30, 3);
+        data.setBidLevel(0, 12344, 10, 1);
+        data.setBidLevel(1, 12343, 20, 2);
+        data.setBidLevel(2, 12342, 30, 3);
 
         final long lastTicks = 12344;
         final long lastLots = 5;
         final long lastTime = 1414932078620L;
 
         final MarketView view = new MarketView(mnem, contr, settlDay, lastTicks, lastLots, lastTime,
-                ladder);
+                data);
 
         final StringBuilder sb = new StringBuilder();
 
@@ -118,22 +118,22 @@ public final class MarketViewTest {
         final String mnem = "EURUSD.MAR14";
         final String contr = "EURUSD";
         final int settlDay = ymdToJd(2014, 2, 14);
-        final Ladder ladder = new Ladder();
+        final MarketData data = new MarketData();
 
-        ladder.setOfferRung(2, 12348, 30, 3);
-        ladder.setOfferRung(1, 12347, 20, 2);
-        ladder.setOfferRung(0, 12346, 10, 1);
+        data.setOfferLevel(2, 12348, 30, 3);
+        data.setOfferLevel(1, 12347, 20, 2);
+        data.setOfferLevel(0, 12346, 10, 1);
 
-        ladder.setBidRung(0, 12344, 10, 1);
-        ladder.setBidRung(1, 12343, 20, 2);
-        ladder.setBidRung(2, 12342, 30, 3);
+        data.setBidLevel(0, 12344, 10, 1);
+        data.setBidLevel(1, 12343, 20, 2);
+        data.setBidLevel(2, 12342, 30, 3);
 
         final long lastTicks = 12344;
         final long lastLots = 5;
         final long lastTime = 1414932078620L;
 
         final MarketView in = new MarketView(mnem, contr, settlDay, lastTicks, lastLots, lastTime,
-                ladder);
+                data);
         System.out.println(in.toString());
         try (final JsonParser p = Json.createParser(new StringReader(in.toString()))) {
             assert p != null;
