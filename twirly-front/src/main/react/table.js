@@ -284,7 +284,7 @@ var ViewRow = React.createClass({
         var view = this.props.view;
         var market = view.market;
         var price = view.bidPrice[0];
-        var lots = view.bidLots[0];
+        var lots = view.bidResd[0];
         if (price === null) {
             price = view.lastPrice;
             if (price === null) {
@@ -308,7 +308,7 @@ var ViewRow = React.createClass({
         var view = this.props.view;
         var market = view.market;
         var price = view.offerPrice[0];
-        var lots = view.offerLots[0];
+        var lots = view.offerResd[0];
         if (price === null) {
             price = view.lastPrice;
             if (price === null) {
@@ -341,7 +341,7 @@ var ViewRow = React.createClass({
                   dangerouslySetInnerHTML={levels(view.bidCount, showDepth)}
                   onClick={this.onClickBid}/>
               <td style={alignRight}
-                  dangerouslySetInnerHTML={levels(view.bidLots, showDepth)}
+                  dangerouslySetInnerHTML={levels(view.bidResd, showDepth)}
                   onClick={this.onClickBid}/>
               <td style={alignRight}
                   dangerouslySetInnerHTML={levels(view.bidPrice, showDepth)}
@@ -352,7 +352,7 @@ var ViewRow = React.createClass({
                   dangerouslySetInnerHTML={levels(view.offerPrice, showDepth)}
                   onClick={this.onClickOffer}/>
               <td style={alignRight}
-                  dangerouslySetInnerHTML={levels(view.offerLots, showDepth)}
+                  dangerouslySetInnerHTML={levels(view.offerResd, showDepth)}
                   onClick={this.onClickOffer}/>
               <td style={alignRight}
                   dangerouslySetInnerHTML={levels(view.offerCount, showDepth)}

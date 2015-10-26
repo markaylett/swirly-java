@@ -70,152 +70,147 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull MnemRbTree selectAsset(@NonNull final Factory factory)
+    public final @NonNull MnemRbTree readAsset(@NonNull final Factory factory)
             throws InterruptedException {
         return getNonNull(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final @NonNull MnemRbTree call() throws Exception {
-                return datastore.selectAsset(factory);
+                return datastore.readAsset(factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull MnemRbTree selectContr(@NonNull final Factory factory)
+    public final @NonNull MnemRbTree readContr(@NonNull final Factory factory)
             throws InterruptedException {
         return getNonNull(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
-                return datastore.selectContr(factory);
+                return datastore.readContr(factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull MnemRbTree selectMarket(@NonNull final Factory factory)
+    public final @NonNull MnemRbTree readMarket(@NonNull final Factory factory)
             throws InterruptedException {
         return getNonNull(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
-                return datastore.selectMarket(factory);
+                return datastore.readMarket(factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull MnemRbTree selectTrader(@NonNull final Factory factory)
+    public final @NonNull MnemRbTree readTrader(@NonNull final Factory factory)
             throws InterruptedException {
         return getNonNull(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
-                return datastore.selectTrader(factory);
+                return datastore.readTrader(factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable String selectTraderByEmail(@NonNull final String email,
+    public final @Nullable String readTraderByEmail(@NonNull final String email,
             @NonNull final Factory factory) throws InterruptedException {
         return getNullable(service.submit(new Callable<String>() {
             @Override
             public final String call() throws Exception {
-                return datastore.selectTraderByEmail(email, factory);
+                return datastore.readTraderByEmail(email, factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull MnemRbTree selectView(@NonNull final Factory factory)
+    public final @NonNull MnemRbTree readView(@NonNull final Factory factory)
             throws InterruptedException {
         return getNonNull(service.submit(new Callable<MnemRbTree>() {
             @Override
             public final MnemRbTree call() throws Exception {
-                return datastore.selectView(factory);
+                return datastore.readView(factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable SlNode selectOrder(@NonNull final Factory factory)
+    public final @Nullable SlNode readOrder(@NonNull final Factory factory)
             throws InterruptedException {
         return getNullable(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
-                return datastore.selectOrder(factory);
+                return datastore.readOrder(factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull InstructTree selectOrder(@NonNull final String trader,
+    public final @NonNull InstructTree readOrder(@NonNull final String trader,
             @NonNull final Factory factory) throws InterruptedException {
         return getNonNull(service.submit(new Callable<InstructTree>() {
             @Override
             public final InstructTree call() throws Exception {
-                return datastore.selectOrder(trader, factory);
+                return datastore.readOrder(trader, factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable SlNode selectTrade(@NonNull final Factory factory)
+    public final @Nullable SlNode readTrade(@NonNull final Factory factory)
             throws InterruptedException {
         return getNullable(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
-                return datastore.selectTrade(factory);
+                return datastore.readTrade(factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull InstructTree selectTrade(@NonNull final String trader,
+    public final @NonNull InstructTree readTrade(@NonNull final String trader,
             @NonNull final Factory factory) throws InterruptedException {
         return getNonNull(service.submit(new Callable<InstructTree>() {
             @Override
             public final InstructTree call() throws Exception {
-                return datastore.selectTrade(trader, factory);
+                return datastore.readTrade(trader, factory);
             }
         }));
     }
 
     @Override
-    public final @Nullable SlNode selectPosn(final int busDay, @NonNull final Factory factory)
+    public final @Nullable SlNode readPosn(final int busDay, @NonNull final Factory factory)
             throws InterruptedException {
         return getNullable(service.submit(new Callable<SlNode>() {
             @Override
             public final SlNode call() throws Exception {
-                return datastore.selectPosn(busDay, factory);
+                return datastore.readPosn(busDay, factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull TraderPosnTree selectPosn(@NonNull final String trader, final int busDay,
+    public final @NonNull TraderPosnTree readPosn(@NonNull final String trader, final int busDay,
             @NonNull final Factory factory) throws InterruptedException {
         return getNonNull(service.submit(new Callable<TraderPosnTree>() {
             @Override
             public final TraderPosnTree call() throws Exception {
-                return datastore.selectPosn(trader, busDay, factory);
+                return datastore.readPosn(trader, busDay, factory);
             }
         }));
     }
 
     @Override
-    public final long selectTimeout() {
-        return 0;
-    }
-
-    @Override
-    public final void insertMarket(final @NonNull String mnem, final @Nullable String display,
+    public final void createMarket(final @NonNull String mnem, final @Nullable String display,
             final @NonNull String contr, final int settlDay, final int expiryDay, final int state) {
         service.submit(new Runnable() {
             @Override
             public final void run() {
                 try {
-                    datastore.insertMarket(mnem, display, contr, settlDay, expiryDay, state);
+                    datastore.createMarket(mnem, display, contr, settlDay, expiryDay, state);
                 } catch (final Throwable t) {
-                    log.log(Level.SEVERE, "failed to insert market", t);
+                    log.log(Level.SEVERE, "failed to create market", t);
                 }
             }
         });
@@ -237,15 +232,15 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertTrader(final @NonNull String mnem, final @Nullable String display,
+    public final void createTrader(final @NonNull String mnem, final @Nullable String display,
             final @NonNull String email) {
         service.submit(new Runnable() {
             @Override
             public final void run() {
                 try {
-                    datastore.insertTrader(mnem, display, email);
+                    datastore.createTrader(mnem, display, email);
                 } catch (final Throwable t) {
-                    log.log(Level.SEVERE, "failed to insert trader", t);
+                    log.log(Level.SEVERE, "failed to create trader", t);
                 }
             }
         });
@@ -267,43 +262,43 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final void insertExec(final @NonNull Exec exec) throws NotFoundException {
+    public final void createExec(final @NonNull Exec exec) throws NotFoundException {
         service.submit(new Runnable() {
             @Override
             public final void run() {
                 try {
-                    datastore.insertExec(exec);
+                    datastore.createExec(exec);
                 } catch (final Throwable t) {
-                    log.log(Level.SEVERE, "failed to insert exec", t);
+                    log.log(Level.SEVERE, "failed to create exec", t);
                 }
             }
         });
     }
 
     @Override
-    public final void insertExecList(final @NonNull String market, final @NonNull JslNode first)
+    public final void createExecList(final @NonNull String market, final @NonNull JslNode first)
             throws NotFoundException {
         service.submit(new Runnable() {
             @Override
             public final void run() {
                 try {
-                    datastore.insertExecList(market, first);
+                    datastore.createExecList(market, first);
                 } catch (final Throwable t) {
-                    log.log(Level.SEVERE, "failed to insert exec-list", t);
+                    log.log(Level.SEVERE, "failed to create exec-list", t);
                 }
             }
         });
     }
 
     @Override
-    public final void insertExecList(final @NonNull JslNode first) throws NotFoundException {
+    public final void createExecList(final @NonNull JslNode first) throws NotFoundException {
         service.submit(new Runnable() {
             @Override
             public final void run() {
                 try {
-                    datastore.insertExecList(first);
+                    datastore.createExecList(first);
                 } catch (final Throwable t) {
-                    log.log(Level.SEVERE, "failed to insert exec-list", t);
+                    log.log(Level.SEVERE, "failed to create exec-list", t);
                 }
             }
         });

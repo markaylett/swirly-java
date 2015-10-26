@@ -14,7 +14,7 @@ import com.swirlycloud.twirly.node.JslNode;
 public class MockDatastore extends MockModel implements Datastore {
 
     @Override
-    public void insertMarket(@NonNull String mnem, @Nullable String display, @NonNull String contr,
+    public void createMarket(@NonNull String mnem, @Nullable String display, @NonNull String contr,
             int settlDay, int expiryDay, int state) {
     }
 
@@ -23,7 +23,7 @@ public class MockDatastore extends MockModel implements Datastore {
     }
 
     @Override
-    public void insertTrader(@NonNull String mnem, @Nullable String display,
+    public void createTrader(@NonNull String mnem, @Nullable String display,
             @NonNull String email) {
     }
 
@@ -33,15 +33,15 @@ public class MockDatastore extends MockModel implements Datastore {
     }
 
     @Override
-    public void insertExec(@NonNull Exec exec) {
+    public void createExec(@NonNull Exec exec) {
     }
 
     @Override
-    public void insertExecList(@NonNull String market, @NonNull JslNode first) {
+    public void createExecList(@NonNull String market, @NonNull JslNode first) {
     }
 
     @Override
-    public void insertExecList(@NonNull JslNode first) {
+    public void createExecList(@NonNull JslNode first) {
     }
 
     @Override

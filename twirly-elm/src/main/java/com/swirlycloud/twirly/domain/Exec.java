@@ -387,9 +387,13 @@ public final @NonNullByDefault class Exec extends BasicRbNode
         resd -= delta;
     }
 
-    public final void cancel() {
-        state = State.CANCEL;
-        resd = 0;
+    public final void cancel(long quot) {
+        if (quot == 0) {
+            state = State.CANCEL;
+            resd = 0;
+        } else {
+            state = State.PECAN;
+        }
     }
 
     public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots, long matchId,
@@ -528,6 +532,7 @@ public final @NonNullByDefault class Exec extends BasicRbNode
         return cpty;
     }
 
+    @Override
     public final long getCreated() {
         return created;
     }

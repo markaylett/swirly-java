@@ -57,8 +57,8 @@ public final class BookSideTest {
 
         // Place orders.
         ++now;
-        side.placeOrder(apple, now);
-        side.placeOrder(orange, now);
+        side.createOrder(apple, now);
+        side.createOrder(orange, now);
 
         assertEquals(State.NEW, apple.getState());
         assertEquals(10, apple.getResd());
@@ -79,7 +79,7 @@ public final class BookSideTest {
         assert level != null;
         assertEquals(12345, level.getTicks());
         // Sum of lots.
-        assertEquals(30, level.getLots());
+        assertEquals(30, level.getResd());
         // Two orders at this price level.
         assertEquals(2, level.getCount());
 
@@ -106,7 +106,7 @@ public final class BookSideTest {
         assert level != null;
         assertEquals(12345, level.getTicks());
         // Sum of lots.
-        assertEquals(25, level.getLots());
+        assertEquals(25, level.getResd());
         // Two orders at this price level.
         assertEquals(2, level.getCount());
 
@@ -132,7 +132,7 @@ public final class BookSideTest {
         level = (Level) side.getFirstLevel();
         assert level != null;
         assertEquals(12345, level.getTicks());
-        assertEquals(5, level.getLots());
+        assertEquals(5, level.getResd());
         assertEquals(1, level.getCount());
     }
 
@@ -149,9 +149,9 @@ public final class BookSideTest {
                 JulianDay.isoToJd(20140314), "pear", Side.BUY, 12346, 25, 0, now);
         final BookSide side = new BookSide();
 
-        side.placeOrder(apple, now);
-        side.placeOrder(orange, now);
-        side.placeOrder(pear, now);
+        side.createOrder(apple, now);
+        side.createOrder(orange, now);
+        side.createOrder(pear, now);
 
         assertEquals(2, size(side.getFirstLevel()));
         assertEquals(3, size(side.getFirstOrder()));
@@ -162,13 +162,13 @@ public final class BookSideTest {
         Level level = (Level) side.getFirstLevel();
         assert level != null;
         assertEquals(12346, level.getTicks());
-        assertEquals(25, level.getLots());
+        assertEquals(25, level.getResd());
         assertEquals(1, level.getCount());
 
         level = (Level) side.getLastLevel();
         assert level != null;
         assertEquals(12345, level.getTicks());
-        assertEquals(30, level.getLots());
+        assertEquals(30, level.getResd());
         assertEquals(2, level.getCount());
     }
 }

@@ -28,7 +28,7 @@ public final class ContrTest extends SerializableTest {
 
     @Test
     public final void testSerializable() throws ClassNotFoundException, IOException {
-        final MnemRbTree t = MockContr.selectContr(FACTORY);
+        final MnemRbTree t = MockContr.readContr(FACTORY);
         final MnemRbTree u = writeAndRead(t);
 
         assertEquals(toJsonString(t.getFirst()), toJsonString(u.getFirst()));

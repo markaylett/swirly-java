@@ -43,13 +43,13 @@ public final class LadderTest {
     public final void testVwap() {
         final Ladder ladder = new Ladder();
 
-        ladder.setOfferRung(2, 12348, 30, 3);
-        ladder.setOfferRung(1, 12347, 20, 2);
-        ladder.setOfferRung(0, 12346, 10, 1);
+        ladder.setOfferLevel(2, 12348, 30, 3);
+        ladder.setOfferLevel(1, 12347, 20, 2);
+        ladder.setOfferLevel(0, 12346, 10, 1);
 
-        ladder.setBidRung(0, 12344, 10, 1);
-        ladder.setBidRung(1, 12343, 20, 2);
-        ladder.setBidRung(2, 12342, 30, 3);
+        ladder.setBidLevel(0, 12344, 10, 1);
+        ladder.setBidLevel(1, 12343, 20, 2);
+        ladder.setBidLevel(2, 12342, 30, 3);
 
         ladder.setVwap(true);
 

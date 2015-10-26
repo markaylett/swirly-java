@@ -39,6 +39,9 @@ public final class FixUtility {
         case TRADE:
             out = resd == 0 ? OrdStatus.FILLED : OrdStatus.PARTIALLY_FILLED;
             break;
+        case PECAN:
+            out = OrdStatus.PENDING_CANCEL;
+            break;
         default:
             out = '\0';
             assert false;
@@ -61,6 +64,9 @@ public final class FixUtility {
         case OrdStatus.FILLED:
         case OrdStatus.PARTIALLY_FILLED:
             out = State.TRADE;
+            break;
+        case OrdStatus.PENDING_CANCEL:
+            out = State.PECAN;
             break;
         default:
             throw new IncorrectTagValue(OrdStatus.FIELD);
@@ -118,6 +124,9 @@ public final class FixUtility {
         case TRADE:
             out = resd == 0 ? ExecType.FILL : ExecType.PARTIAL_FILL;
             break;
+        case PECAN:
+            out = ExecType.PENDING_CANCEL;
+            break;
         default:
             out = '\0';
             assert false;
@@ -141,6 +150,8 @@ public final class FixUtility {
         case ExecType.PARTIAL_FILL:
             out = State.TRADE;
             break;
+        case ExecType.PENDING_CANCEL:
+            out = State.PECAN;
         default:
             throw new IncorrectTagValue(ExecType.FIELD);
         }

@@ -66,7 +66,7 @@ public class AppEngineModel implements Model {
         }
     }
 
-    private final void selectOrder(@NonNull final Filter filter, final @NonNull Factory factory,
+    private final void readOrder(@NonNull final Filter filter, final @NonNull Factory factory,
             @NonNull final Container<? super Order> c) {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
@@ -92,6 +92,7 @@ public class AppEngineModel implements Model {
                     final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
                     final long minLots = (Long) entity.getProperty("minLots");
+                    final boolean pecan = (Boolean) entity.getProperty("pecan");
                     final long created = (Long) entity.getProperty("created");
                     final long modified = (Long) entity.getProperty("modified");
 
@@ -100,14 +101,14 @@ public class AppEngineModel implements Model {
                     assert contr != null;
                     final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
                             state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
-                            minLots, created, modified);
+                            minLots, pecan, created, modified);
                     c.add(order);
                 }
             }
         });
     }
 
-    private final void selectTrade(@NonNull final Filter filter, final @NonNull Factory factory,
+    private final void readTrade(@NonNull final Filter filter, final @NonNull Factory factory,
             @NonNull final Container<? super Exec> c) {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
@@ -152,7 +153,7 @@ public class AppEngineModel implements Model {
         });
     }
 
-    private final void selectPosn(@NonNull final Filter filter, final int busDay,
+    private final void readPosn(@NonNull final Filter filter, final int busDay,
             final @NonNull Factory factory, @NonNull final Container<? super Posn> c) {
         final PosnTree posns = new PosnTree();
         foreachMarket(new UnaryCallback<Entity>() {
@@ -203,19 +204,19 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree selectAsset(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree readAsset(@NonNull Factory factory) {
         // TODO: migrate to datastore.
-        return MockAsset.selectAsset(factory);
+        return MockAsset.readAsset(factory);
     }
 
     @Override
-    public final @NonNull MnemRbTree selectContr(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree readContr(@NonNull Factory factory) {
         // TODO: migrate to datastore.
-        return MockContr.selectContr(factory);
+        return MockContr.readContr(factory);
     }
 
     @Override
-    public final @NonNull MnemRbTree selectMarket(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree readMarket(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         final Query query = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(query);
@@ -242,7 +243,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree selectTrader(@NonNull Factory factory) {
+    public final @NonNull MnemRbTree readTrader(@NonNull Factory factory) {
         final MnemRbTree t = new MnemRbTree();
         final Query query = new Query(TRADER_KIND);
         final PreparedQuery pq = datastore.prepare(query);
@@ -260,7 +261,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable String selectTraderByEmail(@NonNull String email,
+    public final @Nullable String readTraderByEmail(@NonNull String email,
             @NonNull Factory factory) throws InterruptedException {
         final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL, email);
         final Query query = new Query(TRADER_KIND).setFilter(filter).setKeysOnly();
@@ -270,21 +271,21 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree selectView(@NonNull Factory factory)
+    public final @NonNull MnemRbTree readView(@NonNull Factory factory)
             throws InterruptedException {
-        return ModelUtil.selectView(this, factory);
+        return ModelUtil.readView(this, factory);
     }
 
     @Override
-    public final @Nullable SlNode selectOrder(@NonNull Factory factory) {
+    public final @Nullable SlNode readOrder(@NonNull Factory factory) {
         final Filter filter = new FilterPredicate("archive", FilterOperator.EQUAL, Boolean.FALSE);
         final SlQueue q = new SlQueue();
-        selectOrder(filter, factory, q);
+        readOrder(filter, factory, q);
         return q.getFirst();
     }
 
     @Override
-    public final @NonNull InstructTree selectOrder(@NonNull String trader,
+    public final @NonNull InstructTree readOrder(@NonNull String trader,
             @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
@@ -292,12 +293,12 @@ public class AppEngineModel implements Model {
         final Filter filter = CompositeFilterOperator.and(traderFilter, archiveFilter);
         assert filter != null;
         final InstructTree t = new InstructTree();
-        selectOrder(filter, factory, t);
+        readOrder(filter, factory, t);
         return t;
     }
 
     @Override
-    public final @Nullable SlNode selectTrade(@NonNull Factory factory) {
+    public final @Nullable SlNode readTrade(@NonNull Factory factory) {
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
@@ -305,12 +306,12 @@ public class AppEngineModel implements Model {
         final Filter filter = CompositeFilterOperator.and(stateFilter, archiveFilter);
         assert filter != null;
         final SlQueue q = new SlQueue();
-        selectTrade(filter, factory, q);
+        readTrade(filter, factory, q);
         return q.getFirst();
     }
 
     @Override
-    public final @NonNull InstructTree selectTrade(@NonNull String trader,
+    public final @NonNull InstructTree readTrade(@NonNull String trader,
             @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
@@ -320,21 +321,21 @@ public class AppEngineModel implements Model {
         final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter, archiveFilter);
         assert filter != null;
         final InstructTree t = new InstructTree();
-        selectTrade(filter, factory, t);
+        readTrade(filter, factory, t);
         return t;
     }
 
     @Override
-    public final @Nullable SlNode selectPosn(final int busDay, @NonNull Factory factory) {
+    public final @Nullable SlNode readPosn(final int busDay, @NonNull Factory factory) {
         final Filter filter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
         final SlQueue q = new SlQueue();
-        selectPosn(filter, busDay, factory, q);
+        readPosn(filter, busDay, factory, q);
         return q.getFirst();
     }
 
     @Override
-    public final @NonNull TraderPosnTree selectPosn(@NonNull String trader, final int busDay,
+    public final @NonNull TraderPosnTree readPosn(@NonNull String trader, final int busDay,
             @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
@@ -342,12 +343,7 @@ public class AppEngineModel implements Model {
         final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter);
         assert filter != null;
         final TraderPosnTree t = new TraderPosnTree();
-        selectPosn(filter, busDay, factory, t);
+        readPosn(filter, busDay, factory, t);
         return t;
-    }
-
-    @Override
-    public final long selectTimeout() {
-        return 0;
     }
 }

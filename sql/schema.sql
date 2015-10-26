@@ -69,6 +69,8 @@ INSERT INTO State_t (id, mnem) VALUES (3, 'CANCEL')
 ;
 INSERT INTO State_t (id, mnem) VALUES (4, 'TRADE')
 ;
+INSERT INTO State_t (id, mnem) VALUES (5, 'PECAN')
+;
 
 CREATE TABLE Side_t (
   id INT NOT NULL PRIMARY KEY,
@@ -251,6 +253,7 @@ CREATE TABLE Order_t (
   lastLots BIGINT NULL DEFAULT NULL,
   minLots BIGINT NOT NULL DEFAULT 1,
   archive TINYINT(1) NOT NULL DEFAULT 0,
+  pecan TINYINT(1) NOT NULL DEFAULT 0,
   created BIGINT NOT NULL,
   modified BIGINT NOT NULL,
 
@@ -335,6 +338,7 @@ CREATE TRIGGER beforeInsertOnExec
           lastLots,
           minLots,
           archive,
+          pecan,
           created,
           modified
         ) VALUES (
@@ -355,6 +359,7 @@ CREATE TRIGGER beforeInsertOnExec
           NEW.lastLots,
           NEW.minLots,
           NEW.archive,
+          CASE WHEN NEW.stateId = 5 THEN 1 ELSE 0 END,
           NEW.created,
           NEW.modified
         );
@@ -368,6 +373,7 @@ CREATE TRIGGER beforeInsertOnExec
           cost = NEW.cost,
           lastTicks = NEW.lastTicks,
           lastLots = NEW.lastLots,
+          pecan = CASE WHEN NEW.stateId = 5 THEN 1 ELSE pecan END,
           modified = NEW.modified
         WHERE id = NEW.orderId;
       END IF;
@@ -449,6 +455,7 @@ CREATE VIEW Order_v AS
     o.lastTicks,
     o.lastLots,
     o.minLots,
+    o.pecan,
     o.created,
     o.modified
   FROM Order_t o

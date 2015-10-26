@@ -38,14 +38,14 @@ public final class Ladder extends Matrix {
                     bidLots += lots;
                     bidCost += lots * getBidTicks(row);
                     bidCount += getBidCount(row);
-                    setBidRung(row, bidCost / bidLots, bidLots, bidCount);
+                    setBidLevel(row, bidCost / bidLots, bidLots, bidCount);
                 }
                 if (isValidOffer(row)) {
                     final double lots = getOfferLots(row);
                     offerLots += lots;
                     offerCost += lots * getOfferTicks(row);
                     offerCount += getOfferCount(row);
-                    setOfferRung(row, offerCost / offerLots, offerLots, offerCount);
+                    setOfferLevel(row, offerCost / offerLots, offerLots, offerCount);
                 }
             }
         } else {
@@ -58,7 +58,7 @@ public final class Ladder extends Matrix {
                     bidLots -= prevLots;
                     bidCost -= prevLots * getBidTicks(row - 1);
                     bidCount -= getBidCount(row - 1);
-                    setBidRung(row, bidCost / bidLots, bidLots, bidCount);
+                    setBidLevel(row, bidCost / bidLots, bidLots, bidCount);
                 }
                 if (isValidOffer(row)) {
                     double offerLots = getOfferLots(row);
@@ -68,13 +68,13 @@ public final class Ladder extends Matrix {
                     offerLots -= prevLots;
                     offerCost -= prevLots * getOfferTicks(row - 1);
                     offerCount -= getOfferCount(row - 1);
-                    setOfferRung(row, offerCost / offerLots, offerLots, offerCount);
+                    setOfferLevel(row, offerCost / offerLots, offerLots, offerCount);
                 }
             }
         }
     }
 
-    public final void setBidRung(int row, double ticks, double lots, double count) {
+    public final void setBidLevel(int row, double ticks, double lots, double count) {
         setValue(row, BID_TICKS, ticks);
         setValue(row, BID_LOTS, lots);
         setValue(row, BID_COUNT, count);
@@ -92,7 +92,7 @@ public final class Ladder extends Matrix {
         setValue(row, BID_COUNT, count);
     }
 
-    public final void setOfferRung(int row, double ticks, double lots, double count) {
+    public final void setOfferLevel(int row, double ticks, double lots, double count) {
         setValue(row, OFFER_TICKS, ticks);
         setValue(row, OFFER_LOTS, lots);
         setValue(row, OFFER_COUNT, count);

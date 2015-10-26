@@ -94,6 +94,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         }
         entity.setUnindexedProperty("minLots", exec.getMinLots());
         entity.setProperty("archive", Boolean.FALSE);
+        entity.setProperty("pecan", exec.getState() == State.PECAN);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());
         updateMaxOrderId(market, exec.getOrderId());
@@ -150,6 +151,9 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             order.setUnindexedProperty("lastTicks", exec.getLastTicks());
             order.setUnindexedProperty("lastLots", exec.getLastLots());
         }
+        if (exec.getState() == State.PECAN) {
+            order.setProperty("pecan", true);
+        }
         order.setUnindexedProperty("modified", exec.getCreated());
         return order;
     }
@@ -199,7 +203,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertMarket(@NonNull String mnem, @Nullable String display,
+    public final void createMarket(@NonNull String mnem, @Nullable String display,
             @NonNull String contr, int settlDay, int expiryDay, int state) {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -237,7 +241,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertTrader(@NonNull String mnem, @Nullable String display,
+    public final void createTrader(@NonNull String mnem, @Nullable String display,
             @NonNull String email) {
         final Transaction txn = datastore.beginTransaction();
         try {
@@ -275,7 +279,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExec(@NonNull Exec exec) throws NotFoundException {
+    public final void createExec(@NonNull Exec exec) throws NotFoundException {
         final Transaction txn = datastore.beginTransaction();
         try {
             final Entity market = getMarket(txn, exec.getMarket());
@@ -301,12 +305,12 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExecList(@NonNull String marketMnem, @NonNull JslNode first)
+    public final void createExecList(@NonNull String marketMnem, @NonNull JslNode first)
             throws NotFoundException {
 
         if (first.jslNext() == null) {
             // Singleton list.
-            insertExec((Exec) first);
+            createExec((Exec) first);
             return;
         }
 
@@ -364,11 +368,11 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
     }
 
     @Override
-    public final void insertExecList(@NonNull JslNode first) throws NotFoundException {
+    public final void createExecList(@NonNull JslNode first) throws NotFoundException {
 
         if (first.jslNext() == null) {
             // Singleton list.
-            insertExec((Exec) first);
+            createExec((Exec) first);
             return;
         }
 
@@ -400,7 +404,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             final JslNode value = entry.getValue();
             assert key != null;
             assert value != null;
-            insertExecList(key, value);
+            createExecList(key, value);
         }
     }
 

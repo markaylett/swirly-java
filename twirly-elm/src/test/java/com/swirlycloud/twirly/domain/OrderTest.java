@@ -169,7 +169,7 @@ public final class OrderTest {
     public final void testToString() {
         final Order order = newOrder();
         assertEquals(
-                "{\"id\":1,\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"side\":\"BUY\",\"ticks\":12345,\"lots\":10,\"resd\":10,\"exec\":0,\"cost\":0,\"lastTicks\":null,\"lastLots\":null,\"minLots\":1,\"created\":1394625600000,\"modified\":1394625600000}",
+                "{\"id\":1,\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"side\":\"BUY\",\"ticks\":12345,\"lots\":10,\"resd\":10,\"exec\":0,\"cost\":0,\"lastTicks\":null,\"lastLots\":null,\"minLots\":1,\"pecan\":false,\"created\":1394625600000,\"modified\":1394625600000}",
                 order.toString());
     }
 }

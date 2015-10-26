@@ -121,7 +121,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertMarket(@NonNull String mnem, @Nullable String display,
+    public final void createMarket(@NonNull String mnem, @Nullable String display,
             @NonNull String contr, int settlDay, int expiryDay, int state) {
         try {
             int i = 1;
@@ -151,7 +151,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertTrader(@NonNull String mnem, @Nullable String display,
+    public final void createTrader(@NonNull String mnem, @Nullable String display,
             @NonNull String email) {
         try {
             int i = 1;
@@ -178,7 +178,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertExec(@NonNull Exec exec) {
+    public final void createExec(@NonNull Exec exec) {
         try {
             int i = 1;
             setParam(insertExecStmt, i++, exec.getId());
@@ -221,17 +221,17 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     }
 
     @Override
-    public final void insertExecList(@NonNull String market, @NonNull JslNode first) {
+    public final void createExecList(@NonNull String market, @NonNull JslNode first) {
         // The market parameter is ignored in the Jdbc implementation.
-        insertExecList(first);
+        createExecList(first);
     }
 
     @Override
-    public final void insertExecList(@NonNull JslNode first) {
+    public final void createExecList(@NonNull JslNode first) {
 
         if (first.jslNext() == null) {
             // Singleton list.
-            insertExec((Exec) first);
+            createExec((Exec) first);
             return;
         }
 
@@ -245,7 +245,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
                     assert exec != null;
                     node = popNext(node);
 
-                    insertExec(exec);
+                    createExec(exec);
                 } while (node != null);
                 conn.commit();
                 success = true;

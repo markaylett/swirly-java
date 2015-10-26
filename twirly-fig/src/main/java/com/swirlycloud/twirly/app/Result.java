@@ -19,7 +19,7 @@ import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class Trans implements AutoCloseable, Jsonifiable {
+public final @NonNullByDefault class Result implements AutoCloseable, Jsonifiable {
     private @Nullable String trader;
     private @Nullable MarketBook book;
     final SlQueue orders = new SlQueue();
@@ -47,7 +47,7 @@ public final @NonNullByDefault class Trans implements AutoCloseable, Jsonifiable
     }
 
     /**
-     * Prepare execs by cloning the slNode list from the transNode list.
+     * Prepare execs by cloning the jslNode list from the slNode list.
      * 
      * @return the cloned slNode list.
      */

@@ -17,17 +17,17 @@ import com.swirlycloud.twirly.node.JslNode;
  */
 public interface Journ extends AutoCloseable {
 
-    void insertMarket(@NonNull String mnem, @Nullable String display, @NonNull String contr,
+    void createMarket(@NonNull String mnem, @Nullable String display, @NonNull String contr,
             int settlDay, int expiryDay, int state);
 
     void updateMarket(@NonNull String mnem, @Nullable String display, int state)
             throws NotFoundException;
 
-    void insertTrader(@NonNull String mnem, @Nullable String display, @NonNull String email);
+    void createTrader(@NonNull String mnem, @Nullable String display, @NonNull String email);
 
     void updateTrader(@NonNull String mnem, @Nullable String display) throws NotFoundException;
 
-    void insertExec(@NonNull Exec exec) throws NotFoundException;
+    void createExec(@NonNull Exec exec) throws NotFoundException;
 
     /**
      * Archive list of executions. The list may be modified asynchronously by this operation.
@@ -38,7 +38,7 @@ public interface Journ extends AutoCloseable {
      *            The first execution.
      * @throws NotFoundException
      */
-    void insertExecList(@NonNull String market, @NonNull JslNode first) throws NotFoundException;
+    void createExecList(@NonNull String market, @NonNull JslNode first) throws NotFoundException;
 
     /**
      * This overload may be less efficient than the ones that are market-specific. The list may be
@@ -48,7 +48,7 @@ public interface Journ extends AutoCloseable {
      *            The first execution.
      * @throws NotFoundException
      */
-    void insertExecList(@NonNull JslNode first) throws NotFoundException;
+    void createExecList(@NonNull JslNode first) throws NotFoundException;
 
     void archiveOrder(@NonNull String market, long id, long modified) throws NotFoundException;
 

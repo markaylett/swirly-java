@@ -154,7 +154,7 @@ public final class ExecTest {
         final Order order = newOrder();
         final Exec exec = FACTORY.newExec(2, order, NOW + 1);
         exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
-        exec.cancel();
+        exec.cancel(order.quot);
 
         assertEquals(2, exec.getId());
         assertEquals(1, exec.getOrderId());

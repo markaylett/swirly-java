@@ -62,103 +62,103 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return name;
     }
 
-    private final MnemRbTree getAsset(@Nullable Object value) throws InterruptedException {
+    private final MnemRbTree readAsset(@Nullable Object value) throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) value;
         if (tree == null) {
-            tree = model.selectAsset(factory);
-            cache.insert("asset", tree);
+            tree = model.readAsset(factory);
+            cache.create("asset", tree);
         }
         return tree;
     }
 
-    private final MnemRbTree getContr(@Nullable Object value) throws InterruptedException {
+    private final MnemRbTree readContr(@Nullable Object value) throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) value;
         if (tree == null) {
-            tree = model.selectContr(factory);
-            cache.insert("contr", tree);
+            tree = model.readContr(factory);
+            cache.create("contr", tree);
         }
         return tree;
     }
 
-    private final MnemRbTree getMarket(@Nullable Object value) throws InterruptedException {
+    private final MnemRbTree readMarket(@Nullable Object value) throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) value;
         if (tree == null) {
-            tree = model.selectMarket(factory);
-            cache.insert("market", tree);
+            tree = model.readMarket(factory);
+            cache.create("market", tree);
         }
         return tree;
     }
 
-    private final MnemRbTree getTrader(@Nullable Object value) throws InterruptedException {
+    private final MnemRbTree readTrader(@Nullable Object value) throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) value;
         if (tree == null) {
-            tree = model.selectTrader(factory);
-            cache.insert("trader", tree);
+            tree = model.readTrader(factory);
+            cache.create("trader", tree);
         }
         return tree;
     }
 
-    private final MnemRbTree getRec(RecType recType, @Nullable Object value)
+    private final MnemRbTree readRec(RecType recType, @Nullable Object value)
             throws InterruptedException {
         MnemRbTree tree = null;
         switch (recType) {
         case ASSET:
-            tree = getAsset(value);
+            tree = readAsset(value);
             break;
         case CONTR:
-            tree = getContr(value);
+            tree = readContr(value);
             break;
         case MARKET:
-            tree = getMarket(value);
+            tree = readMarket(value);
             break;
         case TRADER:
-            tree = getTrader(value);
+            tree = readTrader(value);
             break;
         }
         assert tree != null;
         return tree;
     }
 
-    private final MnemRbTree getView(@Nullable Object value) throws InterruptedException {
+    private final MnemRbTree readView(@Nullable Object value) throws InterruptedException {
         MnemRbTree tree = (MnemRbTree) value;
         if (tree == null) {
-            tree = model.selectView(factory);
-            cache.insert("view", tree);
+            tree = model.readView(factory);
+            cache.create("view", tree);
         }
         return tree;
     }
 
-    private final InstructTree getOrder(String trader, @Nullable Object value)
+    private final InstructTree readOrder(String trader, @Nullable Object value)
             throws InterruptedException {
         InstructTree tree = (InstructTree) value;
         if (tree == null) {
-            tree = model.selectOrder(trader, factory);
-            cache.insert("order:" + trader, tree);
+            tree = model.readOrder(trader, factory);
+            cache.create("order:" + trader, tree);
         }
         return tree;
     }
 
-    private final InstructTree getTrade(String trader, @Nullable Object value)
+    private final InstructTree readTrade(String trader, @Nullable Object value)
             throws InterruptedException {
         InstructTree tree = (InstructTree) value;
         if (tree == null) {
-            tree = model.selectTrade(trader, factory);
-            cache.insert("trade:" + trader, tree);
+            tree = model.readTrade(trader, factory);
+            cache.create("trade:" + trader, tree);
         }
         return tree;
     }
 
-    private final TraderPosnTree getPosn(String trader, int busDay, @Nullable Object value)
+    private final TraderPosnTree readPosn(String trader, int busDay, @Nullable Object value)
             throws InterruptedException {
         TraderPosnTree tree = (TraderPosnTree) value;
         if (tree == null) {
-            tree = model.selectPosn(trader, busDay, factory);
-            cache.insert("posn:" + trader, tree);
+            tree = model.readPosn(trader, busDay, factory);
+            cache.create("posn:" + trader, tree);
         }
         return tree;
     }
 
-    private final long getTimeout(@Nullable Object value) {
+    private final long readTimeout(@Nullable Object value) {
         return value != null ? (Long) value : 0;
     }
 
@@ -173,12 +173,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException {
         try {
             final String key = "trader:" + email;
-            String trader = (String) cache.select(key).get();
+            String trader = (String) cache.read(key).get();
             if (trader == null) {
-                trader = model.selectTraderByEmail(email, factory);
+                trader = model.readTraderByEmail(email, factory);
                 // An empty value indicates that there is no trader with this email, as opposed to a
                 // null value, which indicates that the cache is empty.
-                cache.insert(key, trader != null ? trader : "");
+                cache.create(key, trader != null ? trader : "");
             }
             return trader != null && !trader.isEmpty() ? trader : null;
         } catch (final ExecutionException e) {
@@ -198,22 +198,22 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final MnemRbTree asset = getAsset(map.get("asset"));
-            final MnemRbTree contr = getAsset(map.get("contr"));
-            final MnemRbTree market = getAsset(map.get("market"));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final MnemRbTree assets = readAsset(map.get("asset"));
+            final MnemRbTree contrs = readAsset(map.get("contr"));
+            final MnemRbTree markets = readAsset(map.get("market"));
+            final long timeout = readTimeout(map.get("timeout"));
 
             out.append("{\"assets\":");
-            toJsonArray(asset.getFirst(), params, out);
+            toJsonArray(assets.getFirst(), params, out);
             out.append(",\"contrs\":");
-            toJsonArray(contr.getFirst(), params, out);
+            toJsonArray(contrs.getFirst(), params, out);
             out.append(",\"markets\":");
-            toJsonArray(market.getFirst(), params, out);
+            toJsonArray(markets.getFirst(), params, out);
             if (withTraders) {
-                final MnemRbTree trader = getAsset(map.get("trader"));
+                final MnemRbTree traders = readAsset(map.get("trader"));
                 out.append(",\"traders\":");
-                toJsonArray(trader.getFirst(), params, out);
+                toJsonArray(traders.getFirst(), params, out);
             }
             out.append('}');
             return timeout;
@@ -234,11 +234,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(name, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final MnemRbTree tree = getRec(recType, map.get(name));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final MnemRbTree recs = readRec(recType, map.get(name));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            toJsonArray(tree.getFirst(), params, out);
+            toJsonArray(recs.getFirst(), params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -257,11 +257,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(name, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final MnemRbTree tree = getRec(recType, map.get(name));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final MnemRbTree recs = readRec(recType, map.get(name));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            final Rec rec = (Rec) tree.find(mnem);
+            final Rec rec = (Rec) recs.find(mnem);
             if (rec == null) {
                 throw new NotFoundException(String.format("record '%s' does not exist", mnem));
             }
@@ -283,11 +283,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList("view", "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final MnemRbTree tree = getView(map.get("view"));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final MnemRbTree views = readView(map.get("view"));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            toJsonArray(tree.getFirst(), params, out);
+            toJsonArray(views.getFirst(), params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -305,11 +305,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList("view", "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final MnemRbTree tree = getView(map.get("view"));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final MnemRbTree views = readView(map.get("view"));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            RestUtil.getView(tree.getFirst(), market, params, out);
+            RestUtil.getView(views.getFirst(), market, params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -331,23 +331,23 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final InstructTree order = getOrder(trader, map.get(orderKey));
-            final InstructTree trade = getTrade(trader, map.get(tradeKey));
+            final Map<String, Object> map = cache.read(keys).get();
+            final InstructTree orders = readOrder(trader, map.get(orderKey));
+            final InstructTree trades = readTrade(trader, map.get(tradeKey));
             final int busDay = getBusDate(now).toJd();
-            final TraderPosnTree posn = getPosn(trader, busDay, map.get(posnKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
             out.append("{\"orders\":");
-            toJsonArray(order.getFirst(), params, out);
+            toJsonArray(orders.getFirst(), params, out);
             out.append(",\"trades\":");
-            toJsonArray(trade.getFirst(), params, out);
+            toJsonArray(trades.getFirst(), params, out);
             out.append(",\"posns\":");
-            toJsonArray(posn.getFirst(), params, out);
+            toJsonArray(posns.getFirst(), params, out);
             if (getViewsParam(params)) {
-                final MnemRbTree view = getView(map.get("view"));
+                final MnemRbTree views = readView(map.get("view"));
                 out.append(",\"views\":");
-                toJsonArray(view.getFirst(), params, out);
+                toJsonArray(views.getFirst(), params, out);
             }
             out.append('}');
             return timeout;
@@ -368,11 +368,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(orderKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final InstructTree tree = getOrder(trader, map.get(orderKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final InstructTree orders = readOrder(trader, map.get(orderKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            toJsonArray(tree.getFirst(), params, out);
+            toJsonArray(orders.getFirst(), params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -391,11 +391,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(orderKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final InstructTree tree = getOrder(trader, map.get(orderKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final InstructTree orders = readOrder(trader, map.get(orderKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            RestUtil.getOrder(tree.getFirst(), market, params, out);
+            RestUtil.getOrder(orders.getFirst(), market, params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -414,11 +414,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(orderKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final InstructTree tree = getOrder(trader, map.get(orderKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final InstructTree orders = readOrder(trader, map.get(orderKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            final Order order = (Order) tree.find(market, id);
+            final Order order = (Order) orders.find(market, id);
             if (order == null) {
                 throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
@@ -441,11 +441,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(tradeKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final InstructTree tree = getTrade(trader, map.get(tradeKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final InstructTree trades = readTrade(trader, map.get(tradeKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            toJsonArray(tree.getFirst(), params, out);
+            toJsonArray(trades.getFirst(), params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -464,11 +464,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(tradeKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final InstructTree tree = getTrade(trader, map.get(tradeKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final InstructTree trades = readTrade(trader, map.get(tradeKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            RestUtil.getTrade(tree.getFirst(), market, params, out);
+            RestUtil.getTrade(trades.getFirst(), market, params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -487,11 +487,11 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(tradeKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
-            final InstructTree tree = getTrade(trader, map.get(tradeKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final Map<String, Object> map = cache.read(keys).get();
+            final InstructTree trades = readTrade(trader, map.get(tradeKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            final Exec trade = (Exec) tree.find(market, id);
+            final Exec trade = (Exec) trades.find(market, id);
             if (trade == null) {
                 throw new NotFoundException(String.format("trade '%d' does not exist", id));
             }
@@ -514,12 +514,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(posnKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
+            final Map<String, Object> map = cache.read(keys).get();
             final int busDay = getBusDate(now).toJd();
-            final TraderPosnTree tree = getPosn(trader, busDay, map.get(posnKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            toJsonArray(tree.getFirst(), params, out);
+            toJsonArray(posns.getFirst(), params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -538,12 +538,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(posnKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
+            final Map<String, Object> map = cache.read(keys).get();
             final int busDay = getBusDate(now).toJd();
-            final TraderPosnTree tree = getPosn(trader, busDay, map.get(posnKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            RestUtil.getPosn(tree.getFirst(), contr, params, out);
+            RestUtil.getPosn(posns.getFirst(), contr, params, out);
             return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
@@ -562,12 +562,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
         final Collection<String> keys = Arrays.asList(posnKey, "timeout");
         assert keys != null;
         try {
-            final Map<String, Object> map = cache.select(keys).get();
+            final Map<String, Object> map = cache.read(keys).get();
             final int busDay = getBusDate(now).toJd();
-            final TraderPosnTree tree = getPosn(trader, busDay, map.get(posnKey));
-            final long timeout = getTimeout(map.get("timeout"));
+            final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
+            final long timeout = readTimeout(map.get("timeout"));
 
-            final Posn posn = (Posn) tree.find(contr, maybeIsoToJd(settlDate));
+            final Posn posn = (Posn) posns.find(contr, maybeIsoToJd(settlDate));
             if (posn == null) {
                 throw new NotFoundException(
                         String.format("posn for '%s' on '%d' does not exist", contr, settlDate));

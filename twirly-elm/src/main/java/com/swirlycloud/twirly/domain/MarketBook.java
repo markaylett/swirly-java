@@ -45,21 +45,23 @@ public @NonNullByDefault class MarketBook extends Market {
         return side == Side.BUY ? bidSide : offerSide;
     }
 
-    private final void fillLadder(Ladder ladder) {
+    private final void fillLadder(MarketData data) {
 
-        view.ladder.clear();
-        final int rows = ladder.getRows();
+        data.clear();
+        final int rows = data.getRows();
         int row = 0;
         for (RbNode node = bidSide.getFirstLevel(); node != null
                 && row < rows; node = node.rbNext()) {
             final Level level = (Level) node;
-            ladder.setBidRung(row++, level.getTicks(), level.getLots(), level.getCount());
+            data.setBidLevel(row++, level.getTicks(), level.getResd(), level.getQuot(),
+                    level.getCount());
         }
         row = 0;
         for (RbNode node = offerSide.getFirstLevel(); node != null
                 && row < rows; node = node.rbNext()) {
             final Level level = (Level) node;
-            ladder.setOfferRung(row++, level.getTicks(), level.getLots(), level.getCount());
+            data.setOfferLevel(row++, level.getTicks(), level.getResd(), level.getQuot(),
+                    level.getCount());
         }
     }
 
@@ -120,7 +122,7 @@ public @NonNullByDefault class MarketBook extends Market {
                 out.append("null");
             }
         }
-        out.append("],\"bidLots\":[");
+        out.append("],\"bidResd\":[");
         node = firstBid;
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -128,7 +130,21 @@ public @NonNullByDefault class MarketBook extends Market {
             }
             if (node != null) {
                 final Level level = (Level) node;
-                out.append(String.valueOf(level.getLots()));
+                out.append(String.valueOf(level.getResd()));
+                node = node.rbNext();
+            } else {
+                out.append("null");
+            }
+        }
+        out.append("],\"bidQuot\":[");
+        node = firstBid;
+        for (int i = 0; i < depth; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                out.append(String.valueOf(level.getQuot()));
                 node = node.rbNext();
             } else {
                 out.append("null");
@@ -162,7 +178,7 @@ public @NonNullByDefault class MarketBook extends Market {
                 out.append("null");
             }
         }
-        out.append("],\"offerLots\":[");
+        out.append("],\"offerResd\":[");
         node = firstOffer;
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -170,7 +186,21 @@ public @NonNullByDefault class MarketBook extends Market {
             }
             if (node != null) {
                 final Level level = (Level) node;
-                out.append(String.valueOf(level.getLots()));
+                out.append(String.valueOf(level.getResd()));
+                node = node.rbNext();
+            } else {
+                out.append("null");
+            }
+        }
+        out.append("],\"offerQuot\":[");
+        node = firstOffer;
+        for (int i = 0; i < depth; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (node != null) {
+                final Level level = (Level) node;
+                out.append(String.valueOf(level.getQuot()));
                 node = node.rbNext();
             } else {
                 out.append("null");
@@ -201,8 +231,8 @@ public @NonNullByDefault class MarketBook extends Market {
         getSide(order.getSide()).removeOrder(order);
     }
 
-    public final void placeOrder(Order order, long now) {
-        getSide(order.getSide()).placeOrder(order, now);
+    public final void createOrder(Order order, long now) {
+        getSide(order.getSide()).createOrder(order, now);
     }
 
     public final void reviseOrder(Order order, long lots, long now) {
@@ -293,6 +323,6 @@ public @NonNullByDefault class MarketBook extends Market {
         view.lastTicks = lastTicks;
         view.lastLots = lastLots;
         view.lastTime = lastTime;
-        fillLadder(view.ladder);
+        fillLadder(view.data);
     }
 }
