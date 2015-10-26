@@ -22,10 +22,10 @@ public class MarketData implements Serializable {
 
     // Columns.
     public static final int BID_TICKS = 0;
-    public static final int BID_LOTS = 1;
+    public static final int BID_RESD = 1;
     public static final int BID_COUNT = 2;
     public static final int OFFER_TICKS = 3;
-    public static final int OFFER_LOTS = 4;
+    public static final int OFFER_RESD = 4;
     public static final int OFFER_COUNT = 5;
 
     private final long[] data;
@@ -80,9 +80,9 @@ public class MarketData implements Serializable {
         return ROWS;
     }
 
-    public final void setBidLevel(int row, long ticks, long lots, long count) {
+    public final void setBidLevel(int row, long ticks, long resd, long count) {
         setValue(row, BID_TICKS, ticks);
-        setValue(row, BID_LOTS, lots);
+        setValue(row, BID_RESD, resd);
         setValue(row, BID_COUNT, count);
     }
 
@@ -90,17 +90,17 @@ public class MarketData implements Serializable {
         setValue(row, BID_TICKS, ticks);
     }
 
-    public final void setBidLots(int row, long lots) {
-        setValue(row, BID_LOTS, lots);
+    public final void setBidResd(int row, long resd) {
+        setValue(row, BID_RESD, resd);
     }
 
     public final void setBidCount(int row, long count) {
         setValue(row, BID_COUNT, count);
     }
 
-    public final void setOfferLevel(int row, long ticks, long lots, long count) {
+    public final void setOfferLevel(int row, long ticks, long resd, long count) {
         setValue(row, OFFER_TICKS, ticks);
-        setValue(row, OFFER_LOTS, lots);
+        setValue(row, OFFER_RESD, resd);
         setValue(row, OFFER_COUNT, count);
     }
 
@@ -108,8 +108,8 @@ public class MarketData implements Serializable {
         setValue(row, OFFER_TICKS, ticks);
     }
 
-    public final void setOfferLots(int row, long lots) {
-        setValue(row, OFFER_LOTS, lots);
+    public final void setOfferResd(int row, long resd) {
+        setValue(row, OFFER_RESD, resd);
     }
 
     public final void setOfferCount(int row, long count) {
@@ -119,15 +119,15 @@ public class MarketData implements Serializable {
     public final boolean isValidBid(int row) {
         // Use lots instead of ticks or count, because zero is a valid price, and order counts may
         // be unavailable.
-        return getBidLots(row) > 0;
+        return getBidResd(row) > 0;
     }
 
     public final long getBidTicks(int row) {
         return getValue(row, BID_TICKS);
     }
 
-    public final long getBidLots(int row) {
-        return getValue(row, BID_LOTS);
+    public final long getBidResd(int row) {
+        return getValue(row, BID_RESD);
     }
 
     public final long getBidCount(int row) {
@@ -137,15 +137,15 @@ public class MarketData implements Serializable {
     public final boolean isValidOffer(int row) {
         // Use lots instead of ticks or count, because zero is a valid price, and order counts may
         // be unavailable.
-        return getOfferLots(row) > 0;
+        return getOfferResd(row) > 0;
     }
 
     public final long getOfferTicks(int row) {
         return getValue(row, OFFER_TICKS);
     }
 
-    public final long getOfferLots(int row) {
-        return getValue(row, OFFER_LOTS);
+    public final long getOfferResd(int row) {
+        return getValue(row, OFFER_RESD);
     }
 
     public final long getOfferCount(int row) {

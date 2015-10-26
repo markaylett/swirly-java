@@ -62,7 +62,7 @@ public final class BookSide {
             // Reduce level and order by lots.
             final Level level = (Level) order.level;
             assert level != null;
-            level.lots -= delta;
+            level.resd -= delta;
             order.resd -= delta;
         } else {
             assert delta == order.getResd();
@@ -106,11 +106,11 @@ public final class BookSide {
 
         final Level level = (Level) order.level;
         assert level != null;
-        level.lots -= order.resd;
+        level.resd -= order.resd;
 
         if (--level.count == 0) {
             // Remove level.
-            assert level.lots == 0;
+            assert level.resd == 0;
             levels.remove(level);
         } else if (level.firstOrder == order) {
             // First order at this level is being removed.

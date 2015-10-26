@@ -53,13 +53,13 @@ public @NonNullByDefault class MarketBook extends Market {
         for (RbNode node = bidSide.getFirstLevel(); node != null
                 && row < rows; node = node.rbNext()) {
             final Level level = (Level) node;
-            data.setBidLevel(row++, level.getTicks(), level.getLots(), level.getCount());
+            data.setBidLevel(row++, level.getTicks(), level.getResd(), level.getCount());
         }
         row = 0;
         for (RbNode node = offerSide.getFirstLevel(); node != null
                 && row < rows; node = node.rbNext()) {
             final Level level = (Level) node;
-            data.setOfferLevel(row++, level.getTicks(), level.getLots(), level.getCount());
+            data.setOfferLevel(row++, level.getTicks(), level.getResd(), level.getCount());
         }
     }
 
@@ -120,7 +120,7 @@ public @NonNullByDefault class MarketBook extends Market {
                 out.append("null");
             }
         }
-        out.append("],\"bidLots\":[");
+        out.append("],\"bidResd\":[");
         node = firstBid;
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -128,7 +128,7 @@ public @NonNullByDefault class MarketBook extends Market {
             }
             if (node != null) {
                 final Level level = (Level) node;
-                out.append(String.valueOf(level.getLots()));
+                out.append(String.valueOf(level.getResd()));
                 node = node.rbNext();
             } else {
                 out.append("null");
@@ -162,7 +162,7 @@ public @NonNullByDefault class MarketBook extends Market {
                 out.append("null");
             }
         }
-        out.append("],\"offerLots\":[");
+        out.append("],\"offerResd\":[");
         node = firstOffer;
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -170,7 +170,7 @@ public @NonNullByDefault class MarketBook extends Market {
             }
             if (node != null) {
                 final Level level = (Level) node;
-                out.append(String.valueOf(level.getLots()));
+                out.append(String.valueOf(level.getResd()));
                 node = node.rbNext();
             } else {
                 out.append("null");

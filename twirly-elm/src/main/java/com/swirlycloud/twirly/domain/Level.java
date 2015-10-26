@@ -26,7 +26,8 @@ public final @NonNullByDefault class Level extends BasicRbNode {
     /**
      * Must be greater than zero.
      */
-    long lots;
+    long resd;
+    long quot;
     /**
      * Must be greater than zero.
      */
@@ -37,7 +38,8 @@ public final @NonNullByDefault class Level extends BasicRbNode {
         this.key = composeKey(order.getSide(), ticks);
         this.ticks = ticks;
         this.firstOrder = order;
-        this.lots = order.getResd();
+        this.resd = order.getResd();
+        this.quot = 0; // FIXME
         this.count = 1;
     }
 
@@ -53,7 +55,7 @@ public final @NonNullByDefault class Level extends BasicRbNode {
     }
 
     public final void addOrder(Order order) {
-        lots += order.getResd();
+        resd += order.getResd();
         ++count;
     }
 
@@ -65,8 +67,12 @@ public final @NonNullByDefault class Level extends BasicRbNode {
         return firstOrder;
     }
 
-    public final long getLots() {
-        return lots;
+    public final long getResd() {
+        return resd;
+    }
+
+    public final long getQuot() {
+        return quot;
     }
 
     public final int getCount() {

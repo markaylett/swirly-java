@@ -124,7 +124,7 @@ public final class ServTest {
         final Level level = (Level) side.getFirstLevel();
         assertNotNull(level);
         assertEquals(12344, level.getTicks());
-        assertEquals(11, level.getLots());
+        assertEquals(11, level.getResd());
         assertEquals(1, level.getCount());
     }
 
@@ -137,7 +137,7 @@ public final class ServTest {
         final Level level = (Level) side.getFirstLevel();
         assertNotNull(level);
         assertEquals(12346, level.getTicks());
-        assertEquals(3, level.getLots());
+        assertEquals(3, level.getResd());
         assertEquals(1, level.getCount());
     }
 

@@ -146,11 +146,11 @@ public abstract class RestTest {
         assertEquals(settlDay, actual.getSettlDay());
 
         assertEquals(0, actual.getOfferTicks(0));
-        assertEquals(0, actual.getOfferLots(0));
+        assertEquals(0, actual.getOfferResd(0));
         assertEquals(0, actual.getOfferCount(0));
 
         assertEquals(0, actual.getBidTicks(0));
-        assertEquals(0, actual.getBidLots(0));
+        assertEquals(0, actual.getBidResd(0));
         assertEquals(0, actual.getOfferCount(0));
 
         assertEquals(0, actual.getLastTicks());
