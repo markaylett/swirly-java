@@ -119,6 +119,15 @@ public final class BackSessServlet extends SessServlet {
                 }
                 rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(), r.getTicks(),
                         r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
+            } else if ("quote".equals(parts[TYPE_PART])) {
+
+                final int required = Request.LOTS;
+                final int optional = Request.REF;
+                if (!r.isValid(required, optional)) {
+                    throw new InvalidException("request fields are invalid");
+                }
+                rest.postQuote(trader, market, r.getRef(), r.getLots(), PARAMS_NONE, now,
+                        resp.getWriter());
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }

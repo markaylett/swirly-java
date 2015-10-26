@@ -22,6 +22,7 @@ import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.TraderSess;
@@ -555,6 +556,22 @@ public final @NonNullByDefault class BackRest implements Rest {
                     now);
             timeout = serv.poll(now);
             trade.toJson(params, out);
+        } finally {
+            serv.unlock(lock);
+        }
+    }
+
+    public final void postQuote(String trader, String market, String ref, long lots, Params params,
+            long now, Appendable out)
+                    throws NotFoundException, ServiceUnavailableException, IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        final int lock = serv.writeLock();
+        try {
+            final TraderSess sess = serv.getTrader(trader);
+            final MarketBook book = serv.getMarket(market);
+            final Quote quote = serv.createQuote(sess, book, ref, lots, now);
+            timeout = serv.poll(now);
+            quote.toJson(params, out);
         } finally {
             serv.unlock(lock);
         }

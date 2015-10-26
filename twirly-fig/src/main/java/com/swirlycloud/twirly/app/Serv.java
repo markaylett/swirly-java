@@ -22,6 +22,7 @@ import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
@@ -68,6 +69,9 @@ public @NonNullByDefault class Serv {
 
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
+
+    // 5 minutes.
+    private static final int QUOTE_EXPIRY = 5 * 60 * 1000;
 
     private final Journ journ;
     private final Cache cache;
@@ -1341,6 +1345,12 @@ public @NonNullByDefault class Serv {
         } while (node != null);
 
         updateDirty();
+    }
+
+    public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
+            long lots, long now) {
+        // FIXME.
+        return factory.newQuote(1, sess.getMnem(), book, ref, 0, 0, 0, 0, now, now + QUOTE_EXPIRY);
     }
 
     /**
