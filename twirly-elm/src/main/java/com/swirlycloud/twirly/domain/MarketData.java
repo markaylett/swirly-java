@@ -13,7 +13,7 @@ public class MarketData implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final int ROWS = 5;
-    public static final int COLS = 6;
+    public static final int COLS = 8;
 
     /**
      * Maximum rungs in ladder.
@@ -23,10 +23,12 @@ public class MarketData implements Serializable {
     // Columns.
     public static final int BID_TICKS = 0;
     public static final int BID_RESD = 1;
-    public static final int BID_COUNT = 2;
-    public static final int OFFER_TICKS = 3;
-    public static final int OFFER_RESD = 4;
-    public static final int OFFER_COUNT = 5;
+    public static final int BID_QUOT = 2;
+    public static final int BID_COUNT = 3;
+    public static final int OFFER_TICKS = 4;
+    public static final int OFFER_RESD = 5;
+    public static final int OFFER_QUOT = 6;
+    public static final int OFFER_COUNT = 7;
 
     private final long[] data;
 
@@ -80,9 +82,10 @@ public class MarketData implements Serializable {
         return ROWS;
     }
 
-    public final void setBidLevel(int row, long ticks, long resd, long count) {
+    public final void setBidLevel(int row, long ticks, long resd, long quot, long count) {
         setValue(row, BID_TICKS, ticks);
         setValue(row, BID_RESD, resd);
+        setValue(row, BID_QUOT, quot);
         setValue(row, BID_COUNT, count);
     }
 
@@ -94,13 +97,18 @@ public class MarketData implements Serializable {
         setValue(row, BID_RESD, resd);
     }
 
+    public final void setBidQuot(int row, long quot) {
+        setValue(row, BID_QUOT, quot);
+    }
+
     public final void setBidCount(int row, long count) {
         setValue(row, BID_COUNT, count);
     }
 
-    public final void setOfferLevel(int row, long ticks, long resd, long count) {
+    public final void setOfferLevel(int row, long ticks, long resd, long quot, long count) {
         setValue(row, OFFER_TICKS, ticks);
         setValue(row, OFFER_RESD, resd);
+        setValue(row, OFFER_QUOT, quot);
         setValue(row, OFFER_COUNT, count);
     }
 
@@ -110,6 +118,10 @@ public class MarketData implements Serializable {
 
     public final void setOfferResd(int row, long resd) {
         setValue(row, OFFER_RESD, resd);
+    }
+
+    public final void setOfferQuot(int row, long quot) {
+        setValue(row, OFFER_QUOT, quot);
     }
 
     public final void setOfferCount(int row, long count) {
@@ -130,6 +142,10 @@ public class MarketData implements Serializable {
         return getValue(row, BID_RESD);
     }
 
+    public final long getBidQuot(int row) {
+        return getValue(row, BID_QUOT);
+    }
+
     public final long getBidCount(int row) {
         return getValue(row, BID_COUNT);
     }
@@ -146,6 +162,10 @@ public class MarketData implements Serializable {
 
     public final long getOfferResd(int row) {
         return getValue(row, OFFER_RESD);
+    }
+
+    public final long getOfferQuot(int row) {
+        return getValue(row, OFFER_QUOT);
     }
 
     public final long getOfferCount(int row) {

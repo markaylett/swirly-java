@@ -135,12 +135,16 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
                     parseArray(p, data, MarketData.BID_TICKS);
                 } else if ("bidResd".equals(name)) {
                     parseArray(p, data, MarketData.BID_RESD);
+                } else if ("bidQuot".equals(name)) {
+                    parseArray(p, data, MarketData.BID_QUOT);
                 } else if ("bidCount".equals(name)) {
                     parseArray(p, data, MarketData.BID_COUNT);
                 } else if ("offerTicks".equals(name)) {
                     parseArray(p, data, MarketData.OFFER_TICKS);
                 } else if ("offerResd".equals(name)) {
                     parseArray(p, data, MarketData.OFFER_RESD);
+                } else if ("offerQuot".equals(name)) {
+                    parseArray(p, data, MarketData.OFFER_QUOT);
                 } else if ("offerCount".equals(name)) {
                     parseArray(p, data, MarketData.OFFER_COUNT);
                 } else {
@@ -268,6 +272,17 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
                 out.append("null");
             }
         }
+        out.append("],\"bidQuot\":[");
+        for (int i = 0; i < depth; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (isValidBid(i)) {
+                out.append(String.valueOf(getBidQuot(i)));
+            } else {
+                out.append("null");
+            }
+        }
         out.append("],\"bidCount\":[");
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -297,6 +312,17 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
             }
             if (isValidOffer(i)) {
                 out.append(String.valueOf(getOfferResd(i)));
+            } else {
+                out.append("null");
+            }
+        }
+        out.append("],\"offerQuot\":[");
+        for (int i = 0; i < depth; ++i) {
+            if (i > 0) {
+                out.append(',');
+            }
+            if (isValidOffer(i)) {
+                out.append(String.valueOf(getOfferQuot(i)));
             } else {
                 out.append("null");
             }
@@ -364,6 +390,10 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
         return data.getBidResd(row);
     }
 
+    public final long getBidQuot(int row) {
+        return data.getBidQuot(row);
+    }
+
     public final long getBidCount(int row) {
         return data.getBidCount(row);
     }
@@ -378,6 +408,10 @@ public final @NonNullByDefault class MarketView extends BasicRbNode
 
     public final long getOfferResd(int row) {
         return data.getOfferResd(row);
+    }
+
+    public final long getOfferQuot(int row) {
+        return data.getOfferQuot(row);
     }
 
     public final long getOfferCount(int row) {
