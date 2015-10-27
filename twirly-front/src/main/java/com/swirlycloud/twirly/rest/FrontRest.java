@@ -25,8 +25,8 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.exception.UncheckedExecutionException;
-import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RequestTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Model;
@@ -129,9 +129,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
-    private final InstructTree readOrder(String trader, @Nullable Object value)
+    private final RequestTree readOrder(String trader, @Nullable Object value)
             throws InterruptedException {
-        InstructTree tree = (InstructTree) value;
+        RequestTree tree = (RequestTree) value;
         if (tree == null) {
             tree = model.readOrder(trader, factory);
             cache.create("order:" + trader, tree);
@@ -139,9 +139,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
-    private final InstructTree readTrade(String trader, @Nullable Object value)
+    private final RequestTree readTrade(String trader, @Nullable Object value)
             throws InterruptedException {
-        InstructTree tree = (InstructTree) value;
+        RequestTree tree = (RequestTree) value;
         if (tree == null) {
             tree = model.readTrade(trader, factory);
             cache.create("trade:" + trader, tree);
@@ -328,8 +328,8 @@ public final @NonNullByDefault class FrontRest implements Rest {
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final InstructTree orders = readOrder(trader, map.get(orderKey));
-            final InstructTree trades = readTrade(trader, map.get(tradeKey));
+            final RequestTree orders = readOrder(trader, map.get(orderKey));
+            final RequestTree trades = readTrade(trader, map.get(tradeKey));
             final int busDay = getBusDate(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
             timeout = readTimeout(map.get("timeout"));
@@ -364,7 +364,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final InstructTree orders = readOrder(trader, map.get(orderKey));
+            final RequestTree orders = readOrder(trader, map.get(orderKey));
             timeout = readTimeout(map.get("timeout"));
 
             toJsonArray(orders.getFirst(), params, out);
@@ -386,7 +386,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final InstructTree orders = readOrder(trader, map.get(orderKey));
+            final RequestTree orders = readOrder(trader, map.get(orderKey));
             timeout = readTimeout(map.get("timeout"));
 
             RestUtil.getOrder(orders.getFirst(), market, params, out);
@@ -408,7 +408,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final InstructTree orders = readOrder(trader, map.get(orderKey));
+            final RequestTree orders = readOrder(trader, map.get(orderKey));
             timeout = readTimeout(map.get("timeout"));
 
             final Order order = (Order) orders.find(market, id);
@@ -434,7 +434,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final InstructTree trades = readTrade(trader, map.get(tradeKey));
+            final RequestTree trades = readTrade(trader, map.get(tradeKey));
             timeout = readTimeout(map.get("timeout"));
 
             toJsonArray(trades.getFirst(), params, out);
@@ -456,7 +456,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final InstructTree trades = readTrade(trader, map.get(tradeKey));
+            final RequestTree trades = readTrade(trader, map.get(tradeKey));
             timeout = readTimeout(map.get("timeout"));
 
             RestUtil.getTrade(trades.getFirst(), market, params, out);
@@ -478,7 +478,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final InstructTree trades = readTrade(trader, map.get(tradeKey));
+            final RequestTree trades = readTrade(trader, map.get(tradeKey));
             timeout = readTimeout(map.get("timeout"));
 
             final Exec trade = (Exec) trades.find(market, id);

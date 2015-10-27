@@ -6,8 +6,8 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.RefHashTable;
+import com.swirlycloud.twirly.intrusive.RequestTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.node.RbNode;
@@ -27,8 +27,8 @@ public @NonNullByDefault class TraderSess extends Trader {
 
     private final transient RefHashTable refIdx;
     private final transient Factory factory;
-    final transient InstructTree orders = new InstructTree();
-    final transient InstructTree trades = new InstructTree();
+    final transient RequestTree orders = new RequestTree();
+    final transient RequestTree trades = new RequestTree();
     final transient TraderPosnTree posns = new TraderPosnTree();
     @Nullable
     private transient TraderSess dirtyNext;

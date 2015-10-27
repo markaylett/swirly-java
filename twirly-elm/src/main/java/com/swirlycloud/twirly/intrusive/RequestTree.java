@@ -8,21 +8,21 @@ import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Instruct;
+import com.swirlycloud.twirly.domain.Request;
 import com.swirlycloud.twirly.node.RbNode;
 
-public final @NonNullByDefault class InstructTree extends Tree<RbNode> {
+public final @NonNullByDefault class RequestTree extends Tree<RbNode> {
 
     private static final long serialVersionUID = 1L;
 
     @Override
     protected final int compareKey(RbNode lhs, RbNode rhs) {
-        final Instruct r = (Instruct) rhs;
+        final Request r = (Request) rhs;
         return compareKey(lhs, r.getMarket(), r.getId());
     }
 
     protected final int compareKey(RbNode lhs, String market, long id) {
-        final Instruct l = (Instruct) lhs;
+        final Request l = (Request) lhs;
         int n = l.getMarket().compareTo(market);
         if (n == 0) {
             n = compareLong(l.getId(), id);

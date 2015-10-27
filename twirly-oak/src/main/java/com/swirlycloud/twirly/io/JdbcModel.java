@@ -24,9 +24,9 @@ import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.intrusive.Container;
-import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
+import com.swirlycloud.twirly.intrusive.RequestTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.RbNode;
@@ -510,9 +510,9 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull InstructTree readOrder(@NonNull String trader,
+    public final @NonNull RequestTree readOrder(@NonNull String trader,
             @NonNull Factory factory) {
-        final InstructTree t = new InstructTree();
+        final RequestTree t = new RequestTree();
         try {
             setParam(selectOrderByTraderStmt, 1, trader);
             readOrder(selectOrderByTraderStmt, factory, t);
@@ -534,9 +534,9 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull InstructTree readTrade(@NonNull String trader,
+    public final @NonNull RequestTree readTrade(@NonNull String trader,
             @NonNull Factory factory) {
-        final InstructTree t = new InstructTree();
+        final RequestTree t = new RequestTree();
         try {
             setParam(selectTradeByTraderStmt, 1, trader);
             readTrade(selectTradeByTraderStmt, factory, t);

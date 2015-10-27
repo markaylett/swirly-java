@@ -26,9 +26,9 @@ import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.intrusive.Container;
-import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
+import com.swirlycloud.twirly.intrusive.RequestTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.mock.MockAsset;
@@ -261,8 +261,8 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable String readTraderByEmail(@NonNull String email,
-            @NonNull Factory factory) throws InterruptedException {
+    public final @Nullable String readTraderByEmail(@NonNull String email, @NonNull Factory factory)
+            throws InterruptedException {
         final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL, email);
         final Query query = new Query(TRADER_KIND).setFilter(filter).setKeysOnly();
         final PreparedQuery pq = datastore.prepare(query);
@@ -285,14 +285,13 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull InstructTree readOrder(@NonNull String trader,
-            @NonNull Factory factory) {
+    public final @NonNull RequestTree readOrder(@NonNull String trader, @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(traderFilter, archiveFilter);
         assert filter != null;
-        final InstructTree t = new InstructTree();
+        final RequestTree t = new RequestTree();
         readOrder(filter, factory, t);
         return t;
     }
@@ -311,8 +310,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull InstructTree readTrade(@NonNull String trader,
-            @NonNull Factory factory) {
+    public final @NonNull RequestTree readTrade(@NonNull String trader, @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
@@ -320,7 +318,7 @@ public class AppEngineModel implements Model {
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter, archiveFilter);
         assert filter != null;
-        final InstructTree t = new InstructTree();
+        final RequestTree t = new RequestTree();
         readTrade(filter, factory, t);
         return t;
     }

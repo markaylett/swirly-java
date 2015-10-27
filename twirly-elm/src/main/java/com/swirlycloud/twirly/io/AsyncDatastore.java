@@ -20,8 +20,8 @@ import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedExecutionException;
-import com.swirlycloud.twirly.intrusive.InstructTree;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RequestTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.SlNode;
@@ -147,11 +147,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull InstructTree readOrder(@NonNull final String trader,
+    public final @NonNull RequestTree readOrder(@NonNull final String trader,
             @NonNull final Factory factory) throws InterruptedException {
-        return getNonNull(service.submit(new Callable<InstructTree>() {
+        return getNonNull(service.submit(new Callable<RequestTree>() {
             @Override
-            public final InstructTree call() throws Exception {
+            public final RequestTree call() throws Exception {
                 return datastore.readOrder(trader, factory);
             }
         }));
@@ -169,11 +169,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull InstructTree readTrade(@NonNull final String trader,
+    public final @NonNull RequestTree readTrade(@NonNull final String trader,
             @NonNull final Factory factory) throws InterruptedException {
-        return getNonNull(service.submit(new Callable<InstructTree>() {
+        return getNonNull(service.submit(new Callable<RequestTree>() {
             @Override
-            public final InstructTree call() throws Exception {
+            public final RequestTree call() throws Exception {
                 return datastore.readTrade(trader, factory);
             }
         }));
