@@ -50,26 +50,25 @@ public final class BackSessServlet extends SessServlet {
                 throw new InvalidException("id not specified");
             }
             final long now = now();
-            long timeout;
             if (ids.jslNext() != null) {
                 if ("order".equals(parts[TYPE_PART])) {
-                    timeout = rest.deleteOrder(trader, market, ids, now);
+                    rest.deleteOrder(trader, market, ids, now);
                 } else if ("trade".equals(parts[TYPE_PART])) {
-                    timeout = rest.deleteTrade(trader, market, ids, now);
+                    rest.deleteTrade(trader, market, ids, now);
                 } else {
                     throw new MethodNotAllowedException("not allowed on this resource");
                 }
             } else {
                 final long id = ids.getId();
                 if ("order".equals(parts[TYPE_PART])) {
-                    timeout = rest.deleteOrder(trader, market, id, now);
+                    rest.deleteOrder(trader, market, id, now);
                 } else if ("trade".equals(parts[TYPE_PART])) {
-                    timeout = rest.deleteTrade(trader, market, id, now);
+                    rest.deleteTrade(trader, market, id, now);
                 } else {
                     throw new MethodNotAllowedException("not allowed on this resource");
                 }
             }
-            setNoContent(resp, timeout);
+            setNoContent(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
@@ -98,7 +97,6 @@ public final class BackSessServlet extends SessServlet {
             final String market = parts[MARKET_PART];
             final Request r = parseRequest(req);
             final long now = now();
-            long timeout;
             if ("order".equals(parts[TYPE_PART])) {
 
                 final int required = Request.SIDE | Request.TICKS | Request.LOTS;
@@ -106,8 +104,8 @@ public final class BackSessServlet extends SessServlet {
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
-                timeout = rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getTicks(),
-                        r.getLots(), r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
+                rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getTicks(), r.getLots(),
+                        r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             } else if ("trade".equals(parts[TYPE_PART])) {
 
                 final int required = Request.TRADER | Request.SIDE | Request.TICKS | Request.LOTS;
@@ -119,13 +117,12 @@ public final class BackSessServlet extends SessServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new ForbiddenException("user is not an admin");
                 }
-                timeout = rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(),
-                        r.getTicks(), r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(), r.getTicks(),
+                        r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            sendJsonResponse(resp, timeout);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
@@ -161,17 +158,14 @@ public final class BackSessServlet extends SessServlet {
                 throw new InvalidException("request fields are invalid");
             }
             final long now = now();
-            long timeout;
             if (ids.jslNext() != null) {
-                timeout = rest.putOrder(trader, market, ids, r.getLots(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.putOrder(trader, market, ids, r.getLots(), PARAMS_NONE, now, resp.getWriter());
             } else {
                 final long id = ids.getId();
-                timeout = rest.putOrder(trader, market, id, r.getLots(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.putOrder(trader, market, id, r.getLots(), PARAMS_NONE, now, resp.getWriter());
             }
 
-            sendJsonResponse(resp, timeout);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

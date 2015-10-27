@@ -39,6 +39,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     private final Model model;
     private final Cache cache;
     private final Factory factory;
+    private volatile long timeout;
 
     private static String toKey(RecType recType) {
         String name;
@@ -191,7 +192,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getRec(boolean withTraders, Params params, long now, Appendable out)
+    public final void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final Collection<String> keys = Arrays.asList("asset", "contr", "market", "trader",
@@ -202,7 +203,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final MnemRbTree assets = readAsset(map.get("asset"));
             final MnemRbTree contrs = readAsset(map.get("contr"));
             final MnemRbTree markets = readAsset(map.get("market"));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             out.append("{\"assets\":");
             toJsonArray(assets.getFirst(), params, out);
@@ -216,7 +217,6 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 toJsonArray(traders.getFirst(), params, out);
             }
             out.append('}');
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -227,7 +227,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getRec(RecType recType, Params params, long now, Appendable out)
+    public final void getRec(RecType recType, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final String name = toKey(recType);
@@ -236,10 +236,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final MnemRbTree recs = readRec(recType, map.get(name));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             toJsonArray(recs.getFirst(), params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -250,7 +249,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getRec(RecType recType, String mnem, Params params, long now, Appendable out)
+    public final void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String name = toKey(recType);
@@ -259,14 +258,13 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final MnemRbTree recs = readRec(recType, map.get(name));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             final Rec rec = (Rec) recs.find(mnem);
             if (rec == null) {
                 throw new NotFoundException(String.format("record '%s' does not exist", mnem));
             }
             rec.toJson(params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -277,7 +275,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getView(Params params, long now, Appendable out)
+    public final void getView(Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final Collection<String> keys = Arrays.asList("view", "timeout");
@@ -285,10 +283,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final MnemRbTree views = readView(map.get("view"));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             toJsonArray(views.getFirst(), params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -299,7 +296,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getView(String market, Params params, long now, Appendable out)
+    public final void getView(String market, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final Collection<String> keys = Arrays.asList("view", "timeout");
@@ -307,10 +304,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final MnemRbTree views = readView(map.get("view"));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             RestUtil.getView(views.getFirst(), market, params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -321,7 +317,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getSess(String trader, Params params, long now, Appendable out)
+    public final void getSess(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final String orderKey = "order:" + trader;
@@ -336,7 +332,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final InstructTree trades = readTrade(trader, map.get(tradeKey));
             final int busDay = getBusDate(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             out.append("{\"orders\":");
             toJsonArray(orders.getFirst(), params, out);
@@ -350,7 +346,6 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 toJsonArray(views.getFirst(), params, out);
             }
             out.append('}');
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -361,7 +356,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getOrder(String trader, Params params, long now, Appendable out)
+    public final void getOrder(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final String orderKey = "order:" + trader;
@@ -370,10 +365,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final InstructTree orders = readOrder(trader, map.get(orderKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             toJsonArray(orders.getFirst(), params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -384,7 +378,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getOrder(String trader, String market, Params params, long now,
+    public final void getOrder(String trader, String market, Params params, long now,
             Appendable out) throws ServiceUnavailableException, IOException {
 
         final String orderKey = "order:" + trader;
@@ -393,10 +387,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final InstructTree orders = readOrder(trader, map.get(orderKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             RestUtil.getOrder(orders.getFirst(), market, params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -407,7 +400,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getOrder(String trader, String market, long id, Params params, long now,
+    public final void getOrder(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String orderKey = "order:" + trader;
@@ -416,14 +409,13 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final InstructTree orders = readOrder(trader, map.get(orderKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             final Order order = (Order) orders.find(market, id);
             if (order == null) {
                 throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
             order.toJson(params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -434,7 +426,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getTrade(String trader, Params params, long now, Appendable out)
+    public final void getTrade(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final String tradeKey = "trade:" + trader;
@@ -443,10 +435,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final InstructTree trades = readTrade(trader, map.get(tradeKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             toJsonArray(trades.getFirst(), params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -457,7 +448,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getTrade(String trader, String market, Params params, long now,
+    public final void getTrade(String trader, String market, Params params, long now,
             Appendable out) throws ServiceUnavailableException, IOException {
 
         final String tradeKey = "trade:" + trader;
@@ -466,10 +457,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final InstructTree trades = readTrade(trader, map.get(tradeKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             RestUtil.getTrade(trades.getFirst(), market, params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -480,7 +470,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getTrade(String trader, String market, long id, Params params, long now,
+    public final void getTrade(String trader, String market, long id, Params params, long now,
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String tradeKey = "trade:" + trader;
@@ -489,14 +479,13 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final InstructTree trades = readTrade(trader, map.get(tradeKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             final Exec trade = (Exec) trades.find(market, id);
             if (trade == null) {
                 throw new NotFoundException(String.format("trade '%d' does not exist", id));
             }
             trade.toJson(params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -507,7 +496,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getPosn(String trader, Params params, long now, Appendable out)
+    public final void getPosn(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final String posnKey = "posn:" + trader;
@@ -517,10 +506,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final Map<String, Object> map = cache.read(keys).get();
             final int busDay = getBusDate(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             toJsonArray(posns.getFirst(), params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -531,7 +519,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getPosn(String trader, String contr, Params params, long now, Appendable out)
+    public final void getPosn(String trader, String contr, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final String posnKey = "posn:" + trader;
@@ -541,10 +529,9 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final Map<String, Object> map = cache.read(keys).get();
             final int busDay = getBusDate(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             RestUtil.getPosn(posns.getFirst(), contr, params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -555,7 +542,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final long getPosn(String trader, String contr, int settlDate, Params params, long now,
+    public final void getPosn(String trader, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String posnKey = "posn:" + trader;
@@ -565,7 +552,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final Map<String, Object> map = cache.read(keys).get();
             final int busDay = getBusDate(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
-            final long timeout = readTimeout(map.get("timeout"));
+            timeout = readTimeout(map.get("timeout"));
 
             final Posn posn = (Posn) posns.find(contr, maybeIsoToJd(settlDate));
             if (posn == null) {
@@ -573,7 +560,6 @@ public final @NonNullByDefault class FrontRest implements Rest {
                         String.format("posn for '%s' on '%d' does not exist", contr, settlDate));
             }
             posn.toJson(params, out);
-            return timeout;
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -581,5 +567,10 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Thread.currentThread().interrupt();
             throw new ServiceUnavailableException("service interrupted", e);
         }
+    }
+
+    @Override
+    public final long getTimeout() {
+        return timeout;
     }
 }

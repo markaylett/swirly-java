@@ -65,11 +65,11 @@ public abstract class RestServlet extends HttpServlet {
         }
     }
 
-    protected final void sendJsonResponse(HttpServletResponse resp, long timeout) {
+    protected final void sendJsonResponse(HttpServletResponse resp) {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json");
         resp.setHeader("Cache-Control", "no-cache");
-        resp.setHeader("Twirly-Timeout", String.valueOf(timeout));
+        resp.setHeader("Twirly-Timeout", String.valueOf(rest.getTimeout()));
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
@@ -83,9 +83,9 @@ public abstract class RestServlet extends HttpServlet {
         resp.setStatus(e.getHttpStatus());
     }
 
-    protected final void setNoContent(HttpServletResponse resp, long timeout) {
+    protected final void setNoContent(HttpServletResponse resp) {
         resp.setHeader("Cache-Control", "no-cache");
-        resp.setHeader("Twirly-Timeout", String.valueOf(timeout));
+        resp.setHeader("Twirly-Timeout", String.valueOf(rest.getTimeout()));
         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 

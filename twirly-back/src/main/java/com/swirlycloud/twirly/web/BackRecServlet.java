@@ -45,7 +45,6 @@ public final class BackRecServlet extends RecServlet {
 
             final Request r = parseRequest(req);
             final long now = now();
-            long timeout;
             if ("market".equals(parts[TYPE_PART])) {
 
                 final int required = Request.MNEM | Request.DISPLAY | Request.CONTR;
@@ -57,9 +56,8 @@ public final class BackRecServlet extends RecServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new ForbiddenException("user is not an admin");
                 }
-                timeout = rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(),
-                        r.getSettlDate(), r.getExpiryDate(), r.getState(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(), r.getSettlDate(),
+                        r.getExpiryDate(), r.getState(), PARAMS_NONE, now, resp.getWriter());
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
@@ -76,13 +74,13 @@ public final class BackRecServlet extends RecServlet {
                     }
                     email = r.getEmail();
                 }
-                timeout = rest.postTrader(r.getMnem(), r.getDisplay(), email, PARAMS_NONE, now,
+                rest.postTrader(r.getMnem(), r.getDisplay(), email, PARAMS_NONE, now,
                         resp.getWriter());
 
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            sendJsonResponse(resp, timeout);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
@@ -110,7 +108,6 @@ public final class BackRecServlet extends RecServlet {
 
             final Request r = parseRequest(req);
             final long now = now();
-            long timeout;
             if ("market".equals(parts[TYPE_PART])) {
 
                 final int required = Request.MNEM | Request.DISPLAY | Request.STATE;
@@ -121,8 +118,8 @@ public final class BackRecServlet extends RecServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new ForbiddenException("user is not an admin");
                 }
-                timeout = rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE,
-                        now, resp.getWriter());
+                rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE, now,
+                        resp.getWriter());
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
@@ -139,13 +136,12 @@ public final class BackRecServlet extends RecServlet {
                     }
                     email = r.getEmail();
                 }
-                timeout = rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now, resp.getWriter());
 
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            sendJsonResponse(resp, timeout);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

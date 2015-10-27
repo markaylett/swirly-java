@@ -40,42 +40,51 @@ public class RecServlet extends RestServlet {
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
             final long now = now();
-            long timeout = -1;
+            boolean match = false;
             if (parts.length == 0) {
-                timeout = rest.getRec(realm.isUserAdmin(req), params, now, resp.getWriter());
+                rest.getRec(realm.isUserAdmin(req), params, now, resp.getWriter());
+                match = true;
             } else if ("asset".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    timeout = rest.getRec(RecType.ASSET, params, now, resp.getWriter());
+                    rest.getRec(RecType.ASSET, params, now, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    timeout = rest.getRec(RecType.ASSET, parts[MNEM_PART], params, now, resp.getWriter());
+                    rest.getRec(RecType.ASSET, parts[MNEM_PART], params, now, resp.getWriter());
+                    match = true;
                 }
             } else if ("contr".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    timeout = rest.getRec(RecType.CONTR, params, now, resp.getWriter());
+                    rest.getRec(RecType.CONTR, params, now, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    timeout = rest.getRec(RecType.CONTR, parts[MNEM_PART], params, now, resp.getWriter());
+                    rest.getRec(RecType.CONTR, parts[MNEM_PART], params, now, resp.getWriter());
+                    match = true;
                 }
             } else if ("market".equals(parts[TYPE_PART])) {
                 if (parts.length == 1) {
-                    timeout = rest.getRec(RecType.MARKET, params, now, resp.getWriter());
+                    rest.getRec(RecType.MARKET, params, now, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    timeout = rest.getRec(RecType.MARKET, parts[MNEM_PART], params, now, resp.getWriter());
+                    rest.getRec(RecType.MARKET, parts[MNEM_PART], params, now, resp.getWriter());
+                    match = true;
                 }
             } else if ("trader".equals(parts[TYPE_PART])) {
                 if (!realm.isUserAdmin(req)) {
                     throw new ForbiddenException("user is not an admin");
                 }
                 if (parts.length == 1) {
-                    timeout = rest.getRec(RecType.TRADER, params, now, resp.getWriter());
+                    rest.getRec(RecType.TRADER, params, now, resp.getWriter());
+                    match = true;
                 } else if (parts.length == 2) {
-                    timeout = rest.getRec(RecType.TRADER, parts[MNEM_PART], params, now, resp.getWriter());
+                    rest.getRec(RecType.TRADER, parts[MNEM_PART], params, now, resp.getWriter());
+                    match = true;
                 }
             }
 
-            if (timeout == -1) {
+            if (!match) {
                 throw new NotFoundException("resource does not exist");
             }
-            sendJsonResponse(resp, timeout);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
