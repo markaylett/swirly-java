@@ -6,13 +6,16 @@ package com.swirlycloud.twirly.app;
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.twirly.node.SlUtil.popNext;
+import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
 
+import java.util.Comparator;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.collection.PriorityQueue;
 import com.swirlycloud.twirly.domain.BookSide;
 import com.swirlycloud.twirly.domain.Direct;
 import com.swirlycloud.twirly.domain.Exec;
@@ -83,6 +86,14 @@ public @NonNullByDefault class Serv {
     private final RecTree traders;
     private final MarketViewTree views = new MarketViewTree();
     private final TraderEmailMap emailIdx = new TraderEmailMap(CAPACITY);
+    private final PriorityQueue<Quote> quotes = new PriorityQueue<>(new Comparator<Quote>() {
+        @Override
+        public final int compare(@Nullable Quote lhs, @Nullable Quote rhs) {
+            assert lhs != null;
+            assert rhs != null;
+            return compareLong(lhs.getExpiry(), rhs.getExpiry());
+        }
+    });
     private transient int dirty;
     @Nullable
     private TraderSess dirtySess;
@@ -255,7 +266,7 @@ public @NonNullByDefault class Serv {
             match.makerOrder = makerOrder;
             match.makerPosn = makerPosn;
             match.ticks = makerOrder.getTicks();
-            match.lots = Math.min(takerOrder.getResd() - takenLots, makerOrder.getResd());
+            match.lots = Math.min(takerOrder.getResd() - takenLots, makerOrder.getAvail());
 
             takenLots += match.lots;
             takenCost += match.lots * match.ticks;
@@ -287,19 +298,30 @@ public @NonNullByDefault class Serv {
     }
 
     private final void matchOrders(TraderSess sess, MarketBook book, Order order, Result result) {
-        BookSide side;
+        BookSide bookSide;
         Direct direct;
         if (order.getSide() == Side.BUY) {
             // Paid when the taker lifts the offer.
-            side = book.getOfferSide();
+            bookSide = book.getOfferSide();
             direct = Direct.PAID;
         } else {
             assert order.getSide() == Side.SELL;
             // Given when the taker hits the bid.
-            side = book.getBidSide();
+            bookSide = book.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(sess, book, order, side, direct, result);
+        matchOrders(sess, book, order, bookSide, direct, result);
+    }
+
+    private final @Nullable Order matchQuote(MarketBook book, Side side, long lots) {
+        final BookSide bookSide = book.getOtherSide(side);
+        for (DlNode node = bookSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
+            final Order makerOrder = (Order) node;
+            if (makerOrder.getAvail() >= lots) {
+                return makerOrder;
+            }
+        }
+        return null;
     }
 
     private final void doCancelOrders(MarketBook book, long now)
@@ -521,98 +543,98 @@ public @NonNullByDefault class Serv {
     }
 
     public final @Nullable Rec findRec(RecType recType, String mnem) {
-        Rec ret = null;
+        Rec rec = null;
         switch (recType) {
         case ASSET:
-            ret = assets.find(mnem);
+            rec = assets.find(mnem);
             break;
         case CONTR:
-            ret = contrs.find(mnem);
+            rec = contrs.find(mnem);
             break;
         case MARKET:
-            ret = markets.find(mnem);
+            rec = markets.find(mnem);
             break;
         case TRADER:
-            ret = traders.find(mnem);
+            rec = traders.find(mnem);
             break;
         }
-        return ret;
+        return rec;
     }
 
-    public final @Nullable RbNode getRootRec(RecType recType) {
-        RbNode ret = null;
+    public final @Nullable Rec getRootRec(RecType recType) {
+        Rec rec = null;
         switch (recType) {
         case ASSET:
-            ret = assets.getRoot();
+            rec = assets.getRoot();
             break;
         case CONTR:
-            ret = contrs.getRoot();
+            rec = contrs.getRoot();
             break;
         case MARKET:
-            ret = markets.getRoot();
+            rec = markets.getRoot();
             break;
         case TRADER:
-            ret = traders.getRoot();
+            rec = traders.getRoot();
             break;
         }
-        return ret;
+        return rec;
     }
 
-    public final @Nullable RbNode getFirstRec(RecType recType) {
-        RbNode ret = null;
+    public final @Nullable Rec getFirstRec(RecType recType) {
+        Rec rec = null;
         switch (recType) {
         case ASSET:
-            ret = assets.getFirst();
+            rec = assets.getFirst();
             break;
         case CONTR:
-            ret = contrs.getFirst();
+            rec = contrs.getFirst();
             break;
         case MARKET:
-            ret = markets.getFirst();
+            rec = markets.getFirst();
             break;
         case TRADER:
-            ret = traders.getFirst();
+            rec = traders.getFirst();
             break;
         }
-        return ret;
+        return rec;
     }
 
-    public final @Nullable RbNode getLastRec(RecType recType) {
-        RbNode ret = null;
+    public final @Nullable Rec getLastRec(RecType recType) {
+        Rec rec = null;
         switch (recType) {
         case ASSET:
-            ret = assets.getLast();
+            rec = assets.getLast();
             break;
         case CONTR:
-            ret = contrs.getLast();
+            rec = contrs.getLast();
             break;
         case MARKET:
-            ret = markets.getLast();
+            rec = markets.getLast();
             break;
         case TRADER:
-            ret = traders.getLast();
+            rec = traders.getLast();
             break;
         }
-        return ret;
+        return rec;
     }
 
     public final boolean isEmptyRec(RecType recType) {
-        boolean ret = true;
+        boolean result = true;
         switch (recType) {
         case ASSET:
-            ret = assets.isEmpty();
+            result = assets.isEmpty();
             break;
         case CONTR:
-            ret = contrs.isEmpty();
+            result = contrs.isEmpty();
             break;
         case MARKET:
-            ret = markets.isEmpty();
+            result = markets.isEmpty();
             break;
         case TRADER:
-            ret = traders.isEmpty();
+            result = traders.isEmpty();
             break;
         }
-        return ret;
+        return result;
     }
 
     public final MarketBook getMarket(String mnem) throws NotFoundException {
@@ -1002,7 +1024,7 @@ public @NonNullByDefault class Serv {
 
         JslNode firstExec = null;
         for (RbNode node = sess.getFirstOrder(); node != null; node = node.rbNext()) {
-            final Order order = (Order) sess.getRootOrder();
+            final Order order = sess.getRootOrder();
             assert order != null;
             if (!order.isDone()) {
                 continue;
@@ -1031,7 +1053,7 @@ public @NonNullByDefault class Serv {
         setDirty(sess, TraderSess.DIRTY_ORDER);
 
         for (;;) {
-            final Order order = (Order) sess.getRootOrder();
+            final Order order = sess.getRootOrder();
             if (order == null) {
                 break;
             }
@@ -1296,7 +1318,7 @@ public @NonNullByDefault class Serv {
         setDirty(sess, TraderSess.DIRTY_TRADE);
 
         for (;;) {
-            final Exec trade = (Exec) sess.getRootTrade();
+            final Exec trade = sess.getRootTrade();
             if (trade == null) {
                 break;
             }
@@ -1349,10 +1371,21 @@ public @NonNullByDefault class Serv {
     }
 
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
-            Side side, long lots, long now) {
-        // FIXME.
-        return factory.newQuote(1, sess.getMnem(), book, ref, side, 10, 12345, now,
-                now + QUOTE_EXPIRY);
+            Side side, long lots, long now) throws NotFoundException {
+        final Order makerOrder = matchQuote(book, side, lots);
+        if (makerOrder == null) {
+            throw new NotFoundException("no liquidity available");
+        }
+
+        final Quote quote = factory.newQuote(1, sess.getMnem(), book, ref, side, lots,
+                makerOrder.getTicks(), now, now + QUOTE_EXPIRY);
+
+        setDirty(book);
+        quotes.add(quote);
+        sess.insertQuote(quote);
+
+        updateDirty();
+        return quote;
     }
 
     /**
@@ -1396,7 +1429,30 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final long poll(long now) {
-        return 0;
+    public final void poll(long now) {
+        for (;;) {
+            final Quote quote = quotes.getFirst();
+            if (quote == null) {
+                break;
+            }
+            if (quote.getExpiry() <= now) {
+
+                final TraderSess sess = (TraderSess) traders.find(quote.getTrader());
+                assert sess != null;
+
+                final MarketBook book = (MarketBook) markets.find(quote.getMarket());
+                assert book != null;
+
+                setDirty(book);
+                quotes.removeFirst();
+                sess.removeQuote(quote);
+            }
+        }
+        updateDirty();
+    }
+
+    public final long getTimeout() {
+        final Quote next = quotes.getFirst();
+        return next != null ? next.getExpiry() : 0;
     }
 }

@@ -23,13 +23,16 @@ public @NonNullByDefault class TraderSess extends Trader {
     public static final int DIRTY_ORDER = 1 << 1;
     public static final int DIRTY_TRADE = 1 << 2;
     public static final int DIRTY_POSN = 1 << 3;
-    public static final int DIRTY_ALL = DIRTY_EMAIL | DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN;
+    public static final int DIRTY_QUOTE = 1 << 4;
+    public static final int DIRTY_ALL = DIRTY_EMAIL | DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN
+            | DIRTY_QUOTE;
 
     private final transient RequestRefMap refIdx;
     private final transient Factory factory;
     final transient RequestIdTree orders = new RequestIdTree();
     final transient RequestIdTree trades = new RequestIdTree();
     final transient TraderPosnTree posns = new TraderPosnTree();
+    final transient RequestIdTree quotes = new RequestIdTree();
     @Nullable
     private transient TraderSess dirtyNext;
     private transient int dirty;
@@ -83,16 +86,16 @@ public @NonNullByDefault class TraderSess extends Trader {
         return (Order) refIdx.find(mnem, ref);
     }
 
-    public final @Nullable RbNode getRootOrder() {
-        return orders.getRoot();
+    public final @Nullable Order getRootOrder() {
+        return (Order) orders.getRoot();
     }
 
-    public final @Nullable RbNode getFirstOrder() {
-        return orders.getFirst();
+    public final @Nullable Order getFirstOrder() {
+        return (Order) orders.getFirst();
     }
 
-    public final @Nullable RbNode getLastOrder() {
-        return orders.getLast();
+    public final @Nullable Order getLastOrder() {
+        return (Order) orders.getLast();
     }
 
     public final boolean isEmptyOrder() {
@@ -121,16 +124,16 @@ public @NonNullByDefault class TraderSess extends Trader {
         return (Exec) trades.find(market, id);
     }
 
-    public final @Nullable RbNode getRootTrade() {
-        return trades.getRoot();
+    public final @Nullable Exec getRootTrade() {
+        return (Exec) trades.getRoot();
     }
 
-    public final @Nullable RbNode getFirstTrade() {
-        return trades.getFirst();
+    public final @Nullable Exec getFirstTrade() {
+        return (Exec) trades.getFirst();
     }
 
-    public final @Nullable RbNode getLastTrade() {
-        return trades.getLast();
+    public final @Nullable Exec getLastTrade() {
+        return (Exec) trades.getLast();
     }
 
     public final boolean isEmptyTrade() {
@@ -172,20 +175,58 @@ public @NonNullByDefault class TraderSess extends Trader {
         return posns.find(contr, settlDay);
     }
 
-    public final @Nullable RbNode getRootPosn() {
+    public final @Nullable Posn getRootPosn() {
         return posns.getRoot();
     }
 
-    public final @Nullable RbNode getFirstPosn() {
+    public final @Nullable Posn getFirstPosn() {
         return posns.getFirst();
     }
 
-    public final @Nullable RbNode getLastPosn() {
+    public final @Nullable Posn getLastPosn() {
         return posns.getLast();
     }
 
     public final boolean isEmptyPosn() {
         return posns.isEmpty();
+    }
+
+    public final void insertQuote(Quote quote) {
+        final RbNode unused = quotes.insert(quote);
+        assert unused == null;
+    }
+
+    public final void removeQuote(Quote quote) {
+        quotes.remove(quote);
+    }
+
+    public final boolean removeQuote(String market, long id) {
+        final Request node = quotes.find(market, id);
+        if (node == null) {
+            return false;
+        }
+        quotes.remove(node);
+        return true;
+    }
+
+    public final @Nullable Quote findQuote(String market, long id) {
+        return (Quote) quotes.find(market, id);
+    }
+
+    public final @Nullable Quote getRootQuote() {
+        return (Quote) quotes.getRoot();
+    }
+
+    public final @Nullable Quote getFirstQuote() {
+        return (Quote) quotes.getFirst();
+    }
+
+    public final @Nullable Quote getLastQuote() {
+        return (Quote) quotes.getLast();
+    }
+
+    public final boolean isEmptyQuote() {
+        return quotes.isEmpty();
     }
 
     /**
@@ -261,6 +302,11 @@ public @NonNullByDefault class TraderSess extends Trader {
             cache.update("posn:" + mnem, posns);
             // Reset flag on success.
             dirty &= ~DIRTY_POSN;
+        }
+        if ((dirty & DIRTY_QUOTE) != 0) {
+            cache.update("quote:" + mnem, quotes);
+            // Reset flag on success.
+            dirty &= ~DIRTY_QUOTE;
         }
     }
 }

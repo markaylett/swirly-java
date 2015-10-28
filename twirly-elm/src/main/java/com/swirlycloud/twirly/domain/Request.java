@@ -6,13 +6,10 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Identifiable;
-import com.swirlycloud.twirly.util.Jsonifiable;
 
-public @NonNullByDefault interface Request
-        extends Jsonifiable, RbNode, SlNode, Identifiable, Financial {
+public @NonNullByDefault interface Request extends SlNode, Identifiable, Financial {
 
     void setRefNext(@Nullable Request next);
 

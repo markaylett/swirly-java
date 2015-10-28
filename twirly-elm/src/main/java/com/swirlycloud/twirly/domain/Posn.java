@@ -17,10 +17,9 @@ import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class Posn extends AbstractRbNode implements Jsonifiable, SlNode {
+public final @NonNullByDefault class Posn extends AbstractRbNode implements Entity, SlNode {
 
     private static final long serialVersionUID = 1L;
 

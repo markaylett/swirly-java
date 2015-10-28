@@ -25,6 +25,7 @@ import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketView;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.exception.BadRequestException;
@@ -238,6 +239,23 @@ public final @NonNullByDefault class BackUnrest {
         throw new IOException("end-of array not found");
     }
 
+    private static void parseQuotes(JsonParser p, Map<Long, ? super Quote> out) throws IOException {
+        while (p.hasNext()) {
+            final Event event = p.next();
+            switch (event) {
+            case END_ARRAY:
+                return;
+            case START_OBJECT:
+                final Quote quote = Quote.parse(p);
+                out.put(quote.getId(), quote);
+                break;
+            default:
+                throw new IOException(String.format("unexpected json token '%s'", event));
+            }
+        }
+        throw new IOException("end-of array not found");
+    }
+
     public static final class RecStruct {
         public final Map<String, Asset> assets = new HashMap<>();
         public final Map<String, Contr> contrs = new HashMap<>();
@@ -249,6 +267,7 @@ public final @NonNullByDefault class BackUnrest {
         public final Map<Long, Order> orders = new HashMap<>();
         public final Map<Long, Exec> trades = new HashMap<>();
         public final Map<PosnKey, Posn> posns = new HashMap<>();
+        public final Map<Long, Quote> quotes = new HashMap<>();
     }
 
     public static final class TransStruct {
@@ -307,6 +326,8 @@ public final @NonNullByDefault class BackUnrest {
                     parseExecs(p, out.trades);
                 } else if ("posns".equals(name)) {
                     parsePosns(p, out.posns);
+                } else if ("quotes".equals(name)) {
+                    parseQuotes(p, out.quotes);
                 } else {
                     throw new IOException(String.format("unexpected array field '%s'", name));
                 }

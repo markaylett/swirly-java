@@ -132,9 +132,9 @@ public final class ServTest {
     public final void testOfferSide() throws Exception {
         final MarketBook actual = serv.getMarket("EURUSD.MAR14");
         assertNotNull(actual);
-        final BookSide side = actual.getOfferSide();
-        assertNotNull(side);
-        final Level level = (Level) side.getFirstLevel();
+        final BookSide bookSide = actual.getOfferSide();
+        assertNotNull(bookSide);
+        final Level level = (Level) bookSide.getFirstLevel();
         assertNotNull(level);
         assertEquals(12346, level.getTicks());
         assertEquals(3, level.getResd());

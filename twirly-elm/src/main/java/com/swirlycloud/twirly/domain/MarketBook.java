@@ -271,6 +271,17 @@ public @NonNullByDefault class MarketBook extends Market {
         return lastTime;
     }
 
+    public final BookSide getOtherSide(Side side) {
+        BookSide bookSide;
+        if (side == Side.BUY) {
+            bookSide = offerSide;
+        } else {
+            assert side == Side.SELL;
+            bookSide = bidSide;
+        }
+        return bookSide;
+    }
+
     public final BookSide getBidSide() {
         return bidSide;
     }

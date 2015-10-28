@@ -6,14 +6,12 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.node.RbNode;
-
 /**
  * Fields common to both Order and Exec.
  * 
  * @author Mark Aylett
  */
-public @NonNullByDefault interface Instruct extends RbNode, Request {
+public @NonNullByDefault interface Instruct extends Request {
 
     @Override
     long getId();

@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.rest;
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.twirly.rest.RestUtil.getExpiredParam;
+import static com.swirlycloud.twirly.rest.RestUtil.getQuotesParam;
 import static com.swirlycloud.twirly.rest.RestUtil.getViewsParam;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
@@ -103,7 +104,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             out.append("{\"assets\":");
             toJsonArray(serv.getFirstRec(RecType.ASSET), params, out);
@@ -117,6 +118,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             }
             out.append('}');
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -127,10 +129,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             toJsonArray(serv.getFirstRec(recType), params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -141,7 +144,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final Rec rec = serv.findRec(recType, mnem);
             if (rec == null) {
@@ -149,6 +152,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             }
             rec.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -158,10 +162,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             getView(serv.getFirstRec(RecType.MARKET), params, now, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -172,7 +177,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final MarketBook book = serv.getMarket(market);
             final boolean withExpired = getExpiredParam(params);
@@ -183,6 +188,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             }
             book.toJsonView(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -193,7 +199,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             out.append("{\"orders\":");
@@ -202,12 +208,17 @@ public final @NonNullByDefault class BackRest implements Rest {
             toJsonArray(sess.getFirstTrade(), params, out);
             out.append(",\"posns\":");
             toJsonArray(sess.getFirstPosn(), params, out);
+            if (getQuotesParam(params)) {
+                out.append(",\"quotes\":");
+                toJsonArray(sess.getFirstQuote(), params, out);
+            }
             if (getViewsParam(params)) {
                 out.append(",\"views\":");
                 getView(serv.getFirstRec(RecType.MARKET), params, now, out);
             }
             out.append('}');
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -218,11 +229,12 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstOrder(), params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -233,11 +245,12 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
-            RestUtil.getOrder(sess.getFirstOrder(), market, params, out);
+            RestUtil.filterMarket(sess.getFirstOrder(), market, params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -248,7 +261,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             final Order order = sess.findOrder(market, id);
@@ -257,6 +270,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             }
             order.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -267,11 +281,12 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstTrade(), params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -282,11 +297,12 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
-            RestUtil.getTrade(sess.getFirstTrade(), market, params, out);
+            RestUtil.filterMarket(sess.getFirstTrade(), market, params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -297,7 +313,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             final Exec trade = sess.findTrade(market, id);
@@ -306,6 +322,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             }
             trade.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -316,11 +333,12 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             toJsonArray(sess.getFirstPosn(), params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -331,11 +349,12 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
-            RestUtil.getPosn(sess.getFirstPosn(), contr, params, out);
+            RestUtil.filterPosn(sess.getFirstPosn(), contr, params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -346,7 +365,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
             final Posn posn = sess.findPosn(contr, maybeIsoToJd(settlDate));
@@ -356,6 +375,59 @@ public final @NonNullByDefault class BackRest implements Rest {
             }
             posn.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
+            serv.unlock(lock);
+        }
+    }
+
+    @Override
+    public final void getQuote(String trader, Params params, long now, Appendable out)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        int lock = serv.writeLock();
+        try {
+            serv.poll(now);
+            lock = serv.demoteLock();
+            final TraderSess sess = serv.getTrader(trader);
+            toJsonArray(sess.getFirstQuote(), params, out);
+        } finally {
+            timeout = serv.getTimeout();
+            serv.unlock(lock);
+        }
+    }
+
+    @Override
+    public final void getQuote(String trader, String market, Params params, long now,
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        int lock = serv.writeLock();
+        try {
+            serv.poll(now);
+            lock = serv.demoteLock();
+            final TraderSess sess = serv.getTrader(trader);
+            RestUtil.filterMarket(sess.getFirstQuote(), market, params, out);
+        } finally {
+            timeout = serv.getTimeout();
+            serv.unlock(lock);
+        }
+    }
+
+    @Override
+    public final void getQuote(String trader, String market, long id, Params params, long now,
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        int lock = serv.writeLock();
+        try {
+            serv.poll(now);
+            lock = serv.demoteLock();
+            final TraderSess sess = serv.getTrader(trader);
+            final Quote quote = sess.findQuote(market, id);
+            if (quote == null) {
+                throw new NotFoundException(String.format("quote '%d' does not exist", id));
+            }
+            quote.toJson(params, out);
+        } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -371,10 +443,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final Trader trader = serv.createTrader(mnem, display, email);
-            timeout = serv.poll(now);
             trader.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -385,10 +458,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final Trader trader = serv.updateTrader(mnem, display);
-            timeout = serv.poll(now);
             trader.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -400,6 +474,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final Contr contr = (Contr) serv.findRec(RecType.CONTR, contrMnem);
             if (contr == null) {
                 throw new NotFoundException(
@@ -409,9 +484,9 @@ public final @NonNullByDefault class BackRest implements Rest {
             final int expiryDay = maybeIsoToJd(expiryDate);
             final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay,
                     state, now);
-            timeout = serv.poll(now);
             market.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -422,10 +497,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final Market market = serv.updateMarket(mnem, display, state, now);
-            timeout = serv.poll(now);
             market.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -436,10 +512,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveOrder(sess, market, id, now);
-            timeout = serv.poll(now);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -450,10 +527,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveOrder(sess, market, first, now);
-            timeout = serv.poll(now);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -465,12 +543,13 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             serv.createOrder(sess, book, ref, side, ticks, lots, minLots, now, result);
-            timeout = serv.poll(now);
             result.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             result.clear();
             serv.unlock(lock);
         }
@@ -482,6 +561,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             if (lots > 0) {
@@ -489,9 +569,9 @@ public final @NonNullByDefault class BackRest implements Rest {
             } else {
                 serv.cancelOrder(sess, book, id, now, result);
             }
-            timeout = serv.poll(now);
             result.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             result.clear();
             serv.unlock(lock);
         }
@@ -503,6 +583,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             if (lots > 0) {
@@ -510,9 +591,9 @@ public final @NonNullByDefault class BackRest implements Rest {
             } else {
                 serv.cancelOrder(sess, book, first, now, result);
             }
-            timeout = serv.poll(now);
             result.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             result.clear();
             serv.unlock(lock);
         }
@@ -523,10 +604,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveTrade(sess, market, id, now);
-            timeout = serv.poll(now);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -536,10 +618,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             serv.archiveTrade(sess, market, first, now);
-            timeout = serv.poll(now);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -550,13 +633,14 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             final Exec trade = serv.createTrade(sess, book, ref, side, ticks, lots, role, cpty,
                     now);
-            timeout = serv.poll(now);
             trade.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -567,12 +651,13 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             final Quote quote = serv.createQuote(sess, book, ref, side, lots, now);
-            timeout = serv.poll(now);
             quote.toJson(params, out);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -583,10 +668,11 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
+            serv.poll(now);
             serv.expireEndOfDay(now);
             serv.settlEndOfDay(now);
-            timeout = serv.poll(now);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }
@@ -595,8 +681,9 @@ public final @NonNullByDefault class BackRest implements Rest {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
-            timeout = serv.poll(now);
+            serv.poll(now);
         } finally {
+            timeout = serv.getTimeout();
             serv.unlock(lock);
         }
     }

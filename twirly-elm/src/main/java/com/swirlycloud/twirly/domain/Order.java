@@ -392,6 +392,10 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         return quot;
     }
 
+    public final long getAvail() {
+        return resd - quot;
+    }
+
     @Override
     public final boolean isDone() {
         return resd == 0;
