@@ -38,10 +38,12 @@ public @NonNullByDefault interface Instruct extends RbNode, Request {
 
     State getState();
 
+    @Override
     Side getSide();
 
     long getTicks();
 
+    @Override
     long getLots();
 
     long getResd();

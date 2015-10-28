@@ -121,17 +121,15 @@ public @NonNullByDefault class BasicFactory implements Factory {
 
     @Override
     public final Quote newQuote(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, long bidTicks, long bidLots, long offerTicks, long offerLots,
-            long created, long expiry) {
-        return new Quote(id, trader, market, contr, settlDay, ref, bidTicks, bidLots, offerTicks,
-                offerLots, created, expiry);
+            @Nullable String ref, Side side, long ticks, long lots, long created, long expiry) {
+        return new Quote(id, trader, market, contr, settlDay, ref, side, ticks, lots, created,
+                expiry);
     }
 
     @Override
     public final Quote newQuote(long id, String trader, Financial fin, @Nullable String ref,
-            long bidTicks, long bidLots, long offerTicks, long offerLots, long created,
-            long expiry) {
-        return new Quote(id, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), ref,
-                bidTicks, bidLots, offerTicks, offerLots, created, expiry);
+            Side side, long bidTicks, long bidLots, long created, long expiry) {
+        return new Quote(id, trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), ref, side,
+                bidTicks, bidLots, created, expiry);
     }
 }

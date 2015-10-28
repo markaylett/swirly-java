@@ -1348,9 +1348,10 @@ public @NonNullByDefault class Serv {
     }
 
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
-            long lots, long now) {
+            Side side, long lots, long now) {
         // FIXME.
-        return factory.newQuote(1, sess.getMnem(), book, ref, 0, 0, 0, 0, now, now + QUOTE_EXPIRY);
+        return factory.newQuote(1, sess.getMnem(), book, ref, side, 10, 12345, now,
+                now + QUOTE_EXPIRY);
     }
 
     /**

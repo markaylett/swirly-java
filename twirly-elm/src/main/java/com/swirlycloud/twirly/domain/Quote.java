@@ -36,26 +36,23 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
      * Ref is optional.
      */
     private final @Nullable String ref;
-    private final long bidTicks;
-    private final long bidLots;
-    private final long offerTicks;
-    private final long offerLots;
+    private final Side side;
+    private final long ticks;
+    private final long lots;
     long created;
     long expiry;
 
     Quote(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
-            long bidTicks, long bidLots, long offerTicks, long offerLots, long created,
-            long expiry) {
+            Side side, long ticks, long lots, long created, long expiry) {
         this.id = id;
         this.trader = trader;
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
         this.ref = nullIfEmpty(ref);
-        this.bidTicks = bidTicks;
-        this.bidLots = bidLots;
-        this.offerTicks = offerTicks;
-        this.offerLots = offerLots;
+        this.side = side;
+        this.ticks = ticks;
+        this.lots = lots;
         this.created = created;
         this.expiry = expiry;
     }
@@ -67,10 +64,9 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
         String contr = null;
         int settlDay = 0;
         String ref = null;
-        long bidTicks = 0;
-        long bidLots = 0;
-        long offerTicks = 0;
-        long offerLots = 0;
+        Side side = null;
+        long ticks = 0;
+        long lots = 0;
         long created = 0;
         long expiry = 0;
 
@@ -88,8 +84,11 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new Quote(id, trader, market, contr, settlDay, ref, bidTicks, bidLots,
-                        offerTicks, offerLots, created, expiry);
+                if (side == null) {
+                    throw new IOException("side is null");
+                }
+                return new Quote(id, trader, market, contr, settlDay, ref, side, ticks, lots,
+                        created, expiry);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -107,14 +106,10 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
                     id = p.getLong();
                 } else if ("settlDate".equals(name)) {
                     settlDay = JulianDay.maybeIsoToJd(p.getInt());
-                } else if ("bidTicks".equals(name)) {
-                    bidTicks = p.getLong();
-                } else if ("bidLots".equals(name)) {
-                    bidLots = p.getLong();
-                } else if ("offerTicks".equals(name)) {
-                    offerTicks = p.getLong();
-                } else if ("offerLots".equals(name)) {
-                    offerLots = p.getLong();
+                } else if ("ticks".equals(name)) {
+                    ticks = p.getLong();
+                } else if ("lots".equals(name)) {
+                    lots = p.getLong();
                 } else if ("created".equals(name)) {
                     created = p.getLong();
                 } else if ("expiry".equals(name)) {
@@ -132,6 +127,10 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
                     contr = p.getString();
                 } else if ("ref".equals(name)) {
                     ref = p.getString();
+                } else if ("side".equals(name)) {
+                    final String s = p.getString();
+                    assert s != null;
+                    side = Side.valueOf(s);
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -196,10 +195,9 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
         } else {
             out.append("null");
         }
-        out.append("\",\"bidTicks\":").append(String.valueOf(bidTicks));
-        out.append(",\"bidLots\":").append(String.valueOf(bidLots));
-        out.append("\",\"offerTicks\":").append(String.valueOf(offerTicks));
-        out.append(",\"offerLots\":").append(String.valueOf(offerLots));
+        out.append(",\"side\":\"").append(side.name());
+        out.append("\",\"ticks\":").append(String.valueOf(ticks));
+        out.append(",\"lots\":").append(String.valueOf(lots));
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"expiry\":").append(String.valueOf(expiry));
         out.append("}");
@@ -240,20 +238,18 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
         return ref;
     }
 
-    public final long getBidTicks() {
-        return bidTicks;
+    @Override
+    public final Side getSide() {
+        return side;
     }
 
-    public final long getBidLots() {
-        return bidLots;
+    public final long getTicks() {
+        return ticks;
     }
 
-    public final long getOfferTicks() {
-        return offerTicks;
-    }
-
-    public final long getOfferLots() {
-        return offerLots;
+    @Override
+    public final long getLots() {
+        return lots;
     }
 
     @Override

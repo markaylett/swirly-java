@@ -24,5 +24,9 @@ public @NonNullByDefault interface Request extends Identifiable, Financial {
     @Nullable
     String getRef();
 
+    Side getSide();
+
+    long getLots();
+
     long getCreated();
 }

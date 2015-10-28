@@ -561,15 +561,15 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void postQuote(String trader, String market, String ref, long lots, Params params,
-            long now, Appendable out)
+    public final void postQuote(String trader, String market, String ref, Side side, long lots,
+            Params params, long now, Appendable out)
                     throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            final Quote quote = serv.createQuote(sess, book, ref, lots, now);
+            final Quote quote = serv.createQuote(sess, book, ref, side, lots, now);
             timeout = serv.poll(now);
             quote.toJson(params, out);
         } finally {
