@@ -18,7 +18,7 @@ import org.junit.Test;
 import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.RbNode;
 
-public final class LongRbTreeTest {
+public final class RbLongTreeTest {
     private static final boolean DEBUG = false;
 
     private static final class Node extends BasicRbNode {
@@ -43,7 +43,7 @@ public final class LongRbTreeTest {
         }
     }
 
-    private static final @NonNullByDefault class NodeTree extends LongRbTree {
+    private static final @NonNullByDefault class NodeTree extends RbLongTree {
 
         private static final long serialVersionUID = 1L;
 
@@ -52,12 +52,12 @@ public final class LongRbTreeTest {
         }
 
         @Override
-        protected final int compareKey(RbNode lhs, RbNode rhs) {
+        protected final int compareNode(RbNode lhs, RbNode rhs) {
             return compareLong(getKey(lhs), getKey(rhs));
         }
 
         @Override
-        protected final int compareKeyDirect(RbNode lhs, long rhs) {
+        protected final int compareKey(RbNode lhs, long rhs) {
             return compareLong(getKey(lhs), rhs);
         }
     }
@@ -162,7 +162,7 @@ public final class LongRbTreeTest {
 
     @Test
     public final void testOperations() {
-        final LongRbTree t = new NodeTree();
+        final RbLongTree t = new NodeTree();
         final Node first = new Node(101, 0);
         final Node second = new Node(102, 0);
         final Node third = new Node(103, 0);

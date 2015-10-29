@@ -20,7 +20,7 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.exception.TraderNotFoundException;
-import com.swirlycloud.twirly.rest.Request;
+import com.swirlycloud.twirly.rest.RestRequest;
 import com.swirlycloud.twirly.rest.Rest;
 import com.swirlycloud.twirly.util.Params;
 
@@ -54,10 +54,10 @@ public abstract class RestServlet extends HttpServlet {
         };
     }
 
-    protected final Request parseRequest(HttpServletRequest req) throws BadRequestException {
+    protected final RestRequest parseRequest(HttpServletRequest req) throws BadRequestException {
         try (final JsonParser p = Json.createParser(req.getReader())) {
             parseStartObject(p);
-            final Request r = new Request();
+            final RestRequest r = new RestRequest();
             r.parse(p);
             return r;
         } catch (IllegalArgumentException | IOException e) {

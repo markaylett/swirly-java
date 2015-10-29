@@ -3,47 +3,23 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.domain;
 
-import static com.swirlycloud.twirly.util.CollectionUtil.compareLong;
-
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.intrusive.DlList;
-import com.swirlycloud.twirly.intrusive.LongRbTree;
+import com.swirlycloud.twirly.intrusive.LevelTree;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
 
 public final class BookSide {
-    private static final class LevelTree extends LongRbTree {
 
-        private static final long serialVersionUID = 1L;
-
-        private static long getKey(@NonNull RbNode node) {
-            return ((Level) node).getKey();
-        }
-
-        @Override
-        protected final int compareKey(@NonNull RbNode lhs, @NonNull RbNode rhs) {
-            return compareLong(getKey(lhs), getKey(rhs));
-        }
-
-        // FIXME: Adding a @NonNull attribute to lhs causes the following erroneous error:
-        // Illegal redefinition of parameter lhs, ...
-        @SuppressWarnings("null")
-        @Override
-        protected final int compareKeyDirect(RbNode lhs, long rhs) {
-            return compareLong(getKey(lhs), rhs);
-        }
-    }
-
-    private final LongRbTree levels = new LevelTree();
+    private final LevelTree levels = new LevelTree();
     private final DlList orders = new DlList();
 
     private final Level getLazyLevel(Order order) {
         final long key = Level.composeKey(order.getSide(), order.getTicks());
-        Level level = (Level) levels.pfind(key);
+        Level level = levels.pfind(key);
         if (level == null || level.getKey() != key) {
-            final RbNode parent = level;
+            final Level parent = level;
             level = new Level(order);
             levels.pinsert(level, parent);
         } else {
@@ -181,7 +157,7 @@ public final class BookSide {
     }
 
     public final @Nullable Level findLevel(long id) {
-        return (Level) levels.find(id);
+        return levels.find(id);
     }
 
     public final @Nullable RbNode getRootLevel() {

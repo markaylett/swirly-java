@@ -4,7 +4,6 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.NullUtil.nullIfEmpty;
 
 import java.io.IOException;
 
@@ -15,45 +14,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.BasicRbNode;
-import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonifiable, Request {
+public final @NonNullByDefault class Quote extends BasicRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private final long id;
-    /**
-     * The executing trader.
-     */
-    private final String trader;
-    private final String market;
-    private final String contr;
-    private final int settlDay;
-    /**
-     * Ref is optional.
-     */
-    private final @Nullable String ref;
-    private final Side side;
     private final long ticks;
-    private final long lots;
-    long created;
     long expiry;
 
     Quote(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
             Side side, long ticks, long lots, long created, long expiry) {
-        this.id = id;
-        this.trader = trader;
-        this.market = market;
-        this.contr = contr;
-        this.settlDay = settlDay;
-        this.ref = nullIfEmpty(ref);
-        this.side = side;
+        super(id, trader, market, contr, settlDay, ref, side, lots, created);
         this.ticks = ticks;
-        this.lots = lots;
-        this.created = created;
         this.expiry = expiry;
     }
 
@@ -143,41 +116,6 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
     }
 
     @Override
-    public final int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + market.hashCode();
-        result = prime * result + (int) (id ^ (id >>> 32));
-        return result;
-    }
-
-    @Override
-    public final boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Quote other = (Quote) obj;
-        if (!market.equals(other.market)) {
-            return false;
-        }
-        if (id != other.id) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public final String toString() {
-        return JsonUtil.toJson(this);
-    }
-
-    @Override
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"trader\":\"").append(trader);
@@ -203,58 +141,8 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
         out.append("}");
     }
 
-    @Override
-    public final long getId() {
-        return id;
-    }
-
-    @Override
-    public final String getTrader() {
-        return trader;
-    }
-
-    @Override
-    public final String getMarket() {
-        return market;
-    }
-
-    @Override
-    public final String getContr() {
-        return contr;
-    }
-
-    @Override
-    public final int getSettlDay() {
-        return settlDay;
-    }
-
-    @Override
-    public final boolean isSettlDaySet() {
-        return settlDay != 0;
-    }
-
-    @Override
-    public final @Nullable String getRef() {
-        return ref;
-    }
-
-    @Override
-    public final Side getSide() {
-        return side;
-    }
-
     public final long getTicks() {
         return ticks;
-    }
-
-    @Override
-    public final long getLots() {
-        return lots;
-    }
-
-    @Override
-    public final long getCreated() {
-        return created;
     }
 
     public final long getExpiry() {

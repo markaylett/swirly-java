@@ -8,7 +8,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.node.RbNode;
 
-public abstract @NonNullByDefault class BasicRbTree<K> extends BasicTree<K, RbNode> {
+public abstract @NonNullByDefault class RbLongTree extends LongTree<RbNode> {
 
     private static final long serialVersionUID = 1L;
 

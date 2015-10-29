@@ -14,7 +14,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.function.UnaryFunction;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.rec.Trader;
 
 public final class MockTrader {
@@ -53,8 +53,8 @@ public final class MockTrader {
         return MAP.get(mnem).call(factory);
     }
 
-    public static @NonNull MnemRbTree readTrader(Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public static @NonNull RecTree readTrader(Factory factory) {
+        final RecTree t = new RecTree();
         for (final UnaryFunction<Trader, Factory> entry : LIST) {
             final Trader trader = entry.call(factory);
             assert trader != null;

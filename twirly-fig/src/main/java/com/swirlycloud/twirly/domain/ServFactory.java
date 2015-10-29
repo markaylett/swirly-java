@@ -6,14 +6,14 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.intrusive.RefHashTable;
+import com.swirlycloud.twirly.intrusive.RequestRefMap;
 import com.swirlycloud.twirly.util.Memorable;
 
 public final @NonNullByDefault class ServFactory extends BasicFactory {
 
     private static final int CAPACITY = 1 << 5; // 64
 
-    private final RefHashTable refIdx = new RefHashTable(CAPACITY);
+    private final RequestRefMap refIdx = new RequestRefMap(CAPACITY);
 
     @Override
     public final MarketBook newMarket(String mnem, @Nullable String display, Memorable contr,

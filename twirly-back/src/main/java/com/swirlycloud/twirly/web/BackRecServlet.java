@@ -18,7 +18,7 @@ import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.rest.BackRest;
-import com.swirlycloud.twirly.rest.Request;
+import com.swirlycloud.twirly.rest.RestRequest;
 
 @SuppressWarnings("serial")
 public final class BackRecServlet extends RecServlet {
@@ -43,12 +43,12 @@ public final class BackRecServlet extends RecServlet {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
 
-            final Request r = parseRequest(req);
+            final RestRequest r = parseRequest(req);
             final long now = now();
             if ("market".equals(parts[TYPE_PART])) {
 
-                final int required = Request.MNEM | Request.DISPLAY | Request.CONTR;
-                final int optional = Request.SETTL_DATE | Request.EXPIRY_DATE | Request.STATE;
+                final int required = RestRequest.MNEM | RestRequest.DISPLAY | RestRequest.CONTR;
+                final int optional = RestRequest.SETTL_DATE | RestRequest.EXPIRY_DATE | RestRequest.STATE;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -61,8 +61,8 @@ public final class BackRecServlet extends RecServlet {
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                final int required = Request.MNEM | Request.DISPLAY;
-                final int optional = Request.EMAIL;
+                final int required = RestRequest.MNEM | RestRequest.DISPLAY;
+                final int optional = RestRequest.EMAIL;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -106,11 +106,11 @@ public final class BackRecServlet extends RecServlet {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
 
-            final Request r = parseRequest(req);
+            final RestRequest r = parseRequest(req);
             final long now = now();
             if ("market".equals(parts[TYPE_PART])) {
 
-                final int required = Request.MNEM | Request.DISPLAY | Request.STATE;
+                final int required = RestRequest.MNEM | RestRequest.DISPLAY | RestRequest.STATE;
                 if (!r.isValid(required)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -123,8 +123,8 @@ public final class BackRecServlet extends RecServlet {
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                final int required = Request.MNEM | Request.DISPLAY;
-                final int optional = Request.EMAIL;
+                final int required = RestRequest.MNEM | RestRequest.DISPLAY;
+                final int optional = RestRequest.EMAIL;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }

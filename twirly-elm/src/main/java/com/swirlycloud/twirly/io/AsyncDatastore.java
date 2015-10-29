@@ -20,8 +20,9 @@ import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedExecutionException;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
-import com.swirlycloud.twirly.intrusive.RequestTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
+import com.swirlycloud.twirly.intrusive.RequestIdTree;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.SlNode;
@@ -70,44 +71,44 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull MnemRbTree readAsset(@NonNull final Factory factory)
+    public final @NonNull RecTree readAsset(@NonNull final Factory factory)
             throws InterruptedException {
-        return getNonNull(service.submit(new Callable<MnemRbTree>() {
+        return getNonNull(service.submit(new Callable<RecTree>() {
             @Override
-            public final @NonNull MnemRbTree call() throws Exception {
+            public final @NonNull RecTree call() throws Exception {
                 return datastore.readAsset(factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull MnemRbTree readContr(@NonNull final Factory factory)
+    public final @NonNull RecTree readContr(@NonNull final Factory factory)
             throws InterruptedException {
-        return getNonNull(service.submit(new Callable<MnemRbTree>() {
+        return getNonNull(service.submit(new Callable<RecTree>() {
             @Override
-            public final MnemRbTree call() throws Exception {
+            public final RecTree call() throws Exception {
                 return datastore.readContr(factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull MnemRbTree readMarket(@NonNull final Factory factory)
+    public final @NonNull RecTree readMarket(@NonNull final Factory factory)
             throws InterruptedException {
-        return getNonNull(service.submit(new Callable<MnemRbTree>() {
+        return getNonNull(service.submit(new Callable<RecTree>() {
             @Override
-            public final MnemRbTree call() throws Exception {
+            public final RecTree call() throws Exception {
                 return datastore.readMarket(factory);
             }
         }));
     }
 
     @Override
-    public final @NonNull MnemRbTree readTrader(@NonNull final Factory factory)
+    public final @NonNull RecTree readTrader(@NonNull final Factory factory)
             throws InterruptedException {
-        return getNonNull(service.submit(new Callable<MnemRbTree>() {
+        return getNonNull(service.submit(new Callable<RecTree>() {
             @Override
-            public final MnemRbTree call() throws Exception {
+            public final RecTree call() throws Exception {
                 return datastore.readTrader(factory);
             }
         }));
@@ -125,11 +126,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull MnemRbTree readView(@NonNull final Factory factory)
+    public final @NonNull MarketViewTree readView(@NonNull final Factory factory)
             throws InterruptedException {
-        return getNonNull(service.submit(new Callable<MnemRbTree>() {
+        return getNonNull(service.submit(new Callable<MarketViewTree>() {
             @Override
-            public final MnemRbTree call() throws Exception {
+            public final MarketViewTree call() throws Exception {
                 return datastore.readView(factory);
             }
         }));
@@ -147,11 +148,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull RequestTree readOrder(@NonNull final String trader,
+    public final @NonNull RequestIdTree readOrder(@NonNull final String trader,
             @NonNull final Factory factory) throws InterruptedException {
-        return getNonNull(service.submit(new Callable<RequestTree>() {
+        return getNonNull(service.submit(new Callable<RequestIdTree>() {
             @Override
-            public final RequestTree call() throws Exception {
+            public final RequestIdTree call() throws Exception {
                 return datastore.readOrder(trader, factory);
             }
         }));
@@ -169,11 +170,11 @@ public final class AsyncDatastore implements Datastore {
     }
 
     @Override
-    public final @NonNull RequestTree readTrade(@NonNull final String trader,
+    public final @NonNull RequestIdTree readTrade(@NonNull final String trader,
             @NonNull final Factory factory) throws InterruptedException {
-        return getNonNull(service.submit(new Callable<RequestTree>() {
+        return getNonNull(service.submit(new Callable<RequestIdTree>() {
             @Override
-            public final RequestTree call() throws Exception {
+            public final RequestIdTree call() throws Exception {
                 return datastore.readTrade(trader, factory);
             }
         }));

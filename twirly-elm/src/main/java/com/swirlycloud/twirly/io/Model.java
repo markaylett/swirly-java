@@ -7,45 +7,44 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
-import com.swirlycloud.twirly.intrusive.RequestTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
+import com.swirlycloud.twirly.intrusive.RequestIdTree;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public interface Model extends AutoCloseable {
 
     @NonNull
-    MnemRbTree readAsset(@NonNull Factory factory) throws InterruptedException;
+    RecTree readAsset(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    MnemRbTree readContr(@NonNull Factory factory) throws InterruptedException;
+    RecTree readContr(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    MnemRbTree readMarket(@NonNull Factory factory) throws InterruptedException;
+    RecTree readMarket(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    MnemRbTree readTrader(@NonNull Factory factory) throws InterruptedException;
+    RecTree readTrader(@NonNull Factory factory) throws InterruptedException;
 
     @Nullable
     String readTraderByEmail(@NonNull String email, @NonNull Factory factory)
             throws InterruptedException;
 
     @NonNull
-    MnemRbTree readView(@NonNull Factory factory) throws InterruptedException;
+    MarketViewTree readView(@NonNull Factory factory) throws InterruptedException;
 
     @Nullable
     SlNode readOrder(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    RequestTree readOrder(@NonNull String trader, @NonNull Factory factory)
-            throws InterruptedException;
+    RequestIdTree readOrder(@NonNull String trader, @NonNull Factory factory) throws InterruptedException;
 
     @Nullable
     SlNode readTrade(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    RequestTree readTrade(@NonNull String trader, @NonNull Factory factory)
-            throws InterruptedException;
+    RequestIdTree readTrade(@NonNull String trader, @NonNull Factory factory) throws InterruptedException;
 
     @Nullable
     SlNode readPosn(int busDay, @NonNull Factory factory) throws InterruptedException;

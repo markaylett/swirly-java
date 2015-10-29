@@ -38,8 +38,9 @@ import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.exception.TooLateException;
 import com.swirlycloud.twirly.exception.TraderNotFoundException;
-import com.swirlycloud.twirly.intrusive.EmailHashTable;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.TraderEmailMap;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
@@ -76,12 +77,12 @@ public @NonNullByDefault class Serv {
     private final Journ journ;
     private final Cache cache;
     private final Factory factory;
-    private final MnemRbTree assets;
-    private final MnemRbTree contrs;
-    private final MnemRbTree markets;
-    private final MnemRbTree traders;
-    private final MnemRbTree views = new MnemRbTree();
-    private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
+    private final RecTree assets;
+    private final RecTree contrs;
+    private final RecTree markets;
+    private final RecTree traders;
+    private final MarketViewTree views = new MarketViewTree();
+    private final TraderEmailMap emailIdx = new TraderEmailMap(CAPACITY);
     private transient int dirty;
     @Nullable
     private TraderSess dirtySess;
@@ -407,7 +408,7 @@ public @NonNullByDefault class Serv {
         this.factory = factory;
         this.dirty = DIRTY_ALL;
 
-        MnemRbTree t = model.readAsset(factory);
+        RecTree t = model.readAsset(factory);
         assert t != null;
         this.assets = t;
 
@@ -523,16 +524,16 @@ public @NonNullByDefault class Serv {
         Rec ret = null;
         switch (recType) {
         case ASSET:
-            ret = (Rec) assets.find(mnem);
+            ret = assets.find(mnem);
             break;
         case CONTR:
-            ret = (Rec) contrs.find(mnem);
+            ret = contrs.find(mnem);
             break;
         case MARKET:
-            ret = (Rec) markets.find(mnem);
+            ret = markets.find(mnem);
             break;
         case TRADER:
-            ret = (Rec) traders.find(mnem);
+            ret = traders.find(mnem);
             break;
         }
         return ret;
@@ -655,7 +656,7 @@ public @NonNullByDefault class Serv {
         if (book != null && book.getMnem().equals(mnem)) {
             throw new AlreadyExistsException(String.format("market '%s' already exists", mnem));
         }
-        final RbNode parent = book;
+        final MarketBook parent = book;
         book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
 
         try {

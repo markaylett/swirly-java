@@ -24,12 +24,12 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
-import com.swirlycloud.twirly.intrusive.RequestTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
+import com.swirlycloud.twirly.intrusive.RequestIdTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
-import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.rec.Asset;
 import com.swirlycloud.twirly.rec.AssetType;
@@ -211,8 +211,7 @@ public class JdbcModel implements Model {
     }
 
     private final void readPosn(@NonNull PreparedStatement stmt, int busDay,
-            @NonNull Factory factory, @NonNull final Sequence<? super Posn> c)
-                    throws SQLException {
+            @NonNull Factory factory, @NonNull final Sequence<? super Posn> c) throws SQLException {
         final PosnTree posns = new PosnTree();
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -226,10 +225,10 @@ public class JdbcModel implements Model {
                     settlDay = 0;
                 }
                 // Lazy position.
-                Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
+                Posn posn = posns.pfind(trader, contr, settlDay);
                 if (posn == null || !posn.getTrader().equals(trader)
                         || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
-                    final RbNode parent = posn;
+                    final Posn parent = posn;
                     assert trader != null;
                     assert contr != null;
                     posn = factory.newPosn(trader, contr, settlDay);
@@ -247,7 +246,7 @@ public class JdbcModel implements Model {
             }
         }
         for (;;) {
-            final Posn posn = (Posn) posns.getRoot();
+            final Posn posn = posns.getRoot();
             if (posn == null) {
                 break;
             }
@@ -425,8 +424,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readAsset(@NonNull Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public final @NonNull RecTree readAsset(@NonNull Factory factory) {
+        final RecTree t = new RecTree();
         try (final ResultSet rs = selectAssetStmt.executeQuery()) {
             while (rs.next()) {
                 t.insert(getAsset(rs, factory));
@@ -438,8 +437,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readContr(@NonNull Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public final @NonNull RecTree readContr(@NonNull Factory factory) {
+        final RecTree t = new RecTree();
         try (final ResultSet rs = selectContrStmt.executeQuery()) {
             while (rs.next()) {
                 t.insert(getContr(rs, factory));
@@ -451,8 +450,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readMarket(@NonNull Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public final @NonNull RecTree readMarket(@NonNull Factory factory) {
+        final RecTree t = new RecTree();
         try (final ResultSet rs = selectMarketStmt.executeQuery()) {
             while (rs.next()) {
                 t.insert(getMarket(rs, factory));
@@ -464,8 +463,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readTrader(@NonNull Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public final @NonNull RecTree readTrader(@NonNull Factory factory) {
+        final RecTree t = new RecTree();
         try (final ResultSet rs = selectTraderStmt.executeQuery()) {
             while (rs.next()) {
                 t.insert(getTrader(rs, factory));
@@ -493,7 +492,7 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readView(@NonNull Factory factory)
+    public final @NonNull MarketViewTree readView(@NonNull Factory factory)
             throws InterruptedException {
         return ModelUtil.readView(this, factory);
     }
@@ -510,9 +509,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull RequestTree readOrder(@NonNull String trader,
-            @NonNull Factory factory) {
-        final RequestTree t = new RequestTree();
+    public final @NonNull RequestIdTree readOrder(@NonNull String trader, @NonNull Factory factory) {
+        final RequestIdTree t = new RequestIdTree();
         try {
             setParam(selectOrderByTraderStmt, 1, trader);
             readOrder(selectOrderByTraderStmt, factory, t);
@@ -534,9 +532,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull RequestTree readTrade(@NonNull String trader,
-            @NonNull Factory factory) {
-        final RequestTree t = new RequestTree();
+    public final @NonNull RequestIdTree readTrade(@NonNull String trader, @NonNull Factory factory) {
+        final RequestIdTree t = new RequestIdTree();
         try {
             setParam(selectTradeByTraderStmt, 1, trader);
             readTrade(selectTradeByTraderStmt, factory, t);

@@ -15,6 +15,9 @@ import com.swirlycloud.twirly.node.RbNode;
  */
 public @NonNullByDefault interface Instruct extends RbNode, Request {
 
+    @Override
+    long getId();
+    
     /**
      * @return order-id or zero if there is no associated order.
      */
@@ -31,6 +34,9 @@ public @NonNullByDefault interface Instruct extends RbNode, Request {
 
     @Override
     int getSettlDay();
+
+    @Override
+    boolean isSettlDaySet();
 
     @Override
     @Nullable

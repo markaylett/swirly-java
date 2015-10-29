@@ -18,7 +18,7 @@ import org.junit.Test;
 import com.swirlycloud.twirly.node.BasicSlNode;
 import com.swirlycloud.twirly.node.SlNode;
 
-public final class LongSlHashTableTest {
+public final class SlLongMapTest {
 
     private static final class Node extends BasicSlNode {
         private final long key;
@@ -28,35 +28,35 @@ public final class LongSlHashTableTest {
         }
     }
 
-    private static final class NodeHashTable extends LongSlHashTable {
+    private static final class NodeMap extends SlLongMap {
 
         private static long getKey(SlNode node) {
             return ((Node) node).key;
         }
 
         @Override
-        protected final int hashKey(SlNode node) {
+        protected final int hashNode(SlNode node) {
             return hashLong(getKey(node));
         }
 
         @Override
-        protected final boolean equalKey(SlNode lhs, SlNode rhs) {
+        protected final boolean equalNode(SlNode lhs, SlNode rhs) {
             return getKey(lhs) == getKey(rhs);
         }
 
         @Override
-        protected final boolean equalKeyDirect(SlNode lhs, long rhs) {
+        protected final boolean equalKey(SlNode lhs, long rhs) {
             return getKey(lhs) == rhs;
         }
 
-        public NodeHashTable() {
+        public NodeMap() {
             super(12);
         }
     }
 
     @Test
     public final void testEmpty() {
-        final NodeHashTable t = new NodeHashTable();
+        final NodeMap t = new NodeMap();
         assertNull(t.remove(1));
         assertNull(t.find(1));
         assertTrue(t.isEmpty());
@@ -71,7 +71,7 @@ public final class LongSlHashTableTest {
         final Node three = new Node(3);
         final Node four = new Node(4);
 
-        final NodeHashTable t = new NodeHashTable();
+        final NodeMap t = new NodeMap();
         assertNull(t.insert(one));
         assertFalse(t.isEmpty());
         assertEquals(1, t.size());
@@ -94,7 +94,7 @@ public final class LongSlHashTableTest {
         final Node three = new Node(3);
         final Node four = new Node(4);
 
-        final NodeHashTable t = new NodeHashTable();
+        final NodeMap t = new NodeMap();
         t.insert(one);
         t.insert(two);
         assertSame(one, t.insert(new Node(1)));
@@ -118,7 +118,7 @@ public final class LongSlHashTableTest {
         final Node three = new Node(3);
         final Node four = new Node(4);
 
-        final NodeHashTable t = new NodeHashTable();
+        final NodeMap t = new NodeMap();
         t.insert(one);
         t.insert(two);
         t.insert(three);
@@ -146,7 +146,7 @@ public final class LongSlHashTableTest {
         final Node three = new Node(3);
         final Node four = new Node(4);
 
-        final NodeHashTable t = new NodeHashTable();
+        final NodeMap t = new NodeMap();
         t.insert(one);
         t.insert(two);
         t.insert(three);
@@ -162,7 +162,7 @@ public final class LongSlHashTableTest {
     @Test
     public final void testLoad() {
         final Random r = new Random();
-        final NodeHashTable t = new NodeHashTable();
+        final NodeMap t = new NodeMap();
         for (long i = 0; i < 100000; ++i) {
             final long l = r.nextLong();
             t.insert(new Node(l));

@@ -16,11 +16,11 @@ import org.eclipse.jdt.annotation.Nullable;
  * 
  * @author Mark Aylett
  */
-public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
+public abstract @NonNullByDefault class ObjectTree<K, V> extends Tree<V> {
 
     private static final long serialVersionUID = 1L;
 
-    protected abstract int compareKeyDirect(V lhs, K rhs);
+    protected abstract int compareKey(V lhs, K rhs);
 
     /**
      * Finds the node with the same key as node.
@@ -29,7 +29,7 @@ public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
         V tmp = root;
         int comp;
         while (tmp != null) {
-            comp = compareKeyDirect(tmp, key);
+            comp = compareKey(tmp, key);
             if (comp > 0) {
                 tmp = getLeft(tmp);
             } else if (comp < 0) {
@@ -49,7 +49,7 @@ public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
         V res = null;
         int comp;
         while (tmp != null) {
-            comp = compareKeyDirect(tmp, key);
+            comp = compareKey(tmp, key);
             if (comp > 0) {
                 res = tmp;
                 tmp = getLeft(tmp);
@@ -71,7 +71,7 @@ public abstract @NonNullByDefault class BasicTree<K, V> extends Tree<V> {
         V tmp = root, parent = null;
         while (tmp != null) {
             parent = tmp;
-            final int comp = compareKeyDirect(tmp, key);
+            final int comp = compareKey(tmp, key);
             if (comp > 0) {
                 tmp = getLeft(tmp);
             } else if (comp < 0) {

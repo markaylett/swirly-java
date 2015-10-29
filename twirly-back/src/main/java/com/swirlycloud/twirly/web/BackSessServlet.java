@@ -20,7 +20,7 @@ import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.rest.BackRest;
-import com.swirlycloud.twirly.rest.Request;
+import com.swirlycloud.twirly.rest.RestRequest;
 
 @SuppressWarnings("serial")
 public final class BackSessServlet extends SessServlet {
@@ -95,12 +95,12 @@ public final class BackSessServlet extends SessServlet {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
             final String market = parts[MARKET_PART];
-            final Request r = parseRequest(req);
+            final RestRequest r = parseRequest(req);
             final long now = now();
             if ("order".equals(parts[TYPE_PART])) {
 
-                final int required = Request.SIDE | Request.TICKS | Request.LOTS;
-                final int optional = Request.REF | Request.MIN_LOTS;
+                final int required = RestRequest.SIDE | RestRequest.TICKS | RestRequest.LOTS;
+                final int optional = RestRequest.REF | RestRequest.MIN_LOTS;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -108,8 +108,8 @@ public final class BackSessServlet extends SessServlet {
                         r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             } else if ("trade".equals(parts[TYPE_PART])) {
 
-                final int required = Request.TRADER | Request.SIDE | Request.TICKS | Request.LOTS;
-                final int optional = Request.REF | Request.ROLE | Request.CPTY;
+                final int required = RestRequest.TRADER | RestRequest.SIDE | RestRequest.TICKS | RestRequest.LOTS;
+                final int optional = RestRequest.REF | RestRequest.ROLE | RestRequest.CPTY;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -121,8 +121,8 @@ public final class BackSessServlet extends SessServlet {
                         r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
             } else if ("quote".equals(parts[TYPE_PART])) {
 
-                final int required = Request.SIDE | Request.LOTS;
-                final int optional = Request.REF;
+                final int required = RestRequest.SIDE | RestRequest.LOTS;
+                final int optional = RestRequest.REF;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -162,7 +162,7 @@ public final class BackSessServlet extends SessServlet {
             if (ids == null) {
                 throw new InvalidException("id not specified");
             }
-            final Request r = parseRequest(req);
+            final RestRequest r = parseRequest(req);
             if (!r.isLotsSet()) {
                 throw new InvalidException("request fields are invalid");
             }

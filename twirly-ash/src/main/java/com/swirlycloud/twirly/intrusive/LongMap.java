@@ -13,11 +13,11 @@ import static com.swirlycloud.twirly.util.CollectionUtil.hashLong;
  * 
  * @author Mark Aylett
  */
-public abstract class LongHashTable<V> extends HashTable<V> {
+public abstract class LongMap<V> extends Map<V> {
 
-    protected abstract boolean equalKeyDirect(V lhs, long rhs);
+    protected abstract boolean equalKey(V lhs, long rhs);
 
-    public LongHashTable(int capacity) {
+    public LongMap(int capacity) {
         super(capacity);
     }
 
@@ -31,14 +31,14 @@ public abstract class LongHashTable<V> extends HashTable<V> {
             return null;
         }
         // Check if the first element in the bucket has an equivalent key.
-        if (equalKeyDirect(it, key)) {
+        if (equalKey(it, key)) {
             buckets[i] = next(it);
             --size;
             return it;
         }
         // Check if a subsequent element in the bucket has an equivalent key.
         for (V next; (next = next(it)) != null; it = next) {
-            if (equalKeyDirect(next, key)) {
+            if (equalKey(next, key)) {
                 setNext(it, next(next));
                 --size;
                 return next;
@@ -53,7 +53,7 @@ public abstract class LongHashTable<V> extends HashTable<V> {
         }
         final int i = indexFor(hashLong(key), buckets.length);
         for (V it = getBucket(i); it != null; it = next(it)) {
-            if (equalKeyDirect(it, key)) {
+            if (equalKey(it, key)) {
                 return it;
             }
         }
