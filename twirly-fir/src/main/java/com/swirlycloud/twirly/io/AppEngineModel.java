@@ -17,6 +17,7 @@ import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.swirlycloud.twirly.collection.Sequence;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Order;
@@ -25,7 +26,6 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.Container;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.RequestTree;
@@ -67,7 +67,7 @@ public class AppEngineModel implements Model {
     }
 
     private final void readOrder(@NonNull final Filter filter, final @NonNull Factory factory,
-            @NonNull final Container<? super Order> c) {
+            @NonNull final Sequence<? super Order> c) {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
@@ -109,7 +109,7 @@ public class AppEngineModel implements Model {
     }
 
     private final void readTrade(@NonNull final Filter filter, final @NonNull Factory factory,
-            @NonNull final Container<? super Exec> c) {
+            @NonNull final Sequence<? super Exec> c) {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
@@ -154,7 +154,7 @@ public class AppEngineModel implements Model {
     }
 
     private final void readPosn(@NonNull final Filter filter, final int busDay,
-            final @NonNull Factory factory, @NonNull final Container<? super Posn> c) {
+            final @NonNull Factory factory, @NonNull final Sequence<? super Posn> c) {
         final PosnTree posns = new PosnTree();
         foreachMarket(new UnaryCallback<Entity>() {
             @Override

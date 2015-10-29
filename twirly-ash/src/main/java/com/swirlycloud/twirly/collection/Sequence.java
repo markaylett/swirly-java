@@ -1,11 +1,11 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.intrusive;
+package com.swirlycloud.twirly.collection;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-public interface Container<V> {
+public interface Sequence<V> {
 
     void clear();
 

@@ -15,6 +15,7 @@ import java.sql.Types;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.collection.Sequence;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Order;
@@ -23,7 +24,6 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
-import com.swirlycloud.twirly.intrusive.Container;
 import com.swirlycloud.twirly.intrusive.MnemRbTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
 import com.swirlycloud.twirly.intrusive.RequestTree;
@@ -193,7 +193,7 @@ public class JdbcModel implements Model {
     }
 
     private static void readOrder(@NonNull PreparedStatement stmt, @NonNull Factory factory,
-            @NonNull final Container<? super Order> c) throws SQLException {
+            @NonNull final Sequence<? super Order> c) throws SQLException {
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 c.add(getOrder(rs, factory));
@@ -202,7 +202,7 @@ public class JdbcModel implements Model {
     }
 
     private final void readTrade(@NonNull PreparedStatement stmt, @NonNull Factory factory,
-            @NonNull final Container<? super Exec> c) throws SQLException {
+            @NonNull final Sequence<? super Exec> c) throws SQLException {
         try (final ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 c.add(getTrade(rs, factory));
@@ -211,7 +211,7 @@ public class JdbcModel implements Model {
     }
 
     private final void readPosn(@NonNull PreparedStatement stmt, int busDay,
-            @NonNull Factory factory, @NonNull final Container<? super Posn> c)
+            @NonNull Factory factory, @NonNull final Sequence<? super Posn> c)
                     throws SQLException {
         final PosnTree posns = new PosnTree();
         try (final ResultSet rs = stmt.executeQuery()) {

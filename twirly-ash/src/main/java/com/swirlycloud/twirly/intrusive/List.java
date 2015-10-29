@@ -6,7 +6,9 @@ package com.swirlycloud.twirly.intrusive;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-public abstract @NonNullByDefault class List<V> implements Container<V> {
+import com.swirlycloud.twirly.collection.Sequence;
+
+public abstract @NonNullByDefault class List<V> implements Sequence<V> {
     private final V end;
 
     protected abstract void insert(V node, V prev, V next);

@@ -13,6 +13,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.collection.Sequence;
+
 /**
  * In addition to the requirements imposed on a binary search tree the following must be satisfied
  * by a red-black tree:
@@ -29,7 +31,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * 
  * @author Mark Aylett
  */
-public abstract @NonNullByDefault class Tree<V> implements Serializable, Container<V> {
+public abstract @NonNullByDefault class Tree<V> implements Serializable, Sequence<V> {
 
     private static final long serialVersionUID = 1L;
 

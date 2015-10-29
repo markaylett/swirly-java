@@ -10,12 +10,14 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.collection.Sequence;
+
 /**
  * @author Mark Aylett
  *
  * @param <V>
  */
-public abstract class HashTable<V> implements Container<V> {
+public abstract class HashTable<V> implements Sequence<V> {
     private static final Object[] EMPTY = {};
     private static final int MIN_BUCKETS = 1 << 4;
 
