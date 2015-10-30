@@ -13,7 +13,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.function.UnaryFunction;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.rec.Asset;
 import com.swirlycloud.twirly.rec.AssetType;
 
@@ -73,8 +73,8 @@ public final class MockAsset {
         return MAP.get(mnem).call(factory);
     }
 
-    public static @NonNull MnemRbTree readAsset(Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public static @NonNull RecTree readAsset(Factory factory) {
+        final RecTree t = new RecTree();
         for (final UnaryFunction<Asset, Factory> entry : LIST) {
             final Asset asset = entry.call(factory);
             assert asset != null;

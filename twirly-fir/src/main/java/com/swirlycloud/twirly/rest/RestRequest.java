@@ -11,7 +11,7 @@ import javax.json.stream.JsonParser.Event;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 
-public final class Request {
+public final class RestRequest {
 
     public static final int MNEM = 1 << 0;
     public static final int DISPLAY = 1 << 1;

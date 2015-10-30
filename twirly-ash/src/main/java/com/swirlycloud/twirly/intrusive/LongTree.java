@@ -10,7 +10,7 @@ public abstract @NonNullByDefault class LongTree<V> extends Tree<V> {
 
     private static final long serialVersionUID = 1L;
 
-    protected abstract int compareKeyDirect(V lhs, long rhs);
+    protected abstract int compareKey(V lhs, long rhs);
 
     /**
      * Finds the node with the same key as node.
@@ -19,7 +19,7 @@ public abstract @NonNullByDefault class LongTree<V> extends Tree<V> {
         V tmp = root;
         int comp;
         while (tmp != null) {
-            comp = compareKeyDirect(tmp, key);
+            comp = compareKey(tmp, key);
             if (comp > 0) {
                 tmp = getLeft(tmp);
             } else if (comp < 0) {
@@ -39,7 +39,7 @@ public abstract @NonNullByDefault class LongTree<V> extends Tree<V> {
         V res = null;
         int comp;
         while (tmp != null) {
-            comp = compareKeyDirect(tmp, key);
+            comp = compareKey(tmp, key);
             if (comp > 0) {
                 res = tmp;
                 tmp = getLeft(tmp);
@@ -61,7 +61,7 @@ public abstract @NonNullByDefault class LongTree<V> extends Tree<V> {
         V tmp = root, parent = null;
         while (tmp != null) {
             parent = tmp;
-            final int comp = compareKeyDirect(tmp, key);
+            final int comp = compareKey(tmp, key);
             if (comp > 0) {
                 tmp = getLeft(tmp);
             } else if (comp < 0) {

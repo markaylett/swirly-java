@@ -4,7 +4,6 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.NullUtil.nullIfEmpty;
 
 import java.io.IOException;
 
@@ -15,48 +14,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.BasicRbNode;
-import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonifiable, Request {
+public final @NonNullByDefault class Quote extends BasicRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private final long id;
-    /**
-     * The executing trader.
-     */
-    private final String trader;
-    private final String market;
-    private final String contr;
-    private final int settlDay;
-    /**
-     * Ref is optional.
-     */
-    private final @Nullable String ref;
-    private final long bidTicks;
-    private final long bidLots;
-    private final long offerTicks;
-    private final long offerLots;
-    long created;
+    private final long ticks;
     long expiry;
 
     Quote(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
-            long bidTicks, long bidLots, long offerTicks, long offerLots, long created,
-            long expiry) {
-        this.id = id;
-        this.trader = trader;
-        this.market = market;
-        this.contr = contr;
-        this.settlDay = settlDay;
-        this.ref = nullIfEmpty(ref);
-        this.bidTicks = bidTicks;
-        this.bidLots = bidLots;
-        this.offerTicks = offerTicks;
-        this.offerLots = offerLots;
-        this.created = created;
+            Side side, long ticks, long lots, long created, long expiry) {
+        super(id, trader, market, contr, settlDay, ref, side, lots, created);
+        this.ticks = ticks;
         this.expiry = expiry;
     }
 
@@ -67,10 +37,9 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
         String contr = null;
         int settlDay = 0;
         String ref = null;
-        long bidTicks = 0;
-        long bidLots = 0;
-        long offerTicks = 0;
-        long offerLots = 0;
+        Side side = null;
+        long ticks = 0;
+        long lots = 0;
         long created = 0;
         long expiry = 0;
 
@@ -88,8 +57,11 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new Quote(id, trader, market, contr, settlDay, ref, bidTicks, bidLots,
-                        offerTicks, offerLots, created, expiry);
+                if (side == null) {
+                    throw new IOException("side is null");
+                }
+                return new Quote(id, trader, market, contr, settlDay, ref, side, ticks, lots,
+                        created, expiry);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -107,14 +79,10 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
                     id = p.getLong();
                 } else if ("settlDate".equals(name)) {
                     settlDay = JulianDay.maybeIsoToJd(p.getInt());
-                } else if ("bidTicks".equals(name)) {
-                    bidTicks = p.getLong();
-                } else if ("bidLots".equals(name)) {
-                    bidLots = p.getLong();
-                } else if ("offerTicks".equals(name)) {
-                    offerTicks = p.getLong();
-                } else if ("offerLots".equals(name)) {
-                    offerLots = p.getLong();
+                } else if ("ticks".equals(name)) {
+                    ticks = p.getLong();
+                } else if ("lots".equals(name)) {
+                    lots = p.getLong();
                 } else if ("created".equals(name)) {
                     created = p.getLong();
                 } else if ("expiry".equals(name)) {
@@ -132,6 +100,10 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
                     contr = p.getString();
                 } else if ("ref".equals(name)) {
                     ref = p.getString();
+                } else if ("side".equals(name)) {
+                    final String s = p.getString();
+                    assert s != null;
+                    side = Side.valueOf(s);
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -141,41 +113,6 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
             }
         }
         throw new IOException("end-of object not found");
-    }
-
-    @Override
-    public final int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + market.hashCode();
-        result = prime * result + (int) (id ^ (id >>> 32));
-        return result;
-    }
-
-    @Override
-    public final boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Quote other = (Quote) obj;
-        if (!market.equals(other.market)) {
-            return false;
-        }
-        if (id != other.id) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public final String toString() {
-        return JsonUtil.toJson(this);
     }
 
     @Override
@@ -196,69 +133,16 @@ public final @NonNullByDefault class Quote extends BasicRbNode implements Jsonif
         } else {
             out.append("null");
         }
-        out.append("\",\"bidTicks\":").append(String.valueOf(bidTicks));
-        out.append(",\"bidLots\":").append(String.valueOf(bidLots));
-        out.append("\",\"offerTicks\":").append(String.valueOf(offerTicks));
-        out.append(",\"offerLots\":").append(String.valueOf(offerLots));
+        out.append(",\"side\":\"").append(side.name());
+        out.append("\",\"ticks\":").append(String.valueOf(ticks));
+        out.append(",\"lots\":").append(String.valueOf(lots));
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"expiry\":").append(String.valueOf(expiry));
         out.append("}");
     }
 
-    @Override
-    public final long getId() {
-        return id;
-    }
-
-    @Override
-    public final String getTrader() {
-        return trader;
-    }
-
-    @Override
-    public final String getMarket() {
-        return market;
-    }
-
-    @Override
-    public final String getContr() {
-        return contr;
-    }
-
-    @Override
-    public final int getSettlDay() {
-        return settlDay;
-    }
-
-    @Override
-    public final boolean isSettlDaySet() {
-        return settlDay != 0;
-    }
-
-    @Override
-    public final @Nullable String getRef() {
-        return ref;
-    }
-
-    public final long getBidTicks() {
-        return bidTicks;
-    }
-
-    public final long getBidLots() {
-        return bidLots;
-    }
-
-    public final long getOfferTicks() {
-        return offerTicks;
-    }
-
-    public final long getOfferLots() {
-        return offerLots;
-    }
-
-    @Override
-    public final long getCreated() {
-        return created;
+    public final long getTicks() {
+        return ticks;
     }
 
     public final long getExpiry() {

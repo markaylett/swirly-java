@@ -13,6 +13,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.collection.Sequence;
+
 /**
  * In addition to the requirements imposed on a binary search tree the following must be satisfied
  * by a red-black tree:
@@ -29,7 +31,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * 
  * @author Mark Aylett
  */
-public abstract @NonNullByDefault class Tree<V> implements Serializable, Container<V> {
+public abstract @NonNullByDefault class Tree<V> implements Serializable, Sequence<V> {
 
     private static final long serialVersionUID = 1L;
 
@@ -70,7 +72,7 @@ public abstract @NonNullByDefault class Tree<V> implements Serializable, Contain
 
     protected abstract int getColor(V node);
 
-    protected abstract int compareKey(V lhs, V rhs);
+    protected abstract int compareNode(V lhs, V rhs);
 
     private final void print(final PrintStream out, final @Nullable V node, int indent) {
         if (node == null) {
@@ -351,7 +353,7 @@ public abstract @NonNullByDefault class Tree<V> implements Serializable, Contain
         tmp = root;
         while (tmp != null) {
             parent = tmp;
-            comp = compareKey(parent, node);
+            comp = compareNode(parent, node);
             if (comp > 0) {
                 tmp = getLeft(tmp);
             } else if (comp < 0) {
@@ -368,7 +370,7 @@ public abstract @NonNullByDefault class Tree<V> implements Serializable, Contain
     public final void pinsert(final V node, final @Nullable V parent) {
         set(node, parent);
         if (parent != null) {
-            final int comp = compareKey(parent, node);
+            final int comp = compareNode(parent, node);
             if (comp > 0) {
                 setLeft(parent, node);
             } else {

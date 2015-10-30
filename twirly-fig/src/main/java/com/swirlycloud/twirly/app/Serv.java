@@ -22,6 +22,7 @@ import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
@@ -37,8 +38,9 @@ import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.exception.TooLateException;
 import com.swirlycloud.twirly.exception.TraderNotFoundException;
-import com.swirlycloud.twirly.intrusive.EmailHashTable;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.TraderEmailMap;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
@@ -69,15 +71,18 @@ public @NonNullByDefault class Serv {
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
+    // 5 minutes.
+    private static final int QUOTE_EXPIRY = 5 * 60 * 1000;
+
     private final Journ journ;
     private final Cache cache;
     private final Factory factory;
-    private final MnemRbTree assets;
-    private final MnemRbTree contrs;
-    private final MnemRbTree markets;
-    private final MnemRbTree traders;
-    private final MnemRbTree views = new MnemRbTree();
-    private final EmailHashTable emailIdx = new EmailHashTable(CAPACITY);
+    private final RecTree assets;
+    private final RecTree contrs;
+    private final RecTree markets;
+    private final RecTree traders;
+    private final MarketViewTree views = new MarketViewTree();
+    private final TraderEmailMap emailIdx = new TraderEmailMap(CAPACITY);
     private transient int dirty;
     @Nullable
     private TraderSess dirtySess;
@@ -403,7 +408,7 @@ public @NonNullByDefault class Serv {
         this.factory = factory;
         this.dirty = DIRTY_ALL;
 
-        MnemRbTree t = model.readAsset(factory);
+        RecTree t = model.readAsset(factory);
         assert t != null;
         this.assets = t;
 
@@ -519,16 +524,16 @@ public @NonNullByDefault class Serv {
         Rec ret = null;
         switch (recType) {
         case ASSET:
-            ret = (Rec) assets.find(mnem);
+            ret = assets.find(mnem);
             break;
         case CONTR:
-            ret = (Rec) contrs.find(mnem);
+            ret = contrs.find(mnem);
             break;
         case MARKET:
-            ret = (Rec) markets.find(mnem);
+            ret = markets.find(mnem);
             break;
         case TRADER:
-            ret = (Rec) traders.find(mnem);
+            ret = traders.find(mnem);
             break;
         }
         return ret;
@@ -651,7 +656,7 @@ public @NonNullByDefault class Serv {
         if (book != null && book.getMnem().equals(mnem)) {
             throw new AlreadyExistsException(String.format("market '%s' already exists", mnem));
         }
-        final RbNode parent = book;
+        final MarketBook parent = book;
         book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
 
         try {
@@ -1341,6 +1346,13 @@ public @NonNullByDefault class Serv {
         } while (node != null);
 
         updateDirty();
+    }
+
+    public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
+            Side side, long lots, long now) {
+        // FIXME.
+        return factory.newQuote(1, sess.getMnem(), book, ref, side, 10, 12345, now,
+                now + QUOTE_EXPIRY);
     }
 
     /**

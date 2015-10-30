@@ -37,15 +37,14 @@ public class ViewServlet extends RestServlet {
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
             final long now = now();
-            long timeout;
             if (parts.length == 0) {
-                timeout = rest.getView(params, now, resp.getWriter());
+                rest.getView(params, now, resp.getWriter());
             } else if (parts.length == 1) {
-                timeout = rest.getView(parts[MNEM_PART], params, now, resp.getWriter());
+                rest.getView(parts[MNEM_PART], params, now, resp.getWriter());
             } else {
                 throw new NotFoundException("resource does not exist");
             }
-            sendJsonResponse(resp, timeout);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

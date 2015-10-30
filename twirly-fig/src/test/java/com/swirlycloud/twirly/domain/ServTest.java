@@ -23,7 +23,7 @@ import com.swirlycloud.twirly.app.Result;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.node.SlNode;
@@ -47,8 +47,8 @@ public final class ServTest {
         return new MockDatastore() {
 
             @Override
-            public final @NonNull MnemRbTree readMarket(@NonNull Factory factory) {
-                final MnemRbTree t = new MnemRbTree();
+            public final @NonNull RecTree readMarket(@NonNull Factory factory) {
+                final RecTree t = new RecTree();
                 t.insert(factory.newMarket("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"),
                         SETTL_DAY, EXPIRY_DAY, STATE, 12345, 10, NOW - 2, 3, 2));
                 return t;

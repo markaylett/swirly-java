@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.SerializableTest;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.mock.MockAsset;
 
 public final class AssetTest extends SerializableTest {
@@ -28,8 +28,8 @@ public final class AssetTest extends SerializableTest {
 
     @Test
     public final void testSerializable() throws ClassNotFoundException, IOException {
-        final MnemRbTree t = MockAsset.readAsset(FACTORY);
-        final MnemRbTree u = writeAndRead(t);
+        final RecTree t = MockAsset.readAsset(FACTORY);
+        final RecTree u = writeAndRead(t);
 
         assertEquals(toJsonString(t.getFirst()), toJsonString(u.getFirst()));
     }

@@ -5,7 +5,9 @@ package com.swirlycloud.twirly.intrusive;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-public abstract class Stack<V> implements Container<V> {
+import com.swirlycloud.twirly.collection.Sequence;
+
+public abstract class Stack<V> implements Sequence<V> {
     private V first;
 
     protected abstract void setNext(V node, V next);

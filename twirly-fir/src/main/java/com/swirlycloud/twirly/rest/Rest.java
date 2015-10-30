@@ -15,48 +15,50 @@ public @NonNullByDefault interface Rest {
     @Nullable
     String findTraderByEmail(String email) throws ServiceUnavailableException, IOException;
 
-    long getRec(boolean withTraders, Params params, long now, Appendable out)
+    void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException;
 
-    long getRec(RecType recType, Params params, long now, Appendable out)
+    void getRec(RecType recType, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException;
 
-    long getRec(RecType recType, String mnem, Params params, long now, Appendable out)
+    void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getView(Params params, long now, Appendable out)
+    void getView(Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException;
 
-    long getView(String market, Params params, long now, Appendable out)
+    void getView(String market, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getSess(String trader, Params params, long now, Appendable out)
+    void getSess(String trader, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getOrder(String trader, Params params, long now, Appendable out)
+    void getOrder(String trader, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getOrder(String trader, String market, Params params, long now, Appendable out)
+    void getOrder(String trader, String market, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getOrder(String trader, String market, long id, Params params, long now, Appendable out)
+    void getOrder(String trader, String market, long id, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getTrade(String trader, Params params, long now, Appendable out)
+    void getTrade(String trader, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getTrade(String trader, String market, Params params, long now, Appendable out)
+    void getTrade(String trader, String market, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getTrade(String trader, String market, long id, Params params, long now, Appendable out)
+    void getTrade(String trader, String market, long id, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getPosn(String trader, Params params, long now, Appendable out)
+    void getPosn(String trader, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getPosn(String trader, String contr, Params params, long now, Appendable out)
+    void getPosn(String trader, String contr, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    long getPosn(String trader, String contr, int settlDate, Params params, long now,
+    void getPosn(String trader, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException;
+
+    long getTimeout();
 }

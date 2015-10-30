@@ -13,7 +13,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.function.UnaryFunction;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.rec.Contr;
 
 public final class MockContr {
@@ -74,8 +74,8 @@ public final class MockContr {
         return MAP.get(mnem).call(factory);
     }
 
-    public static @NonNull MnemRbTree readContr(Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public static @NonNull RecTree readContr(Factory factory) {
+        final RecTree t = new RecTree();
         for (final UnaryFunction<Contr, Factory> entry : LIST) {
             final Contr contr = entry.call(factory);
             assert contr != null;

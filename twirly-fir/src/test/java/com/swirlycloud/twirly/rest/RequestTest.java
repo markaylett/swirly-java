@@ -18,8 +18,8 @@ import org.junit.Test;
 import com.swirlycloud.twirly.domain.Side;
 
 public final class RequestTest {
-    private static final Request parse(String s) throws IOException {
-        final Request r = new Request();
+    private static final RestRequest parse(String s) throws IOException {
+        final RestRequest r = new RestRequest();
         try (JsonParser p = Json.createParser(new StringReader(s))) {
             parseStartObject(p);
             r.parse(p);
@@ -29,43 +29,43 @@ public final class RequestTest {
 
     @Test
     public final void testNull() throws IOException {
-        final Request r = parse("{\"mnem\":null}");
-        assertEquals(Request.MNEM, r.getFields());
+        final RestRequest r = parse("{\"mnem\":null}");
+        assertEquals(RestRequest.MNEM, r.getFields());
         assertNull(r.getMnem());
     }
 
     @Test
     public final void testLong() throws IOException {
-        final Request r = parse("{\"ticks\":12345}");
-        assertEquals(Request.TICKS, r.getFields());
+        final RestRequest r = parse("{\"ticks\":12345}");
+        assertEquals(RestRequest.TICKS, r.getFields());
         assertEquals(12345, r.getTicks());
     }
 
     @Test
     public final void testString() throws IOException {
-        final Request r = parse("{\"contr\":\"EURUSD\"}");
-        assertEquals(Request.CONTR, r.getFields());
+        final RestRequest r = parse("{\"contr\":\"EURUSD\"}");
+        assertEquals(RestRequest.CONTR, r.getFields());
         assertEquals("EURUSD", r.getContr());
     }
 
     @Test
     public final void testAction() throws IOException {
-        final Request r = parse("{\"side\":\"SELL\"}");
-        assertEquals(Request.SIDE, r.getFields());
+        final RestRequest r = parse("{\"side\":\"SELL\"}");
+        assertEquals(RestRequest.SIDE, r.getFields());
         assertEquals(Side.SELL, r.getSide());
     }
 
     @Test
     public final void testMulti() throws IOException {
-        final Request r = parse("{\"contr\":\"EURUSD\",\"settlDate\":20140314}");
-        assertEquals(Request.CONTR | Request.SETTL_DATE, r.getFields());
+        final RestRequest r = parse("{\"contr\":\"EURUSD\",\"settlDate\":20140314}");
+        assertEquals(RestRequest.CONTR | RestRequest.SETTL_DATE, r.getFields());
         assertEquals("EURUSD", r.getContr());
         assertEquals(20140314, r.getSettlDate());
     }
 
     public final void testDuplicate() throws IOException {
-        final Request r = parse("{\"trader\":\"MARAYL1\",\"trader\":\"MARAYL2\"}");
-        assertEquals(Request.TRADER, r.getFields());
+        final RestRequest r = parse("{\"trader\":\"MARAYL1\",\"trader\":\"MARAYL2\"}");
+        assertEquals(RestRequest.TRADER, r.getFields());
         // First value is overwritten with second.
         assertEquals("MARAYL2", r.getTrader());
     }

@@ -36,10 +36,9 @@ public final class BackTaskServlet extends RestServlet {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
             final long now = now();
-            long timeout;
             if ("endofday".equals(parts[TASK_PART])) {
                 log("processing end-of-day");
-                timeout = rest.endOfDay(now);
+                rest.endOfDay(now);
             } else if ("ecbrates".equals(parts[TASK_PART])) {
                 log("processing ecb-rates");
                 final EcbRates ecbRates = new EcbRates();
@@ -49,13 +48,13 @@ public final class BackTaskServlet extends RestServlet {
                 } catch (final Throwable t) {
                     log("error: " + t.getMessage());
                 }
-                timeout = rest.poll(now);
+                rest.poll(now);
             } else if ("poll".equals(parts[TASK_PART])) {
-                timeout = rest.poll(now);
+                rest.poll(now);
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            setNoContent(resp, timeout);
+            setNoContent(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

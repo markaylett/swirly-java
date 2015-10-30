@@ -6,8 +6,8 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.intrusive.InstructTree;
-import com.swirlycloud.twirly.intrusive.RefHashTable;
+import com.swirlycloud.twirly.intrusive.RequestRefMap;
+import com.swirlycloud.twirly.intrusive.RequestIdTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.node.RbNode;
@@ -25,16 +25,16 @@ public @NonNullByDefault class TraderSess extends Trader {
     public static final int DIRTY_POSN = 1 << 3;
     public static final int DIRTY_ALL = DIRTY_EMAIL | DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN;
 
-    private final transient RefHashTable refIdx;
+    private final transient RequestRefMap refIdx;
     private final transient Factory factory;
-    final transient InstructTree orders = new InstructTree();
-    final transient InstructTree trades = new InstructTree();
+    final transient RequestIdTree orders = new RequestIdTree();
+    final transient RequestIdTree trades = new RequestIdTree();
     final transient TraderPosnTree posns = new TraderPosnTree();
     @Nullable
     private transient TraderSess dirtyNext;
     private transient int dirty;
 
-    TraderSess(String mnem, @Nullable String display, String email, RefHashTable refIdx,
+    TraderSess(String mnem, @Nullable String display, String email, RequestRefMap refIdx,
             Factory factory) {
         super(mnem, display, email);
         this.refIdx = refIdx;
@@ -68,7 +68,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     }
 
     public final @Nullable Order removeOrder(String ref) {
-        final Order order = refIdx.remove(mnem, ref);
+        final Order order = (Order) refIdx.remove(mnem, ref);
         if (order != null) {
             orders.remove(order);
         }
@@ -80,7 +80,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     }
 
     public final @Nullable Order findOrder(String ref) {
-        return refIdx.find(mnem, ref);
+        return (Order) refIdx.find(mnem, ref);
     }
 
     public final @Nullable RbNode getRootOrder() {
@@ -109,7 +109,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     }
 
     public final boolean removeTrade(String market, long id) {
-        final RbNode node = trades.find(market, id);
+        final Request node = trades.find(market, id);
         if (node == null) {
             return false;
         }
@@ -145,23 +145,23 @@ public @NonNullByDefault class TraderSess extends Trader {
     public final Posn addPosn(Posn posn) {
         final String contr = posn.getContr();
         final int settlDay = posn.getSettlDay();
-        final Posn exist = (Posn) posns.pfind(contr, settlDay);
+        final Posn exist = posns.pfind(contr, settlDay);
         if (exist != null && exist.getContr().equals(contr) && exist.getSettlDay() == settlDay) {
             // Add to existing position.
             exist.add(posn);
             posn = exist;
         } else {
-            final RbNode parent = exist;
+            final Posn parent = exist;
             posns.pinsert(posn, parent);
         }
         return posn;
     }
 
     public final Posn getLazyPosn(Market market) {
-        Posn posn = (Posn) posns.pfind(market.getContr(), market.getSettlDay());
+        Posn posn = posns.pfind(market.getContr(), market.getSettlDay());
         if (posn == null || !posn.getContr().equals(market.getContr())
                 || posn.getSettlDay() != market.getSettlDay()) {
-            final RbNode parent = posn;
+            final Posn parent = posn;
             posn = factory.newPosn(mnem, market.getContr(), market.getSettlDay());
             posns.pinsert(posn, parent);
         }
@@ -169,7 +169,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     }
 
     public final @Nullable Posn findPosn(String contr, int settlDay) {
-        return (Posn) posns.find(contr, settlDay);
+        return posns.find(contr, settlDay);
     }
 
     public final @Nullable RbNode getRootPosn() {

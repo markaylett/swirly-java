@@ -11,7 +11,8 @@ import com.swirlycloud.twirly.domain.BookFactory;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 
@@ -20,11 +21,12 @@ public final @NonNullByDefault class ModelUtil {
     private ModelUtil() {
     }
 
-    public static MnemRbTree readView(Model model, Factory factory) throws InterruptedException {
+    public static MarketViewTree readView(Model model, Factory factory)
+            throws InterruptedException {
 
-        final MnemRbTree views = new MnemRbTree();
+        final MarketViewTree views = new MarketViewTree();
 
-        final MnemRbTree markets = model.readMarket(new BookFactory());
+        final RecTree markets = model.readMarket(new BookFactory());
         assert markets != null;
 
         for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {

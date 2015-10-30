@@ -4,7 +4,6 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.NullUtil.nullIfEmpty;
 
 import java.io.IOException;
 
@@ -16,13 +15,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.DlUtil;
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
 /**
@@ -30,40 +25,18 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Order extends BasicRbNode
-        implements Jsonifiable, DlNode, SlNode, Instruct {
+public final @NonNullByDefault class Order extends BasicRequest implements DlNode, Instruct {
 
     private static final long serialVersionUID = 1L;
 
     private transient DlNode dlPrev = DlUtil.NULL;
     private transient DlNode dlNext = DlUtil.NULL;
 
-    private transient @Nullable SlNode slNext;
-    // Singly-linked node for RefHashTable.
-    private transient @Nullable Order refNext;
-
     // Internals.
     transient @Nullable RbNode level;
 
-    private final long id;
-    /**
-     * The executing trader.
-     */
-    private final String trader;
-    private final String market;
-    private final String contr;
-    private final int settlDay;
-    /**
-     * Ref is optional.
-     */
-    private final @Nullable String ref;
     State state;
-    private final Side side;
     private final long ticks;
-    /**
-     * Must be greater than zero.
-     */
-    long lots;
     /**
      * Must be greater than zero.
      */
@@ -81,32 +54,24 @@ public final @NonNullByDefault class Order extends BasicRbNode
     private final long minLots;
     transient long quot;
     private boolean pecan;
-    long created;
     long modified;
 
     Order(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
             State state, Side side, long ticks, long lots, long resd, long exec, long cost,
             long lastTicks, long lastLots, long minLots, boolean pecan, long created,
             long modified) {
+        super(id, trader, market, contr, settlDay, ref, side, lots, created);
         assert lots > 0 && lots >= minLots;
-        this.id = id;
-        this.trader = trader;
-        this.market = market;
-        this.contr = contr;
-        this.settlDay = settlDay;
-        this.ref = nullIfEmpty(ref);
         this.state = state;
-        this.side = side;
         this.ticks = ticks;
-        this.lots = lots;
         this.resd = resd;
         this.exec = exec;
         this.cost = cost;
         this.lastTicks = lastTicks;
         this.lastLots = lastLots;
         this.minLots = minLots;
+        this.quot = 0;
         this.pecan = pecan;
-        this.created = created;
         this.modified = modified;
     }
 
@@ -237,41 +202,6 @@ public final @NonNullByDefault class Order extends BasicRbNode
     }
 
     @Override
-    public final int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + market.hashCode();
-        result = prime * result + (int) (id ^ (id >>> 32));
-        return result;
-    }
-
-    @Override
-    public final boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Order other = (Order) obj;
-        if (!market.equals(other.market)) {
-            return false;
-        }
-        if (id != other.id) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public final String toString() {
-        return JsonUtil.toJson(this);
-    }
-
-    @Override
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"trader\":\"").append(trader);
@@ -362,24 +292,6 @@ public final @NonNullByDefault class Order extends BasicRbNode
         return false;
     }
 
-    @Override
-    public final void setSlNext(@Nullable SlNode next) {
-        this.slNext = next;
-    }
-
-    @Override
-    public final @Nullable SlNode slNext() {
-        return slNext;
-    }
-
-    public final void setRefNext(@Nullable Order next) {
-        this.refNext = next;
-    }
-
-    public final @Nullable Order refNext() {
-        return refNext;
-    }
-
     final void create(long now) {
         assert lots > 0 && lots >= minLots;
         state = State.NEW;
@@ -427,43 +339,8 @@ public final @NonNullByDefault class Order extends BasicRbNode
     }
 
     @Override
-    public final long getId() {
-        return id;
-    }
-
-    @Override
     public final long getOrderId() {
         return id;
-    }
-
-    @Override
-    public final String getTrader() {
-        return trader;
-    }
-
-    @Override
-    public final String getMarket() {
-        return market;
-    }
-
-    @Override
-    public final String getContr() {
-        return contr;
-    }
-
-    @Override
-    public final int getSettlDay() {
-        return settlDay;
-    }
-
-    @Override
-    public final boolean isSettlDaySet() {
-        return settlDay != 0;
-    }
-
-    @Override
-    public final @Nullable String getRef() {
-        return ref;
     }
 
     @Override
@@ -472,18 +349,8 @@ public final @NonNullByDefault class Order extends BasicRbNode
     }
 
     @Override
-    public final Side getSide() {
-        return side;
-    }
-
-    @Override
     public final long getTicks() {
         return ticks;
-    }
-
-    @Override
-    public final long getLots() {
-        return lots;
     }
 
     @Override
@@ -532,11 +399,6 @@ public final @NonNullByDefault class Order extends BasicRbNode
 
     public final boolean isPecan() {
         return pecan;
-    }
-
-    @Override
-    public final long getCreated() {
-        return created;
     }
 
     public final long getModified() {

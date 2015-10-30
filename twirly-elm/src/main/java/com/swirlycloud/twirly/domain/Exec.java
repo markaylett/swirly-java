@@ -4,7 +4,6 @@
 package com.swirlycloud.twirly.domain;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.NullUtil.nullIfEmpty;
 
 import java.io.IOException;
 
@@ -15,11 +14,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.BasicRbNode;
 import com.swirlycloud.twirly.node.JslNode;
-import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Params;
 
 /**
@@ -29,34 +24,15 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Exec extends BasicRbNode
-        implements Jsonifiable, SlNode, JslNode, Instruct {
+public final @NonNullByDefault class Exec extends BasicRequest implements JslNode, Instruct {
 
     private static final long serialVersionUID = 1L;
 
-    private transient @Nullable SlNode slNext;
     private transient @Nullable JslNode jslNext;
 
-    private final long id;
     private final long orderId;
-    /**
-     * The executing trader.
-     */
-    private final String trader;
-    private final String market;
-    private final String contr;
-    private final int settlDay;
-    /**
-     * Ref is optional.
-     */
-    private final @Nullable String ref;
     private State state;
-    private final Side side;
     private final long ticks;
-    /**
-     * Must be greater than zero.
-     */
-    private long lots;
     /**
      * Must be greater than zero.
      */
@@ -75,23 +51,15 @@ public final @NonNullByDefault class Exec extends BasicRbNode
     private long matchId;
     private @Nullable Role role;
     private @Nullable String cpty;
-    private final long created;
 
     Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
             @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
             long exec, long cost, long lastTicks, long lastLots, long minLots, long matchId,
             @Nullable Role role, @Nullable String cpty, long created) {
-        this.id = id;
+        super(id, trader, market, contr, settlDay, ref, side, lots, created);
         this.orderId = orderId;
-        this.trader = trader;
-        this.market = market;
-        this.contr = contr;
-        this.settlDay = settlDay;
-        this.ref = nullIfEmpty(ref);
         this.state = state;
-        this.side = side;
         this.ticks = ticks;
-        this.lots = lots;
         this.resd = resd;
         this.exec = exec;
         this.cost = cost;
@@ -101,7 +69,6 @@ public final @NonNullByDefault class Exec extends BasicRbNode
         this.matchId = matchId;
         this.role = role;
         this.cpty = cpty;
-        this.created = created;
     }
 
     /**
@@ -269,41 +236,6 @@ public final @NonNullByDefault class Exec extends BasicRbNode
     }
 
     @Override
-    public final int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + market.hashCode();
-        result = prime * result + (int) (id ^ (id >>> 32));
-        return result;
-    }
-
-    @Override
-    public final boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Exec other = (Exec) obj;
-        if (!market.equals(other.market)) {
-            return false;
-        }
-        if (id != other.id) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public final String toString() {
-        return JsonUtil.toJson(this);
-    }
-
-    @Override
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"id\":").append(String.valueOf(id));
         out.append(",\"orderId\":").append(String.valueOf(orderId));
@@ -360,16 +292,6 @@ public final @NonNullByDefault class Exec extends BasicRbNode
     }
 
     @Override
-    public final void setSlNext(@Nullable SlNode next) {
-        this.slNext = next;
-    }
-
-    @Override
-    public final @Nullable SlNode slNext() {
-        return slNext;
-    }
-
-    @Override
     public final void setJslNext(@Nullable JslNode next) {
         this.jslNext = next;
     }
@@ -414,43 +336,8 @@ public final @NonNullByDefault class Exec extends BasicRbNode
     }
 
     @Override
-    public final long getId() {
-        return id;
-    }
-
-    @Override
     public final long getOrderId() {
         return orderId;
-    }
-
-    @Override
-    public final String getTrader() {
-        return trader;
-    }
-
-    @Override
-    public final String getMarket() {
-        return market;
-    }
-
-    @Override
-    public final String getContr() {
-        return contr;
-    }
-
-    @Override
-    public final int getSettlDay() {
-        return settlDay;
-    }
-
-    @Override
-    public final boolean isSettlDaySet() {
-        return settlDay != 0;
-    }
-
-    @Override
-    public final @Nullable String getRef() {
-        return ref;
     }
 
     @Override
@@ -459,18 +346,8 @@ public final @NonNullByDefault class Exec extends BasicRbNode
     }
 
     @Override
-    public final Side getSide() {
-        return side;
-    }
-
-    @Override
     public final long getTicks() {
         return ticks;
-    }
-
-    @Override
-    public final long getLots() {
-        return lots;
     }
 
     @Override
@@ -530,10 +407,5 @@ public final @NonNullByDefault class Exec extends BasicRbNode
 
     public final @Nullable String getCpty() {
         return cpty;
-    }
-
-    @Override
-    public final long getCreated() {
-        return created;
     }
 }

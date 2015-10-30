@@ -18,7 +18,7 @@ import com.swirlycloud.twirly.exception.MethodNotAllowedException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;
 import com.swirlycloud.twirly.rest.BackRest;
-import com.swirlycloud.twirly.rest.Request;
+import com.swirlycloud.twirly.rest.RestRequest;
 
 @SuppressWarnings("serial")
 public final class BackRecServlet extends RecServlet {
@@ -43,13 +43,12 @@ public final class BackRecServlet extends RecServlet {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
 
-            final Request r = parseRequest(req);
+            final RestRequest r = parseRequest(req);
             final long now = now();
-            long timeout;
             if ("market".equals(parts[TYPE_PART])) {
 
-                final int required = Request.MNEM | Request.DISPLAY | Request.CONTR;
-                final int optional = Request.SETTL_DATE | Request.EXPIRY_DATE | Request.STATE;
+                final int required = RestRequest.MNEM | RestRequest.DISPLAY | RestRequest.CONTR;
+                final int optional = RestRequest.SETTL_DATE | RestRequest.EXPIRY_DATE | RestRequest.STATE;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -57,14 +56,13 @@ public final class BackRecServlet extends RecServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new ForbiddenException("user is not an admin");
                 }
-                timeout = rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(),
-                        r.getSettlDate(), r.getExpiryDate(), r.getState(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.postMarket(r.getMnem(), r.getDisplay(), r.getContr(), r.getSettlDate(),
+                        r.getExpiryDate(), r.getState(), PARAMS_NONE, now, resp.getWriter());
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                final int required = Request.MNEM | Request.DISPLAY;
-                final int optional = Request.EMAIL;
+                final int required = RestRequest.MNEM | RestRequest.DISPLAY;
+                final int optional = RestRequest.EMAIL;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -76,13 +74,13 @@ public final class BackRecServlet extends RecServlet {
                     }
                     email = r.getEmail();
                 }
-                timeout = rest.postTrader(r.getMnem(), r.getDisplay(), email, PARAMS_NONE, now,
+                rest.postTrader(r.getMnem(), r.getDisplay(), email, PARAMS_NONE, now,
                         resp.getWriter());
 
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            sendJsonResponse(resp, timeout);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
@@ -108,12 +106,11 @@ public final class BackRecServlet extends RecServlet {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
 
-            final Request r = parseRequest(req);
+            final RestRequest r = parseRequest(req);
             final long now = now();
-            long timeout;
             if ("market".equals(parts[TYPE_PART])) {
 
-                final int required = Request.MNEM | Request.DISPLAY | Request.STATE;
+                final int required = RestRequest.MNEM | RestRequest.DISPLAY | RestRequest.STATE;
                 if (!r.isValid(required)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -121,13 +118,13 @@ public final class BackRecServlet extends RecServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new ForbiddenException("user is not an admin");
                 }
-                timeout = rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE,
-                        now, resp.getWriter());
+                rest.putMarket(r.getMnem(), r.getDisplay(), r.getState(), PARAMS_NONE, now,
+                        resp.getWriter());
 
             } else if ("trader".equals(parts[TYPE_PART])) {
 
-                final int required = Request.MNEM | Request.DISPLAY;
-                final int optional = Request.EMAIL;
+                final int required = RestRequest.MNEM | RestRequest.DISPLAY;
+                final int optional = RestRequest.EMAIL;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
@@ -139,13 +136,12 @@ public final class BackRecServlet extends RecServlet {
                     }
                     email = r.getEmail();
                 }
-                timeout = rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now,
-                        resp.getWriter());
+                rest.putTrader(r.getMnem(), r.getDisplay(), PARAMS_NONE, now, resp.getWriter());
 
             } else {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            sendJsonResponse(resp, timeout);
+            sendJsonResponse(resp);
         } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }

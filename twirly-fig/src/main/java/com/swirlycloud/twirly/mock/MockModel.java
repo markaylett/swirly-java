@@ -7,8 +7,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.intrusive.InstructTree;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
+import com.swirlycloud.twirly.intrusive.RequestIdTree;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
@@ -20,22 +21,22 @@ public class MockModel implements Model {
     }
 
     @Override
-    public @NonNull MnemRbTree readAsset(@NonNull final Factory factory) {
+    public @NonNull RecTree readAsset(@NonNull final Factory factory) {
         return MockAsset.readAsset(factory);
     }
 
     @Override
-    public @NonNull MnemRbTree readContr(@NonNull final Factory factory) {
+    public @NonNull RecTree readContr(@NonNull final Factory factory) {
         return MockContr.readContr(factory);
     }
 
     @Override
-    public @NonNull MnemRbTree readMarket(@NonNull final Factory factory) {
-        return new MnemRbTree();
+    public @NonNull RecTree readMarket(@NonNull final Factory factory) {
+        return new RecTree();
     }
 
     @Override
-    public @NonNull MnemRbTree readTrader(@NonNull final Factory factory) {
+    public @NonNull RecTree readTrader(@NonNull final Factory factory) {
         return MockTrader.readTrader(factory);
     }
 
@@ -46,9 +47,9 @@ public class MockModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readView(@NonNull Factory factory)
+    public final @NonNull MarketViewTree readView(@NonNull Factory factory)
             throws InterruptedException {
-        return new MnemRbTree();
+        return new MarketViewTree();
     }
 
     @Override
@@ -57,9 +58,8 @@ public class MockModel implements Model {
     }
 
     @Override
-    public @NonNull InstructTree readOrder(@NonNull String trader,
-            @NonNull final Factory factory) {
-        return new InstructTree();
+    public @NonNull RequestIdTree readOrder(@NonNull String trader, @NonNull final Factory factory) {
+        return new RequestIdTree();
     }
 
     @Override
@@ -68,9 +68,8 @@ public class MockModel implements Model {
     }
 
     @Override
-    public @NonNull InstructTree readTrade(@NonNull String trader,
-            @NonNull final Factory factory) {
-        return new InstructTree();
+    public @NonNull RequestIdTree readTrade(@NonNull String trader, @NonNull final Factory factory) {
+        return new RequestIdTree();
     }
 
     @Override

@@ -17,6 +17,7 @@ import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.swirlycloud.twirly.collection.Sequence;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Order;
@@ -25,15 +26,14 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.Container;
-import com.swirlycloud.twirly.intrusive.InstructTree;
-import com.swirlycloud.twirly.intrusive.MnemRbTree;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.PosnTree;
+import com.swirlycloud.twirly.intrusive.RecTree;
+import com.swirlycloud.twirly.intrusive.RequestIdTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
-import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.rec.Market;
 import com.swirlycloud.twirly.rec.Trader;
@@ -67,7 +67,7 @@ public class AppEngineModel implements Model {
     }
 
     private final void readOrder(@NonNull final Filter filter, final @NonNull Factory factory,
-            @NonNull final Container<? super Order> c) {
+            @NonNull final Sequence<? super Order> c) {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
@@ -109,7 +109,7 @@ public class AppEngineModel implements Model {
     }
 
     private final void readTrade(@NonNull final Filter filter, final @NonNull Factory factory,
-            @NonNull final Container<? super Exec> c) {
+            @NonNull final Sequence<? super Exec> c) {
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
             public final void call(Entity arg) {
@@ -154,7 +154,7 @@ public class AppEngineModel implements Model {
     }
 
     private final void readPosn(@NonNull final Filter filter, final int busDay,
-            final @NonNull Factory factory, @NonNull final Container<? super Posn> c) {
+            final @NonNull Factory factory, @NonNull final Sequence<? super Posn> c) {
         final PosnTree posns = new PosnTree();
         foreachMarket(new UnaryCallback<Entity>() {
             @Override
@@ -172,10 +172,10 @@ public class AppEngineModel implements Model {
                         settlDay = 0;
                     }
                     // Lazy position.
-                    Posn posn = (Posn) posns.pfind(trader, contr, settlDay);
+                    Posn posn = posns.pfind(trader, contr, settlDay);
                     if (posn == null || !posn.getTrader().equals(trader)
                             || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
-                        final RbNode parent = posn;
+                        final Posn parent = posn;
                         assert trader != null;
                         assert contr != null;
                         posn = factory.newPosn(trader, contr, settlDay);
@@ -190,7 +190,7 @@ public class AppEngineModel implements Model {
             }
         });
         for (;;) {
-            final Posn posn = (Posn) posns.getRoot();
+            final Posn posn = posns.getRoot();
             if (posn == null) {
                 break;
             }
@@ -204,20 +204,20 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readAsset(@NonNull Factory factory) {
+    public final @NonNull RecTree readAsset(@NonNull Factory factory) {
         // TODO: migrate to datastore.
         return MockAsset.readAsset(factory);
     }
 
     @Override
-    public final @NonNull MnemRbTree readContr(@NonNull Factory factory) {
+    public final @NonNull RecTree readContr(@NonNull Factory factory) {
         // TODO: migrate to datastore.
         return MockContr.readContr(factory);
     }
 
     @Override
-    public final @NonNull MnemRbTree readMarket(@NonNull Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public final @NonNull RecTree readMarket(@NonNull Factory factory) {
+        final RecTree t = new RecTree();
         final Query query = new Query(MARKET_KIND);
         final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
@@ -243,8 +243,8 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readTrader(@NonNull Factory factory) {
-        final MnemRbTree t = new MnemRbTree();
+    public final @NonNull RecTree readTrader(@NonNull Factory factory) {
+        final RecTree t = new RecTree();
         final Query query = new Query(TRADER_KIND);
         final PreparedQuery pq = datastore.prepare(query);
         for (final Entity entity : pq.asIterable()) {
@@ -261,8 +261,8 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @Nullable String readTraderByEmail(@NonNull String email,
-            @NonNull Factory factory) throws InterruptedException {
+    public final @Nullable String readTraderByEmail(@NonNull String email, @NonNull Factory factory)
+            throws InterruptedException {
         final Filter filter = new FilterPredicate("email", FilterOperator.EQUAL, email);
         final Query query = new Query(TRADER_KIND).setFilter(filter).setKeysOnly();
         final PreparedQuery pq = datastore.prepare(query);
@@ -271,7 +271,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull MnemRbTree readView(@NonNull Factory factory)
+    public final @NonNull MarketViewTree readView(@NonNull Factory factory)
             throws InterruptedException {
         return ModelUtil.readView(this, factory);
     }
@@ -285,14 +285,13 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull InstructTree readOrder(@NonNull String trader,
-            @NonNull Factory factory) {
+    public final @NonNull RequestIdTree readOrder(@NonNull String trader, @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(traderFilter, archiveFilter);
         assert filter != null;
-        final InstructTree t = new InstructTree();
+        final RequestIdTree t = new RequestIdTree();
         readOrder(filter, factory, t);
         return t;
     }
@@ -311,8 +310,7 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull InstructTree readTrade(@NonNull String trader,
-            @NonNull Factory factory) {
+    public final @NonNull RequestIdTree readTrade(@NonNull String trader, @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());
@@ -320,7 +318,7 @@ public class AppEngineModel implements Model {
                 Boolean.FALSE);
         final Filter filter = CompositeFilterOperator.and(traderFilter, stateFilter, archiveFilter);
         assert filter != null;
-        final InstructTree t = new InstructTree();
+        final RequestIdTree t = new RequestIdTree();
         readTrade(filter, factory, t);
         return t;
     }

@@ -5,7 +5,9 @@ package com.swirlycloud.twirly.intrusive;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-public abstract class Queue<V> implements Container<V> {
+import com.swirlycloud.twirly.collection.Sequence;
+
+public abstract class Queue<V> implements Sequence<V> {
     private V first;
     private V last;
 

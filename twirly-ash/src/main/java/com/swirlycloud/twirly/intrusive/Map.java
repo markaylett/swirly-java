@@ -10,12 +10,14 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.collection.Sequence;
+
 /**
  * @author Mark Aylett
  *
  * @param <V>
  */
-public abstract class HashTable<V> implements Container<V> {
+public abstract class Map<V> implements Sequence<V> {
     private static final Object[] EMPTY = {};
     private static final int MIN_BUCKETS = 1 << 4;
 
@@ -27,9 +29,9 @@ public abstract class HashTable<V> implements Container<V> {
 
     protected abstract V next(V node);
 
-    protected abstract int hashKey(V node);
+    protected abstract int hashNode(V node);
 
-    protected abstract boolean equalKey(V lhs, V rhs);
+    protected abstract boolean equalNode(V lhs, V rhs);
 
     protected static int indexFor(int h, int length) {
         // Doug Lea's supplemental secondaryHash function.
@@ -65,7 +67,7 @@ public abstract class HashTable<V> implements Container<V> {
                 final V node = getBucket(i);
                 buckets[i] = next(node);
                 // Push.
-                final int j = indexFor(hashKey(node), newBuckets.length);
+                final int j = indexFor(hashNode(node), newBuckets.length);
                 setNext(node, (V) newBuckets[j]);
                 newBuckets[j] = node;
             }
@@ -74,7 +76,7 @@ public abstract class HashTable<V> implements Container<V> {
         threshold = thresholdFor(capacity);
     }
 
-    public HashTable(int capacity) {
+    public Map(int capacity) {
         // Postpone allocation until first insert.
         this.buckets = EMPTY;
         this.size = 0;
@@ -114,11 +116,11 @@ public abstract class HashTable<V> implements Container<V> {
             // First item.
             grow(threshold);
         }
-        int i = indexFor(hashKey(node), buckets.length);
+        int i = indexFor(hashNode(node), buckets.length);
         V it = getBucket(i);
         if (it != null) {
             // Check if the first element in the bucket has an equivalent key.
-            if (equalKey(it, node)) {
+            if (equalNode(it, node)) {
                 if (replace) {
                     setNext(node, next(it));
                     buckets[i] = node;
@@ -127,7 +129,7 @@ public abstract class HashTable<V> implements Container<V> {
             }
             // Check if a subsequent element in the bucket has an equivalent key.
             for (V next; (next = next(it)) != null; it = next) {
-                if (equalKey(next, node)) {
+                if (equalNode(next, node)) {
                     if (replace) {
                         // Replace.
                         setNext(node, next(next));
@@ -140,7 +142,7 @@ public abstract class HashTable<V> implements Container<V> {
         // This is a new element.
         if (size >= threshold) {
             grow(buckets.length << 1);
-            i = indexFor(hashKey(node), buckets.length);
+            i = indexFor(hashNode(node), buckets.length);
             it = getBucket(i);
         }
         setNext(node, it);
