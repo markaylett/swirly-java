@@ -87,7 +87,7 @@ final @NonNullByDefault class FixCache {
                 final Response res = new Response(ref, seqNum);
                 put(res);
                 return res;
-            } catch (FieldNotFound e) {
+            } catch (final FieldNotFound e) {
                 throw new RuntimeException("seq-num not found", e);
             }
         }

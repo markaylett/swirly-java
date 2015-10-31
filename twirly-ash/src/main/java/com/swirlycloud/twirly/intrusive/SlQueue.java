@@ -4,9 +4,10 @@
 package com.swirlycloud.twirly.intrusive;
 
 import static com.swirlycloud.twirly.node.SlUtil.popNext;
+
 import com.swirlycloud.twirly.node.SlNode;
 
-public final class SlQueue extends Queue<SlNode> {
+public final class SlQueue extends AbstractQueue<SlNode> {
 
     /**
      * Clear the queue and set each next reference to null.

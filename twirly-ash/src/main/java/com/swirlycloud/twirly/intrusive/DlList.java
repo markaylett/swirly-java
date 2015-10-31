@@ -6,10 +6,10 @@ package com.swirlycloud.twirly.intrusive;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.node.BasicDlNode;
+import com.swirlycloud.twirly.node.AbstractDlNode;
 import com.swirlycloud.twirly.node.DlNode;
 
-public final @NonNullByDefault class DlList extends List<DlNode> {
+public final @NonNullByDefault class DlList extends AbstractList<DlNode> {
 
     @Override
     protected final void insert(DlNode node, DlNode prev, DlNode next) {
@@ -52,7 +52,7 @@ public final @NonNullByDefault class DlList extends List<DlNode> {
     }
 
     public DlList() {
-        super(new BasicDlNode() {
+        super(new AbstractDlNode() {
             @Override
             public final boolean isEnd() {
                 return true;

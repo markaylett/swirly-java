@@ -8,7 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public abstract class BasicRbNode implements Serializable, RbNode {
+public abstract class AbstractRbNode implements Serializable, RbNode {
 
     private static final long serialVersionUID = 1L;
 

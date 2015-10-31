@@ -17,7 +17,7 @@ import com.swirlycloud.twirly.collection.Sequence;
  *
  * @param <V>
  */
-public abstract class Map<V> implements Sequence<V> {
+public abstract class AbstractMap<V> implements Sequence<V> {
     private static final Object[] EMPTY = {};
     private static final int MIN_BUCKETS = 1 << 4;
 
@@ -76,7 +76,7 @@ public abstract class Map<V> implements Sequence<V> {
         threshold = thresholdFor(capacity);
     }
 
-    public Map(int capacity) {
+    public AbstractMap(int capacity) {
         // Postpone allocation until first insert.
         this.buckets = EMPTY;
         this.size = 0;

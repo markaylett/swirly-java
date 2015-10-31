@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.intrusive;
 
 import com.swirlycloud.twirly.rec.Trader;
 
-public final class TraderEmailMap extends ObjectMap<String, Trader> {
+public final class TraderEmailMap extends AbstractObjectMap<String, Trader> {
 
     @Override
     protected final void setNext(Trader node, Trader next) {
@@ -16,7 +16,7 @@ public final class TraderEmailMap extends ObjectMap<String, Trader> {
     protected final Trader next(Trader node) {
         return (Trader) node.slNext();
     }
-    
+
     @Override
     protected final int hashNode(Trader node) {
         return node.getEmail().hashCode();

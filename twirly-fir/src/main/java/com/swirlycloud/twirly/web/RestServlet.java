@@ -20,8 +20,8 @@ import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.exception.TraderNotFoundException;
-import com.swirlycloud.twirly.rest.RestRequest;
 import com.swirlycloud.twirly.rest.Rest;
+import com.swirlycloud.twirly.rest.RestRequest;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("serial")

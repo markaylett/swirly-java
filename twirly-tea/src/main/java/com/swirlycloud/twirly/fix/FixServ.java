@@ -181,8 +181,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     public static FixServ create(final SessionSettings settings, LockableServ serv,
-            final LogFactory logFactory)
-                    throws ConfigError, FieldConvertError, NotFoundException {
+            final LogFactory logFactory) throws ConfigError, FieldConvertError, NotFoundException {
         final FixServ server = new FixServ(settings, serv);
         final Acceptor acceptor = new SocketAcceptor(server, new NullStoreFactory(), settings,
                 logFactory, new DefaultMessageFactory());

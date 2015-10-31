@@ -3,29 +3,29 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.intrusive;
 
-import static com.swirlycloud.twirly.util.CollectionUtil.hashLong;
-
 /**
- * Hashtable with key of type long.
+ * Hashtable with a single key derived from Object.
  * 
+ * @param <K>
+ *            The key type.
  * @param <V>
- *            The concrete element type.
+ *            The element or value type.
  * 
  * @author Mark Aylett
  */
-public abstract class LongMap<V> extends Map<V> {
+public abstract class AbstractObjectMap<K, V> extends AbstractMap<V> {
 
-    protected abstract boolean equalKey(V lhs, long rhs);
+    protected abstract boolean equalKey(V lhs, K rhs);
 
-    public LongMap(int capacity) {
+    public AbstractObjectMap(int capacity) {
         super(capacity);
     }
 
-    public final V remove(long key) {
+    public final V remove(K key) {
         if (isEmpty()) {
             return null;
         }
-        final int i = indexFor(hashLong(key), buckets.length);
+        final int i = indexFor(key.hashCode(), buckets.length);
         V it = getBucket(i);
         if (it == null) {
             return null;
@@ -47,11 +47,11 @@ public abstract class LongMap<V> extends Map<V> {
         return null;
     }
 
-    public final V find(long key) {
+    public final V find(K key) {
         if (isEmpty()) {
             return null;
         }
-        final int i = indexFor(hashLong(key), buckets.length);
+        final int i = indexFor(key.hashCode(), buckets.length);
         for (V it = getBucket(i); it != null; it = next(it)) {
             if (equalKey(it, key)) {
                 return it;

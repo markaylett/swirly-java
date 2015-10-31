@@ -15,13 +15,13 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.node.RbNode;
 
-public final class RbLongTreeTest {
+public final class AbstractRbLongTreeTest {
     private static final boolean DEBUG = false;
 
-    private static final class Node extends BasicRbNode {
+    private static final class Node extends AbstractRbNode {
 
         private static final long serialVersionUID = 1L;
 
@@ -43,7 +43,7 @@ public final class RbLongTreeTest {
         }
     }
 
-    private static final @NonNullByDefault class NodeTree extends RbLongTree {
+    private static final @NonNullByDefault class NodeTree extends AbstractRbLongTree {
 
         private static final long serialVersionUID = 1L;
 
@@ -162,7 +162,7 @@ public final class RbLongTreeTest {
 
     @Test
     public final void testOperations() {
-        final RbLongTree t = new NodeTree();
+        final AbstractRbLongTree t = new NodeTree();
         final Node first = new Node(101, 0);
         final Node second = new Node(102, 0);
         final Node third = new Node(103, 0);

@@ -15,8 +15,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.app.Result;
+import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
@@ -88,7 +88,7 @@ public final @NonNullByDefault class BackRest implements Rest {
     @Override
     public final @Nullable String findTraderByEmail(String email) {
         final LockableServ serv = (LockableServ) this.serv;
-        int lock = serv.readLock();
+        final int lock = serv.readLock();
         try {
             final Trader trader = serv.findTraderByEmail(email);
             return trader != null ? trader.getMnem() : null;
@@ -593,7 +593,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     public final void poll(long now) {
         final LockableServ serv = (LockableServ) this.serv;
-        int lock = serv.writeLock();
+        final int lock = serv.writeLock();
         try {
             timeout = serv.poll(now);
         } finally {

@@ -8,7 +8,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.MarketView;
 
-public final @NonNullByDefault class MarketViewTree extends ObjectTree<String, MarketView> {
+public final @NonNullByDefault class MarketViewTree extends AbstractObjectTree<String, MarketView> {
 
     private static final long serialVersionUID = 1L;
 

@@ -20,6 +20,16 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Instruct;
+import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.quickfix.Contract;
+import com.swirlycloud.twirly.quickfix.Cost;
+import com.swirlycloud.twirly.quickfix.MatchId;
+
 import quickfix.FieldNotFound;
 import quickfix.Group;
 import quickfix.IncorrectTagValue;
@@ -56,16 +66,6 @@ import quickfix.field.RefSeqNum;
 import quickfix.field.Symbol;
 import quickfix.field.Text;
 import quickfix.field.TransactTime;
-
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Instruct;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Role;
-import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.quickfix.Contract;
-import com.swirlycloud.twirly.quickfix.Cost;
-import com.swirlycloud.twirly.quickfix.MatchId;
 
 /**
  * @author Mark Aylett
@@ -170,7 +170,7 @@ public final class FixBuilder {
         final Header header = message.getHeader();
         return header.getString(MsgType.FIELD);
     }
-    
+
     // OrderId(37)
 
     public final void setOrderId(long id) {

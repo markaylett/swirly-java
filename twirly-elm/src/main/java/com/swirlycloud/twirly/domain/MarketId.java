@@ -6,10 +6,10 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.node.BasicJslNode;
+import com.swirlycloud.twirly.node.AbstractJslNode;
 import com.swirlycloud.twirly.util.Identifiable;
 
-public final @NonNullByDefault class MarketId extends BasicJslNode implements Identifiable {
+public final @NonNullByDefault class MarketId extends AbstractJslNode implements Identifiable {
 
     private final String market;
     private final long id;

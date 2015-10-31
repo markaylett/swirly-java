@@ -24,7 +24,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Exec extends BasicRequest implements JslNode, Instruct {
+public final @NonNullByDefault class Exec extends AbstractRequest implements JslNode, Instruct {
 
     private static final long serialVersionUID = 1L;
 

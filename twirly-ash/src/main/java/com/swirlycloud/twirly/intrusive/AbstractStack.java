@@ -7,7 +7,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.collection.Sequence;
 
-public abstract class Stack<V> implements Sequence<V> {
+public abstract class AbstractStack<V> implements Sequence<V> {
     private V first;
 
     protected abstract void setNext(V node, V next);

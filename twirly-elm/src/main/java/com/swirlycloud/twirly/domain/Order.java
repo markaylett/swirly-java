@@ -25,7 +25,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Order extends BasicRequest implements DlNode, Instruct {
+public final @NonNullByDefault class Order extends AbstractRequest implements DlNode, Instruct {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,7 +53,7 @@ public final @NonNullByDefault class Order extends BasicRequest implements DlNod
      */
     private final long minLots;
     transient long quot;
-    private boolean pecan;
+    private final boolean pecan;
     long modified;
 
     Order(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,

@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.Side;
 
-public final class RequestTest {
+public final class RestRequestTest {
     private static final RestRequest parse(String s) throws IOException {
         final RestRequest r = new RestRequest();
         try (JsonParser p = Json.createParser(new StringReader(s))) {

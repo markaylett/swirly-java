@@ -10,7 +10,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Posn;
 
-public final @NonNullByDefault class PosnTree extends Tree<Posn> {
+public final @NonNullByDefault class PosnTree extends AbstractTree<Posn> {
 
     private static final long serialVersionUID = 1L;
 

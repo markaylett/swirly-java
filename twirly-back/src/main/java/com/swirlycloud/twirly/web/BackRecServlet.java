@@ -48,7 +48,8 @@ public final class BackRecServlet extends RecServlet {
             if ("market".equals(parts[TYPE_PART])) {
 
                 final int required = RestRequest.MNEM | RestRequest.DISPLAY | RestRequest.CONTR;
-                final int optional = RestRequest.SETTL_DATE | RestRequest.EXPIRY_DATE | RestRequest.STATE;
+                final int optional = RestRequest.SETTL_DATE | RestRequest.EXPIRY_DATE
+                        | RestRequest.STATE;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }

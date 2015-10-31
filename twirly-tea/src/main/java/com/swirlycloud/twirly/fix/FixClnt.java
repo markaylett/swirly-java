@@ -169,7 +169,7 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
         }
         try {
             crack(message, sessionId);
-        } catch (UnsupportedMessageType e) {
+        } catch (final UnsupportedMessageType e) {
             log.error(sessionId + ": fromAdmin: " + e.getMessage(), e);
         }
     }

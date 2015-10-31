@@ -16,7 +16,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.exception.AlreadyExistsException;
-import com.swirlycloud.twirly.fix.FixCache;
 
 import quickfix.Message;
 import quickfix.SessionID;

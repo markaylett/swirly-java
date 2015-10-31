@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class Quote extends BasicRequest {
+public final @NonNullByDefault class Quote extends AbstractRequest {
 
     private static final long serialVersionUID = 1L;
 

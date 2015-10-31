@@ -288,7 +288,7 @@ public abstract class RestTest {
 
     protected final @NonNull JslNode jslList(@NonNull String market, Long... ids) {
         MarketId firstMid = null;
-        for (long id : ids) {
+        for (final long id : ids) {
             final MarketId mid = new MarketId(market, id);
             mid.setJslNext(firstMid);
             firstMid = mid;

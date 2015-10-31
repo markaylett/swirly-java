@@ -13,8 +13,6 @@ import org.junit.Test;
 import com.swirlycloud.twirly.domain.BasicFactory;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.mock.MockContr;
-import com.swirlycloud.twirly.rec.Contr;
-import com.swirlycloud.twirly.rec.Market;
 
 public final class MarketTest {
 

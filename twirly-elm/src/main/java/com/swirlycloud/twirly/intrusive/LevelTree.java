@@ -10,7 +10,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Level;
 
-public final @NonNullByDefault class LevelTree extends LongTree<Level> {
+public final @NonNullByDefault class LevelTree extends AbstractLongTree<Level> {
 
     private static final long serialVersionUID = 1L;
 

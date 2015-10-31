@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.intrusive;
 
 import com.swirlycloud.twirly.node.SlNode;
 
-public abstract class SlLongMap extends LongMap<SlNode> {
+public abstract class AbstractSlObjectMap<K> extends AbstractObjectMap<K, SlNode> {
 
     @Override
     protected final void setNext(SlNode node, SlNode next) {
@@ -17,7 +17,7 @@ public abstract class SlLongMap extends LongMap<SlNode> {
         return node.slNext();
     }
 
-    public SlLongMap(int capacity) {
+    public AbstractSlObjectMap(int capacity) {
         super(capacity);
     }
 }

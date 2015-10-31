@@ -24,7 +24,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public @NonNullByDefault class Market extends Rec implements Financial {
+public @NonNullByDefault class Market extends AbstractRec implements Financial {
 
     private static final long serialVersionUID = 1L;
 

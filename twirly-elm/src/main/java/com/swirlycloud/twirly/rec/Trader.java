@@ -14,7 +14,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Params;
 
-public @NonNullByDefault class Trader extends Rec implements SlNode {
+public @NonNullByDefault class Trader extends AbstractRec implements SlNode {
 
     private static final long serialVersionUID = 1L;
 

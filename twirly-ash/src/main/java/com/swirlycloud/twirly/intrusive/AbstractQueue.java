@@ -7,7 +7,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.collection.Sequence;
 
-public abstract class Queue<V> implements Sequence<V> {
+public abstract class AbstractQueue<V> implements Sequence<V> {
     private V first;
     private V last;
 
@@ -48,7 +48,7 @@ public abstract class Queue<V> implements Sequence<V> {
         return node;
     }
 
-    public final void join(Queue<V> rhs) {
+    public final void join(AbstractQueue<V> rhs) {
         if (!rhs.isEmpty()) {
             if (!isEmpty()) {
                 setNext(last, rhs.first);

@@ -3,13 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.fix;
 
-import quickfix.ConfigError;
-import quickfix.IncorrectTagValue;
-import quickfix.SessionSettings;
-import quickfix.field.ExecType;
-import quickfix.field.LastLiquidityInd;
-import quickfix.field.OrdStatus;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -17,6 +10,13 @@ import java.util.Properties;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
+
+import quickfix.ConfigError;
+import quickfix.IncorrectTagValue;
+import quickfix.SessionSettings;
+import quickfix.field.ExecType;
+import quickfix.field.LastLiquidityInd;
+import quickfix.field.OrdStatus;
 
 public final class FixUtility {
     private FixUtility() {
