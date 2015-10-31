@@ -23,7 +23,7 @@ import com.swirlycloud.twirly.util.Params;
  *
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Contr extends Rec {
+public final @NonNullByDefault class Contr extends AbstractRec {
 
     private static final long serialVersionUID = 1L;
     private Memorable asset;

@@ -18,7 +18,7 @@ import com.swirlycloud.twirly.util.Params;
  *
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Asset extends Rec {
+public final @NonNullByDefault class Asset extends AbstractRec {
 
     private static final long serialVersionUID = 1L;
     private final AssetType type;
