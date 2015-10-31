@@ -5,7 +5,6 @@ package com.swirlycloud.twirly.intrusive;
 
 import com.swirlycloud.twirly.node.SlNode;
 
-@Deprecated
 public abstract class SlObjectMap<K> extends ObjectMap<K, SlNode> {
 
     @Override
