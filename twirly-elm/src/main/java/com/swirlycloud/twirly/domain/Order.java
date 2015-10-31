@@ -25,7 +25,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Order extends BasicRequest implements DlNode, Instruct {
+public final @NonNullByDefault class Order extends AbstractRequest implements DlNode, Instruct {
 
     private static final long serialVersionUID = 1L;
 

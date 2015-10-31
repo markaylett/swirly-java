@@ -15,12 +15,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.node.BasicSlNode;
+import com.swirlycloud.twirly.node.AbstractSlNode;
 import com.swirlycloud.twirly.node.SlNode;
 
-public final class SlLongMapTest {
+public final class AbstractSlLongMapTest {
 
-    private static final class Node extends BasicSlNode {
+    private static final class Node extends AbstractSlNode {
         private final long key;
 
         public Node(long key) {
@@ -28,7 +28,7 @@ public final class SlLongMapTest {
         }
     }
 
-    private static final class NodeMap extends SlLongMap {
+    private static final class NodeMap extends AbstractSlLongMap {
 
         private static long getKey(SlNode node) {
             return ((Node) node).key;

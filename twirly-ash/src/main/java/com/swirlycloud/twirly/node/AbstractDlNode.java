@@ -6,7 +6,7 @@ package com.swirlycloud.twirly.node;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-public abstract @NonNullByDefault class BasicDlNode implements DlNode {
+public abstract @NonNullByDefault class AbstractDlNode implements DlNode {
 
     private transient DlNode prev = DlUtil.NULL;
     private transient DlNode next = DlUtil.NULL;

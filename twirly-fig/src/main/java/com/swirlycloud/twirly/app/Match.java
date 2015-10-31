@@ -6,14 +6,14 @@ package com.swirlycloud.twirly.app;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.node.BasicSlNode;
+import com.swirlycloud.twirly.node.AbstractSlNode;
 
 /**
  * A Match represents two orders from opposing sides of the market that may trade.
  * 
  * @author Mark Aylett
  */
-public final class Match extends BasicSlNode {
+public final class Match extends AbstractSlNode {
     long ticks;
     long lots;
     Order makerOrder;

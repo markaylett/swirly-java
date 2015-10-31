@@ -8,7 +8,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.twirly.collection.Sequence;
 
-public abstract @NonNullByDefault class List<V> implements Sequence<V> {
+public abstract @NonNullByDefault class AbstractList<V> implements Sequence<V> {
     private final V end;
 
     protected abstract void insert(V node, V prev, V next);
@@ -27,7 +27,7 @@ public abstract @NonNullByDefault class List<V> implements Sequence<V> {
 
     protected abstract V prev(V node);
 
-    protected List(V end) {
+    protected AbstractList(V end) {
         this.end = end;
         clear();
     }

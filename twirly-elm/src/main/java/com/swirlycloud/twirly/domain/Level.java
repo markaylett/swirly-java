@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.domain;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.node.DlNode;
 
 /**
@@ -16,7 +16,7 @@ import com.swirlycloud.twirly.node.DlNode;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class Level extends BasicRbNode {
+public final @NonNullByDefault class Level extends AbstractRbNode {
 
     private static final long serialVersionUID = 1L;
 

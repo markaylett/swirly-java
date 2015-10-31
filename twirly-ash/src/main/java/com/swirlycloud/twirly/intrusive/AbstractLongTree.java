@@ -6,26 +6,16 @@ package com.swirlycloud.twirly.intrusive;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-/**
- * Tree with a single key derived from Object.
- * 
- * @param <K>
- *            The key type.
- * @param <V>
- *            The element or value type.
- * 
- * @author Mark Aylett
- */
-public abstract @NonNullByDefault class ObjectTree<K, V> extends Tree<V> {
+public abstract @NonNullByDefault class AbstractLongTree<V> extends AbstractTree<V> {
 
     private static final long serialVersionUID = 1L;
 
-    protected abstract int compareKey(V lhs, K rhs);
+    protected abstract int compareKey(V lhs, long rhs);
 
     /**
      * Finds the node with the same key as node.
      */
-    public final @Nullable V find(K key) {
+    public final @Nullable V find(long key) {
         V tmp = root;
         int comp;
         while (tmp != null) {
@@ -44,7 +34,7 @@ public abstract @NonNullByDefault class ObjectTree<K, V> extends Tree<V> {
     /**
      * Finds the first node greater than or equal to the search key.
      */
-    public final @Nullable V nfind(K key) {
+    public final @Nullable V nfind(long key) {
         V tmp = root;
         V res = null;
         int comp;
@@ -67,7 +57,7 @@ public abstract @NonNullByDefault class ObjectTree<K, V> extends Tree<V> {
     /**
      * Return match or parent.
      */
-    public final @Nullable V pfind(K key) {
+    public final @Nullable V pfind(long key) {
         V tmp = root, parent = null;
         while (tmp != null) {
             parent = tmp;

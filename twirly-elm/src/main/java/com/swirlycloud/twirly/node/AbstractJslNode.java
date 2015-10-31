@@ -5,7 +5,7 @@ package com.swirlycloud.twirly.node;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-public abstract class BasicJslNode implements JslNode {
+public abstract class AbstractJslNode implements JslNode {
     private transient JslNode next;
 
     @Override

@@ -6,10 +6,10 @@ package com.swirlycloud.twirly.rec;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 
-public abstract @NonNullByDefault class AbstractRec extends BasicRbNode implements Rec {
+public abstract @NonNullByDefault class AbstractRec extends AbstractRbNode implements Rec {
 
     private static final long serialVersionUID = 1L;
 

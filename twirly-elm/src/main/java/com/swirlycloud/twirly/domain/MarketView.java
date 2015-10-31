@@ -14,7 +14,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Memorable;
@@ -25,7 +25,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class MarketView extends BasicRbNode
+public final @NonNullByDefault class MarketView extends AbstractRbNode
         implements Jsonifiable, Memorable, Financial {
 
     private static final long serialVersionUID = 1L;

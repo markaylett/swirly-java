@@ -8,11 +8,11 @@ import static com.swirlycloud.twirly.util.NullUtil.nullIfEmpty;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.node.BasicRbNode;
+import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
 
-public abstract @NonNullByDefault class BasicRequest extends BasicRbNode implements Request {
+public abstract @NonNullByDefault class AbstractRequest extends AbstractRbNode implements Request {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,7 +36,7 @@ public abstract @NonNullByDefault class BasicRequest extends BasicRbNode impleme
     protected long lots;
     protected final long created;
 
-    protected BasicRequest(long id, String trader, String market, String contr, int settlDay,
+    protected AbstractRequest(long id, String trader, String market, String contr, int settlDay,
             @Nullable String ref, Side side, long lots, long created) {
         this.id = id;
         this.trader = trader;
@@ -69,7 +69,7 @@ public abstract @NonNullByDefault class BasicRequest extends BasicRbNode impleme
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final BasicRequest other = (BasicRequest) obj;
+        final AbstractRequest other = (AbstractRequest) obj;
         if (!market.equals(other.market)) {
             return false;
         }

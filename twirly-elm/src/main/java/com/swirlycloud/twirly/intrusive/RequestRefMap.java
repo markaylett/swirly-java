@@ -7,7 +7,7 @@ import static com.swirlycloud.twirly.util.NullUtil.emptyIfNull;
 
 import com.swirlycloud.twirly.domain.Request;
 
-public final class RequestRefMap extends Map<Request> {
+public final class RequestRefMap extends AbstractMap<Request> {
 
     private static int hashKey(String trader, String ref) {
         final int prime = 31;

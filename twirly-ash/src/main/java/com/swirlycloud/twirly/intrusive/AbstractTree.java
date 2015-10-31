@@ -31,7 +31,7 @@ import com.swirlycloud.twirly.collection.Sequence;
  * 
  * @author Mark Aylett
  */
-public abstract @NonNullByDefault class Tree<V> implements Serializable, Sequence<V> {
+public abstract @NonNullByDefault class AbstractTree<V> implements Serializable, Sequence<V> {
 
     private static final long serialVersionUID = 1L;
 
@@ -319,7 +319,7 @@ public abstract @NonNullByDefault class Tree<V> implements Serializable, Sequenc
         }
     }
 
-    public Tree() {
+    public AbstractTree() {
         clear();
     }
 

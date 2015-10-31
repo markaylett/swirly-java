@@ -8,7 +8,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.rec.Rec;
 
-public final @NonNullByDefault class RecTree extends ObjectTree<String, Rec> {
+public final @NonNullByDefault class RecTree extends AbstractObjectTree<String, Rec> {
 
     private static final long serialVersionUID = 1L;
 
