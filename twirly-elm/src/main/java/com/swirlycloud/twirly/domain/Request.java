@@ -16,8 +16,9 @@ public @NonNullByDefault interface Request
 
     void setRefNext(@Nullable Request next);
 
-    @Nullable Request refNext();
-    
+    @Nullable
+    Request refNext();
+
     @Override
     long getId();
 

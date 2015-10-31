@@ -125,8 +125,7 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new MarketView(market, contr, settlDay, lastTicks, lastLots, lastTime,
-                        data);
+                return new MarketView(market, contr, settlDay, lastTicks, lastLots, lastTime, data);
             case KEY_NAME:
                 name = p.getString();
                 break;

@@ -4,6 +4,7 @@
 package com.swirlycloud.twirly.intrusive;
 
 import static com.swirlycloud.twirly.node.SlUtil.popNext;
+
 import com.swirlycloud.twirly.node.SlNode;
 
 public final class SlQueue extends AbstractQueue<SlNode> {

@@ -42,7 +42,7 @@ public final @NonNullByDefault class LockableServ extends Serv {
         sem.acquireUninterruptibly(PERMITS);
         return PERMITS;
     }
-    
+
     public final int demoteLock() {
         final int permits = PERMITS - 1;
         sem.release(permits);

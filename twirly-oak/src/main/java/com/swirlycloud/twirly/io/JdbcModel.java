@@ -509,7 +509,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull RequestIdTree readOrder(@NonNull String trader, @NonNull Factory factory) {
+    public final @NonNull RequestIdTree readOrder(@NonNull String trader,
+            @NonNull Factory factory) {
         final RequestIdTree t = new RequestIdTree();
         try {
             setParam(selectOrderByTraderStmt, 1, trader);
@@ -532,7 +533,8 @@ public class JdbcModel implements Model {
     }
 
     @Override
-    public final @NonNull RequestIdTree readTrade(@NonNull String trader, @NonNull Factory factory) {
+    public final @NonNull RequestIdTree readTrade(@NonNull String trader,
+            @NonNull Factory factory) {
         final RequestIdTree t = new RequestIdTree();
         try {
             setParam(selectTradeByTraderStmt, 1, trader);

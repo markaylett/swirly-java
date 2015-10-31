@@ -7,9 +7,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.intrusive.RequestIdTree;
-import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.SlNode;
@@ -58,7 +58,8 @@ public class MockModel implements Model {
     }
 
     @Override
-    public @NonNull RequestIdTree readOrder(@NonNull String trader, @NonNull final Factory factory) {
+    public @NonNull RequestIdTree readOrder(@NonNull String trader,
+            @NonNull final Factory factory) {
         return new RequestIdTree();
     }
 
@@ -68,7 +69,8 @@ public class MockModel implements Model {
     }
 
     @Override
-    public @NonNull RequestIdTree readTrade(@NonNull String trader, @NonNull final Factory factory) {
+    public @NonNull RequestIdTree readTrade(@NonNull String trader,
+            @NonNull final Factory factory) {
         return new RequestIdTree();
     }
 

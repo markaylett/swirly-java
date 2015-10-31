@@ -55,7 +55,7 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonifiabl
         final Exec first = (Exec) execs.getFirst();
         Exec node = first;
         while (node != null) {
-            Exec next = (Exec) node.slNext();
+            final Exec next = (Exec) node.slNext();
             node.setJslNext(next);
             node = next;
         }

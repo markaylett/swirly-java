@@ -6,8 +6,8 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.intrusive.RequestRefMap;
 import com.swirlycloud.twirly.intrusive.RequestIdTree;
+import com.swirlycloud.twirly.intrusive.RequestRefMap;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.node.RbNode;

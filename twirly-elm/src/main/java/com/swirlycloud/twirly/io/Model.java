@@ -7,9 +7,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.RecTree;
 import com.swirlycloud.twirly.intrusive.RequestIdTree;
-import com.swirlycloud.twirly.intrusive.MarketViewTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.node.SlNode;
 
@@ -38,13 +38,15 @@ public interface Model extends AutoCloseable {
     SlNode readOrder(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    RequestIdTree readOrder(@NonNull String trader, @NonNull Factory factory) throws InterruptedException;
+    RequestIdTree readOrder(@NonNull String trader, @NonNull Factory factory)
+            throws InterruptedException;
 
     @Nullable
     SlNode readTrade(@NonNull Factory factory) throws InterruptedException;
 
     @NonNull
-    RequestIdTree readTrade(@NonNull String trader, @NonNull Factory factory) throws InterruptedException;
+    RequestIdTree readTrade(@NonNull String trader, @NonNull Factory factory)
+            throws InterruptedException;
 
     @Nullable
     SlNode readPosn(int busDay, @NonNull Factory factory) throws InterruptedException;

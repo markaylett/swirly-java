@@ -16,7 +16,7 @@ public final class TraderEmailMap extends AbstractObjectMap<String, Trader> {
     protected final Trader next(Trader node) {
         return (Trader) node.slNext();
     }
-    
+
     @Override
     protected final int hashNode(Trader node) {
         return node.getEmail().hashCode();

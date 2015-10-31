@@ -13,7 +13,7 @@ public final class MarketIdTest {
     @Test
     public final void testZero() {
         // End.
-        MarketId mid = MarketId.parse("EURUSD", "");
+        final MarketId mid = MarketId.parse("EURUSD", "");
         assertNull(mid);
     }
 

@@ -285,7 +285,8 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull RequestIdTree readOrder(@NonNull String trader, @NonNull Factory factory) {
+    public final @NonNull RequestIdTree readOrder(@NonNull String trader,
+            @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter archiveFilter = new FilterPredicate("archive", FilterOperator.EQUAL,
                 Boolean.FALSE);
@@ -310,7 +311,8 @@ public class AppEngineModel implements Model {
     }
 
     @Override
-    public final @NonNull RequestIdTree readTrade(@NonNull String trader, @NonNull Factory factory) {
+    public final @NonNull RequestIdTree readTrade(@NonNull String trader,
+            @NonNull Factory factory) {
         final Filter traderFilter = new FilterPredicate("trader", FilterOperator.EQUAL, trader);
         final Filter stateFilter = new FilterPredicate("state", FilterOperator.EQUAL,
                 State.TRADE.name());

@@ -42,7 +42,7 @@ public final @NonNullByDefault class SpyCache implements Cache {
     public final Future<Map<String, Object>> read(Collection<String> keys) {
         final BulkFuture<Map<String, Object>> fut = mc.asyncGetBulk(keys);
         assert fut != null;
-        return fut;        
+        return fut;
     }
 
     @Override

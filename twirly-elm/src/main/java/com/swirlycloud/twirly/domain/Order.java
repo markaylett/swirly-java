@@ -53,7 +53,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
      */
     private final long minLots;
     transient long quot;
-    private boolean pecan;
+    private final boolean pecan;
     long modified;
 
     Order(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,

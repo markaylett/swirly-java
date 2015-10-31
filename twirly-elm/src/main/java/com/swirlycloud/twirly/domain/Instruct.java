@@ -17,7 +17,7 @@ public @NonNullByDefault interface Instruct extends RbNode, Request {
 
     @Override
     long getId();
-    
+
     /**
      * @return order-id or zero if there is no associated order.
      */
