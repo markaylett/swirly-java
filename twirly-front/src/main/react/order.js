@@ -2,7 +2,7 @@
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 
-var TradeModuleImpl = React.createClass({
+var OrderModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
         $.getJSON('/front/sess?views=true', function(sess, status, xhr) {
@@ -422,7 +422,7 @@ var TradeModuleImpl = React.createClass({
         };
 
         return (
-            <div className="tradeModuleImpl">
+            <div className="orderModuleImpl">
               <MultiAlertWidget module={module} errors={errors}/>
               <NewOrderForm ref="newOrder" module={module} marketMap={marketMap}
                             isSelectedWorking={isSelectedWorking}/>
@@ -467,7 +467,7 @@ var TradeModuleImpl = React.createClass({
     timeout: undefined
 });
 
-var TradeModule = React.createClass({
+var OrderModule = React.createClass({
     // Mutators.
     refresh: function() {
         $.getJSON('/front/rec/contr', function(contrs, status, xhr) {
@@ -510,12 +510,12 @@ var TradeModule = React.createClass({
             );
         } else if (contrMap !== null) {
             body = (
-                <TradeModuleImpl contrMap={contrMap} pollInterval={this.props.pollInterval}/>
+                <OrderModuleImpl contrMap={contrMap} pollInterval={this.props.pollInterval}/>
             );
         }
         if (body !== undefined) {
             return (
-                <div className="tradeModule">
+                <div className="orderModule">
                   {body}
                 </div>
             );

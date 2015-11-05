@@ -26,7 +26,7 @@
               <h2>Swirly Cloud</h2>
               <p>Our aim is to host an electronic order-book in the Cloud, where people can trade on
               exciting new markets.</p>
-              <p><a href="/page/trade" class="btn btn-primary btn-lg" role="button">Try the demo now &raquo;</a></p>
+              <p><a href="/page/order" class="btn btn-primary btn-lg" role="button">Try the demo now &raquo;</a></p>
             </div>
           </div>
         </div>

@@ -34,8 +34,8 @@ combineJs {
         "${buildDir}/react/widget.js",
         "${buildDir}/react/contr.js",
         "${buildDir}/react/market.js",
+        "${buildDir}/react/order.js",
         "${buildDir}/react/signup.js",
-        "${buildDir}/react/trade.js",
         "${buildDir}/react/trader.js"
     ]
     dest = file("${buildDir}/js/twirly.js")

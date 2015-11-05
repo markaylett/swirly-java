@@ -26,7 +26,7 @@
     <script type="text/javascript" src="/js/twirly.min.js"></script>
     <script type="text/javascript">
       React.render(
-          React.createElement(TradeModule, {pollInterval: 20000}),
+          React.createElement(OrderModule, {pollInterval: 20000}),
           document.getElementById('module')
       );
     </script>
