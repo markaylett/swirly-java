@@ -649,3 +649,53 @@ var PosnTable = React.createClass({
         );
     }
 });
+
+var QuoteRow = React.createClass({
+    // Mutators.
+    // DOM Events.
+    // Lifecycle.
+    render: function() {
+        var quote = this.props.quote;
+        return (
+            <tr>
+              <td>{quote.market}</td>
+              <td>{quote.id}</td>
+              <td>{quote.side}</td>
+              <td style={alignRight}>{quote.price}</td>
+              <td style={alignRight}>{quote.lots}</td>
+              <td>{quote.expiry}</td>
+            </tr>
+        );
+    }
+});
+
+var QuoteTable = React.createClass({
+    // Mutators.
+    // DOM Events.
+    // Lifecycle.
+    render: function() {
+        var props = this.props;
+        var rows = props.quotes.map(function(quote) {
+            return (
+                <QuoteRow key={quote.key} quote={quote}/>
+            );
+        });
+        return (
+            <table className="quoteTable table table-hover table-striped">
+              <thead>
+                <tr>
+                  <th>Market</th>
+                  <th>Id</th>
+                  <th>Side</th>
+                  <th style={alignRight}>Price</th>
+                  <th style={alignRight}>Lots</th>
+                  <th>Expiry</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows}
+              </tbody>
+            </table>
+        );
+    }
+});

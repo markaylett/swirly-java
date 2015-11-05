@@ -70,6 +70,7 @@
     <web-resource-collection>
       <web-resource-name>user</web-resource-name>
       <url-pattern>/page/order</url-pattern>
+      <url-pattern>/page/quote</url-pattern>
       <url-pattern>/page/contr</url-pattern>
     </web-resource-collection>
     <auth-constraint>

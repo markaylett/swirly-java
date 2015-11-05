@@ -62,6 +62,11 @@ public final class FrontPageServlet extends HttpServlet {
                 page = Page.ORDER;
             }
             break;
+        case 'q':
+            if ("quote".equals(name)) {
+                page = Page.QUOTE;
+            }
+            break;
         case 's':
             if ("signin".equals(name)) {
                 page = Page.SIGNIN;

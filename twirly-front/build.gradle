@@ -35,6 +35,7 @@ combineJs {
         "${buildDir}/react/contr.js",
         "${buildDir}/react/market.js",
         "${buildDir}/react/order.js",
+        "${buildDir}/react/quote.js",
         "${buildDir}/react/signup.js",
         "${buildDir}/react/trader.js"
     ]

@@ -90,6 +90,10 @@ public final class PageState {
         return page == Page.ORDER;
     }
 
+    public final boolean isQuotePage() {
+        return page == Page.QUOTE;
+    }
+
     public final boolean isContrPage() {
         return page == Page.CONTR;
     }

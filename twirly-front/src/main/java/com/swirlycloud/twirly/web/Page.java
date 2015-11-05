@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.web;
 public enum Page {
     HOME("/page/home", "/WEB-INF/jsp/home.jsp", false, false), //
     ORDER("/page/order", "/WEB-INF/jsp/order.jsp", false, true), //
+    QUOTE("/page/quote", "/WEB-INF/jsp/quote.jsp", false, true), //
     CONTR("/page/contr", "/WEB-INF/jsp/contr.jsp", false, true), //
     MARKET("/page/market", "/WEB-INF/jsp/market.jsp", false, true), //
     TRADER("/page/trader", "/WEB-INF/jsp/trader.jsp", false, true), //

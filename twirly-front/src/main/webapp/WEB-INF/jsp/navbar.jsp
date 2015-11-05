@@ -19,6 +19,7 @@
         <li ${state.homePage ? 'class="active"' : ""}><a href="/page/home">Home</a></li>
         <c:if test="${state.userLoggedIn}">
           <li ${state.orderPage ? 'class="active"' : ""}><a href="/page/order">Order</a></li>
+          <li ${state.quotePage ? 'class="active"' : ""}><a href="/page/quote">Quote</a></li>
           <li ${state.contrPage ? 'class="active"' : ""}><a href="/page/contr">Contract</a></li>
           <c:if test="${state.userAdmin}">
             <li ${state.adminPage ? 'class="active dropdown"' : 'class="dropdown"'}>

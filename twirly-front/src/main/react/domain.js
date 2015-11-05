@@ -110,3 +110,13 @@ function enrichPosn(contrMap, posn) {
     posn.netPrice = calcNetPrice(posn);
     posn.netLots = posn.buyLots - posn.sellLots;
 }
+
+function enrichQuote(contrMap, quote) {
+
+    quote.key = quote.market + '/' + zeroPad(quote.id);
+
+    var contr = contrMap[quote.contr];
+    quote.contr = contr;
+    quote.settlDate = isSpecified(quote.settlDate) ? toDateStr(quote.settlDate) : null;
+    quote.price = ticksToPrice(quote.ticks, contr);
+}
