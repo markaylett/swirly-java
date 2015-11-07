@@ -14,19 +14,19 @@ import com.swirlycloud.twirly.node.AbstractSlNode;
  * @author Mark Aylett
  */
 public final class Match extends AbstractSlNode {
-    long ticks;
     long lots;
+    long ticks;
     Order makerOrder;
     Exec makerTrade;
     Posn makerPosn;
     Exec takerTrade;
 
-    public final long getTicks() {
-        return ticks;
-    }
-
     public final long getLots() {
         return lots;
+    }
+
+    public final long getTicks() {
+        return ticks;
     }
 
     public final Order getMakerOrder() {

@@ -28,30 +28,30 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
     private final String trader;
     private final String contr;
     private int settlDay;
-    private long buyCost;
     private long buyLots;
-    private long sellCost;
+    private long buyCost;
     private long sellLots;
+    private long sellCost;
 
-    Posn(String trader, String contr, int settlDay, long buyCost, long buyLots, long sellCost,
-            long sellLots) {
+    Posn(String trader, String contr, int settlDay, long buyLots, long buyCost, long sellLots,
+            long sellCost) {
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.buyCost = buyCost;
         this.buyLots = buyLots;
-        this.sellCost = sellCost;
+        this.buyCost = buyCost;
         this.sellLots = sellLots;
+        this.sellCost = sellCost;
     }
 
     public static Posn parse(JsonParser p) throws IOException {
         String trader = null;
         String contr = null;
         int settlDay = 0;
-        long buyCost = 0;
         long buyLots = 0;
-        long sellCost = 0;
+        long buyCost = 0;
         long sellLots = 0;
+        long sellCost = 0;
 
         String name = null;
         while (p.hasNext()) {
@@ -64,7 +64,7 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new Posn(trader, contr, settlDay, buyCost, buyLots, sellCost, sellLots);
+                return new Posn(trader, contr, settlDay, buyLots, buyCost, sellLots, sellCost);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -76,14 +76,14 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
             case VALUE_NUMBER:
                 if ("settlDate".equals(name)) {
                     settlDay = JulianDay.maybeIsoToJd(p.getInt());
-                } else if ("buyCost".equals(name)) {
-                    buyCost = p.getLong();
                 } else if ("buyLots".equals(name)) {
                     buyLots = p.getLong();
-                } else if ("sellCost".equals(name)) {
-                    sellCost = p.getLong();
+                } else if ("buyCost".equals(name)) {
+                    buyCost = p.getLong();
                 } else if ("sellLots".equals(name)) {
                     sellLots = p.getLong();
+                } else if ("sellCost".equals(name)) {
+                    sellCost = p.getLong();
                 } else {
                     throw new IOException(String.format("unexpected number field '%s'", name));
                 }
@@ -154,16 +154,16 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
             out.append("null");
         }
         if (buyLots != 0) {
-            out.append(",\"buyCost\":").append(String.valueOf(buyCost));
             out.append(",\"buyLots\":").append(String.valueOf(buyLots));
+            out.append(",\"buyCost\":").append(String.valueOf(buyCost));
         } else {
-            out.append(",\"buyCost\":0,\"buyLots\":0");
+            out.append(",\"buyLots\":0,\"buyCost\":0");
         }
         if (sellLots != 0) {
-            out.append(",\"sellCost\":").append(String.valueOf(sellCost));
             out.append(",\"sellLots\":").append(String.valueOf(sellLots));
+            out.append(",\"sellCost\":").append(String.valueOf(sellCost));
         } else {
-            out.append(",\"sellCost\":0,\"sellLots\":0");
+            out.append(",\"sellLots\":0,\"sellCost\":0");
         }
         out.append("}");
     }
@@ -179,32 +179,32 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
     }
 
     final void add(Posn rhs) {
-        addBuy(rhs.buyCost, rhs.buyLots);
-        addSell(rhs.sellCost, rhs.sellLots);
+        addBuy(rhs.buyLots, rhs.buyCost);
+        addSell(rhs.sellLots, rhs.sellCost);
     }
 
-    public final void addBuy(long cost, long lots) {
-        this.buyCost += cost;
+    public final void addBuy(long lots, long cost) {
         this.buyLots += lots;
+        this.buyCost += cost;
     }
 
-    public final void addSell(long cost, long lots) {
-        this.sellCost += cost;
+    public final void addSell(long lots, long cost) {
         this.sellLots += lots;
+        this.sellCost += cost;
     }
 
-    public final void addTrade(Side side, long lastTicks, long lastLots) {
+    public final void addTrade(Side side, long lastLots, long lastTicks) {
         final long cost = lastLots * lastTicks;
         if (side == Side.BUY) {
-            addBuy(cost, lastLots);
+            addBuy(lastLots, cost);
         } else {
             assert side == Side.SELL;
-            addSell(cost, lastLots);
+            addSell(lastLots, cost);
         }
     }
 
     public final void addTrade(Exec trade) {
-        addTrade(trade.getSide(), trade.getLastTicks(), trade.getLastLots());
+        addTrade(trade.getSide(), trade.getLastLots(), trade.getLastTicks());
     }
 
     /**
@@ -217,20 +217,20 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
         this.settlDay = settlDay;
     }
 
-    final void setBuyCost(long buyCost) {
-        this.buyCost = buyCost;
-    }
-
     final void setBuyLots(long buyLots) {
         this.buyLots = buyLots;
     }
 
-    final void setSellCost(long sellCost) {
-        this.sellCost = sellCost;
+    final void setBuyCost(long buyCost) {
+        this.buyCost = buyCost;
     }
 
     final void setSellLots(long sellLots) {
         this.sellLots = sellLots;
+    }
+
+    final void setSellCost(long sellCost) {
+        this.sellCost = sellCost;
     }
 
     public final String getTrader() {
@@ -249,19 +249,19 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
         return settlDay != 0;
     }
 
-    public final long getBuyCost() {
-        return buyCost;
-    }
-
     public final long getBuyLots() {
         return buyLots;
     }
 
-    public final long getSellCost() {
-        return sellCost;
+    public final long getBuyCost() {
+        return buyCost;
     }
 
     public final long getSellLots() {
         return sellLots;
+    }
+
+    public final long getSellCost() {
+        return sellCost;
     }
 }

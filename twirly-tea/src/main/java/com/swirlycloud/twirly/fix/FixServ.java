@@ -215,8 +215,8 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         final String market = message.getString(Symbol.FIELD);
         final String ref = message.getString(ClOrdID.FIELD);
         final Side side = fixToSide(message.getChar(quickfix.field.Side.FIELD));
-        final long ticks = (long) message.getDouble(Price.FIELD);
         final long lots = (long) message.getDouble(OrderQty.FIELD);
+        final long ticks = (long) message.getDouble(Price.FIELD);
         final long minLots = (long) message.getDouble(MinQty.FIELD);
         final long now = getNow(message);
 
@@ -237,7 +237,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
             }
             final MarketBook book = serv.getMarket(market);
             try (final Result result = new Result()) {
-                serv.createOrder(sess, book, ref, side, ticks, lots, minLots, now, result);
+                serv.createOrder(sess, book, ref, side, lots, ticks, minLots, now, result);
                 log.info(sessionId + ": " + result);
                 sendResultLocked(sess, null, result, sessionId);
             }

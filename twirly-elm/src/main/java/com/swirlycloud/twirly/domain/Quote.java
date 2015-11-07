@@ -23,23 +23,23 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
     private final long ticks;
     long expiry;
 
-    Quote(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
-            Side side, long ticks, long lots, long created, long expiry) {
-        super(id, trader, market, contr, settlDay, ref, side, lots, created);
+    Quote(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,
+            Side side, long lots, long ticks, long created, long expiry) {
+        super(trader, market, contr, settlDay, id, ref, side, lots, created);
         this.ticks = ticks;
         this.expiry = expiry;
     }
 
     public static Quote parse(JsonParser p) throws IOException {
-        long id = 0;
         String trader = null;
         String market = null;
         String contr = null;
         int settlDay = 0;
+        long id = 0;
         String ref = null;
         Side side = null;
-        long ticks = 0;
         long lots = 0;
+        long ticks = 0;
         long created = 0;
         long expiry = 0;
 
@@ -60,7 +60,7 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
                 if (side == null) {
                     throw new IOException("side is null");
                 }
-                return new Quote(id, trader, market, contr, settlDay, ref, side, ticks, lots,
+                return new Quote(trader, market, contr, settlDay, id, ref, side, lots, ticks,
                         created, expiry);
             case KEY_NAME:
                 name = p.getString();
@@ -75,14 +75,14 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
                 }
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
-                    id = p.getLong();
-                } else if ("settlDate".equals(name)) {
+                if ("settlDate".equals(name)) {
                     settlDay = JulianDay.maybeIsoToJd(p.getInt());
-                } else if ("ticks".equals(name)) {
-                    ticks = p.getLong();
+                } else if ("id".equals(name)) {
+                    id = p.getLong();
                 } else if ("lots".equals(name)) {
                     lots = p.getLong();
+                } else if ("ticks".equals(name)) {
+                    ticks = p.getLong();
                 } else if ("created".equals(name)) {
                     created = p.getLong();
                 } else if ("expiry".equals(name)) {
@@ -117,8 +117,7 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
 
     @Override
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
-        out.append("{\"id\":").append(String.valueOf(id));
-        out.append(",\"trader\":\"").append(trader);
+        out.append("{\"trader\":\"").append(trader);
         out.append("\",\"market\":\"").append(market);
         out.append("\",\"contr\":\"").append(contr);
         out.append("\",\"settlDate\":");
@@ -127,6 +126,7 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
         } else {
             out.append("null");
         }
+        out.append(",\"id\":").append(String.valueOf(id));
         out.append(",\"ref\":");
         if (ref != null) {
             out.append('"').append(ref).append('"');
@@ -134,8 +134,8 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
             out.append("null");
         }
         out.append(",\"side\":\"").append(side.name());
-        out.append("\",\"ticks\":").append(String.valueOf(ticks));
-        out.append(",\"lots\":").append(String.valueOf(lots));
+        out.append("\",\"lots\":").append(String.valueOf(lots));
+        out.append(",\"ticks\":").append(String.valueOf(ticks));
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"expiry\":").append(String.valueOf(expiry));
         out.append("}");

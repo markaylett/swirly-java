@@ -37,13 +37,13 @@ public final class MarketBookTest {
 
         final long now = 1414932078620L;
 
-        book.createOrder(factory.newOrder(1, "MARAYL", book, "apple", Side.BUY, 12343, 10, 0, now),
+        book.createOrder(factory.newOrder("MARAYL", book, 1, "apple", Side.BUY, 10, 12343, 0, now),
                 now);
-        book.createOrder(factory.newOrder(2, "MARAYL", book, "orange", Side.BUY, 12344, 5, 0, now),
+        book.createOrder(factory.newOrder("MARAYL", book, 2, "orange", Side.BUY, 5, 12344, 0, now),
                 now);
-        book.createOrder(factory.newOrder(3, "MARAYL", book, "pear", Side.SELL, 12346, 5, 0, now),
+        book.createOrder(factory.newOrder("MARAYL", book, 3, "pear", Side.SELL, 5, 12346, 0, now),
                 now);
-        book.createOrder(factory.newOrder(4, "MARAYL", book, "banana", Side.SELL, 12346, 2, 0, now),
+        book.createOrder(factory.newOrder("MARAYL", book, 4, "banana", Side.SELL, 2, 12346, 0, now),
                 now);
 
         final StringBuilder sb = new StringBuilder();
@@ -51,7 +51,7 @@ public final class MarketBookTest {
         // Null params.
         book.toJsonView(null, sb);
         assertEquals(
-                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null,\"bidTicks\":[12344,12343,null],\"bidResd\":[5,10,null],\"bidQuot\":[0,0,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerResd\":[7,null,null],\"offerQuot\":[0,null,null],\"offerCount\":[2,null,null]}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastLots\":null,\"lastTicks\":null,\"lastTime\":null,\"bidTicks\":[12344,12343,null],\"bidResd\":[5,10,null],\"bidQuot\":[0,0,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerResd\":[7,null,null],\"offerQuot\":[0,null,null],\"offerCount\":[2,null,null]}",
                 sb.toString());
 
         // Empty params.
@@ -63,7 +63,7 @@ public final class MarketBookTest {
             }
         }, sb);
         assertEquals(
-                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null,\"bidTicks\":[12344,12343,null],\"bidResd\":[5,10,null],\"bidQuot\":[0,0,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerResd\":[7,null,null],\"offerQuot\":[0,null,null],\"offerCount\":[2,null,null]}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastLots\":null,\"lastTicks\":null,\"lastTime\":null,\"bidTicks\":[12344,12343,null],\"bidResd\":[5,10,null],\"bidQuot\":[0,0,null],\"bidCount\":[1,1,null],\"offerTicks\":[12346,null,null],\"offerResd\":[7,null,null],\"offerQuot\":[0,null,null],\"offerCount\":[2,null,null]}",
                 sb.toString());
 
         // Explicit TOB.
@@ -76,7 +76,7 @@ public final class MarketBookTest {
             }
         }, sb);
         assertEquals(
-                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null,\"bidTicks\":[12344],\"bidResd\":[5],\"bidQuot\":[0],\"bidCount\":[1],\"offerTicks\":[12346],\"offerResd\":[7],\"offerQuot\":[0],\"offerCount\":[2]}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastLots\":null,\"lastTicks\":null,\"lastTime\":null,\"bidTicks\":[12344],\"bidResd\":[5],\"bidQuot\":[0],\"bidCount\":[1],\"offerTicks\":[12346],\"offerResd\":[7],\"offerQuot\":[0],\"offerCount\":[2]}",
                 sb.toString());
 
         // Round-up to minimum.
@@ -89,7 +89,7 @@ public final class MarketBookTest {
             }
         }, sb);
         assertEquals(
-                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null,\"bidTicks\":[12344],\"bidResd\":[5],\"bidQuot\":[0],\"bidCount\":[1],\"offerTicks\":[12346],\"offerResd\":[7],\"offerQuot\":[0],\"offerCount\":[2]}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastLots\":null,\"lastTicks\":null,\"lastTime\":null,\"bidTicks\":[12344],\"bidResd\":[5],\"bidQuot\":[0],\"bidCount\":[1],\"offerTicks\":[12346],\"offerResd\":[7],\"offerQuot\":[0],\"offerCount\":[2]}",
                 sb.toString());
 
         // Between minimum and maximum.
@@ -102,7 +102,7 @@ public final class MarketBookTest {
             }
         }, sb);
         assertEquals(
-                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null,\"bidTicks\":[12344,12343],\"bidResd\":[5,10],\"bidQuot\":[0,0],\"bidCount\":[1,1],\"offerTicks\":[12346,null],\"offerResd\":[7,null],\"offerQuot\":[0,null],\"offerCount\":[2,null]}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastLots\":null,\"lastTicks\":null,\"lastTime\":null,\"bidTicks\":[12344,12343],\"bidResd\":[5,10],\"bidQuot\":[0,0],\"bidCount\":[1,1],\"offerTicks\":[12346,null],\"offerResd\":[7,null],\"offerQuot\":[0,null],\"offerCount\":[2,null]}",
                 sb.toString());
 
         // Round-down to maximum.
@@ -115,7 +115,7 @@ public final class MarketBookTest {
             }
         }, sb);
         assertEquals(
-                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null,\"bidTicks\":[12344,12343,null,null,null],\"bidResd\":[5,10,null,null,null],\"bidQuot\":[0,0,null,null,null],\"bidCount\":[1,1,null,null,null],\"offerTicks\":[12346,null,null,null,null],\"offerResd\":[7,null,null,null,null],\"offerQuot\":[0,null,null,null,null],\"offerCount\":[2,null,null,null,null]}",
+                "{\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"lastLots\":null,\"lastTicks\":null,\"lastTime\":null,\"bidTicks\":[12344,12343,null,null,null],\"bidResd\":[5,10,null,null,null],\"bidQuot\":[0,0,null,null,null],\"bidCount\":[1,1,null,null,null],\"offerTicks\":[12346,null,null,null,null],\"offerResd\":[7,null,null,null,null],\"offerQuot\":[0,null,null,null,null],\"offerCount\":[2,null,null,null,null]}",
                 sb.toString());
     }
 }

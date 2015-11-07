@@ -82,16 +82,16 @@ public class JdbcModel implements Model {
         final Memorable asset = newMnem(rs.getString("asset"));
         @SuppressWarnings("null")
         final Memorable ccy = newMnem(rs.getString("ccy"));
-        final int tickNumer = rs.getInt("tickNumer");
-        final int tickDenom = rs.getInt("tickDenom");
         final int lotNumer = rs.getInt("lotNumer");
         final int lotDenom = rs.getInt("lotDenom");
+        final int tickNumer = rs.getInt("tickNumer");
+        final int tickDenom = rs.getInt("tickDenom");
         final int pipDp = rs.getInt("pipDp");
         final int minLots = rs.getInt("minLots");
         final int maxLots = rs.getInt("maxLots");
 
         assert mnem != null;
-        return factory.newContr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom,
+        return factory.newContr(mnem, display, asset, ccy, lotNumer, lotDenom, tickNumer, tickDenom,
                 pipDp, minLots, maxLots);
     }
 
@@ -106,15 +106,15 @@ public class JdbcModel implements Model {
         // getInt() returns zero if value is null.
         final int expiryDay = rs.getInt("expiryDay");
         final int state = rs.getInt("state");
-        final long lastTicks = rs.getLong("lastTicks");
         final long lastLots = rs.getLong("lastLots");
+        final long lastTicks = rs.getLong("lastTicks");
         final long lastTime = rs.getLong("lastTime");
         final long maxOrderId = rs.getLong("maxOrderId");
         final long maxExecId = rs.getLong("maxExecId");
 
         assert mnem != null;
-        return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state, lastTicks,
-                lastLots, lastTime, maxOrderId, maxExecId);
+        return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state, lastLots,
+                lastTicks, lastTime, maxOrderId, maxExecId);
     }
 
     private static @NonNull Trader getTrader(@NonNull ResultSet rs, @NonNull Factory factory)
@@ -130,21 +130,21 @@ public class JdbcModel implements Model {
 
     private static @NonNull Order getOrder(@NonNull ResultSet rs, @NonNull Factory factory)
             throws SQLException {
-        final long id = rs.getLong("id");
         final String trader = rs.getString("trader");
         final String market = rs.getString("market");
         final String contr = rs.getString("contr");
         final int settlDay = rs.getInt("settlDay");
+        final long id = rs.getLong("id");
         final String ref = rs.getString("ref");
         final State state = State.valueOf(rs.getInt("stateId"));
         final Side side = Side.valueOf(rs.getInt("sideId"));
-        final long ticks = rs.getLong("ticks");
         final long lots = rs.getLong("lots");
+        final long ticks = rs.getLong("ticks");
         final long resd = rs.getLong("resd");
         final long exec = rs.getLong("exec");
         final long cost = rs.getLong("cost");
-        final long lastTicks = rs.getLong("lastTicks");
         final long lastLots = rs.getLong("lastLots");
+        final long lastTicks = rs.getLong("lastTicks");
         final long minLots = rs.getLong("minLots");
         final boolean pecan = rs.getBoolean("pecan");
         final long created = rs.getLong("created");
@@ -152,30 +152,30 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return factory.newOrder(id, trader, market, contr, settlDay, ref, state, side, ticks, lots,
-                resd, exec, cost, lastTicks, lastLots, minLots, pecan, created, modified);
+        return factory.newOrder(trader, market, contr, settlDay, id, ref, state, side, lots, ticks,
+                resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified);
     }
 
     private static @NonNull Exec getTrade(@NonNull ResultSet rs, @NonNull Factory factory)
             throws SQLException {
-        final long id = rs.getLong("id");
-        // getLong() returns zero if value is null.
-        final long orderId = rs.getLong("orderId");
         final String trader = rs.getString("trader");
         final String market = rs.getString("market");
         final String contr = rs.getString("contr");
         // getInt() returns zero if value is null.
         final int settlDay = rs.getInt("settlDay");
+        final long id = rs.getLong("id");
         final String ref = rs.getString("ref");
+        // getLong() returns zero if value is null.
+        final long orderId = rs.getLong("orderId");
         final State state = State.TRADE;
         final Side side = Side.valueOf(rs.getInt("sideId"));
-        final long ticks = rs.getLong("ticks");
         final long lots = rs.getLong("lots");
+        final long ticks = rs.getLong("ticks");
         final long resd = rs.getLong("resd");
         final long exec = rs.getLong("exec");
         final long cost = rs.getLong("cost");
-        final long lastTicks = rs.getLong("lastTicks");
         final long lastLots = rs.getLong("lastLots");
+        final long lastTicks = rs.getLong("lastTicks");
         final long minLots = rs.getLong("minLots");
         final long matchId = rs.getLong("matchId");
         // If roleId is null in the database, then getInt() will return zero, and valueOf() will
@@ -187,8 +187,8 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return factory.newExec(id, orderId, trader, market, contr, settlDay, ref, state, side,
-                ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty,
+        return factory.newExec(trader, market, contr, settlDay, id, ref, orderId, state, side,
+                lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, cpty,
                 created);
     }
 
@@ -235,13 +235,13 @@ public class JdbcModel implements Model {
                     posns.pinsert(posn, parent);
                 }
                 final Side side = Side.valueOf(rs.getInt("sideId"));
-                final long cost = rs.getLong("cost");
                 final long lots = rs.getLong("lots");
+                final long cost = rs.getLong("cost");
                 if (side == Side.BUY) {
-                    posn.addBuy(cost, lots);
+                    posn.addBuy(lots, cost);
                 } else {
                     assert side == Side.SELL;
-                    posn.addSell(cost, lots);
+                    posn.addSell(lots, cost);
                 }
             }
         }
@@ -320,23 +320,23 @@ public class JdbcModel implements Model {
                 selectContrStmt = conn.prepareStatement(
                         "SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM Contr_v");
                 selectMarketStmt = conn.prepareStatement(
-                        "SELECT mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId FROM Market_v");
+                        "SELECT mnem, display, contr, settlDay, expiryDay, state, lastLots, lastTicks, lastTime, maxOrderId, maxExecId FROM Market_v");
                 selectTraderStmt = conn
                         .prepareStatement("SELECT mnem, display, email FROM Trader_t");
                 selectTraderByEmailStmt = conn
                         .prepareStatement("SELECT mnem FROM Trader_t WHERE email = ?");
                 selectOrderStmt = conn.prepareStatement(
-                        "SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, pecan, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
+                        "SELECT trader, market, contr, settlDay, id, ref, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
                 selectOrderByTraderStmt = conn.prepareStatement(
-                        "SELECT id, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, pecan, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
+                        "SELECT trader, market, contr, settlDay, id, ref, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
                 selectTradeStmt = conn.prepareStatement(
-                        "SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
+                        "SELECT trader, market, contr, settlDay, id, ref, orderId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
                 selectTradeByTraderStmt = conn.prepareStatement(
-                        "SELECT id, orderId, trader, market, contr, settlDay, ref, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE trader = ? AND archive = 0 AND stateId = 4");
+                        "SELECT trader, market, contr, settlDay, id, ref, orderId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE trader = ? AND archive = 0 AND stateId = 4");
                 selectPosnStmt = conn.prepareStatement(
-                        "SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v");
+                        "SELECT trader, contr, settlDay, sideId, lots, cost FROM Posn_v");
                 selectPosnByTraderStmt = conn.prepareStatement(
-                        "SELECT trader, contr, settlDay, sideId, cost, lots FROM Posn_v WHERE trader = ?");
+                        "SELECT trader, contr, settlDay, sideId, lots, cost FROM Posn_v WHERE trader = ?");
                 // Success.
                 this.conn = conn;
                 assert selectAssetStmt != null;

@@ -28,41 +28,41 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
-                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
-                10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
+                10, 12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
+                12345, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
     }
 
     @Test
     public final void testGetByMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", "EURUSD.MAR14", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
-                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
-                10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
+                10, 12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
+                12345, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
         assertTrue(unrest.getTrade("MARAYL", "USDJPY.MAR14", PARAMS_NONE, NOW).isEmpty());
     }
 
     @Test
     public final void testGetByMarketId() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", "EURUSD.MAR14", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
-                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
-                10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
+                10, 12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
+                12345, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
         try {
             unrest.getOrder("MARAYL", "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
             fail("Expected exception");
@@ -80,10 +80,10 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testCreate()
             throws NotFoundException, ServiceUnavailableException, IOException {
-        final Exec exec = unrest.postTrade("MARAYL", "EURUSD.MAR14", "", Side.BUY, 12345, 10,
+        final Exec exec = unrest.postTrade("MARAYL", "EURUSD.MAR14", "", Side.BUY, 10, 12345,
                 Role.MAKER, "MARAYL", PARAMS_NONE, NOW);
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
-                10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", exec);
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
+                12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", exec);
     }
 
     // Archive Market.
@@ -91,14 +91,14 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testArchiveSingle() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
-                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
-                10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
+                10, 12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(3)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
+                12345, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(4)));
         deleteTrade("MARAYL", "EURUSD.MAR14", 3);
         try {
             unrest.getTrade("MARAYL", "EURUSD.MAR14", 3, PARAMS_NONE, NOW);
@@ -110,19 +110,19 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testArchiveBatch() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12346, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12346, 20);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12346);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 20, 12346);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(4, out.size());
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
-                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(4)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12346, 20, 10, 10, 123450,
-                12345, 10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(5)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12346, 10, 0, 10, 123460,
-                12346, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(6)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12346, 20, 0, 20, 246910, 12346,
-                10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(7)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
+                10, 12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(4)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 20, 12346, 10, 10, 123450,
+                10, 12345, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(5)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12346, 0, 10, 123460,
+                10, 12346, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.get(Long.valueOf(6)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 20, 12346, 0, 20, 246910, 10,
+                12346, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.get(Long.valueOf(7)));
         deleteTrade("MARAYL", "EURUSD.MAR14", jslList("EURUSD.MAR14", Long.valueOf(4),
                 Long.valueOf(5), Long.valueOf(6), Long.valueOf(7)));
         try {

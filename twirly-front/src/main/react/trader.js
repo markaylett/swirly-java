@@ -118,10 +118,10 @@ var TraderModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    postTrade: function(trader, market, ref, side, price, lots, role, cpty) {
+    postTrade: function(trader, market, ref, side, lots, price, role, cpty) {
         console.debug('postTrade: trader=' + trader + ', market=' + market
-                      + ', ref=' + ref + ', side=' + side + ', price=' + price
-                      + ', lots=' + lots + ', role=' + role + ', cpty=' + cpty);
+                      + ', ref=' + ref + ', side=' + side + ', lots=' + lots
+                      + ', price=' + price + ', role=' + role + ', cpty=' + cpty);
         var req = {};
         if (isSpecified(trader)) {
             req.trader = trader;
@@ -147,16 +147,16 @@ var TraderModuleImpl = React.createClass({
             this.onReportError(internalError('side not specified'));
             return;
         }
-        if (isSpecified(price)) {
-            req.ticks = priceToTicks(price, contr);
-        } else {
-            this.onReportError(internalError('price not specified'));
-            return;
-        }
         if (isSpecified(lots) && lots > 0) {
             req.lots = parseInt(lots);
         } else {
             this.onReportError(internalError('lots not specified'));
+            return;
+        }
+        if (isSpecified(price)) {
+            req.ticks = priceToTicks(price, contr);
+        } else {
+            this.onReportError(internalError('price not specified'));
             return;
         }
         if (isSpecified(role)) {
@@ -198,8 +198,8 @@ var TraderModuleImpl = React.createClass({
     onPutTrader: function(mnem, display, email) {
         this.putTrader(mnem, display, email);
     },
-    onPostTrade: function(trader, market, ref, side, price, lots, role, cpty) {
-        this.postTrade(trader, market, ref, side, price, lots, role, cpty);
+    onPostTrade: function(trader, market, ref, side, lots, price, role, cpty) {
+        this.postTrade(trader, market, ref, side, lots, price, role, cpty);
     },
     onEditTrader: function(trader) {
         console.debug('onEditTrader: mnem=' + trader.mnem);

@@ -32,37 +32,37 @@ INSERT INTO Asset_t (mnem, display, typeId)
        VALUES ('VZ', 'Verizon Com', 2)
 ;
 
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('CSCO', 'Cisco Systems Inc', 'CSCO', 'USD', 1, 1000, 1, 1, 3, 1, 10);
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
+       VALUES ('CSCO', 'Cisco Systems Inc', 'CSCO', 'USD', 1, 1, 1, 1000, 3, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('DIS', 'Walt Disney', 'DIS', 'USD', 1, 1000, 1, 1, 3, 1, 10);
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
+       VALUES ('DIS', 'Walt Disney', 'DIS', 'USD', 1, 1, 1, 1000, 3, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('IBM', 'Ibm Corp', 'IBM', 'USD', 1, 1000, 1, 1, 3, 1, 10);
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
+       VALUES ('IBM', 'Ibm Corp', 'IBM', 'USD', 1, 1, 1, 1000, 3, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('INTC', 'Intel Corp', 'INTC', 'USD', 1, 1000, 1, 1, 3, 1, 10);
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
+       VALUES ('INTC', 'Intel Corp', 'INTC', 'USD', 1, 1, 1, 1000, 3, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('MSFT', 'Microsoft Corp', 'MSFT', 'USD', 1, 1000, 1, 1, 3, 1, 10);
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
+       VALUES ('MSFT', 'Microsoft Corp', 'MSFT', 'USD', 1, 1, 1, 1000, 3, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('VIA', 'Viacom Inc', 'VIA', 'USD', 1, 1000, 1, 1, 3, 1, 10);
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
+       VALUES ('VIA', 'Viacom Inc', 'VIA', 'USD', 1, 1, 1, 1000, 3, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('VOD', 'Vodafone Group Plc', 'VOD', 'USD', 1, 1000, 1, 1, 3, 1, 10);
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
+       VALUES ('VOD', 'Vodafone Group Plc', 'VOD', 'USD', 1, 1, 1, 1000, 3, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
-       VALUES ('VZ', 'Verizon Com', 'VZ', 'USD', 1, 1000, 1, 1, 3, 1, 10);
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
+       VALUES ('VZ', 'Verizon Com', 'VZ', 'USD', 1, 1, 1, 1000, 3, 1, 10);
 ;
 
 INSERT INTO market_t (mnem, display, contr, settlDay, expiryDay, state)

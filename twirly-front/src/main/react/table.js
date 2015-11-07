@@ -62,10 +62,10 @@ var ContrRow = React.createClass({
               <td>{contr.display}</td>
               <td>{contr.asset}</td>
               <td>{contr.ccy}</td>
-              <td style={alignRight}>{contr.tickNumer}</td>
-              <td style={alignRight}>{contr.tickDenom}</td>
               <td style={alignRight}>{contr.lotNumer}</td>
               <td style={alignRight}>{contr.lotDenom}</td>
+              <td style={alignRight}>{contr.tickNumer}</td>
+              <td style={alignRight}>{contr.tickDenom}</td>
               <td style={alignRight}>{contr.pipDp}</td>
               <td style={alignRight}>{contr.minLots}</td>
               <td style={alignRight}>{contr.maxLots}</td>
@@ -93,10 +93,10 @@ var ContrTable = React.createClass({
                   <th>Display</th>
                   <th>Asset</th>
                   <th>Ccy</th>
-                  <th style={alignRight}>Tick Numer</th>
-                  <th style={alignRight}>Tick Denom</th>
                   <th style={alignRight}>Lot Numer</th>
                   <th style={alignRight}>Lot Denom</th>
+                  <th style={alignRight}>Tick Numer</th>
+                  <th style={alignRight}>Tick Denom</th>
                   <th style={alignRight}>Pip Dp</th>
                   <th style={alignRight}>Min Lots</th>
                   <th style={alignRight}>Max Lots</th>
@@ -283,8 +283,8 @@ var ViewRow = React.createClass({
     onClickBid: function(event) {
         var view = this.props.view;
         var market = view.market;
-        var price = view.bidPrice[0];
         var lots = view.bidResd[0];
+        var price = view.bidPrice[0];
         if (price === null) {
             price = view.lastPrice;
             if (price === null) {
@@ -292,23 +292,23 @@ var ViewRow = React.createClass({
             }
             lots = undefined;
         }
-        this.props.module.onChangeFields(market, price, lots);
+        this.props.module.onChangeFields(market, lots, price);
     },
     onClickLast: function(event) {
         var view = this.props.view;
         var market = view.market;
-        var price = view.lastPrice;
         var lots = undefined;
+        var price = view.lastPrice;
         if (price === null) {
             price = 0;
         }
-        this.props.module.onChangeFields(market, price, lots);
+        this.props.module.onChangeFields(market, lots, price);
     },
     onClickOffer: function(event) {
         var view = this.props.view;
         var market = view.market;
-        var price = view.offerPrice[0];
         var lots = view.offerResd[0];
+        var price = view.offerPrice[0];
         if (price === null) {
             price = view.lastPrice;
             if (price === null) {
@@ -316,7 +316,7 @@ var ViewRow = React.createClass({
             }
             lots = undefined;
         }
-        this.props.module.onChangeFields(market, price, lots);
+        this.props.module.onChangeFields(market, lots, price);
     },
     // Lifecycle.
     getInitialState: function() {
@@ -422,9 +422,9 @@ var OrderRow = React.createClass({
     onClickOrder: function(event) {
         var order = this.props.order;
         var market = order.market;
-        var price = order.price;
         var lots = order.resd > 0 ? order.resd : order.lots;
-        this.props.module.onChangeFields(market, price, lots);
+        var price = order.price;
+        this.props.module.onChangeFields(market, lots, price);
     },
     // Lifecycle.
     componentWillUnmount: function() {
@@ -441,12 +441,12 @@ var OrderRow = React.createClass({
               <td>{order.id}</td>
               <td>{order.state}</td>
               <td>{order.side}</td>
-              <td style={alignRight}>{order.price}</td>
               <td style={alignRight}>{order.lots}</td>
+              <td style={alignRight}>{order.price}</td>
               <td style={alignRight}>{order.resd}</td>
               <td style={alignRight}>{order.exec}</td>
-              <td style={alignRight}>{optional(order.lastPrice)}</td>
               <td style={alignRight}>{optional(order.lastLots)}</td>
+              <td style={alignRight}>{optional(order.lastPrice)}</td>
             </tr>
         );
     }
@@ -483,12 +483,12 @@ var OrderTable = React.createClass({
                   <th>Id</th>
                   <th>State</th>
                   <th>Side</th>
-                  <th style={alignRight}>Price</th>
                   <th style={alignRight}>Lots</th>
+                  <th style={alignRight}>Price</th>
                   <th style={alignRight}>Resd</th>
                   <th style={alignRight}>Exec</th>
-                  <th style={alignRight}>Last Price</th>
                   <th style={alignRight}>Last Lots</th>
+                  <th style={alignRight}>Last Price</th>
                 </tr>
               </thead>
               <tbody>
@@ -514,9 +514,9 @@ var TradeRow = React.createClass({
     onClickTrade: function(event) {
         var trade = this.props.trade;
         var market = trade.market;
-        var price = trade.lastPrice;
         var lots = trade.resd > 0 ? trade.resd : trade.lastLots;
-        this.props.module.onChangeFields(market, price, lots);
+        var price = trade.lastPrice;
+        this.props.module.onChangeFields(market, lots, price);
     },
     // Lifecycle.
     componentWillUnmount: function() {
@@ -533,8 +533,8 @@ var TradeRow = React.createClass({
               <td>{trade.id}</td>
               <td>{trade.orderId}</td>
               <td>{trade.side}</td>
-              <td style={alignRight}>{trade.lastPrice}</td>
               <td style={alignRight}>{trade.lastLots}</td>
+              <td style={alignRight}>{trade.lastPrice}</td>
               <td style={alignRight}>{trade.resd}</td>
               <td style={alignRight}>{trade.exec}</td>
               <td>{trade.role}</td>
@@ -580,8 +580,8 @@ var TradeTable = React.createClass({
                   <th>Id</th>
                   <th>Order Id</th>
                   <th>Side</th>
-                  <th style={alignRight}>Price</th>
                   <th style={alignRight}>Lots</th>
+                  <th style={alignRight}>Price</th>
                   <th style={alignRight}>Resd</th>
                   <th style={alignRight}>Exec</th>
                   <th>Role</th>
@@ -606,12 +606,12 @@ var PosnRow = React.createClass({
             <tr>
               <td>{posn.contr.mnem}</td>
               <td>{posn.settlDate}</td>
-              <td style={alignRight}>{posn.sellPrice}</td>
               <td style={alignRight}>{posn.sellLots}</td>
-              <td style={alignRight}>{posn.buyLots}</td>
+              <td style={alignRight}>{posn.sellPrice}</td>
               <td style={alignRight}>{posn.buyPrice}</td>
-              <td style={alignRight}>{posn.netPrice}</td>
+              <td style={alignRight}>{posn.buyLots}</td>
               <td style={alignRight}>{posn.netLots}</td>
+              <td style={alignRight}>{posn.netPrice}</td>
             </tr>
         );
     }
@@ -634,12 +634,12 @@ var PosnTable = React.createClass({
                 <tr>
                 <th>Contr</th>
                 <th>Settl Date</th>
-                <th style={alignRight}>Sell Price</th>
                 <th style={alignRight}>Sell Lots</th>
-                <th style={alignRight}>Buy Lots</th>
+                <th style={alignRight}>Sell Price</th>
                 <th style={alignRight}>Buy Price</th>
-                <th style={alignRight}>Net Price</th>
+                <th style={alignRight}>Buy Lots</th>
                 <th style={alignRight}>Net Lots</th>
+                <th style={alignRight}>Net Price</th>
                 </tr>
               </thead>
               <tbody>
@@ -661,8 +661,8 @@ var QuoteRow = React.createClass({
               <td>{quote.market}</td>
               <td>{quote.id}</td>
               <td>{quote.side}</td>
-              <td style={alignRight}>{quote.price}</td>
               <td style={alignRight}>{quote.lots}</td>
+              <td style={alignRight}>{quote.price}</td>
               <td>{quote.expiry}</td>
             </tr>
         );
@@ -687,8 +687,8 @@ var QuoteTable = React.createClass({
                   <th>Market</th>
                   <th>Id</th>
                   <th>Side</th>
-                  <th style={alignRight}>Price</th>
                   <th style={alignRight}>Lots</th>
+                  <th style={alignRight}>Price</th>
                   <th>Expiry</th>
                 </tr>
               </thead>

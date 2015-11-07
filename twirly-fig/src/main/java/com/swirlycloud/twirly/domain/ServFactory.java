@@ -17,9 +17,9 @@ public final @NonNullByDefault class ServFactory extends BasicFactory {
 
     @Override
     public final MarketBook newMarket(String mnem, @Nullable String display, Memorable contr,
-            int settlDay, int expiryDay, int state, long lastTicks, long lastLots, long lastTime,
+            int settlDay, int expiryDay, int state, long lastLots, long lastTicks, long lastTime,
             long maxOrderId, long maxExecId) {
-        return new MarketTag(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots,
+        return new MarketTag(mnem, display, contr, settlDay, expiryDay, state, lastLots, lastTicks,
                 lastTime, maxOrderId, maxExecId);
     }
 

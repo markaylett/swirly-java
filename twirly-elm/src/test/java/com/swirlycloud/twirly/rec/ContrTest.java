@@ -22,7 +22,7 @@ public final class ContrTest extends SerializableTest {
     @Test
     public final void testToString() {
         assertEquals(
-                "{\"mnem\":\"EURUSD\",\"display\":\"EURUSD\",\"asset\":\"EUR\",\"ccy\":\"USD\",\"tickNumer\":1,\"tickDenom\":10000,\"lotNumer\":1000000,\"lotDenom\":1,\"pipDp\":4,\"minLots\":1,\"maxLots\":10}",
+                "{\"mnem\":\"EURUSD\",\"display\":\"EURUSD\",\"asset\":\"EUR\",\"ccy\":\"USD\",\"lotNumer\":1000000,\"lotDenom\":1,\"tickNumer\":1,\"tickDenom\":10000,\"pipDp\":4,\"minLots\":1,\"maxLots\":10}",
                 MockContr.newContr("EURUSD", FACTORY).toString());
     }
 

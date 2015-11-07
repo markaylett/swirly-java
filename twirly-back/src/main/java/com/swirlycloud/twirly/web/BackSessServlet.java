@@ -99,12 +99,12 @@ public final class BackSessServlet extends SessServlet {
             final long now = now();
             if ("order".equals(parts[TYPE_PART])) {
 
-                final int required = RestRequest.SIDE | RestRequest.TICKS | RestRequest.LOTS;
+                final int required = RestRequest.SIDE | RestRequest.LOTS | RestRequest.TICKS;
                 final int optional = RestRequest.REF | RestRequest.MIN_LOTS;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
-                rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getTicks(), r.getLots(),
+                rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getLots(), r.getTicks(),
                         r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             } else if ("trade".equals(parts[TYPE_PART])) {
 
@@ -118,8 +118,8 @@ public final class BackSessServlet extends SessServlet {
                 if (!realm.isUserAdmin(req)) {
                     throw new ForbiddenException("user is not an admin");
                 }
-                rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(), r.getTicks(),
-                        r.getLots(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
+                rest.postTrade(r.getTrader(), market, r.getRef(), r.getSide(), r.getLots(),
+                        r.getTicks(), r.getRole(), r.getCpty(), PARAMS_NONE, now, resp.getWriter());
             } else if ("quote".equals(parts[TYPE_PART])) {
 
                 final int required = RestRequest.SIDE | RestRequest.LOTS;

@@ -24,14 +24,14 @@ public final class ExecTest {
     private static final long NOW = jdToMillis(TODAY);
 
     private static @NonNull Order newOrder() {
-        return FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test", Side.BUY,
-                12345, 10, 1, NOW);
+        return FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1, "test", Side.BUY,
+                10, 12345, 1, NOW);
     }
 
     @Test
     public final void testContruct() {
         final Order order = newOrder();
-        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
+        final Exec exec = FACTORY.newExec(order, 2, NOW + 1);
 
         assertEquals(2, exec.getId());
         assertEquals(1, exec.getOrderId());
@@ -57,26 +57,26 @@ public final class ExecTest {
     @Test
     public final void testTrade() {
         final Order order = newOrder();
-        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
-        exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
+        final Exec exec = FACTORY.newExec(order, 2, NOW + 1);
+        exec.trade(2, 12344, 3, Role.MAKER, "GOSAYL");
 
-        assertEquals(2, exec.getId());
-        assertEquals(1, exec.getOrderId());
         assertEquals("MARAYL", exec.getTrader());
         assertEquals("EURUSD.MAR14", exec.getMarket());
         assertEquals("EURUSD", exec.getContr());
         assertEquals(SETTL_DAY, exec.getSettlDay());
+        assertEquals(2, exec.getId());
         assertEquals("test", exec.getRef());
+        assertEquals(1, exec.getOrderId());
         assertEquals(State.TRADE, exec.getState());
         assertEquals(Side.BUY, exec.getSide());
-        assertEquals(12345, exec.getTicks());
         assertEquals(10, exec.getLots());
+        assertEquals(12345, exec.getTicks());
         assertEquals(8, exec.getResd());
         assertEquals(2, exec.getExec());
         assertEquals(24688, exec.getCost());
         assertEquals(12344, exec.getAvgTicks(), DELTA);
-        assertEquals(12344, exec.getLastTicks());
         assertEquals(2, exec.getLastLots());
+        assertEquals(12344, exec.getLastTicks());
         assertEquals(1, exec.getMinLots());
         assertFalse(exec.isDone());
         assertEquals(3, exec.getMatchId());
@@ -88,27 +88,27 @@ public final class ExecTest {
     @Test
     public final void testInverse() {
         final Order order = newOrder();
-        Exec exec = FACTORY.newExec(2, order, NOW + 1);
-        exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
+        Exec exec = FACTORY.newExec(order, 2, NOW + 1);
+        exec.trade(2, 12344, 3, Role.MAKER, "GOSAYL");
         exec = exec.inverse(3);
 
-        assertEquals(3, exec.getId());
-        assertEquals(1, exec.getOrderId());
         assertEquals("GOSAYL", exec.getTrader());
         assertEquals("EURUSD.MAR14", exec.getMarket());
         assertEquals("EURUSD", exec.getContr());
         assertEquals(SETTL_DAY, exec.getSettlDay());
+        assertEquals(3, exec.getId());
         assertEquals("test", exec.getRef());
+        assertEquals(1, exec.getOrderId());
         assertEquals(State.TRADE, exec.getState());
         assertEquals(Side.SELL, exec.getSide());
-        assertEquals(12345, exec.getTicks());
         assertEquals(10, exec.getLots());
+        assertEquals(12345, exec.getTicks());
         assertEquals(8, exec.getResd());
         assertEquals(2, exec.getExec());
         assertEquals(24688, exec.getCost());
         assertEquals(12344, exec.getAvgTicks(), DELTA);
-        assertEquals(12344, exec.getLastTicks());
         assertEquals(2, exec.getLastLots());
+        assertEquals(12344, exec.getLastTicks());
         assertEquals(1, exec.getMinLots());
         assertFalse(exec.isDone());
         assertEquals(3, exec.getMatchId());
@@ -120,27 +120,27 @@ public final class ExecTest {
     @Test
     public final void testRevise() {
         final Order order = newOrder();
-        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
-        exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
+        final Exec exec = FACTORY.newExec(order, 2, NOW + 1);
+        exec.trade(2, 12344, 3, Role.MAKER, "GOSAYL");
         exec.revise(5);
 
-        assertEquals(2, exec.getId());
-        assertEquals(1, exec.getOrderId());
         assertEquals("MARAYL", exec.getTrader());
         assertEquals("EURUSD.MAR14", exec.getMarket());
         assertEquals("EURUSD", exec.getContr());
         assertEquals(SETTL_DAY, exec.getSettlDay());
+        assertEquals(2, exec.getId());
         assertEquals("test", exec.getRef());
+        assertEquals(1, exec.getOrderId());
         assertEquals(State.REVISE, exec.getState());
         assertEquals(Side.BUY, exec.getSide());
-        assertEquals(12345, exec.getTicks());
         assertEquals(5, exec.getLots());
+        assertEquals(12345, exec.getTicks());
         assertEquals(3, exec.getResd());
         assertEquals(2, exec.getExec());
         assertEquals(24688, exec.getCost());
         assertEquals(12344, exec.getAvgTicks(), DELTA);
-        assertEquals(12344, exec.getLastTicks());
         assertEquals(2, exec.getLastLots());
+        assertEquals(12344, exec.getLastTicks());
         assertEquals(1, exec.getMinLots());
         assertFalse(exec.isDone());
         assertEquals(3, exec.getMatchId());
@@ -152,27 +152,27 @@ public final class ExecTest {
     @Test
     public final void testCancel() {
         final Order order = newOrder();
-        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
-        exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
+        final Exec exec = FACTORY.newExec(order, 2, NOW + 1);
+        exec.trade(2, 12344, 3, Role.MAKER, "GOSAYL");
         exec.cancel(order.quot);
 
-        assertEquals(2, exec.getId());
-        assertEquals(1, exec.getOrderId());
         assertEquals("MARAYL", exec.getTrader());
         assertEquals("EURUSD.MAR14", exec.getMarket());
         assertEquals("EURUSD", exec.getContr());
         assertEquals(SETTL_DAY, exec.getSettlDay());
+        assertEquals(2, exec.getId());
         assertEquals("test", exec.getRef());
+        assertEquals(1, exec.getOrderId());
         assertEquals(State.CANCEL, exec.getState());
         assertEquals(Side.BUY, exec.getSide());
-        assertEquals(12345, exec.getTicks());
         assertEquals(10, exec.getLots());
+        assertEquals(12345, exec.getTicks());
         assertEquals(0, exec.getResd());
         assertEquals(2, exec.getExec());
         assertEquals(24688, exec.getCost());
         assertEquals(12344, exec.getAvgTicks(), DELTA);
-        assertEquals(12344, exec.getLastTicks());
         assertEquals(2, exec.getLastLots());
+        assertEquals(12344, exec.getLastTicks());
         assertEquals(1, exec.getMinLots());
         assertTrue(exec.isDone());
         assertEquals(3, exec.getMatchId());
@@ -184,27 +184,27 @@ public final class ExecTest {
     @Test
     public final void testMulti() {
         final Order order = newOrder();
-        final Exec exec = FACTORY.newExec(2, order, NOW + 1);
-        exec.trade(12344, 2, 3, Role.MAKER, "GOSAYL");
-        exec.trade(12345, 3, 3, Role.MAKER, "GOSAYL");
+        final Exec exec = FACTORY.newExec(order, 2, NOW + 1);
+        exec.trade(2, 12344, 3, Role.MAKER, "GOSAYL");
+        exec.trade(3, 12345, 3, Role.MAKER, "GOSAYL");
 
-        assertEquals(2, exec.getId());
-        assertEquals(1, exec.getOrderId());
         assertEquals("MARAYL", exec.getTrader());
         assertEquals("EURUSD.MAR14", exec.getMarket());
         assertEquals("EURUSD", exec.getContr());
         assertEquals(SETTL_DAY, exec.getSettlDay());
+        assertEquals(2, exec.getId());
         assertEquals("test", exec.getRef());
+        assertEquals(1, exec.getOrderId());
         assertEquals(State.TRADE, exec.getState());
         assertEquals(Side.BUY, exec.getSide());
-        assertEquals(12345, exec.getTicks());
         assertEquals(10, exec.getLots());
+        assertEquals(12345, exec.getTicks());
         assertEquals(5, exec.getResd());
         assertEquals(5, exec.getExec());
         assertEquals(61723, exec.getCost());
         assertEquals(12344.6, exec.getAvgTicks(), DELTA);
-        assertEquals(12345, exec.getLastTicks());
         assertEquals(3, exec.getLastLots());
+        assertEquals(12345, exec.getLastTicks());
         assertEquals(1, exec.getMinLots());
         assertFalse(exec.isDone());
         assertEquals(3, exec.getMatchId());
@@ -215,15 +215,15 @@ public final class ExecTest {
 
     @Test
     public final void testToString() {
-        final Order order = FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "test", Side.BUY, 12345, 3, 1, 1414692516006L);
-        final Exec exec = FACTORY.newExec(2, order, 1414692516007L);
+        final Order order = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD",
+                JulianDay.isoToJd(20140314), 1, "test", Side.BUY, 3, 12345, 1, 1414692516006L);
+        final Exec exec = FACTORY.newExec(order, 2, 1414692516007L);
         assertEquals(
-                "{\"id\":2,\"orderId\":1,\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"NEW\",\"side\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":3,\"exec\":0,\"cost\":0,\"lastTicks\":null,\"lastLots\":null,\"minLots\":1,\"matchId\":null,\"role\":null,\"cpty\":null,\"created\":1414692516007}",
+                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":2,\"ref\":\"test\",\"orderId\":1,\"state\":\"NEW\",\"side\":\"BUY\",\"lots\":3,\"ticks\":12345,\"resd\":3,\"exec\":0,\"cost\":0,\"lastLots\":null,\"lastTicks\":null,\"minLots\":1,\"matchId\":null,\"role\":null,\"cpty\":null,\"created\":1414692516007}",
                 exec.toString());
-        exec.trade(12345, 1, 3, Role.MAKER, "GOSAYL");
+        exec.trade(1, 12345, 3, Role.MAKER, "GOSAYL");
         assertEquals(
-                "{\"id\":2,\"orderId\":1,\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"state\":\"TRADE\",\"side\":\"BUY\",\"ticks\":12345,\"lots\":3,\"resd\":2,\"exec\":1,\"cost\":12345,\"lastTicks\":12345,\"lastLots\":1,\"minLots\":1,\"matchId\":3,\"role\":\"MAKER\",\"cpty\":\"GOSAYL\",\"created\":1414692516007}",
+                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":2,\"ref\":\"test\",\"orderId\":1,\"state\":\"TRADE\",\"side\":\"BUY\",\"lots\":3,\"ticks\":12345,\"resd\":2,\"exec\":1,\"cost\":12345,\"lastLots\":1,\"lastTicks\":12345,\"minLots\":1,\"matchId\":3,\"role\":\"MAKER\",\"cpty\":\"GOSAYL\",\"created\":1414692516007}",
                 exec.toString());
     }
 }

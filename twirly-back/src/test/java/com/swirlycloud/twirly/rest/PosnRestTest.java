@@ -26,38 +26,38 @@ public final class PosnRestTest extends RestTest {
     @Test
     public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
-        postOrder("MARAYL", "USDJPY.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "USDJPY.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "USDJPY.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "USDJPY.MAR14", Side.BUY, 10, 12345);
         final Map<PosnKey, Posn> out = unrest.getPosn("MARAYL", PARAMS_NONE, NOW);
         assertEquals(out.size(), 2);
-        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
+        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 10, 123450, 10, 123450,
                 out.get(new PosnKey("EURUSD", SETTL_DAY)));
-        assertPosn("MARAYL", "USDJPY.MAR14", "USDJPY", SETTL_DAY, 123450, 10, 123450, 10,
+        assertPosn("MARAYL", "USDJPY.MAR14", "USDJPY", SETTL_DAY, 10, 123450, 10, 123450,
                 out.get(new PosnKey("USDJPY", SETTL_DAY)));
     }
 
     @Test
     public final void testGetByContr() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
-        postOrder("MARAYL", "USDJPY.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "USDJPY.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "USDJPY.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "USDJPY.MAR14", Side.BUY, 10, 12345);
         final Map<PosnKey, Posn> out = unrest.getPosn("MARAYL", "EURUSD", PARAMS_NONE, NOW);
         assertEquals(out.size(), 1);
-        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
+        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 10, 123450, 10, 123450,
                 out.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 
     @Test
     public final void testGetByContrSettlDay() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
         final Posn posn = unrest.getPosn("MARAYL", "EURUSD", SETTL_DAY, PARAMS_NONE, NOW);
-        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10, posn);
+        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 10, 123450, 10, 123450, posn);
         try {
             unrest.getPosn("MARAYL", "USDJPY", SETTL_DAY, PARAMS_NONE, NOW);
             fail("Expected exception");

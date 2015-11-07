@@ -42,19 +42,19 @@ public final class TraderRestTest extends RestTest {
     @Test
     public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 12345, 10);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 12345, 10);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
         final SessStruct out = unrest.getSess("MARAYL", PARAMS_NONE, NOW);
-        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
-                12345, 10, out.orders.get(Long.valueOf(1)));
-        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450,
-                12345, 10, out.orders.get(Long.valueOf(2)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 12345, 10, 0, 10, 123450,
-                12345, 10, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL",
+        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
+                10, 12345, out.orders.get(Long.valueOf(1)));
+        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450,
+                10, 12345, out.orders.get(Long.valueOf(2)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
+                10, 12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL",
                 out.trades.get(Long.valueOf(3)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
-                10, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.trades.get(Long.valueOf(4)));
-        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 123450, 10, 123450, 10,
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
+                12345, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.trades.get(Long.valueOf(4)));
+        assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 10, 123450, 10, 123450,
                 out.posns.get(new PosnKey("EURUSD", SETTL_DAY)));
     }
 

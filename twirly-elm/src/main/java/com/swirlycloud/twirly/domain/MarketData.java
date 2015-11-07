@@ -146,8 +146,8 @@ public class MarketData implements Serializable {
         return getValue(row, BID_QUOT);
     }
 
-    public final long getBidCount(int row) {
-        return getValue(row, BID_COUNT);
+    public final int getBidCount(int row) {
+        return (int) getValue(row, BID_COUNT);
     }
 
     public final boolean isValidOffer(int row) {
@@ -168,7 +168,7 @@ public class MarketData implements Serializable {
         return getValue(row, OFFER_QUOT);
     }
 
-    public final long getOfferCount(int row) {
-        return getValue(row, OFFER_COUNT);
+    public final int getOfferCount(int row) {
+        return (int) getValue(row, OFFER_COUNT);
     }
 }

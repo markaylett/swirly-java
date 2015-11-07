@@ -28,30 +28,30 @@ public final @NonNullByDefault class Contr extends AbstractRec {
     private static final long serialVersionUID = 1L;
     private Memorable asset;
     private Memorable ccy;
-    private final int tickNumer;
-    private final int tickDenom;
-    private final transient double priceInc;
     private final int lotNumer;
     private final int lotDenom;
     private final transient double qtyInc;
-    private final transient int priceDp;
+    private final int tickNumer;
+    private final int tickDenom;
+    private final transient double priceInc;
     private final int pipDp;
     private final transient int qtyDp;
+    private final transient int priceDp;
     private final long minLots;
     private final long maxLots;
 
     public Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
-            int tickNumer, int tickDenom, int lotNumer, int lotDenom, int pipDp, long minLots,
+            int lotNumer, int lotDenom, int tickNumer, int tickDenom, int pipDp, long minLots,
             long maxLots) {
         super(mnem, display);
         this.asset = asset;
         this.ccy = ccy;
-        this.tickNumer = tickNumer;
-        this.tickDenom = tickDenom;
-        this.priceInc = fractToReal(tickNumer, tickDenom);
         this.lotNumer = lotNumer;
         this.lotDenom = lotDenom;
         this.qtyInc = fractToReal(lotNumer, lotDenom);
+        this.tickNumer = tickNumer;
+        this.tickDenom = tickDenom;
+        this.priceInc = fractToReal(tickNumer, tickDenom);
         this.priceDp = realToDp(priceInc);
         this.pipDp = pipDp;
         this.qtyDp = realToDp(qtyInc);
@@ -64,10 +64,10 @@ public final @NonNullByDefault class Contr extends AbstractRec {
         String display = null;
         Memorable asset = null;
         Memorable ccy = null;
-        int tickNumer = 0;
-        int tickDenom = 0;
         int lotNumer = 0;
         int lotDenom = 0;
+        int tickNumer = 0;
+        int tickDenom = 0;
         int pipDp = 0;
         long minLots = 0;
         long maxLots = 0;
@@ -86,20 +86,20 @@ public final @NonNullByDefault class Contr extends AbstractRec {
                 if (ccy == null) {
                     throw new IOException("ccy is null");
                 }
-                return new Contr(mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer,
-                        lotDenom, pipDp, minLots, maxLots);
+                return new Contr(mnem, display, asset, ccy, lotNumer, lotDenom, tickNumer,
+                        tickDenom, pipDp, minLots, maxLots);
             case KEY_NAME:
                 name = p.getString();
                 break;
             case VALUE_NUMBER:
-                if ("tickNumer".equals(name)) {
-                    tickNumer = p.getInt();
-                } else if ("tickDenom".equals(name)) {
-                    tickDenom = p.getInt();
-                } else if ("lotNumer".equals(name)) {
+                if ("lotNumer".equals(name)) {
                     lotNumer = p.getInt();
                 } else if ("lotDenom".equals(name)) {
                     lotDenom = p.getInt();
+                } else if ("tickNumer".equals(name)) {
+                    tickNumer = p.getInt();
+                } else if ("tickDenom".equals(name)) {
+                    tickDenom = p.getInt();
                 } else if ("pipDp".equals(name)) {
                     pipDp = p.getInt();
                 } else if ("minLots".equals(name)) {
@@ -140,10 +140,10 @@ public final @NonNullByDefault class Contr extends AbstractRec {
         out.append("\",\"display\":\"").append(display);
         out.append("\",\"asset\":\"").append(asset.getMnem());
         out.append("\",\"ccy\":\"").append(ccy.getMnem());
-        out.append("\",\"tickNumer\":").append(String.valueOf(tickNumer));
-        out.append(",\"tickDenom\":").append(String.valueOf(tickDenom));
-        out.append(",\"lotNumer\":").append(String.valueOf(lotNumer));
+        out.append("\",\"lotNumer\":").append(String.valueOf(lotNumer));
         out.append(",\"lotDenom\":").append(String.valueOf(lotDenom));
+        out.append(",\"tickNumer\":").append(String.valueOf(tickNumer));
+        out.append(",\"tickDenom\":").append(String.valueOf(tickDenom));
         out.append(",\"pipDp\":").append(String.valueOf(pipDp));
         out.append(",\"minLots\":").append(String.valueOf(minLots));
         out.append(",\"maxLots\":").append(String.valueOf(maxLots));
@@ -178,18 +178,6 @@ public final @NonNullByDefault class Contr extends AbstractRec {
         return (Asset) ccy;
     }
 
-    public final int getTickNumer() {
-        return tickNumer;
-    }
-
-    public final int getTickDenom() {
-        return tickDenom;
-    }
-
-    public final double getPriceInc() {
-        return priceInc;
-    }
-
     public final int getLotNumer() {
         return lotNumer;
     }
@@ -202,16 +190,28 @@ public final @NonNullByDefault class Contr extends AbstractRec {
         return qtyInc;
     }
 
+    public final int getTickNumer() {
+        return tickNumer;
+    }
+
+    public final int getTickDenom() {
+        return tickDenom;
+    }
+
+    public final double getPriceInc() {
+        return priceInc;
+    }
+
     public final int getPriceDp() {
         return priceDp;
     }
 
-    public final int getPipDp() {
-        return pipDp;
-    }
-
     public final int getQtyDp() {
         return qtyDp;
+    }
+
+    public final int getPipDp() {
+        return pipDp;
     }
 
     public final long getMinLots() {

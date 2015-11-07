@@ -350,14 +350,14 @@ var TradeDialog = React.createClass({
             side: event.target.value
         });
     },
-    onChangePrice: function(event) {
-        this.setState({
-            price: event.target.value
-        });
-    },
     onChangeLots: function(event) {
         this.setState({
             lots: event.target.value
+        });
+    },
+    onChangePrice: function(event) {
+        this.setState({
+            price: event.target.value
         });
     },
     onChangeRole: function(event) {
@@ -381,11 +381,11 @@ var TradeDialog = React.createClass({
         var market = state.market;
         var ref = state.ref;
         var side = state.side;
-        var price = state.price;
         var lots = state.lots;
+        var price = state.price;
         var role = state.role;
         var cpty = state.cpty;
-        this.props.module.onPostTrade(trader, market, ref, side, price, lots, role, cpty);
+        this.props.module.onPostTrade(trader, market, ref, side, lots, price, role, cpty);
         this.reset();
     },
     // Lifecycle.
@@ -395,8 +395,8 @@ var TradeDialog = React.createClass({
             market: undefined,
             ref: undefined,
             side: undefined,
-            price: undefined,
             lots: undefined,
+            price: undefined,
             role: undefined,
             cpty: undefined
         };
@@ -423,17 +423,17 @@ var TradeDialog = React.createClass({
         var market = state.market;
         var ref = state.ref;
         var side = state.side;
-        var price = state.price;
         var lots = state.lots;
+        var price = state.price;
         var role = state.role;
         var cpty = state.cpty;
 
         var contr = this.props.marketMap[market];
-        var priceInc = 0.01;
         var minLots = 1;
+        var priceInc = 0.01;
         if (contr !== undefined) {
-            priceInc = contr.priceInc;
             minLots = contr.minLots;
+            priceInc = contr.priceInc;
         }
 
         if (role === undefined) {
@@ -486,17 +486,17 @@ var TradeDialog = React.createClass({
                         </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="price" className="col-sm-2 control-label">Price</label>
-                        <div className="col-sm-10">
-                          <input id="price" type="number" className="form-control" value={price}
-                                 onChange={this.onChangePrice} step={priceInc}/>
-                        </div>
-                      </div>
-                      <div className="form-group">
                         <label htmlFor="lots" className="col-sm-2 control-label">Lots</label>
                         <div className="col-sm-10">
                           <input id="lots" type="number" className="form-control" value={lots}
                                  onChange={this.onChangeLots} min={minLots}/>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="price" className="col-sm-2 control-label">Price</label>
+                        <div className="col-sm-10">
+                          <input id="price" type="number" className="form-control" value={price}
+                                 onChange={this.onChangePrice} step={priceInc}/>
                         </div>
                       </div>
                       <div className="form-group">
@@ -581,11 +581,11 @@ var TransferDialog = React.createClass({
         var market = state.market;
         var ref = state.ref;
         var side = state.side;
-        var price = 0;
         var lots = state.lots;
+        var price = 0;
         var role = undefined;
         var cpty = undefined;
-        this.props.module.onPostTrade(trader, market, ref, side, price, lots, role, cpty);
+        this.props.module.onPostTrade(trader, market, ref, side, lots, price, role, cpty);
         this.reset();
     },
     // Lifecycle.

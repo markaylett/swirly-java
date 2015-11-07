@@ -9,15 +9,12 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.Identifiable;
 
-public @NonNullByDefault interface Request extends SlNode, Identifiable, Financial {
+public @NonNullByDefault interface Request extends SlNode, Financial, Identifiable {
 
     void setRefNext(@Nullable Request next);
 
     @Nullable
     Request refNext();
-
-    @Override
-    long getId();
 
     String getTrader();
 
@@ -32,6 +29,9 @@ public @NonNullByDefault interface Request extends SlNode, Identifiable, Financi
 
     @Override
     boolean isSettlDaySet();
+
+    @Override
+    long getId();
 
     @Nullable
     String getRef();

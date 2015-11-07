@@ -57,16 +57,16 @@ var SignupForm = React.createClass({
 
 var NewOrderForm = React.createClass({
     // Mutators.
-    setFields: function(market, price, lots) {
+    setFields: function(market, lots, price) {
         var newState = {};
         if (market !== undefined) {
             newState.market = market;
         }
-        if (price !== undefined) {
-            newState.price = price;
-        }
         if (lots !== undefined) {
             newState.lots = lots;
+        }
+        if (price !== undefined) {
+            newState.price = price;
         }
         this.setState(newState);
     },
@@ -76,38 +76,38 @@ var NewOrderForm = React.createClass({
             market: event.target.value
         });
     },
-    onChangePrice: function(event) {
-        this.setState({
-            price: event.target.value
-        });
-    },
     onChangeLots: function(event) {
         this.setState({
             lots: event.target.value
+        });
+    },
+    onChangePrice: function(event) {
+        this.setState({
+            price: event.target.value
         });
     },
     onClickBuy: function(event) {
         event.preventDefault();
         var state = this.state;
         var market = state.market;
-        var price = state.price;
         var lots = state.lots;
-        this.props.module.onPostOrder(market, 'BUY', price, lots);
+        var price = state.price;
+        this.props.module.onPostOrder(market, 'BUY', lots, price);
     },
     onClickSell: function(event) {
         event.preventDefault();
         var state = this.state;
         var market = state.market;
-        var price = state.price;
         var lots = state.lots;
-        this.props.module.onPostOrder(market, 'SELL', price, lots);
+        var price = state.price;
+        this.props.module.onPostOrder(market, 'SELL', lots, price);
     },
     // Lifecycle.
     getInitialState: function() {
         return {
             market: undefined,
-            price: undefined,
-            lots: undefined
+            lots: undefined,
+            price: undefined
         };
     },
     componentDidMount: function() {
@@ -129,15 +129,15 @@ var NewOrderForm = React.createClass({
     render: function() {
         var state = this.state;
         var market = state.market;
-        var price = state.price;
         var lots = state.lots;
+        var price = state.price;
 
         var contr = this.props.marketMap[market];
-        var priceInc = 0.01;
         var minLots = 1;
+        var priceInc = 0.01;
         if (contr !== undefined) {
-            priceInc = contr.priceInc;
             minLots = contr.minLots;
+            priceInc = contr.priceInc;
         }
         var isSelectedWorking = this.props.isSelectedWorking;
         return (
@@ -148,14 +148,14 @@ var NewOrderForm = React.createClass({
                        onChange={this.onChangeMarket}/>
               </div>
               <div className="form-group">
-                <input type="number" className="form-control" placeholder="Price"
-                       value={price} disabled={isSelectedWorking}
-                       onChange={this.onChangePrice} step={priceInc}/>
-              </div>
-              <div className="form-group">
                 <input type="number" className="form-control" placeholder="Lots"
                        value={lots} disabled={isSelectedWorking}
                        onChange={this.onChangeLots} min={minLots}/>
+              </div>
+              <div className="form-group">
+                <input type="number" className="form-control" placeholder="Price"
+                       value={price} disabled={isSelectedWorking}
+                       onChange={this.onChangePrice} step={priceInc}/>
               </div>
               <div className="btn-group">
                 <button type="button" className="btn btn-default"
@@ -174,7 +174,7 @@ var NewOrderForm = React.createClass({
 
 var ReviseOrderForm = React.createClass({
     // Mutators.
-    setFields: function(market, price, lots) {
+    setFields: function(market, lots, price) {
         var newState = {};
         if (market !== undefined) {
             newState.market = market;

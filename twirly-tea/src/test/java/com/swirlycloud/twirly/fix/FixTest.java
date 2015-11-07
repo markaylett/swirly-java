@@ -109,11 +109,11 @@ public final class FixTest {
         final SessionID gosayl = new SessionID("FIX.4.4", "GoskaAylett", "Twirly");
 
         final FixBuilder sb = new FixBuilder();
-        sb.setMessage(fixClnt.sendNewOrderSingle("EURUSD.MAR14", "marayl1", Side.BUY, 12345, 10, 1,
+        sb.setMessage(fixClnt.sendNewOrderSingle("EURUSD.MAR14", "marayl1", Side.BUY, 10, 12345, 1,
                 NOW + 1, marayl).get());
         assertEquals(MsgType.EXECUTION_REPORT, sb.getMsgType());
 
-        sb.setMessage(fixClnt.sendNewOrderSingle("EURUSD.MAR14", "gosayl1", Side.SELL, 12345, 5, 1,
+        sb.setMessage(fixClnt.sendNewOrderSingle("EURUSD.MAR14", "gosayl1", Side.SELL, 5, 12345, 1,
                 NOW + 2, gosayl).get());
         assertEquals(MsgType.EXECUTION_REPORT, sb.getMsgType());
 

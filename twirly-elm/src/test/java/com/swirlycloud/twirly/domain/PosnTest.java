@@ -29,20 +29,20 @@ public final class PosnTest {
         assertEquals(0, posn.getSellCost());
         assertEquals(0, posn.getSellLots());
 
-        posn.addBuy(12344 * 10, 10);
+        posn.addBuy(10, 12344 * 10);
         assertEquals(12344 * 10, posn.getBuyCost());
         assertEquals(10, posn.getBuyLots());
         assertEquals(0, posn.getSellCost());
         assertEquals(0, posn.getSellLots());
 
-        posn.addSell(12346 * 15, 15);
+        posn.addSell(15, 12346 * 15);
         assertEquals(12344 * 10, posn.getBuyCost());
         assertEquals(10, posn.getBuyLots());
         assertEquals(12346 * 15, posn.getSellCost());
         assertEquals(15, posn.getSellLots());
 
-        posn.addBuy(12343 * 15, 15);
-        posn.addSell(12347 * 10, 10);
+        posn.addBuy(15, 12343 * 15);
+        posn.addSell(10, 12347 * 10);
         assertEquals(12344 * 10 + 12343 * 15, posn.getBuyCost());
         assertEquals(25, posn.getBuyLots());
         assertEquals(12346 * 15 + 12347 * 10, posn.getSellCost());
@@ -66,7 +66,7 @@ public final class PosnTest {
         posn.setSellCost(3);
         posn.setSellLots(4);
         assertEquals(
-                "{\"trader\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyCost\":1,\"buyLots\":2,\"sellCost\":3,\"sellLots\":4}",
+                "{\"trader\":\"MARAYL\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"buyLots\":2,\"buyCost\":1,\"sellLots\":4,\"sellCost\":3}",
                 posn.toString());
     }
 }

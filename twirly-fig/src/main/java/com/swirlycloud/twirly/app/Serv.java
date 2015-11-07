@@ -225,7 +225,7 @@ public @NonNullByDefault class Serv {
     }
 
     private final Exec newExec(MarketBook book, Instruct instruct, long now) {
-        return factory.newExec(book.allocExecId(), instruct, now);
+        return factory.newExec(instruct, book.allocExecId(), now);
     }
 
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
@@ -243,8 +243,8 @@ public @NonNullByDefault class Serv {
 
         long takenLots = 0;
         long takenCost = 0;
-        long lastTicks = 0;
         long lastLots = 0;
+        long lastTicks = 0;
 
         DlNode node = side.getFirstOrder();
         for (; takenLots < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
@@ -270,15 +270,15 @@ public @NonNullByDefault class Serv {
 
             takenLots += match.lots;
             takenCost += match.lots * match.ticks;
-            lastTicks = match.ticks;
             lastLots = match.lots;
+            lastTicks = match.ticks;
 
-            final Exec makerTrade = factory.newExec(makerId, makerOrder, now);
-            makerTrade.trade(match.ticks, match.lots, takerId, Role.MAKER, takerOrder.getTrader());
+            final Exec makerTrade = factory.newExec(makerOrder, makerId, now);
+            makerTrade.trade(match.lots, match.ticks, takerId, Role.MAKER, takerOrder.getTrader());
             match.makerTrade = makerTrade;
 
-            final Exec takerTrade = factory.newExec(takerId, takerOrder, now);
-            takerTrade.trade(takenLots, takenCost, match.ticks, match.lots, makerId, Role.TAKER,
+            final Exec takerTrade = factory.newExec(takerOrder, takerId, now);
+            takerTrade.trade(takenLots, takenCost, match.lots, match.ticks, makerId, Role.TAKER,
                     makerOrder.getTrader());
             match.takerTrade = takerTrade;
 
@@ -293,7 +293,7 @@ public @NonNullByDefault class Serv {
         if (!result.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
             result.posn = takerSess.getLazyPosn(book);
-            takerOrder.trade(takenLots, takenCost, lastTicks, lastLots, now);
+            takerOrder.trade(takenLots, takenCost, lastLots, lastTicks, now);
         }
     }
 
@@ -733,7 +733,7 @@ public @NonNullByDefault class Serv {
     }
 
     public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
-            long ticks, long lots, long minLots, long now, Result result)
+            long lots, long ticks, long minLots, long now, Result result)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
@@ -744,7 +744,7 @@ public @NonNullByDefault class Serv {
             throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = book.allocOrderId();
-        final Order order = factory.newOrder(orderId, sess.getMnem(), book, ref, side, ticks, lots,
+        final Order order = factory.newOrder(sess.getMnem(), book, orderId, ref, side, lots, ticks,
                 minLots, now);
 
         final Exec exec = newExec(book, order, now);
@@ -1203,11 +1203,12 @@ public @NonNullByDefault class Serv {
     }
 
     public final Exec createTrade(TraderSess sess, MarketBook book, String ref, Side side,
-            long ticks, long lots, @Nullable Role role, @Nullable String cpty, long created)
+            long lots, long ticks, @Nullable Role role, @Nullable String cpty, long created)
                     throws NotFoundException, ServiceUnavailableException {
         final Posn posn = sess.getLazyPosn(book);
-        final Exec trade = Exec.manual(book.allocExecId(), sess.getMnem(), book.getMnem(),
-                book.getContr(), book.getSettlDay(), ref, side, ticks, lots, role, cpty, created);
+        final Exec trade = Exec.manual(sess.getMnem(), book.getMnem(), book.getContr(),
+                book.getSettlDay(), book.allocExecId(), ref, side, lots, ticks, role, cpty,
+                created);
         if (cpty != null) {
 
             // Create back-to-back trade if counter-party is specified.
@@ -1377,8 +1378,8 @@ public @NonNullByDefault class Serv {
             throw new NotFoundException("no liquidity available");
         }
 
-        final Quote quote = factory.newQuote(1, sess.getMnem(), book, ref, side, lots,
-                makerOrder.getTicks(), now, now + QUOTE_EXPIRY);
+        final Quote quote = factory.newQuote(sess.getMnem(), book, 1, ref, side,
+                makerOrder.getTicks(), lots, now, now + QUOTE_EXPIRY);
 
         setDirty(book);
         quotes.add(quote);

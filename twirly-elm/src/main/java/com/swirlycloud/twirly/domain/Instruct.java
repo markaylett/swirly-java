@@ -45,10 +45,10 @@ public @NonNullByDefault interface Instruct extends Request {
     @Override
     Side getSide();
 
-    long getTicks();
-
     @Override
     long getLots();
+
+    long getTicks();
 
     long getResd();
 
@@ -68,14 +68,14 @@ public @NonNullByDefault interface Instruct extends Request {
     double getAvgTicks();
 
     /**
-     * @return last traded ticks.
-     */
-    long getLastTicks();
-
-    /**
      * @return last traded lots.
      */
     long getLastLots();
+
+    /**
+     * @return last traded ticks.
+     */
+    long getLastTicks();
 
     long getMinLots();
 

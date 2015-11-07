@@ -20,7 +20,6 @@ public abstract @NonNullByDefault class AbstractRequest extends AbstractRbNode i
     // Singly-linked node for RequestRefMap.
     private transient @Nullable Request refNext;
 
-    protected final long id;
     /**
      * The executing trader.
      */
@@ -28,6 +27,7 @@ public abstract @NonNullByDefault class AbstractRequest extends AbstractRbNode i
     protected final String market;
     protected final String contr;
     protected final int settlDay;
+    protected final long id;
     /**
      * Ref is optional.
      */
@@ -36,13 +36,13 @@ public abstract @NonNullByDefault class AbstractRequest extends AbstractRbNode i
     protected long lots;
     protected final long created;
 
-    protected AbstractRequest(long id, String trader, String market, String contr, int settlDay,
+    protected AbstractRequest(String trader, String market, String contr, int settlDay, long id,
             @Nullable String ref, Side side, long lots, long created) {
-        this.id = id;
         this.trader = trader;
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
+        this.id = id;
         this.ref = nullIfEmpty(ref);
         this.side = side;
         this.lots = lots;
@@ -105,11 +105,6 @@ public abstract @NonNullByDefault class AbstractRequest extends AbstractRbNode i
     }
 
     @Override
-    public final long getId() {
-        return id;
-    }
-
-    @Override
     public final String getTrader() {
         return trader;
     }
@@ -132,6 +127,11 @@ public abstract @NonNullByDefault class AbstractRequest extends AbstractRbNode i
     @Override
     public final boolean isSettlDaySet() {
         return settlDay != 0;
+    }
+
+    @Override
+    public final long getId() {
+        return id;
     }
 
     @Override

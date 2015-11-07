@@ -23,8 +23,8 @@ public final class RestRequest {
     public static final int STATE = 1 << 7;
     public static final int REF = 1 << 8;
     public static final int SIDE = 1 << 9;
-    public static final int TICKS = 1 << 10;
-    public static final int LOTS = 1 << 11;
+    public static final int LOTS = 1 << 10;
+    public static final int TICKS = 1 << 11;
     public static final int MIN_LOTS = 1 << 12;
     public static final int ROLE = 1 << 13;
     public static final int CPTY = 1 << 14;
@@ -41,8 +41,8 @@ public final class RestRequest {
     private int state;
     private String ref;
     private Side side;
-    private long ticks;
     private long lots;
+    private long ticks;
     private long minLots;
     private Role role;
     private String cpty;
@@ -59,8 +59,8 @@ public final class RestRequest {
         state = 0;
         ref = null;
         side = null;
-        ticks = 0;
         lots = 0;
+        ticks = 0;
         minLots = 0;
         role = null;
         cpty = null;
@@ -124,12 +124,12 @@ public final class RestRequest {
                 } else if ("state".equals(name)) {
                     fields |= STATE;
                     state = p.getInt();
-                } else if ("ticks".equals(name)) {
-                    fields |= TICKS;
-                    ticks = p.getLong();
                 } else if ("lots".equals(name)) {
                     fields |= LOTS;
                     lots = p.getLong();
+                } else if ("ticks".equals(name)) {
+                    fields |= TICKS;
+                    ticks = p.getLong();
                 } else if ("minLots".equals(name)) {
                     fields |= MIN_LOTS;
                     minLots = p.getLong();
@@ -261,20 +261,20 @@ public final class RestRequest {
         return side;
     }
 
-    public final boolean isTicksSet() {
-        return (fields & TICKS) != 0;
-    }
-
-    public final long getTicks() {
-        return ticks;
-    }
-
     public final boolean isLotsSet() {
         return (fields & LOTS) != 0;
     }
 
     public final long getLots() {
         return lots;
+    }
+
+    public final boolean isTicksSet() {
+        return (fields & TICKS) != 0;
+    }
+
+    public final long getTicks() {
+        return ticks;
     }
 
     public final boolean isMinLotsSet() {

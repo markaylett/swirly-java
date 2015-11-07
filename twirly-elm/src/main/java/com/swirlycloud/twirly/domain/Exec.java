@@ -42,8 +42,8 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
      */
     private long exec;
     private long cost;
-    private long lastTicks;
     private long lastLots;
+    private long lastTicks;
     /**
      * Minimum to be filled by this order.
      */
@@ -52,19 +52,19 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
     private @Nullable Role role;
     private @Nullable String cpty;
 
-    Exec(long id, long orderId, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
-            long exec, long cost, long lastTicks, long lastLots, long minLots, long matchId,
+    Exec(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,
+            long orderId, State state, Side side, long lots, long ticks, long resd, long exec,
+            long cost, long lastLots, long lastTicks, long minLots, long matchId,
             @Nullable Role role, @Nullable String cpty, long created) {
-        super(id, trader, market, contr, settlDay, ref, side, lots, created);
+        super(trader, market, contr, settlDay, id, ref, side, lots, created);
         this.orderId = orderId;
         this.state = state;
         this.ticks = ticks;
         this.resd = resd;
         this.exec = exec;
         this.cost = cost;
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         this.minLots = minLots;
         this.matchId = matchId;
         this.role = role;
@@ -74,39 +74,39 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
     /**
      * Special factory method for manual adjustments.
      */
-    public static Exec manual(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, Side side, long ticks, long lots, @Nullable Role role,
+    public static Exec manual(String trader, String market, String contr, int settlDay, long id,
+            @Nullable String ref, Side side, long lots, long ticks, @Nullable Role role,
             @Nullable String cpty, long created) {
         final long orderId = 0;
         final State state = State.TRADE;
         final long resd = 0;
         final long exec = lots;
         final long cost = ticks * lots;
-        final long lastTicks = ticks;
         final long lastLots = lots;
+        final long lastTicks = ticks;
         final long minLots = 1;
         final long matchId = 0;
-        return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, side, ticks, lots,
-                resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, cpty, created);
+        return new Exec(trader, market, contr, settlDay, id, ref, orderId, state, side, lots, ticks,
+                resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, cpty, created);
     }
 
     public static Exec parse(JsonParser p) throws IOException {
-        long id = 0;
-        long orderId = 0;
         String trader = null;
         String market = null;
         String contr = null;
         int settlDay = 0;
+        long id = 0;
         String ref = null;
+        long orderId = 0;
         State state = null;
         Side side = null;
-        long ticks = 0;
         long lots = 0;
+        long ticks = 0;
         long resd = 0;
         long exec = 0;
         long cost = 0;
-        long lastTicks = 0;
         long lastLots = 0;
+        long lastTicks = 0;
         long minLots = 0;
         long matchId = 0;
         Role role = null;
@@ -133,8 +133,8 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
                 if (side == null) {
                     throw new IOException("side is null");
                 }
-                return new Exec(id, orderId, trader, market, contr, settlDay, ref, state, side,
-                        ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role,
+                return new Exec(trader, market, contr, settlDay, id, ref, orderId, state, side,
+                        lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role,
                         cpty, created);
             case KEY_NAME:
                 name = p.getString();
@@ -144,10 +144,10 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
                     settlDay = 0;
                 } else if ("ref".equals(name)) {
                     ref = "";
-                } else if ("lastTicks".equals(name)) {
-                    lastTicks = 0;
                 } else if ("lastLots".equals(name)) {
                     lastLots = 0;
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = 0;
                 } else if ("matchId".equals(name)) {
                     matchId = 0;
                 } else if ("role".equals(name)) {
@@ -159,26 +159,26 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
                 }
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
+                if ("settlDate".equals(name)) {
+                    settlDay = JulianDay.maybeIsoToJd(p.getInt());
+                } else if ("id".equals(name)) {
                     id = p.getLong();
                 } else if ("orderId".equals(name)) {
                     orderId = p.getLong();
-                } else if ("settlDate".equals(name)) {
-                    settlDay = JulianDay.maybeIsoToJd(p.getInt());
-                } else if ("ticks".equals(name)) {
-                    ticks = p.getLong();
                 } else if ("lots".equals(name)) {
                     lots = p.getLong();
+                } else if ("ticks".equals(name)) {
+                    ticks = p.getLong();
                 } else if ("resd".equals(name)) {
                     resd = p.getLong();
                 } else if ("exec".equals(name)) {
                     exec = p.getLong();
                 } else if ("cost".equals(name)) {
                     cost = p.getLong();
-                } else if ("lastTicks".equals(name)) {
-                    lastTicks = p.getLong();
                 } else if ("lastLots".equals(name)) {
                     lastLots = p.getLong();
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = p.getLong();
                 } else if ("minLots".equals(name)) {
                     minLots = p.getLong();
                 } else if ("matchId".equals(name)) {
@@ -230,16 +230,14 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
         if (role != null) {
             role = role.inverse();
         }
-        return new Exec(id, orderId, cpty, market, contr, settlDay, ref, state, side.inverse(),
-                ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, role, trader,
+        return new Exec(cpty, market, contr, settlDay, id, ref, orderId, state, side.inverse(),
+                lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, trader,
                 created);
     }
 
     @Override
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
-        out.append("{\"id\":").append(String.valueOf(id));
-        out.append(",\"orderId\":").append(String.valueOf(orderId));
-        out.append(",\"trader\":\"").append(trader);
+        out.append("{\"trader\":\"").append(trader);
         out.append("\",\"market\":\"").append(market);
         out.append("\",\"contr\":\"").append(contr);
         out.append("\",\"settlDate\":");
@@ -248,24 +246,26 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
         } else {
             out.append("null");
         }
+        out.append(",\"id\":").append(String.valueOf(id));
         out.append(",\"ref\":");
         if (ref != null) {
             out.append('"').append(ref).append('"');
         } else {
             out.append("null");
         }
+        out.append(",\"orderId\":").append(String.valueOf(orderId));
         out.append(",\"state\":\"").append(state.name());
         out.append("\",\"side\":\"").append(side.name());
-        out.append("\",\"ticks\":").append(String.valueOf(ticks));
-        out.append(",\"lots\":").append(String.valueOf(lots));
+        out.append("\",\"lots\":").append(String.valueOf(lots));
+        out.append(",\"ticks\":").append(String.valueOf(ticks));
         out.append(",\"resd\":").append(String.valueOf(resd));
         out.append(",\"exec\":").append(String.valueOf(exec));
         out.append(",\"cost\":").append(String.valueOf(cost));
         if (lastLots != 0) {
-            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
             out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
         } else {
-            out.append(",\"lastTicks\":null,\"lastLots\":null");
+            out.append(",\"lastLots\":null,\"lastTicks\":null");
         }
         out.append(",\"minLots\":").append(String.valueOf(minLots));
         out.append(",\"matchId\":");
@@ -318,21 +318,21 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
         }
     }
 
-    public final void trade(long sumLots, long sumCost, long lastTicks, long lastLots, long matchId,
+    public final void trade(long sumLots, long sumCost, long lastLots, long lastTicks, long matchId,
             Role role, String cpty) {
         state = State.TRADE;
         resd -= sumLots;
         exec += sumLots;
         cost += sumCost;
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         this.matchId = matchId;
         this.role = role;
         this.cpty = cpty;
     }
 
-    public final void trade(long lastTicks, long lastLots, long matchId, Role role, String cpty) {
-        trade(lastLots, lastLots * lastTicks, lastTicks, lastLots, matchId, role, cpty);
+    public final void trade(long lastLots, long lastTicks, long matchId, Role role, String cpty) {
+        trade(lastLots, lastLots * lastTicks, lastLots, lastTicks, matchId, role, cpty);
     }
 
     @Override
@@ -371,13 +371,13 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
     }
 
     @Override
-    public final long getLastTicks() {
-        return lastTicks;
+    public final long getLastLots() {
+        return lastLots;
     }
 
     @Override
-    public final long getLastLots() {
-        return lastLots;
+    public final long getLastTicks() {
+        return lastTicks;
     }
 
     @Override

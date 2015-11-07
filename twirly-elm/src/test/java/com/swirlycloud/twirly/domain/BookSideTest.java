@@ -35,25 +35,25 @@ public final class BookSideTest {
     public final void testOrders() {
         long now = now();
         // Two orders at the same price level.
-        final Order apple = FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "apple", Side.BUY, 12345, 10, 0, now);
-        final Order orange = FACTORY.newOrder(2, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "orange", Side.BUY, 12345, 20, 0, now);
+        final Order apple = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
+                1, "apple", Side.BUY, 10, 12345, 0, now);
+        final Order orange = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
+                2, "orange", Side.BUY, 20, 12345, 0, now);
         final BookSide side = new BookSide();
 
         apple.state = State.NONE;
         apple.resd = -1;
         apple.exec = -1;
         apple.cost = -1;
-        apple.lastTicks = -1;
         apple.lastLots = -1;
+        apple.lastTicks = -1;
 
         orange.state = State.NONE;
         orange.resd = -1;
         orange.exec = -1;
         orange.cost = -1;
-        orange.lastTicks = -1;
         orange.lastLots = -1;
+        orange.lastTicks = -1;
 
         // Place orders.
         ++now;
@@ -140,13 +140,13 @@ public final class BookSideTest {
     public final void testLevels() {
         final long now = now();
         // Two orders at the same price level.
-        final Order apple = FACTORY.newOrder(1, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "apple", Side.BUY, 12345, 10, 0, now);
-        final Order orange = FACTORY.newOrder(2, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "orange", Side.BUY, 12345, 20, 0, now);
+        final Order apple = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
+                1, "apple", Side.BUY, 10, 12345, 0, now);
+        final Order orange = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
+                2, "orange", Side.BUY, 20, 12345, 0, now);
         // Best inserted last.
-        final Order pear = FACTORY.newOrder(3, "MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), "pear", Side.BUY, 12346, 25, 0, now);
+        final Order pear = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
+                3, "pear", Side.BUY, 25, 12346, 0, now);
         final BookSide side = new BookSide();
 
         side.createOrder(apple, now);

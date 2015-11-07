@@ -138,10 +138,10 @@ CREATE TABLE Contr_t (
   display VARCHAR(64) NOT NULL,
   asset CHAR(16) NOT NULL,
   ccy CHAR(16) NOT NULL,
-  tickNumer INT NOT NULL,
-  tickDenom INT NOT NULL,
   lotNumer INT NOT NULL,
   lotDenom INT NOT NULL,
+  tickNumer INT NOT NULL,
+  tickDenom INT NOT NULL,
   pipDp INT NOT NULL,
   minLots BIGINT NOT NULL DEFAULT 1,
   maxLots BIGINT NOT NULL,
@@ -158,8 +158,8 @@ CREATE TABLE Market_t (
   settlDay INT NULL DEFAULT NULL,
   expiryDay INT NULL DEFAULT NULL,
   state INT NOT NULL DEFAULT 0,
-  lastTicks BIGINT NULL DEFAULT NULL,
   lastLots BIGINT NULL DEFAULT NULL,
+  lastTicks BIGINT NULL DEFAULT NULL,
   lastTime BIGINT NULL DEFAULT NULL,
 
   FOREIGN KEY (contr) REFERENCES Contr_t (mnem)
@@ -236,21 +236,21 @@ CREATE TRIGGER afterDeleteOnTrader
 DELIMITER ;
 
 CREATE TABLE Order_t (
-  id BIGINT NOT NULL,
   trader CHAR(16) NOT NULL,
   market CHAR(16) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NULL DEFAULT NULL,
+  id BIGINT NOT NULL,
   ref VARCHAR(64) NULL DEFAULT NULL,
   stateId INT NOT NULL,
   sideId INT NOT NULL,
-  ticks BIGINT NOT NULL,
   lots BIGINT NOT NULL,
+  ticks BIGINT NOT NULL,
   resd BIGINT NOT NULL,
   exec BIGINT NOT NULL,
   cost BIGINT NOT NULL,
-  lastTicks BIGINT NULL DEFAULT NULL,
   lastLots BIGINT NULL DEFAULT NULL,
+  lastTicks BIGINT NULL DEFAULT NULL,
   minLots BIGINT NOT NULL DEFAULT 1,
   archive TINYINT(1) NOT NULL DEFAULT 0,
   pecan TINYINT(1) NOT NULL DEFAULT 0,
@@ -273,22 +273,22 @@ CREATE INDEX orderResdIdx ON Order_t (resd);
 CREATE INDEX orderArchiveIdx ON Order_t (archive);
 
 CREATE TABLE Exec_t (
-  id BIGINT NOT NULL,
-  orderId BIGINT NULL DEFAULT NULL,
   trader CHAR(16) NOT NULL,
   market CHAR(16) NOT NULL,
   contr CHAR(16) NOT NULL,
   settlDay INT NULL DEFAULT NULL,
+  id BIGINT NOT NULL,
   ref VARCHAR(64) NULL DEFAULT NULL,
+  orderId BIGINT NULL DEFAULT NULL,
   stateId INT NOT NULL,
   sideId INT NOT NULL,
-  ticks BIGINT NOT NULL,
   lots BIGINT NOT NULL,
+  ticks BIGINT NOT NULL,
   resd BIGINT NOT NULL,
   exec BIGINT NOT NULL,
   cost BIGINT NOT NULL,
-  lastTicks BIGINT NULL DEFAULT NULL,
   lastLots BIGINT NULL DEFAULT NULL,
+  lastTicks BIGINT NULL DEFAULT NULL,
   minLots BIGINT NOT NULL DEFAULT 1,
   matchId BIGINT NULL DEFAULT NULL,
   roleId INT NULL DEFAULT NULL,
@@ -321,42 +321,42 @@ CREATE TRIGGER beforeInsertOnExec
     IF NEW.orderId IS NOT NULL THEN
       IF NEW.stateId = 1 THEN
         INSERT INTO Order_t (
-          id,
           trader,
           market,
           contr,
           settlDay,
+          id,
           ref,
           stateId,
           sideId,
-          ticks,
           lots,
+          ticks,
           resd,
           exec,
           cost,
-          lastTicks,
           lastLots,
+          lastTicks,
           minLots,
           archive,
           pecan,
           created,
           modified
         ) VALUES (
-          NEW.orderId,
           NEW.trader,
           NEW.market,
           NEW.contr,
           NEW.settlDay,
+          NEW.orderId,
           NEW.ref,
           NEW.stateId,
           NEW.sideId,
-          NEW.ticks,
           NEW.lots,
+          NEW.ticks,
           NEW.resd,
           NEW.exec,
           NEW.cost,
-          NEW.lastTicks,
           NEW.lastLots,
+          NEW.lastTicks,
           NEW.minLots,
           NEW.archive,
           CASE WHEN NEW.stateId = 5 THEN 1 ELSE 0 END,
@@ -371,8 +371,8 @@ CREATE TRIGGER beforeInsertOnExec
           resd = NEW.resd,
           exec = NEW.exec,
           cost = NEW.cost,
-          lastTicks = NEW.lastTicks,
           lastLots = NEW.lastLots,
+          lastTicks = NEW.lastTicks,
           pecan = CASE WHEN NEW.stateId = 5 THEN 1 ELSE pecan END,
           modified = NEW.modified
         WHERE id = NEW.orderId;
@@ -380,8 +380,8 @@ CREATE TRIGGER beforeInsertOnExec
       IF NEW.stateId = 4 THEN
         UPDATE Market_t
         SET
-          lastTicks = NEW.lastTicks,
           lastLots = NEW.lastLots,
+          lastTicks = NEW.lastTicks,
           lastTime = NEW.created
         WHERE mnem = NEW.market;
       END IF;
@@ -406,10 +406,10 @@ CREATE VIEW Contr_v AS
     a.type,
     c.asset,
     c.ccy,
-    c.tickNumer,
-    c.tickDenom,
     c.lotNumer,
     c.lotDenom,
+    c.tickNumer,
+    c.tickDenom,
     c.pipDp,
     c.minLots,
     c.maxLots
@@ -426,8 +426,8 @@ CREATE VIEW Market_v AS
     m.settlDay,
     m.expiryDay,
     m.state,
-    m.lastTicks,
     m.lastLots,
+    m.lastTicks,
     m.lastTime,
     MAX(e.orderId) maxOrderId,
     MAX(e.id) maxExecId
@@ -439,21 +439,21 @@ CREATE VIEW Market_v AS
 
 CREATE VIEW Order_v AS
   SELECT
-    o.id,
     o.trader,
     o.market,
     o.contr,
     o.settlDay,
+    o.id,
     o.ref,
     s.mnem state,
     a.mnem side,
-    o.ticks,
     o.lots,
+    o.ticks,
     o.resd,
     o.exec,
     o.cost,
-    o.lastTicks,
     o.lastLots,
+    o.lastTicks,
     o.minLots,
     o.pecan,
     o.created,
@@ -467,21 +467,21 @@ CREATE VIEW Order_v AS
 
 CREATE VIEW Exec_v AS
   SELECT
-    e.id,
-    e.orderId,
     e.trader,
     e.contr,
     e.settlDay,
+    e.id,
     e.ref,
+    e.orderId,
     s.mnem state,
     a.mnem side,
-    e.ticks,
     e.lots,
+    e.ticks,
     e.resd,
     e.exec,
     e.cost,
-    e.lastTicks,
     e.lastLots,
+    e.lastTicks,
     e.minLots,
     e.matchId,
     r.mnem role,
@@ -504,8 +504,8 @@ CREATE VIEW Posn_v AS
     e.contr,
     e.settlDay,
     e.sideId,
-    SUM(e.lastLots * e.lastTicks) cost,
-    SUM(e.lastLots) lots
+    SUM(e.lastLots) lots,
+    SUM(e.lastLots * e.lastTicks) cost
   FROM Exec_t e
   WHERE e.stateId = 4
   GROUP BY e.trader, e.contr, e.settlDay, e.sideId

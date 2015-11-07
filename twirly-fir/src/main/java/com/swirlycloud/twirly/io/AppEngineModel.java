@@ -74,11 +74,11 @@ public class AppEngineModel implements Model {
                 final Query query = new Query(ORDER_KIND, arg.getKey()).setFilter(filter);
                 final PreparedQuery pq = datastore.prepare(query);
                 for (final Entity entity : pq.asIterable()) {
-                    final long id = entity.getKey().getId();
                     final String trader = (String) entity.getProperty("trader");
                     final String market = (String) entity.getProperty("market");
                     final String contr = (String) entity.getProperty("contr");
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    final long id = entity.getKey().getId();
                     final String ref = (String) entity.getProperty("ref");
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
@@ -89,8 +89,8 @@ public class AppEngineModel implements Model {
                     final long resd = (Long) entity.getProperty("resd");
                     final long exec = (Long) entity.getProperty("exec");
                     final long cost = (Long) entity.getProperty("cost");
-                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
+                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long minLots = (Long) entity.getProperty("minLots");
                     final boolean pecan = (Boolean) entity.getProperty("pecan");
                     final long created = (Long) entity.getProperty("created");
@@ -99,8 +99,8 @@ public class AppEngineModel implements Model {
                     assert trader != null;
                     assert market != null;
                     assert contr != null;
-                    final Order order = factory.newOrder(id, trader, market, contr, settlDay, ref,
-                            state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
+                    final Order order = factory.newOrder(trader, market, contr, settlDay, id, ref,
+                            state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
                             minLots, pecan, created, modified);
                     c.add(order);
                 }
@@ -116,24 +116,24 @@ public class AppEngineModel implements Model {
                 final Query query = new Query(EXEC_KIND, arg.getKey()).setFilter(filter);
                 final PreparedQuery pq = datastore.prepare(query);
                 for (final Entity entity : pq.asIterable()) {
-                    final long id = entity.getKey().getId();
-                    final long orderId = (Long) entity.getProperty("orderId");
                     final String trader = (String) entity.getProperty("trader");
                     final String market = (String) entity.getProperty("market");
                     final String contr = (String) entity.getProperty("contr");
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
+                    final long id = entity.getKey().getId();
                     final String ref = (String) entity.getProperty("ref");
+                    final long orderId = (Long) entity.getProperty("orderId");
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
                     final Side side = Side.valueOf((String) entity.getProperty("side"));
-                    final long ticks = (Long) entity.getProperty("ticks");
                     final long lots = (Long) entity.getProperty("lots");
+                    final long ticks = (Long) entity.getProperty("ticks");
                     final long resd = (Long) entity.getProperty("resd");
                     final long exec = (Long) entity.getProperty("exec");
                     final long cost = (Long) entity.getProperty("cost");
-                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
+                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long minLots = (Long) entity.getProperty("minLots");
                     final long matchId = (Long) entity.getProperty("matchId");
                     final String s = (String) entity.getProperty("role");
@@ -144,8 +144,8 @@ public class AppEngineModel implements Model {
                     assert trader != null;
                     assert market != null;
                     assert contr != null;
-                    final Exec trade = factory.newExec(id, orderId, trader, market, contr, settlDay,
-                            ref, state, side, ticks, lots, resd, exec, cost, lastTicks, lastLots,
+                    final Exec trade = factory.newExec(trader, market, contr, settlDay, id, ref,
+                            orderId, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
                             minLots, matchId, role, cpty, created);
                     c.add(trade);
                 }
@@ -183,9 +183,9 @@ public class AppEngineModel implements Model {
                     }
                     @SuppressWarnings("null")
                     final Side side = Side.valueOf((String) entity.getProperty("side"));
-                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
                     final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
-                    posn.addTrade(side, lastTicks, lastLots);
+                    final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
+                    posn.addTrade(side, lastLots, lastTicks);
                 }
             }
         });
@@ -228,15 +228,15 @@ public class AppEngineModel implements Model {
             final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
             final int expiryDay = intOrZeroIfNull(entity.getProperty("expiryDay"));
             final int state = ((Long) entity.getProperty("state")).intValue();
-            final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
             final long lastLots = longOrZeroIfNull(entity.getProperty("lastLots"));
+            final long lastTicks = longOrZeroIfNull(entity.getProperty("lastTicks"));
             final long lastTime = longOrZeroIfNull(entity.getProperty("lastTime"));
             final long maxOrderId = (Long) entity.getProperty("maxOrderId");
             final long maxExecId = (Long) entity.getProperty("maxExecId");
 
             assert mnem != null;
             final Market market = factory.newMarket(mnem, display, contr, settlDay, expiryDay,
-                    state, lastTicks, lastLots, lastTime, maxOrderId, maxExecId);
+                    state, lastLots, lastTicks, lastTime, maxOrderId, maxExecId);
             t.insert(market);
         }
         return t;

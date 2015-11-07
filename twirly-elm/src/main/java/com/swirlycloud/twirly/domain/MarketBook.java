@@ -29,8 +29,8 @@ public @NonNullByDefault class MarketBook extends Market {
      */
     private static final int DEPTH_MAX = 5;
 
-    private transient long lastTicks;
     private transient long lastLots;
+    private transient long lastTicks;
     private transient long lastTime;
     // Two sides constitute the book.
     private final transient BookSide bidSide = new BookSide();
@@ -66,13 +66,13 @@ public @NonNullByDefault class MarketBook extends Market {
     }
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId,
+            int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
             long maxExecId) {
         super(mnem, display, contr, settlDay, expiryDay, state);
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         this.lastTime = lastTime;
-        this.view = new MarketView(mnem, contr.getMnem(), settlDay, lastTicks, lastLots, lastTime);
+        this.view = new MarketView(mnem, contr.getMnem(), settlDay, lastLots, lastTicks, lastTime);
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
     }
@@ -99,11 +99,11 @@ public @NonNullByDefault class MarketBook extends Market {
             out.append("null");
         }
         if (lastLots != 0) {
-            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
             out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
             out.append(",\"lastTime\":").append(String.valueOf(lastTime));
         } else {
-            out.append(",\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
+            out.append(",\"lastLots\":null,\"lastTicks\":null,\"lastTime\":null");
         }
 
         out.append(",\"bidTicks\":[");
@@ -246,8 +246,8 @@ public @NonNullByDefault class MarketBook extends Market {
     public final void takeOrder(Order order, long lots, long now) {
         final BookSide side = getSide(order.getSide());
         side.takeOrder(order, lots, now);
-        lastTicks = order.getTicks();
         lastLots = lots;
+        lastTicks = order.getTicks();
         lastTime = now;
     }
 
@@ -259,12 +259,12 @@ public @NonNullByDefault class MarketBook extends Market {
         return ++maxExecId;
     }
 
-    public final long getLastTicks() {
-        return lastTicks;
-    }
-
     public final long getLastLots() {
         return lastLots;
+    }
+
+    public final long getLastTicks() {
+        return lastTicks;
     }
 
     public final long getLastTime() {
@@ -331,8 +331,8 @@ public @NonNullByDefault class MarketBook extends Market {
     }
 
     public final void updateView() {
-        view.lastTicks = lastTicks;
         view.lastLots = lastLots;
+        view.lastTicks = lastTicks;
         view.lastTime = lastTime;
         fillLadder(view.data);
     }

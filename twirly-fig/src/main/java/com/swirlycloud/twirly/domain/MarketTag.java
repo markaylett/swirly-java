@@ -18,9 +18,9 @@ public final @NonNullByDefault class MarketTag extends MarketBook {
     private static final long serialVersionUID = 1L;
 
     MarketTag(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastTicks, long lastLots, long lastTime, long maxOrderId,
+            int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
             long maxExecId) {
-        super(mnem, display, contr, settlDay, expiryDay, state, lastTicks, lastLots, lastTime,
+        super(mnem, display, contr, settlDay, expiryDay, state, lastLots, lastTicks, lastTime,
                 maxOrderId, maxExecId);
     }
 }

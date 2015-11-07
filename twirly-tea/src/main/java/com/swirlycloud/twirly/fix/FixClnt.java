@@ -191,11 +191,11 @@ public final class FixClnt extends MessageCracker implements AutoCloseable, Appl
     }
 
     public final Future<Message> sendNewOrderSingle(@NonNull String market, @NonNull String ref,
-            @NonNull Side side, long ticks, long lots, long minLots, long now,
+            @NonNull Side side, long lots, long ticks, long minLots, long now,
             @NonNull SessionID sessionId) throws AlreadyExistsException, SessionNotFound {
         final FixBuilder builder = FixClnt.builder.get();
         builder.setMessage(new NewOrderSingle());
-        builder.setNewOrderSingle(market, ref, side, ticks, lots, minLots, now);
+        builder.setNewOrderSingle(market, ref, side, lots, ticks, minLots, now);
         final Message message = builder.getMessage();
         assert message != null;
         return cache.sendRequest(ref, message, sessionId);

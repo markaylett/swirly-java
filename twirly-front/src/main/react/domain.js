@@ -10,19 +10,19 @@ function enrichContr(contr) {
 
     contr.key = contr.mnem;
 
-    var tickNumer = contr.tickNumer;
-    var tickDenom = contr.tickDenom;
-    var priceInc = fractToReal(tickNumer, tickDenom);
-
     var lotNumer = contr.lotNumer;
     var lotDenom = contr.lotDenom;
     var qtyInc = fractToReal(lotNumer, lotDenom);
 
-    contr.priceDp = realToDp(priceInc);
-    contr.priceInc = priceInc.toFixed(contr.priceDp);
+    var tickNumer = contr.tickNumer;
+    var tickDenom = contr.tickDenom;
+    var priceInc = fractToReal(tickNumer, tickDenom);
 
     contr.qtyDp = realToDp(qtyInc);
     contr.qtyInc = qtyInc.toFixed(contr.qtyDp);
+
+    contr.priceDp = realToDp(priceInc);
+    contr.priceInc = priceInc.toFixed(contr.priceDp);
 }
 
 function enrichMarket(contrMap, market) {
@@ -77,7 +77,7 @@ function enrichTrade(contrMap, trade) {
     trade.lastPrice = isSpecified(trade.lastTicks) ? ticksToPrice(trade.lastTicks, contr) : null;
 }
 
-function posnPrice(cost, lots, contr) {
+function posnPrice(lots, cost, contr) {
     var ticks = 0;
     if (lots !== 0) {
         ticks = fractToReal(cost, lots);
@@ -87,9 +87,9 @@ function posnPrice(cost, lots, contr) {
 }
 
 function calcNetPrice(posn) {
-    var ticks = 0;
-    var cost = posn.buyCost - posn.sellCost;
     var lots = posn.buyLots - posn.sellLots;
+    var cost = posn.buyCost - posn.sellCost;
+    var ticks = 0;
     if (lots !== 0) {
         ticks = fractToReal(cost, lots);
     }
@@ -105,10 +105,10 @@ function enrichPosn(contrMap, posn) {
     var contr = contrMap[posn.contr];
     posn.contr = contr;
     posn.settlDate = isSpecified(posn.settlDate) ? toDateStr(posn.settlDate) : null;
-    posn.buyPrice = posnPrice(posn.buyCost, posn.buyLots, contr);
-    posn.sellPrice = posnPrice(posn.sellCost, posn.sellLots, contr);
-    posn.netPrice = calcNetPrice(posn);
+    posn.buyPrice = posnPrice(posn.buyLots, posn.buyCost, contr);
+    posn.sellPrice = posnPrice(posn.sellLots, posn.sellCost, contr);
     posn.netLots = posn.buyLots - posn.sellLots;
+    posn.netPrice = calcNetPrice(posn);
 }
 
 function enrichQuote(contrMap, quote) {

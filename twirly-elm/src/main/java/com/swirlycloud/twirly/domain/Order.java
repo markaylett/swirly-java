@@ -46,8 +46,8 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
      */
     long exec;
     long cost;
-    long lastTicks;
     long lastLots;
+    long lastTicks;
     /**
      * Minimum to be filled by this
      */
@@ -56,19 +56,19 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     private final boolean pecan;
     long modified;
 
-    Order(long id, String trader, String market, String contr, int settlDay, @Nullable String ref,
-            State state, Side side, long ticks, long lots, long resd, long exec, long cost,
-            long lastTicks, long lastLots, long minLots, boolean pecan, long created,
+    Order(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,
+            State state, Side side, long lots, long ticks, long resd, long exec, long cost,
+            long lastLots, long lastTicks, long minLots, boolean pecan, long created,
             long modified) {
-        super(id, trader, market, contr, settlDay, ref, side, lots, created);
+        super(trader, market, contr, settlDay, id, ref, side, lots, created);
         assert lots > 0 && lots >= minLots;
         this.state = state;
         this.ticks = ticks;
         this.resd = resd;
         this.exec = exec;
         this.cost = cost;
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         this.minLots = minLots;
         this.quot = 0;
         this.pecan = pecan;
@@ -76,21 +76,21 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     }
 
     public static Order parse(JsonParser p) throws IOException {
-        long id = 0;
         String trader = null;
         String market = null;
         String contr = null;
         int settlDay = 0;
+        long id = 0;
         String ref = null;
         State state = null;
         Side side = null;
-        long ticks = 0;
         long lots = 0;
+        long ticks = 0;
         long resd = 0;
         long exec = 0;
         long cost = 0;
-        long lastTicks = 0;
         long lastLots = 0;
+        long lastTicks = 0;
         long minLots = 0;
         boolean pecan = false;
         long created = 0;
@@ -116,8 +116,8 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
                 if (side == null) {
                     throw new IOException("side is null");
                 }
-                return new Order(id, trader, market, contr, settlDay, ref, state, side, ticks, lots,
-                        resd, exec, cost, lastTicks, lastLots, minLots, pecan, created, modified);
+                return new Order(trader, market, contr, settlDay, id, ref, state, side, lots, ticks,
+                        resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -131,33 +131,33 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
                     settlDay = 0;
                 } else if ("ref".equals(name)) {
                     ref = "";
-                } else if ("lastTicks".equals(name)) {
-                    lastTicks = 0;
                 } else if ("lastLots".equals(name)) {
                     lastLots = 0;
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = 0;
                 } else {
                     throw new IOException(String.format("unexpected null field '%s'", name));
                 }
                 break;
             case VALUE_NUMBER:
-                if ("id".equals(name)) {
-                    id = p.getLong();
-                } else if ("settlDate".equals(name)) {
+                if ("settlDate".equals(name)) {
                     settlDay = JulianDay.maybeIsoToJd(p.getInt());
-                } else if ("ticks".equals(name)) {
-                    ticks = p.getLong();
+                } else if ("id".equals(name)) {
+                    id = p.getLong();
                 } else if ("lots".equals(name)) {
                     lots = p.getLong();
+                } else if ("ticks".equals(name)) {
+                    ticks = p.getLong();
                 } else if ("resd".equals(name)) {
                     resd = p.getLong();
                 } else if ("exec".equals(name)) {
                     exec = p.getLong();
                 } else if ("cost".equals(name)) {
                     cost = p.getLong();
-                } else if ("lastTicks".equals(name)) {
-                    lastTicks = p.getLong();
                 } else if ("lastLots".equals(name)) {
                     lastLots = p.getLong();
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = p.getLong();
                 } else if ("minLots".equals(name)) {
                     minLots = p.getLong();
                 } else if ("created".equals(name)) {
@@ -203,8 +203,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
 
     @Override
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
-        out.append("{\"id\":").append(String.valueOf(id));
-        out.append(",\"trader\":\"").append(trader);
+        out.append("{\"trader\":\"").append(trader);
         out.append("\",\"market\":\"").append(market);
         out.append("\",\"contr\":\"").append(contr);
         out.append("\",\"settlDate\":");
@@ -213,6 +212,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         } else {
             out.append("null");
         }
+        out.append(",\"id\":").append(String.valueOf(id));
         out.append(",\"ref\":");
         if (ref != null) {
             out.append('"').append(ref).append('"');
@@ -221,16 +221,16 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         }
         out.append(",\"state\":\"").append(state.name());
         out.append("\",\"side\":\"").append(side.name());
-        out.append("\",\"ticks\":").append(String.valueOf(ticks));
-        out.append(",\"lots\":").append(String.valueOf(lots));
+        out.append("\",\"lots\":").append(String.valueOf(lots));
+        out.append(",\"ticks\":").append(String.valueOf(ticks));
         out.append(",\"resd\":").append(String.valueOf(resd));
         out.append(",\"exec\":").append(String.valueOf(exec));
         out.append(",\"cost\":").append(String.valueOf(cost));
         if (lastLots != 0) {
-            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
             out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
         } else {
-            out.append(",\"lastTicks\":null,\"lastLots\":null");
+            out.append(",\"lastLots\":null,\"lastTicks\":null");
         }
         out.append(",\"minLots\":").append(String.valueOf(minLots));
         out.append(",\"pecan\":").append(String.valueOf(pecan));
@@ -323,19 +323,19 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         modified = now;
     }
 
-    public final void trade(long takenLots, long takenCost, long lastTicks, long lastLots,
+    public final void trade(long takenLots, long takenCost, long lastLots, long lastTicks,
             long now) {
         state = State.TRADE;
         resd -= takenLots;
         this.exec += takenLots;
         this.cost += takenCost;
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         modified = now;
     }
 
-    final void trade(long lastTicks, long lastLots, long now) {
-        trade(lastLots, lastLots * lastTicks, lastTicks, lastLots, now);
+    final void trade(long lastLots, long lastTicks, long now) {
+        trade(lastLots, lastLots * lastTicks, lastLots, lastTicks, now);
     }
 
     @Override
@@ -374,13 +374,13 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     }
 
     @Override
-    public final long getLastTicks() {
-        return lastTicks;
+    public final long getLastLots() {
+        return lastLots;
     }
 
     @Override
-    public final long getLastLots() {
-        return lastLots;
+    public final long getLastTicks() {
+        return lastTicks;
     }
 
     @Override
