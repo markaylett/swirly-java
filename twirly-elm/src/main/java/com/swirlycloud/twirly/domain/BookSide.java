@@ -139,8 +139,8 @@ public final class BookSide {
         order.state = State.TRADE;
         order.exec += lots;
         order.cost += lots * ticks;
-        order.lastTicks = ticks;
         order.lastLots = lots;
+        order.lastTicks = ticks;
         order.modified = now;
     }
 

@@ -138,28 +138,35 @@ public abstract class RestTest {
         });
     }
 
-    protected static void assertView(String market, String contr, int settlDay, MarketView actual)
-            throws NotFoundException, IOException {
+    protected static void assertView(String market, String contr, int settlDay, int level,
+            long bidTicks, long bidResd, int bidCount, long offerTicks, long offerResd,
+            int offerCount, long lastTicks, long lastLots, long lastTime, MarketView actual)
+                    throws NotFoundException, IOException {
         assertNotNull(actual);
         assertEquals(market, actual.getMarket());
         assertEquals(contr, actual.getContr());
         assertEquals(settlDay, actual.getSettlDay());
 
-        assertEquals(0, actual.getOfferTicks(0));
-        assertEquals(0, actual.getOfferResd(0));
-        assertEquals(0, actual.getOfferCount(0));
+        assertEquals(bidTicks, actual.getBidTicks(level));
+        assertEquals(bidResd, actual.getBidResd(level));
+        assertEquals(bidCount, actual.getBidCount(level));
 
-        assertEquals(0, actual.getBidTicks(0));
-        assertEquals(0, actual.getBidResd(0));
-        assertEquals(0, actual.getOfferCount(0));
+        assertEquals(offerTicks, actual.getOfferTicks(level));
+        assertEquals(offerResd, actual.getOfferResd(level));
+        assertEquals(offerCount, actual.getOfferCount(level));
 
-        assertEquals(0, actual.getLastTicks());
-        assertEquals(0, actual.getLastLots());
-        assertEquals(0, actual.getLastTime());
+        assertEquals(lastTicks, actual.getLastTicks());
+        assertEquals(lastLots, actual.getLastLots());
+        assertEquals(lastTime, actual.getLastTime());
+    }
+
+    protected static void assertView(String market, String contr, int settlDay, MarketView actual)
+            throws NotFoundException, IOException {
+        assertView(market, contr, settlDay, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, actual);
     }
 
     protected static void assertOrder(String trader, String market, State state, Side side,
-            long ticks, long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
+            long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
             Order actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
@@ -167,20 +174,20 @@ public abstract class RestTest {
         assertNull(actual.getRef());
         assertEquals(state, actual.getState());
         assertEquals(side, actual.getSide());
-        assertEquals(ticks, actual.getTicks());
         assertEquals(lots, actual.getLots());
+        assertEquals(ticks, actual.getTicks());
         assertEquals(resd, actual.getResd());
         assertEquals(exec, actual.getExec());
         assertEquals(cost, actual.getCost());
-        assertEquals(lastTicks, actual.getLastTicks());
         assertEquals(lastLots, actual.getLastLots());
+        assertEquals(lastTicks, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
         assertEquals(NOW, actual.getCreated());
         assertEquals(NOW, actual.getModified());
     }
 
     protected static void assertExec(String trader, String market, State state, Side side,
-            long ticks, long lots, long resd, long exec, long cost, long lastTicks, long lastLots,
+            long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
             String contr, int settlDay, Role role, String cpty, Exec actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
@@ -188,13 +195,13 @@ public abstract class RestTest {
         assertNull(actual.getRef());
         assertEquals(state, actual.getState());
         assertEquals(side, actual.getSide());
-        assertEquals(ticks, actual.getTicks());
         assertEquals(lots, actual.getLots());
+        assertEquals(ticks, actual.getTicks());
         assertEquals(resd, actual.getResd());
         assertEquals(exec, actual.getExec());
         assertEquals(cost, actual.getCost());
-        assertEquals(lastTicks, actual.getLastTicks());
         assertEquals(lastLots, actual.getLastLots());
+        assertEquals(lastTicks, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
         assertEquals(contr, actual.getContr());
         assertEquals(settlDay, actual.getSettlDay());
@@ -204,7 +211,7 @@ public abstract class RestTest {
     }
 
     protected static void assertPosn(String trader, String market, String contr, int settlDay,
-            long buyCost, long buyLots, long sellCost, long sellLots, Posn actual) {
+            long buyLots, long buyCost, long sellLots, long sellCost, Posn actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
         assertEquals(contr, actual.getContr());
@@ -258,9 +265,9 @@ public abstract class RestTest {
     }
 
     protected final TransStruct postOrder(@NonNull String trader, @NonNull String market,
-            @NonNull Side side, long ticks, long lots) throws BadRequestException,
+            @NonNull Side side, long lots, long ticks) throws BadRequestException,
                     NotFoundException, ServiceUnavailableException, IOException {
-        return unrest.postOrder(trader, market, null, side, ticks, lots, 1, PARAMS_NONE, NOW);
+        return unrest.postOrder(trader, market, null, side, lots, ticks, 1, PARAMS_NONE, NOW);
     }
 
     protected final TransStruct putOrder(@NonNull String trader, @NonNull String market, long id,
@@ -323,5 +330,4 @@ public abstract class RestTest {
         // Assumption: MockDatastore need not be closed because it does not acquire resources.
         unrest = null;
     }
-
 }

@@ -12,13 +12,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import com.swirlycloud.twirly.node.RbNode;
-
 public abstract class SerializableTest {
 
-    protected static String toJsonString(RbNode node) throws IOException {
+    protected static String toJsonString(Entity entity) throws IOException {
         final StringBuilder sb = new StringBuilder();
-        toJsonArray(node, PARAMS_NONE, sb);
+        toJsonArray(entity, PARAMS_NONE, sb);
         return sb.toString();
     }
 

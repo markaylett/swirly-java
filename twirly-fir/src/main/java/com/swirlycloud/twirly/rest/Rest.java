@@ -60,5 +60,14 @@ public @NonNullByDefault interface Rest {
     void getPosn(String trader, String contr, int settlDate, Params params, long now,
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException;
 
+    void getQuote(String trader, Params params, long now, Appendable out)
+            throws NotFoundException, ServiceUnavailableException, IOException;
+
+    void getQuote(String trader, String market, Params params, long now, Appendable out)
+            throws NotFoundException, ServiceUnavailableException, IOException;
+
+    void getQuote(String trader, String market, long id, Params params, long now, Appendable out)
+            throws NotFoundException, ServiceUnavailableException, IOException;
+
     long getTimeout();
 }

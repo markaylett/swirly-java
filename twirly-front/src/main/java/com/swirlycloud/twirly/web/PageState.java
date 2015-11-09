@@ -86,8 +86,12 @@ public final class PageState {
         return page == Page.HOME;
     }
 
-    public final boolean isTradePage() {
-        return page == Page.TRADE;
+    public final boolean isOrderPage() {
+        return page == Page.ORDER;
+    }
+
+    public final boolean isQuotePage() {
+        return page == Page.QUOTE;
     }
 
     public final boolean isContrPage() {

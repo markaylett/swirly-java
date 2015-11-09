@@ -25,31 +25,60 @@ public final class FrontPageServlet extends HttpServlet {
         if (parts.length != 1) {
             return null;
         }
-        Page page;
-        if ("home".equals(parts[0])) {
-            page = Page.HOME;
-        } else if ("trade".equals(parts[0])) {
-            page = Page.TRADE;
-        } else if ("contr".equals(parts[0])) {
-            page = Page.CONTR;
-        } else if ("market".equals(parts[0])) {
-            page = Page.MARKET;
-        } else if ("trader".equals(parts[0])) {
-            page = Page.TRADER;
-        } else if ("about".equals(parts[0])) {
-            page = Page.ABOUT;
-        } else if ("contact".equals(parts[0])) {
-            page = Page.CONTACT;
-        } else if ("auth".equals(parts[0])) {
-            page = Page.AUTH;
-        } else if ("error".equals(parts[0])) {
-            page = Page.ERROR;
-        } else if ("signin".equals(parts[0])) {
-            page = Page.SIGNIN;
-        } else if ("signout".equals(parts[0])) {
-            page = Page.SIGNOUT;
-        } else {
-            page = null;
+        Page page = null;
+        final String name = parts[0];
+        switch (name.charAt(0)) {
+        case 'a':
+            if ("about".equals(name)) {
+                page = Page.ABOUT;
+            } else if ("auth".equals(name)) {
+                page = Page.AUTH;
+            }
+            break;
+        case 'c':
+            if ("contact".equals(name)) {
+                page = Page.CONTACT;
+            } else if ("contr".equals(name)) {
+                page = Page.CONTR;
+            }
+            break;
+        case 'e':
+            if ("error".equals(name)) {
+                page = Page.ERROR;
+            }
+            break;
+        case 'h':
+            if ("home".equals(name)) {
+                page = Page.HOME;
+            }
+            break;
+        case 'm':
+            if ("market".equals(name)) {
+                page = Page.MARKET;
+            }
+            break;
+        case 'o':
+            if ("order".equals(name)) {
+                page = Page.ORDER;
+            }
+            break;
+        case 'q':
+            if ("quote".equals(name)) {
+                page = Page.QUOTE;
+            }
+            break;
+        case 's':
+            if ("signin".equals(name)) {
+                page = Page.SIGNIN;
+            } else if ("signout".equals(name)) {
+                page = Page.SIGNOUT;
+            }
+            break;
+        case 't':
+            if ("trader".equals(name)) {
+                page = Page.TRADER;
+            }
+            break;
         }
         return page;
     }
@@ -78,7 +107,7 @@ public final class FrontPageServlet extends HttpServlet {
         if (page.isRestricted() && !state.authenticate()) {
             return;
         }
-        if (page == Page.TRADE) {
+        if (page == Page.ORDER) {
             try {
                 if (!state.isUserTrader()) {
                     page = Page.SIGNUP;

@@ -5,10 +5,11 @@ package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
-import static com.swirlycloud.twirly.rest.RestUtil.getViewsParam;
+import static com.swirlycloud.twirly.rest.RestUtil.*;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -31,12 +32,13 @@ import com.swirlycloud.twirly.intrusive.RequestIdTree;
 import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Model;
-import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.rec.Rec;
 import com.swirlycloud.twirly.rec.RecType;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class FrontRest implements Rest {
+
+    private static final RequestIdTree EMPTY_QUOTES = new RequestIdTree();
 
     private final Model model;
     private final Cache cache;
@@ -161,6 +163,14 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
+    private final RequestIdTree readQuote(String trader, @Nullable Object value) {
+        RequestIdTree tree = (RequestIdTree) value;
+        if (tree == null) {
+            tree = EMPTY_QUOTES;
+        }
+        return tree;
+    }
+
     private final long readTimeout(@Nullable Object value) {
         return value != null ? (Long) value : 0;
     }
@@ -197,9 +207,14 @@ public final @NonNullByDefault class FrontRest implements Rest {
     public final void getRec(boolean withTraders, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
-        final Collection<String> keys = Arrays.asList("asset", "contr", "market", "trader",
-                "timeout");
-        assert keys != null;
+        final Collection<String> keys = new ArrayList<>(5);
+        keys.add("asset");
+        keys.add("contr");
+        keys.add("market");
+        if (withTraders) {
+            keys.add("trader");
+        }
+        keys.add("timeout");
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final RecTree assets = readAsset(map.get("asset"));
@@ -308,7 +323,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final MarketViewTree views = readView(map.get("view"));
             timeout = readTimeout(map.get("timeout"));
 
-            RestUtil.getView(views.getFirst(), market, params, out);
+            RestUtil.filterMarket(views.getFirst(), market, params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -322,12 +337,25 @@ public final @NonNullByDefault class FrontRest implements Rest {
     public final void getSess(String trader, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
+        final boolean withQuotes = getQuotesParam(params);
+        final boolean withViews = getViewsParam(params);
+
         final String orderKey = "order:" + trader;
         final String tradeKey = "trade:" + trader;
         final String posnKey = "posn:" + trader;
-        final Collection<String> keys = Arrays.asList(orderKey, tradeKey, posnKey, "view",
-                "timeout");
-        assert keys != null;
+        final String quoteKey = "quote:" + trader;
+
+        final Collection<String> keys = new ArrayList<>(6);
+        keys.add(orderKey);
+        keys.add(tradeKey);
+        keys.add(posnKey);
+        if (withQuotes) {
+            keys.add(quoteKey);
+        }
+        if (withViews) {
+            keys.add("view");
+        }
+        keys.add("timeout");
         try {
             final Map<String, Object> map = cache.read(keys).get();
             final RequestIdTree orders = readOrder(trader, map.get(orderKey));
@@ -337,12 +365,17 @@ public final @NonNullByDefault class FrontRest implements Rest {
             timeout = readTimeout(map.get("timeout"));
 
             out.append("{\"orders\":");
-            toJsonArray((RbNode) orders.getFirst(), params, out);
+            toJsonArray(orders.getFirst(), params, out);
             out.append(",\"trades\":");
-            toJsonArray((RbNode) trades.getFirst(), params, out);
+            toJsonArray(trades.getFirst(), params, out);
             out.append(",\"posns\":");
-            toJsonArray((RbNode) posns.getFirst(), params, out);
-            if (getViewsParam(params)) {
+            toJsonArray(posns.getFirst(), params, out);
+            if (withQuotes) {
+                final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
+                out.append(",\"quotes\":");
+                toJsonArray(quotes.getFirst(), params, out);
+            }
+            if (withViews) {
                 final MarketViewTree views = readView(map.get("view"));
                 out.append(",\"views\":");
                 toJsonArray(views.getFirst(), params, out);
@@ -369,7 +402,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final RequestIdTree orders = readOrder(trader, map.get(orderKey));
             timeout = readTimeout(map.get("timeout"));
 
-            toJsonArray((RbNode) orders.getFirst(), params, out);
+            toJsonArray(orders.getFirst(), params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -391,7 +424,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final RequestIdTree orders = readOrder(trader, map.get(orderKey));
             timeout = readTimeout(map.get("timeout"));
 
-            RestUtil.getOrder(orders.getFirst(), market, params, out);
+            RestUtil.filterMarket(orders.getFirst(), market, params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -439,7 +472,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
             timeout = readTimeout(map.get("timeout"));
 
-            toJsonArray((RbNode) trades.getFirst(), params, out);
+            toJsonArray(trades.getFirst(), params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -461,7 +494,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
             timeout = readTimeout(map.get("timeout"));
 
-            RestUtil.getTrade(trades.getFirst(), market, params, out);
+            RestUtil.filterMarket(trades.getFirst(), market, params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -510,7 +543,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
             timeout = readTimeout(map.get("timeout"));
 
-            toJsonArray((RbNode) posns.getFirst(), params, out);
+            toJsonArray(posns.getFirst(), params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -533,7 +566,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
             timeout = readTimeout(map.get("timeout"));
 
-            RestUtil.getPosn(posns.getFirst(), contr, params, out);
+            RestUtil.filterPosn(posns.getFirst(), contr, params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
@@ -562,6 +595,76 @@ public final @NonNullByDefault class FrontRest implements Rest {
                         String.format("posn for '%s' on '%d' does not exist", contr, settlDate));
             }
             posn.toJson(params, out);
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+    }
+
+    @Override
+    public final void getQuote(String trader, Params params, long now, Appendable out)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+
+        final String quoteKey = "quote:" + trader;
+        final Collection<String> keys = Arrays.asList(quoteKey, "timeout");
+        assert keys != null;
+        try {
+            final Map<String, Object> map = cache.read(keys).get();
+            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
+            timeout = readTimeout(map.get("timeout"));
+
+            toJsonArray(quotes.getFirst(), params, out);
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+    }
+
+    @Override
+    public final void getQuote(String trader, String market, Params params, long now,
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
+
+        final String quoteKey = "quote:" + trader;
+        final Collection<String> keys = Arrays.asList(quoteKey, "timeout");
+        assert keys != null;
+        try {
+            final Map<String, Object> map = cache.read(keys).get();
+            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
+            timeout = readTimeout(map.get("timeout"));
+
+            RestUtil.filterMarket(quotes.getFirst(), market, params, out);
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+    }
+
+    @Override
+    public final void getQuote(String trader, String market, long id, Params params, long now,
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
+
+        final String quoteKey = "quote:" + trader;
+        final Collection<String> keys = Arrays.asList(quoteKey, "timeout");
+        assert keys != null;
+        try {
+            final Map<String, Object> map = cache.read(keys).get();
+            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
+            timeout = readTimeout(map.get("timeout"));
+
+            final Exec trade = (Exec) quotes.find(market, id);
+            if (trade == null) {
+                throw new NotFoundException(String.format("trade '%d' does not exist", id));
+            }
+            trade.toJson(params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {

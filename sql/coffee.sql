@@ -31,36 +31,36 @@ INSERT INTO Asset_t (mnem, display, typeId)
        VALUES ('WGAB', 'Gelena Abaya B', 1)
 ;
 
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
        VALUES ('WYCA', 'Yirgachefe A', 'WYCA', 'ETB', 1, 1, 1, 1, 0, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
        VALUES ('WWNA', 'Wenago A', 'WWNA', 'ETB', 1, 1, 1, 1, 0, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
        VALUES ('WKCA', 'Kochere A', 'WKCA', 'ETB', 1, 1, 1, 1, 0, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
        VALUES ('WGAA', 'Gelena Abaya A', 'WGAA', 'ETB', 1, 1, 1, 1, 0, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
        VALUES ('WYCB', 'Yirgachefe B', 'WYCB', 'ETB', 1, 1, 1, 1, 0, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
        VALUES ('WWNB', 'Wenago B', 'WWNB', 'ETB', 1, 1, 1, 1, 0, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
        VALUES ('WKCB', 'Kochere B', 'WKCB', 'ETB', 1, 1, 1, 1, 0, 1, 10);
 ;
-INSERT INTO Contr_t (mnem, display, asset, ccy, tickNumer,
-       tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots)
+INSERT INTO Contr_t (mnem, display, asset, ccy, lotNumer, lotDenom,
+       tickNumer, tickDenom, pipDp, minLots, maxLots)
        VALUES ('WGAB', 'Gelena Abaya B', 'WGAB', 'ETB', 1, 1, 1, 1, 0, 1, 10);
 ;
 

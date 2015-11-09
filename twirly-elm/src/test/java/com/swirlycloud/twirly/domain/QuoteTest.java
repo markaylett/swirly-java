@@ -18,19 +18,19 @@ public final class QuoteTest {
     private static final long EXPIRY = NOW + 60 * 1000;
 
     private static Quote newQuote() {
-        return FACTORY.newQuote(1, "MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, "test", Side.BUY,
-                12345, 10, NOW, EXPIRY);
+        return FACTORY.newQuote("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1, "test", Side.BUY,
+                10, 12345, NOW, EXPIRY);
     }
 
     @Test
     public final void testContruct() {
         final Quote quote = newQuote();
 
-        assertEquals(1, quote.getId());
         assertEquals("MARAYL", quote.getTrader());
         assertEquals("EURUSD.MAR14", quote.getMarket());
         assertEquals("EURUSD", quote.getContr());
         assertEquals(SETTL_DAY, quote.getSettlDay());
+        assertEquals(1, quote.getId());
         assertEquals("test", quote.getRef());
         assertEquals(Side.BUY, quote.getSide());
         assertEquals(10, quote.getLots());
@@ -43,7 +43,7 @@ public final class QuoteTest {
     public final void testToString() {
         final Quote quote = newQuote();
         assertEquals(
-                "{\"id\":1,\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"ref\":\"test\",\"side\":\"BUY\",\"ticks\":12345,\"lots\":10,\"created\":1394625600000,\"expiry\":1394625660000}",
+                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":1,\"ref\":\"test\",\"side\":\"BUY\",\"lots\":10,\"ticks\":12345,\"created\":1394625600000,\"expiry\":1394625660000}",
                 quote.toString());
     }
 }

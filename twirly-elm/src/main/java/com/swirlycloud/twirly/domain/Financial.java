@@ -10,7 +10,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * 
  * @author Mark Aylett
  */
-public @NonNullByDefault interface Financial {
+public @NonNullByDefault interface Financial extends Entity {
 
     String getMarket();
 

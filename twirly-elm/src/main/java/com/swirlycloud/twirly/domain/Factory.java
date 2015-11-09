@@ -18,11 +18,11 @@ public @NonNullByDefault interface Factory {
     Asset newAsset(String mnem, @Nullable String display, AssetType type);
 
     Contr newContr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
-            int tickNumer, int tickDenom, int lotNumer, int lotDenom, int pipDp, long minLots,
+            int lotNumer, int lotDenom, int tickNumer, int tickDenom, int pipDp, long minLots,
             long maxLots);
 
     Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
-            int expiryDay, int state, long lastTicks, long lastLots, long lastTime, long maxOrderId,
+            int expiryDay, int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
             long maxExecId);
 
     Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
@@ -30,41 +30,41 @@ public @NonNullByDefault interface Factory {
 
     Trader newTrader(String mnem, @Nullable String display, String email);
 
-    Order newOrder(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
-            long exec, long cost, long lastTicks, long lastLots, long minLots, boolean pecan,
+    Order newOrder(String trader, String market, String contr, int settlDay, long id,
+            @Nullable String ref, State state, Side side, long lots, long ticks, long resd,
+            long exec, long cost, long lastLots, long lastTicks, long minLots, boolean pecan,
             long created, long modified);
 
-    Order newOrder(long id, String trader, Financial fin, @Nullable String ref, State state,
-            Side side, long ticks, long lots, long resd, long exec, long cost, long lastTicks,
-            long lastLots, long minLots, boolean pecan, long created, long modified);
+    Order newOrder(String trader, Financial fin, long id, @Nullable String ref, State state,
+            Side side, long lots, long ticks, long resd, long exec, long cost, long lastLots,
+            long lastTicks, long minLots, boolean pecan, long created, long modified);
 
-    Order newOrder(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, Side side, long ticks, long lots, long minLots, long created);
+    Order newOrder(String trader, String market, String contr, int settlDay, long id,
+            @Nullable String ref, Side side, long lots, long ticks, long minLots, long created);
 
-    Order newOrder(long id, String trader, Financial fin, @Nullable String ref, Side side,
-            long ticks, long lots, long minLots, long created);
+    Order newOrder(String trader, Financial fin, long id, @Nullable String ref, Side side,
+            long lots, long ticks, long minLots, long created);
 
-    Exec newExec(long id, long orderId, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, State state, Side side, long ticks, long lots, long resd,
-            long exec, long cost, long lastTicks, long lastLots, long minLots, long matchId,
-            @Nullable Role role, @Nullable String cpty, long created);
+    Exec newExec(String trader, String market, String contr, int settlDay, long id,
+            @Nullable String ref, long orderId, State state, Side side, long lots, long ticks,
+            long resd, long exec, long cost, long lastLots, long lastTicks, long minLots,
+            long matchId, @Nullable Role role, @Nullable String cpty, long created);
 
-    Exec newExec(long id, long orderId, String trader, Financial fin, @Nullable String ref,
-            State state, Side side, long ticks, long lots, long resd, long exec, long cost,
-            long lastTicks, long lastLots, long minLots, long matchId, @Nullable Role role,
+    Exec newExec(String trader, Financial fin, long id, @Nullable String ref, long orderId,
+            State state, Side side, long lots, long ticks, long resd, long exec, long cost,
+            long lastLots, long lastTicks, long minLots, long matchId, @Nullable Role role,
             @Nullable String cpty, long created);
 
-    Exec newExec(long id, Instruct instruct, long created);
+    Exec newExec(Instruct instruct, long id, long created);
 
-    Posn newPosn(String trader, String contr, int settlDay, long buyCost, long buyLots,
-            long sellCost, long sellLots);
+    Posn newPosn(String trader, String contr, int settlDay, long buyLots, long buyCost,
+            long sellLots, long sellCost);
 
     Posn newPosn(String trader, String contr, int settlDay);
 
-    Quote newQuote(long id, String trader, String market, String contr, int settlDay,
-            @Nullable String ref, Side side, long ticks, long lots, long created, long expiry);
+    Quote newQuote(String trader, String market, String contr, int settlDay, long id,
+            @Nullable String ref, Side side, long lots, long ticks, long created, long expiry);
 
-    Quote newQuote(long id, String trader, Financial fin, @Nullable String ref, Side side,
-            long ticks, long lots, long created, long expiry);
+    Quote newQuote(String trader, Financial fin, long id, @Nullable String ref, Side side,
+            long lots, long ticks, long created, long expiry);
 }

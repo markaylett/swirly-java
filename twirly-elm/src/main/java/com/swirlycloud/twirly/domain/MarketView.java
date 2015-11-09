@@ -16,7 +16,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Jsonifiable;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
@@ -26,7 +25,7 @@ import com.swirlycloud.twirly.util.Params;
  * @author Mark Aylett
  */
 public final @NonNullByDefault class MarketView extends AbstractRbNode
-        implements Jsonifiable, Memorable, Financial {
+        implements Memorable, Financial {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +37,8 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
     private final String market;
     private final String contr;
     private final int settlDay;
-    long lastTicks;
     long lastLots;
+    long lastTicks;
     long lastTime;
     final MarketData data;
 
@@ -62,45 +61,45 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
         throw new IOException("end-of array not found");
     }
 
-    public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
+    public MarketView(String market, String contr, int settlDay, long lastLots, long lastTicks,
             long lastTime, MarketData data) {
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         this.lastTime = lastTime;
         this.data = data;
     }
 
-    public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime,
+    public MarketView(Financial fin, long lastLots, long lastTicks, long lastTime,
             MarketData data) {
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         this.lastTime = lastTime;
         this.data = data;
     }
 
-    public MarketView(String market, String contr, int settlDay, long lastTicks, long lastLots,
+    public MarketView(String market, String contr, int settlDay, long lastLots, long lastTicks,
             long lastTime) {
         this.market = market;
         this.contr = contr;
         this.settlDay = settlDay;
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         this.lastTime = lastTime;
         this.data = new MarketData();
     }
 
-    public MarketView(Financial fin, long lastTicks, long lastLots, long lastTime) {
+    public MarketView(Financial fin, long lastLots, long lastTicks, long lastTime) {
         this.market = fin.getMarket();
         this.contr = fin.getContr();
         this.settlDay = fin.getSettlDay();
-        this.lastTicks = lastTicks;
         this.lastLots = lastLots;
+        this.lastTicks = lastTicks;
         this.lastTime = lastTime;
         this.data = new MarketData();
     }
@@ -109,8 +108,8 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
         String market = null;
         String contr = null;
         int settlDay = 0;
-        long lastTicks = 0;
         long lastLots = 0;
+        long lastTicks = 0;
         long lastTime = 0;
         final MarketData data = new MarketData();
 
@@ -125,7 +124,7 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
                 if (contr == null) {
                     throw new IOException("contr is null");
                 }
-                return new MarketView(market, contr, settlDay, lastTicks, lastLots, lastTime, data);
+                return new MarketView(market, contr, settlDay, lastLots, lastTicks, lastTime, data);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -153,10 +152,10 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
             case VALUE_NULL:
                 if ("settlDate".equals(name)) {
                     settlDay = 0;
-                } else if ("lastTicks".equals(name)) {
-                    lastTicks = 0;
                 } else if ("lastLots".equals(name)) {
                     lastLots = 0;
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = 0;
                 } else if ("lastTime".equals(name)) {
                     lastTime = 0;
                 } else {
@@ -166,10 +165,10 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
             case VALUE_NUMBER:
                 if ("settlDate".equals(name)) {
                     settlDay = JulianDay.maybeIsoToJd(p.getInt());
-                } else if ("lastTicks".equals(name)) {
-                    lastTicks = p.getLong();
                 } else if ("lastLots".equals(name)) {
                     lastLots = p.getLong();
+                } else if ("lastTicks".equals(name)) {
+                    lastTicks = p.getLong();
                 } else if ("lastTime".equals(name)) {
                     lastTime = p.getLong();
                 } else {
@@ -243,11 +242,11 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
             out.append("null");
         }
         if (lastLots != 0) {
-            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
             out.append(",\"lastLots\":").append(String.valueOf(lastLots));
+            out.append(",\"lastTicks\":").append(String.valueOf(lastTicks));
             out.append(",\"lastTime\":").append(String.valueOf(lastTime));
         } else {
-            out.append(",\"lastTicks\":null,\"lastLots\":null,\"lastTime\":null");
+            out.append(",\"lastLots\":null,\"lastTicks\":null,\"lastTime\":null");
         }
         out.append(",\"bidTicks\":[");
         for (int i = 0; i < depth; ++i) {
@@ -365,12 +364,12 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
         return settlDay != 0;
     }
 
-    public final long getLastTicks() {
-        return lastTicks;
-    }
-
     public final long getLastLots() {
         return lastLots;
+    }
+
+    public final long getLastTicks() {
+        return lastTicks;
     }
 
     public final long getLastTime() {
@@ -393,7 +392,7 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
         return data.getBidQuot(row);
     }
 
-    public final long getBidCount(int row) {
+    public final int getBidCount(int row) {
         return data.getBidCount(row);
     }
 
@@ -413,7 +412,7 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
         return data.getOfferQuot(row);
     }
 
-    public final long getOfferCount(int row) {
+    public final int getOfferCount(int row) {
         return data.getOfferCount(row);
     }
 }

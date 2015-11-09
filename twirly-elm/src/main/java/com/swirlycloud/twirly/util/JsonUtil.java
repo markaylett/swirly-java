@@ -10,9 +10,9 @@ import javax.json.stream.JsonParser.Event;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.domain.Entity;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.node.SlNode;
 
 public final class JsonUtil {
 
@@ -56,27 +56,15 @@ public final class JsonUtil {
         return sb.toString();
     }
 
-    public static void toJsonArray(SlNode node, Params params, Appendable out) throws IOException {
+    public static void toJsonArray(Entity first, Params params, Appendable out) throws IOException {
         out.append('[');
-        for (int i = 0; node != null; node = node.slNext()) {
-            final Jsonifiable j = (Jsonifiable) node;
-            if (i > 0) {
-                out.append(',');
-            }
-            j.toJson(params, out);
-            ++i;
-        }
-        out.append(']');
-    }
-
-    public static void toJsonArray(RbNode node, Params params, Appendable out) throws IOException {
-        out.append('[');
+        RbNode node = first;
         for (int i = 0; node != null; node = node.rbNext()) {
-            final Jsonifiable j = (Jsonifiable) node;
+            final Entity entity = (Entity) node;
             if (i > 0) {
                 out.append(',');
             }
-            j.toJson(params, out);
+            entity.toJson(params, out);
             ++i;
         }
         out.append(']');

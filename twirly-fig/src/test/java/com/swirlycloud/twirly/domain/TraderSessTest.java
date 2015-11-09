@@ -28,12 +28,12 @@ public final class TraderSessTest {
     public final void testAdd() {
         final TraderSess sess = (TraderSess) MockTrader.newTrader("MARAYL", factory);
         final Posn posn1 = factory.newPosn(sess.getMnem(), "EURUSD", SETTL_DAY);
-        posn1.addBuy(12344 * 10, 10);
-        posn1.addSell(12346 * 15, 15);
+        posn1.addBuy(10, 12344 * 10);
+        posn1.addSell(15, 12346 * 15);
         assertSame(posn1, sess.addPosn(posn1));
         final Posn posn2 = factory.newPosn(sess.getMnem(), "EURUSD", SETTL_DAY);
-        posn2.addBuy(12343 * 15, 15);
-        posn2.addSell(12347 * 10, 10);
+        posn2.addBuy(15, 12343 * 15);
+        posn2.addSell(10, 12347 * 10);
         assertSame(posn1, sess.addPosn(posn2));
         assertEquals(12344 * 10 + 12343 * 15, posn1.getBuyCost());
         assertEquals(25, posn1.getBuyLots());

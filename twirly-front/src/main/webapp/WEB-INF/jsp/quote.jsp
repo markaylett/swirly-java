@@ -23,10 +23,10 @@
     <script type="text/javascript" src="/js/bootstrap3-typeahead.min.js"></script>
     <script type="text/javascript" src="/js/react.min.js"></script>
 
-    <script type="text/javascript" src="/js/twirly.min.js"></script>
+    <script type="text/javascript" src="/js/twirly.js"></script>
     <script type="text/javascript">
       React.render(
-          React.createElement(TradeModule, {pollInterval: 20000}),
+          React.createElement(QuoteModule, {pollInterval: 20000}),
           document.getElementById('module')
       );
     </script>

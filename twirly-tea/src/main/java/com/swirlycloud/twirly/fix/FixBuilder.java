@@ -535,13 +535,13 @@ public final class FixBuilder {
     }
 
     public final void setNewOrderSingle(@NonNull String market, @NonNull String ref,
-            @NonNull Side side, long ticks, long lots, long minLots, long now) {
+            @NonNull Side side, long lots, long ticks, long minLots, long now) {
         setSymbol(market);
         setClOrdId(ref);
         setSide(side);
         setOrdType();
-        setPrice(ticks);
         setOrderQty(lots);
+        setPrice(ticks);
         setMinQty(minLots);
         setTransactTime(now);
     }

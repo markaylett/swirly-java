@@ -83,6 +83,18 @@ public class SessServlet extends RestServlet {
                             resp.getWriter());
                     match = true;
                 }
+            } else if ("quote".equals(parts[TYPE_PART])) {
+                if (parts.length == 1) {
+                    rest.getQuote(trader, params, now, resp.getWriter());
+                    match = true;
+                } else if (parts.length == 2) {
+                    rest.getQuote(trader, parts[MARKET_PART], params, now, resp.getWriter());
+                    match = true;
+                } else if (parts.length == 3) {
+                    rest.getQuote(trader, parts[MARKET_PART], Long.parseLong(parts[ID_PART]),
+                            params, now, resp.getWriter());
+                    match = true;
+                }
             }
 
             if (!match) {

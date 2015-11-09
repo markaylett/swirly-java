@@ -2,7 +2,7 @@
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
 
-var TradeModuleImpl = React.createClass({
+var OrderModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
         $.getJSON('/front/sess?views=true', function(sess, status, xhr) {
@@ -79,9 +79,9 @@ var TradeModuleImpl = React.createClass({
             isSelectedArchivable: isSelectedArchivable
         });
     },
-    postOrder: function(market, side, price, lots) {
+    postOrder: function(market, side, lots, price) {
         console.debug('postOrder: market=' + market + ', side=' + side
-                      + ', price=' + price + ', lots=' + lots);
+                       + ', lots=' + lots + ', price=' + price);
         var req = {};
         var contr = undefined;
         if (isSpecified(market)) {
@@ -100,16 +100,16 @@ var TradeModuleImpl = React.createClass({
             this.onReportError(internalError('side not specified'));
             return;
         }
-        if (isSpecified(price)) {
-            req.ticks = priceToTicks(price, contr);
-        } else {
-            this.onReportError(internalError('price not specified'));
-            return;
-        }
         if (isSpecified(lots) && lots > 0) {
             req.lots = parseInt(lots);
         } else {
             this.onReportError(internalError('lots not specified'));
+            return;
+        }
+        if (isSpecified(price)) {
+            req.ticks = priceToTicks(price, contr);
+        } else {
+            this.onReportError(internalError('price not specified'));
             return;
         }
 
@@ -289,10 +289,10 @@ var TradeModuleImpl = React.createClass({
         this.staging.context = context;
         this.updateSelected();
     },
-    onChangeFields: function(market, price, lots) {
-        console.debug('onChangeFields: market=' + market + ', price=' + price + ', lots=' + lots);
-        this.refs.newOrder.setFields(market, price, lots);
-        this.refs.reviseOrder.setFields(market, price, lots);
+    onChangeFields: function(market, lots, price) {
+        console.debug('onChangeFields: market=' + market + ', lots=' + lots + ', price=' + price);
+        this.refs.newOrder.setFields(market, lots, price);
+        this.refs.reviseOrder.setFields(market, lots, price);
     },
     onSelectOrder: function(order, isSelected) {
         console.debug('onSelectOrder: key=' + order.key + ', isSelected=' + isSelected);
@@ -323,8 +323,8 @@ var TradeModuleImpl = React.createClass({
         }
         this.updateSelected();
     },
-    onPostOrder: function(market, side, price, lots) {
-        this.postOrder(market, side, price, lots);
+    onPostOrder: function(market, side, lots, price) {
+        this.postOrder(market, side, lots, price);
     },
     onReviseAll: function(lots) {
         if (this.staging.context === 'working') {
@@ -422,7 +422,7 @@ var TradeModuleImpl = React.createClass({
         };
 
         return (
-            <div className="tradeModuleImpl">
+            <div className="orderModuleImpl">
               <MultiAlertWidget module={module} errors={errors}/>
               <NewOrderForm ref="newOrder" module={module} marketMap={marketMap}
                             isSelectedWorking={isSelectedWorking}/>
@@ -467,7 +467,7 @@ var TradeModuleImpl = React.createClass({
     timeout: undefined
 });
 
-var TradeModule = React.createClass({
+var OrderModule = React.createClass({
     // Mutators.
     refresh: function() {
         $.getJSON('/front/rec/contr', function(contrs, status, xhr) {
@@ -510,12 +510,12 @@ var TradeModule = React.createClass({
             );
         } else if (contrMap !== null) {
             body = (
-                <TradeModuleImpl contrMap={contrMap} pollInterval={this.props.pollInterval}/>
+                <OrderModuleImpl contrMap={contrMap} pollInterval={this.props.pollInterval}/>
             );
         }
         if (body !== undefined) {
             return (
-                <div className="tradeModule">
+                <div className="orderModule">
                   {body}
                 </div>
             );

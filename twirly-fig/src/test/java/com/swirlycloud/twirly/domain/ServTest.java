@@ -50,22 +50,22 @@ public final class ServTest {
             public final @NonNull RecTree readMarket(@NonNull Factory factory) {
                 final RecTree t = new RecTree();
                 t.insert(factory.newMarket("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"),
-                        SETTL_DAY, EXPIRY_DAY, STATE, 12345, 10, NOW - 2, 3, 2));
+                        SETTL_DAY, EXPIRY_DAY, STATE, 10, 12345, NOW - 2, 3, 2));
                 return t;
             }
 
             @Override
             public final SlNode readOrder(@NonNull Factory factory) {
-                final Order first = factory.newOrder(1, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
-                        "first", Side.BUY, 12344, 11, 1, NOW - 5);
-                final Order second = factory.newOrder(2, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "second", Side.BUY, 12345, 10, 1, NOW - 4);
-                final Order third = factory.newOrder(3, TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
-                        "third", Side.SELL, 12346, 10, 1, NOW - 3);
+                final Order first = factory.newOrder(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1,
+                        "first", Side.BUY, 11, 12344, 1, NOW - 5);
+                final Order second = factory.newOrder(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
+                        2, "second", Side.BUY, 10, 12345, 1, NOW - 4);
+                final Order third = factory.newOrder(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY, 3,
+                        "third", Side.SELL, 10, 12346, 1, NOW - 3);
                 // Fully fill second order.
-                second.trade(12345, 10, NOW - 2);
+                second.trade(10, 12345, NOW - 2);
                 // Partially fill third order.
-                third.trade(12346, 7, NOW - 1);
+                third.trade(7, 12346, NOW - 1);
                 first.setSlNext(second);
                 second.setSlNext(third);
                 return first;
@@ -73,12 +73,12 @@ public final class ServTest {
 
             @Override
             public final SlNode readTrade(@NonNull Factory factory) {
-                final Exec second = factory.newExec(1, 2, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "second", State.TRADE, Side.BUY, 12345, 10, 0, 10, 123450, 12345,
-                        10, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
-                final Exec third = factory.newExec(2, 3, TRADER, "EURUSD.MAR14", "EURUSD",
-                        SETTL_DAY, "third", State.TRADE, Side.SELL, 12346, 10, 3, 7, 86422, 12346,
-                        7, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
+                final Exec second = factory.newExec(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1,
+                        "second", 2, State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
+                        12345, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
+                final Exec third = factory.newExec(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY, 2,
+                        "third", 3, State.TRADE, Side.SELL, 10, 12346, 3, 7, 86422, 7,
+                        12346, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
                 second.setSlNext(third);
                 return second;
             }
@@ -108,8 +108,8 @@ public final class ServTest {
         assertEquals(SETTL_DAY, actual.getSettlDay());
         assertEquals(EXPIRY_DAY, actual.getExpiryDay());
         assertEquals(STATE, actual.getState());
-        assertEquals(12345, actual.getLastTicks());
         assertEquals(10, actual.getLastLots());
+        assertEquals(12345, actual.getLastTicks());
         assertEquals(NOW - 2, actual.getLastTime());
         assertEquals(3, actual.getMaxOrderId());
         assertEquals(2, actual.getMaxExecId());
@@ -132,9 +132,9 @@ public final class ServTest {
     public final void testOfferSide() throws Exception {
         final MarketBook actual = serv.getMarket("EURUSD.MAR14");
         assertNotNull(actual);
-        final BookSide side = actual.getOfferSide();
-        assertNotNull(side);
-        final Level level = (Level) side.getFirstLevel();
+        final BookSide bookSide = actual.getOfferSide();
+        assertNotNull(bookSide);
+        final Level level = (Level) bookSide.getFirstLevel();
         assertNotNull(level);
         assertEquals(12346, level.getTicks());
         assertEquals(3, level.getResd());
@@ -154,14 +154,14 @@ public final class ServTest {
         assertEquals("first", actual.getRef());
         assertEquals(State.NEW, actual.getState());
         assertEquals(Side.BUY, actual.getSide());
-        assertEquals(12344, actual.getTicks());
         assertEquals(11, actual.getLots());
+        assertEquals(12344, actual.getTicks());
         assertEquals(11, actual.getResd());
         assertEquals(0, actual.getExec());
         assertEquals(0, actual.getCost());
         assertEquals(0.0, actual.getAvgTicks(), DELTA);
-        assertEquals(0, actual.getLastTicks());
         assertEquals(0, actual.getLastLots());
+        assertEquals(0, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
         assertEquals(NOW - 5, actual.getCreated());
         assertEquals(NOW - 5, actual.getModified());
@@ -174,14 +174,14 @@ public final class ServTest {
         assertEquals("second", actual.getRef());
         assertEquals(State.TRADE, actual.getState());
         assertEquals(Side.BUY, actual.getSide());
-        assertEquals(12345, actual.getTicks());
         assertEquals(10, actual.getLots());
+        assertEquals(12345, actual.getTicks());
         assertEquals(0, actual.getResd());
         assertEquals(10, actual.getExec());
         assertEquals(123450, actual.getCost());
-        assertEquals(12345, actual.getLastTicks());
         assertEquals(12345.0, actual.getAvgTicks(), DELTA);
         assertEquals(10, actual.getLastLots());
+        assertEquals(12345, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
         assertEquals(NOW - 4, actual.getCreated());
         assertEquals(NOW - 2, actual.getModified());
@@ -194,14 +194,14 @@ public final class ServTest {
         assertEquals("third", actual.getRef());
         assertEquals(State.TRADE, actual.getState());
         assertEquals(Side.SELL, actual.getSide());
-        assertEquals(12346, actual.getTicks());
         assertEquals(10, actual.getLots());
+        assertEquals(12346, actual.getTicks());
         assertEquals(3, actual.getResd());
         assertEquals(7, actual.getExec());
         assertEquals(86422, actual.getCost());
-        assertEquals(12346, actual.getLastTicks());
         assertEquals(12346.0, actual.getAvgTicks(), DELTA);
         assertEquals(7, actual.getLastLots());
+        assertEquals(12346, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
         assertEquals(NOW - 3, actual.getCreated());
         assertEquals(NOW - 1, actual.getModified());
@@ -219,14 +219,14 @@ public final class ServTest {
         assertEquals("second", actual.getRef());
         assertEquals(State.TRADE, actual.getState());
         assertEquals(Side.BUY, actual.getSide());
-        assertEquals(12345, actual.getTicks());
         assertEquals(10, actual.getLots());
+        assertEquals(12345, actual.getTicks());
         assertEquals(0, actual.getResd());
         assertEquals(10, actual.getExec());
         assertEquals(123450, actual.getCost());
-        assertEquals(12345, actual.getLastTicks());
         assertEquals(12345.0, actual.getAvgTicks(), DELTA);
         assertEquals(10, actual.getLastLots());
+        assertEquals(12345, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
         assertTrue(actual.isDone());
         assertTrue(actual.isAuto());
@@ -242,14 +242,14 @@ public final class ServTest {
         assertEquals("third", actual.getRef());
         assertEquals(State.TRADE, actual.getState());
         assertEquals(Side.SELL, actual.getSide());
-        assertEquals(12346, actual.getTicks());
         assertEquals(10, actual.getLots());
+        assertEquals(12346, actual.getTicks());
         assertEquals(3, actual.getResd());
         assertEquals(7, actual.getExec());
         assertEquals(86422, actual.getCost());
-        assertEquals(12346, actual.getLastTicks());
         assertEquals(12346.0, actual.getAvgTicks(), DELTA);
         assertEquals(7, actual.getLastLots());
+        assertEquals(12346, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
         assertFalse(actual.isDone());
         assertTrue(actual.isAuto());
@@ -276,7 +276,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
+            serv.createOrder(sess, book, "", Side.BUY, 5, 12345, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             assertEquals(sess.getMnem(), order.getTrader());
@@ -284,13 +284,13 @@ public final class ServTest {
             assertNull(order.getRef());
             assertEquals(State.NEW, order.getState());
             assertEquals(Side.BUY, order.getSide());
-            assertEquals(12345, order.getTicks());
             assertEquals(5, order.getLots());
+            assertEquals(12345, order.getTicks());
             assertEquals(5, order.getResd());
             assertEquals(0, order.getExec());
             assertEquals(0, order.getCost());
-            assertEquals(0, order.getLastTicks());
             assertEquals(0, order.getLastLots());
+            assertEquals(0, order.getLastTicks());
             assertEquals(1, order.getMinLots());
             assertEquals(NOW, order.getCreated());
             assertEquals(NOW, order.getModified());
@@ -307,7 +307,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
+            serv.createOrder(sess, book, "", Side.BUY, 5, 12345, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             serv.reviseOrder(sess, book, order, 4, NOW + 1, result);
@@ -316,13 +316,13 @@ public final class ServTest {
             assertNull(order.getRef());
             assertEquals(State.REVISE, order.getState());
             assertEquals(Side.BUY, order.getSide());
-            assertEquals(12345, order.getTicks());
             assertEquals(4, order.getLots());
+            assertEquals(12345, order.getTicks());
             assertEquals(4, order.getResd());
             assertEquals(0, order.getExec());
             assertEquals(0, order.getCost());
-            assertEquals(0, order.getLastTicks());
             assertEquals(0, order.getLastLots());
+            assertEquals(0, order.getLastTicks());
             assertEquals(1, order.getMinLots());
             assertEquals(NOW, order.getCreated());
             assertEquals(NOW + 1, order.getModified());
@@ -339,7 +339,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", Side.BUY, 12345, 5, 1, NOW, result);
+            serv.createOrder(sess, book, "", Side.BUY, 5, 12345, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             serv.cancelOrder(sess, book, order, NOW + 1, result);
@@ -348,13 +348,13 @@ public final class ServTest {
             assertNull(order.getRef());
             assertEquals(State.CANCEL, order.getState());
             assertEquals(Side.BUY, order.getSide());
-            assertEquals(12345, order.getTicks());
             assertEquals(5, order.getLots());
+            assertEquals(12345, order.getTicks());
             assertEquals(0, order.getResd());
             assertEquals(0, order.getExec());
             assertEquals(0, order.getCost());
-            assertEquals(0, order.getLastTicks());
             assertEquals(0, order.getLastLots());
+            assertEquals(0, order.getLastTicks());
             assertEquals(1, order.getMinLots());
             assertEquals(NOW, order.getCreated());
             assertEquals(NOW + 1, order.getModified());

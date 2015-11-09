@@ -6,14 +6,12 @@ package com.swirlycloud.twirly.domain;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.node.RbNode;
-
 /**
  * Fields common to both Order and Exec.
  * 
  * @author Mark Aylett
  */
-public @NonNullByDefault interface Instruct extends RbNode, Request {
+public @NonNullByDefault interface Instruct extends Request {
 
     @Override
     long getId();
@@ -47,10 +45,10 @@ public @NonNullByDefault interface Instruct extends RbNode, Request {
     @Override
     Side getSide();
 
-    long getTicks();
-
     @Override
     long getLots();
+
+    long getTicks();
 
     long getResd();
 
@@ -70,14 +68,14 @@ public @NonNullByDefault interface Instruct extends RbNode, Request {
     double getAvgTicks();
 
     /**
-     * @return last traded ticks.
-     */
-    long getLastTicks();
-
-    /**
      * @return last traded lots.
      */
     long getLastLots();
+
+    /**
+     * @return last traded ticks.
+     */
+    long getLastTicks();
 
     long getMinLots();
 

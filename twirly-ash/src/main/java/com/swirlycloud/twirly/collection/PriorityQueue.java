@@ -5,7 +5,6 @@ package com.swirlycloud.twirly.collection;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.NoSuchElementException;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -124,6 +123,9 @@ public final class PriorityQueue<V> implements Sequence<V> {
     }
 
     public final V removeFirst() {
+        if (isEmpty()) {
+            return null;
+        }
         // Root has lowest value.
         final V elem = getFirst();
         // Fill gap with last.
@@ -142,9 +144,6 @@ public final class PriorityQueue<V> implements Sequence<V> {
     @SuppressWarnings("unchecked")
     @Override
     public final V getFirst() {
-        if (size < 1) {
-            throw new NoSuchElementException();
-        }
         // Root has lowest value.
         return (V) elems[1];
     }

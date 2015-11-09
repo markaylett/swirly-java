@@ -52,7 +52,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
                 insertTraderStmt = conn.prepareStatement(
                         "INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn.prepareStatement(
-                        "INSERT INTO Exec_t (id, orderId, trader, market, contr, settlDay, ref, stateId, sideId, ticks, lots, resd, exec, cost, lastTicks, lastLots, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        "INSERT INTO Exec_t (trader, market, contr, settlDay, id, ref, orderId, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 updateMarketStmt = conn.prepareStatement(
                         "UPDATE Market_t SET display = ?, state = ? WHERE mnem = ?");
                 updateTraderStmt = conn
@@ -181,23 +181,23 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     public final void createExec(@NonNull Exec exec) {
         try {
             int i = 1;
-            setParam(insertExecStmt, i++, exec.getId());
-            setNullIfZero(insertExecStmt, i++, exec.getOrderId());
             setParam(insertExecStmt, i++, exec.getTrader());
             setParam(insertExecStmt, i++, exec.getMarket());
             setParam(insertExecStmt, i++, exec.getContr());
             setNullIfZero(insertExecStmt, i++, exec.getSettlDay());
+            setParam(insertExecStmt, i++, exec.getId());
             setParam(insertExecStmt, i++, exec.getRef());
+            setNullIfZero(insertExecStmt, i++, exec.getOrderId());
             setParam(insertExecStmt, i++, exec.getState().intValue());
             setParam(insertExecStmt, i++, exec.getSide().intValue());
-            setParam(insertExecStmt, i++, exec.getTicks());
             setParam(insertExecStmt, i++, exec.getLots());
+            setParam(insertExecStmt, i++, exec.getTicks());
             setParam(insertExecStmt, i++, exec.getResd());
             setParam(insertExecStmt, i++, exec.getExec());
             setParam(insertExecStmt, i++, exec.getCost());
             if (exec.getLastLots() > 0) {
-                setParam(insertExecStmt, i++, exec.getLastTicks());
                 setParam(insertExecStmt, i++, exec.getLastLots());
+                setParam(insertExecStmt, i++, exec.getLastTicks());
             } else {
                 insertExecStmt.setNull(i++, Types.INTEGER);
                 insertExecStmt.setNull(i++, Types.INTEGER);

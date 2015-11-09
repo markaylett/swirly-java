@@ -27,6 +27,25 @@ import com.swirlycloud.twirly.util.Params;
 @SuppressWarnings("serial")
 public abstract class RestServlet extends HttpServlet {
 
+    private static boolean isBoolean(@NonNull String name) {
+        boolean result = false;
+        switch (name.charAt(0)) {
+        case 'e':
+            result = "expired".equals(name);
+            break;
+        case 'i':
+            result = "internal".equals(name);
+            break;
+        case 'q':
+            result = "quotes".equals(name);
+            break;
+        case 'v':
+            result = "views".equals(name);
+            break;
+        }
+        return result;
+    }
+
     protected static Realm realm;
     protected static Rest rest;
 
@@ -35,13 +54,13 @@ public abstract class RestServlet extends HttpServlet {
             @SuppressWarnings("unchecked")
             @Override
             public final <T> T getParam(String name, Class<T> clazz) {
+                assert name != null;
                 final String s = req.getParameter(name);
                 final Object val;
                 if (s != null) {
                     if ("depth".equals(name)) {
                         val = Integer.valueOf(s);
-                    } else if ("expired".equals(name) || "internal".equals(name)
-                            || "views".equals(name)) {
+                    } else if (isBoolean(name)) {
                         val = Boolean.valueOf(s);
                     } else {
                         val = s;
