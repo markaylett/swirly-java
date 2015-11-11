@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.app.LockableServ;
+import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketView;
@@ -400,9 +401,21 @@ public final @NonNullByDefault class BackUnrest {
         return rest.findTraderByEmail(email);
     }
 
+    public final RecStruct getRec(EntitySet es, Params params, long now) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getRec(es, params, now, sb);
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return parseRecStruct(p);
+        }
+    }
+
+    @Deprecated
     public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(withTraders, params, now, sb);
+        final EntitySet es = new EntitySet(
+                EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET | EntitySet.TRADER);
+        rest.getRec(es, params, now, sb);
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
             return parseRecStruct(p);

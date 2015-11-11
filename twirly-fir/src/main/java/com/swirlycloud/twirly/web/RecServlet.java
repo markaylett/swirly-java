@@ -11,6 +11,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.exception.ForbiddenException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
@@ -23,6 +24,28 @@ public class RecServlet extends RestServlet {
 
     protected static final int TYPE_PART = 0;
     protected static final int MNEM_PART = 1;
+
+    private static RecType toRecType(int n) {
+        RecType type;
+        switch (n) {
+        case EntitySet.ASSET:
+            type = RecType.ASSET;
+            break;
+        case EntitySet.CONTR:
+            type = RecType.CONTR;
+            break;
+        case EntitySet.MARKET:
+            type = RecType.MARKET;
+            break;
+        case EntitySet.TRADER:
+            type = RecType.TRADER;
+            break;
+        default:
+            throw new IllegalArgumentException("invalid side");
+
+        }
+        return type;
+    }
 
     @SuppressWarnings("null")
     @Override
@@ -42,42 +65,34 @@ public class RecServlet extends RestServlet {
             final long now = now();
             boolean match = false;
             if (parts.length == 0) {
-                rest.getRec(realm.isUserAdmin(req), params, now, resp.getWriter());
+                int bs = EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET;
+                if (realm.isUserAdmin(req)) {
+                    bs |= EntitySet.TRADER;
+                }
+                final EntitySet es = new EntitySet(bs);
+                rest.getRec(es, params, now, resp.getWriter());
                 match = true;
-            } else if ("asset".equals(parts[TYPE_PART])) {
-                if (parts.length == 1) {
-                    rest.getRec(RecType.ASSET, params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 2) {
-                    rest.getRec(RecType.ASSET, parts[MNEM_PART], params, now, resp.getWriter());
-                    match = true;
-                }
-            } else if ("contr".equals(parts[TYPE_PART])) {
-                if (parts.length == 1) {
-                    rest.getRec(RecType.CONTR, params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 2) {
-                    rest.getRec(RecType.CONTR, parts[MNEM_PART], params, now, resp.getWriter());
-                    match = true;
-                }
-            } else if ("market".equals(parts[TYPE_PART])) {
-                if (parts.length == 1) {
-                    rest.getRec(RecType.MARKET, params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 2) {
-                    rest.getRec(RecType.MARKET, parts[MNEM_PART], params, now, resp.getWriter());
-                    match = true;
-                }
-            } else if ("trader".equals(parts[TYPE_PART])) {
-                if (!realm.isUserAdmin(req)) {
-                    throw new ForbiddenException("user is not an admin");
-                }
-                if (parts.length == 1) {
-                    rest.getRec(RecType.TRADER, params, now, resp.getWriter());
-                    match = true;
-                } else if (parts.length == 2) {
-                    rest.getRec(RecType.TRADER, parts[MNEM_PART], params, now, resp.getWriter());
-                    match = true;
+            } else {
+                final EntitySet es = EntitySet.parse(parts[TYPE_PART]);
+                if (!es.isSessSet()) {
+                    if (es.isTraderSet() && !realm.isUserAdmin(req)) {
+                        throw new ForbiddenException("user is not an admin");
+                    }
+                    if (es.hasMany()) {
+                        if (parts.length == 1) {
+                            rest.getRec(es, params, now, resp.getWriter());
+                            match = true;
+                        }
+                    } else {
+                        final RecType type = toRecType(es.getFirst());
+                        if (parts.length == 1) {
+                            rest.getRec(type, params, now, resp.getWriter());
+                            match = true;
+                        } else if (parts.length == 2) {
+                            rest.getRec(type, parts[MNEM_PART], params, now, resp.getWriter());
+                            match = true;
+                        }
+                    }
                 }
             }
 

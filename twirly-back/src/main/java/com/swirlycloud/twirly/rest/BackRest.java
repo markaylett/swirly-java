@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.app.Result;
 import com.swirlycloud.twirly.app.Serv;
+import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
@@ -99,21 +100,41 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getRec(boolean withTraders, Params params, long now, Appendable out)
+    public final void getRec(EntitySet es, Params params, long now, Appendable out)
             throws IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
             serv.poll(now);
             lock = serv.demoteLock();
-            out.append("{\"assets\":");
-            toJsonArray(serv.getFirstRec(RecType.ASSET), params, out);
-            out.append(",\"contrs\":");
-            toJsonArray(serv.getFirstRec(RecType.CONTR), params, out);
-            out.append(",\"markets\":");
-            toJsonArray(serv.getFirstRec(RecType.MARKET), params, out);
-            if (withTraders) {
-                out.append(",\"traders\":");
+            int i = 0;
+            out.append('{');
+            if (es.isAssetSet()) {
+                out.append("\"assets\":");
+                toJsonArray(serv.getFirstRec(RecType.ASSET), params, out);
+                ++i;
+            }
+            if (es.isContrSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"contrs\":");
+                toJsonArray(serv.getFirstRec(RecType.CONTR), params, out);
+                ++i;
+            }
+            if (es.isMarketSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"markets\":");
+                toJsonArray(serv.getFirstRec(RecType.MARKET), params, out);
+                ++i;
+            }
+            if (es.isTraderSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"traders\":");
                 toJsonArray(serv.getFirstRec(RecType.TRADER), params, out);
             }
             out.append('}');
