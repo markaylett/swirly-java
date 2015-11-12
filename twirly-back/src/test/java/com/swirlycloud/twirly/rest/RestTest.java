@@ -138,33 +138,6 @@ public abstract class RestTest {
         });
     }
 
-    protected static void assertView(String market, String contr, int settlDay, int level,
-            long bidTicks, long bidResd, int bidCount, long offerTicks, long offerResd,
-            int offerCount, long lastTicks, long lastLots, long lastTime, MarketView actual)
-                    throws NotFoundException, IOException {
-        assertNotNull(actual);
-        assertEquals(market, actual.getMarket());
-        assertEquals(contr, actual.getContr());
-        assertEquals(settlDay, actual.getSettlDay());
-
-        assertEquals(bidTicks, actual.getBidTicks(level));
-        assertEquals(bidResd, actual.getBidResd(level));
-        assertEquals(bidCount, actual.getBidCount(level));
-
-        assertEquals(offerTicks, actual.getOfferTicks(level));
-        assertEquals(offerResd, actual.getOfferResd(level));
-        assertEquals(offerCount, actual.getOfferCount(level));
-
-        assertEquals(lastTicks, actual.getLastTicks());
-        assertEquals(lastLots, actual.getLastLots());
-        assertEquals(lastTime, actual.getLastTime());
-    }
-
-    protected static void assertView(String market, String contr, int settlDay, MarketView actual)
-            throws NotFoundException, IOException {
-        assertView(market, contr, settlDay, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, actual);
-    }
-
     protected static void assertOrder(String trader, String market, State state, Side side,
             long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
             Order actual) {
@@ -220,6 +193,33 @@ public abstract class RestTest {
         assertEquals(buyLots, actual.getBuyLots());
         assertEquals(sellCost, actual.getSellCost());
         assertEquals(sellLots, actual.getSellLots());
+    }
+
+    protected static void assertView(String market, String contr, int settlDay, int level,
+            long bidTicks, long bidResd, int bidCount, long offerTicks, long offerResd,
+            int offerCount, long lastTicks, long lastLots, long lastTime, MarketView actual)
+                    throws NotFoundException, IOException {
+        assertNotNull(actual);
+        assertEquals(market, actual.getMarket());
+        assertEquals(contr, actual.getContr());
+        assertEquals(settlDay, actual.getSettlDay());
+
+        assertEquals(bidTicks, actual.getBidTicks(level));
+        assertEquals(bidResd, actual.getBidResd(level));
+        assertEquals(bidCount, actual.getBidCount(level));
+
+        assertEquals(offerTicks, actual.getOfferTicks(level));
+        assertEquals(offerResd, actual.getOfferResd(level));
+        assertEquals(offerCount, actual.getOfferCount(level));
+
+        assertEquals(lastTicks, actual.getLastTicks());
+        assertEquals(lastLots, actual.getLastLots());
+        assertEquals(lastTime, actual.getLastTime());
+    }
+
+    protected static void assertView(String market, String contr, int settlDay, MarketView actual)
+            throws NotFoundException, IOException {
+        assertView(market, contr, settlDay, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, actual);
     }
 
     protected final Trader postTrader(@NonNull String mnem, String display, @NonNull String email)

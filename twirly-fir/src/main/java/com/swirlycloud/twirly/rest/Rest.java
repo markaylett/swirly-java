@@ -25,13 +25,7 @@ public @NonNullByDefault interface Rest {
     void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
-    void getView(Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException;
-
-    void getView(String market, Params params, long now, Appendable out)
-            throws NotFoundException, ServiceUnavailableException, IOException;
-
-    void getSess(String trader, Params params, long now, Appendable out)
+    void getSess(String trader, EntitySet es, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getOrder(String trader, Params params, long now, Appendable out)
@@ -68,6 +62,12 @@ public @NonNullByDefault interface Rest {
             throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getQuote(String trader, String market, long id, Params params, long now, Appendable out)
+            throws NotFoundException, ServiceUnavailableException, IOException;
+
+    void getView(Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException;
+
+    void getView(String market, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
 
     long getTimeout();

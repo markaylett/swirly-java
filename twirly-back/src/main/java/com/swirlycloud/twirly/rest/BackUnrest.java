@@ -272,10 +272,10 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public static final class TransStruct {
-        public @Nullable MarketView view;
         public final Map<Long, Order> orders = new HashMap<>();
         public final Map<Long, Exec> execs = new HashMap<>();
         public @Nullable Posn posn;
+        public @Nullable MarketView view;
     }
 
     private static final RecStruct parseRecStruct(JsonParser p) throws IOException {
@@ -361,10 +361,10 @@ public final @NonNullByDefault class BackUnrest {
                 }
                 break;
             case START_OBJECT:
-                if ("view".equals(name)) {
-                    out.view = MarketView.parse(p);
-                } else if ("posn".equals(name)) {
+                if ("posn".equals(name)) {
                     out.posn = Posn.parse(p);
+                } else if ("view".equals(name)) {
+                    out.view = MarketView.parse(p);
                 } else {
                     throw new IOException(String.format("unexpected array field '%s'", name));
                 }
@@ -475,33 +475,10 @@ public final @NonNullByDefault class BackUnrest {
         return rec;
     }
 
-    public final Map<String, MarketView> getView(Params params, long now) throws IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.getView(params, now, sb);
-
-        final Map<String, MarketView> out = new HashMap<>();
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartArray(p);
-            parseViews(p, out);
-        }
-        return out;
-    }
-
-    public final MarketView getView(String market, Params params, long now)
+    public final SessStruct getSess(String trader, EntitySet es, Params params, long now)
             throws NotFoundException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getView(market, params, now, sb);
-
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return MarketView.parse(p);
-        }
-    }
-
-    public final SessStruct getSess(String trader, Params params, long now)
-            throws NotFoundException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        rest.getSess(trader, params, now, sb);
+        rest.getSess(trader, es, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
@@ -617,6 +594,29 @@ public final @NonNullByDefault class BackUnrest {
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
             return Posn.parse(p);
+        }
+    }
+
+    public final Map<String, MarketView> getView(Params params, long now) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getView(params, now, sb);
+
+        final Map<String, MarketView> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseViews(p, out);
+        }
+        return out;
+    }
+
+    public final MarketView getView(String market, Params params, long now)
+            throws NotFoundException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getView(market, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return MarketView.parse(p);
         }
     }
 

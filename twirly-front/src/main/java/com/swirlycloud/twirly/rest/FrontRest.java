@@ -5,7 +5,6 @@ package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
-import static com.swirlycloud.twirly.rest.RestUtil.*;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
@@ -125,15 +124,6 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
-    private final MarketViewTree readView(@Nullable Object value) throws InterruptedException {
-        MarketViewTree tree = (MarketViewTree) value;
-        if (tree == null) {
-            tree = model.readView(factory);
-            cache.create("view", tree);
-        }
-        return tree;
-    }
-
     private final RequestIdTree readOrder(String trader, @Nullable Object value)
             throws InterruptedException {
         RequestIdTree tree = (RequestIdTree) value;
@@ -168,6 +158,15 @@ public final @NonNullByDefault class FrontRest implements Rest {
         RequestIdTree tree = (RequestIdTree) value;
         if (tree == null) {
             tree = EMPTY_QUOTES;
+        }
+        return tree;
+    }
+
+    private final MarketViewTree readView(@Nullable Object value) throws InterruptedException {
+        MarketViewTree tree = (MarketViewTree) value;
+        if (tree == null) {
+            tree = model.readView(factory);
+            cache.create("view", tree);
         }
         return tree;
     }
@@ -236,7 +235,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             }
             if (es.isContrSet()) {
                 if (i > 0) {
-                    out.append(',');                    
+                    out.append(',');
                 }
                 out.append("\"contrs\":");
                 final RecTree contrs = readContr(map.get("contr"));
@@ -245,7 +244,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             }
             if (es.isMarketSet()) {
                 if (i > 0) {
-                    out.append(',');                    
+                    out.append(',');
                 }
                 out.append("\"markets\":");
                 final RecTree markets = readMarket(map.get("market"));
@@ -254,7 +253,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
             }
             if (es.isTraderSet()) {
                 if (i > 0) {
-                    out.append(',');                    
+                    out.append(',');
                 }
                 out.append("\"traders\":");
                 final RecTree traders = readTrader(map.get("trader"));
@@ -319,92 +318,82 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getView(Params params, long now, Appendable out)
+    public final void getSess(String trader, EntitySet es, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
-        final Collection<String> keys = Arrays.asList("timeout", "view");
-        assert keys != null;
-        try {
-            final Map<String, Object> map = cache.read(keys).get();
-            timeout = readTimeout(map.get("timeout"));
-            final MarketViewTree views = readView(map.get("view"));
-
-            toJsonArray(views.getFirst(), params, out);
-        } catch (final ExecutionException e) {
-            throw new UncheckedExecutionException(e);
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status.
-            Thread.currentThread().interrupt();
-            throw new ServiceUnavailableException("service interrupted", e);
-        }
-    }
-
-    @Override
-    public final void getView(String market, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException {
-
-        final Collection<String> keys = Arrays.asList("timeout", "view");
-        assert keys != null;
-        try {
-            final Map<String, Object> map = cache.read(keys).get();
-            timeout = readTimeout(map.get("timeout"));
-            final MarketViewTree views = readView(map.get("view"));
-
-            RestUtil.filterMarket(views.getFirst(), market, params, out);
-        } catch (final ExecutionException e) {
-            throw new UncheckedExecutionException(e);
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status.
-            Thread.currentThread().interrupt();
-            throw new ServiceUnavailableException("service interrupted", e);
-        }
-    }
-
-    @Override
-    public final void getSess(String trader, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException {
-
-        final boolean withQuotes = getQuotesParam(params);
-        final boolean withViews = getViewsParam(params);
-
-        final String orderKey = "order:" + trader;
-        final String tradeKey = "trade:" + trader;
-        final String posnKey = "posn:" + trader;
-        final String quoteKey = "quote:" + trader;
+        String orderKey = null;
+        String tradeKey = null;
+        String posnKey = null;
+        String quoteKey = null;
 
         final Collection<String> keys = new ArrayList<>(6);
         keys.add("timeout");
-        keys.add(orderKey);
-        keys.add(tradeKey);
-        keys.add(posnKey);
-        if (withQuotes) {
+        if (es.isOrderSet()) {
+            orderKey = "order:" + trader;
+            keys.add(orderKey);
+        }
+        if (es.isTradeSet()) {
+            tradeKey = "trade:" + trader;
+            keys.add(tradeKey);
+        }
+        if (es.isPosnSet()) {
+            posnKey = "posn:" + trader;
+            keys.add(posnKey);
+        }
+        if (es.isQuoteSet()) {
+            quoteKey = "quote:" + trader;
             keys.add(quoteKey);
         }
-        if (withViews) {
+        if (es.isViewSet()) {
             keys.add("view");
         }
         try {
             final Map<String, Object> map = cache.read(keys).get();
             timeout = readTimeout(map.get("timeout"));
-            final RequestIdTree orders = readOrder(trader, map.get(orderKey));
-            final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
-            final int busDay = getBusDate(now).toJd();
-            final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
 
-            out.append("{\"orders\":");
-            toJsonArray(orders.getFirst(), params, out);
-            out.append(",\"trades\":");
-            toJsonArray(trades.getFirst(), params, out);
-            out.append(",\"posns\":");
-            toJsonArray(posns.getFirst(), params, out);
-            if (withQuotes) {
-                final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
-                out.append(",\"quotes\":");
-                toJsonArray(quotes.getFirst(), params, out);
+            int i = 0;
+            out.append('{');
+
+            if (es.isOrderSet()) {
+                out.append("\"orders\":");
+                final RequestIdTree orders = readOrder(trader, map.get(orderKey));
+                toJsonArray(orders.getFirst(), params, out);
+                ++i;
             }
-            if (withViews) {
+            if (es.isTradeSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"trades\":");
+                final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
+                toJsonArray(trades.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isPosnSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"posns\":");
+                final int busDay = getBusDate(now).toJd();
+                final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
+                toJsonArray(posns.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isQuoteSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"quotes\":");
+                final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
+                toJsonArray(quotes.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isViewSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"views\":");
                 final MarketViewTree views = readView(map.get("view"));
-                out.append(",\"views\":");
                 toJsonArray(views.getFirst(), params, out);
             }
             out.append('}');
@@ -692,6 +681,48 @@ public final @NonNullByDefault class FrontRest implements Rest {
                 throw new NotFoundException(String.format("trade '%d' does not exist", id));
             }
             trade.toJson(params, out);
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+    }
+
+    @Override
+    public final void getView(Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException {
+
+        final Collection<String> keys = Arrays.asList("timeout", "view");
+        assert keys != null;
+        try {
+            final Map<String, Object> map = cache.read(keys).get();
+            timeout = readTimeout(map.get("timeout"));
+            final MarketViewTree views = readView(map.get("view"));
+
+            toJsonArray(views.getFirst(), params, out);
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+    }
+
+    @Override
+    public final void getView(String market, Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException {
+
+        final Collection<String> keys = Arrays.asList("timeout", "view");
+        assert keys != null;
+        try {
+            final Map<String, Object> map = cache.read(keys).get();
+            timeout = readTimeout(map.get("timeout"));
+            final MarketViewTree views = readView(map.get("view"));
+
+            RestUtil.filterMarket(views.getFirst(), market, params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {
