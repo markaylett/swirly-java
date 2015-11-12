@@ -5,35 +5,27 @@
 var TraderModuleImpl = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/front/rec/market', function(markets) {
+        $.getJSON('/front/rec/market,trader', function(rec) {
             var contrMap = this.props.contrMap;
             var marketMap = {};
 
-            markets.forEach(function(market) {
+            rec.markets.forEach(function(market) {
                 enrichMarket(contrMap, market);
                 marketMap[market.key] = market.contr;
             });
 
-            this.setState({
-                marketMap: marketMap
-            });
-        }.bind(this)).fail(function(xhr) {
-            this.setState({
-                error: parseError(xhr)
-            });
-        }.bind(this));
-        $.getJSON('/front/rec/trader', function(traders) {
             var staging = this.staging;
-
             staging.traders.clear();
-            traders.forEach(function(trader) {
+            rec.traders.forEach(function(trader) {
                 enrichTrader(trader);
                 staging.traders.set(trader.key, trader);
             });
 
             this.setState({
+                marketMap: marketMap,
                 traders: staging.traders.toSortedArray()
             });
+
         }.bind(this)).fail(function(xhr) {
             this.setState({
                 error: parseError(xhr)
