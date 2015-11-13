@@ -23,6 +23,55 @@ var QuoteModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
+    postQuote: function(market, side, lots) {
+        console.debug('postQuote: market=' + market + ', side=' + side
+                       + ', lots=' + lots);
+        var req = {};
+        var contr = undefined;
+        if (isSpecified(market)) {
+            contr = this.props.marketMap[market];
+        } else {
+            this.onReportError(internalError('market not specified'));
+            return;
+        }
+        if (contr === undefined) {
+            this.onReportError(internalError('invalid market: ' + market));
+            return;
+        }
+        if (isSpecified(side)) {
+            req.side = side;
+        } else {
+            this.onReportError(internalError('side not specified'));
+            return;
+        }
+        if (isSpecified(lots) && lots > 0) {
+            req.lots = parseInt(lots);
+        } else {
+            this.onReportError(internalError('lots not specified'));
+            return;
+        }
+
+        $.ajax({
+            type: 'post',
+            url: '/back/sess/quote/' + market,
+            data: JSON.stringify(req)
+        }).done(function(quote, status, xhr) {
+
+            var contrMap = this.props.contrMap;
+            var staging = this.staging;
+
+            var quotes = staging.quotes;
+
+            this.resetTimeout(xhr);
+            enrichQuote(contrMap, quote);
+            quotes.set(quote.key, quote);
+            this.setState({
+                quotes: quotes.toSortedArray()
+            });
+        }.bind(this)).fail(function(xhr) {
+            this.onReportError(parseError(xhr));
+        }.bind(this));
+    },
     // DOM Events.
     onClearErrors: function() {
         console.debug('onClearErrors');
@@ -40,12 +89,16 @@ var QuoteModuleImpl = React.createClass({
             errors: errors.toArray()
         });
     },
+    onPostQuote: function(market, side, lots) {
+        this.postQuote(market, side, lots);
+    },
     // Lifecycle.
     getInitialState: function() {
         return {
             module: {
                 onClearErrors: this.onClearErrors,
-                onReportError: this.onReportError
+                onReportError: this.onReportError,
+                onPostQuote: this.onPostQuote
             },
             errors: [],
             quotes: []
@@ -57,7 +110,7 @@ var QuoteModuleImpl = React.createClass({
     },
     render: function() {
         var props = this.props;
-        var contrMap = props.contrMap;
+        var marketMap = props.marketMap;
 
         var state = this.state;
         var module = state.module;
@@ -71,6 +124,7 @@ var QuoteModuleImpl = React.createClass({
         return (
             <div className="quoteModuleImpl">
               <MultiAlertWidget module={module} errors={errors}/>
+              <NewQuoteForm ref="newOrder" module={module} marketMap={marketMap}/>
               <div style={marginTop}>
                 <QuoteTable module={module} quotes={quotes}/>
               </div>
@@ -100,14 +154,20 @@ var QuoteModuleImpl = React.createClass({
 var QuoteModule = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/front/rec/contr', function(contrs, status, xhr) {
+        $.getJSON('/front/rec/contr,market', function(rec, status, xhr) {
             var contrMap = {};
-            contrs.forEach(function(contr) {
+            var marketMap = {};
+            rec.contrs.forEach(function(contr) {
                 enrichContr(contr);
                 contrMap[contr.mnem] = contr;
             });
+            rec.markets.forEach(function(market) {
+                enrichMarket(contrMap, market);
+                marketMap[market.key] = market.contr;
+            });
             this.setState({
-                contrMap: contrMap
+                contrMap: contrMap,
+                marketMap: marketMap
             });
         }.bind(this)).fail(function(xhr) {
             this.setState({
@@ -123,7 +183,8 @@ var QuoteModule = React.createClass({
     getInitialState: function() {
         return {
             error: null,
-            contrMap: null
+            contrMap: null,
+            marketMap: null
         };
     },
     componentDidMount: function() {
@@ -132,6 +193,7 @@ var QuoteModule = React.createClass({
     render: function() {
         var state = this.state;
         var contrMap = state.contrMap;
+        var marketMap = state.marketMap;
         var error = state.error;
         var body = undefined;
         if (error !== null) {
@@ -140,7 +202,8 @@ var QuoteModule = React.createClass({
             );
         } else if (contrMap !== null) {
             body = (
-                <QuoteModuleImpl contrMap={contrMap} pollInterval={this.props.pollInterval}/>
+                <QuoteModuleImpl contrMap={contrMap} marketMap={marketMap}
+                                 pollInterval={this.props.pollInterval}/>
             );
         }
         if (body !== undefined) {

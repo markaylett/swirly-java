@@ -172,6 +172,101 @@ var NewOrderForm = React.createClass({
     }
 });
 
+var NewQuoteForm = React.createClass({
+    // Mutators.
+    setFields: function(market, lots) {
+        var newState = {};
+        if (market !== undefined) {
+            newState.market = market;
+        }
+        if (lots !== undefined) {
+            newState.lots = lots;
+        }
+        this.setState(newState);
+    },
+    // DOM Events.
+    onChangeMarket: function(event) {
+        this.setState({
+            market: event.target.value
+        });
+    },
+    onChangeLots: function(event) {
+        this.setState({
+            lots: event.target.value
+        });
+    },
+    onClickBuy: function(event) {
+        event.preventDefault();
+        var state = this.state;
+        var market = state.market;
+        var lots = state.lots;
+        this.props.module.onPostQuote(market, 'BUY', lots);
+    },
+    onClickSell: function(event) {
+        event.preventDefault();
+        var state = this.state;
+        var market = state.market;
+        var lots = state.lots;
+        this.props.module.onPostQuote(market, 'SELL', lots);
+    },
+    // Lifecycle.
+    getInitialState: function() {
+        return {
+            market: undefined,
+            lots: undefined
+        };
+    },
+    componentDidMount: function() {
+        var node = this.refs.market.getDOMNode();
+        $(node).typeahead({
+            items: 4,
+            source: function(query, process) {
+                var marketKeys = Object.keys(this.props.marketMap);
+                process(marketKeys);
+            }.bind(this),
+            updater: function(value) {
+                this.setState({
+                    market: value
+                });
+                return value;
+            }.bind(this)
+        });
+    },
+    render: function() {
+        var state = this.state;
+        var market = state.market;
+        var lots = state.lots;
+
+        var contr = this.props.marketMap[market];
+        var minLots = 1;
+        if (contr !== undefined) {
+            minLots = contr.minLots;
+        }
+        return (
+            <form className="newQuoteForm form-inline">
+              <div className="form-group">
+                <input ref="market" type="text" className="form-control" placeholder="Market"
+                       value={market} onChange={this.onChangeMarket}/>
+              </div>
+              <div className="form-group">
+                <input type="number" className="form-control" placeholder="Lots"
+                       value={lots} onChange={this.onChangeLots} min={minLots}/>
+              </div>
+              <div className="btn-group">
+                <button type="button" className="btn btn-default"
+                        onClick={this.onClickBuy}>
+                  <span className="glyphicon glyphicon-plus"></span> Buy
+                </button>
+                <button type="button" className="btn btn-default"
+                        onClick={this.onClickSell}>
+                  <span className="glyphicon glyphicon-minus"></span> Sell
+                </button>
+              </div>
+            </form>
+        );
+    }
+});
+
 var ReviseOrderForm = React.createClass({
     // Mutators.
     setFields: function(market, lots, price) {

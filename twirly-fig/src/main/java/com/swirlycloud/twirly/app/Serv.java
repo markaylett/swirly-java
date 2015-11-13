@@ -67,15 +67,16 @@ public @NonNullByDefault class Serv {
     private static final int DIRTY_CONTR = 1 << 1;
     private static final int DIRTY_MARKET = 1 << 2;
     private static final int DIRTY_TRADER = 1 << 3;
-    private static final int DIRTY_VIEW = 1 << 4;
+    private static final int DIRTY_VIEW = 1 << 5;
+    private static final int DIRTY_TIMEOUT = 1 << 6;
     private static final int DIRTY_ALL = DIRTY_ASSET | DIRTY_CONTR | DIRTY_MARKET | DIRTY_TRADER
-            | DIRTY_VIEW;
+            | DIRTY_VIEW | DIRTY_TIMEOUT;
 
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
-    // 5 minutes.
-    private static final int QUOTE_EXPIRY = 5 * 60 * 1000;
+    // 30 seconds.
+    private static final int QUOTE_EXPIRY = 30 * 1000;
 
     private final Journ journ;
     private final Cache cache;
@@ -99,6 +100,10 @@ public @NonNullByDefault class Serv {
     private TraderSess dirtySess;
     @Nullable
     private MarketBook dirtyBook;
+
+    private final void setDirty(int dirty) {
+        this.dirty |= dirty;
+    }
 
     private final void setDirty(TraderSess next, int dirty) {
         dirtySess = TraderSess.insertDirty(dirtySess, next, dirty);
@@ -136,12 +141,10 @@ public @NonNullByDefault class Serv {
             dirty &= ~DIRTY_TRADER;
         }
 
-        while (dirtySess != null) {
-            final TraderSess sess = dirtySess;
-            assert sess != null;
-            sess.updateCache(cache);
-            // Pop if flush succeeded.
-            dirtySess = sess.popDirty();
+        if ((dirty & DIRTY_TIMEOUT) != 0) {
+            cache.update("timeout", getTimeout());
+            // Reset flag on success.
+            dirty &= ~DIRTY_TIMEOUT;
         }
 
         while (dirtyBook != null) {
@@ -152,6 +155,15 @@ public @NonNullByDefault class Serv {
             dirtyBook = book.popDirty();
         }
 
+        while (dirtySess != null) {
+            final TraderSess sess = dirtySess;
+            assert sess != null;
+            sess.updateCache(cache);
+            // Pop if flush succeeded.
+            dirtySess = sess.popDirty();
+        }
+
+        // Must happen after book has been updated above.
         if ((dirty & DIRTY_VIEW) != 0) {
             cache.update("view", views);
             // Reset flag on success.
@@ -509,7 +521,7 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
-        dirty |= DIRTY_TRADER;
+        setDirty(DIRTY_TRADER);
         setDirty(sess, TraderSess.DIRTY_ALL);
 
         traders.insert(sess);
@@ -534,7 +546,7 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
-        dirty |= DIRTY_TRADER;
+        setDirty(DIRTY_TRADER);
 
         sess.setDisplay(display);
 
@@ -689,7 +701,7 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
-        dirty |= (DIRTY_MARKET | DIRTY_VIEW);
+        setDirty(DIRTY_MARKET | DIRTY_VIEW);
 
         markets.pinsert(book, parent);
         views.insert(book.getView());
@@ -723,7 +735,7 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
-        dirty |= DIRTY_MARKET;
+        setDirty(DIRTY_MARKET);
 
         book.setDisplay(display);
         book.setState(state);
@@ -1371,6 +1383,9 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
+    // FIXME: move to datastore.
+    private int nextQuoteId = 1;
+
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
             Side side, long lots, long now) throws NotFoundException {
         final Order makerOrder = matchQuote(book, side, lots);
@@ -1378,10 +1393,13 @@ public @NonNullByDefault class Serv {
             throw new NotFoundException("no liquidity available");
         }
 
-        final Quote quote = factory.newQuote(sess.getMnem(), book, 1, ref, side,
-                makerOrder.getTicks(), lots, now, now + QUOTE_EXPIRY);
+        final Quote quote = factory.newQuote(sess.getMnem(), book, nextQuoteId++, ref, side, lots,
+                makerOrder.getTicks(), now, now + QUOTE_EXPIRY);
 
+        setDirty(DIRTY_TIMEOUT);
         setDirty(book);
+        setDirty(sess, TraderSess.DIRTY_QUOTE);
+
         quotes.add(quote);
         sess.insertQuote(quote);
 
@@ -1418,7 +1436,7 @@ public @NonNullByDefault class Serv {
             if (book.isSettlDaySet() && book.getSettlDay() <= busDay) {
                 views.remove(book.getView());
                 markets.remove(book);
-                dirty |= (DIRTY_MARKET | DIRTY_VIEW);
+                setDirty(DIRTY_MARKET | DIRTY_VIEW);
             }
         }
         for (RbNode node = traders.getFirst(); node != null; node = node.rbNext()) {
@@ -1433,21 +1451,23 @@ public @NonNullByDefault class Serv {
     public final void poll(long now) {
         for (;;) {
             final Quote quote = quotes.getFirst();
-            if (quote == null) {
+            // Break if no quote or not expired.
+            if (quote == null || quote.getExpiry() > now) {
                 break;
             }
-            if (quote.getExpiry() <= now) {
 
-                final TraderSess sess = (TraderSess) traders.find(quote.getTrader());
-                assert sess != null;
+            final TraderSess sess = (TraderSess) traders.find(quote.getTrader());
+            assert sess != null;
 
-                final MarketBook book = (MarketBook) markets.find(quote.getMarket());
-                assert book != null;
+            final MarketBook book = (MarketBook) markets.find(quote.getMarket());
+            assert book != null;
 
-                setDirty(book);
-                quotes.removeFirst();
-                sess.removeQuote(quote);
-            }
+            setDirty(DIRTY_TIMEOUT);
+            setDirty(book);
+            setDirty(sess, TraderSess.DIRTY_QUOTE);
+
+            quotes.removeFirst();
+            sess.removeQuote(quote);
         }
         updateDirty();
     }
