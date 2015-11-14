@@ -4,8 +4,11 @@
 
 var OrderModuleImpl = React.createClass({
     // Mutators.
-    refresh: function() {
-        $.getJSON('/front/sess/order,trade,posn,view', function(sess, status, xhr) {
+    refresh: function(url) {
+        if (url === undefined) {
+            url = '/front/sess/order,trade,posn,view';
+        }
+        $.getJSON(url, function(sess, status, xhr) {
             this.resetTimeout(xhr);
             var contrMap = this.props.contrMap;
             var staging = this.staging;
@@ -445,13 +448,14 @@ var OrderModuleImpl = React.createClass({
         var timeout = parseInt(xhr.getResponseHeader('Twirly-Timeout'));
         clearTimeout(this.timeout);
         if (timeout !== 0) {
+            console.debug('timeout set for ' + new Date(timeout));
             var delta = timeout - Date.now();
             this.timeout = setTimeout(function() {
-                console.debug('timeout');
-                $.getJSON('/back/task/poll', function(data, status, xhr) {
-                    this.resetTimeout(xhr);
-                }.bind(this));
+                console.debug('timeout now at ' + new Date(timeout));
+                this.refresh('/back/sess/order,trade,posn,view');
             }.bind(this), delta);
+        } else {
+            console.debug('timeout not set');
         }
     },
     staging: {
