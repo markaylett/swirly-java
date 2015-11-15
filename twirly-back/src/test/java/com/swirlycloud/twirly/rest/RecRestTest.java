@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.rec.Asset;
 import com.swirlycloud.twirly.rec.Contr;
@@ -30,7 +31,9 @@ public final class RecRestTest extends RestTest {
     public final void testGetAll() throws IOException {
 
         // With traders.
-        RecStruct st = unrest.getRec(true, PARAMS_NONE, NOW);
+        EntitySet es = new EntitySet(
+                EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET | EntitySet.TRADER);
+        RecStruct st = unrest.getRec(es, PARAMS_NONE, NOW);
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertEquals(2, st.markets.size());
@@ -41,7 +44,8 @@ public final class RecRestTest extends RestTest {
         assertTraders(st.traders);
 
         // Without traders.
-        st = unrest.getRec(false, PARAMS_NONE, NOW);
+        es = new EntitySet(EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET);
+        st = unrest.getRec(es, PARAMS_NONE, NOW);
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertEquals(2, st.markets.size());

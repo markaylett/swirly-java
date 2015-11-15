@@ -129,7 +129,9 @@ public final class PriorityQueue<V> implements Sequence<V> {
         // Root has lowest value.
         final V elem = getFirst();
         // Fill gap with last.
-        elems[1] = elems[size--];
+        final int i = size--; 
+        elems[1] = elems[i];
+        elems[i] = null;
         // Restore invariant.
         // heap(2, n)
         siftDown(size);

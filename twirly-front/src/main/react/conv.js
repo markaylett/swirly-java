@@ -54,3 +54,10 @@ function toDateStr(i) {
         + '-' + ('0' + mon).slice(-2)
         + '-' + ('0' + mday).slice(-2);
 }
+
+function toTimeStr(ms) {
+    var date = new Date(ms);
+    return ('0' + date.getHours()).slice(-2)
+        + ':' + ('0' + date.getMinutes()).slice(-2)
+        + ':' + ('0' + date.getSeconds()).slice(-2);
+}

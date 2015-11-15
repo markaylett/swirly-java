@@ -4,19 +4,15 @@
 
 var OrderModuleImpl = React.createClass({
     // Mutators.
-    refresh: function() {
-        $.getJSON('/front/sess?views=true', function(sess, status, xhr) {
+    refresh: function(url) {
+        if (url === undefined) {
+            url = '/front/sess/order,trade,posn,view';
+        }
+        $.getJSON(url, function(sess, status, xhr) {
             this.resetTimeout(xhr);
             var contrMap = this.props.contrMap;
             var staging = this.staging;
             var marketMap = {};
-
-            staging.views.clear();
-            sess.views.forEach(function(view) {
-                enrichView(contrMap, view);
-                marketMap[view.market] = view.contr;
-                staging.views.set(view.key, view);
-            });
 
             staging.working.clear();
             staging.done.clear();
@@ -38,14 +34,21 @@ var OrderModuleImpl = React.createClass({
                 staging.posns.set(posn.key, posn);
             });
 
+            staging.views.clear();
+            sess.views.forEach(function(view) {
+                enrichView(contrMap, view);
+                marketMap[view.market] = view.contr;
+                staging.views.set(view.key, view);
+            });
+
             this.setState({
                 marketMap: marketMap,
-                views: staging.views.toSortedArray(),
                 sess: {
                     working: staging.working.toSortedArray(),
                     done: staging.done.toSortedArray(),
                     trades: staging.trades.toSortedArray(),
-                    posns: staging.posns.toSortedArray()
+                    posns: staging.posns.toSortedArray(),
+                    views: staging.views.toSortedArray()
                 }
             });
         }.bind(this)).fail(function(xhr) {
@@ -117,9 +120,9 @@ var OrderModuleImpl = React.createClass({
             type: 'post',
             url: '/back/sess/order/' + market,
             data: JSON.stringify(req)
-        }).done(function(trans, status, xhr) {
+        }).done(function(result, status, xhr) {
             this.resetTimeout(xhr);
-            this.applyTrans(trans);
+            this.applyResult(result);
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
         }.bind(this));
@@ -145,9 +148,9 @@ var OrderModuleImpl = React.createClass({
             type: 'put',
             url: '/back/sess/order/' + market + '/' + ids,
             data: JSON.stringify(req)
-        }).done(function(trans, status, xhr) {
+        }).done(function(result, status, xhr) {
             this.resetTimeout(xhr);
-            this.applyTrans(trans);
+            this.applyResult(result);
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
         }.bind(this));
@@ -178,7 +181,8 @@ var OrderModuleImpl = React.createClass({
                     working: sess.working,
                     done: done.toSortedArray(),
                     trades: sess.trades,
-                    posns: sess.posns
+                    posns: sess.posns,
+                    views: sess.views
                 }
             });
         }.bind(this)).fail(function(xhr) {
@@ -211,29 +215,25 @@ var OrderModuleImpl = React.createClass({
                     working: sess.working,
                     done: sess.done,
                     trades: trades.toSortedArray(),
-                    posns: sess.posns
+                    posns: sess.posns,
+                    views: sess.views
                 }
             });
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    applyTrans: function(trans) {
+    applyResult: function(result) {
         var contrMap = this.props.contrMap;
         var staging = this.staging;
 
-        var views = staging.views;
         var working = staging.working;
         var done = staging.done;
         var trades = staging.trades;
         var posns = staging.posns;
+        var views = staging.views;
 
-        var view = trans.view;
-        if (view !== null) {
-            enrichView(contrMap, view);
-            views.set(view.key, view);
-        }
-        trans.orders.forEach(function(order) {
+        result.orders.forEach(function(order) {
             enrichOrder(contrMap, order);
             if (order.isDone) {
                 working.delete(order.key);
@@ -242,24 +242,29 @@ var OrderModuleImpl = React.createClass({
                 working.set(order.key, order);
             }
         });
-        trans.execs.forEach(function(exec) {
+        result.execs.forEach(function(exec) {
             if (exec.state === 'TRADE') {
                 enrichTrade(contrMap, exec);
                 trades.set(exec.key, exec);
             }
         });
-        var posn = trans.posn;
+        var posn = result.posn;
         if (posn !== null) {
             enrichPosn(contrMap, posn);
             staging.posns.set(posn.key, posn);
         }
+        var view = result.view;
+        if (view !== null) {
+            enrichView(contrMap, view);
+            views.set(view.key, view);
+        }
         this.setState({
-            views: views.toSortedArray(),
             sess: {
                 working: working.toSortedArray(),
                 done: done.toSortedArray(),
                 trades: trades.toSortedArray(),
-                posns: posns.toSortedArray()
+                posns: posns.toSortedArray(),
+                views: views.toSortedArray()
             }
         });
     },
@@ -385,12 +390,12 @@ var OrderModuleImpl = React.createClass({
             },
             errors: [],
             marketMap: {},
-            views: [],
             sess: {
                 working: [],
                 done: [],
                 trades: [],
-                posns: []
+                posns: [],
+                views: []
             },
             isSelectedWorking: false,
             isSelectedDone: false,
@@ -410,7 +415,6 @@ var OrderModuleImpl = React.createClass({
         var module = state.module;
         var errors = state.errors;
         var marketMap = state.marketMap;
-        var views = state.views;
         var sess = state.sess;
         var isSelectedWorking = state.isSelectedWorking;
         var isSelectedDone = state.isSelectedDone;
@@ -427,7 +431,7 @@ var OrderModuleImpl = React.createClass({
               <NewOrderForm ref="newOrder" module={module} marketMap={marketMap}
                             isSelectedWorking={isSelectedWorking}/>
               <div style={marginTop}>
-                <ViewTable module={module} views={views}/>
+                <ViewTable module={module} views={sess.views}/>
               </div>
               <div style={marginTop}>
                 <ReviseOrderForm ref="reviseOrder" module={module} marketMap={marketMap}
@@ -444,22 +448,23 @@ var OrderModuleImpl = React.createClass({
         var timeout = parseInt(xhr.getResponseHeader('Twirly-Timeout'));
         clearTimeout(this.timeout);
         if (timeout !== 0) {
+            console.debug('timeout set for ' + new Date(timeout));
             var delta = timeout - Date.now();
             this.timeout = setTimeout(function() {
-                console.debug('timeout');
-                $.getJSON('/back/task/poll', function(data, status, xhr) {
-                    this.resetTimeout(xhr);
-                }.bind(this));
+                console.debug('timeout now at ' + new Date(timeout));
+                this.refresh('/back/sess/order,trade,posn,view');
             }.bind(this), delta);
+        } else {
+            console.debug('timeout not set');
         }
     },
     staging: {
         errors: new Tail(5),
-        views: new Map(),
         working: new Map(),
         done: new Map(),
         trades: new Map(),
         posns: new Map(),
+        views: new Map(),
         selectedWorking: new Map(),
         selectedDone: new Map(),
         selectedTrades: new Map()

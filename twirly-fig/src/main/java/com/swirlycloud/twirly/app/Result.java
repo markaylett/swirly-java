@@ -74,12 +74,8 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonifiabl
 
     @Override
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
-        out.append("{\"view\":");
-        final MarketBook book = this.book;
-        assert book != null;
-        book.toJsonView(params, out);
         // Multiple orders may be updated if one trades with one's self.
-        out.append(",\"orders\":[");
+        out.append("{\"orders\":[");
         int i = 0;
         for (SlNode node = orders.getFirst(); node != null; node = node.slNext()) {
             final Order order = (Order) node;
@@ -117,6 +113,10 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonifiabl
         } else {
             out.append("null");
         }
+        out.append(",\"view\":");
+        final MarketBook book = this.book;
+        assert book != null;
+        book.toJsonView(params, out);
         out.append('}');
     }
 

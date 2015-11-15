@@ -6,8 +6,6 @@ package com.swirlycloud.twirly.rest;
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.twirly.rest.RestUtil.getExpiredParam;
-import static com.swirlycloud.twirly.rest.RestUtil.getQuotesParam;
-import static com.swirlycloud.twirly.rest.RestUtil.getViewsParam;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
@@ -18,6 +16,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.app.Result;
 import com.swirlycloud.twirly.app.Serv;
+import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.MarketBook;
@@ -99,21 +98,41 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getRec(boolean withTraders, Params params, long now, Appendable out)
+    public final void getRec(EntitySet es, Params params, long now, Appendable out)
             throws IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
             serv.poll(now);
             lock = serv.demoteLock();
-            out.append("{\"assets\":");
-            toJsonArray(serv.getFirstRec(RecType.ASSET), params, out);
-            out.append(",\"contrs\":");
-            toJsonArray(serv.getFirstRec(RecType.CONTR), params, out);
-            out.append(",\"markets\":");
-            toJsonArray(serv.getFirstRec(RecType.MARKET), params, out);
-            if (withTraders) {
-                out.append(",\"traders\":");
+            int i = 0;
+            out.append('{');
+            if (es.isAssetSet()) {
+                out.append("\"assets\":");
+                toJsonArray(serv.getFirstRec(RecType.ASSET), params, out);
+                ++i;
+            }
+            if (es.isContrSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"contrs\":");
+                toJsonArray(serv.getFirstRec(RecType.CONTR), params, out);
+                ++i;
+            }
+            if (es.isMarketSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"markets\":");
+                toJsonArray(serv.getFirstRec(RecType.MARKET), params, out);
+                ++i;
+            }
+            if (es.isTraderSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"traders\":");
                 toJsonArray(serv.getFirstRec(RecType.TRADER), params, out);
             }
             out.append('}');
@@ -158,43 +177,7 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getView(Params params, long now, Appendable out) throws IOException {
-        final LockableServ serv = (LockableServ) this.serv;
-        int lock = serv.writeLock();
-        try {
-            serv.poll(now);
-            lock = serv.demoteLock();
-            getView(serv.getFirstRec(RecType.MARKET), params, now, out);
-        } finally {
-            timeout = serv.getTimeout();
-            serv.unlock(lock);
-        }
-    }
-
-    @Override
-    public final void getView(String market, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
-        final LockableServ serv = (LockableServ) this.serv;
-        int lock = serv.writeLock();
-        try {
-            serv.poll(now);
-            lock = serv.demoteLock();
-            final MarketBook book = serv.getMarket(market);
-            final boolean withExpired = getExpiredParam(params);
-            final int busDay = getBusDate(now).toJd();
-            if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
-                throw new MarketClosedException(
-                        String.format("market '%s' has expired", book.getMnem()));
-            }
-            book.toJsonView(params, out);
-        } finally {
-            timeout = serv.getTimeout();
-            serv.unlock(lock);
-        }
-    }
-
-    @Override
-    public final void getSess(String trader, Params params, long now, Appendable out)
+    public final void getSess(String trader, EntitySet es, Params params, long now, Appendable out)
             throws NotFoundException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
@@ -202,18 +185,42 @@ public final @NonNullByDefault class BackRest implements Rest {
             serv.poll(now);
             lock = serv.demoteLock();
             final TraderSess sess = serv.getTrader(trader);
-            out.append("{\"orders\":");
-            toJsonArray(sess.getFirstOrder(), params, out);
-            out.append(",\"trades\":");
-            toJsonArray(sess.getFirstTrade(), params, out);
-            out.append(",\"posns\":");
-            toJsonArray(sess.getFirstPosn(), params, out);
-            if (getQuotesParam(params)) {
-                out.append(",\"quotes\":");
-                toJsonArray(sess.getFirstQuote(), params, out);
+            int i = 0;
+            out.append('{');
+            if (es.isOrderSet()) {
+                out.append("\"orders\":");
+                toJsonArray(sess.getFirstOrder(), params, out);
+                ++i;
             }
-            if (getViewsParam(params)) {
-                out.append(",\"views\":");
+            if (es.isTradeSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"trades\":");
+                toJsonArray(sess.getFirstTrade(), params, out);
+                ++i;
+            }
+            if (es.isPosnSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"posns\":");
+                toJsonArray(sess.getFirstPosn(), params, out);
+                ++i;
+            }
+            if (es.isQuoteSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"quotes\":");
+                toJsonArray(sess.getFirstQuote(), params, out);
+                ++i;
+            }
+            if (es.isViewSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"views\":");
                 getView(serv.getFirstRec(RecType.MARKET), params, now, out);
             }
             out.append('}');
@@ -426,6 +433,42 @@ public final @NonNullByDefault class BackRest implements Rest {
                 throw new NotFoundException(String.format("quote '%d' does not exist", id));
             }
             quote.toJson(params, out);
+        } finally {
+            timeout = serv.getTimeout();
+            serv.unlock(lock);
+        }
+    }
+
+    @Override
+    public final void getView(Params params, long now, Appendable out) throws IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        int lock = serv.writeLock();
+        try {
+            serv.poll(now);
+            lock = serv.demoteLock();
+            getView(serv.getFirstRec(RecType.MARKET), params, now, out);
+        } finally {
+            timeout = serv.getTimeout();
+            serv.unlock(lock);
+        }
+    }
+
+    @Override
+    public final void getView(String market, Params params, long now, Appendable out)
+            throws NotFoundException, IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        int lock = serv.writeLock();
+        try {
+            serv.poll(now);
+            lock = serv.demoteLock();
+            final MarketBook book = serv.getMarket(market);
+            final boolean withExpired = getExpiredParam(params);
+            final int busDay = getBusDate(now).toJd();
+            if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
+                throw new MarketClosedException(
+                        String.format("market '%s' has expired", book.getMnem()));
+            }
+            book.toJsonView(params, out);
         } finally {
             timeout = serv.getTimeout();
             serv.unlock(lock);

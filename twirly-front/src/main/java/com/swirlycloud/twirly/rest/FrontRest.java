@@ -5,7 +5,6 @@ package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.date.DateUtil.getBusDate;
 import static com.swirlycloud.twirly.date.JulianDay.maybeIsoToJd;
-import static com.swirlycloud.twirly.rest.RestUtil.*;
 import static com.swirlycloud.twirly.util.JsonUtil.toJsonArray;
 
 import java.io.IOException;
@@ -18,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
 import com.swirlycloud.twirly.domain.Order;
@@ -124,15 +124,6 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
-    private final MarketViewTree readView(@Nullable Object value) throws InterruptedException {
-        MarketViewTree tree = (MarketViewTree) value;
-        if (tree == null) {
-            tree = model.readView(factory);
-            cache.create("view", tree);
-        }
-        return tree;
-    }
-
     private final RequestIdTree readOrder(String trader, @Nullable Object value)
             throws InterruptedException {
         RequestIdTree tree = (RequestIdTree) value;
@@ -171,6 +162,15 @@ public final @NonNullByDefault class FrontRest implements Rest {
         return tree;
     }
 
+    private final MarketViewTree readView(@Nullable Object value) throws InterruptedException {
+        MarketViewTree tree = (MarketViewTree) value;
+        if (tree == null) {
+            tree = model.readView(factory);
+            cache.create("view", tree);
+        }
+        return tree;
+    }
+
     private final long readTimeout(@Nullable Object value) {
         return value != null ? (Long) value : 0;
     }
@@ -204,33 +204,59 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getRec(boolean withTraders, Params params, long now, Appendable out)
+    public final void getRec(EntitySet es, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
         final Collection<String> keys = new ArrayList<>(5);
-        keys.add("asset");
-        keys.add("contr");
-        keys.add("market");
-        if (withTraders) {
+        keys.add("timeout");
+        if (es.isAssetSet()) {
+            keys.add("asset");
+        }
+        if (es.isContrSet()) {
+            keys.add("contr");
+        }
+        if (es.isMarketSet()) {
+            keys.add("market");
+        }
+        if (es.isTraderSet()) {
             keys.add("trader");
         }
-        keys.add("timeout");
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RecTree assets = readAsset(map.get("asset"));
-            final RecTree contrs = readAsset(map.get("contr"));
-            final RecTree markets = readAsset(map.get("market"));
             timeout = readTimeout(map.get("timeout"));
 
-            out.append("{\"assets\":");
-            toJsonArray(assets.getFirst(), params, out);
-            out.append(",\"contrs\":");
-            toJsonArray(contrs.getFirst(), params, out);
-            out.append(",\"markets\":");
-            toJsonArray(markets.getFirst(), params, out);
-            if (withTraders) {
-                final RecTree traders = readAsset(map.get("trader"));
-                out.append(",\"traders\":");
+            int i = 0;
+            out.append('{');
+            if (es.isAssetSet()) {
+                out.append("\"assets\":");
+                final RecTree assets = readAsset(map.get("asset"));
+                toJsonArray(assets.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isContrSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"contrs\":");
+                final RecTree contrs = readContr(map.get("contr"));
+                toJsonArray(contrs.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isMarketSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"markets\":");
+                final RecTree markets = readMarket(map.get("market"));
+                toJsonArray(markets.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isTraderSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"traders\":");
+                final RecTree traders = readTrader(map.get("trader"));
                 toJsonArray(traders.getFirst(), params, out);
             }
             out.append('}');
@@ -248,12 +274,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
 
         final String name = toKey(recType);
-        final Collection<String> keys = Arrays.asList(name, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", name);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RecTree recs = readRec(recType, map.get(name));
             timeout = readTimeout(map.get("timeout"));
+            final RecTree recs = readRec(recType, map.get(name));
 
             toJsonArray(recs.getFirst(), params, out);
         } catch (final ExecutionException e) {
@@ -270,12 +296,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String name = toKey(recType);
-        final Collection<String> keys = Arrays.asList(name, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", name);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RecTree recs = readRec(recType, map.get(name));
             timeout = readTimeout(map.get("timeout"));
+            final RecTree recs = readRec(recType, map.get(name));
 
             final Rec rec = recs.find(mnem);
             if (rec == null) {
@@ -292,92 +318,82 @@ public final @NonNullByDefault class FrontRest implements Rest {
     }
 
     @Override
-    public final void getView(Params params, long now, Appendable out)
+    public final void getSess(String trader, EntitySet es, Params params, long now, Appendable out)
             throws ServiceUnavailableException, IOException {
 
-        final Collection<String> keys = Arrays.asList("view", "timeout");
-        assert keys != null;
-        try {
-            final Map<String, Object> map = cache.read(keys).get();
-            final MarketViewTree views = readView(map.get("view"));
-            timeout = readTimeout(map.get("timeout"));
-
-            toJsonArray(views.getFirst(), params, out);
-        } catch (final ExecutionException e) {
-            throw new UncheckedExecutionException(e);
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status.
-            Thread.currentThread().interrupt();
-            throw new ServiceUnavailableException("service interrupted", e);
-        }
-    }
-
-    @Override
-    public final void getView(String market, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException {
-
-        final Collection<String> keys = Arrays.asList("view", "timeout");
-        assert keys != null;
-        try {
-            final Map<String, Object> map = cache.read(keys).get();
-            final MarketViewTree views = readView(map.get("view"));
-            timeout = readTimeout(map.get("timeout"));
-
-            RestUtil.filterMarket(views.getFirst(), market, params, out);
-        } catch (final ExecutionException e) {
-            throw new UncheckedExecutionException(e);
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status.
-            Thread.currentThread().interrupt();
-            throw new ServiceUnavailableException("service interrupted", e);
-        }
-    }
-
-    @Override
-    public final void getSess(String trader, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException {
-
-        final boolean withQuotes = getQuotesParam(params);
-        final boolean withViews = getViewsParam(params);
-
-        final String orderKey = "order:" + trader;
-        final String tradeKey = "trade:" + trader;
-        final String posnKey = "posn:" + trader;
-        final String quoteKey = "quote:" + trader;
+        String orderKey = null;
+        String tradeKey = null;
+        String posnKey = null;
+        String quoteKey = null;
 
         final Collection<String> keys = new ArrayList<>(6);
-        keys.add(orderKey);
-        keys.add(tradeKey);
-        keys.add(posnKey);
-        if (withQuotes) {
+        keys.add("timeout");
+        if (es.isOrderSet()) {
+            orderKey = "order:" + trader;
+            keys.add(orderKey);
+        }
+        if (es.isTradeSet()) {
+            tradeKey = "trade:" + trader;
+            keys.add(tradeKey);
+        }
+        if (es.isPosnSet()) {
+            posnKey = "posn:" + trader;
+            keys.add(posnKey);
+        }
+        if (es.isQuoteSet()) {
+            quoteKey = "quote:" + trader;
             keys.add(quoteKey);
         }
-        if (withViews) {
+        if (es.isViewSet()) {
             keys.add("view");
         }
-        keys.add("timeout");
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree orders = readOrder(trader, map.get(orderKey));
-            final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
-            final int busDay = getBusDate(now).toJd();
-            final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
             timeout = readTimeout(map.get("timeout"));
 
-            out.append("{\"orders\":");
-            toJsonArray(orders.getFirst(), params, out);
-            out.append(",\"trades\":");
-            toJsonArray(trades.getFirst(), params, out);
-            out.append(",\"posns\":");
-            toJsonArray(posns.getFirst(), params, out);
-            if (withQuotes) {
-                final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
-                out.append(",\"quotes\":");
-                toJsonArray(quotes.getFirst(), params, out);
+            int i = 0;
+            out.append('{');
+
+            if (es.isOrderSet()) {
+                out.append("\"orders\":");
+                final RequestIdTree orders = readOrder(trader, map.get(orderKey));
+                toJsonArray(orders.getFirst(), params, out);
+                ++i;
             }
-            if (withViews) {
+            if (es.isTradeSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"trades\":");
+                final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
+                toJsonArray(trades.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isPosnSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"posns\":");
+                final int busDay = getBusDate(now).toJd();
+                final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
+                toJsonArray(posns.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isQuoteSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"quotes\":");
+                final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
+                toJsonArray(quotes.getFirst(), params, out);
+                ++i;
+            }
+            if (es.isViewSet()) {
+                if (i > 0) {
+                    out.append(',');
+                }
+                out.append("\"views\":");
                 final MarketViewTree views = readView(map.get("view"));
-                out.append(",\"views\":");
                 toJsonArray(views.getFirst(), params, out);
             }
             out.append('}');
@@ -395,12 +411,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
 
         final String orderKey = "order:" + trader;
-        final Collection<String> keys = Arrays.asList(orderKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", orderKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree orders = readOrder(trader, map.get(orderKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree orders = readOrder(trader, map.get(orderKey));
 
             toJsonArray(orders.getFirst(), params, out);
         } catch (final ExecutionException e) {
@@ -417,12 +433,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws ServiceUnavailableException, IOException {
 
         final String orderKey = "order:" + trader;
-        final Collection<String> keys = Arrays.asList(orderKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", orderKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree orders = readOrder(trader, map.get(orderKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree orders = readOrder(trader, map.get(orderKey));
 
             RestUtil.filterMarket(orders.getFirst(), market, params, out);
         } catch (final ExecutionException e) {
@@ -439,12 +455,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String orderKey = "order:" + trader;
-        final Collection<String> keys = Arrays.asList(orderKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", orderKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree orders = readOrder(trader, map.get(orderKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree orders = readOrder(trader, map.get(orderKey));
 
             final Order order = (Order) orders.find(market, id);
             if (order == null) {
@@ -465,12 +481,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
 
         final String tradeKey = "trade:" + trader;
-        final Collection<String> keys = Arrays.asList(tradeKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", tradeKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
 
             toJsonArray(trades.getFirst(), params, out);
         } catch (final ExecutionException e) {
@@ -487,12 +503,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws ServiceUnavailableException, IOException {
 
         final String tradeKey = "trade:" + trader;
-        final Collection<String> keys = Arrays.asList(tradeKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", tradeKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
 
             RestUtil.filterMarket(trades.getFirst(), market, params, out);
         } catch (final ExecutionException e) {
@@ -509,12 +525,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String tradeKey = "trade:" + trader;
-        final Collection<String> keys = Arrays.asList(tradeKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", tradeKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree trades = readTrade(trader, map.get(tradeKey));
 
             final Exec trade = (Exec) trades.find(market, id);
             if (trade == null) {
@@ -535,13 +551,13 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
 
         final String posnKey = "posn:" + trader;
-        final Collection<String> keys = Arrays.asList(posnKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", posnKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
+            timeout = readTimeout(map.get("timeout"));
             final int busDay = getBusDate(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
-            timeout = readTimeout(map.get("timeout"));
 
             toJsonArray(posns.getFirst(), params, out);
         } catch (final ExecutionException e) {
@@ -558,13 +574,13 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws ServiceUnavailableException, IOException {
 
         final String posnKey = "posn:" + trader;
-        final Collection<String> keys = Arrays.asList(posnKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", posnKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
+            timeout = readTimeout(map.get("timeout"));
             final int busDay = getBusDate(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
-            timeout = readTimeout(map.get("timeout"));
 
             RestUtil.filterPosn(posns.getFirst(), contr, params, out);
         } catch (final ExecutionException e) {
@@ -581,13 +597,13 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String posnKey = "posn:" + trader;
-        final Collection<String> keys = Arrays.asList(posnKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", posnKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
+            timeout = readTimeout(map.get("timeout"));
             final int busDay = getBusDate(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
-            timeout = readTimeout(map.get("timeout"));
 
             final Posn posn = posns.find(contr, maybeIsoToJd(settlDate));
             if (posn == null) {
@@ -609,12 +625,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String quoteKey = "quote:" + trader;
-        final Collection<String> keys = Arrays.asList(quoteKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", quoteKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
 
             toJsonArray(quotes.getFirst(), params, out);
         } catch (final ExecutionException e) {
@@ -631,12 +647,12 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String quoteKey = "quote:" + trader;
-        final Collection<String> keys = Arrays.asList(quoteKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", quoteKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
 
             RestUtil.filterMarket(quotes.getFirst(), market, params, out);
         } catch (final ExecutionException e) {
@@ -653,18 +669,60 @@ public final @NonNullByDefault class FrontRest implements Rest {
             Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
 
         final String quoteKey = "quote:" + trader;
-        final Collection<String> keys = Arrays.asList(quoteKey, "timeout");
+        final Collection<String> keys = Arrays.asList("timeout", quoteKey);
         assert keys != null;
         try {
             final Map<String, Object> map = cache.read(keys).get();
-            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
             timeout = readTimeout(map.get("timeout"));
+            final RequestIdTree quotes = readQuote(trader, map.get(quoteKey));
 
             final Exec trade = (Exec) quotes.find(market, id);
             if (trade == null) {
                 throw new NotFoundException(String.format("trade '%d' does not exist", id));
             }
             trade.toJson(params, out);
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+    }
+
+    @Override
+    public final void getView(Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException {
+
+        final Collection<String> keys = Arrays.asList("timeout", "view");
+        assert keys != null;
+        try {
+            final Map<String, Object> map = cache.read(keys).get();
+            timeout = readTimeout(map.get("timeout"));
+            final MarketViewTree views = readView(map.get("view"));
+
+            toJsonArray(views.getFirst(), params, out);
+        } catch (final ExecutionException e) {
+            throw new UncheckedExecutionException(e);
+        } catch (final InterruptedException e) {
+            // Restore the interrupted status.
+            Thread.currentThread().interrupt();
+            throw new ServiceUnavailableException("service interrupted", e);
+        }
+    }
+
+    @Override
+    public final void getView(String market, Params params, long now, Appendable out)
+            throws ServiceUnavailableException, IOException {
+
+        final Collection<String> keys = Arrays.asList("timeout", "view");
+        assert keys != null;
+        try {
+            final Map<String, Object> map = cache.read(keys).get();
+            timeout = readTimeout(map.get("timeout"));
+            final MarketViewTree views = readView(map.get("view"));
+
+            RestUtil.filterMarket(views.getFirst(), market, params, out);
         } catch (final ExecutionException e) {
             throw new UncheckedExecutionException(e);
         } catch (final InterruptedException e) {

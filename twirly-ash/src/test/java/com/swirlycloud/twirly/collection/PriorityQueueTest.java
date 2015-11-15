@@ -26,5 +26,7 @@ public final class PriorityQueueTest {
             assertEquals(Integer.valueOf(i), pq.pop());
         }
         assertTrue(pq.isEmpty());
+        assertNull(pq.getFirst());
+        assertNull(pq.removeFirst());
     }
 }

@@ -656,6 +656,7 @@ var QuoteRow = React.createClass({
     // Lifecycle.
     render: function() {
         var quote = this.props.quote;
+        var expiry = toTimeStr(quote.expiry);
         return (
             <tr>
               <td>{quote.market}</td>
@@ -663,7 +664,7 @@ var QuoteRow = React.createClass({
               <td>{quote.side}</td>
               <td style={alignRight}>{quote.lots}</td>
               <td style={alignRight}>{quote.price}</td>
-              <td>{quote.expiry}</td>
+              <td>{expiry}</td>
             </tr>
         );
     }

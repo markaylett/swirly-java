@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
@@ -44,14 +45,14 @@ public final class TraderRestTest extends RestTest {
             ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
         postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
-        final SessStruct out = unrest.getSess("MARAYL", PARAMS_NONE, NOW);
-        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
-                10, 12345, out.orders.get(Long.valueOf(1)));
-        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450,
-                10, 12345, out.orders.get(Long.valueOf(2)));
-        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
-                10, 12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL",
-                out.trades.get(Long.valueOf(3)));
+        EntitySet es = new EntitySet(EntitySet.ORDER | EntitySet.TRADE | EntitySet.POSN);
+        final SessStruct out = unrest.getSess("MARAYL", es, PARAMS_NONE, NOW);
+        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450, 10,
+                12345, out.orders.get(Long.valueOf(1)));
+        assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
+                12345, out.orders.get(Long.valueOf(2)));
+        assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450, 10,
+                12345, "EURUSD", SETTL_DAY, Role.MAKER, "MARAYL", out.trades.get(Long.valueOf(3)));
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
                 12345, "EURUSD", SETTL_DAY, Role.TAKER, "MARAYL", out.trades.get(Long.valueOf(4)));
         assertPosn("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 10, 123450, 10, 123450,
