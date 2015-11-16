@@ -31,7 +31,7 @@ public @NonNullByDefault class BasicFactory implements Factory {
     @Override
     public Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
             int expiryDay, int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
-            long maxExecId) {
+            long maxExecId, long maxQuoteId) {
         // Note that last five arguments are unused in this base implementation.
         return new Market(mnem, display, contr, settlDay, expiryDay, state);
     }
@@ -39,7 +39,7 @@ public @NonNullByDefault class BasicFactory implements Factory {
     @Override
     public final Market newMarket(String mnem, @Nullable String display, Memorable contr,
             int settlDay, int expiryDay, int state) {
-        return newMarket(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L);
+        return newMarket(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L, 0L);
     }
 
     @Override

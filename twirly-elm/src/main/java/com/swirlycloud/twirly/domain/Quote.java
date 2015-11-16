@@ -21,7 +21,7 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
     private static final long serialVersionUID = 1L;
 
     private final long ticks;
-    long expiry;
+    private final long expiry;
 
     Quote(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,
             Side side, long lots, long ticks, long created, long expiry) {

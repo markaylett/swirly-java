@@ -1383,18 +1383,23 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    // FIXME: move to datastore.
-    private int nextQuoteId = 1;
-
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
-            Side side, long lots, long now) throws NotFoundException {
+            Side side, long lots, long now) throws NotFoundException, ServiceUnavailableException {
         final Order makerOrder = matchQuote(book, side, lots);
         if (makerOrder == null) {
             throw new NotFoundException("no liquidity available");
         }
 
-        final Quote quote = factory.newQuote(sess.getMnem(), book, nextQuoteId++, ref, side, lots,
-                makerOrder.getTicks(), now, now + QUOTE_EXPIRY);
+        final Quote quote = factory.newQuote(sess.getMnem(), book, book.allocQuoteId(), ref, side,
+                lots, makerOrder.getTicks(), now, now + QUOTE_EXPIRY);
+
+        try {
+            journ.createQuote(quote);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
 
         setDirty(DIRTY_TIMEOUT);
         setDirty(book);

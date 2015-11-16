@@ -7,6 +7,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.JslNode;
 
@@ -49,6 +50,8 @@ public interface Journ extends AutoCloseable {
      * @throws NotFoundException
      */
     void createExecList(@NonNull JslNode first) throws NotFoundException;
+
+    void createQuote(@NonNull Quote quote) throws NotFoundException;
 
     void archiveOrder(@NonNull String market, long id, long modified) throws NotFoundException;
 

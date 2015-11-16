@@ -107,7 +107,7 @@ public final class FrontPageServlet extends HttpServlet {
         if (page.isRestricted() && !state.authenticate()) {
             return;
         }
-        if (page == Page.ORDER) {
+        if (page == Page.ORDER || page == Page.QUOTE) {
             try {
                 if (!state.isUserTrader()) {
                     page = Page.SIGNUP;

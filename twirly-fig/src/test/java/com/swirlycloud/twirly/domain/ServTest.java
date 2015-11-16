@@ -50,7 +50,7 @@ public final class ServTest {
             public final @NonNull RecTree readMarket(@NonNull Factory factory) {
                 final RecTree t = new RecTree();
                 t.insert(factory.newMarket("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"),
-                        SETTL_DAY, EXPIRY_DAY, STATE, 10, 12345, NOW - 2, 3, 2));
+                        SETTL_DAY, EXPIRY_DAY, STATE, 10, 12345, NOW - 2, 3, 2, 4));
                 return t;
             }
 
