@@ -111,10 +111,11 @@ public class JdbcModel implements Model {
         final long lastTime = rs.getLong("lastTime");
         final long maxOrderId = rs.getLong("maxOrderId");
         final long maxExecId = rs.getLong("maxExecId");
+        final long maxQuoteId = rs.getLong("maxQuoteId");
 
         assert mnem != null;
         return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state, lastLots,
-                lastTicks, lastTime, maxOrderId, maxExecId);
+                lastTicks, lastTime, maxOrderId, maxExecId, maxQuoteId);
     }
 
     private static @NonNull Trader getTrader(@NonNull ResultSet rs, @NonNull Factory factory)
@@ -320,7 +321,7 @@ public class JdbcModel implements Model {
                 selectContrStmt = conn.prepareStatement(
                         "SELECT mnem, display, asset, ccy, tickNumer, tickDenom, lotNumer, lotDenom, pipDp, minLots, maxLots FROM Contr_v");
                 selectMarketStmt = conn.prepareStatement(
-                        "SELECT mnem, display, contr, settlDay, expiryDay, state, lastLots, lastTicks, lastTime, maxOrderId, maxExecId FROM Market_v");
+                        "SELECT mnem, display, contr, settlDay, expiryDay, state, lastLots, lastTicks, lastTime, maxOrderId, maxExecId, maxQuoteId FROM Market_v");
                 selectTraderStmt = conn
                         .prepareStatement("SELECT mnem, display, email FROM Trader_t");
                 selectTraderByEmailStmt = conn

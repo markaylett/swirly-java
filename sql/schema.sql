@@ -389,6 +389,12 @@ CREATE TRIGGER beforeInsertOnExec
   END //
 DELIMITER ;
 
+CREATE TABLE Quote_t (
+  market CHAR(16) NOT NULL PRIMARY KEY,
+  id BIGINT NOT NULL
+)
+ENGINE = InnoDB;
+
 CREATE VIEW Asset_v AS
   SELECT
     a.mnem,
@@ -430,10 +436,13 @@ CREATE VIEW Market_v AS
     m.lastTicks,
     m.lastTime,
     MAX(e.orderId) maxOrderId,
-    MAX(e.id) maxExecId
+    MAX(e.id) maxExecId,
+    q.id maxQuoteId
   FROM Market_t m
   LEFT OUTER JOIN Exec_t e
   ON m.mnem = e.market
+  LEFT OUTER JOIN Quote_t q
+  ON m.mnem = q.market
   GROUP BY m.mnem
 ;
 

@@ -7,6 +7,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.node.JslNode;
@@ -42,6 +43,10 @@ public class MockDatastore extends MockModel implements Datastore {
 
     @Override
     public void createExecList(@NonNull JslNode first) {
+    }
+
+    @Override
+    public final void createQuote(@NonNull Quote quote) throws NotFoundException {
     }
 
     @Override

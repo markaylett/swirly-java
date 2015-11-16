@@ -38,6 +38,7 @@ public @NonNullByDefault class MarketBook extends Market {
     private final transient MarketView view;
     private transient long maxOrderId;
     private transient long maxExecId;
+    private transient long maxQuoteId;
     @Nullable
     private transient MarketBook dirtyNext;
 
@@ -67,7 +68,7 @@ public @NonNullByDefault class MarketBook extends Market {
 
     MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
             int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
-            long maxExecId) {
+            long maxExecId, long maxQuoteId) {
         super(mnem, display, contr, settlDay, expiryDay, state);
         this.lastLots = lastLots;
         this.lastTicks = lastTicks;
@@ -75,6 +76,7 @@ public @NonNullByDefault class MarketBook extends Market {
         this.view = new MarketView(mnem, contr.getMnem(), settlDay, lastLots, lastTicks, lastTime);
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
+        this.maxQuoteId = maxQuoteId;
     }
 
     public final void toJsonView(@Nullable Params params, Appendable out) throws IOException {
@@ -259,6 +261,10 @@ public @NonNullByDefault class MarketBook extends Market {
         return ++maxExecId;
     }
 
+    public final long allocQuoteId() {
+        return ++maxQuoteId;
+    }
+
     public final long getLastLots() {
         return lastLots;
     }
@@ -300,6 +306,10 @@ public @NonNullByDefault class MarketBook extends Market {
 
     public final long getMaxExecId() {
         return maxExecId;
+    }
+
+    public final long getMaxQuoteId() {
+        return maxQuoteId;
     }
 
     public static MarketBook insertDirty(@Nullable final MarketBook first, MarketBook next) {

@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.MarketId;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.exception.MarketNotFoundException;
@@ -47,6 +48,14 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         }
     }
 
+    private static void updateMaxQuoteId(Entity market, long id) {
+        Long maxQuoteId = (Long) market.getProperty("maxQuoteId");
+        if (maxQuoteId.longValue() < id) {
+            maxQuoteId = Long.valueOf(id);
+            market.setUnindexedProperty("maxQuoteId", maxQuoteId);
+        }
+    }
+
     private static Entity newMarket(String mnem, String display, String contr, int settlDay,
             int expiryDay, int state) {
         final Long zero = Long.valueOf(0);
@@ -61,6 +70,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         entity.setUnindexedProperty("lastTime", null);
         entity.setUnindexedProperty("maxOrderId", zero);
         entity.setUnindexedProperty("maxExecId", zero);
+        entity.setUnindexedProperty("maxQuoteId", zero);
         return entity;
     }
 
@@ -405,6 +415,24 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             assert key != null;
             assert value != null;
             createExecList(key, value);
+        }
+    }
+
+    @Override
+    public final void createQuote(@NonNull Quote quote) throws NotFoundException {
+        final Transaction txn = datastore.beginTransaction();
+        try {
+            final Entity market = getMarket(txn, quote.getMarket());
+            updateMaxQuoteId(market, quote.getId());
+            datastore.put(txn, market);
+            txn.commit();
+        } catch (final ConcurrentModificationException e) {
+            // FIXME: implement retry logic.
+            throw e;
+        } finally {
+            if (txn.isActive()) {
+                txn.rollback();
+            }
         }
     }
 

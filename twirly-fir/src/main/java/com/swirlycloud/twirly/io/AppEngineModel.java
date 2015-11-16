@@ -233,10 +233,11 @@ public class AppEngineModel implements Model {
             final long lastTime = longOrZeroIfNull(entity.getProperty("lastTime"));
             final long maxOrderId = (Long) entity.getProperty("maxOrderId");
             final long maxExecId = (Long) entity.getProperty("maxExecId");
+            final long maxQuoteId = (Long) entity.getProperty("maxQuoteId");
 
             assert mnem != null;
             final Market market = factory.newMarket(mnem, display, contr, settlDay, expiryDay,
-                    state, lastLots, lastTicks, lastTime, maxOrderId, maxExecId);
+                    state, lastLots, lastTicks, lastTime, maxOrderId, maxExecId, maxQuoteId);
             t.insert(market);
         }
         return t;

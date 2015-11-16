@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedExecutionException;
 import com.swirlycloud.twirly.intrusive.MarketViewTree;
@@ -300,6 +301,20 @@ public final class AsyncDatastore implements Datastore {
                     datastore.createExecList(first);
                 } catch (final Throwable t) {
                     log.log(Level.SEVERE, "failed to create exec-list", t);
+                }
+            }
+        });
+    }
+
+    @Override
+    public final void createQuote(@NonNull final Quote quote) throws NotFoundException {
+        service.submit(new Runnable() {
+            @Override
+            public final void run() {
+                try {
+                    datastore.createQuote(quote);
+                } catch (final Throwable t) {
+                    log.log(Level.SEVERE, "failed to create quote", t);
                 }
             }
         });

@@ -14,6 +14,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.MarketId;
+import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.UncheckedIOException;
@@ -26,6 +27,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
     private final PreparedStatement insertTraderStmt;
     @NonNull
     private final PreparedStatement insertExecStmt;
+    @NonNull
+    private final PreparedStatement insertQuoteStmt;
     @NonNull
     private final PreparedStatement updateMarketStmt;
     @NonNull
@@ -40,6 +43,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
         PreparedStatement insertMarketStmt = null;
         PreparedStatement insertTraderStmt = null;
         PreparedStatement insertExecStmt = null;
+        PreparedStatement insertQuoteStmt = null;
         PreparedStatement updateMarketStmt = null;
         PreparedStatement updateTraderStmt = null;
         PreparedStatement updateOrderStmt = null;
@@ -53,6 +57,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
                         "INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn.prepareStatement(
                         "INSERT INTO Exec_t (trader, market, contr, settlDay, id, ref, orderId, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                insertQuoteStmt = conn.prepareStatement(
+                        "INSERT INTO Quote_t (market, id) VALUES (?, ?) ON DUPLICATE KEY UPDATE id = ?");
                 updateMarketStmt = conn.prepareStatement(
                         "UPDATE Market_t SET display = ?, state = ? WHERE mnem = ?");
                 updateTraderStmt = conn
@@ -68,6 +74,8 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
                 this.insertTraderStmt = insertTraderStmt;
                 assert insertExecStmt != null;
                 this.insertExecStmt = insertExecStmt;
+                assert insertQuoteStmt != null;
+                this.insertQuoteStmt = insertQuoteStmt;
                 assert updateMarketStmt != null;
                 this.updateMarketStmt = updateMarketStmt;
                 assert updateTraderStmt != null;
@@ -90,6 +98,9 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
                     }
                     if (updateMarketStmt != null) {
                         updateMarketStmt.close();
+                    }
+                    if (insertQuoteStmt != null) {
+                        insertQuoteStmt.close();
                     }
                     if (insertExecStmt != null) {
                         insertExecStmt.close();
@@ -114,6 +125,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
         updateOrderStmt.close();
         updateTraderStmt.close();
         updateMarketStmt.close();
+        insertQuoteStmt.close();
         insertExecStmt.close();
         insertTraderStmt.close();
         insertMarketStmt.close();
@@ -262,6 +274,19 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
             while (node != null) {
                 node = popNext(node);
             }
+        }
+    }
+
+    @Override
+    public final void createQuote(@NonNull Quote quote) throws NotFoundException {
+        try {
+            int i = 1;
+            setParam(insertQuoteStmt, i++, quote.getMarket());
+            setParam(insertQuoteStmt, i++, quote.getId());
+            setParam(insertQuoteStmt, i++, quote.getId());
+            insertQuoteStmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
