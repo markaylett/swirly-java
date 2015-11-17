@@ -54,14 +54,14 @@ public @NonNullByDefault class MarketBook extends Market {
         for (RbNode node = bidSide.getFirstLevel(); node != null
                 && row < rows; node = node.rbNext()) {
             final Level level = (Level) node;
-            data.setBidLevel(row++, level.getTicks(), level.getResd(), level.getQuot(),
+            data.setBidLevel(row++, level.getTicks(), level.getResd(), level.getQuotd(),
                     level.getCount());
         }
         row = 0;
         for (RbNode node = offerSide.getFirstLevel(); node != null
                 && row < rows; node = node.rbNext()) {
             final Level level = (Level) node;
-            data.setOfferLevel(row++, level.getTicks(), level.getResd(), level.getQuot(),
+            data.setOfferLevel(row++, level.getTicks(), level.getResd(), level.getQuotd(),
                     level.getCount());
         }
     }
@@ -138,7 +138,7 @@ public @NonNullByDefault class MarketBook extends Market {
                 out.append("null");
             }
         }
-        out.append("],\"bidQuot\":[");
+        out.append("],\"bidQuotd\":[");
         node = firstBid;
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -146,7 +146,7 @@ public @NonNullByDefault class MarketBook extends Market {
             }
             if (node != null) {
                 final Level level = (Level) node;
-                out.append(String.valueOf(level.getQuot()));
+                out.append(String.valueOf(level.getQuotd()));
                 node = node.rbNext();
             } else {
                 out.append("null");
@@ -194,7 +194,7 @@ public @NonNullByDefault class MarketBook extends Market {
                 out.append("null");
             }
         }
-        out.append("],\"offerQuot\":[");
+        out.append("],\"offerQuotd\":[");
         node = firstOffer;
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -202,7 +202,7 @@ public @NonNullByDefault class MarketBook extends Market {
             }
             if (node != null) {
                 final Level level = (Level) node;
-                out.append(String.valueOf(level.getQuot()));
+                out.append(String.valueOf(level.getQuotd()));
                 node = node.rbNext();
             } else {
                 out.append("null");

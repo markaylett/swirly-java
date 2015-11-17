@@ -52,7 +52,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
      * Minimum to be filled by this
      */
     private final long minLots;
-    transient long quot;
+    transient long quotd;
     private final boolean pecan;
     long modified;
 
@@ -70,7 +70,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         this.lastLots = lastLots;
         this.lastTicks = lastTicks;
         this.minLots = minLots;
-        this.quot = 0;
+        this.quotd = 0;
         this.pecan = pecan;
         this.modified = modified;
     }
@@ -313,7 +313,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     }
 
     final void cancel(long now) {
-        if (quot == 0) {
+        if (quotd == 0) {
             state = State.CANCEL;
             // Note that executed lots is not affected.
             resd = 0;
@@ -388,12 +388,12 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         return minLots;
     }
 
-    public final long getQuot() {
-        return quot;
+    public final long getQuotd() {
+        return quotd;
     }
 
     public final long getAvail() {
-        return resd - quot;
+        return resd - quotd;
     }
 
     @Override

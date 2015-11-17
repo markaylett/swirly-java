@@ -347,7 +347,7 @@ public @NonNullByDefault class Serv {
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
             final Exec exec = newExec(book, order, now);
-            exec.cancel(order.getQuot());
+            exec.cancel(order.getQuotd());
             // Stack push.
             exec.setJslNext(firstExec);
             firstExec = exec;
@@ -355,7 +355,7 @@ public @NonNullByDefault class Serv {
         for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
             final Exec exec = newExec(book, order, now);
-            exec.cancel(order.getQuot());
+            exec.cancel(order.getQuotd());
             // Stack push.
             exec.setJslNext(firstExec);
             firstExec = exec;
@@ -923,7 +923,7 @@ public @NonNullByDefault class Serv {
         }
 
         final Exec exec = newExec(book, order, now);
-        exec.cancel(order.getQuot());
+        exec.cancel(order.getQuotd());
         result.reset(sess.getMnem(), book, order, exec);
         try {
             journ.createExec(exec);
@@ -983,7 +983,7 @@ public @NonNullByDefault class Serv {
             }
 
             final Exec exec = newExec(book, order, now);
-            exec.cancel(order.getQuot());
+            exec.cancel(order.getQuotd());
 
             result.orders.insertBack(order);
             result.execs.insertBack(exec);
@@ -1045,7 +1045,7 @@ public @NonNullByDefault class Serv {
             assert book != null;
 
             final Exec exec = newExec(book, order, now);
-            exec.cancel(order.getQuot());
+            exec.cancel(order.getQuotd());
             // Stack push.
             exec.setJslNext(firstExec);
             firstExec = exec;

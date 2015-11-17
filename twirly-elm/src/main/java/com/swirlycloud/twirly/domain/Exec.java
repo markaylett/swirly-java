@@ -309,8 +309,8 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
         resd -= delta;
     }
 
-    public final void cancel(long quot) {
-        if (quot == 0) {
+    public final void cancel(long quotd) {
+        if (quotd == 0) {
             state = State.CANCEL;
             resd = 0;
         } else {
