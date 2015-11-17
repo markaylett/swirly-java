@@ -20,12 +20,14 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
 
     private static final long serialVersionUID = 1L;
 
+    private final transient @Nullable Order order;
     private final long ticks;
     private final long expiry;
 
     Quote(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,
-            Side side, long lots, long ticks, long created, long expiry) {
+            @Nullable Order order, Side side, long lots, long ticks, long created, long expiry) {
         super(trader, market, contr, settlDay, id, ref, side, lots, created);
+        this.order = order;
         this.ticks = ticks;
         this.expiry = expiry;
     }
@@ -60,7 +62,7 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
                 if (side == null) {
                     throw new IOException("side is null");
                 }
-                return new Quote(trader, market, contr, settlDay, id, ref, side, lots, ticks,
+                return new Quote(trader, market, contr, settlDay, id, ref, null, side, lots, ticks,
                         created, expiry);
             case KEY_NAME:
                 name = p.getString();
@@ -139,6 +141,30 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"expiry\":").append(String.valueOf(expiry));
         out.append("}");
+    }
+
+    public final void insert()
+    {
+        final Order order = this.order;
+        assert order != null;
+        final Level level = (Level) order.level;
+        assert level != null;
+        level.quotd += lots;
+        order.quotd += lots;
+    }
+
+    public final void remove()
+    {
+        final Order order = this.order;
+        assert order != null;
+        final Level level = (Level) order.level;
+        assert level != null;
+        level.quotd -= lots;
+        order.quotd -= lots;
+    }
+
+    public final @Nullable Order getOrder() {
+        return order;
     }
 
     public final long getTicks() {

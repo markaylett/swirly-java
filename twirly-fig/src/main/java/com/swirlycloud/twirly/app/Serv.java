@@ -1385,13 +1385,13 @@ public @NonNullByDefault class Serv {
 
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
             Side side, long lots, long now) throws NotFoundException, ServiceUnavailableException {
-        final Order makerOrder = matchQuote(book, side, lots);
-        if (makerOrder == null) {
+        final Order order = matchQuote(book, side, lots);
+        if (order == null) {
             throw new NotFoundException("no liquidity available");
         }
 
-        final Quote quote = factory.newQuote(sess.getMnem(), book, book.allocQuoteId(), ref, side,
-                lots, makerOrder.getTicks(), now, now + QUOTE_EXPIRY);
+        final Quote quote = factory.newQuote(sess.getMnem(), book, book.allocQuoteId(), ref, order,
+                side, lots, order.getTicks(), now, now + QUOTE_EXPIRY);
 
         try {
             journ.createQuote(quote);
@@ -1405,6 +1405,7 @@ public @NonNullByDefault class Serv {
         setDirty(book);
         setDirty(sess, TraderSess.DIRTY_QUOTE);
 
+        quote.insert();
         quotes.add(quote);
         sess.insertQuote(quote);
 
@@ -1471,6 +1472,7 @@ public @NonNullByDefault class Serv {
             setDirty(book);
             setDirty(sess, TraderSess.DIRTY_QUOTE);
 
+            quote.remove();
             quotes.removeFirst();
             sess.removeQuote(quote);
         }

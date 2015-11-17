@@ -63,8 +63,9 @@ public @NonNullByDefault interface Factory {
     Posn newPosn(String trader, String contr, int settlDay);
 
     Quote newQuote(String trader, String market, String contr, int settlDay, long id,
-            @Nullable String ref, Side side, long lots, long ticks, long created, long expiry);
+            @Nullable String ref, @Nullable Order order, Side side, long lots, long ticks,
+            long created, long expiry);
 
-    Quote newQuote(String trader, Financial fin, long id, @Nullable String ref, Side side,
-            long lots, long ticks, long created, long expiry);
+    Quote newQuote(String trader, Financial fin, long id, @Nullable String ref,
+            @Nullable Order order, Side side, long lots, long ticks, long created, long expiry);
 }

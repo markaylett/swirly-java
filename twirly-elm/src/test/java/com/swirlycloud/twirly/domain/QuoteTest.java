@@ -6,6 +6,7 @@ package com.swirlycloud.twirly.domain;
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -18,8 +19,8 @@ public final class QuoteTest {
     private static final long EXPIRY = NOW + 60 * 1000;
 
     private static Quote newQuote() {
-        return FACTORY.newQuote("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1, "test", Side.BUY,
-                10, 12345, NOW, EXPIRY);
+        return FACTORY.newQuote("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1, "test", null,
+                Side.BUY, 10, 12345, NOW, EXPIRY);
     }
 
     @Test
@@ -32,6 +33,7 @@ public final class QuoteTest {
         assertEquals(SETTL_DAY, quote.getSettlDay());
         assertEquals(1, quote.getId());
         assertEquals("test", quote.getRef());
+        assertNull(quote.getOrder());
         assertEquals(Side.BUY, quote.getSide());
         assertEquals(10, quote.getLots());
         assertEquals(12345, quote.getTicks());
