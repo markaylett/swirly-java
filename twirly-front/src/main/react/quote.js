@@ -92,6 +92,10 @@ var QuoteModuleImpl = React.createClass({
             errors: errors.toArray()
         });
     },
+    onChangeFields: function(market, lots) {
+        console.debug('onChangeFields: market=' + market + ', lots=' + lots);
+        this.refs.newQuote.setFields(market, lots);
+    },
     onPostQuote: function(market, side, lots) {
         this.postQuote(market, side, lots);
     },
@@ -101,6 +105,7 @@ var QuoteModuleImpl = React.createClass({
             module: {
                 onClearErrors: this.onClearErrors,
                 onReportError: this.onReportError,
+                onChangeFields: this.onChangeFields,
                 onPostQuote: this.onPostQuote
             },
             errors: [],
@@ -127,7 +132,7 @@ var QuoteModuleImpl = React.createClass({
         return (
             <div className="quoteModuleImpl">
               <MultiAlertWidget module={module} errors={errors}/>
-              <NewQuoteForm ref="newOrder" module={module} marketMap={marketMap}/>
+              <NewQuoteForm ref="newQuote" module={module} marketMap={marketMap}/>
               <div style={marginTop}>
                 <QuoteTable module={module} quotes={quotes}/>
               </div>
