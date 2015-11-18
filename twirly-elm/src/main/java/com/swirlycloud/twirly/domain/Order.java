@@ -36,7 +36,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     transient @Nullable RbNode level;
 
     State state;
-    private final long ticks;
+    final long ticks;
     /**
      * Must be greater than zero.
      */
@@ -52,8 +52,8 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     /**
      * Minimum to be filled by this
      */
-    private final long minLots;
-    private final boolean pecan;
+    final long minLots;
+    final boolean pecan;
     long modified;
 
     Order(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,

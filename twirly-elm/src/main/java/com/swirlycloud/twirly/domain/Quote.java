@@ -143,8 +143,7 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
         out.append("}");
     }
 
-    public final void insert()
-    {
+    public final void insert() {
         final Order order = this.order;
         assert order != null;
         final Level level = (Level) order.level;
@@ -153,13 +152,15 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
         order.quotd += lots;
     }
 
-    public final void remove()
-    {
+    public final void remove() {
         final Order order = this.order;
         assert order != null;
         final Level level = (Level) order.level;
-        assert level != null;
-        level.quotd -= lots;
+        // Level may be null if the order has been withdrawn from the order-book, because it is
+        // pending cancellation.
+        if (level != null) {
+            level.quotd -= lots;
+        }
         order.quotd -= lots;
     }
 

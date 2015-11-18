@@ -38,8 +38,8 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
         this.key = composeKey(order.getSide(), ticks);
         this.ticks = ticks;
         this.firstOrder = order;
-        this.resd = order.getResd();
-        this.quotd = 0;
+        this.resd = order.resd;
+        this.quotd = order.quotd;
         this.count = 1;
     }
 
@@ -55,7 +55,8 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
     }
 
     public final void addOrder(Order order) {
-        resd += order.getResd();
+        resd += order.resd;
+        quotd += order.quotd;
         ++count;
     }
 

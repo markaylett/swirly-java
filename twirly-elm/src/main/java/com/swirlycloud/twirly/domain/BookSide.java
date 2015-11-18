@@ -16,7 +16,7 @@ public final class BookSide {
     private final DlList orders = new DlList();
 
     private final Level getLazyLevel(Order order) {
-        final long key = Level.composeKey(order.getSide(), order.getTicks());
+        final long key = Level.composeKey(order.side, order.ticks);
         Level level = levels.pfind(key);
         if (level == null || level.getKey() != key) {
             final Level parent = level;
@@ -32,16 +32,16 @@ public final class BookSide {
     private final void reduce(Order order, long delta) {
         assert order != null;
         assert order.level != null;
-        assert delta >= 0 && delta <= order.getResd();
+        assert delta >= 0 && delta <= order.resd;
 
-        if (delta < order.getResd()) {
+        if (delta < order.resd) {
             // Reduce level and order by lots.
             final Level level = (Level) order.level;
             assert level != null;
             level.resd -= delta;
             order.resd -= delta;
         } else {
-            assert delta == order.getResd();
+            assert delta == order.resd;
             removeOrder(order);
             order.resd = 0;
         }
@@ -55,11 +55,11 @@ public final class BookSide {
 
         assert order != null;
         assert order.level == null;
-        assert order.getTicks() != 0;
+        assert order.ticks != 0;
         assert order.resd > 0;
         assert order.exec <= order.lots;
         assert order.lots > 0;
-        assert order.getMinLots() >= 0;
+        assert order.minLots >= 0;
 
         final Level level = getLazyLevel(order);
         final Level nextLevel = (Level) level.rbNext();
@@ -83,6 +83,7 @@ public final class BookSide {
         final Level level = (Level) order.level;
         assert level != null;
         level.resd -= order.resd;
+        level.quotd -= order.quotd;
 
         if (--level.count == 0) {
             // Remove level.
@@ -108,7 +109,7 @@ public final class BookSide {
         assert order != null;
         assert order.level != null;
         assert lots > 0;
-        assert lots >= order.exec && lots >= order.getMinLots() && lots <= order.lots;
+        assert lots >= order.exec && lots >= order.minLots && lots <= order.lots;
 
         final long delta = order.lots - lots;
 
@@ -135,7 +136,7 @@ public final class BookSide {
 
         reduce(order, lots);
 
-        final long ticks = order.getTicks();
+        final long ticks = order.ticks;
         order.state = State.TRADE;
         order.exec += lots;
         order.cost += lots * ticks;
