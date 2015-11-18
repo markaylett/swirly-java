@@ -133,16 +133,12 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
                     parseArray(p, data, MarketData.BID_TICKS);
                 } else if ("bidResd".equals(name)) {
                     parseArray(p, data, MarketData.BID_RESD);
-                } else if ("bidQuotd".equals(name)) {
-                    parseArray(p, data, MarketData.BID_QUOTD);
                 } else if ("bidCount".equals(name)) {
                     parseArray(p, data, MarketData.BID_COUNT);
                 } else if ("offerTicks".equals(name)) {
                     parseArray(p, data, MarketData.OFFER_TICKS);
                 } else if ("offerResd".equals(name)) {
                     parseArray(p, data, MarketData.OFFER_RESD);
-                } else if ("offerQuotd".equals(name)) {
-                    parseArray(p, data, MarketData.OFFER_QUOTD);
                 } else if ("offerCount".equals(name)) {
                     parseArray(p, data, MarketData.OFFER_COUNT);
                 } else {
@@ -270,17 +266,6 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
                 out.append("null");
             }
         }
-        out.append("],\"bidQuotd\":[");
-        for (int i = 0; i < depth; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (isValidBid(i)) {
-                out.append(String.valueOf(getBidQuotd(i)));
-            } else {
-                out.append("null");
-            }
-        }
         out.append("],\"bidCount\":[");
         for (int i = 0; i < depth; ++i) {
             if (i > 0) {
@@ -310,17 +295,6 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
             }
             if (isValidOffer(i)) {
                 out.append(String.valueOf(getOfferResd(i)));
-            } else {
-                out.append("null");
-            }
-        }
-        out.append("],\"offerQuotd\":[");
-        for (int i = 0; i < depth; ++i) {
-            if (i > 0) {
-                out.append(',');
-            }
-            if (isValidOffer(i)) {
-                out.append(String.valueOf(getOfferQuotd(i)));
             } else {
                 out.append("null");
             }
@@ -388,10 +362,6 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
         return data.getBidResd(row);
     }
 
-    public final long getBidQuotd(int row) {
-        return data.getBidQuotd(row);
-    }
-
     public final int getBidCount(int row) {
         return data.getBidCount(row);
     }
@@ -406,10 +376,6 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
 
     public final long getOfferResd(int row) {
         return data.getOfferResd(row);
-    }
-
-    public final long getOfferQuotd(int row) {
-        return data.getOfferQuotd(row);
     }
 
     public final int getOfferCount(int row) {

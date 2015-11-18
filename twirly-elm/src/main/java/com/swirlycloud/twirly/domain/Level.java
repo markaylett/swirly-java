@@ -39,7 +39,7 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
         this.ticks = ticks;
         this.firstOrder = order;
         this.resd = order.getResd();
-        this.quotd = 0; // FIXME
+        this.quotd = 0;
         this.count = 1;
     }
 
@@ -77,5 +77,9 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
 
     public final int getCount() {
         return count;
+    }
+
+    public final long getAvail() {
+        return resd - quotd;
     }
 }

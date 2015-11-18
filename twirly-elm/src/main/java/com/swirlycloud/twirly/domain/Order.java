@@ -41,6 +41,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
      * Must be greater than zero.
      */
     long resd;
+    transient long quotd;
     /**
      * Must not be greater that lots.
      */
@@ -52,7 +53,6 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
      * Minimum to be filled by this
      */
     private final long minLots;
-    transient long quotd;
     private final boolean pecan;
     long modified;
 
@@ -65,12 +65,12 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         this.state = state;
         this.ticks = ticks;
         this.resd = resd;
+        this.quotd = 0;
         this.exec = exec;
         this.cost = cost;
         this.lastLots = lastLots;
         this.lastTicks = lastTicks;
         this.minLots = minLots;
-        this.quotd = 0;
         this.pecan = pecan;
         this.modified = modified;
     }
@@ -358,6 +358,10 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         return resd;
     }
 
+    public final long getQuotd() {
+        return quotd;
+    }
+
     @Override
     public final long getExec() {
         return exec;
@@ -386,10 +390,6 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     @Override
     public final long getMinLots() {
         return minLots;
-    }
-
-    public final long getQuotd() {
-        return quotd;
     }
 
     public final long getAvail() {
