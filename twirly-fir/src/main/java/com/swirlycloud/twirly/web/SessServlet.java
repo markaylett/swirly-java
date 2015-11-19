@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.swirlycloud.twirly.domain.EntitySet;
+import com.swirlycloud.twirly.entity.EntitySet;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.UnauthorizedException;

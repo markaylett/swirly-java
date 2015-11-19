@@ -14,9 +14,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;

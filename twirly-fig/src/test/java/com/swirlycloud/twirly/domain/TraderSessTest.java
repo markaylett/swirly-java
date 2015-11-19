@@ -10,6 +10,10 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.Posn;
+import com.swirlycloud.twirly.entity.ServFactory;
+import com.swirlycloud.twirly.entity.TraderSess;
 import com.swirlycloud.twirly.mock.MockTrader;
 
 public final class TraderSessTest {

@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;

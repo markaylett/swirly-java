@@ -12,15 +12,15 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.EntitySet;
+import com.swirlycloud.twirly.entity.RecType;
+import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.rec.RecType;
-import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.rest.BackUnrest.PosnKey;
 import com.swirlycloud.twirly.rest.BackUnrest.SessStruct;
 

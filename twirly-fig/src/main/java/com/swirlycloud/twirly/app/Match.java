@@ -3,9 +3,9 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.app;
 
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.node.AbstractSlNode;
 
 /**

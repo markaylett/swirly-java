@@ -20,12 +20,12 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Instruct;
-import com.swirlycloud.twirly.domain.Order;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Instruct;
+import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.quickfix.Contract;
 import com.swirlycloud.twirly.quickfix.Cost;
 import com.swirlycloud.twirly.quickfix.MatchId;

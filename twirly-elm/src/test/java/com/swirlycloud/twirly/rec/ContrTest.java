@@ -9,10 +9,10 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.BasicFactory;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.SerializableTest;
-import com.swirlycloud.twirly.intrusive.RecTree;
+import com.swirlycloud.twirly.entity.BasicFactory;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.RecTree;
+import com.swirlycloud.twirly.entity.SerializableTest;
 import com.swirlycloud.twirly.mock.MockContr;
 
 public final class ContrTest extends SerializableTest {

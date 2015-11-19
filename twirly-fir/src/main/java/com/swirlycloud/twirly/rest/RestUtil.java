@@ -8,8 +8,8 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Financial;
-import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.entity.Financial;
+import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Params;
 

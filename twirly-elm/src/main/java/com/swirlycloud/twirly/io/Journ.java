@@ -6,8 +6,8 @@ package com.swirlycloud.twirly.io;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Quote;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.node.JslNode;
 

@@ -7,12 +7,12 @@ import static com.swirlycloud.twirly.node.SlUtil.popNext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.domain.BookFactory;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.MarketBook;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.intrusive.MarketViewTree;
-import com.swirlycloud.twirly.intrusive.RecTree;
+import com.swirlycloud.twirly.entity.BookFactory;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.MarketBook;
+import com.swirlycloud.twirly.entity.MarketViewTree;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.RecTree;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
 

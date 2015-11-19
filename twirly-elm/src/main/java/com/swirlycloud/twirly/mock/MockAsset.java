@@ -10,12 +10,12 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.entity.Asset;
+import com.swirlycloud.twirly.entity.AssetType;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.RecTree;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.function.UnaryFunction;
-import com.swirlycloud.twirly.intrusive.RecTree;
-import com.swirlycloud.twirly.rec.Asset;
-import com.swirlycloud.twirly.rec.AssetType;
 
 public final class MockAsset {
 

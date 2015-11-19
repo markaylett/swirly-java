@@ -10,8 +10,10 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.BasicFactory;
-import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.entity.BasicFactory;
+import com.swirlycloud.twirly.entity.Contr;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.Market;
 import com.swirlycloud.twirly.mock.MockContr;
 
 public final class MarketTest {
