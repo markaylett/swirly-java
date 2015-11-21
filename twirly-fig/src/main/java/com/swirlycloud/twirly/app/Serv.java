@@ -15,6 +15,9 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.book.BookSide;
+import com.swirlycloud.twirly.book.Level;
+import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.collection.PriorityQueue;
 import com.swirlycloud.twirly.domain.Direct;
 import com.swirlycloud.twirly.domain.MarketId;
@@ -22,13 +25,11 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.entity.Asset;
-import com.swirlycloud.twirly.entity.BookSide;
 import com.swirlycloud.twirly.entity.Contr;
 import com.swirlycloud.twirly.entity.Exec;
 import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.entity.Instruct;
 import com.swirlycloud.twirly.entity.Market;
-import com.swirlycloud.twirly.entity.MarketBook;
 import com.swirlycloud.twirly.entity.MarketViewTree;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Posn;
@@ -1405,7 +1406,11 @@ public @NonNullByDefault class Serv {
         setDirty(book);
         setDirty(sess, TraderSess.DIRTY_QUOTE);
 
-        quote.insert();
+        final Level level = (Level) order.getLevel();
+        assert level != null;
+        level.addQuote(quote);
+        order.addQuote(lots);
+
         quotes.add(quote);
         sess.insertQuote(quote);
 
@@ -1472,7 +1477,16 @@ public @NonNullByDefault class Serv {
             setDirty(book);
             setDirty(sess, TraderSess.DIRTY_QUOTE);
 
-            quote.remove();
+            final Order order = quote.getOrder();
+            assert order != null;
+            final Level level = (Level) order.getLevel();
+            // Level may be null if the order has been withdrawn from the order-book, because it is
+            // pending cancellation.
+            if (level != null) {
+                level.subQuote(quote);
+            }
+            order.subQuote(-quote.getLots());
+
             quotes.removeFirst();
             sess.removeQuote(quote);
         }

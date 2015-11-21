@@ -16,7 +16,7 @@ public abstract @NonNullByDefault class AbstractRec extends AbstractRbNode imple
     protected final String mnem;
     protected String display;
 
-    public AbstractRec(String mnem, @Nullable String display) {
+    protected AbstractRec(String mnem, @Nullable String display) {
         this.mnem = mnem;
         this.display = display != null ? display : mnem;
     }

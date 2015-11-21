@@ -1,11 +1,13 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.entity;
+package com.swirlycloud.twirly.book;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.node.DlNode;
 
@@ -21,14 +23,14 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
 
     private static final long serialVersionUID = 1L;
 
-    final long key;
-    final long ticks;
+    private final long key;
+    private final long ticks;
     Order firstOrder;
     /**
      * Must be greater than zero.
      */
     long resd;
-    long quotd;
+    private long quotd;
     /**
      * Must be greater than zero.
      */
@@ -39,8 +41,8 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
         this.key = composeKey(order.getSide(), ticks);
         this.ticks = ticks;
         this.firstOrder = order;
-        this.resd = order.resd;
-        this.quotd = order.quotd;
+        this.resd = order.getResd();
+        this.quotd = order.getQuotd();
         this.count = 1;
     }
 
@@ -56,9 +58,23 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
     }
 
     public final void addOrder(Order order) {
-        resd += order.resd;
-        quotd += order.quotd;
+        resd += order.getResd();
+        quotd += order.getQuotd();
         ++count;
+    }
+
+    public final void subOrder(Order order) {
+        resd -= order.getResd();
+        quotd -= order.getQuotd();
+        --count;
+    }
+
+    public final void addQuote(Quote quote) {
+        quotd += quote.getLots();
+    }
+
+    public final void subQuote(Quote quote) {
+        quotd -= quote.getLots();
     }
 
     public final long getTicks() {

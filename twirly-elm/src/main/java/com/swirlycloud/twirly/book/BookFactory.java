@@ -1,11 +1,12 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.entity;
+package com.swirlycloud.twirly.book;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.entity.BasicFactory;
 import com.swirlycloud.twirly.util.Memorable;
 
 public final @NonNullByDefault class BookFactory extends BasicFactory {

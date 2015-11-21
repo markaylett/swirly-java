@@ -38,10 +38,10 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
     private final String market;
     private final String contr;
     private final int settlDay;
-    long lastLots;
-    long lastTicks;
-    long lastTime;
-    final MarketData data;
+    private long lastLots;
+    private long lastTicks;
+    private long lastTime;
+    private final MarketData data;
 
     private static void parseArray(JsonParser p, MarketData data, int col) throws IOException {
         for (int row = 0; p.hasNext(); ++row) {
@@ -314,6 +314,18 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
         out.append("]}");
     }
 
+    public final void setLastLots(long lastLots) {
+        this.lastLots = lastLots;
+    }
+
+    public final void setLastTicks(long lastTicks) {
+        this.lastTicks = lastTicks;
+    }
+
+    public final void setLastTime(long lastTime) {
+        this.lastTime = lastTime;
+    }
+
     @Override
     public final String getMnem() {
         return market;
@@ -349,6 +361,10 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
 
     public final long getLastTime() {
         return lastTime;
+    }
+
+    public final MarketData getData() {
+        return data;
     }
 
     public final boolean isValidBid(int row) {

@@ -13,7 +13,10 @@ import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.entity.Request;
+import com.swirlycloud.twirly.entity.RequestIdTree;
+import com.swirlycloud.twirly.entity.RequestRefMap;
 import com.swirlycloud.twirly.entity.Trader;
+import com.swirlycloud.twirly.entity.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.node.RbNode;
 
@@ -40,7 +43,7 @@ public @NonNullByDefault class TraderSess extends Trader {
     private transient TraderSess dirtyNext;
     private transient int dirty;
 
-    TraderSess(String mnem, @Nullable String display, String email, RequestRefMap refIdx,
+    protected TraderSess(String mnem, @Nullable String display, String email, RequestRefMap refIdx,
             Factory factory) {
         super(mnem, display, email);
         this.refIdx = refIdx;

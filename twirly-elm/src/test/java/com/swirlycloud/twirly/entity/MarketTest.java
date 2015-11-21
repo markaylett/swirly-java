@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.rec;
+package com.swirlycloud.twirly.entity;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;

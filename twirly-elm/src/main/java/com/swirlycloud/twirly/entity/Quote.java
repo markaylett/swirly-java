@@ -25,8 +25,9 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
     private final long ticks;
     private final long expiry;
 
-    Quote(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,
-            @Nullable Order order, Side side, long lots, long ticks, long created, long expiry) {
+    protected Quote(String trader, String market, String contr, int settlDay, long id,
+            @Nullable String ref, @Nullable Order order, Side side, long lots, long ticks,
+            long created, long expiry) {
         super(trader, market, contr, settlDay, id, ref, side, lots, created);
         this.order = order;
         this.ticks = ticks;
@@ -142,27 +143,6 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"expiry\":").append(String.valueOf(expiry));
         out.append("}");
-    }
-
-    public final void insert() {
-        final Order order = this.order;
-        assert order != null;
-        final Level level = (Level) order.level;
-        assert level != null;
-        level.quotd += lots;
-        order.quotd += lots;
-    }
-
-    public final void remove() {
-        final Order order = this.order;
-        assert order != null;
-        final Level level = (Level) order.level;
-        // Level may be null if the order has been withdrawn from the order-book, because it is
-        // pending cancellation.
-        if (level != null) {
-            level.quotd -= lots;
-        }
-        order.quotd -= lots;
     }
 
     public final @Nullable Order getOrder() {

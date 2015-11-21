@@ -40,7 +40,7 @@ public final @NonNullByDefault class Contr extends AbstractRec {
     private final long minLots;
     private final long maxLots;
 
-    public Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
+    protected Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
             int lotNumer, int lotDenom, int tickNumer, int tickDenom, int pipDp, long minLots,
             long maxLots) {
         super(mnem, display);

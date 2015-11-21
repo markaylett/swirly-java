@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.entity;
+package com.swirlycloud.twirly.book;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
@@ -11,11 +11,11 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.swirlycloud.twirly.book.BookFactory;
+import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.entity.BookFactory;
 import com.swirlycloud.twirly.entity.Contr;
 import com.swirlycloud.twirly.entity.Factory;
-import com.swirlycloud.twirly.entity.MarketBook;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.util.Params;
 

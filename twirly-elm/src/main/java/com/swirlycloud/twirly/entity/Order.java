@@ -35,33 +35,33 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     private transient DlNode dlNext = DlUtil.NULL;
 
     // Internals.
-    transient @Nullable RbNode level;
+    private transient @Nullable RbNode level;
 
-    State state;
-    final long ticks;
+    private State state;
+    private final long ticks;
     /**
      * Must be greater than zero.
      */
-    long resd;
-    transient long quotd;
+    private long resd;
+    private transient long quotd;
     /**
      * Must not be greater that lots.
      */
-    long exec;
-    long cost;
-    long lastLots;
-    long lastTicks;
+    private long exec;
+    private long cost;
+    private long lastLots;
+    private long lastTicks;
     /**
      * Minimum to be filled by this
      */
-    final long minLots;
-    final boolean pecan;
-    long modified;
+    private final long minLots;
+    private final boolean pecan;
+    private long modified;
 
-    Order(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,
-            State state, Side side, long lots, long ticks, long resd, long exec, long cost,
-            long lastLots, long lastTicks, long minLots, boolean pecan, long created,
-            long modified) {
+    protected Order(String trader, String market, String contr, int settlDay, long id,
+            @Nullable String ref, State state, Side side, long lots, long ticks, long resd,
+            long exec, long cost, long lastLots, long lastTicks, long minLots, boolean pecan,
+            long created, long modified) {
         super(trader, market, contr, settlDay, id, ref, side, lots, created);
         assert lots > 0 && lots >= minLots;
         this.state = state;
@@ -279,6 +279,10 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         this.dlNext = next;
     }
 
+    public final void setLevel(@Nullable RbNode level) {
+        this.level = level;
+    }
+
     @Override
     public final DlNode dlNext() {
         return this.dlNext;
@@ -289,12 +293,30 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         return this.dlPrev;
     }
 
+    public final @Nullable RbNode getLevel() {
+        return level;
+    }
+
     @Override
     public boolean isEnd() {
         return false;
     }
 
-    final void create(long now) {
+    /**
+     * Invalidate mutable fields. Unit-testing only.
+     */
+    public final void invalidate() {
+        state = State.NONE;
+        resd = -1;
+        quotd = -1;
+        exec = -1;
+        cost = -1;
+        lastLots = -1;
+        lastTicks = -1;
+        modified = -1;
+    }
+
+    public final void create(long now) {
         assert lots > 0 && lots >= minLots;
         state = State.NEW;
         resd = lots;
@@ -303,7 +325,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         modified = now;
     }
 
-    final void revise(long lots, long now) {
+    public final void revise(long lots, long now) {
         assert lots > 0;
         assert lots >= exec && lots >= minLots && lots <= this.lots;
         final long delta = this.lots - lots;
@@ -314,8 +336,8 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         modified = now;
     }
 
-    final void cancel(long now) {
-        if (quotd == 0) {
+    public final void cancel(long now) {
+        if (quotd <= 0) {
             state = State.CANCEL;
             // Note that executed lots is not affected.
             resd = 0;
@@ -338,6 +360,14 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
 
     public final void trade(long lastLots, long lastTicks, long now) {
         trade(lastLots, lastLots * lastTicks, lastLots, lastTicks, now);
+    }
+
+    public final void addQuote(long lots) {
+        this.quotd += lots;
+    }
+
+    public final void subQuote(long lots) {
+        this.quotd -= lots;
     }
 
     @Override

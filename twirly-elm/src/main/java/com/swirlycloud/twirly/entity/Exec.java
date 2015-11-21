@@ -55,10 +55,10 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
     private @Nullable Role role;
     private @Nullable String cpty;
 
-    Exec(String trader, String market, String contr, int settlDay, long id, @Nullable String ref,
-            long orderId, State state, Side side, long lots, long ticks, long resd, long exec,
-            long cost, long lastLots, long lastTicks, long minLots, long matchId,
-            @Nullable Role role, @Nullable String cpty, long created) {
+    protected Exec(String trader, String market, String contr, int settlDay, long id,
+            @Nullable String ref, long orderId, State state, Side side, long lots, long ticks,
+            long resd, long exec, long cost, long lastLots, long lastTicks, long minLots,
+            long matchId, @Nullable Role role, @Nullable String cpty, long created) {
         super(trader, market, contr, settlDay, id, ref, side, lots, created);
         this.orderId = orderId;
         this.state = state;

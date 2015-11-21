@@ -1,20 +1,20 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.entity;
+package com.swirlycloud.twirly.book;
 
 import static com.swirlycloud.twirly.util.TimeUtil.now;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.swirlycloud.twirly.book.BookSide;
+import com.swirlycloud.twirly.book.Level;
 import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
 import com.swirlycloud.twirly.entity.BasicFactory;
-import com.swirlycloud.twirly.entity.BookSide;
 import com.swirlycloud.twirly.entity.Factory;
-import com.swirlycloud.twirly.entity.Level;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
@@ -48,19 +48,8 @@ public final class BookSideTest {
                 2, "orange", Side.BUY, 20, 12345, 0, now);
         final BookSide side = new BookSide();
 
-        apple.state = State.NONE;
-        apple.resd = -1;
-        apple.exec = -1;
-        apple.cost = -1;
-        apple.lastLots = -1;
-        apple.lastTicks = -1;
-
-        orange.state = State.NONE;
-        orange.resd = -1;
-        orange.exec = -1;
-        orange.cost = -1;
-        orange.lastLots = -1;
-        orange.lastTicks = -1;
+        apple.invalidate();
+        orange.invalidate();
 
         // Place orders.
         ++now;
@@ -69,6 +58,7 @@ public final class BookSideTest {
 
         assertEquals(State.NEW, apple.getState());
         assertEquals(10, apple.getResd());
+        assertEquals(-1, apple.getQuotd());
         assertEquals(0, apple.getExec());
         assertEquals(0, apple.getCost());
         assertEquals(-1, apple.getLastTicks());
@@ -96,6 +86,7 @@ public final class BookSideTest {
 
         assertEquals(State.REVISE, apple.getState());
         assertEquals(5, apple.getResd());
+        assertEquals(-1, apple.getQuotd());
         assertEquals(0, apple.getExec());
         assertEquals(0, apple.getCost());
         assertEquals(-1, apple.getLastTicks());

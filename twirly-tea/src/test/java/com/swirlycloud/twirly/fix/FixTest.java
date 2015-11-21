@@ -19,8 +19,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.app.LockableServ;
+import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.entity.ServFactory;
 import com.swirlycloud.twirly.exception.AlreadyExistsException;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.mock.MockDatastore;

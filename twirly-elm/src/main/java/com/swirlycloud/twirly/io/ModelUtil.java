@@ -7,9 +7,9 @@ import static com.swirlycloud.twirly.node.SlUtil.popNext;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.entity.BookFactory;
+import com.swirlycloud.twirly.book.BookFactory;
+import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.entity.Factory;
-import com.swirlycloud.twirly.entity.MarketBook;
 import com.swirlycloud.twirly.entity.MarketViewTree;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.RecTree;

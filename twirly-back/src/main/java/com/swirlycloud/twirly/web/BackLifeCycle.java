@@ -14,8 +14,8 @@ import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.entity.Factory;
-import com.swirlycloud.twirly.entity.ServFactory;
 import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineDatastore;
 import com.swirlycloud.twirly.io.Cache;

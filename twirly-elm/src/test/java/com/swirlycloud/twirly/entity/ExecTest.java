@@ -161,7 +161,7 @@ public final class ExecTest {
         final Order order = newOrder();
         final Exec exec = FACTORY.newExec(order, 2, NOW + 1);
         exec.trade(2, 12344, 3, Role.MAKER, "GOSAYL");
-        exec.cancel(order.quotd);
+        exec.cancel(order.getQuotd());
 
         assertEquals("MARAYL", exec.getTrader());
         assertEquals("EURUSD.MAR14", exec.getMarket());

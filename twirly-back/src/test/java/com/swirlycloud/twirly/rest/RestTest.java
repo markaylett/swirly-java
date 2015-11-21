@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 
+import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
@@ -32,7 +33,6 @@ import com.swirlycloud.twirly.entity.Market;
 import com.swirlycloud.twirly.entity.MarketView;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Posn;
-import com.swirlycloud.twirly.entity.ServFactory;
 import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;

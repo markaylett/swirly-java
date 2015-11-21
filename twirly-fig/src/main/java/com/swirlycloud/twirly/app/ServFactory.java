@@ -1,13 +1,17 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.entity;
+package com.swirlycloud.twirly.app;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.entity.BasicFactory;
-import com.swirlycloud.twirly.entity.MarketBook;
+import com.swirlycloud.twirly.entity.RequestRefMap;
+import com.swirlycloud.twirly.entity.TraderSess;
+import com.swirlycloud.twirly.tag.MarketTag;
+import com.swirlycloud.twirly.tag.TraderTag;
 import com.swirlycloud.twirly.util.Memorable;
 
 public final @NonNullByDefault class ServFactory extends BasicFactory {

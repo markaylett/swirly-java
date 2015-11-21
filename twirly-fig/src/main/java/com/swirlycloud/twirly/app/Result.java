@@ -8,8 +8,8 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.entity.Exec;
-import com.swirlycloud.twirly.entity.MarketBook;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.intrusive.SlQueue;

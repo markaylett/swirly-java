@@ -34,8 +34,8 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
     private long sellLots;
     private long sellCost;
 
-    Posn(String trader, String contr, int settlDay, long buyLots, long buyCost, long sellLots,
-            long sellCost) {
+    protected Posn(String trader, String contr, int settlDay, long buyLots, long buyCost,
+            long sellLots, long sellCost) {
         this.trader = trader;
         this.contr = contr;
         this.settlDay = settlDay;
@@ -179,7 +179,7 @@ public final @NonNullByDefault class Posn extends AbstractRbNode implements Enti
         return slNext;
     }
 
-    final void add(Posn rhs) {
+    public final void add(Posn rhs) {
         addBuy(rhs.buyLots, rhs.buyCost);
         addSell(rhs.sellLots, rhs.sellCost);
     }

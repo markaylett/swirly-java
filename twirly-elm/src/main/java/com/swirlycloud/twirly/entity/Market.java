@@ -32,7 +32,7 @@ public @NonNullByDefault class Market extends AbstractRec implements Financial {
     protected final int expiryDay;
     protected int state;
 
-    public Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
+    protected Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
             int expiryDay, int state) {
         super(mnem, display);
         assert (settlDay == 0) == (expiryDay == 0);

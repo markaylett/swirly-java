@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.entity;
+package com.swirlycloud.twirly.book;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
 
@@ -12,6 +12,9 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.domain.MarketData;
 import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.entity.Market;
+import com.swirlycloud.twirly.entity.MarketView;
+import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
@@ -65,8 +68,8 @@ public @NonNullByDefault class MarketBook extends Market {
         }
     }
 
-    MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
-            int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
+    protected MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay,
+            int expiryDay, int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
             long maxExecId, long maxQuoteId) {
         super(mnem, display, contr, settlDay, expiryDay, state);
         this.lastLots = lastLots;
@@ -312,9 +315,9 @@ public @NonNullByDefault class MarketBook extends Market {
     }
 
     public final void updateView() {
-        view.lastLots = lastLots;
-        view.lastTicks = lastTicks;
-        view.lastTime = lastTime;
-        fillLadder(view.data);
+        view.setLastLots(lastLots);
+        view.setLastTicks(lastTicks);
+        view.setLastTime(lastTime);
+        fillLadder(view.getData());
     }
 }

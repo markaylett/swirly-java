@@ -16,7 +16,6 @@ import javax.json.stream.JsonParser;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.MarketData;
-import com.swirlycloud.twirly.entity.MarketView;
 import com.swirlycloud.twirly.util.Params;
 
 public final class MarketViewTest {

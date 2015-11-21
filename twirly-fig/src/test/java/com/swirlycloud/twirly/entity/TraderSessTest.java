@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.domain;
+package com.swirlycloud.twirly.entity;
 
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
@@ -10,9 +10,9 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.entity.Posn;
-import com.swirlycloud.twirly.entity.ServFactory;
 import com.swirlycloud.twirly.entity.TraderSess;
 import com.swirlycloud.twirly.mock.MockTrader;
 

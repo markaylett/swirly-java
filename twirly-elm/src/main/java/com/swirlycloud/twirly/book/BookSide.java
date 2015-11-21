@@ -1,11 +1,11 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.entity;
+package com.swirlycloud.twirly.book;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.intrusive.DlList;
 import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.RbNode;
@@ -16,7 +16,7 @@ public final class BookSide {
     private final DlList orders = new DlList();
 
     private final Level getLazyLevel(Order order) {
-        final long key = Level.composeKey(order.side, order.ticks);
+        final long key = Level.composeKey(order.getSide(), order.getTicks());
         Level level = levels.pfind(key);
         if (level == null || level.getKey() != key) {
             final Level parent = level;
@@ -25,25 +25,23 @@ public final class BookSide {
         } else {
             level.addOrder(order);
         }
-        order.level = level;
+        order.setLevel(level);
         return level;
     }
 
-    private final void reduce(Order order, long delta) {
+    private final void reduceLevel(Order order, long delta) {
         assert order != null;
-        assert order.level != null;
-        assert delta >= 0 && delta <= order.resd;
+        assert order.getLevel() != null;
+        assert delta >= 0 && delta <= order.getResd();
 
-        if (delta < order.resd) {
+        if (delta < order.getResd()) {
             // Reduce level and order by lots.
-            final Level level = (Level) order.level;
+            final Level level = (Level) order.getLevel();
             assert level != null;
             level.resd -= delta;
-            order.resd -= delta;
         } else {
-            assert delta == order.resd;
+            assert delta == order.getResd();
             removeOrder(order);
-            order.resd = 0;
         }
     }
 
@@ -54,12 +52,12 @@ public final class BookSide {
     public final void insertOrder(Order order) {
 
         assert order != null;
-        assert order.level == null;
-        assert order.ticks != 0;
-        assert order.resd > 0;
-        assert order.exec <= order.lots;
-        assert order.lots > 0;
-        assert order.minLots >= 0;
+        assert order.getLevel() == null;
+        assert order.getTicks() != 0;
+        assert order.getResd() > 0;
+        assert order.getExec() <= order.getLots();
+        assert order.getLots() > 0;
+        assert order.getMinLots() >= 0;
 
         final Level level = getLazyLevel(order);
         final Level nextLevel = (Level) level.rbNext();
@@ -78,14 +76,13 @@ public final class BookSide {
      */
     public final void removeOrder(Order order) {
         assert order != null;
-        assert order.level != null;
+        assert order.getLevel() != null;
 
-        final Level level = (Level) order.level;
+        final Level level = (Level) order.getLevel();
         assert level != null;
-        level.resd -= order.resd;
-        level.quotd -= order.quotd;
+        level.subOrder(order);
 
-        if (--level.count == 0) {
+        if (level.count == 0) {
             // Remove level.
             assert level.resd == 0;
             levels.remove(level);
@@ -97,7 +94,7 @@ public final class BookSide {
         order.remove();
 
         // No longer associated with side.
-        order.level = null;
+        order.setLevel(null);
     }
 
     public final void createOrder(Order order, long now) {
@@ -107,18 +104,15 @@ public final class BookSide {
 
     public final void reviseOrder(Order order, long lots, long now) {
         assert order != null;
-        assert order.level != null;
+        assert order.getLevel() != null;
         assert lots > 0;
-        assert lots >= order.exec && lots >= order.minLots && lots <= order.lots;
+        assert lots >= order.getExec() && lots >= order.getMinLots() && lots <= order.getLots();
 
-        final long delta = order.lots - lots;
+        final long delta = order.getLots() - lots;
 
         // This will increase order revision.
-        reduce(order, delta);
-
-        order.state = State.REVISE;
-        order.lots = lots;
-        order.modified = now;
+        reduceLevel(order, delta);
+        order.revise(lots, now);
     }
 
     public final void cancelOrder(Order order, long now) {
@@ -132,17 +126,10 @@ public final class BookSide {
      */
     public final void takeOrder(Order order, long lots, long now) {
         assert order != null;
-        assert order.level != null;
+        assert order.getLevel() != null;
 
-        reduce(order, lots);
-
-        final long ticks = order.ticks;
-        order.state = State.TRADE;
-        order.exec += lots;
-        order.cost += lots * ticks;
-        order.lastLots = lots;
-        order.lastTicks = ticks;
-        order.modified = now;
+        reduceLevel(order, lots);
+        order.trade(lots, order.getTicks(), now);
     }
 
     public final DlNode getFirstOrder() {

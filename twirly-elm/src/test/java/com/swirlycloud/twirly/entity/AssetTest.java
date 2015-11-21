@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013, 2015 Swirly Cloud Limited. All rights reserved.
  *******************************************************************************/
-package com.swirlycloud.twirly.rec;
+package com.swirlycloud.twirly.entity;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,7 +12,6 @@ import org.junit.Test;
 import com.swirlycloud.twirly.entity.BasicFactory;
 import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.entity.RecTree;
-import com.swirlycloud.twirly.entity.SerializableTest;
 import com.swirlycloud.twirly.mock.MockAsset;
 
 public final class AssetTest extends SerializableTest {

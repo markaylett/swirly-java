@@ -23,7 +23,7 @@ public @NonNullByDefault class Trader extends AbstractRec implements SlNode {
 
     protected final String email;
 
-    public Trader(String mnem, @Nullable String display, String email) {
+    protected Trader(String mnem, @Nullable String display, String email) {
         super(mnem, display);
         this.email = email;
     }
