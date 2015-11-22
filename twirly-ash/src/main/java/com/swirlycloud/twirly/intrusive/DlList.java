@@ -42,13 +42,13 @@ public final @NonNullByDefault class DlList extends AbstractList<DlNode> {
     }
 
     @Override
-    protected final DlNode next(DlNode node) {
-        return node.dlNext();
+    protected final DlNode prev(DlNode node) {
+        return node.dlPrev();
     }
 
     @Override
-    protected final DlNode prev(DlNode node) {
-        return node.dlPrev();
+    protected final DlNode next(DlNode node) {
+        return node.dlNext();
     }
 
     public DlList() {

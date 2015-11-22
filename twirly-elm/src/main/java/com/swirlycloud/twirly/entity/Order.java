@@ -284,13 +284,13 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     }
 
     @Override
-    public final DlNode dlNext() {
-        return this.dlNext;
+    public final DlNode dlPrev() {
+        return this.dlPrev;
     }
 
     @Override
-    public final DlNode dlPrev() {
-        return this.dlPrev;
+    public final DlNode dlNext() {
+        return this.dlNext;
     }
 
     public final @Nullable RbNode getLevel() {
