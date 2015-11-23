@@ -23,9 +23,9 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
 
     private static final long serialVersionUID = 1L;
 
+    transient Order firstOrder;
     private final long key;
     private final long ticks;
-    Order firstOrder;
     /**
      * Must be greater than zero.
      */
@@ -36,11 +36,11 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
      */
     int count;
 
-    public Level(Order order) {
+    Level(Order order) {
         final long ticks = order.getTicks();
+        this.firstOrder = order;
         this.key = composeKey(order.getSide(), ticks);
         this.ticks = ticks;
-        this.firstOrder = order;
         this.resd = order.getResd();
         this.quotd = order.getQuotd();
         this.count = 1;
@@ -49,21 +49,17 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
     /**
      * Synthetic level key.
      */
-    public static long composeKey(Side side, long ticks) {
+    static long composeKey(Side side, long ticks) {
         return side == Side.BUY ? -ticks : ticks;
     }
 
-    public final long getKey() {
-        return key;
-    }
-
-    public final void addOrder(Order order) {
+    final void addOrder(Order order) {
         resd += order.getResd();
         quotd += order.getQuotd();
         ++count;
     }
 
-    public final void subOrder(Order order) {
+    final void subOrder(Order order) {
         resd -= order.getResd();
         quotd -= order.getQuotd();
         --count;
@@ -77,12 +73,16 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
         quotd -= quote.getLots();
     }
 
-    public final long getTicks() {
-        return ticks;
+    final DlNode getFirstOrder() {
+        return firstOrder;
     }
 
-    public final DlNode getFirstOrder() {
-        return firstOrder;
+    final long getKey() {
+        return key;
+    }
+
+    public final long getTicks() {
+        return ticks;
     }
 
     public final long getResd() {
