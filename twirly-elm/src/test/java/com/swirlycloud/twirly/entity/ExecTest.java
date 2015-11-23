@@ -31,8 +31,8 @@ public final class ExecTest {
     private static final long NOW = jdToMillis(TODAY);
 
     private static @NonNull Order newOrder() {
-        return FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1, "test", Side.BUY,
-                10, 12345, 1, NOW);
+        return FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1, "test", 0,
+                Side.BUY, 10, 12345, 1, NOW);
     }
 
     @Test
@@ -223,7 +223,7 @@ public final class ExecTest {
     @Test
     public final void testToString() {
         final Order order = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD",
-                JulianDay.isoToJd(20140314), 1, "test", Side.BUY, 3, 12345, 1, 1414692516006L);
+                JulianDay.isoToJd(20140314), 1, "test", 0, Side.BUY, 3, 12345, 1, 1414692516006L);
         final Exec exec = FACTORY.newExec(order, 2, 1414692516007L);
         assertEquals(
                 "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":2,\"ref\":\"test\",\"orderId\":1,\"state\":\"NEW\",\"side\":\"BUY\",\"lots\":3,\"ticks\":12345,\"resd\":3,\"exec\":0,\"cost\":0,\"lastLots\":null,\"lastTicks\":null,\"minLots\":1,\"matchId\":null,\"role\":null,\"cpty\":null,\"created\":1414692516007}",

@@ -34,6 +34,7 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
     private transient @Nullable JslNode jslNext;
 
     private final long orderId;
+    private final long quoteId;
     private State state;
     private final long ticks;
     /**
@@ -56,11 +57,12 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
     private @Nullable String cpty;
 
     protected Exec(String trader, String market, String contr, int settlDay, long id,
-            @Nullable String ref, long orderId, State state, Side side, long lots, long ticks,
-            long resd, long exec, long cost, long lastLots, long lastTicks, long minLots,
-            long matchId, @Nullable Role role, @Nullable String cpty, long created) {
+            @Nullable String ref, long orderId, long quoteId, State state, Side side, long lots,
+            long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
+            long minLots, long matchId, @Nullable Role role, @Nullable String cpty, long created) {
         super(trader, market, contr, settlDay, id, ref, side, lots, created);
         this.orderId = orderId;
+        this.quoteId = quoteId;
         this.state = state;
         this.ticks = ticks;
         this.resd = resd;
@@ -81,6 +83,7 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
             @Nullable String ref, Side side, long lots, long ticks, @Nullable Role role,
             @Nullable String cpty, long created) {
         final long orderId = 0;
+        final long quoteId = 0;
         final State state = State.TRADE;
         final long resd = 0;
         final long exec = lots;
@@ -89,8 +92,9 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
         final long lastTicks = ticks;
         final long minLots = 1;
         final long matchId = 0;
-        return new Exec(trader, market, contr, settlDay, id, ref, orderId, state, side, lots, ticks,
-                resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, cpty, created);
+        return new Exec(trader, market, contr, settlDay, id, ref, orderId, quoteId, state, side,
+                lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, cpty,
+                created);
     }
 
     public static Exec parse(JsonParser p) throws IOException {
@@ -101,6 +105,7 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
         long id = 0;
         String ref = null;
         long orderId = 0;
+        long quoteId = 0;
         State state = null;
         Side side = null;
         long lots = 0;
@@ -136,9 +141,9 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
                 if (side == null) {
                     throw new IOException("side is null");
                 }
-                return new Exec(trader, market, contr, settlDay, id, ref, orderId, state, side,
-                        lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role,
-                        cpty, created);
+                return new Exec(trader, market, contr, settlDay, id, ref, orderId, quoteId, state,
+                        side, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId,
+                        role, cpty, created);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -168,6 +173,8 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
                     id = p.getLong();
                 } else if ("orderId".equals(name)) {
                     orderId = p.getLong();
+                } else if ("quoteId".equals(name)) {
+                    quoteId = p.getLong();
                 } else if ("lots".equals(name)) {
                     lots = p.getLong();
                 } else if ("ticks".equals(name)) {
@@ -233,9 +240,9 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
         if (role != null) {
             role = role.inverse();
         }
-        return new Exec(cpty, market, contr, settlDay, id, ref, orderId, state, side.inverse(),
-                lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, trader,
-                created);
+        return new Exec(cpty, market, contr, settlDay, id, ref, orderId, quoteId, state,
+                side.inverse(), lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots,
+                matchId, role, trader, created);
     }
 
     @Override
@@ -341,6 +348,11 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
     @Override
     public final long getOrderId() {
         return orderId;
+    }
+
+    @Override
+    public final long getQuoteId() {
+        return quoteId;
     }
 
     @Override

@@ -80,6 +80,7 @@ public class AppEngineModel implements Model {
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
                     final long id = entity.getKey().getId();
                     final String ref = (String) entity.getProperty("ref");
+                    final long quoteId = longOrZeroIfNull(entity.getProperty("quoteId"));
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
@@ -100,8 +101,8 @@ public class AppEngineModel implements Model {
                     assert market != null;
                     assert contr != null;
                     final Order order = factory.newOrder(trader, market, contr, settlDay, id, ref,
-                            state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
-                            minLots, pecan, created, modified);
+                            quoteId, state, side, lots, ticks, resd, exec, cost, lastLots,
+                            lastTicks, minLots, pecan, created, modified);
                     c.add(order);
                 }
             }
@@ -122,7 +123,8 @@ public class AppEngineModel implements Model {
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
                     final long id = entity.getKey().getId();
                     final String ref = (String) entity.getProperty("ref");
-                    final long orderId = (Long) entity.getProperty("orderId");
+                    final long orderId = longOrZeroIfNull(entity.getProperty("orderId"));
+                    final long quoteId = longOrZeroIfNull(entity.getProperty("quoteId"));
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
@@ -145,8 +147,8 @@ public class AppEngineModel implements Model {
                     assert market != null;
                     assert contr != null;
                     final Exec trade = factory.newExec(trader, market, contr, settlDay, id, ref,
-                            orderId, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
-                            minLots, matchId, role, cpty, created);
+                            orderId, quoteId, state, side, lots, ticks, resd, exec, cost, lastLots,
+                            lastTicks, minLots, matchId, role, cpty, created);
                     c.add(trade);
                 }
             }

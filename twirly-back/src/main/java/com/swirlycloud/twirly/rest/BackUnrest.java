@@ -682,11 +682,11 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final TransStruct postOrder(String trader, String market, @Nullable String ref,
-            Side side, long lots, long ticks, long minLots, Params params, long now)
+            long quoteId, Side side, long lots, long ticks, long minLots, Params params, long now)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postOrder(trader, market, ref, side, lots, ticks, minLots, params, now, sb);
+        rest.postOrder(trader, market, ref, quoteId, side, lots, ticks, minLots, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);

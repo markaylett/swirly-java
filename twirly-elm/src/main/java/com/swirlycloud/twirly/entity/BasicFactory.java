@@ -47,63 +47,67 @@ public @NonNullByDefault class BasicFactory implements Factory {
 
     @Override
     public Order newOrder(String trader, String market, String contr, int settlDay, long id,
-            @Nullable String ref, State state, Side side, long lots, long ticks, long resd,
-            long exec, long cost, long lastLots, long lastTicks, long minLots, boolean pecan,
-            long created, long modified) {
-        return new Order(trader, market, contr, settlDay, id, ref, state, side, lots, ticks, resd,
-                exec, cost, lastLots, lastTicks, minLots, pecan, created, modified);
+            @Nullable String ref, long quoteId, State state, Side side, long lots, long ticks,
+            long resd, long exec, long cost, long lastLots, long lastTicks, long minLots,
+            boolean pecan, long created, long modified) {
+        return new Order(trader, market, contr, settlDay, id, ref, quoteId, state, side, lots,
+                ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified);
     }
 
     @Override
     public final Order newOrder(String trader, Financial fin, long id, @Nullable String ref,
-            State state, Side side, long lots, long ticks, long resd, long exec, long cost,
-            long lastLots, long lastTicks, long minLots, boolean pecan, long created,
+            long quoteId, State state, Side side, long lots, long ticks, long resd, long exec,
+            long cost, long lastLots, long lastTicks, long minLots, boolean pecan, long created,
             long modified) {
-        return newOrder(trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), id, ref, state,
-                side, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created,
-                modified);
+        return newOrder(trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), id, ref,
+                quoteId, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots,
+                pecan, created, modified);
     }
 
     @Override
     public final Order newOrder(String trader, String market, String contr, int settlDay, long id,
-            @Nullable String ref, Side side, long lots, long ticks, long minLots, long created) {
-        return newOrder(trader, market, contr, settlDay, id, ref, State.NEW, side, lots, ticks,
-                lots, 0, 0, 0, 0, minLots, false, created, created);
+            @Nullable String ref, long quoteId, Side side, long lots, long ticks, long minLots,
+            long created) {
+        return newOrder(trader, market, contr, settlDay, id, ref, quoteId, State.NEW, side, lots,
+                ticks, lots, 0, 0, 0, 0, minLots, false, created, created);
     }
 
     @Override
     public final Order newOrder(String trader, Financial fin, long id, @Nullable String ref,
-            Side side, long lots, long ticks, long minLots, long created) {
+            long quoteId, Side side, long lots, long ticks, long minLots, long created) {
         return newOrder(trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), id, ref,
-                State.NEW, side, lots, ticks, lots, 0, 0, 0, 0, minLots, false, created, created);
+                quoteId, State.NEW, side, lots, ticks, lots, 0, 0, 0, 0, minLots, false, created,
+                created);
     }
 
     @Override
     public Exec newExec(String trader, String market, String contr, int settlDay, long id,
-            @Nullable String ref, long orderId, State state, Side side, long lots, long ticks,
-            long resd, long exec, long cost, long lastLots, long lastTicks, long minLots,
-            long matchId, @Nullable Role role, @Nullable String cpty, long created) {
-        return new Exec(trader, market, contr, settlDay, id, ref, orderId, state, side, lots, ticks,
-                resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, cpty, created);
+            @Nullable String ref, long orderId, long quoteId, State state, Side side, long lots,
+            long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
+            long minLots, long matchId, @Nullable Role role, @Nullable String cpty, long created) {
+        return new Exec(trader, market, contr, settlDay, id, ref, orderId, quoteId, state, side,
+                lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, cpty,
+                created);
     }
 
     @Override
     public final Exec newExec(String trader, Financial fin, long id, @Nullable String ref,
-            long orderId, State state, Side side, long lots, long ticks, long resd, long exec,
-            long cost, long lastLots, long lastTicks, long minLots, long matchId,
+            long orderId, long quoteId, State state, Side side, long lots, long ticks, long resd,
+            long exec, long cost, long lastLots, long lastTicks, long minLots, long matchId,
             @Nullable Role role, @Nullable String cpty, long created) {
         return newExec(trader, fin.getMarket(), fin.getContr(), fin.getSettlDay(), id, ref, orderId,
-                state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId,
-                role, cpty, created);
+                quoteId, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots,
+                matchId, role, cpty, created);
     }
 
     @Override
     public final Exec newExec(Instruct instruct, long id, long created) {
         return newExec(instruct.getTrader(), instruct.getMarket(), instruct.getContr(),
                 instruct.getSettlDay(), id, instruct.getRef(), instruct.getOrderId(),
-                instruct.getState(), instruct.getSide(), instruct.getLots(), instruct.getTicks(),
-                instruct.getResd(), instruct.getExec(), instruct.getCost(), instruct.getLastLots(),
-                instruct.getLastTicks(), instruct.getMinLots(), 0, null, null, created);
+                instruct.getQuoteId(), instruct.getState(), instruct.getSide(), instruct.getLots(),
+                instruct.getTicks(), instruct.getResd(), instruct.getExec(), instruct.getCost(),
+                instruct.getLastLots(), instruct.getLastTicks(), instruct.getMinLots(), 0, null,
+                null, created);
     }
 
     @Override

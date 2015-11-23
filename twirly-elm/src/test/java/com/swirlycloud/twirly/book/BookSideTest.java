@@ -43,9 +43,9 @@ public final class BookSideTest {
         long now = now();
         // Two orders at the same price level.
         final Order apple = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
-                1, "apple", Side.BUY, 10, 12345, 0, now);
+                1, "apple", 0, Side.BUY, 10, 12345, 0, now);
         final Order orange = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
-                2, "orange", Side.BUY, 20, 12345, 0, now);
+                2, "orange", 0, Side.BUY, 20, 12345, 0, now);
         final BookSide side = new BookSide();
 
         apple.invalidate();
@@ -139,12 +139,12 @@ public final class BookSideTest {
         final long now = now();
         // Two orders at the same price level.
         final Order apple = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
-                1, "apple", Side.BUY, 10, 12345, 0, now);
+                1, "apple", 0, Side.BUY, 10, 12345, 0, now);
         final Order orange = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
-                2, "orange", Side.BUY, 20, 12345, 0, now);
+                2, "orange", 0, Side.BUY, 20, 12345, 0, now);
         // Best inserted last.
         final Order pear = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
-                3, "pear", Side.BUY, 25, 12346, 0, now);
+                3, "pear", 0, Side.BUY, 25, 12346, 0, now);
         final BookSide side = new BookSide();
 
         side.createOrder(apple, now);

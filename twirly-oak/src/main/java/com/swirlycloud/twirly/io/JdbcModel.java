@@ -137,6 +137,8 @@ public class JdbcModel implements Model {
         final int settlDay = rs.getInt("settlDay");
         final long id = rs.getLong("id");
         final String ref = rs.getString("ref");
+        // getLong() returns zero if value is null.
+        final long quoteId = rs.getLong("quoteId");
         final State state = State.valueOf(rs.getInt("stateId"));
         final Side side = Side.valueOf(rs.getInt("sideId"));
         final long lots = rs.getLong("lots");
@@ -153,8 +155,9 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return factory.newOrder(trader, market, contr, settlDay, id, ref, state, side, lots, ticks,
-                resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified);
+        return factory.newOrder(trader, market, contr, settlDay, id, ref, quoteId, state, side,
+                lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created,
+                modified);
     }
 
     private static @NonNull Exec getTrade(@NonNull ResultSet rs, @NonNull Factory factory)
@@ -168,6 +171,8 @@ public class JdbcModel implements Model {
         final String ref = rs.getString("ref");
         // getLong() returns zero if value is null.
         final long orderId = rs.getLong("orderId");
+        // getLong() returns zero if value is null.
+        final long quoteId = rs.getLong("quoteId");
         final State state = State.TRADE;
         final Side side = Side.valueOf(rs.getInt("sideId"));
         final long lots = rs.getLong("lots");
@@ -188,9 +193,9 @@ public class JdbcModel implements Model {
         assert trader != null;
         assert market != null;
         assert contr != null;
-        return factory.newExec(trader, market, contr, settlDay, id, ref, orderId, state, side,
-                lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role, cpty,
-                created);
+        return factory.newExec(trader, market, contr, settlDay, id, ref, orderId, quoteId, state,
+                side, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, role,
+                cpty, created);
     }
 
     private static void readOrder(@NonNull PreparedStatement stmt, @NonNull Factory factory,
@@ -327,13 +332,13 @@ public class JdbcModel implements Model {
                 selectTraderByEmailStmt = conn
                         .prepareStatement("SELECT mnem FROM Trader_t WHERE email = ?");
                 selectOrderStmt = conn.prepareStatement(
-                        "SELECT trader, market, contr, settlDay, id, ref, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
+                        "SELECT trader, market, contr, settlDay, id, ref, quoteId, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified FROM Order_t WHERE archive = 0 AND resd > 0");
                 selectOrderByTraderStmt = conn.prepareStatement(
-                        "SELECT trader, market, contr, settlDay, id, ref, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
+                        "SELECT trader, market, contr, settlDay, id, ref, quoteId, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified FROM Order_t WHERE trader = ? AND archive = 0 AND resd > 0");
                 selectTradeStmt = conn.prepareStatement(
-                        "SELECT trader, market, contr, settlDay, id, ref, orderId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
+                        "SELECT trader, market, contr, settlDay, id, ref, orderId, quoteId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE archive = 0 AND stateId = 4");
                 selectTradeByTraderStmt = conn.prepareStatement(
-                        "SELECT trader, market, contr, settlDay, id, ref, orderId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE trader = ? AND archive = 0 AND stateId = 4");
+                        "SELECT trader, market, contr, settlDay, id, ref, orderId, quoteId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, created FROM Exec_t WHERE trader = ? AND archive = 0 AND stateId = 4");
                 selectPosnStmt = conn.prepareStatement(
                         "SELECT trader, contr, settlDay, sideId, lots, cost FROM Posn_v");
                 selectPosnByTraderStmt = conn.prepareStatement(

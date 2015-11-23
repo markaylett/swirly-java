@@ -26,8 +26,8 @@ public final class OrderTest {
     private static final long NOW = jdToMillis(TODAY);
 
     private static Order newOrder() {
-        return FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1, "test", Side.BUY,
-                10, 12345, 1, NOW);
+        return FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1, "test", 0,
+                Side.BUY, 10, 12345, 1, NOW);
     }
 
     @Test
@@ -175,7 +175,7 @@ public final class OrderTest {
     public final void testToString() {
         final Order order = newOrder();
         assertEquals(
-                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":1,\"ref\":\"test\",\"state\":\"NEW\",\"side\":\"BUY\",\"lots\":10,\"ticks\":12345,\"resd\":10,\"exec\":0,\"cost\":0,\"lastLots\":null,\"lastTicks\":null,\"minLots\":1,\"pecan\":false,\"created\":1394625600000,\"modified\":1394625600000}",
+                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":1,\"ref\":\"test\",\"quoteId\":0,\"state\":\"NEW\",\"side\":\"BUY\",\"lots\":10,\"ticks\":12345,\"resd\":10,\"exec\":0,\"cost\":0,\"lastLots\":null,\"lastTicks\":null,\"minLots\":1,\"pecan\":false,\"created\":1394625600000,\"modified\":1394625600000}",
                 order.toString());
     }
 }

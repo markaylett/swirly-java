@@ -579,8 +579,8 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void postOrder(String trader, String market, @Nullable String ref, Side side,
-            long lots, long ticks, long minLots, Params params, long now, Appendable out)
+    public final void postOrder(String trader, String market, @Nullable String ref, long quoteId,
+            Side side, long lots, long ticks, long minLots, Params params, long now, Appendable out)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
         final LockableServ serv = (LockableServ) this.serv;
@@ -589,7 +589,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            serv.createOrder(sess, book, ref, side, lots, ticks, minLots, now, result);
+            serv.createOrder(sess, book, ref, quoteId, side, lots, ticks, minLots, now, result);
             result.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();

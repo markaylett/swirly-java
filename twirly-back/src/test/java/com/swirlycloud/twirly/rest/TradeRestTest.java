@@ -28,8 +28,8 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
@@ -41,8 +41,8 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testGetByMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", "EURUSD.MAR14", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
@@ -55,8 +55,8 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testGetByMarketId() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", "EURUSD.MAR14", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
@@ -91,8 +91,8 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testArchiveSingle() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
@@ -110,9 +110,9 @@ public final class TradeRestTest extends RestTest {
     @Test
     public final void testArchiveBatch() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12346);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 20, 12346);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12346);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.BUY, 20, 12346);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(4, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,

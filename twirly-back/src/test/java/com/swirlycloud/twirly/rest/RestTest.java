@@ -265,9 +265,10 @@ public abstract class RestTest {
     }
 
     protected final TransStruct postOrder(@NonNull String trader, @NonNull String market,
-            @NonNull Side side, long lots, long ticks) throws BadRequestException,
+            long quoteId, @NonNull Side side, long lots, long ticks) throws BadRequestException,
                     NotFoundException, ServiceUnavailableException, IOException {
-        return unrest.postOrder(trader, market, null, side, lots, ticks, 1, PARAMS_NONE, NOW);
+        return unrest.postOrder(trader, market, null, quoteId, side, lots, ticks, 1, PARAMS_NONE,
+                NOW);
     }
 
     protected final TransStruct putOrder(@NonNull String trader, @NonNull String market, long id,

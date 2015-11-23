@@ -41,14 +41,14 @@ public final class MarketBookTest {
 
         final long now = 1414932078620L;
 
-        book.createOrder(factory.newOrder("MARAYL", book, 1, "apple", Side.BUY, 10, 12343, 0, now),
-                now);
-        book.createOrder(factory.newOrder("MARAYL", book, 2, "orange", Side.BUY, 5, 12344, 0, now),
-                now);
-        book.createOrder(factory.newOrder("MARAYL", book, 3, "pear", Side.SELL, 5, 12346, 0, now),
-                now);
-        book.createOrder(factory.newOrder("MARAYL", book, 4, "banana", Side.SELL, 2, 12346, 0, now),
-                now);
+        book.createOrder(
+                factory.newOrder("MARAYL", book, 1, "apple", 0, Side.BUY, 10, 12343, 0, now), now);
+        book.createOrder(
+                factory.newOrder("MARAYL", book, 2, "orange", 0, Side.BUY, 5, 12344, 0, now), now);
+        book.createOrder(
+                factory.newOrder("MARAYL", book, 3, "pear", 0, Side.SELL, 5, 12346, 0, now), now);
+        book.createOrder(
+                factory.newOrder("MARAYL", book, 4, "banana", 0, Side.SELL, 2, 12346, 0, now), now);
 
         final StringBuilder sb = new StringBuilder();
 

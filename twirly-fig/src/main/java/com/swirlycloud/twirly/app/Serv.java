@@ -745,8 +745,8 @@ public @NonNullByDefault class Serv {
         return book;
     }
 
-    public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
-            long lots, long ticks, long minLots, long now, Result result)
+    public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref,
+            long quoteId, Side side, long lots, long ticks, long minLots, long now, Result result)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
@@ -757,8 +757,8 @@ public @NonNullByDefault class Serv {
             throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = book.allocOrderId();
-        final Order order = factory.newOrder(sess.getMnem(), book, orderId, ref, side, lots, ticks,
-                minLots, now);
+        final Order order = factory.newOrder(sess.getMnem(), book, orderId, ref, quoteId, side,
+                lots, ticks, minLots, now);
 
         final Exec exec = newExec(book, order, now);
         result.reset(sess.getMnem(), book, order, exec);

@@ -67,11 +67,11 @@ public final class ServTest {
             @Override
             public final SlNode readOrder(@NonNull Factory factory) {
                 final Order first = factory.newOrder(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1,
-                        "first", Side.BUY, 11, 12344, 1, NOW - 5);
+                        "first", 0, Side.BUY, 11, 12344, 1, NOW - 5);
                 final Order second = factory.newOrder(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY,
-                        2, "second", Side.BUY, 10, 12345, 1, NOW - 4);
+                        2, "second", 0, Side.BUY, 10, 12345, 1, NOW - 4);
                 final Order third = factory.newOrder(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY, 3,
-                        "third", Side.SELL, 10, 12346, 1, NOW - 3);
+                        "third", 0, Side.SELL, 10, 12346, 1, NOW - 3);
                 // Fully fill second order.
                 second.trade(10, 12345, NOW - 2);
                 // Partially fill third order.
@@ -84,11 +84,11 @@ public final class ServTest {
             @Override
             public final SlNode readTrade(@NonNull Factory factory) {
                 final Exec second = factory.newExec(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY, 1,
-                        "second", 2, State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
-                        12345, 1, 1, Role.MAKER, "RAMMAC", NOW - 2);
+                        "second", 2, 0, State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10, 12345,
+                        1, 1, Role.MAKER, "RAMMAC", NOW - 2);
                 final Exec third = factory.newExec(TRADER, "EURUSD.MAR14", "EURUSD", SETTL_DAY, 2,
-                        "third", 3, State.TRADE, Side.SELL, 10, 12346, 3, 7, 86422, 7,
-                        12346, 1, 2, Role.TAKER, "RAMMAC", NOW - 1);
+                        "third", 3, 0, State.TRADE, Side.SELL, 10, 12346, 3, 7, 86422, 7, 12346, 1,
+                        2, Role.TAKER, "RAMMAC", NOW - 1);
                 second.setSlNext(third);
                 return second;
             }
@@ -286,7 +286,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", Side.BUY, 5, 12345, 1, NOW, result);
+            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             assertEquals(sess.getMnem(), order.getTrader());
@@ -317,7 +317,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", Side.BUY, 5, 12345, 1, NOW, result);
+            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             serv.reviseOrder(sess, book, order, 4, NOW + 1, result);
@@ -349,7 +349,7 @@ public final class ServTest {
         assertNotNull(book);
 
         try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", Side.BUY, 5, 12345, 1, NOW, result);
+            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, result);
             final Order order = (Order) result.getFirstOrder();
             assertNotNull(order);
             serv.cancelOrder(sess, book, order, NOW + 1, result);

@@ -37,6 +37,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     // Internals.
     private transient @Nullable RbNode level;
 
+    private final long quoteId;
     private State state;
     private final long ticks;
     /**
@@ -59,11 +60,12 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     private long modified;
 
     protected Order(String trader, String market, String contr, int settlDay, long id,
-            @Nullable String ref, State state, Side side, long lots, long ticks, long resd,
-            long exec, long cost, long lastLots, long lastTicks, long minLots, boolean pecan,
-            long created, long modified) {
+            @Nullable String ref, long quoteId, State state, Side side, long lots, long ticks,
+            long resd, long exec, long cost, long lastLots, long lastTicks, long minLots,
+            boolean pecan, long created, long modified) {
         super(trader, market, contr, settlDay, id, ref, side, lots, created);
         assert lots > 0 && lots >= minLots;
+        this.quoteId = quoteId;
         this.state = state;
         this.ticks = ticks;
         this.resd = resd;
@@ -84,6 +86,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         int settlDay = 0;
         long id = 0;
         String ref = null;
+        long quoteId = 0;
         State state = null;
         Side side = null;
         long lots = 0;
@@ -118,8 +121,9 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
                 if (side == null) {
                     throw new IOException("side is null");
                 }
-                return new Order(trader, market, contr, settlDay, id, ref, state, side, lots, ticks,
-                        resd, exec, cost, lastLots, lastTicks, minLots, pecan, created, modified);
+                return new Order(trader, market, contr, settlDay, id, ref, quoteId, state, side,
+                        lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, pecan, created,
+                        modified);
             case KEY_NAME:
                 name = p.getString();
                 break;
@@ -146,6 +150,8 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
                     settlDay = JulianDay.maybeIsoToJd(p.getInt());
                 } else if ("id".equals(name)) {
                     id = p.getLong();
+                } else if ("quoteId".equals(name)) {
+                    quoteId = p.getLong();
                 } else if ("lots".equals(name)) {
                     lots = p.getLong();
                 } else if ("ticks".equals(name)) {
@@ -221,6 +227,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         } else {
             out.append("null");
         }
+        out.append(",\"quoteId\":").append(String.valueOf(quoteId));
         out.append(",\"state\":\"").append(state.name());
         out.append("\",\"side\":\"").append(side.name());
         out.append("\",\"lots\":").append(String.valueOf(lots));
@@ -373,6 +380,11 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     @Override
     public final long getOrderId() {
         return id;
+    }
+
+    @Override
+    public final long getQuoteId() {
+        return quoteId;
     }
 
     @Override

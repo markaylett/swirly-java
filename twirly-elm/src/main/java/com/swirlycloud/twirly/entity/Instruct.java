@@ -17,14 +17,6 @@ import com.swirlycloud.twirly.domain.State;
 public @NonNullByDefault interface Instruct extends Request {
 
     @Override
-    long getId();
-
-    /**
-     * @return order-id or zero if there is no associated order.
-     */
-    long getOrderId();
-
-    @Override
     String getTrader();
 
     @Override
@@ -40,8 +32,21 @@ public @NonNullByDefault interface Instruct extends Request {
     boolean isSettlDaySet();
 
     @Override
+    long getId();
+
+    @Override
     @Nullable
     String getRef();
+
+    /**
+     * @return order-id or zero if there is no associated order.
+     */
+    long getOrderId();
+
+    /**
+     * @return quote-id or zero if there is no associated quote.
+     */
+    long getQuoteId();
 
     State getState();
 
