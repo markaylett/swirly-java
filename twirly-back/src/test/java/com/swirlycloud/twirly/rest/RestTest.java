@@ -19,17 +19,21 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 
-import com.swirlycloud.twirly.domain.BasicFactory;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.domain.MarketId;
-import com.swirlycloud.twirly.domain.MarketView;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Role;
-import com.swirlycloud.twirly.domain.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.Asset;
+import com.swirlycloud.twirly.entity.BasicFactory;
+import com.swirlycloud.twirly.entity.Contr;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.Market;
+import com.swirlycloud.twirly.entity.MarketView;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Posn;
+import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -40,10 +44,6 @@ import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.mock.MockTrader;
 import com.swirlycloud.twirly.node.JslNode;
-import com.swirlycloud.twirly.rec.Asset;
-import com.swirlycloud.twirly.rec.Contr;
-import com.swirlycloud.twirly.rec.Market;
-import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.rest.BackUnrest.TransStruct;
 
 public abstract class RestTest {
@@ -265,9 +265,10 @@ public abstract class RestTest {
     }
 
     protected final TransStruct postOrder(@NonNull String trader, @NonNull String market,
-            @NonNull Side side, long lots, long ticks) throws BadRequestException,
+            long quoteId, @NonNull Side side, long lots, long ticks) throws BadRequestException,
                     NotFoundException, ServiceUnavailableException, IOException {
-        return unrest.postOrder(trader, market, null, side, lots, ticks, 1, PARAMS_NONE, NOW);
+        return unrest.postOrder(trader, market, null, quoteId, side, lots, ticks, 1, PARAMS_NONE,
+                NOW);
     }
 
     protected final TransStruct putOrder(@NonNull String trader, @NonNull String market, long id,

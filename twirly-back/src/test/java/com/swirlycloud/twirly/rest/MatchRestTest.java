@@ -11,10 +11,10 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.Exec;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -26,8 +26,8 @@ public final class MatchRestTest extends RestTest {
     @Test
     public final void testWithSelf() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.BUY, 10, 12345);
         final Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
@@ -39,8 +39,8 @@ public final class MatchRestTest extends RestTest {
     @Test
     public final void testWithCpty() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("GOSAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("GOSAYL", "EURUSD.MAR14", 0, Side.BUY, 10, 12345);
         Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(1, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,
@@ -54,8 +54,8 @@ public final class MatchRestTest extends RestTest {
     @Test
     public final void testPartial() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("GOSAYL", "EURUSD.MAR14", Side.BUY, 3, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("GOSAYL", "EURUSD.MAR14", 0, Side.BUY, 3, 12345);
         Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(1, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 7, 3, 37035, 3,
@@ -69,9 +69,9 @@ public final class MatchRestTest extends RestTest {
     @Test
     public final void testSweep() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12346);
-        postOrder("GOSAYL", "EURUSD.MAR14", Side.BUY, 20, 12346);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12346);
+        postOrder("GOSAYL", "EURUSD.MAR14", 0, Side.BUY, 20, 12346);
         Map<Long, Exec> out = unrest.getTrade("MARAYL", PARAMS_NONE, NOW);
         assertEquals(2, out.size());
         assertExec("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450,

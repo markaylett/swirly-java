@@ -12,15 +12,15 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.EntitySet;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.EntitySet;
+import com.swirlycloud.twirly.entity.RecType;
+import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.rec.RecType;
-import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.rest.BackUnrest.PosnKey;
 import com.swirlycloud.twirly.rest.BackUnrest.SessStruct;
 
@@ -43,8 +43,8 @@ public final class TraderRestTest extends RestTest {
     @Test
     public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", Side.SELL, 10, 12345);
-        postOrder("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.BUY, 10, 12345);
         EntitySet es = new EntitySet(EntitySet.ORDER | EntitySet.TRADE | EntitySet.POSN);
         final SessStruct out = unrest.getSess("MARAYL", es, PARAMS_NONE, NOW);
         assertOrder("MARAYL", "EURUSD.MAR14", State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450, 10,

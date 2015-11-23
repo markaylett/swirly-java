@@ -11,10 +11,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.fix.BusinessRejectReason;
 import com.swirlycloud.twirly.fix.CancelRejectReason;
 import com.swirlycloud.twirly.fix.OrderRejectReason;
-import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Jsonable;
 import com.swirlycloud.twirly.util.Params;
 
-public class ServException extends Exception implements Jsonifiable {
+public class ServException extends Exception implements Jsonable {
 
     private static final long serialVersionUID = 1L;
 

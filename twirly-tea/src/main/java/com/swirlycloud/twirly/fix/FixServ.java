@@ -19,11 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.app.Result;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.MarketBook;
-import com.swirlycloud.twirly.domain.Order;
+import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.TraderSess;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.TraderSess;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
@@ -214,6 +214,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
 
         final String market = message.getString(Symbol.FIELD);
         final String ref = message.getString(ClOrdID.FIELD);
+        final long quoteId = 0;
         final Side side = fixToSide(message.getChar(quickfix.field.Side.FIELD));
         final long lots = (long) message.getDouble(OrderQty.FIELD);
         final long ticks = (long) message.getDouble(Price.FIELD);
@@ -237,7 +238,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
             }
             final MarketBook book = serv.getMarket(market);
             try (final Result result = new Result()) {
-                serv.createOrder(sess, book, ref, side, lots, ticks, minLots, now, result);
+                serv.createOrder(sess, book, ref, quoteId, side, lots, ticks, minLots, now, result);
                 log.info(sessionId + ": " + result);
                 sendResultLocked(sess, null, result, sessionId);
             }

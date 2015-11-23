@@ -51,13 +51,13 @@ public abstract @NonNullByDefault class AbstractDlNode implements DlNode {
     }
 
     @Override
-    public final DlNode dlNext() {
-        return this.next;
+    public final DlNode dlPrev() {
+        return this.prev;
     }
 
     @Override
-    public final DlNode dlPrev() {
-        return this.prev;
+    public final DlNode dlNext() {
+        return this.next;
     }
 
     @Override

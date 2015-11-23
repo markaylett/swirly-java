@@ -14,9 +14,8 @@ import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.ServFactory;
-import com.swirlycloud.twirly.exception.UncheckedIOException;
+import com.swirlycloud.twirly.app.ServFactory;
+import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineDatastore;
 import com.swirlycloud.twirly.io.Cache;
@@ -25,6 +24,7 @@ import com.swirlycloud.twirly.io.JdbcDatastore;
 import com.swirlycloud.twirly.io.SpyCache;
 import com.swirlycloud.twirly.rest.BackRest;
 import com.swirlycloud.twirly.rest.Rest;
+import com.swirlycloud.twirly.unchecked.UncheckedIOException;
 
 public final class BackLifeCycle implements ServletContextListener {
 

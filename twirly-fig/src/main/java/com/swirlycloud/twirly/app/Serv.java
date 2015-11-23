@@ -15,21 +15,30 @@ import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.twirly.book.BookSide;
+import com.swirlycloud.twirly.book.Level;
+import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.collection.PriorityQueue;
-import com.swirlycloud.twirly.domain.BookSide;
 import com.swirlycloud.twirly.domain.Direct;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Instruct;
-import com.swirlycloud.twirly.domain.MarketBook;
 import com.swirlycloud.twirly.domain.MarketId;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.domain.TraderSess;
+import com.swirlycloud.twirly.entity.Asset;
+import com.swirlycloud.twirly.entity.Contr;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.Instruct;
+import com.swirlycloud.twirly.entity.Market;
+import com.swirlycloud.twirly.entity.MarketViewTree;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Posn;
+import com.swirlycloud.twirly.entity.Quote;
+import com.swirlycloud.twirly.entity.Rec;
+import com.swirlycloud.twirly.entity.RecTree;
+import com.swirlycloud.twirly.entity.RecType;
+import com.swirlycloud.twirly.entity.TraderEmailMap;
+import com.swirlycloud.twirly.entity.TraderSess;
 import com.swirlycloud.twirly.exception.AlreadyExistsException;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.InvalidException;
@@ -41,9 +50,6 @@ import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.exception.TooLateException;
 import com.swirlycloud.twirly.exception.TraderNotFoundException;
-import com.swirlycloud.twirly.intrusive.MarketViewTree;
-import com.swirlycloud.twirly.intrusive.RecTree;
-import com.swirlycloud.twirly.intrusive.TraderEmailMap;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
@@ -52,11 +58,6 @@ import com.swirlycloud.twirly.node.DlNode;
 import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.RbNode;
 import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.rec.Asset;
-import com.swirlycloud.twirly.rec.Contr;
-import com.swirlycloud.twirly.rec.Market;
-import com.swirlycloud.twirly.rec.Rec;
-import com.swirlycloud.twirly.rec.RecType;
 
 public @NonNullByDefault class Serv {
 
@@ -347,7 +348,7 @@ public @NonNullByDefault class Serv {
         for (DlNode node = bidSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
             final Exec exec = newExec(book, order, now);
-            exec.cancel(order.getQuot());
+            exec.cancel(order.getQuotd());
             // Stack push.
             exec.setJslNext(firstExec);
             firstExec = exec;
@@ -355,7 +356,7 @@ public @NonNullByDefault class Serv {
         for (DlNode node = offerSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order order = (Order) node;
             final Exec exec = newExec(book, order, now);
-            exec.cancel(order.getQuot());
+            exec.cancel(order.getQuotd());
             // Stack push.
             exec.setJslNext(firstExec);
             firstExec = exec;
@@ -744,8 +745,8 @@ public @NonNullByDefault class Serv {
         return book;
     }
 
-    public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref, Side side,
-            long lots, long ticks, long minLots, long now, Result result)
+    public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref,
+            long quoteId, Side side, long lots, long ticks, long minLots, long now, Result result)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
@@ -756,8 +757,8 @@ public @NonNullByDefault class Serv {
             throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = book.allocOrderId();
-        final Order order = factory.newOrder(sess.getMnem(), book, orderId, ref, side, lots, ticks,
-                minLots, now);
+        final Order order = factory.newOrder(sess.getMnem(), book, orderId, ref, quoteId, side,
+                lots, ticks, minLots, now);
 
         final Exec exec = newExec(book, order, now);
         result.reset(sess.getMnem(), book, order, exec);
@@ -923,7 +924,7 @@ public @NonNullByDefault class Serv {
         }
 
         final Exec exec = newExec(book, order, now);
-        exec.cancel(order.getQuot());
+        exec.cancel(order.getQuotd());
         result.reset(sess.getMnem(), book, order, exec);
         try {
             journ.createExec(exec);
@@ -983,7 +984,7 @@ public @NonNullByDefault class Serv {
             }
 
             final Exec exec = newExec(book, order, now);
-            exec.cancel(order.getQuot());
+            exec.cancel(order.getQuotd());
 
             result.orders.insertBack(order);
             result.execs.insertBack(exec);
@@ -1045,7 +1046,7 @@ public @NonNullByDefault class Serv {
             assert book != null;
 
             final Exec exec = newExec(book, order, now);
-            exec.cancel(order.getQuot());
+            exec.cancel(order.getQuotd());
             // Stack push.
             exec.setJslNext(firstExec);
             firstExec = exec;
@@ -1385,13 +1386,13 @@ public @NonNullByDefault class Serv {
 
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
             Side side, long lots, long now) throws NotFoundException, ServiceUnavailableException {
-        final Order makerOrder = matchQuote(book, side, lots);
-        if (makerOrder == null) {
+        final Order order = matchQuote(book, side, lots);
+        if (order == null) {
             throw new NotFoundException("no liquidity available");
         }
 
-        final Quote quote = factory.newQuote(sess.getMnem(), book, book.allocQuoteId(), ref, side,
-                lots, makerOrder.getTicks(), now, now + QUOTE_EXPIRY);
+        final Quote quote = factory.newQuote(sess.getMnem(), book, book.allocQuoteId(), ref, order,
+                side, lots, order.getTicks(), now, now + QUOTE_EXPIRY);
 
         try {
             journ.createQuote(quote);
@@ -1404,6 +1405,11 @@ public @NonNullByDefault class Serv {
         setDirty(DIRTY_TIMEOUT);
         setDirty(book);
         setDirty(sess, TraderSess.DIRTY_QUOTE);
+
+        final Level level = (Level) order.getLevel();
+        assert level != null;
+        level.addQuote(quote);
+        order.addQuote(lots);
 
         quotes.add(quote);
         sess.insertQuote(quote);
@@ -1470,6 +1476,16 @@ public @NonNullByDefault class Serv {
             setDirty(DIRTY_TIMEOUT);
             setDirty(book);
             setDirty(sess, TraderSess.DIRTY_QUOTE);
+
+            final Order order = quote.getOrder();
+            assert order != null;
+            final Level level = (Level) order.getLevel();
+            // Level may be null if the order has been withdrawn from the order-book, because it is
+            // pending cancellation.
+            if (level != null) {
+                level.subQuote(quote);
+            }
+            order.subQuote(-quote.getLots());
 
             quotes.removeFirst();
             sess.removeQuote(quote);

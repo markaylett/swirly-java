@@ -20,15 +20,21 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.domain.EntitySet;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.MarketView;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.entity.Asset;
+import com.swirlycloud.twirly.entity.Contr;
+import com.swirlycloud.twirly.entity.EntitySet;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.Market;
+import com.swirlycloud.twirly.entity.MarketView;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Posn;
+import com.swirlycloud.twirly.entity.Quote;
+import com.swirlycloud.twirly.entity.Rec;
+import com.swirlycloud.twirly.entity.RecType;
+import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -37,12 +43,6 @@ import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.JslNode;
-import com.swirlycloud.twirly.rec.Asset;
-import com.swirlycloud.twirly.rec.Contr;
-import com.swirlycloud.twirly.rec.Market;
-import com.swirlycloud.twirly.rec.Rec;
-import com.swirlycloud.twirly.rec.RecType;
-import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.util.Params;
 
 @SuppressWarnings("null")
@@ -682,11 +682,11 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final TransStruct postOrder(String trader, String market, @Nullable String ref,
-            Side side, long lots, long ticks, long minLots, Params params, long now)
+            long quoteId, Side side, long lots, long ticks, long minLots, Params params, long now)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.postOrder(trader, market, ref, side, lots, ticks, minLots, params, now, sb);
+        rest.postOrder(trader, market, ref, quoteId, side, lots, ticks, minLots, params, now, sb);
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);

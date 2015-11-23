@@ -100,12 +100,12 @@ public final class BackSessServlet extends SessServlet {
             if ("order".equals(parts[TYPE_PART])) {
 
                 final int required = RestRequest.SIDE | RestRequest.LOTS | RestRequest.TICKS;
-                final int optional = RestRequest.REF | RestRequest.MIN_LOTS;
+                final int optional = RestRequest.REF | RestRequest.QUOTE_ID | RestRequest.MIN_LOTS;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
                 }
-                rest.postOrder(trader, market, r.getRef(), r.getSide(), r.getLots(), r.getTicks(),
-                        r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
+                rest.postOrder(trader, market, r.getRef(), r.getQuoteId(), r.getSide(), r.getLots(),
+                        r.getTicks(), r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             } else if ("trade".equals(parts[TYPE_PART])) {
 
                 final int required = RestRequest.TRADER | RestRequest.SIDE | RestRequest.TICKS

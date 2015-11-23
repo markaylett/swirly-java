@@ -20,14 +20,15 @@ public final class RestRequest {
     public static final int CONTR = 1 << 4;
     public static final int SETTL_DATE = 1 << 5;
     public static final int EXPIRY_DATE = 1 << 6;
-    public static final int STATE = 1 << 7;
-    public static final int REF = 1 << 8;
-    public static final int SIDE = 1 << 9;
-    public static final int LOTS = 1 << 10;
-    public static final int TICKS = 1 << 11;
-    public static final int MIN_LOTS = 1 << 12;
-    public static final int ROLE = 1 << 13;
-    public static final int CPTY = 1 << 14;
+    public static final int REF = 1 << 7;
+    public static final int QUOTE_ID = 1 << 8;
+    public static final int STATE = 1 << 9;
+    public static final int SIDE = 1 << 10;
+    public static final int LOTS = 1 << 11;
+    public static final int TICKS = 1 << 12;
+    public static final int MIN_LOTS = 1 << 13;
+    public static final int ROLE = 1 << 14;
+    public static final int CPTY = 1 << 15;
 
     private int fields;
 
@@ -38,8 +39,9 @@ public final class RestRequest {
     private String contr;
     private int settlDate;
     private int expiryDate;
-    private int state;
     private String ref;
+    private long quoteId;
+    private int state;
     private Side side;
     private long lots;
     private long ticks;
@@ -56,8 +58,9 @@ public final class RestRequest {
         contr = null;
         settlDate = 0;
         expiryDate = 0;
-        state = 0;
         ref = null;
+        quoteId = 0;
+        state = 0;
         side = null;
         lots = 0;
         ticks = 0;
@@ -121,6 +124,9 @@ public final class RestRequest {
                 } else if ("expiryDate".equals(name)) {
                     fields |= EXPIRY_DATE;
                     expiryDate = p.getInt();
+                } else if ("quoteId".equals(name)) {
+                    fields |= QUOTE_ID;
+                    quoteId = p.getLong();
                 } else if ("state".equals(name)) {
                     fields |= STATE;
                     state = p.getInt();
@@ -237,20 +243,28 @@ public final class RestRequest {
         return expiryDate;
     }
 
-    public final boolean isStateSet() {
-        return (fields & STATE) != 0;
-    }
-
-    public final int getState() {
-        return state;
-    }
-
     public final boolean isRefSet() {
         return (fields & REF) != 0;
     }
 
     public final String getRef() {
         return ref;
+    }
+
+    public final boolean isQuoteIdSet() {
+        return (fields & QUOTE_ID) != 0;
+    }
+
+    public final long getQuoteId() {
+        return quoteId;
+    }
+
+    public final boolean isStateSet() {
+        return (fields & STATE) != 0;
+    }
+
+    public final int getState() {
+        return state;
     }
 
     public final boolean isSideSet() {

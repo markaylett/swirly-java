@@ -17,23 +17,23 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.EntitySet;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.entity.EntitySet;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.MarketViewTree;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Posn;
+import com.swirlycloud.twirly.entity.Rec;
+import com.swirlycloud.twirly.entity.RecTree;
+import com.swirlycloud.twirly.entity.RecType;
+import com.swirlycloud.twirly.entity.RequestIdTree;
+import com.swirlycloud.twirly.entity.TraderPosnTree;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.OrderNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.exception.UncheckedExecutionException;
-import com.swirlycloud.twirly.intrusive.MarketViewTree;
-import com.swirlycloud.twirly.intrusive.RecTree;
-import com.swirlycloud.twirly.intrusive.RequestIdTree;
-import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Model;
-import com.swirlycloud.twirly.rec.Rec;
-import com.swirlycloud.twirly.rec.RecType;
+import com.swirlycloud.twirly.unchecked.UncheckedExecutionException;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class FrontRest implements Rest {

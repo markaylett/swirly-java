@@ -11,11 +11,11 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.RecTree;
+import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.function.UnaryCallback;
 import com.swirlycloud.twirly.function.UnaryFunction;
-import com.swirlycloud.twirly.intrusive.RecTree;
-import com.swirlycloud.twirly.rec.Trader;
 
 public final class MockTrader {
 

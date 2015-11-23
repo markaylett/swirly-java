@@ -10,11 +10,11 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.swirlycloud.twirly.entity.Market;
+import com.swirlycloud.twirly.entity.RecType;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
-import com.swirlycloud.twirly.rec.Market;
-import com.swirlycloud.twirly.rec.RecType;
 
 public final class MarketRestTest extends RestTest {
 

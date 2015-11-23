@@ -653,12 +653,18 @@ var PosnTable = React.createClass({
 var QuoteRow = React.createClass({
     // Mutators.
     // DOM Events.
+    onClickQuote: function(event) {
+        var quote = this.props.quote;
+        var market = quote.market;
+        var lots = quote.resd > 0 ? quote.resd : quote.lots;
+        this.props.module.onChangeFields(market, lots);
+    },
     // Lifecycle.
     render: function() {
         var quote = this.props.quote;
         var expiry = toTimeStr(quote.expiry);
         return (
-            <tr>
+            <tr style={{cursor: 'hand'}} onClick={this.onClickQuote}>
               <td>{quote.market}</td>
               <td>{quote.id}</td>
               <td>{quote.side}</td>
@@ -676,11 +682,11 @@ var QuoteTable = React.createClass({
     // Lifecycle.
     render: function() {
         var props = this.props;
-        var rows = props.quotes.map(function(quote) {
+        var rows = props.quotes.map(function(module, quote) {
             return (
-                <QuoteRow key={quote.key} quote={quote}/>
+                <QuoteRow key={quote.key} module={module} quote={quote}/>
             );
-        });
+        }.bind(this, props.module));
         return (
             <table className="quoteTable table table-hover table-striped">
               <thead>

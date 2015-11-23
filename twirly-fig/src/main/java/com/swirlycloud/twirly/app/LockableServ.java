@@ -7,7 +7,7 @@ import java.util.concurrent.Semaphore;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
-import com.swirlycloud.twirly.domain.Factory;
+import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;

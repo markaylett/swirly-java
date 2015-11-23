@@ -18,25 +18,25 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.swirlycloud.twirly.collection.Sequence;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.Market;
+import com.swirlycloud.twirly.entity.MarketViewTree;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Posn;
+import com.swirlycloud.twirly.entity.PosnTree;
+import com.swirlycloud.twirly.entity.RecTree;
+import com.swirlycloud.twirly.entity.RequestIdTree;
+import com.swirlycloud.twirly.entity.Trader;
+import com.swirlycloud.twirly.entity.TraderPosnTree;
 import com.swirlycloud.twirly.function.UnaryCallback;
-import com.swirlycloud.twirly.intrusive.MarketViewTree;
-import com.swirlycloud.twirly.intrusive.PosnTree;
-import com.swirlycloud.twirly.intrusive.RecTree;
-import com.swirlycloud.twirly.intrusive.RequestIdTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
-import com.swirlycloud.twirly.intrusive.TraderPosnTree;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.rec.Market;
-import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.util.Memorable;
 
 public class AppEngineModel implements Model {
@@ -80,6 +80,7 @@ public class AppEngineModel implements Model {
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
                     final long id = entity.getKey().getId();
                     final String ref = (String) entity.getProperty("ref");
+                    final long quoteId = longOrZeroIfNull(entity.getProperty("quoteId"));
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
@@ -100,8 +101,8 @@ public class AppEngineModel implements Model {
                     assert market != null;
                     assert contr != null;
                     final Order order = factory.newOrder(trader, market, contr, settlDay, id, ref,
-                            state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
-                            minLots, pecan, created, modified);
+                            quoteId, state, side, lots, ticks, resd, exec, cost, lastLots,
+                            lastTicks, minLots, pecan, created, modified);
                     c.add(order);
                 }
             }
@@ -122,7 +123,8 @@ public class AppEngineModel implements Model {
                     final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
                     final long id = entity.getKey().getId();
                     final String ref = (String) entity.getProperty("ref");
-                    final long orderId = (Long) entity.getProperty("orderId");
+                    final long orderId = longOrZeroIfNull(entity.getProperty("orderId"));
+                    final long quoteId = longOrZeroIfNull(entity.getProperty("quoteId"));
                     @SuppressWarnings("null")
                     final State state = State.valueOf((String) entity.getProperty("state"));
                     @SuppressWarnings("null")
@@ -145,8 +147,8 @@ public class AppEngineModel implements Model {
                     assert market != null;
                     assert contr != null;
                     final Exec trade = factory.newExec(trader, market, contr, settlDay, id, ref,
-                            orderId, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
-                            minLots, matchId, role, cpty, created);
+                            orderId, quoteId, state, side, lots, ticks, resd, exec, cost, lastLots,
+                            lastTicks, minLots, matchId, role, cpty, created);
                     c.add(trade);
                 }
             }

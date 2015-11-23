@@ -13,14 +13,14 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.EntitySet;
+import com.swirlycloud.twirly.entity.Asset;
+import com.swirlycloud.twirly.entity.Contr;
+import com.swirlycloud.twirly.entity.EntitySet;
+import com.swirlycloud.twirly.entity.Market;
+import com.swirlycloud.twirly.entity.Rec;
+import com.swirlycloud.twirly.entity.RecType;
+import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.rec.Asset;
-import com.swirlycloud.twirly.rec.Contr;
-import com.swirlycloud.twirly.rec.Market;
-import com.swirlycloud.twirly.rec.Rec;
-import com.swirlycloud.twirly.rec.RecType;
-import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.rest.BackUnrest.RecStruct;
 
 public final class RecRestTest extends RestTest {

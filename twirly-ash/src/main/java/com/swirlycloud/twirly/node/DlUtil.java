@@ -43,13 +43,13 @@ public final @NonNullByDefault class DlUtil {
         }
 
         @Override
-        public final DlNode dlNext() {
-            throw new UnsupportedOperationException("dlNext");
+        public final DlNode dlPrev() {
+            throw new UnsupportedOperationException("dlPrev");
         }
 
         @Override
-        public final DlNode dlPrev() {
-            throw new UnsupportedOperationException("dlPrev");
+        public final DlNode dlNext() {
+            throw new UnsupportedOperationException("dlNext");
         }
 
         @Override

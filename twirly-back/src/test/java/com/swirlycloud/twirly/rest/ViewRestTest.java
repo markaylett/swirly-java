@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.domain.MarketView;
+import com.swirlycloud.twirly.entity.MarketView;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 

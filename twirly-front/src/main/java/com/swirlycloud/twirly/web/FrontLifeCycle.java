@@ -12,9 +12,8 @@ import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.domain.BasicFactory;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.exception.UncheckedIOException;
+import com.swirlycloud.twirly.entity.BasicFactory;
+import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineModel;
 import com.swirlycloud.twirly.io.Cache;
@@ -23,6 +22,7 @@ import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.io.SpyCache;
 import com.swirlycloud.twirly.rest.FrontRest;
 import com.swirlycloud.twirly.rest.Rest;
+import com.swirlycloud.twirly.unchecked.UncheckedIOException;
 
 public final class FrontLifeCycle implements ServletContextListener {
 

@@ -6,11 +6,11 @@ package com.swirlycloud.twirly.io;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.intrusive.MarketViewTree;
-import com.swirlycloud.twirly.intrusive.RecTree;
-import com.swirlycloud.twirly.intrusive.RequestIdTree;
-import com.swirlycloud.twirly.intrusive.TraderPosnTree;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.MarketViewTree;
+import com.swirlycloud.twirly.entity.RecTree;
+import com.swirlycloud.twirly.entity.RequestIdTree;
+import com.swirlycloud.twirly.entity.TraderPosnTree;
 import com.swirlycloud.twirly.node.SlNode;
 
 public interface Model extends AutoCloseable {

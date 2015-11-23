@@ -8,18 +8,18 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.MarketBook;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
+import com.swirlycloud.twirly.book.MarketBook;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Jsonifiable;
+import com.swirlycloud.twirly.util.Jsonable;
 import com.swirlycloud.twirly.util.Params;
 
-public final @NonNullByDefault class Result implements AutoCloseable, Jsonifiable {
+public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
     private @Nullable String trader;
     private @Nullable MarketBook book;
     final SlQueue orders = new SlQueue();

@@ -19,11 +19,11 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
-import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.MarketId;
-import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.exception.MarketNotFoundException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.OrderNotFoundException;
@@ -88,6 +88,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
         entity.setUnindexedProperty("contr", exec.getContr());
         entity.setUnindexedProperty("settlDay", nullIfZero(exec.getSettlDay()));
         entity.setUnindexedProperty("ref", exec.getRef());
+        entity.setUnindexedProperty("quoteId", nullIfZero(exec.getQuoteId()));
         entity.setUnindexedProperty("state", exec.getState().name());
         entity.setUnindexedProperty("side", exec.getSide().name());
         entity.setUnindexedProperty("ticks", exec.getTicks());
@@ -113,12 +114,13 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
 
     private static Entity newExec(Entity market, Exec exec) {
         final Entity entity = new Entity(EXEC_KIND, exec.getId(), market.getKey());
-        entity.setUnindexedProperty("orderId", nullIfZero(exec.getOrderId()));
         entity.setProperty("trader", exec.getTrader());
         entity.setUnindexedProperty("market", exec.getMarket());
         entity.setUnindexedProperty("contr", exec.getContr());
         entity.setUnindexedProperty("settlDay", nullIfZero(exec.getSettlDay()));
         entity.setUnindexedProperty("ref", exec.getRef());
+        entity.setUnindexedProperty("orderId", nullIfZero(exec.getOrderId()));
+        entity.setUnindexedProperty("quoteId", nullIfZero(exec.getQuoteId()));
         entity.setProperty("state", exec.getState().name());
         entity.setUnindexedProperty("side", exec.getSide().name());
         entity.setUnindexedProperty("ticks", exec.getTicks());

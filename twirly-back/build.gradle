@@ -1,6 +1,7 @@
 // -*- conf -*-
 
 apply plugin: 'eclipse-wtp'
+apply plugin: 'jdepend'
 apply plugin: 'war'
 
 dependencies {
@@ -15,6 +16,14 @@ dependencies {
     testCompile group: 'com.google.appengine', name: 'appengine-testing', version: config.appengine.version
     testCompile group: 'com.google.appengine', name: 'appengine-api-stubs', version: config.appengine.version
     testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+jdependMain.doLast {
+    File file = new File(jdepend.reportsDir, "main.xml")
+    def cycles = new XmlSlurper().parse(file).Cycles.Package.size()
+    if (cycles > 0) {
+        throw new GradleException("Detected $cycles cycles. See JDepend report at ${file}")
+    }
 }
 
 eclipse {

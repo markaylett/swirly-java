@@ -12,13 +12,13 @@ import java.sql.Types;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.domain.Exec;
 import com.swirlycloud.twirly.domain.MarketId;
-import com.swirlycloud.twirly.domain.Quote;
 import com.swirlycloud.twirly.domain.Role;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.exception.NotFoundException;
-import com.swirlycloud.twirly.exception.UncheckedIOException;
 import com.swirlycloud.twirly.node.JslNode;
+import com.swirlycloud.twirly.unchecked.UncheckedIOException;
 
 public final class JdbcDatastore extends JdbcModel implements Datastore {
     @NonNull
@@ -56,7 +56,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
                 insertTraderStmt = conn.prepareStatement(
                         "INSERT INTO Trader_t (mnem, display, email) VALUES (?, ?, ?)");
                 insertExecStmt = conn.prepareStatement(
-                        "INSERT INTO Exec_t (trader, market, contr, settlDay, id, ref, orderId, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        "INSERT INTO Exec_t (trader, market, contr, settlDay, id, ref, orderId, quoteId, stateId, sideId, lots, ticks, resd, exec, cost, lastLots, lastTicks, minLots, matchId, roleId, cpty, archive, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 insertQuoteStmt = conn.prepareStatement(
                         "INSERT INTO Quote_t (market, id) VALUES (?, ?) ON DUPLICATE KEY UPDATE id = ?");
                 updateMarketStmt = conn.prepareStatement(
@@ -200,6 +200,7 @@ public final class JdbcDatastore extends JdbcModel implements Datastore {
             setParam(insertExecStmt, i++, exec.getId());
             setParam(insertExecStmt, i++, exec.getRef());
             setNullIfZero(insertExecStmt, i++, exec.getOrderId());
+            setNullIfZero(insertExecStmt, i++, exec.getQuoteId());
             setParam(insertExecStmt, i++, exec.getState().intValue());
             setParam(insertExecStmt, i++, exec.getSide().intValue());
             setParam(insertExecStmt, i++, exec.getLots());

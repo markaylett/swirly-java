@@ -16,16 +16,21 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.app.LockableServ;
 import com.swirlycloud.twirly.app.Result;
 import com.swirlycloud.twirly.app.Serv;
-import com.swirlycloud.twirly.domain.EntitySet;
-import com.swirlycloud.twirly.domain.Exec;
-import com.swirlycloud.twirly.domain.Factory;
-import com.swirlycloud.twirly.domain.MarketBook;
-import com.swirlycloud.twirly.domain.Order;
-import com.swirlycloud.twirly.domain.Posn;
-import com.swirlycloud.twirly.domain.Quote;
+import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.domain.TraderSess;
+import com.swirlycloud.twirly.entity.Contr;
+import com.swirlycloud.twirly.entity.EntitySet;
+import com.swirlycloud.twirly.entity.Exec;
+import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.entity.Market;
+import com.swirlycloud.twirly.entity.Order;
+import com.swirlycloud.twirly.entity.Posn;
+import com.swirlycloud.twirly.entity.Quote;
+import com.swirlycloud.twirly.entity.Rec;
+import com.swirlycloud.twirly.entity.RecType;
+import com.swirlycloud.twirly.entity.Trader;
+import com.swirlycloud.twirly.entity.TraderSess;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.MarketClosedException;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -37,11 +42,6 @@ import com.swirlycloud.twirly.io.Journ;
 import com.swirlycloud.twirly.io.Model;
 import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.rec.Contr;
-import com.swirlycloud.twirly.rec.Market;
-import com.swirlycloud.twirly.rec.Rec;
-import com.swirlycloud.twirly.rec.RecType;
-import com.swirlycloud.twirly.rec.Trader;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class BackRest implements Rest {
@@ -579,8 +579,8 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void postOrder(String trader, String market, @Nullable String ref, Side side,
-            long lots, long ticks, long minLots, Params params, long now, Appendable out)
+    public final void postOrder(String trader, String market, @Nullable String ref, long quoteId,
+            Side side, long lots, long ticks, long minLots, Params params, long now, Appendable out)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
         final LockableServ serv = (LockableServ) this.serv;
@@ -589,7 +589,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            serv.createOrder(sess, book, ref, side, lots, ticks, minLots, now, result);
+            serv.createOrder(sess, book, ref, quoteId, side, lots, ticks, minLots, now, result);
             result.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();

@@ -23,9 +23,9 @@ public abstract @NonNullByDefault class AbstractList<V> implements Sequence<V> {
 
     protected abstract void setNext(V node, V next);
 
-    protected abstract V next(V node);
-
     protected abstract V prev(V node);
+
+    protected abstract V next(V node);
 
     protected AbstractList(V end) {
         this.end = end;
