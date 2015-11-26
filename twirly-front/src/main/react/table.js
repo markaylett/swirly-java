@@ -659,6 +659,15 @@ var QuoteRow = React.createClass({
         var lots = quote.resd > 0 ? quote.resd : quote.lots;
         this.props.module.onChangeFields(market, lots);
     },
+    onClickConfirm: function(event) {
+        var quote = this.props.quote;
+        var market = quote.market;
+        var quoteId = quote.id;
+        var side = quote.side;
+        var lots = quote.lots;
+        var price = quote.price;
+        this.props.module.onPostOrder(market, quoteId, side, lots, price);
+    },
     // Lifecycle.
     render: function() {
         var quote = this.props.quote;
@@ -671,6 +680,14 @@ var QuoteRow = React.createClass({
               <td style={alignRight}>{quote.lots}</td>
               <td style={alignRight}>{quote.price}</td>
               <td>{expiry}</td>
+              <td>
+                <div className="btn-group btn-group-xs" role="group">
+                  <button type="button" className="btn btn-default"
+                          onClick={this.onClickConfirm}>
+                    <span className="glyphicon glyphicon-ok"></span>
+                  </button>
+                </div>
+              </td>
             </tr>
         );
     }
@@ -697,6 +714,7 @@ var QuoteTable = React.createClass({
                   <th style={alignRight}>Lots</th>
                   <th style={alignRight}>Price</th>
                   <th>Expiry</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>

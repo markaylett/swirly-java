@@ -26,6 +26,55 @@ var QuoteModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
+    postOrder: function(market, quoteId, side, lots, price) {
+        console.debug('postOrder: market=' + market + ', quoteId=' + quoteId
+                      + ', side=' + side + ', lots=' + lots + ', price=' + price);
+        var req = {};
+        var contr = undefined;
+        if (isSpecified(market)) {
+            contr = this.props.marketMap[market];
+        } else {
+            this.onReportError(internalError('market not specified'));
+            return;
+        }
+        if (contr === undefined) {
+            this.onReportError(internalError('invalid market: ' + market));
+            return;
+        }
+        // Optional quoteId.
+        if (isSpecified(quoteId) && quoteId > 0) {
+            req.quoteId = parseInt(quoteId);
+        }
+        if (isSpecified(side)) {
+            req.side = side;
+        } else {
+            this.onReportError(internalError('side not specified'));
+            return;
+        }
+        if (isSpecified(lots) && lots > 0) {
+            req.lots = parseInt(lots);
+        } else {
+            this.onReportError(internalError('lots not specified'));
+            return;
+        }
+        if (isSpecified(price)) {
+            req.ticks = priceToTicks(price, contr);
+        } else {
+            this.onReportError(internalError('price not specified'));
+            return;
+        }
+
+        $.ajax({
+            type: 'post',
+            url: '/back/sess/order/' + market,
+            data: JSON.stringify(req)
+        }).done(function(result, status, xhr) {
+            this.resetTimeout(xhr);
+            this.applyResult(result);
+        }.bind(this)).fail(function(xhr) {
+            this.onReportError(parseError(xhr));
+        }.bind(this));
+    },
     postQuote: function(market, side, lots) {
         console.debug('postQuote: market=' + market + ', side=' + side
                        + ', lots=' + lots);
@@ -75,6 +124,25 @@ var QuoteModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
+    applyResult: function(result) {
+
+        var contrMap = this.props.contrMap;
+        var staging = this.staging;
+
+        var quotes = staging.quotes;
+
+        result.orders.forEach(function(order) {
+            enrichOrder(contrMap, order);
+            if (order.isDone && order.quoteId !== 0) {
+                var key = order.market + '/' + zeroPad(order.quoteId);
+                quotes.delete(key);
+            }
+        });
+
+        this.setState({
+            quotes: quotes.toSortedArray()
+        });
+    },
     // DOM Events.
     onClearErrors: function() {
         console.debug('onClearErrors');
@@ -96,6 +164,9 @@ var QuoteModuleImpl = React.createClass({
         console.debug('onChangeFields: market=' + market + ', lots=' + lots);
         this.refs.newQuote.setFields(market, lots);
     },
+    onPostOrder: function(market, quoteId, side, lots, price) {
+        this.postOrder(market, quoteId, side, lots, price);
+    },
     onPostQuote: function(market, side, lots) {
         this.postQuote(market, side, lots);
     },
@@ -106,6 +177,7 @@ var QuoteModuleImpl = React.createClass({
                 onClearErrors: this.onClearErrors,
                 onReportError: this.onReportError,
                 onChangeFields: this.onChangeFields,
+                onPostOrder: this.onPostOrder,
                 onPostQuote: this.onPostQuote
             },
             errors: [],

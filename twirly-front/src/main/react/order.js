@@ -82,9 +82,9 @@ var OrderModuleImpl = React.createClass({
             isSelectedArchivable: isSelectedArchivable
         });
     },
-    postOrder: function(market, side, lots, price) {
-        console.debug('postOrder: market=' + market + ', side=' + side
-                       + ', lots=' + lots + ', price=' + price);
+    postOrder: function(market, quoteId, side, lots, price) {
+        console.debug('postOrder: market=' + market + ', quoteId=' + quoteId
+                      + ', side=' + side + ', lots=' + lots + ', price=' + price);
         var req = {};
         var contr = undefined;
         if (isSpecified(market)) {
@@ -96,6 +96,10 @@ var OrderModuleImpl = React.createClass({
         if (contr === undefined) {
             this.onReportError(internalError('invalid market: ' + market));
             return;
+        }
+        // Optional quoteId.
+        if (isSpecified(quoteId) && quoteId > 0) {
+            req.quoteId = parseInt(quoteId);
         }
         if (isSpecified(side)) {
             req.side = side;
@@ -328,8 +332,8 @@ var OrderModuleImpl = React.createClass({
         }
         this.updateSelected();
     },
-    onPostOrder: function(market, side, lots, price) {
-        this.postOrder(market, side, lots, price);
+    onPostOrder: function(market, quoteId, side, lots, price) {
+        this.postOrder(market, quoteId, side, lots, price);
     },
     onReviseAll: function(lots) {
         if (this.staging.context === 'working') {

@@ -28,7 +28,7 @@ combineJs {
         "${buildDir}/react/util.js",
         "${buildDir}/react/error.js",
         "${buildDir}/react/conv.js",
-        "${buildDir}/react/domain.js",
+        "${buildDir}/react/entity.js",
         "${buildDir}/react/table.js",
         "${buildDir}/react/form.js",
         "${buildDir}/react/dialog.js",

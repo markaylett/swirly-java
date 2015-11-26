@@ -92,7 +92,7 @@ var NewOrderForm = React.createClass({
         var market = state.market;
         var lots = state.lots;
         var price = state.price;
-        this.props.module.onPostOrder(market, 'BUY', lots, price);
+        this.props.module.onPostOrder(market, 0, 'BUY', lots, price);
     },
     onClickSell: function(event) {
         event.preventDefault();
@@ -100,7 +100,7 @@ var NewOrderForm = React.createClass({
         var market = state.market;
         var lots = state.lots;
         var price = state.price;
-        this.props.module.onPostOrder(market, 'SELL', lots, price);
+        this.props.module.onPostOrder(market, 0, 'SELL', lots, price);
     },
     // Lifecycle.
     getInitialState: function() {
