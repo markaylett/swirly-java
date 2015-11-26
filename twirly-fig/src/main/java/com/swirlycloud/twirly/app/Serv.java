@@ -344,8 +344,8 @@ public @NonNullByDefault class Serv {
         matchOrders(takerSess, book, takerOrder, bookSide, direct, now, result);
     }
 
-    private final void matchQuote(TraderSess takerSess, MarketBook book, Order takerOrder, long now,
-            Result result)
+    private final Quote matchQuote(TraderSess takerSess, MarketBook book, Order takerOrder,
+            long now, Result result)
                     throws InvalidLotsException, InvalidTicksException, QuoteNotFoundException {
 
         final long quoteId = takerOrder.getQuoteId();
@@ -374,6 +374,7 @@ public @NonNullByDefault class Serv {
         // Avoid allocating position when there are no matches.
         result.posn = takerSess.getLazyPosn(book);
         takerOrder.trade(lots, cost, lots, ticks, now);
+        return quote;
     }
 
     private final @Nullable Order findOrder(MarketBook book, Side side, long lots) {
@@ -385,6 +386,38 @@ public @NonNullByDefault class Serv {
             }
         }
         return null;
+    }
+
+    private final void insertQuote(TraderSess sess, MarketBook book, Quote quote) {
+        final Order order = quote.getOrder();
+        assert order != null;
+
+        setDirty(book);
+        setDirty(sess, TraderSess.DIRTY_QUOTE);
+
+        final Level level = (Level) order.getLevel();
+        assert level != null;
+        level.addQuote(quote);
+        order.addQuote(quote.getLots());
+        sess.insertQuote(quote);
+    }
+
+    private final void removeQuote(TraderSess sess, MarketBook book, Quote quote) {
+
+        final Order order = quote.getOrder();
+        assert order != null;
+
+        setDirty(book);
+        setDirty(sess, TraderSess.DIRTY_QUOTE);
+
+        final Level level = (Level) order.getLevel();
+        // Level may be null if the order has been withdrawn from the order-book, because it is
+        // pending cancellation.
+        if (level != null) {
+            level.subQuote(quote);
+        }
+        order.subQuote(quote.getLots());
+        sess.removeQuote(quote);
     }
 
     private final void doCancelOrders(MarketBook book, long now)
@@ -813,6 +846,7 @@ public @NonNullByDefault class Serv {
         final Exec exec = newExec(book, order, now);
         result.reset(sess.getMnem(), book, order, exec);
         // Order fields are updated on match.
+        Quote quote = null;
         if (quoteId == 0) {
             matchOrders(sess, book, order, now, result);
             // Place incomplete order in market.
@@ -821,7 +855,7 @@ public @NonNullByDefault class Serv {
                 book.insertOrder(order);
             }
         } else {
-            matchQuote(sess, book, order, now, result);
+            quote = matchQuote(sess, book, order, now, result);
             assert order.isDone();
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
@@ -846,6 +880,9 @@ public @NonNullByDefault class Serv {
         sess.insertOrder(order);
         // Commit trans to cycle and free matches.
         commitMatches(sess, book, now, result);
+        if (quote != null) {
+            removeQuote(sess, book, quote);
+        }
 
         updateDirty();
     }
@@ -1457,17 +1494,10 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
+        insertQuote(sess, book, quote);
+
         setDirty(DIRTY_TIMEOUT);
-        setDirty(book);
-        setDirty(sess, TraderSess.DIRTY_QUOTE);
-
-        final Level level = (Level) order.getLevel();
-        assert level != null;
-        level.addQuote(quote);
-        order.addQuote(lots);
-
         quotes.add(quote);
-        sess.insertQuote(quote);
 
         updateDirty();
         return quote;
@@ -1528,22 +1558,10 @@ public @NonNullByDefault class Serv {
             final MarketBook book = (MarketBook) markets.find(quote.getMarket());
             assert book != null;
 
+            removeQuote(sess, book, quote);
+
             setDirty(DIRTY_TIMEOUT);
-            setDirty(book);
-            setDirty(sess, TraderSess.DIRTY_QUOTE);
-
-            final Order order = quote.getOrder();
-            assert order != null;
-            final Level level = (Level) order.getLevel();
-            // Level may be null if the order has been withdrawn from the order-book, because it is
-            // pending cancellation.
-            if (level != null) {
-                level.subQuote(quote);
-            }
-            order.subQuote(quote.getLots());
-
             quotes.removeFirst();
-            sess.removeQuote(quote);
         }
         updateDirty();
     }
