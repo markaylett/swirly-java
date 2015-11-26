@@ -1533,7 +1533,7 @@ public @NonNullByDefault class Serv {
             if (level != null) {
                 level.subQuote(quote);
             }
-            order.subQuote(-quote.getLots());
+            order.subQuote(quote.getLots());
 
             quotes.removeFirst();
             sess.removeQuote(quote);
