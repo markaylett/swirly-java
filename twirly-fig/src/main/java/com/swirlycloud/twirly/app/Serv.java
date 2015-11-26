@@ -329,52 +329,54 @@ public @NonNullByDefault class Serv {
     private final void matchOrders(TraderSess takerSess, MarketBook book, Order takerOrder,
             long now, Result result)
                     throws InvalidLotsException, InvalidTicksException, QuoteNotFoundException {
-        final long quoteId = takerOrder.getQuoteId();
-        if (quoteId == 0) {
-            BookSide bookSide;
-            Direct direct;
-            if (takerOrder.getSide() == Side.BUY) {
-                // Paid when the taker lifts the offer.
-                bookSide = book.getOfferSide();
-                direct = Direct.PAID;
-            } else {
-                assert takerOrder.getSide() == Side.SELL;
-                // Given when the taker hits the bid.
-                bookSide = book.getBidSide();
-                direct = Direct.GIVEN;
-            }
-            matchOrders(takerSess, book, takerOrder, bookSide, direct, now, result);
+        BookSide bookSide;
+        Direct direct;
+        if (takerOrder.getSide() == Side.BUY) {
+            // Paid when the taker lifts the offer.
+            bookSide = book.getOfferSide();
+            direct = Direct.PAID;
         } else {
-            final Quote quote = takerSess.findQuote(takerOrder.getMarket(), quoteId);
-            if (quote == null) {
-                throw new QuoteNotFoundException(
-                        String.format("quote '%d' does not exist", quoteId));
-            }
-
-            final Order makerOrder = quote.getOrder();
-            assert makerOrder != null;
-
-            final long lots = quote.getLots();
-            final long ticks = quote.getTicks();
-            final long cost = lots * ticks;
-
-            if (lots != takerOrder.getLots() || lots < takerOrder.getMinLots()) {
-                throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
-            }
-
-            if (ticks != takerOrder.getTicks()) {
-                throw new InvalidTicksException(String.format("invalid ticks '%d'", ticks));
-            }
-
-            insertMatch(book, takerOrder, makerOrder, lots, lots, cost, now, result);
-
-            // Avoid allocating position when there are no matches.
-            result.posn = takerSess.getLazyPosn(book);
-            takerOrder.trade(lots, cost, lots, ticks, now);
+            assert takerOrder.getSide() == Side.SELL;
+            // Given when the taker hits the bid.
+            bookSide = book.getBidSide();
+            direct = Direct.GIVEN;
         }
+        matchOrders(takerSess, book, takerOrder, bookSide, direct, now, result);
     }
 
-    private final @Nullable Order matchQuote(MarketBook book, Side side, long lots) {
+    private final void matchQuote(TraderSess takerSess, MarketBook book, Order takerOrder, long now,
+            Result result)
+                    throws InvalidLotsException, InvalidTicksException, QuoteNotFoundException {
+
+        final long quoteId = takerOrder.getQuoteId();
+        final Quote quote = takerSess.findQuote(takerOrder.getMarket(), quoteId);
+        if (quote == null) {
+            throw new QuoteNotFoundException(String.format("quote '%d' does not exist", quoteId));
+        }
+
+        final Order makerOrder = quote.getOrder();
+        assert makerOrder != null;
+
+        final long lots = quote.getLots();
+        final long ticks = quote.getTicks();
+        final long cost = lots * ticks;
+
+        if (lots != takerOrder.getLots() || lots < takerOrder.getMinLots()) {
+            throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
+        }
+
+        if (ticks != takerOrder.getTicks()) {
+            throw new InvalidTicksException(String.format("invalid ticks '%d'", ticks));
+        }
+
+        insertMatch(book, takerOrder, makerOrder, lots, lots, cost, now, result);
+
+        // Avoid allocating position when there are no matches.
+        result.posn = takerSess.getLazyPosn(book);
+        takerOrder.trade(lots, cost, lots, ticks, now);
+    }
+
+    private final @Nullable Order findOrder(MarketBook book, Side side, long lots) {
         final BookSide bookSide = book.getOtherSide(side);
         for (DlNode node = bookSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order makerOrder = (Order) node;
@@ -811,11 +813,16 @@ public @NonNullByDefault class Serv {
         final Exec exec = newExec(book, order, now);
         result.reset(sess.getMnem(), book, order, exec);
         // Order fields are updated on match.
-        matchOrders(sess, book, order, now, result);
-        // Place incomplete order in market.
-        if (!order.isDone()) {
-            // This may fail if level cannot be allocated.
-            book.insertOrder(order);
+        if (quoteId == 0) {
+            matchOrders(sess, book, order, now, result);
+            // Place incomplete order in market.
+            if (!order.isDone()) {
+                // This may fail if level cannot be allocated.
+                book.insertOrder(order);
+            }
+        } else {
+            matchQuote(sess, book, order, now, result);
+            assert order.isDone();
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
         // any unfilled quantity.
@@ -1434,7 +1441,7 @@ public @NonNullByDefault class Serv {
 
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
             Side side, long lots, long now) throws NotFoundException, ServiceUnavailableException {
-        final Order order = matchQuote(book, side, lots);
+        final Order order = findOrder(book, side, lots);
         if (order == null) {
             throw new NotFoundException("no liquidity available");
         }
