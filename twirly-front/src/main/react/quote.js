@@ -6,25 +6,55 @@ var QuoteModuleImpl = React.createClass({
     // Mutators.
     refresh: function(url) {
         if (url === undefined) {
-            url = '/front/sess/quote';
+            url = '/front/sess/trade,posn,quote';
         }
-        $.getJSON(url, function(quotes, status, xhr) {
+        $.getJSON(url, function(sess, status, xhr) {
             this.resetTimeout(xhr);
             var contrMap = this.props.contrMap;
             var staging = this.staging;
 
+            staging.trades.clear();
+            sess.trades.forEach(function(trade) {
+                enrichTrade(contrMap, trade);
+                staging.trades.set(trade.key, trade);
+            });
+
+            staging.posns.clear();
+            sess.posns.forEach(function(posn) {
+                enrichPosn(contrMap, posn);
+                staging.posns.set(posn.key, posn);
+            });
+
             staging.quotes.clear();
-            quotes.forEach(function(quote) {
+            sess.quotes.forEach(function(quote) {
                 enrichQuote(contrMap, quote);
                 staging.quotes.set(quote.key, quote);
             });
 
             this.setState({
-                quotes: staging.quotes.toSortedArray()
+                sess: {
+                    trades: staging.trades.toSortedArray(),
+                    posns: staging.posns.toSortedArray(),
+                    quotes: staging.quotes.toSortedArray()
+                }
             });
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
         }.bind(this));
+    },
+    updateSelected: function() {
+        var isSelectedTrade = false;
+        var isSelectedArchivable = false;
+        if (this.staging.context === 'trades') {
+            if (!this.staging.selectedTrades.isEmpty()) {
+                isSelectedTrade = true;
+                isSelectedArchivable = true;
+            }
+        }
+        this.setState({
+            isSelectedTrade: isSelectedTrade,
+            isSelectedArchivable: isSelectedArchivable
+        });
     },
     postOrder: function(market, quoteId, side, lots, price) {
         console.debug('postOrder: market=' + market + ', quoteId=' + quoteId
@@ -108,17 +138,50 @@ var QuoteModuleImpl = React.createClass({
             url: '/back/sess/quote/' + market,
             data: JSON.stringify(req)
         }).done(function(quote, status, xhr) {
-
-            var contrMap = this.props.contrMap;
-            var staging = this.staging;
-
-            var quotes = staging.quotes;
-
             this.resetTimeout(xhr);
+            var contrMap = this.props.contrMap;
+            var quotes = this.staging.quotes;
+            var sess = this.state.sess;
             enrichQuote(contrMap, quote);
             quotes.set(quote.key, quote);
             this.setState({
-                quotes: quotes.toSortedArray()
+                sess: {
+                    trades: sess.trades,
+                    posns: sess.posns,
+                    quotes: quotes.toSortedArray()
+                }
+            });
+        }.bind(this)).fail(function(xhr) {
+            this.onReportError(parseError(xhr));
+        }.bind(this));
+    },
+    deleteTrade: function(market, ids) {
+        console.debug('deleteTrade: market=' + market + ', ids=[' + ids + ']');
+        if (!isSpecified(market)) {
+            this.onReportError(internalError('market not specified'));
+            return;
+        }
+        if (!Array.isArray(ids) || ids.length === 0) {
+            this.onReportError(internalError('trade-id not specified'));
+            return;
+        }
+        $.ajax({
+            type: 'delete',
+            url: '/back/sess/trade/' + market + '/' + ids
+        }).done(function(unused, status, xhr) {
+            this.resetTimeout(xhr);
+            var trades = this.staging.trades;
+            var sess = this.state.sess;
+            ids.forEach(function(id) {
+                var key = market + '/' + zeroPad(id);
+                trades.delete(key);
+            }.bind(this));
+            this.setState({
+                sess: {
+                    trades: trades.toSortedArray(),
+                    posns: sess.posns,
+                    quotes: sess.quotes
+                }
             });
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
@@ -129,18 +192,31 @@ var QuoteModuleImpl = React.createClass({
         var contrMap = this.props.contrMap;
         var staging = this.staging;
 
+        var trades = staging.trades;
+        var posns = staging.posns;
         var quotes = staging.quotes;
 
-        result.orders.forEach(function(order) {
-            enrichOrder(contrMap, order);
-            if (order.isDone && order.quoteId !== 0) {
-                var key = order.market + '/' + zeroPad(order.quoteId);
-                quotes.delete(key);
+        result.execs.forEach(function(exec) {
+            if (exec.state === 'TRADE') {
+                enrichTrade(contrMap, exec);
+                trades.set(exec.key, exec);
+                if (exec.quoteId !== 0) {
+                    var key = exec.market + '/' + zeroPad(exec.quoteId);
+                    quotes.delete(key);
+                }
             }
         });
-
+        var posn = result.posn;
+        if (posn !== null) {
+            enrichPosn(contrMap, posn);
+            staging.posns.set(posn.key, posn);
+        }
         this.setState({
-            quotes: quotes.toSortedArray()
+            sess: {
+                trades: trades.toSortedArray(),
+                posns: posns.toSortedArray(),
+                quotes: quotes.toSortedArray()
+            }
         });
     },
     // DOM Events.
@@ -160,9 +236,28 @@ var QuoteModuleImpl = React.createClass({
             errors: errors.toArray()
         });
     },
-    onChangeFields: function(market, lots) {
-        console.debug('onChangeFields: market=' + market + ', lots=' + lots);
+    onRefresh: function() {
+        console.debug('onRefresh');
+        this.refresh();
+    },
+    onChangeContext: function(context) {
+        console.debug('onChangeContext: context=' + context);
+        this.staging.context = context;
+        this.updateSelected();
+    },
+    onChangeFields: function(market, lots, price) {
+        console.debug('onChangeFields: market=' + market + ', lots=' + lots + ', price=' + price);
         this.refs.newQuote.setFields(market, lots);
+    },
+    onSelectTrade: function(trade, isSelected) {
+        console.debug('onSelectTrade: key=' + trade.key + ', isSelected=' + isSelected);
+        var selectedTrades = this.staging.selectedTrades;
+        if (isSelected) {
+            selectedTrades.set(trade.key, trade);
+        } else {
+            selectedTrades.delete(trade.key);
+        }
+        this.updateSelected();
     },
     onPostOrder: function(market, quoteId, side, lots, price) {
         this.postOrder(market, quoteId, side, lots, price);
@@ -170,18 +265,39 @@ var QuoteModuleImpl = React.createClass({
     onPostQuote: function(market, side, lots) {
         this.postQuote(market, side, lots);
     },
+    onArchiveAll: function() {
+        if (this.staging.context === 'trades') {
+            var batches = new Map();
+            this.staging.selectedTrades.forEach(function(key, trade) {
+                batches.push(trade.market, trade.id);
+            }.bind(this));
+            batches.forEach(function(market, ids) {
+                this.deleteTrade(market, ids);
+            }.bind(this));
+        }
+    },
     // Lifecycle.
     getInitialState: function() {
         return {
             module: {
                 onClearErrors: this.onClearErrors,
                 onReportError: this.onReportError,
+                onRefresh: this.onRefresh,
+                onChangeContext: this.onChangeContext,
                 onChangeFields: this.onChangeFields,
+                onSelectTrade: this.onSelectTrade,
                 onPostOrder: this.onPostOrder,
-                onPostQuote: this.onPostQuote
+                onPostQuote: this.onPostQuote,
+                onArchiveAll: this.onArchiveAll
             },
             errors: [],
-            quotes: []
+            sess: {
+                trades: [],
+                posns: [],
+                quotes: []
+            },
+            isSelectedTrade: false,
+            isSelectedArchivable: false
         };
     },
     componentDidMount: function() {
@@ -195,18 +311,27 @@ var QuoteModuleImpl = React.createClass({
         var state = this.state;
         var module = state.module;
         var errors = state.errors;
-        var quotes = state.quotes;
+        var sess = state.sess;
+        var isSelectedTrade = state.isSelectedTrade;
+        var isSelectedArchivable = state.isSelectedArchivable;
 
         var marginTop = {
             marginTop: 24
         };
 
         return (
-            <div className="quoteModuleImpl">
+            <div className="quoteModule">
               <MultiAlertWidget module={module} errors={errors}/>
               <NewQuoteForm ref="newQuote" module={module} marketMap={marketMap}/>
               <div style={marginTop}>
-                <QuoteTable module={module} quotes={quotes}/>
+                <QuoteTable module={module} quotes={sess.quotes}/>
+              </div>
+              <div style={marginTop}>
+                <ArchiveForm ref="archive" module={module} marketMap={marketMap}
+                                 isSelectedArchivable={isSelectedArchivable}/>
+              </div>
+              <div style={marginTop}>
+                <QuoteWidget module={module} sess={sess}/>
               </div>
             </div>
         );
@@ -219,7 +344,7 @@ var QuoteModuleImpl = React.createClass({
             var delta = timeout - Date.now();
             this.timeout = setTimeout(function() {
                 console.debug('timeout now at ' + new Date(timeout));
-                this.refresh('/back/sess/quote');
+                this.refresh('/back/sess/trade,posn,quote');
             }.bind(this), delta);
         } else {
             console.debug('timeout not set');
@@ -227,7 +352,10 @@ var QuoteModuleImpl = React.createClass({
     },
     staging: {
         errors: new Tail(5),
-        quotes: new Map()
+        trades: new Map(),
+        posns: new Map(),
+        quotes: new Map(),
+        selectedTrades: new Map()
     },
     timeout: undefined
 });

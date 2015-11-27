@@ -413,7 +413,6 @@ var OrderModuleImpl = React.createClass({
     },
     render: function() {
         var props = this.props;
-        var contrMap = props.contrMap;
 
         var state = this.state;
         var module = state.module;
@@ -430,7 +429,7 @@ var OrderModuleImpl = React.createClass({
         };
 
         return (
-            <div className="orderModuleImpl">
+            <div className="orderModule">
               <MultiAlertWidget module={module} errors={errors}/>
               <NewOrderForm ref="newOrder" module={module} marketMap={marketMap}
                             isSelectedWorking={isSelectedWorking}/>
@@ -443,7 +442,7 @@ var OrderModuleImpl = React.createClass({
                                  isSelectedWorking={isSelectedWorking}/>
               </div>
               <div style={marginTop}>
-                <SessWidget module={module} sess={sess}/>
+                <OrderWidget module={module} sess={sess}/>
               </div>
             </div>
         );

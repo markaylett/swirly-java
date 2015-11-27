@@ -657,7 +657,7 @@ var QuoteRow = React.createClass({
         var quote = this.props.quote;
         var market = quote.market;
         var lots = quote.resd > 0 ? quote.resd : quote.lots;
-        this.props.module.onChangeFields(market, lots);
+        this.props.module.onChangeFields(market, lots, undefined);
     },
     onClickConfirm: function(event) {
         var quote = this.props.quote;
