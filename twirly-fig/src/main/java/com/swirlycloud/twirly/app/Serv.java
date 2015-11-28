@@ -877,12 +877,13 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
-        sess.insertOrder(order);
-        // Commit trans to cycle and free matches.
-        commitMatches(sess, book, now, result);
         if (quote != null) {
             removeQuote(sess, book, quote);
+        } else {
+            sess.insertOrder(order);
         }
+        // Commit trans and free matches.
+        commitMatches(sess, book, now, result);
 
         updateDirty();
     }

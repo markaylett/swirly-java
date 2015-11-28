@@ -79,6 +79,10 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
         int i = 0;
         for (SlNode node = orders.getFirst(); node != null; node = node.slNext()) {
             final Order order = (Order) node;
+            // Filter-out previously quoted orders.
+            if (order.getQuoteId() != 0) {
+                continue;
+            }
             if (i > 0) {
                 out.append(',');
             }
@@ -87,11 +91,15 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
         }
         for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
             final Match match = (Match) node;
+            // Filter-out counter-party trades.
             if (!match.makerOrder.getTrader().equals(trader)) {
                 continue;
             }
-            out.append(',');
+            if (i > 0) {
+                out.append(',');
+            }
             match.makerOrder.toJson(params, out);
+            ++i;
         }
         out.append("],\"execs\":[");
         i = 0;

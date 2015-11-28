@@ -362,7 +362,7 @@ CREATE TRIGGER beforeInsertOnExec
           NEW.lastLots,
           NEW.lastTicks,
           NEW.minLots,
-          NEW.archive,
+          CASE WHEN NEW.quoteId != 0 THEN 1 ELSE 0 END,
           CASE WHEN NEW.stateId = 5 THEN 1 ELSE 0 END,
           NEW.created,
           NEW.modified
