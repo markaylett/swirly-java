@@ -21,6 +21,7 @@ import com.swirlycloud.twirly.entity.Rec;
 import com.swirlycloud.twirly.entity.RecType;
 import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.rest.BackUnrest.RecStruct;
 
 public final class RecRestTest extends RestTest {
@@ -28,7 +29,8 @@ public final class RecRestTest extends RestTest {
     // Get Rec.
 
     @Test
-    public final void testGetAll() throws IOException {
+    public final void testGetAll()
+            throws NotFoundException, ServiceUnavailableException, IOException {
 
         // With traders.
         EntitySet es = new EntitySet(
@@ -57,7 +59,8 @@ public final class RecRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetByRecType() throws IOException {
+    public final void testGetByRecType()
+            throws NotFoundException, ServiceUnavailableException, IOException {
 
         Map<String, Rec> recs = unrest.getRec(RecType.ASSET, PARAMS_NONE, NOW);
         assertAssets(recs);
@@ -77,7 +80,8 @@ public final class RecRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetByTypeMnem() throws NotFoundException, IOException {
+    public final void testGetByTypeMnem()
+            throws NotFoundException, ServiceUnavailableException, IOException {
 
         final Asset asset = (Asset) unrest.getRec(RecType.ASSET, "JPY", PARAMS_NONE, NOW);
         assertAsset("JPY", asset);

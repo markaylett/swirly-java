@@ -401,7 +401,8 @@ public final @NonNullByDefault class BackUnrest {
         return rest.findTraderByEmail(email);
     }
 
-    public final RecStruct getRec(EntitySet es, Params params, long now) throws IOException {
+    public final RecStruct getRec(EntitySet es, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(es, params, now, sb);
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
@@ -411,7 +412,8 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     @Deprecated
-    public final RecStruct getRec(boolean withTraders, Params params, long now) throws IOException {
+    public final RecStruct getRec(boolean withTraders, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         final EntitySet es = new EntitySet(
                 EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET | EntitySet.TRADER);
@@ -423,7 +425,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Map<String, Rec> getRec(RecType recType, Params params, long now)
-            throws IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(recType, params, now, sb);
 
@@ -449,7 +451,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Rec getRec(RecType recType, String mnem, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getRec(recType, mnem, params, now, sb);
 
@@ -476,7 +478,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final SessStruct getSess(String trader, EntitySet es, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getSess(trader, es, params, now, sb);
 
@@ -487,7 +489,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Map<Long, Order> getOrder(String trader, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getOrder(trader, params, now, sb);
 
@@ -500,7 +502,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Map<Long, Order> getOrder(String trader, String market, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getOrder(trader, market, params, now, sb);
 
@@ -513,7 +515,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Order getOrder(String trader, String market, long id, Params params, long now)
-            throws IOException, NotFoundException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getOrder(trader, market, id, params, now, sb);
 
@@ -524,7 +526,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Map<Long, Exec> getTrade(String trader, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getTrade(trader, params, now, sb);
 
@@ -537,7 +539,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Map<Long, Exec> getTrade(String trader, String market, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getTrade(trader, market, params, now, sb);
 
@@ -550,7 +552,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Exec getTrade(String trader, String market, long id, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getTrade(trader, market, id, params, now, sb);
 
@@ -561,7 +563,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Map<PosnKey, Posn> getPosn(String trader, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getPosn(trader, params, now, sb);
 
@@ -574,7 +576,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Map<PosnKey, Posn> getPosn(String trader, String contr, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getPosn(trader, contr, params, now, sb);
 
@@ -587,7 +589,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Posn getPosn(String trader, String contr, int settlDay, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getPosn(trader, contr, maybeJdToIso(settlDay), params, now, sb);
 
@@ -597,7 +599,8 @@ public final @NonNullByDefault class BackUnrest {
         }
     }
 
-    public final Map<String, MarketView> getView(Params params, long now) throws IOException {
+    public final Map<String, MarketView> getView(Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getView(params, now, sb);
 
@@ -610,7 +613,7 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final MarketView getView(String market, Params params, long now)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.getView(market, params, now, sb);
 
@@ -621,8 +624,8 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Trader postTrader(String mnem, @Nullable String display, String email,
-            Params params, long now)
-                    throws BadRequestException, ServiceUnavailableException, IOException {
+            Params params, long now) throws BadRequestException, NotFoundException,
+                    ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postTrader(mnem, display, email, params, now, sb);
 

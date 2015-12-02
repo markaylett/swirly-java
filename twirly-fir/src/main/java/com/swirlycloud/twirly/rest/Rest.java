@@ -17,10 +17,10 @@ public @NonNullByDefault interface Rest {
     String findTraderByEmail(String email) throws ServiceUnavailableException, IOException;
 
     void getRec(EntitySet es, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getRec(RecType recType, Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;
@@ -65,7 +65,7 @@ public @NonNullByDefault interface Rest {
             throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getView(Params params, long now, Appendable out)
-            throws ServiceUnavailableException, IOException;
+            throws NotFoundException, ServiceUnavailableException, IOException;
 
     void getView(String market, Params params, long now, Appendable out)
             throws NotFoundException, ServiceUnavailableException, IOException;

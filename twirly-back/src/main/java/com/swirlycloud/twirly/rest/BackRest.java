@@ -99,7 +99,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getRec(EntitySet es, Params params, long now, Appendable out)
-            throws IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -144,7 +144,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getRec(RecType recType, Params params, long now, Appendable out)
-            throws IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -159,7 +159,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getRec(RecType recType, String mnem, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -178,7 +178,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getSess(String trader, EntitySet es, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -232,7 +232,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getOrder(String trader, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -248,7 +248,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getOrder(String trader, String market, Params params, long now,
-            Appendable out) throws NotFoundException, IOException {
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -264,7 +264,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getOrder(String trader, String market, long id, Params params, long now,
-            Appendable out) throws NotFoundException, IOException {
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -284,7 +284,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getTrade(String trader, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -300,7 +300,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getTrade(String trader, String market, Params params, long now,
-            Appendable out) throws NotFoundException, IOException {
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -316,7 +316,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getTrade(String trader, String market, long id, Params params, long now,
-            Appendable out) throws NotFoundException, IOException {
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -336,7 +336,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getPosn(String trader, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -352,7 +352,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getPosn(String trader, String contr, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -368,7 +368,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getPosn(String trader, String contr, int settlDate, Params params, long now,
-            Appendable out) throws NotFoundException, IOException {
+            Appendable out) throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -440,7 +440,8 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     @Override
-    public final void getView(Params params, long now, Appendable out) throws IOException {
+    public final void getView(Params params, long now, Appendable out)
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -455,7 +456,7 @@ public final @NonNullByDefault class BackRest implements Rest {
 
     @Override
     public final void getView(String market, Params params, long now, Appendable out)
-            throws NotFoundException, IOException {
+            throws NotFoundException, ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         int lock = serv.writeLock();
         try {
@@ -481,8 +482,8 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     public final void postTrader(String mnem, @Nullable String display, String email, Params params,
-            long now, Appendable out)
-                    throws BadRequestException, ServiceUnavailableException, IOException {
+            long now, Appendable out) throws BadRequestException, NotFoundException,
+                    ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
@@ -720,7 +721,7 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void poll(long now) {
+    public final void poll(long now) throws NotFoundException, ServiceUnavailableException {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {

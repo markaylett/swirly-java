@@ -78,8 +78,8 @@ public @NonNullByDefault class Serv {
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
-    // 30 seconds.
-    private static final int QUOTE_EXPIRY = 30 * 1000;
+    // 20 seconds.
+    private static final int QUOTE_EXPIRY = 20 * 1000;
 
     private final Journ journ;
     private final Cache cache;
@@ -392,7 +392,6 @@ public @NonNullByDefault class Serv {
         final Order order = quote.getOrder();
         assert order != null;
 
-        setDirty(book);
         setDirty(sess, TraderSess.DIRTY_QUOTE);
 
         final Level level = (Level) order.getLevel();
@@ -407,7 +406,6 @@ public @NonNullByDefault class Serv {
         final Order order = quote.getOrder();
         assert order != null;
 
-        setDirty(book);
         setDirty(sess, TraderSess.DIRTY_QUOTE);
 
         final Level level = (Level) order.getLevel();
@@ -1545,7 +1543,8 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void poll(long now) {
+    public final void poll(long now) throws NotFoundException, ServiceUnavailableException {
+        JslNode firstExec = null;
         for (;;) {
             final Quote quote = quotes.getFirst();
             // Break if no quote or not expired.
@@ -1559,11 +1558,41 @@ public @NonNullByDefault class Serv {
             final MarketBook book = (MarketBook) markets.find(quote.getMarket());
             assert book != null;
 
-            removeQuote(sess, book, quote);
+            final Order order = quote.getOrder();
+            assert order != null;
 
             setDirty(DIRTY_TIMEOUT);
+            removeQuote(sess, book, quote);
             quotes.removeFirst();
+
+            if (order.isPecan() && order.getQuotd() == 0) {
+
+                // N.B. we could theoretically throw here if the allocation fails. This would
+                // result in executions not being written to the journal. The executions would be
+                // recovered, however, when the application is restarted.
+                final Exec exec = newExec(book, order, now);
+
+                // Commit phase.
+                setDirty(sess, TraderSess.DIRTY_ORDER);
+                exec.cancel(0);
+                order.cancel(now);
+
+                // Stack push.
+                exec.setJslNext(firstExec);
+                firstExec = exec;
+            }
         }
+
+        if (firstExec != null) {
+            try {
+                journ.createExecList(firstExec);
+            } catch (final RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
+        }
+
+        // Commit phase.
+
         updateDirty();
     }
 

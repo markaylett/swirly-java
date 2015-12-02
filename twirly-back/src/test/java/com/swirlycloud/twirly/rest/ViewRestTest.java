@@ -18,13 +18,15 @@ import org.junit.Test;
 import com.swirlycloud.twirly.entity.MarketView;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 
 public final class ViewRestTest extends RestTest {
 
     // Get View.
 
     @Test
-    public final void testGetAll() throws BadRequestException, NotFoundException, IOException {
+    public final void testGetAll() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
 
         long now = NOW;
 
@@ -45,7 +47,8 @@ public final class ViewRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetByMarket() throws BadRequestException, NotFoundException, IOException {
+    public final void testGetByMarket() throws BadRequestException, NotFoundException,
+            ServiceUnavailableException, IOException {
 
         long now = NOW;
 
