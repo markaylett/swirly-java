@@ -43,10 +43,12 @@ import com.swirlycloud.twirly.exception.AlreadyExistsException;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.InvalidException;
 import com.swirlycloud.twirly.exception.InvalidLotsException;
+import com.swirlycloud.twirly.exception.InvalidTicksException;
 import com.swirlycloud.twirly.exception.MarketClosedException;
 import com.swirlycloud.twirly.exception.MarketNotFoundException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.OrderNotFoundException;
+import com.swirlycloud.twirly.exception.QuoteNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.exception.TooLateException;
 import com.swirlycloud.twirly.exception.TraderNotFoundException;
@@ -76,8 +78,8 @@ public @NonNullByDefault class Serv {
     @SuppressWarnings("null")
     private static final Pattern MNEM_PATTERN = Pattern.compile("^[0-9A-Za-z-._]{3,16}$");
 
-    // 30 seconds.
-    private static final int QUOTE_EXPIRY = 30 * 1000;
+    // 20 seconds.
+    private static final int QUOTE_EXPIRY = 20 * 1000;
 
     private final Journ journ;
     private final Cache cache;
@@ -241,6 +243,46 @@ public @NonNullByDefault class Serv {
         return factory.newExec(instruct, book.allocExecId(), now);
     }
 
+    private final Match createMatch(MarketBook book, Order takerOrder, Order makerOrder, long lots,
+            long sumLots, long sumCost, long now) {
+
+        final long makerId = book.allocExecId();
+        final long takerId = book.allocExecId();
+
+        final TraderSess makerSess = (TraderSess) traders.find(makerOrder.getTrader());
+        assert makerSess != null;
+        final Posn makerPosn = makerSess.getLazyPosn(book);
+
+        final Match match = new Match();
+        match.makerOrder = makerOrder;
+        match.makerPosn = makerPosn;
+        match.lots = lots;
+        match.ticks = makerOrder.getTicks();
+
+        final Exec makerTrade = factory.newExec(makerOrder, makerId, now);
+        makerTrade.trade(match.lots, match.ticks, takerId, Role.MAKER, takerOrder.getTrader());
+        match.makerTrade = makerTrade;
+
+        final Exec takerTrade = factory.newExec(takerOrder, takerId, now);
+        takerTrade.trade(sumLots, sumCost, match.lots, match.ticks, makerId, Role.TAKER,
+                makerOrder.getTrader());
+        match.takerTrade = takerTrade;
+
+        return match;
+    }
+
+    private final void insertMatch(MarketBook book, Order takerOrder, Order makerOrder, long lots,
+            long sumLots, long sumCost, long now, Result result) {
+
+        final Match match = createMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost, now);
+        result.matches.insertBack(match);
+
+        // Maker updated first because this is consistent with last-look semantics.
+        // N.B. the reference count is not incremented here.
+        result.execs.insertBack(match.makerTrade);
+        result.execs.insertBack(match.takerTrade);
+    }
+
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
         return direct == Direct.PAID
                 // Paid when the taker lifts the offer.
@@ -250,17 +292,15 @@ public @NonNullByDefault class Serv {
     }
 
     private final void matchOrders(TraderSess takerSess, MarketBook book, Order takerOrder,
-            BookSide side, Direct direct, Result result) {
+            BookSide side, Direct direct, long now, Result result) {
 
-        final long now = takerOrder.getCreated();
-
-        long takenLots = 0;
-        long takenCost = 0;
+        long sumLots = 0;
+        long sumCost = 0;
         long lastLots = 0;
         long lastTicks = 0;
 
         DlNode node = side.getFirstOrder();
-        for (; takenLots < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
+        for (; sumLots < takerOrder.getResd() && !node.isEnd(); node = node.dlNext()) {
             final Order makerOrder = (Order) node;
 
             // Only consider orders while prices cross.
@@ -268,65 +308,76 @@ public @NonNullByDefault class Serv {
                 break;
             }
 
-            final long makerId = book.allocExecId();
-            final long takerId = book.allocExecId();
+            final long lots = Math.min(takerOrder.getResd() - sumLots, makerOrder.getAvail());
+            final long ticks = makerOrder.getTicks();
 
-            final TraderSess makerSess = (TraderSess) traders.find(makerOrder.getTrader());
-            assert makerSess != null;
-            final Posn makerPosn = makerSess.getLazyPosn(book);
+            sumLots += lots;
+            sumCost += lots * ticks;
+            lastLots = lots;
+            lastTicks = ticks;
 
-            final Match match = new Match();
-            match.makerOrder = makerOrder;
-            match.makerPosn = makerPosn;
-            match.ticks = makerOrder.getTicks();
-            match.lots = Math.min(takerOrder.getResd() - takenLots, makerOrder.getAvail());
-
-            takenLots += match.lots;
-            takenCost += match.lots * match.ticks;
-            lastLots = match.lots;
-            lastTicks = match.ticks;
-
-            final Exec makerTrade = factory.newExec(makerOrder, makerId, now);
-            makerTrade.trade(match.lots, match.ticks, takerId, Role.MAKER, takerOrder.getTrader());
-            match.makerTrade = makerTrade;
-
-            final Exec takerTrade = factory.newExec(takerOrder, takerId, now);
-            takerTrade.trade(takenLots, takenCost, match.lots, match.ticks, makerId, Role.TAKER,
-                    makerOrder.getTrader());
-            match.takerTrade = takerTrade;
-
-            result.matches.insertBack(match);
-
-            // Maker updated first because this is consistent with last-look semantics.
-            // N.B. the reference count is not incremented here.
-            result.execs.insertBack(makerTrade);
-            result.execs.insertBack(takerTrade);
+            insertMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost, now, result);
         }
 
         if (!result.matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
             result.posn = takerSess.getLazyPosn(book);
-            takerOrder.trade(takenLots, takenCost, lastLots, lastTicks, now);
+            takerOrder.trade(sumLots, sumCost, lastLots, lastTicks, now);
         }
     }
 
-    private final void matchOrders(TraderSess sess, MarketBook book, Order order, Result result) {
+    private final void matchOrders(TraderSess takerSess, MarketBook book, Order takerOrder,
+            long now, Result result)
+                    throws InvalidLotsException, InvalidTicksException, QuoteNotFoundException {
         BookSide bookSide;
         Direct direct;
-        if (order.getSide() == Side.BUY) {
+        if (takerOrder.getSide() == Side.BUY) {
             // Paid when the taker lifts the offer.
             bookSide = book.getOfferSide();
             direct = Direct.PAID;
         } else {
-            assert order.getSide() == Side.SELL;
+            assert takerOrder.getSide() == Side.SELL;
             // Given when the taker hits the bid.
             bookSide = book.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(sess, book, order, bookSide, direct, result);
+        matchOrders(takerSess, book, takerOrder, bookSide, direct, now, result);
     }
 
-    private final @Nullable Order matchQuote(MarketBook book, Side side, long lots) {
+    private final Quote matchQuote(TraderSess takerSess, MarketBook book, Order takerOrder,
+            long now, Result result)
+                    throws InvalidLotsException, InvalidTicksException, QuoteNotFoundException {
+
+        final long quoteId = takerOrder.getQuoteId();
+        final Quote quote = takerSess.findQuote(takerOrder.getMarket(), quoteId);
+        if (quote == null) {
+            throw new QuoteNotFoundException(String.format("quote '%d' does not exist", quoteId));
+        }
+
+        final Order makerOrder = quote.getOrder();
+        assert makerOrder != null;
+
+        final long lots = quote.getLots();
+        final long ticks = quote.getTicks();
+        final long cost = lots * ticks;
+
+        if (lots != takerOrder.getLots() || lots < takerOrder.getMinLots()) {
+            throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
+        }
+
+        if (ticks != takerOrder.getTicks()) {
+            throw new InvalidTicksException(String.format("invalid ticks '%d'", ticks));
+        }
+
+        insertMatch(book, takerOrder, makerOrder, lots, lots, cost, now, result);
+
+        // Avoid allocating position when there are no matches.
+        result.posn = takerSess.getLazyPosn(book);
+        takerOrder.trade(lots, cost, lots, ticks, now);
+        return quote;
+    }
+
+    private final @Nullable Order findOrder(MarketBook book, Side side, long lots) {
         final BookSide bookSide = book.getOtherSide(side);
         for (DlNode node = bookSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order makerOrder = (Order) node;
@@ -335,6 +386,36 @@ public @NonNullByDefault class Serv {
             }
         }
         return null;
+    }
+
+    private final void insertQuote(TraderSess sess, MarketBook book, Quote quote) {
+        final Order order = quote.getOrder();
+        assert order != null;
+
+        setDirty(sess, TraderSess.DIRTY_QUOTE);
+
+        final Level level = (Level) order.getLevel();
+        assert level != null;
+        level.addQuote(quote);
+        order.addQuote(quote.getLots());
+        sess.insertQuote(quote);
+    }
+
+    private final void removeQuote(TraderSess sess, MarketBook book, Quote quote) {
+
+        final Order order = quote.getOrder();
+        assert order != null;
+
+        setDirty(sess, TraderSess.DIRTY_QUOTE);
+
+        final Level level = (Level) order.getLevel();
+        // Level may be null if the order has been withdrawn from the order-book, because it is
+        // pending cancellation.
+        if (level != null) {
+            level.subQuote(quote);
+        }
+        order.subQuote(quote.getLots());
+        sess.removeQuote(quote);
     }
 
     private final void doCancelOrders(MarketBook book, long now)
@@ -763,11 +844,17 @@ public @NonNullByDefault class Serv {
         final Exec exec = newExec(book, order, now);
         result.reset(sess.getMnem(), book, order, exec);
         // Order fields are updated on match.
-        matchOrders(sess, book, order, result);
-        // Place incomplete order in market.
-        if (!order.isDone()) {
-            // This may fail if level cannot be allocated.
-            book.insertOrder(order);
+        Quote quote = null;
+        if (quoteId == 0) {
+            matchOrders(sess, book, order, now, result);
+            // Place incomplete order in market.
+            if (!order.isDone()) {
+                // This may fail if level cannot be allocated.
+                book.insertOrder(order);
+            }
+        } else {
+            quote = matchQuote(sess, book, order, now, result);
+            assert order.isDone();
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
         // any unfilled quantity.
@@ -788,8 +875,12 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
-        sess.insertOrder(order);
-        // Commit trans to cycle and free matches.
+        if (quote != null) {
+            removeQuote(sess, book, quote);
+        } else {
+            sess.insertOrder(order);
+        }
+        // Commit trans and free matches.
         commitMatches(sess, book, now, result);
 
         updateDirty();
@@ -1386,7 +1477,7 @@ public @NonNullByDefault class Serv {
 
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
             Side side, long lots, long now) throws NotFoundException, ServiceUnavailableException {
-        final Order order = matchQuote(book, side, lots);
+        final Order order = findOrder(book, side, lots);
         if (order == null) {
             throw new NotFoundException("no liquidity available");
         }
@@ -1402,17 +1493,10 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
+        insertQuote(sess, book, quote);
+
         setDirty(DIRTY_TIMEOUT);
-        setDirty(book);
-        setDirty(sess, TraderSess.DIRTY_QUOTE);
-
-        final Level level = (Level) order.getLevel();
-        assert level != null;
-        level.addQuote(quote);
-        order.addQuote(lots);
-
         quotes.add(quote);
-        sess.insertQuote(quote);
 
         updateDirty();
         return quote;
@@ -1459,7 +1543,8 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final void poll(long now) {
+    public final void poll(long now) throws NotFoundException, ServiceUnavailableException {
+        JslNode firstExec = null;
         for (;;) {
             final Quote quote = quotes.getFirst();
             // Break if no quote or not expired.
@@ -1473,23 +1558,41 @@ public @NonNullByDefault class Serv {
             final MarketBook book = (MarketBook) markets.find(quote.getMarket());
             assert book != null;
 
-            setDirty(DIRTY_TIMEOUT);
-            setDirty(book);
-            setDirty(sess, TraderSess.DIRTY_QUOTE);
-
             final Order order = quote.getOrder();
             assert order != null;
-            final Level level = (Level) order.getLevel();
-            // Level may be null if the order has been withdrawn from the order-book, because it is
-            // pending cancellation.
-            if (level != null) {
-                level.subQuote(quote);
-            }
-            order.subQuote(-quote.getLots());
 
+            setDirty(DIRTY_TIMEOUT);
+            removeQuote(sess, book, quote);
             quotes.removeFirst();
-            sess.removeQuote(quote);
+
+            if (order.isPecan() && order.getQuotd() == 0) {
+
+                // N.B. we could theoretically throw here if the allocation fails. This would
+                // result in executions not being written to the journal. The executions would be
+                // recovered, however, when the application is restarted.
+                final Exec exec = newExec(book, order, now);
+
+                // Commit phase.
+                setDirty(sess, TraderSess.DIRTY_ORDER);
+                exec.cancel(0);
+                order.cancel(now);
+
+                // Stack push.
+                exec.setJslNext(firstExec);
+                firstExec = exec;
+            }
         }
+
+        if (firstExec != null) {
+            try {
+                journ.createExecList(firstExec);
+            } catch (final RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
+        }
+
+        // Commit phase.
+
         updateDirty();
     }
 

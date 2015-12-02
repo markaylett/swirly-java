@@ -161,7 +161,7 @@ var ViewWidget = React.createClass({
     }
 });
 
-var SessWidget = React.createClass({
+var OrderWidget = React.createClass({
     // Mutators.
     // DOM Events.
     onWorkingTab: function(event) {
@@ -191,7 +191,7 @@ var SessWidget = React.createClass({
         var trades = sess.trades;
         var posns = sess.posns;
         return (
-            <div className="sessWidget">
+            <div className="orderWidget">
               <ul ref="tabs" className="nav nav-tabs" data-tabs="tabs">
                 <li className="active">
                   <a href="#working" data-toggle="tab" onClick={this.onWorkingTab}>
@@ -216,13 +216,61 @@ var SessWidget = React.createClass({
               </ul>
               <div className="tab-content">
                 <div id="working" className="tab-pane active">
-                  <OrderTable ref="working" module={module} orders={working}/>
+                  <OrderTable module={module} orders={working}/>
                 </div>
                 <div id="done" className="tab-pane">
-                  <OrderTable ref="done" module={module} orders={done}/>
+                  <OrderTable module={module} orders={done}/>
                 </div>
                 <div id="trades" className="tab-pane">
-                  <TradeTable ref="trades" module={module} trades={trades}/>
+                  <TradeTable module={module} trades={trades}/>
+                </div>
+                <div id="posns" className="tab-pane">
+                  <PosnTable posns={posns}/>
+                </div>
+              </div>
+            </div>
+        );
+    }
+});
+
+var QuoteWidget = React.createClass({
+    // Mutators.
+    // DOM Events.
+    onTradesTab: function(event) {
+        this.props.module.onChangeContext('trades');
+    },
+    onPosnsTab: function(event) {
+        this.props.module.onChangeContext('posns');
+    },
+    // Lifecycle.
+    componentDidMount: function() {
+        var node = this.refs.tabs.getDOMNode();
+        $(node).tab();
+        this.props.module.onChangeContext('trades');
+    },
+    render: function() {
+        var props = this.props;
+        var module = props.module;
+        var sess = props.sess;
+        var trades = sess.trades;
+        var posns = sess.posns;
+        return (
+            <div className="quoteWidget">
+              <ul ref="tabs" className="nav nav-tabs" data-tabs="tabs">
+                <li className="active">
+                  <a href="#trades" data-toggle="tab" onClick={this.onTradesTab}>
+                    Trades ({trades.length})
+                  </a>
+                </li>
+                <li>
+                  <a href="#posns" data-toggle="tab" onClick={this.onPosnsTab}>
+                    Posns ({posns.length})
+                  </a>
+                </li>
+              </ul>
+              <div className="tab-content">
+                <div id="trades" className="tab-pane active">
+                  <TradeTable module={module} trades={trades}/>
                 </div>
                 <div id="posns" className="tab-pane">
                   <PosnTable posns={posns}/>

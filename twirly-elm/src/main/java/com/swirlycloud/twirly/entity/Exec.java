@@ -264,6 +264,7 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
             out.append("null");
         }
         out.append(",\"orderId\":").append(String.valueOf(orderId));
+        out.append(",\"quoteId\":").append(String.valueOf(quoteId));
         out.append(",\"state\":\"").append(state.name());
         out.append("\",\"side\":\"").append(side.name());
         out.append("\",\"lots\":").append(String.valueOf(lots));

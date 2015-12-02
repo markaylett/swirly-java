@@ -56,7 +56,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
      * Minimum to be filled by this
      */
     private final long minLots;
-    private final boolean pecan;
+    private boolean pecan;
     private long modified;
 
     protected Order(String trader, String market, String contr, int settlDay, long id,
@@ -348,8 +348,10 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
             state = State.CANCEL;
             // Note that executed lots is not affected.
             resd = 0;
+            pecan = false;
         } else {
             state = State.PECAN;
+            pecan = true;
         }
         modified = now;
     }

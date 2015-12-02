@@ -76,10 +76,11 @@ public final class BookSide {
      */
     public final void removeOrder(Order order) {
         assert order != null;
-        assert order.getLevel() != null;
 
         final Level level = (Level) order.getLevel();
-        assert level != null;
+        if (level == null) {
+            return;
+        }
         level.subOrder(order);
 
         if (level.count == 0) {

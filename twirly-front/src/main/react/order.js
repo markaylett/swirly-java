@@ -82,9 +82,9 @@ var OrderModuleImpl = React.createClass({
             isSelectedArchivable: isSelectedArchivable
         });
     },
-    postOrder: function(market, side, lots, price) {
-        console.debug('postOrder: market=' + market + ', side=' + side
-                       + ', lots=' + lots + ', price=' + price);
+    postOrder: function(market, quoteId, side, lots, price) {
+        console.debug('postOrder: market=' + market + ', quoteId=' + quoteId
+                      + ', side=' + side + ', lots=' + lots + ', price=' + price);
         var req = {};
         var contr = undefined;
         if (isSpecified(market)) {
@@ -96,6 +96,10 @@ var OrderModuleImpl = React.createClass({
         if (contr === undefined) {
             this.onReportError(internalError('invalid market: ' + market));
             return;
+        }
+        // Optional quoteId.
+        if (isSpecified(quoteId) && quoteId > 0) {
+            req.quoteId = parseInt(quoteId);
         }
         if (isSpecified(side)) {
             req.side = side;
@@ -328,8 +332,8 @@ var OrderModuleImpl = React.createClass({
         }
         this.updateSelected();
     },
-    onPostOrder: function(market, side, lots, price) {
-        this.postOrder(market, side, lots, price);
+    onPostOrder: function(market, quoteId, side, lots, price) {
+        this.postOrder(market, quoteId, side, lots, price);
     },
     onReviseAll: function(lots) {
         if (this.staging.context === 'working') {
@@ -409,7 +413,6 @@ var OrderModuleImpl = React.createClass({
     },
     render: function() {
         var props = this.props;
-        var contrMap = props.contrMap;
 
         var state = this.state;
         var module = state.module;
@@ -426,7 +429,7 @@ var OrderModuleImpl = React.createClass({
         };
 
         return (
-            <div className="orderModuleImpl">
+            <div className="orderModule">
               <MultiAlertWidget module={module} errors={errors}/>
               <NewOrderForm ref="newOrder" module={module} marketMap={marketMap}
                             isSelectedWorking={isSelectedWorking}/>
@@ -439,7 +442,7 @@ var OrderModuleImpl = React.createClass({
                                  isSelectedWorking={isSelectedWorking}/>
               </div>
               <div style={marginTop}>
-                <SessWidget module={module} sess={sess}/>
+                <OrderWidget module={module} sess={sess}/>
               </div>
             </div>
         );

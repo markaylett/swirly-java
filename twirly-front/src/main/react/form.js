@@ -92,7 +92,7 @@ var NewOrderForm = React.createClass({
         var market = state.market;
         var lots = state.lots;
         var price = state.price;
-        this.props.module.onPostOrder(market, 'BUY', lots, price);
+        this.props.module.onPostOrder(market, 0, 'BUY', lots, price);
     },
     onClickSell: function(event) {
         event.preventDefault();
@@ -100,7 +100,7 @@ var NewOrderForm = React.createClass({
         var market = state.market;
         var lots = state.lots;
         var price = state.price;
-        this.props.module.onPostOrder(market, 'SELL', lots, price);
+        this.props.module.onPostOrder(market, 0, 'SELL', lots, price);
     },
     // Lifecycle.
     getInitialState: function() {
@@ -165,6 +165,91 @@ var NewOrderForm = React.createClass({
                 <button type="button" className="btn btn-default"
                         disabled={isSelectedWorking} onClick={this.onClickSell}>
                   <span className="glyphicon glyphicon-minus"></span> Sell
+                </button>
+              </div>
+            </form>
+        );
+    }
+});
+
+var ReviseOrderForm = React.createClass({
+    // Mutators.
+    setFields: function(market, lots, price) {
+        var newState = {};
+        if (market !== undefined) {
+            newState.market = market;
+        }
+        if (lots !== undefined) {
+            newState.lots = lots;
+        }
+        this.setState(newState);
+    },
+    // DOM Events.
+    onChangeLots: function(event) {
+        this.setState({
+            lots: event.target.value
+        });
+    },
+    onClickCancel: function(event) {
+        event.preventDefault();
+        this.props.module.onCancelAll();
+    },
+    onClickArchive: function(event) {
+        event.preventDefault();
+        this.props.module.onArchiveAll();
+    },
+    onClickRefresh: function(event) {
+        event.preventDefault();
+        this.props.module.onRefresh();
+    },
+    onClickRevise: function(event) {
+        event.preventDefault();
+        this.props.module.onReviseAll(this.state.lots);
+    },
+    // Lifecycle.
+    getInitialState: function() {
+        return {
+            market: undefined,
+            lots: undefined
+        };
+    },
+    render: function() {
+        var state = this.state;
+        var market = state.market;
+        var lots = state.lots;
+
+        var contr = this.props.marketMap[market];
+        var minLots = 1;
+        if (contr !== undefined) {
+            minLots = contr.minLots;
+        }
+        var isSelectedWorking = this.props.isSelectedWorking;
+        var isSelectedArchivable = this.props.isSelectedArchivable;
+        return (
+            <form className="reviseOrderForm form-inline">
+              <div className="btn-group">
+                <button type="button" className="btn btn-default"
+                        disabled={!isSelectedWorking} onClick={this.onClickCancel}>
+                  <span className="glyphicon glyphicon-remove"></span> Cancel
+                </button>
+                <button type="button" className="btn btn-default"
+                        disabled={!isSelectedArchivable} onClick={this.onClickArchive}>
+                  <span className="glyphicon glyphicon-ok"></span> Archive
+                </button>
+                <button type="button" className="btn btn-default"
+                        onClick={this.onClickRefresh}>
+                  <span className="glyphicon glyphicon-refresh"></span> Refresh
+                </button>
+              </div>
+              <div className="form-group">
+                <input type="number" className="form-control" placeholder="Lots"
+                       value={lots} disabled={!isSelectedWorking} onChange={this.onChangeLots}
+                       min={minLots}/>
+              </div>
+              <div className="btn-group">
+                <button type="button" className="btn btn-default"
+                        disabled={!isSelectedWorking} onClick={this.onClickRevise}>
+                  <span className="glyphicon glyphicon-pencil"></span> Revise
                 </button>
               </div>
             </form>
@@ -267,28 +352,9 @@ var NewQuoteForm = React.createClass({
     }
 });
 
-var ReviseOrderForm = React.createClass({
+var ArchiveForm = React.createClass({
     // Mutators.
-    setFields: function(market, lots, price) {
-        var newState = {};
-        if (market !== undefined) {
-            newState.market = market;
-        }
-        if (lots !== undefined) {
-            newState.lots = lots;
-        }
-        this.setState(newState);
-    },
     // DOM Events.
-    onChangeLots: function(event) {
-        this.setState({
-            lots: event.target.value
-        });
-    },
-    onClickCancel: function(event) {
-        event.preventDefault();
-        this.props.module.onCancelAll();
-    },
     onClickArchive: function(event) {
         event.preventDefault();
         this.props.module.onArchiveAll();
@@ -297,36 +363,16 @@ var ReviseOrderForm = React.createClass({
         event.preventDefault();
         this.props.module.onRefresh();
     },
-    onClickRevise: function(event) {
-        event.preventDefault();
-        this.props.module.onReviseAll(this.state.lots);
-    },
     // Lifecycle.
     getInitialState: function() {
         return {
-            market: undefined,
-            lots: undefined
         };
     },
     render: function() {
-        var state = this.state;
-        var market = state.market;
-        var lots = state.lots;
-
-        var contr = this.props.marketMap[market];
-        var minLots = 1;
-        if (contr !== undefined) {
-            minLots = contr.minLots;
-        }
-        var isSelectedWorking = this.props.isSelectedWorking;
         var isSelectedArchivable = this.props.isSelectedArchivable;
         return (
-            <form className="reviseOrderForm form-inline">
+            <form className="archiveForm form-inline">
               <div className="btn-group">
-                <button type="button" className="btn btn-default"
-                        disabled={!isSelectedWorking} onClick={this.onClickCancel}>
-                  <span className="glyphicon glyphicon-remove"></span> Cancel
-                </button>
                 <button type="button" className="btn btn-default"
                         disabled={!isSelectedArchivable} onClick={this.onClickArchive}>
                   <span className="glyphicon glyphicon-ok"></span> Archive
@@ -334,17 +380,6 @@ var ReviseOrderForm = React.createClass({
                 <button type="button" className="btn btn-default"
                         onClick={this.onClickRefresh}>
                   <span className="glyphicon glyphicon-refresh"></span> Refresh
-                </button>
-              </div>
-              <div className="form-group">
-                <input type="number" className="form-control" placeholder="Lots"
-                       value={lots} disabled={!isSelectedWorking} onChange={this.onChangeLots}
-                       min={minLots}/>
-              </div>
-              <div className="btn-group">
-                <button type="button" className="btn btn-default"
-                        disabled={!isSelectedWorking} onClick={this.onClickRevise}>
-                  <span className="glyphicon glyphicon-pencil"></span> Revise
                 </button>
               </div>
             </form>

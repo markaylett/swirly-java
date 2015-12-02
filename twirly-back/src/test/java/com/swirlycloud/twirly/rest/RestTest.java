@@ -223,7 +223,8 @@ public abstract class RestTest {
     }
 
     protected final Trader postTrader(@NonNull String mnem, String display, @NonNull String email)
-            throws BadRequestException, ServiceUnavailableException, IOException {
+            throws BadRequestException, NotFoundException, ServiceUnavailableException,
+            IOException {
         return unrest.postTrader(mnem, display, email, PARAMS_NONE, NOW);
     }
 

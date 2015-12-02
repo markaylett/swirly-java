@@ -104,7 +104,7 @@ public final class AppEngineDatastore extends AppEngineModel implements Datastor
             entity.setUnindexedProperty("lastLots", null);
         }
         entity.setUnindexedProperty("minLots", exec.getMinLots());
-        entity.setProperty("archive", Boolean.FALSE);
+        entity.setProperty("archive", exec.getQuoteId() != 0 ? Boolean.FALSE : Boolean.TRUE);
         entity.setProperty("pecan", exec.getState() == State.PECAN);
         entity.setUnindexedProperty("created", exec.getCreated());
         entity.setUnindexedProperty("modified", exec.getCreated());

@@ -226,11 +226,11 @@ public final class ExecTest {
                 JulianDay.isoToJd(20140314), 1, "test", 0, Side.BUY, 3, 12345, 1, 1414692516006L);
         final Exec exec = FACTORY.newExec(order, 2, 1414692516007L);
         assertEquals(
-                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":2,\"ref\":\"test\",\"orderId\":1,\"state\":\"NEW\",\"side\":\"BUY\",\"lots\":3,\"ticks\":12345,\"resd\":3,\"exec\":0,\"cost\":0,\"lastLots\":null,\"lastTicks\":null,\"minLots\":1,\"matchId\":null,\"role\":null,\"cpty\":null,\"created\":1414692516007}",
+                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":2,\"ref\":\"test\",\"orderId\":1,\"quoteId\":0,\"state\":\"NEW\",\"side\":\"BUY\",\"lots\":3,\"ticks\":12345,\"resd\":3,\"exec\":0,\"cost\":0,\"lastLots\":null,\"lastTicks\":null,\"minLots\":1,\"matchId\":null,\"role\":null,\"cpty\":null,\"created\":1414692516007}",
                 exec.toString());
         exec.trade(1, 12345, 3, Role.MAKER, "GOSAYL");
         assertEquals(
-                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":2,\"ref\":\"test\",\"orderId\":1,\"state\":\"TRADE\",\"side\":\"BUY\",\"lots\":3,\"ticks\":12345,\"resd\":2,\"exec\":1,\"cost\":12345,\"lastLots\":1,\"lastTicks\":12345,\"minLots\":1,\"matchId\":3,\"role\":\"MAKER\",\"cpty\":\"GOSAYL\",\"created\":1414692516007}",
+                "{\"trader\":\"MARAYL\",\"market\":\"EURUSD.MAR14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"id\":2,\"ref\":\"test\",\"orderId\":1,\"quoteId\":0,\"state\":\"TRADE\",\"side\":\"BUY\",\"lots\":3,\"ticks\":12345,\"resd\":2,\"exec\":1,\"cost\":12345,\"lastLots\":1,\"lastTicks\":12345,\"minLots\":1,\"matchId\":3,\"role\":\"MAKER\",\"cpty\":\"GOSAYL\",\"created\":1414692516007}",
                 exec.toString());
     }
 }
