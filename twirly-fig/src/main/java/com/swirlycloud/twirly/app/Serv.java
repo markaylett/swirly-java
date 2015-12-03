@@ -207,7 +207,7 @@ public @NonNullByDefault class Serv {
         final TraderSess sess = (TraderSess) traders.find(order.getTrader());
         assert sess != null;
         sess.insertOrder(order);
-        if (!order.isDone()) {
+        if (order.isWorking()) {
             final MarketBook book = (MarketBook) markets.find(order.getMarket());
             boolean success = false;
             try {
@@ -847,7 +847,8 @@ public @NonNullByDefault class Serv {
         Quote quote = null;
         if (quoteId == 0) {
             matchOrders(sess, book, order, now, result);
-            // Place incomplete order in market.
+            // Place incomplete order in market. N.B. isDone() is sufficient here because the order
+            // cannot be pending cancellation.
             if (!order.isDone()) {
                 // This may fail if level cannot be allocated.
                 book.insertOrder(order);
@@ -891,6 +892,10 @@ public @NonNullByDefault class Serv {
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new TooLateException(String.format("order '%d' is done", order.getId()));
+        }
+        if (order.isPecan()) {
+            throw new TooLateException(
+                    String.format("order '%d' is pending cancellation", order.getId()));
         }
         // Revised lots must not be:
         // 1. less than min lots;
@@ -961,6 +966,9 @@ public @NonNullByDefault class Serv {
             if (order.isDone()) {
                 throw new TooLateException(String.format("order '%d' is done", id));
             }
+            if (order.isPecan()) {
+                throw new TooLateException(String.format("order '%d' is pending cancellation", id));
+            }
             // Revised lots must not be:
             // 1. less than min lots;
             // 2. less than executed lots;
@@ -1010,6 +1018,7 @@ public @NonNullByDefault class Serv {
     public final void cancelOrder(TraderSess sess, MarketBook book, Order order, long now,
             Result result)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        // Note that orders pending cancellation may be cancelled.
         if (order.isDone()) {
             throw new TooLateException(String.format("order '%d' is done", order.getId()));
         }
@@ -1070,6 +1079,7 @@ public @NonNullByDefault class Serv {
             if (order == null) {
                 throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
+            // Note that orders pending cancellation may be cancelled.
             if (order.isDone()) {
                 throw new TooLateException(String.format("order '%d' is done", id));
             }
@@ -1130,6 +1140,7 @@ public @NonNullByDefault class Serv {
         for (RbNode node = sess.getFirstOrder(); node != null; node = node.rbNext()) {
             final Order order = sess.getRootOrder();
             assert order != null;
+            // Note that orders pending cancellation may be cancelled.
             if (!order.isDone()) {
                 continue;
             }

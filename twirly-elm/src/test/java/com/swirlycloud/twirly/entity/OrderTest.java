@@ -52,6 +52,8 @@ public final class OrderTest {
         assertEquals(0, order.getLastLots());
         assertEquals(1, order.getMinLots());
         assertFalse(order.isDone());
+        assertFalse(order.isPecan());
+        assertTrue(order.isWorking());
         assertEquals(NOW, order.getCreated());
         assertEquals(NOW, order.getModified());
     }
@@ -80,6 +82,8 @@ public final class OrderTest {
         assertEquals(12344, order.getLastTicks());
         assertEquals(1, order.getMinLots());
         assertFalse(order.isDone());
+        assertFalse(order.isPecan());
+        assertTrue(order.isWorking());
         assertEquals(NOW, order.getCreated());
         assertEquals(NOW + 1, order.getModified());
     }
@@ -109,6 +113,8 @@ public final class OrderTest {
         assertEquals(12344, order.getLastTicks());
         assertEquals(1, order.getMinLots());
         assertFalse(order.isDone());
+        assertFalse(order.isPecan());
+        assertTrue(order.isWorking());
         assertEquals(NOW, order.getCreated());
         assertEquals(NOW + 2, order.getModified());
     }
@@ -138,6 +144,8 @@ public final class OrderTest {
         assertEquals(12344, order.getLastTicks());
         assertEquals(1, order.getMinLots());
         assertTrue(order.isDone());
+        assertFalse(order.isPecan());
+        assertFalse(order.isWorking());
         assertEquals(NOW, order.getCreated());
         assertEquals(NOW + 2, order.getModified());
     }
@@ -167,6 +175,8 @@ public final class OrderTest {
         assertEquals(12345, order.getLastTicks());
         assertEquals(1, order.getMinLots());
         assertFalse(order.isDone());
+        assertFalse(order.isPecan());
+        assertTrue(order.isWorking());
         assertEquals(NOW, order.getCreated());
         assertEquals(NOW + 2, order.getModified());
     }
