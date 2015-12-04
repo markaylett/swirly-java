@@ -525,6 +525,43 @@ public final @NonNullByDefault class BackUnrest {
         }
     }
 
+    public final Map<Long, Quote> getQuote(String trader, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getQuote(trader, params, now, sb);
+
+        final Map<Long, Quote> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseQuotes(p, out);
+        }
+        return out;
+    }
+
+    public final Map<Long, Quote> getQuote(String trader, String market, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getQuote(trader, market, params, now, sb);
+
+        final Map<Long, Quote> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseQuotes(p, out);
+        }
+        return out;
+    }
+
+    public final Quote getQuote(String trader, String market, long id, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getQuote(trader, market, id, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Quote.parse(p);
+        }
+    }
+
     public final Map<Long, Exec> getTrade(String trader, Params params, long now)
             throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
