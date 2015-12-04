@@ -44,7 +44,7 @@ import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.mock.MockDatastore;
 import com.swirlycloud.twirly.mock.MockTrader;
 import com.swirlycloud.twirly.node.JslNode;
-import com.swirlycloud.twirly.rest.BackUnrest.TransStruct;
+import com.swirlycloud.twirly.rest.BackUnrest.ResultStruct;
 
 public abstract class RestTest {
 
@@ -265,20 +265,20 @@ public abstract class RestTest {
         unrest.deleteOrder(trader, market, first, NOW);
     }
 
-    protected final TransStruct postOrder(@NonNull String trader, @NonNull String market,
+    protected final ResultStruct postOrder(@NonNull String trader, @NonNull String market,
             long quoteId, @NonNull Side side, long lots, long ticks) throws BadRequestException,
                     NotFoundException, ServiceUnavailableException, IOException {
         return unrest.postOrder(trader, market, null, quoteId, side, lots, ticks, 1, PARAMS_NONE,
                 NOW);
     }
 
-    protected final TransStruct putOrder(@NonNull String trader, @NonNull String market, long id,
+    protected final ResultStruct putOrder(@NonNull String trader, @NonNull String market, long id,
             long lots) throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
         return unrest.putOrder(trader, market, id, lots, PARAMS_NONE, NOW);
     }
 
-    protected final TransStruct putOrder(@NonNull String trader, @NonNull String market,
+    protected final ResultStruct putOrder(@NonNull String trader, @NonNull String market,
             @NonNull JslNode first, long lots) throws BadRequestException, NotFoundException,
                     ServiceUnavailableException, IOException {
         return unrest.putOrder(trader, market, first, lots, PARAMS_NONE, NOW);
