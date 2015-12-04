@@ -8,6 +8,8 @@ import java.util.concurrent.Semaphore;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
@@ -24,12 +26,12 @@ public final @NonNullByDefault class LockableServ extends Serv {
     private final Semaphore sem = new Semaphore(PERMITS);
 
     public LockableServ(Model model, Journ journ, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         super(model, journ, cache, factory, now);
     }
 
     public LockableServ(Datastore datastore, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         super(datastore, cache, factory, now);
     }
 

@@ -203,11 +203,19 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final void insertOrder(Order order) {
+    private final @Nullable Exec insertOrder(Order order, long now) {
         final TraderSess sess = (TraderSess) traders.find(order.getTrader());
         assert sess != null;
         sess.insertOrder(order);
-        if (order.isWorking()) {
+        Exec exec = null;
+        if (order.isPecan()) {
+            // Cancel any orders that are in a pending-cancel state.
+            final MarketBook book = (MarketBook) markets.find(order.getMarket());
+            assert book != null;
+            exec = newExec(book, order, now);
+            exec.cancel(0);
+            order.cancel(now);
+        } else if (!order.isDone()) {
             final MarketBook book = (MarketBook) markets.find(order.getMarket());
             boolean success = false;
             try {
@@ -221,6 +229,7 @@ public @NonNullByDefault class Serv {
                 }
             }
         }
+        return exec;
     }
 
     private final TraderSess newTrader(String mnem, @Nullable String display, String email)
@@ -518,7 +527,7 @@ public @NonNullByDefault class Serv {
     }
 
     public Serv(Model model, Journ journ, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this.journ = journ;
         this.cache = cache;
         this.factory = factory;
@@ -542,13 +551,19 @@ public @NonNullByDefault class Serv {
         assert t != null;
         this.traders = t;
 
+        JslNode firstExec = null;
         final SlNode firstOrder = model.readOrder(factory);
         for (SlNode node = firstOrder; node != null;) {
             final Order order = (Order) node;
             node = popNext(node);
 
-            // This method will mark the book as dirty.
-            insertOrder(order);
+            // This method will mark the book as dirty. It will also return an execution if the
+            // order was cancelled, because it was in a pending-cancel state.
+            final Exec exec = insertOrder(order, now);
+            if (exec != null) {
+                exec.setJslNext(firstExec);
+                firstExec = exec;
+            }
         }
 
         final SlNode firstTrade = model.readTrade(factory);
@@ -577,11 +592,19 @@ public @NonNullByDefault class Serv {
             setDirty(sess, TraderSess.DIRTY_ALL);
         }
 
+        if (firstExec != null) {
+            try {
+                journ.createExecList(firstExec);
+            } catch (final RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
+        }
+
         updateDirty();
     }
 
     public Serv(Datastore datastore, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(datastore, datastore, cache, factory, now);
     }
 

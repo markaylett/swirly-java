@@ -388,12 +388,12 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public BackUnrest(Model model, Journ journ, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(model, journ, cache, factory, now));
     }
 
     public BackUnrest(Datastore datastore, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(datastore, cache, factory, now));
     }
 
