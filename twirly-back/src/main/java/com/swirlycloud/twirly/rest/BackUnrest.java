@@ -721,6 +721,18 @@ public final @NonNullByDefault class BackUnrest {
         }
     }
 
+    public final Quote postQuote(String trader, String market, @Nullable String ref, Side side,
+            long lots, Params params, long now) throws BadRequestException, NotFoundException,
+                    ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.postQuote(trader, market, ref, side, lots, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Quote.parse(p);
+        }
+    }
+
     public final void deleteTrade(String trader, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         rest.deleteTrade(trader, market, id, now);
