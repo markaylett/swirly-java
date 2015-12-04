@@ -33,6 +33,7 @@ import com.swirlycloud.twirly.entity.Market;
 import com.swirlycloud.twirly.entity.MarketView;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Posn;
+import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -159,6 +160,19 @@ public abstract class RestTest {
         assertEquals(NOW, actual.getModified());
     }
 
+    protected static void assertQuote(String trader, String market, Side side, long lots,
+            long ticks, Quote actual) {
+        assertNotNull(actual);
+        assertEquals(trader, actual.getTrader());
+        assertEquals(market, actual.getMarket());
+        assertNull(actual.getRef());
+        assertEquals(side, actual.getSide());
+        assertEquals(lots, actual.getLots());
+        assertEquals(ticks, actual.getTicks());
+        assertEquals(NOW, actual.getCreated());
+        assertEquals(NOW + 20 * 1000, actual.getExpiry());
+    }
+
     protected static void assertExec(String trader, String market, State state, Side side,
             long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
             String contr, int settlDay, Role role, String cpty, Exec actual) {
@@ -282,6 +296,12 @@ public abstract class RestTest {
             @NonNull JslNode first, long lots) throws BadRequestException, NotFoundException,
                     ServiceUnavailableException, IOException {
         return unrest.putOrder(trader, market, first, lots, PARAMS_NONE, NOW);
+    }
+
+    protected final Quote postQuote(@NonNull String trader, @NonNull String market,
+            @NonNull Side side, long lots) throws BadRequestException, NotFoundException,
+                    ServiceUnavailableException, IOException {
+        return unrest.postQuote(trader, market, null, side, lots, PARAMS_NONE, NOW);
     }
 
     protected final void deleteTrade(@NonNull String mnem, @NonNull String market, long id)
