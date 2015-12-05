@@ -203,11 +203,19 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final void insertOrder(Order order) {
+    private final @Nullable Exec insertOrder(Order order, long now) {
         final TraderSess sess = (TraderSess) traders.find(order.getTrader());
         assert sess != null;
         sess.insertOrder(order);
-        if (!order.isDone()) {
+        Exec exec = null;
+        if (order.isPecan()) {
+            // Cancel any orders that are in a pending-cancel state.
+            final MarketBook book = (MarketBook) markets.find(order.getMarket());
+            assert book != null;
+            exec = newExec(book, order, now);
+            exec.cancel(0);
+            order.cancel(now);
+        } else if (!order.isDone()) {
             final MarketBook book = (MarketBook) markets.find(order.getMarket());
             boolean success = false;
             try {
@@ -221,6 +229,7 @@ public @NonNullByDefault class Serv {
                 }
             }
         }
+        return exec;
     }
 
     private final TraderSess newTrader(String mnem, @Nullable String display, String email)
@@ -518,7 +527,7 @@ public @NonNullByDefault class Serv {
     }
 
     public Serv(Model model, Journ journ, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this.journ = journ;
         this.cache = cache;
         this.factory = factory;
@@ -542,13 +551,19 @@ public @NonNullByDefault class Serv {
         assert t != null;
         this.traders = t;
 
+        JslNode firstExec = null;
         final SlNode firstOrder = model.readOrder(factory);
         for (SlNode node = firstOrder; node != null;) {
             final Order order = (Order) node;
             node = popNext(node);
 
-            // This method will mark the book as dirty.
-            insertOrder(order);
+            // This method will mark the book as dirty. It will also return an execution if the
+            // order was cancelled, because it was in a pending-cancel state.
+            final Exec exec = insertOrder(order, now);
+            if (exec != null) {
+                exec.setJslNext(firstExec);
+                firstExec = exec;
+            }
         }
 
         final SlNode firstTrade = model.readTrade(factory);
@@ -577,11 +592,19 @@ public @NonNullByDefault class Serv {
             setDirty(sess, TraderSess.DIRTY_ALL);
         }
 
+        if (firstExec != null) {
+            try {
+                journ.createExecList(firstExec);
+            } catch (final RejectedExecutionException e) {
+                throw new ServiceUnavailableException("journal is busy", e);
+            }
+        }
+
         updateDirty();
     }
 
     public Serv(Datastore datastore, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(datastore, datastore, cache, factory, now);
     }
 
@@ -847,7 +870,8 @@ public @NonNullByDefault class Serv {
         Quote quote = null;
         if (quoteId == 0) {
             matchOrders(sess, book, order, now, result);
-            // Place incomplete order in market.
+            // Place incomplete order in market. N.B. isDone() is sufficient here because the order
+            // cannot be pending cancellation.
             if (!order.isDone()) {
                 // This may fail if level cannot be allocated.
                 book.insertOrder(order);
@@ -891,6 +915,10 @@ public @NonNullByDefault class Serv {
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new TooLateException(String.format("order '%d' is done", order.getId()));
+        }
+        if (order.isPecan()) {
+            throw new TooLateException(
+                    String.format("order '%d' is pending cancellation", order.getId()));
         }
         // Revised lots must not be:
         // 1. less than min lots;
@@ -961,6 +989,9 @@ public @NonNullByDefault class Serv {
             if (order.isDone()) {
                 throw new TooLateException(String.format("order '%d' is done", id));
             }
+            if (order.isPecan()) {
+                throw new TooLateException(String.format("order '%d' is pending cancellation", id));
+            }
             // Revised lots must not be:
             // 1. less than min lots;
             // 2. less than executed lots;
@@ -1010,6 +1041,7 @@ public @NonNullByDefault class Serv {
     public final void cancelOrder(TraderSess sess, MarketBook book, Order order, long now,
             Result result)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        // Note that orders pending cancellation may be cancelled.
         if (order.isDone()) {
             throw new TooLateException(String.format("order '%d' is done", order.getId()));
         }
@@ -1070,6 +1102,7 @@ public @NonNullByDefault class Serv {
             if (order == null) {
                 throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
             }
+            // Note that orders pending cancellation may be cancelled.
             if (order.isDone()) {
                 throw new TooLateException(String.format("order '%d' is done", id));
             }
@@ -1130,6 +1163,7 @@ public @NonNullByDefault class Serv {
         for (RbNode node = sess.getFirstOrder(); node != null; node = node.rbNext()) {
             final Order order = sess.getRootOrder();
             assert order != null;
+            // Note that orders pending cancellation may be cancelled.
             if (!order.isDone()) {
                 continue;
             }

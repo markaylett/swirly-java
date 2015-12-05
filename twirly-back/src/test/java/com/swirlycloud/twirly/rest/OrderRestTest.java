@@ -21,7 +21,7 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.node.JslNode;
-import com.swirlycloud.twirly.rest.BackUnrest.TransStruct;
+import com.swirlycloud.twirly.rest.BackUnrest.ResultStruct;
 
 public final class OrderRestTest extends RestTest {
 
@@ -66,7 +66,7 @@ public final class OrderRestTest extends RestTest {
     @Test
     public final void testPlace() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        final TransStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        final ResultStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, 0, 0, 0, 0, 12345, 10, 1, 0, 0, 0,
@@ -78,7 +78,7 @@ public final class OrderRestTest extends RestTest {
     @Test
     public final void testReviseSingle() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        TransStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        ResultStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, 0, 0, 0, 0, 12345, 10, 1, 0, 0, 0,
@@ -93,7 +93,7 @@ public final class OrderRestTest extends RestTest {
     @Test
     public final void testReviseBatch() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        TransStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        ResultStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, 0, 0, 0, 0, 12345, 10, 1, 0, 0, 0,
@@ -131,7 +131,7 @@ public final class OrderRestTest extends RestTest {
     @Test
     public final void testCancelSingle() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        TransStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        ResultStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, 0, 0, 0, 0, 12345, 10, 1, 0, 0, 0,
@@ -146,7 +146,7 @@ public final class OrderRestTest extends RestTest {
     @Test
     public final void testCancelBatch() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        TransStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        ResultStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, 0, 0, 0, 0, 12345, 10, 1, 0, 0, 0,
@@ -205,7 +205,7 @@ public final class OrderRestTest extends RestTest {
     @Test
     public final void testArchiveBatch() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        TransStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
+        ResultStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12346);

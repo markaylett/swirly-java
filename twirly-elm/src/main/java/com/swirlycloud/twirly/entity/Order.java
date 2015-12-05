@@ -451,6 +451,15 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         return pecan;
     }
 
+    /**
+     * An order is working when it has residual quantity and it is not pending cancellation.
+     *
+     * @return true if order is working.
+     */
+    public final boolean isWorking() {
+        return resd > 0 && !pecan;
+    }
+
     public final long getModified() {
         return modified;
     }

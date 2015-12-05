@@ -39,7 +39,7 @@ public final @NonNullByDefault class ModelUtil {
             final Order order = (Order) node;
             node = popNext(node);
 
-            if (!order.isDone()) {
+            if (order.isWorking()) {
                 final MarketBook book = (MarketBook) markets.find(order.getMarket());
                 if (book != null) {
                     book.insertOrder(order);

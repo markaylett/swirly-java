@@ -271,7 +271,7 @@ public final @NonNullByDefault class BackUnrest {
         public final Map<Long, Quote> quotes = new HashMap<>();
     }
 
-    public static final class TransStruct {
+    public static final class ResultStruct {
         public final Map<Long, Order> orders = new HashMap<>();
         public final Map<Long, Exec> execs = new HashMap<>();
         public @Nullable Posn posn;
@@ -340,8 +340,8 @@ public final @NonNullByDefault class BackUnrest {
         throw new IOException("end-of object not found");
     }
 
-    private static final TransStruct parseTransStruct(JsonParser p) throws IOException {
-        final TransStruct out = new TransStruct();
+    private static final ResultStruct parseResultStruct(JsonParser p) throws IOException {
+        final ResultStruct out = new ResultStruct();
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
@@ -388,12 +388,12 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public BackUnrest(Model model, Journ journ, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(model, journ, cache, factory, now));
     }
 
     public BackUnrest(Datastore datastore, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(datastore, cache, factory, now));
     }
 
@@ -522,6 +522,43 @@ public final @NonNullByDefault class BackUnrest {
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
             return Order.parse(p);
+        }
+    }
+
+    public final Map<Long, Quote> getQuote(String trader, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getQuote(trader, params, now, sb);
+
+        final Map<Long, Quote> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseQuotes(p, out);
+        }
+        return out;
+    }
+
+    public final Map<Long, Quote> getQuote(String trader, String market, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getQuote(trader, market, params, now, sb);
+
+        final Map<Long, Quote> out = new HashMap<>();
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartArray(p);
+            parseQuotes(p, out);
+        }
+        return out;
+    }
+
+    public final Quote getQuote(String trader, String market, long id, Params params, long now)
+            throws NotFoundException, ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.getQuote(trader, market, id, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Quote.parse(p);
         }
     }
 
@@ -684,7 +721,7 @@ public final @NonNullByDefault class BackUnrest {
         rest.deleteOrder(trader, market, first, now);
     }
 
-    public final TransStruct postOrder(String trader, String market, @Nullable String ref,
+    public final ResultStruct postOrder(String trader, String market, @Nullable String ref,
             long quoteId, Side side, long lots, long ticks, long minLots, Params params, long now)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
@@ -693,11 +730,11 @@ public final @NonNullByDefault class BackUnrest {
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            return parseTransStruct(p);
+            return parseResultStruct(p);
         }
     }
 
-    public final TransStruct putOrder(String trader, String market, long id, long lots,
+    public final ResultStruct putOrder(String trader, String market, long id, long lots,
             Params params, long now) throws BadRequestException, NotFoundException,
                     ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
@@ -705,11 +742,11 @@ public final @NonNullByDefault class BackUnrest {
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            return parseTransStruct(p);
+            return parseResultStruct(p);
         }
     }
 
-    public final TransStruct putOrder(String trader, String market, JslNode first, long lots,
+    public final ResultStruct putOrder(String trader, String market, JslNode first, long lots,
             Params params, long now) throws BadRequestException, NotFoundException,
                     ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
@@ -717,7 +754,19 @@ public final @NonNullByDefault class BackUnrest {
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            return parseTransStruct(p);
+            return parseResultStruct(p);
+        }
+    }
+
+    public final Quote postQuote(String trader, String market, @Nullable String ref, Side side,
+            long lots, Params params, long now) throws BadRequestException, NotFoundException,
+                    ServiceUnavailableException, IOException {
+        final StringBuilder sb = new StringBuilder();
+        rest.postQuote(trader, market, ref, side, lots, params, now, sb);
+
+        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
+            parseStartObject(p);
+            return Quote.parse(p);
         }
     }
 

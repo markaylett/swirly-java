@@ -16,6 +16,9 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.entity.Factory;
+import com.swirlycloud.twirly.exception.NotFoundException;
+import com.swirlycloud.twirly.exception.ServException;
+import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.io.AppEngineCache;
 import com.swirlycloud.twirly.io.AppEngineDatastore;
 import com.swirlycloud.twirly.io.Cache;
@@ -96,7 +99,7 @@ public final class BackLifeCycle implements ServletContextListener {
 
     @SuppressWarnings("resource")
     private final void open(ServletContext sc, @NonNull Factory factory)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
 
         Realm realm = null;
         Datastore datastore = null;
@@ -151,6 +154,8 @@ public final class BackLifeCycle implements ServletContextListener {
         final ServletContext sc = event.getServletContext();
         try {
             open(sc, new ServFactory());
+        } catch (final ServException e) {
+            sc.log("internal error", e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status.
             Thread.currentThread().interrupt();

@@ -72,12 +72,12 @@ public final @NonNullByDefault class BackRest implements Rest {
     }
 
     public BackRest(Model model, Journ journ, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(model, journ, cache, factory, now));
     }
 
     public BackRest(Datastore datastore, Cache cache, Factory factory, long now)
-            throws InterruptedException {
+            throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(datastore, cache, factory, now));
     }
 
@@ -643,6 +643,23 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
+    public final void postQuote(String trader, String market, @Nullable String ref, Side side,
+            long lots, Params params, long now, Appendable out)
+                    throws NotFoundException, ServiceUnavailableException, IOException {
+        final LockableServ serv = (LockableServ) this.serv;
+        final int lock = serv.writeLock();
+        try {
+            serv.poll(now);
+            final TraderSess sess = serv.getTrader(trader);
+            final MarketBook book = serv.getMarket(market);
+            final Quote quote = serv.createQuote(sess, book, ref, side, lots, now);
+            quote.toJson(params, out);
+        } finally {
+            timeout = serv.getTimeout();
+            serv.unlock(lock);
+        }
+    }
+
     public final void deleteTrade(String trader, String market, long id, long now)
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final LockableServ serv = (LockableServ) this.serv;
@@ -683,23 +700,6 @@ public final @NonNullByDefault class BackRest implements Rest {
             final Exec trade = serv.createTrade(sess, book, ref, side, lots, ticks, role, cpty,
                     now);
             trade.toJson(params, out);
-        } finally {
-            timeout = serv.getTimeout();
-            serv.unlock(lock);
-        }
-    }
-
-    public final void postQuote(String trader, String market, String ref, Side side, long lots,
-            Params params, long now, Appendable out)
-                    throws NotFoundException, ServiceUnavailableException, IOException {
-        final LockableServ serv = (LockableServ) this.serv;
-        final int lock = serv.writeLock();
-        try {
-            serv.poll(now);
-            final TraderSess sess = serv.getTrader(trader);
-            final MarketBook book = serv.getMarket(market);
-            final Quote quote = serv.createQuote(sess, book, ref, side, lots, now);
-            quote.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
             serv.unlock(lock);
