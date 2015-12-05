@@ -35,6 +35,7 @@ public final class OrderRestTest extends RestTest {
         assertEquals(1, out.size());
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
                 out.get(Long.valueOf(1)));
+        assertTrue(unrest.getOrder("GOSAYL", PARAMS_NONE, NOW).isEmpty());
     }
 
     @Test
@@ -61,10 +62,10 @@ public final class OrderRestTest extends RestTest {
         }
     }
 
-    // Place Order.
+    // Create Order.
 
     @Test
-    public final void testPlace() throws BadRequestException, NotFoundException,
+    public final void testCreate() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
         final ResultStruct out = postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         assertOrder("MARAYL", "EURUSD.MAR14", State.NEW, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
