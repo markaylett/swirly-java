@@ -28,7 +28,7 @@ public final class ViewRestTest extends RestTest {
     public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
 
-        long now = NOW;
+        long now = TODAY_MILLIS;
 
         Map<String, MarketView> views = unrest.getView(PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
@@ -50,7 +50,7 @@ public final class ViewRestTest extends RestTest {
     public final void testGetByMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
 
-        long now = NOW;
+        long now = TODAY_MILLIS;
 
         try {
             unrest.getView("USDCHF.MAR14", PARAMS_NONE, now);

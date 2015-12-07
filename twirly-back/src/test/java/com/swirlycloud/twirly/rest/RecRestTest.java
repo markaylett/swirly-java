@@ -35,7 +35,7 @@ public final class RecRestTest extends RestTest {
         // With traders.
         EntitySet es = new EntitySet(
                 EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET | EntitySet.TRADER);
-        RecStruct st = unrest.getRec(es, PARAMS_NONE, NOW);
+        RecStruct st = unrest.getRec(es, PARAMS_NONE, TODAY_MILLIS);
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertEquals(2, st.markets.size());
@@ -47,7 +47,7 @@ public final class RecRestTest extends RestTest {
 
         // Without traders.
         es = new EntitySet(EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET);
-        st = unrest.getRec(es, PARAMS_NONE, NOW);
+        st = unrest.getRec(es, PARAMS_NONE, TODAY_MILLIS);
         assertAssets(st.assets);
         assertContrs(st.contrs);
         assertEquals(2, st.markets.size());
@@ -62,20 +62,20 @@ public final class RecRestTest extends RestTest {
     public final void testGetByRecType()
             throws NotFoundException, ServiceUnavailableException, IOException {
 
-        Map<String, Rec> recs = unrest.getRec(RecType.ASSET, PARAMS_NONE, NOW);
+        Map<String, Rec> recs = unrest.getRec(RecType.ASSET, PARAMS_NONE, TODAY_MILLIS);
         assertAssets(recs);
 
-        recs = unrest.getRec(RecType.CONTR, PARAMS_NONE, NOW);
+        recs = unrest.getRec(RecType.CONTR, PARAMS_NONE, TODAY_MILLIS);
         assertContrs(recs);
 
-        recs = unrest.getRec(RecType.MARKET, PARAMS_NONE, NOW);
+        recs = unrest.getRec(RecType.MARKET, PARAMS_NONE, TODAY_MILLIS);
         assertEquals(2, recs.size());
         assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 (Market) recs.get("EURUSD.MAR14"));
         assertMarket("USDJPY.MAR14", "USDJPY March 14", "USDJPY", SETTL_DAY, EXPIRY_DAY, 0x1,
                 (Market) recs.get("USDJPY.MAR14"));
 
-        recs = unrest.getRec(RecType.TRADER, PARAMS_NONE, NOW);
+        recs = unrest.getRec(RecType.TRADER, PARAMS_NONE, TODAY_MILLIS);
         assertTraders(recs);
     }
 
@@ -83,36 +83,38 @@ public final class RecRestTest extends RestTest {
     public final void testGetByTypeMnem()
             throws NotFoundException, ServiceUnavailableException, IOException {
 
-        final Asset asset = (Asset) unrest.getRec(RecType.ASSET, "JPY", PARAMS_NONE, NOW);
+        final Asset asset = (Asset) unrest.getRec(RecType.ASSET, "JPY", PARAMS_NONE, TODAY_MILLIS);
         assertAsset("JPY", asset);
         try {
-            unrest.getRec(RecType.ASSET, "JPYx", PARAMS_NONE, NOW);
+            unrest.getRec(RecType.ASSET, "JPYx", PARAMS_NONE, TODAY_MILLIS);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
 
-        final Contr contr = (Contr) unrest.getRec(RecType.CONTR, "USDJPY", PARAMS_NONE, NOW);
+        final Contr contr = (Contr) unrest.getRec(RecType.CONTR, "USDJPY", PARAMS_NONE,
+                TODAY_MILLIS);
         assertContr("USDJPY", contr);
         try {
-            unrest.getRec(RecType.CONTR, "USDJPYx", PARAMS_NONE, NOW);
+            unrest.getRec(RecType.CONTR, "USDJPYx", PARAMS_NONE, TODAY_MILLIS);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
 
         final Market market = (Market) unrest.getRec(RecType.MARKET, "EURUSD.MAR14", PARAMS_NONE,
-                NOW);
+                TODAY_MILLIS);
         assertMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 market);
         try {
-            unrest.getRec(RecType.MARKET, "EURUSD.MAR14x", PARAMS_NONE, NOW);
+            unrest.getRec(RecType.MARKET, "EURUSD.MAR14x", PARAMS_NONE, TODAY_MILLIS);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
 
-        final Trader trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL", PARAMS_NONE, NOW);
+        final Trader trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL", PARAMS_NONE,
+                TODAY_MILLIS);
         assertTrader("MARAYL", trader);
         try {
-            unrest.getRec(RecType.TRADER, "MARAYLx", PARAMS_NONE, NOW);
+            unrest.getRec(RecType.TRADER, "MARAYLx", PARAMS_NONE, TODAY_MILLIS);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
