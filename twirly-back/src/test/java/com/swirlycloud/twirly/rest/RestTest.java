@@ -60,6 +60,15 @@ public abstract class RestTest {
     protected static final long SETTL_DAY_MILLIS = jdToMillis(SETTL_DAY);
     protected static final long EXPIRY_DAY_MILLIS = jdToMillis(EXPIRY_DAY);
 
+    protected static final @NonNull String EURUSD = "EURUSD";
+    protected static final @NonNull String USDJPY = "USDJPY";
+
+    protected static final @NonNull String EURUSD_MAR14 = "EURUSD.MAR14";
+    protected static final @NonNull String USDJPY_MAR14 = "USDJPY.MAR14";
+
+    protected static final @NonNull String MARAYL = "MARAYL";
+    protected static final @NonNull String GOSAYL = "GOSAYL";
+
     protected BackUnrest unrest;
 
     protected static void assertAsset(Asset expected, Asset actual) {
@@ -341,8 +350,8 @@ public abstract class RestTest {
         this.unrest = unrest;
         boolean success = false;
         try {
-            postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
-            postMarket("USDJPY.MAR14", "USDJPY March 14", "USDJPY", SETTL_DAY, EXPIRY_DAY, 0x1);
+            postMarket(EURUSD_MAR14, "EURUSD March 14", EURUSD, SETTL_DAY, EXPIRY_DAY, 0x1);
+            postMarket(USDJPY_MAR14, "USDJPY March 14", USDJPY, SETTL_DAY, EXPIRY_DAY, 0x1);
             success = true;
         } finally {
             if (!success) {

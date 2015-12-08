@@ -33,10 +33,10 @@ public final class ViewRestTest extends RestTest {
         Map<String, MarketView> views = unrest.getView(PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
             assertEquals(2, views.size());
-            MarketView view = views.get("EURUSD.MAR14");
-            assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, view);
-            view = views.get("USDJPY.MAR14");
-            assertView("USDJPY.MAR14", "USDJPY", SETTL_DAY, view);
+            MarketView view = views.get(EURUSD_MAR14);
+            assertView(EURUSD_MAR14, EURUSD, SETTL_DAY, view);
+            view = views.get(USDJPY_MAR14);
+            assertView(USDJPY_MAR14, USDJPY, SETTL_DAY, view);
             // Use now beyond expiry.
             now = jdToMillis(EXPIRY_DAY + 1);
             views = unrest.getView(PARAMS_EXPIRED, now);
@@ -58,12 +58,12 @@ public final class ViewRestTest extends RestTest {
         } catch (final NotFoundException e) {
         }
 
-        MarketView view = unrest.getView("EURUSD.MAR14", PARAMS_NONE, now);
+        MarketView view = unrest.getView(EURUSD_MAR14, PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
-            assertView("EURUSD.MAR14", "EURUSD", SETTL_DAY, view);
+            assertView(EURUSD_MAR14, EURUSD, SETTL_DAY, view);
             // Use now beyond expiry.
             now = jdToMillis(EXPIRY_DAY + 1);
-            view = unrest.getView("EURUSD.MAR14", PARAMS_EXPIRED, now);
+            view = unrest.getView(EURUSD_MAR14, PARAMS_EXPIRED, now);
         }
     }
 }

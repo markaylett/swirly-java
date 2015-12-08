@@ -27,35 +27,35 @@ public final class QuoteRestTest extends RestTest {
     @Test
     public final void testGetAll() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10, TODAY_MILLIS);
-        final Map<Long, Quote> out = unrest.getQuote("MARAYL", PARAMS_NONE, TODAY_MILLIS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        final Map<Long, Quote> out = unrest.getQuote(MARAYL, PARAMS_NONE, TODAY_MILLIS);
         assertEquals(1, out.size());
-        assertQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345, out.get(Long.valueOf(1)));
-        assertTrue(unrest.getQuote("GOSAYL", PARAMS_NONE, TODAY_MILLIS).isEmpty());
+        assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, out.get(Long.valueOf(1)));
+        assertTrue(unrest.getQuote(GOSAYL, PARAMS_NONE, TODAY_MILLIS).isEmpty());
     }
 
     @Test
     public final void testGetByMarket() throws BadRequestException, InternalException,
             NotFoundException, ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10, TODAY_MILLIS);
-        final Map<Long, Quote> out = unrest.getQuote("MARAYL", "EURUSD.MAR14", PARAMS_NONE,
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        final Map<Long, Quote> out = unrest.getQuote(MARAYL, EURUSD_MAR14, PARAMS_NONE,
                 TODAY_MILLIS);
         assertEquals(1, out.size());
-        assertQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345, out.get(Long.valueOf(1)));
-        assertTrue(unrest.getQuote("MARAYL", "USDJPY.MAR14", PARAMS_NONE, TODAY_MILLIS).isEmpty());
+        assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, out.get(Long.valueOf(1)));
+        assertTrue(unrest.getQuote(MARAYL, USDJPY_MAR14, PARAMS_NONE, TODAY_MILLIS).isEmpty());
     }
 
     @Test
     public final void testGetByMarketId() throws BadRequestException, InternalException,
             NotFoundException, ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10, TODAY_MILLIS);
-        final Quote out = unrest.getQuote("MARAYL", "EURUSD.MAR14", 1, PARAMS_NONE, TODAY_MILLIS);
-        assertQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345, out);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        final Quote out = unrest.getQuote(MARAYL, EURUSD_MAR14, 1, PARAMS_NONE, TODAY_MILLIS);
+        assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, out);
         try {
-            unrest.getQuote("MARAYL", "EURUSD.MAR14", 2, PARAMS_NONE, TODAY_MILLIS);
+            unrest.getQuote(MARAYL, EURUSD_MAR14, 2, PARAMS_NONE, TODAY_MILLIS);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -66,8 +66,8 @@ public final class QuoteRestTest extends RestTest {
     @Test
     public final void testCreate() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        final Quote quote = postQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10, TODAY_MILLIS);
-        assertQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10, 12345, quote);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        final Quote quote = postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, quote);
     }
 }

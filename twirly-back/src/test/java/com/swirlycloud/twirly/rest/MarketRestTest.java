@@ -49,7 +49,7 @@ public final class MarketRestTest extends RestTest {
             ServiceUnavailableException, IOException {
         Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
                 EXPIRY_DAY, 0x1);
-        market = putMarket("MARAYL", "GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
+        market = putMarket(MARAYL, "GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
                 market);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
