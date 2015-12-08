@@ -5,6 +5,7 @@ package com.swirlycloud.twirly.rest;
 
 import static com.swirlycloud.twirly.util.JsonUtil.PARAMS_NONE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -14,11 +15,16 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.domain.Side;
+import com.swirlycloud.twirly.domain.State;
+import com.swirlycloud.twirly.entity.MarketView;
+import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.InternalException;
+import com.swirlycloud.twirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
+import com.swirlycloud.twirly.rest.BackUnrest.ResultStruct;
 
 public final class QuoteRestTest extends RestTest {
 
@@ -69,5 +75,47 @@ public final class QuoteRestTest extends RestTest {
         postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
         final Quote quote = postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
         assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, quote);
+    }
+
+    @Test
+    public final void testExpiry() throws BadRequestException, InternalException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        final Map<Long, Quote> out = unrest.getQuote("MARAYL", PARAMS_NONE,
+                TODAY_MILLIS + QUOTE_EXPIRY);
+        assertTrue(out.isEmpty());
+    }
+
+    @Test(expected = LiquidityUnavailableException.class)
+    public final void testNoLiquidity() throws BadRequestException, InternalException,
+            NotFoundException, ServiceUnavailableException, IOException {
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 1, TODAY_MILLIS);
+    }
+
+    @Test
+    public final void testPecan() throws BadRequestException, InternalException, NotFoundException,
+            ServiceUnavailableException, IOException {
+        ResultStruct out = postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        MarketView view = out.view;
+        assert view != null;
+        assertTrue(view.isValidOffer(0));
+
+        final Quote quote = postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, quote);
+
+        out = putOrder(MARAYL, EURUSD_MAR14, 1, 0, TODAY_MILLIS);
+        assertOrder(MARAYL, EURUSD_MAR14, State.PECAN, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
+                out.orders.get(Long.valueOf(1)));
+        view = out.view;
+        assert view != null;
+        assertFalse(view.isValidOffer(0));
+
+        final Order order = unrest.getOrder(MARAYL, EURUSD_MAR14, 1, PARAMS_NONE,
+                TODAY_MILLIS + QUOTE_EXPIRY);
+        assertOrder(MARAYL, EURUSD_MAR14, State.CANCEL, Side.SELL, 10, 12345, 0, 0, 0, 0, 0,
+                TODAY_MILLIS, TODAY_MILLIS + QUOTE_EXPIRY, order);
     }
 }

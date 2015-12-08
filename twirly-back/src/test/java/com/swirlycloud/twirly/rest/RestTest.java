@@ -69,6 +69,9 @@ public abstract class RestTest {
     protected static final @NonNull String MARAYL = "MARAYL";
     protected static final @NonNull String GOSAYL = "GOSAYL";
 
+    // 20 seconds.
+    protected static final int QUOTE_EXPIRY = 20 * 1000;
+
     protected BackUnrest unrest;
 
     protected static void assertAsset(Asset expected, Asset actual) {
@@ -153,7 +156,7 @@ public abstract class RestTest {
 
     protected static void assertOrder(String trader, String market, State state, Side side,
             long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
-            Order actual) {
+            long created, long modified, Order actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -168,12 +171,19 @@ public abstract class RestTest {
         assertEquals(lastLots, actual.getLastLots());
         assertEquals(lastTicks, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
-        assertEquals(TODAY_MILLIS, actual.getCreated());
-        assertEquals(TODAY_MILLIS, actual.getModified());
+        assertEquals(created, actual.getCreated());
+        assertEquals(modified, actual.getModified());
+    }
+
+    protected static void assertOrder(String trader, String market, State state, Side side,
+            long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
+            Order actual) {
+        assertOrder(trader, market, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
+                TODAY_MILLIS, TODAY_MILLIS, actual);
     }
 
     protected static void assertQuote(String trader, String market, Side side, long lots,
-            long ticks, Quote actual) {
+            long ticks, long created, long expiry, Quote actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -181,13 +191,19 @@ public abstract class RestTest {
         assertEquals(side, actual.getSide());
         assertEquals(lots, actual.getLots());
         assertEquals(ticks, actual.getTicks());
-        assertEquals(TODAY_MILLIS, actual.getCreated());
-        assertEquals(TODAY_MILLIS + 20 * 1000, actual.getExpiry());
+        assertEquals(created, actual.getCreated());
+        assertEquals(expiry, actual.getExpiry());
+    }
+
+    protected static void assertQuote(String trader, String market, Side side, long lots,
+            long ticks, Quote actual) {
+        assertQuote(trader, market, side, lots, ticks, TODAY_MILLIS, TODAY_MILLIS + QUOTE_EXPIRY,
+                actual);
     }
 
     protected static void assertExec(String trader, String market, State state, Side side,
             long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
-            String contr, int settlDay, Role role, String cpty, Exec actual) {
+            String contr, int settlDay, Role role, String cpty, long created, Exec actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -206,7 +222,14 @@ public abstract class RestTest {
         assertEquals(settlDay, actual.getSettlDay());
         assertEquals(role, actual.getRole());
         assertEquals(cpty, actual.getCpty());
-        assertEquals(TODAY_MILLIS, actual.getCreated());
+        assertEquals(created, actual.getCreated());
+    }
+
+    protected static void assertExec(String trader, String market, State state, Side side,
+            long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
+            String contr, int settlDay, Role role, String cpty, Exec actual) {
+        assertExec(trader, market, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
+                contr, settlDay, role, cpty, TODAY_MILLIS, actual);
     }
 
     protected static void assertPosn(String trader, String market, String contr, int settlDay,
