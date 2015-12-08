@@ -36,6 +36,7 @@ import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.function.UnaryCallback;
@@ -299,7 +300,8 @@ public abstract class RestTest {
     }
 
     protected final Quote postQuote(@NonNull String trader, @NonNull String market,
-            @NonNull Side side, long lots) throws BadRequestException, NotFoundException,
+            @NonNull Side side, long lots)
+                    throws BadRequestException, LiquidityUnavailableException, NotFoundException,
                     ServiceUnavailableException, IOException {
         return unrest.postQuote(trader, market, null, side, lots, PARAMS_NONE, NOW);
     }

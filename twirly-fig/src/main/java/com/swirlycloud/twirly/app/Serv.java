@@ -44,6 +44,7 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.InvalidException;
 import com.swirlycloud.twirly.exception.InvalidLotsException;
 import com.swirlycloud.twirly.exception.InvalidTicksException;
+import com.swirlycloud.twirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.twirly.exception.MarketClosedException;
 import com.swirlycloud.twirly.exception.MarketNotFoundException;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -1510,10 +1511,11 @@ public @NonNullByDefault class Serv {
     }
 
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
-            Side side, long lots, long now) throws NotFoundException, ServiceUnavailableException {
+            Side side, long lots, long now) throws LiquidityUnavailableException, NotFoundException,
+                    ServiceUnavailableException {
         final Order order = findOrder(book, side, lots);
         if (order == null) {
-            throw new NotFoundException("no liquidity available");
+            throw new LiquidityUnavailableException("insufficient liquidity");
         }
 
         final Quote quote = factory.newQuote(sess.getMnem(), book, book.allocQuoteId(), ref, order,

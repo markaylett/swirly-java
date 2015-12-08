@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.InternalException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 
@@ -24,7 +25,7 @@ public final class QuoteRestTest extends RestTest {
     // Get Quote.
 
     @Test
-    public final void testGetAll() throws BadRequestException, NotFoundException,
+    public final void testGetAll() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         postQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10);
@@ -35,8 +36,8 @@ public final class QuoteRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetByMarket() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+    public final void testGetByMarket() throws BadRequestException, InternalException,
+            NotFoundException, ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         postQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10);
         final Map<Long, Quote> out = unrest.getQuote("MARAYL", "EURUSD.MAR14", PARAMS_NONE, NOW);
@@ -46,8 +47,8 @@ public final class QuoteRestTest extends RestTest {
     }
 
     @Test
-    public final void testGetByMarketId() throws BadRequestException, NotFoundException,
-            ServiceUnavailableException, IOException {
+    public final void testGetByMarketId() throws BadRequestException, InternalException,
+            NotFoundException, ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         postQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10);
         final Quote out = unrest.getQuote("MARAYL", "EURUSD.MAR14", 1, PARAMS_NONE, NOW);
@@ -62,7 +63,7 @@ public final class QuoteRestTest extends RestTest {
     // Create Quote.
 
     @Test
-    public final void testCreate() throws BadRequestException, NotFoundException,
+    public final void testCreate() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
         postOrder("MARAYL", "EURUSD.MAR14", 0, Side.SELL, 10, 12345);
         final Quote quote = postQuote("MARAYL", "EURUSD.MAR14", Side.BUY, 10);

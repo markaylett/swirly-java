@@ -36,6 +36,7 @@ import com.swirlycloud.twirly.entity.Rec;
 import com.swirlycloud.twirly.entity.RecType;
 import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.io.Cache;
@@ -759,7 +760,8 @@ public final @NonNullByDefault class BackUnrest {
     }
 
     public final Quote postQuote(String trader, String market, @Nullable String ref, Side side,
-            long lots, Params params, long now) throws BadRequestException, NotFoundException,
+            long lots, Params params, long now)
+                    throws BadRequestException, LiquidityUnavailableException, NotFoundException,
                     ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
         rest.postQuote(trader, market, ref, side, lots, params, now, sb);
