@@ -236,6 +236,9 @@ var OrderWidget = React.createClass({
 var QuoteWidget = React.createClass({
     // Mutators.
     // DOM Events.
+    onQuotesTab: function(event) {
+        this.props.module.onChangeContext('quotes');
+    },
     onTradesTab: function(event) {
         this.props.module.onChangeContext('trades');
     },
@@ -246,18 +249,24 @@ var QuoteWidget = React.createClass({
     componentDidMount: function() {
         var node = this.refs.tabs.getDOMNode();
         $(node).tab();
-        this.props.module.onChangeContext('trades');
+        this.props.module.onChangeContext('quotes');
     },
     render: function() {
         var props = this.props;
         var module = props.module;
         var sess = props.sess;
+        var quotes = sess.quotes;
         var trades = sess.trades;
         var posns = sess.posns;
         return (
             <div className="quoteWidget">
               <ul ref="tabs" className="nav nav-tabs" data-tabs="tabs">
                 <li className="active">
+                  <a href="#quotes" data-toggle="tab" onClick={this.onQuotesTab}>
+                    Quotes ({quotes.length})
+                  </a>
+                </li>
+                <li>
                   <a href="#trades" data-toggle="tab" onClick={this.onTradesTab}>
                     Trades ({trades.length})
                   </a>
@@ -269,7 +278,10 @@ var QuoteWidget = React.createClass({
                 </li>
               </ul>
               <div className="tab-content">
-                <div id="trades" className="tab-pane active">
+                <div id="quotes" className="tab-pane active">
+                  <QuoteTable module={module} quotes={quotes}/>
+                </div>
+                <div id="trades" className="tab-pane">
                   <TradeTable module={module} trades={trades}/>
                 </div>
                 <div id="posns" className="tab-pane">

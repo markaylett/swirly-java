@@ -6,12 +6,18 @@ var QuoteModuleImpl = React.createClass({
     // Mutators.
     refresh: function(url) {
         if (url === undefined) {
-            url = '/front/sess/trade,posn,quote';
+            url = '/front/sess/quote,trade,posn,view';
         }
         $.getJSON(url, function(sess, status, xhr) {
             this.resetTimeout(xhr);
             var contrMap = this.props.contrMap;
             var staging = this.staging;
+
+            staging.quotes.clear();
+            sess.quotes.forEach(function(quote) {
+                enrichQuote(contrMap, quote);
+                staging.quotes.set(quote.key, quote);
+            });
 
             staging.trades.clear();
             sess.trades.forEach(function(trade) {
@@ -25,17 +31,18 @@ var QuoteModuleImpl = React.createClass({
                 staging.posns.set(posn.key, posn);
             });
 
-            staging.quotes.clear();
-            sess.quotes.forEach(function(quote) {
-                enrichQuote(contrMap, quote);
-                staging.quotes.set(quote.key, quote);
+            staging.views.clear();
+            sess.views.forEach(function(view) {
+                enrichView(contrMap, view);
+                staging.views.set(view.key, view);
             });
 
             this.setState({
                 sess: {
+                    quotes: staging.quotes.toSortedArray(),
                     trades: staging.trades.toSortedArray(),
                     posns: staging.posns.toSortedArray(),
-                    quotes: staging.quotes.toSortedArray()
+                    views: staging.views.toSortedArray()
                 }
             });
         }.bind(this)).fail(function(xhr) {
@@ -146,9 +153,10 @@ var QuoteModuleImpl = React.createClass({
             quotes.set(quote.key, quote);
             this.setState({
                 sess: {
+                    quotes: quotes.toSortedArray(),
                     trades: sess.trades,
                     posns: sess.posns,
-                    quotes: quotes.toSortedArray()
+                    views: sess.views
                 }
             });
         }.bind(this)).fail(function(xhr) {
@@ -178,9 +186,10 @@ var QuoteModuleImpl = React.createClass({
             }.bind(this));
             this.setState({
                 sess: {
+                    quotes: sess.quotes,
                     trades: trades.toSortedArray(),
                     posns: sess.posns,
-                    quotes: sess.quotes
+                    views: sess.views
                 }
             });
         }.bind(this)).fail(function(xhr) {
@@ -192,9 +201,10 @@ var QuoteModuleImpl = React.createClass({
         var contrMap = this.props.contrMap;
         var staging = this.staging;
 
+        var quotes = staging.quotes;
         var trades = staging.trades;
         var posns = staging.posns;
-        var quotes = staging.quotes;
+        var views = staging.views;
 
         result.execs.forEach(function(exec) {
             if (exec.state === 'TRADE') {
@@ -211,11 +221,17 @@ var QuoteModuleImpl = React.createClass({
             enrichPosn(contrMap, posn);
             staging.posns.set(posn.key, posn);
         }
+        var view = result.view;
+        if (view !== null) {
+            enrichView(contrMap, view);
+            views.set(view.key, view);
+        }
         this.setState({
             sess: {
+                quotes: quotes.toSortedArray(),
                 trades: trades.toSortedArray(),
                 posns: posns.toSortedArray(),
-                quotes: quotes.toSortedArray()
+                views: views.toSortedArray()
             }
         });
     },
@@ -292,9 +308,10 @@ var QuoteModuleImpl = React.createClass({
             },
             errors: [],
             sess: {
+                quotes: [],
                 trades: [],
                 posns: [],
-                quotes: []
+                views: []
             },
             isSelectedTrade: false,
             isSelectedArchivable: false
@@ -324,7 +341,7 @@ var QuoteModuleImpl = React.createClass({
               <MultiAlertWidget module={module} errors={errors}/>
               <NewQuoteForm ref="newQuote" module={module} marketMap={marketMap}/>
               <div style={marginTop}>
-                <QuoteTable module={module} quotes={sess.quotes}/>
+                <ViewTable module={module} views={sess.views}/>
               </div>
               <div style={marginTop}>
                 <ArchiveForm ref="archive" module={module} marketMap={marketMap}
@@ -344,7 +361,7 @@ var QuoteModuleImpl = React.createClass({
             var delta = timeout - Date.now();
             this.timeout = setTimeout(function() {
                 console.debug('timeout now at ' + new Date(timeout));
-                this.refresh('/back/sess/trade,posn,quote');
+                this.refresh('/back/sess/quote,trade,posn,view');
             }.bind(this), delta);
         } else {
             console.debug('timeout not set');
@@ -352,9 +369,10 @@ var QuoteModuleImpl = React.createClass({
     },
     staging: {
         errors: new Tail(5),
+        quotes: new Map(),
         trades: new Map(),
         posns: new Map(),
-        quotes: new Map(),
+        views: new Map(),
         selectedTrades: new Map()
     },
     timeout: undefined
