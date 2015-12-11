@@ -68,6 +68,7 @@ var NewOrderForm = React.createClass({
         if (price !== undefined) {
             newState.price = price;
         }
+        newState.minLots = undefined;
         this.setState(newState);
     },
     // DOM Events.
@@ -86,13 +87,19 @@ var NewOrderForm = React.createClass({
             price: event.target.value
         });
     },
+    onChangeMinLots: function(event) {
+        this.setState({
+            minLots: event.target.value
+        });
+    },
     onClickBuy: function(event) {
         event.preventDefault();
         var state = this.state;
         var market = state.market;
         var lots = state.lots;
         var price = state.price;
-        this.props.module.onPostOrder(market, 0, 'BUY', lots, price);
+        var minLots = state.minLots;
+        this.props.module.onPostOrder(market, 0, 'BUY', lots, price, minLots);
     },
     onClickSell: function(event) {
         event.preventDefault();
@@ -100,14 +107,16 @@ var NewOrderForm = React.createClass({
         var market = state.market;
         var lots = state.lots;
         var price = state.price;
-        this.props.module.onPostOrder(market, 0, 'SELL', lots, price);
+        var minLots = state.minLots;
+        this.props.module.onPostOrder(market, 0, 'SELL', lots, price, minLots);
     },
     // Lifecycle.
     getInitialState: function() {
         return {
             market: undefined,
             lots: undefined,
-            price: undefined
+            price: undefined,
+            minLots: undefined
         };
     },
     componentDidMount: function() {
@@ -131,13 +140,14 @@ var NewOrderForm = React.createClass({
         var market = state.market;
         var lots = state.lots;
         var price = state.price;
+        var minLots = state.minLots;
 
         var contr = this.props.marketMap[market];
-        var minLots = 1;
         var priceInc = 0.01;
+        var minContrLots = 1;
         if (contr !== undefined) {
-            minLots = contr.minLots;
             priceInc = contr.priceInc;
+            minContrLots = contr.minLots;
         }
         var isSelectedWorking = this.props.isSelectedWorking;
         return (
@@ -150,7 +160,7 @@ var NewOrderForm = React.createClass({
               <div className="form-group">
                 <input type="number" className="form-control" placeholder="Lots"
                        value={lots} disabled={isSelectedWorking}
-                       onChange={this.onChangeLots} min={minLots}/>
+                       onChange={this.onChangeLots} min={minContrLots}/>
               </div>
               <div className="form-group">
                 <input type="number" className="form-control" placeholder="Price"
@@ -166,6 +176,11 @@ var NewOrderForm = React.createClass({
                         disabled={isSelectedWorking} onClick={this.onClickSell}>
                   <span className="glyphicon glyphicon-minus"></span> Sell
                 </button>
+              </div>
+              <div className="form-group">
+                <input type="number" className="form-control" placeholder="Min"
+                       value={minLots} disabled={isSelectedWorking}
+                       onChange={this.onChangeMinLots} min={0}/>
               </div>
             </form>
         );

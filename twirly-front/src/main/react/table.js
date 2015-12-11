@@ -447,6 +447,7 @@ var OrderRow = React.createClass({
               <td style={alignRight}>{order.exec}</td>
               <td style={alignRight}>{optional(order.lastLots)}</td>
               <td style={alignRight}>{optional(order.lastPrice)}</td>
+              <td style={alignRight}>{optional(order.minLots)}</td>
             </tr>
         );
     }
@@ -489,6 +490,7 @@ var OrderTable = React.createClass({
                   <th style={alignRight}>Exec</th>
                   <th style={alignRight}>Last Lots</th>
                   <th style={alignRight}>Last Price</th>
+                  <th style={alignRight}>Min Lots</th>
                 </tr>
               </thead>
               <tbody>

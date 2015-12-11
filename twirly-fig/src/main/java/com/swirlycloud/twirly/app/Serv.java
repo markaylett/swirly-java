@@ -319,6 +319,10 @@ public @NonNullByDefault class Serv {
             }
 
             final long lots = Math.min(takerOrder.getResd() - sumLots, makerOrder.getAvail());
+            // Must satisfy min-lots on maker's order.
+            if (lots > makerOrder.getMinResd()) {
+                continue;
+            }
             final long ticks = makerOrder.getTicks();
 
             sumLots += lots;
@@ -330,9 +334,14 @@ public @NonNullByDefault class Serv {
         }
 
         if (!result.matches.isEmpty()) {
-            // Avoid allocating position when there are no matches.
-            result.posn = takerSess.getLazyPosn(book);
-            takerOrder.trade(sumLots, sumCost, lastLots, lastTicks, now);
+            if (sumLots >= takerOrder.getMinLots()) {
+                // Avoid allocating position when there are no matches.
+                result.posn = takerSess.getLazyPosn(book);
+                takerOrder.trade(sumLots, sumCost, lastLots, lastTicks, now);
+            } else {
+                // Discard matches if min-lots is not satisfied.
+                result.clearMatches();
+            }
         }
     }
 
@@ -391,7 +400,7 @@ public @NonNullByDefault class Serv {
         final BookSide bookSide = book.getOtherSide(side);
         for (DlNode node = bookSide.getFirstOrder(); !node.isEnd(); node = node.dlNext()) {
             final Order makerOrder = (Order) node;
-            if (makerOrder.getAvail() >= lots) {
+            if (lots <= makerOrder.getAvail() && lots >= makerOrder.getMinResd()) {
                 return makerOrder;
             }
         }
@@ -1147,7 +1156,7 @@ public @NonNullByDefault class Serv {
 
     /**
      * Cancels all orders.
-     * 
+     *
      * @param sess
      *            The session.
      * @param now
@@ -1247,7 +1256,7 @@ public @NonNullByDefault class Serv {
 
     /**
      * Archive all orders.
-     * 
+     *
      * @param sess
      *            The session.
      * @param now
@@ -1425,7 +1434,7 @@ public @NonNullByDefault class Serv {
 
     /**
      * Archive all trades.
-     * 
+     *
      * @param sess
      *            The session.
      * @param now
@@ -1539,7 +1548,7 @@ public @NonNullByDefault class Serv {
 
     /**
      * This method may partially fail.
-     * 
+     *
      * @param now
      *            The current time.
      * @throws NotFoundException

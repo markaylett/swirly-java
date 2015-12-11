@@ -79,9 +79,10 @@ var OrderModuleImpl = React.createClass({
             isSelectedArchivable: isSelectedArchivable
         });
     },
-    postOrder: function(market, quoteId, side, lots, price) {
+    postOrder: function(market, quoteId, side, lots, price, minLots) {
         console.debug('postOrder: market=' + market + ', quoteId=' + quoteId
-                      + ', side=' + side + ', lots=' + lots + ', price=' + price);
+                      + ', side=' + side + ', lots=' + lots + ', price=' + price
+                      + ', minLots=' + minLots);
         var req = {};
         var contr = undefined;
         if (isSpecified(market)) {
@@ -115,6 +116,10 @@ var OrderModuleImpl = React.createClass({
         } else {
             this.onReportError(internalError('price not specified'));
             return;
+        }
+        // Optional minLots.
+        if (isSpecified(minLots) && minLots > 0) {
+            req.minLots = parseInt(minLots);
         }
 
         $.ajax({
@@ -329,8 +334,8 @@ var OrderModuleImpl = React.createClass({
         }
         this.updateSelected();
     },
-    onPostOrder: function(market, quoteId, side, lots, price) {
-        this.postOrder(market, quoteId, side, lots, price);
+    onPostOrder: function(market, quoteId, side, lots, price, minLots) {
+        this.postOrder(market, quoteId, side, lots, price, minLots);
     },
     onReviseAll: function(lots) {
         if (this.staging.context === 'working') {
