@@ -595,7 +595,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             result.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clear();
+            result.clearAll();
             serv.unlock(lock);
         }
     }
@@ -617,7 +617,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             result.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clear();
+            result.clearAll();
             serv.unlock(lock);
         }
     }
@@ -639,7 +639,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             result.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clear();
+            result.clearAll();
             serv.unlock(lock);
         }
     }
