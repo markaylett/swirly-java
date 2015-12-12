@@ -277,7 +277,7 @@ public final class ServTest {
     }
 
     @Test
-    public final void testPlace()
+    public final void testCreate()
             throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final TraderSess sess = serv.getTrader(TRADER);
         assertNotNull(sess);

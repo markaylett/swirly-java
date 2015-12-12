@@ -12,7 +12,6 @@ var OrderModuleImpl = React.createClass({
             this.resetTimeout(xhr);
             var contrMap = this.props.contrMap;
             var staging = this.staging;
-            var marketMap = {};
 
             staging.working.clear();
             staging.done.clear();
@@ -37,12 +36,10 @@ var OrderModuleImpl = React.createClass({
             staging.views.clear();
             sess.views.forEach(function(view) {
                 enrichView(contrMap, view);
-                marketMap[view.market] = view.contr;
                 staging.views.set(view.key, view);
             });
 
             this.setState({
-                marketMap: marketMap,
                 sess: {
                     working: staging.working.toSortedArray(),
                     done: staging.done.toSortedArray(),
@@ -88,7 +85,7 @@ var OrderModuleImpl = React.createClass({
         var req = {};
         var contr = undefined;
         if (isSpecified(market)) {
-            contr = this.state.marketMap[market];
+            contr = this.props.marketMap[market];
         } else {
             this.onReportError(internalError('market not specified'));
             return;
@@ -393,7 +390,6 @@ var OrderModuleImpl = React.createClass({
                 onArchiveAll: this.onArchiveAll
             },
             errors: [],
-            marketMap: {},
             sess: {
                 working: [],
                 done: [],
@@ -413,11 +409,11 @@ var OrderModuleImpl = React.createClass({
     },
     render: function() {
         var props = this.props;
+        var marketMap = props.marketMap;
 
         var state = this.state;
         var module = state.module;
         var errors = state.errors;
-        var marketMap = state.marketMap;
         var sess = state.sess;
         var isSelectedWorking = state.isSelectedWorking;
         var isSelectedDone = state.isSelectedDone;
@@ -478,14 +474,20 @@ var OrderModuleImpl = React.createClass({
 var OrderModule = React.createClass({
     // Mutators.
     refresh: function() {
-        $.getJSON('/front/rec/contr', function(contrs, status, xhr) {
+        $.getJSON('/front/rec/contr,market', function(rec, status, xhr) {
             var contrMap = {};
-            contrs.forEach(function(contr) {
+            var marketMap = {};
+            rec.contrs.forEach(function(contr) {
                 enrichContr(contr);
                 contrMap[contr.mnem] = contr;
             });
+            rec.markets.forEach(function(market) {
+                enrichMarket(contrMap, market);
+                marketMap[market.key] = market.contr;
+            });
             this.setState({
-                contrMap: contrMap
+                contrMap: contrMap,
+                marketMap: marketMap
             });
         }.bind(this)).fail(function(xhr) {
             this.setState({
@@ -501,7 +503,8 @@ var OrderModule = React.createClass({
     getInitialState: function() {
         return {
             error: null,
-            contrMap: null
+            contrMap: null,
+            marketMap: null
         };
     },
     componentDidMount: function() {
@@ -510,6 +513,7 @@ var OrderModule = React.createClass({
     render: function() {
         var state = this.state;
         var contrMap = state.contrMap;
+        var marketMap = state.marketMap;
         var error = state.error;
         var body = undefined;
         if (error !== null) {
@@ -518,7 +522,8 @@ var OrderModule = React.createClass({
             );
         } else if (contrMap !== null) {
             body = (
-                <OrderModuleImpl contrMap={contrMap} pollInterval={this.props.pollInterval}/>
+                <OrderModuleImpl contrMap={contrMap} marketMap={marketMap}
+                                 pollInterval={this.props.pollInterval}/>
             );
         }
         if (body !== undefined) {

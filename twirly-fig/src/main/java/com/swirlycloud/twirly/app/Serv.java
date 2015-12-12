@@ -44,6 +44,7 @@ import com.swirlycloud.twirly.exception.BadRequestException;
 import com.swirlycloud.twirly.exception.InvalidException;
 import com.swirlycloud.twirly.exception.InvalidLotsException;
 import com.swirlycloud.twirly.exception.InvalidTicksException;
+import com.swirlycloud.twirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.twirly.exception.MarketClosedException;
 import com.swirlycloud.twirly.exception.MarketNotFoundException;
 import com.swirlycloud.twirly.exception.NotFoundException;
@@ -412,7 +413,7 @@ public @NonNullByDefault class Serv {
 
     private final void removeQuote(TraderSess sess, MarketBook book, Quote quote) {
 
-        final Order order = quote.getOrder();
+        final Order order = quote.removeOrder();
         assert order != null;
 
         setDirty(sess, TraderSess.DIRTY_QUOTE);
@@ -1510,10 +1511,11 @@ public @NonNullByDefault class Serv {
     }
 
     public final Quote createQuote(TraderSess sess, MarketBook book, @Nullable String ref,
-            Side side, long lots, long now) throws NotFoundException, ServiceUnavailableException {
+            Side side, long lots, long now) throws LiquidityUnavailableException, NotFoundException,
+                    ServiceUnavailableException {
         final Order order = findOrder(book, side, lots);
         if (order == null) {
-            throw new NotFoundException("no liquidity available");
+            throw new LiquidityUnavailableException("insufficient liquidity");
         }
 
         final Quote quote = factory.newQuote(sess.getMnem(), book, book.allocQuoteId(), ref, order,
@@ -1527,9 +1529,8 @@ public @NonNullByDefault class Serv {
 
         // Commit phase.
 
-        insertQuote(sess, book, quote);
-
         setDirty(DIRTY_TIMEOUT);
+        insertQuote(sess, book, quote);
         quotes.add(quote);
 
         updateDirty();
@@ -1592,29 +1593,30 @@ public @NonNullByDefault class Serv {
             final MarketBook book = (MarketBook) markets.find(quote.getMarket());
             assert book != null;
 
-            final Order order = quote.getOrder();
-            assert order != null;
-
             setDirty(DIRTY_TIMEOUT);
-            removeQuote(sess, book, quote);
-            quotes.removeFirst();
 
-            if (order.isPecan() && order.getQuotd() == 0) {
+            final Order order = quote.getOrder();
+            if (order != null) {
+                removeQuote(sess, book, quote);
+                if (order.isPecan() && order.getQuotd() == 0) {
 
-                // N.B. we could theoretically throw here if the allocation fails. This would
-                // result in executions not being written to the journal. The executions would be
-                // recovered, however, when the application is restarted.
-                final Exec exec = newExec(book, order, now);
+                    // N.B. we could theoretically throw here if the allocation fails. This would
+                    // result in executions not being written to the journal. The executions would
+                    // be
+                    // recovered, however, when the application is restarted.
+                    final Exec exec = newExec(book, order, now);
 
-                // Commit phase.
-                setDirty(sess, TraderSess.DIRTY_ORDER);
-                exec.cancel(0);
-                order.cancel(now);
+                    // Commit phase.
+                    setDirty(sess, TraderSess.DIRTY_ORDER);
+                    exec.cancel(0);
+                    order.cancel(now);
 
-                // Stack push.
-                exec.setJslNext(firstExec);
-                firstExec = exec;
+                    // Stack push.
+                    exec.setJslNext(firstExec);
+                    firstExec = exec;
+                }
             }
+            quotes.removeFirst();
         }
 
         if (firstExec != null) {

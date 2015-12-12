@@ -36,6 +36,7 @@ import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.entity.Quote;
 import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.function.UnaryCallback;
@@ -55,7 +56,21 @@ public abstract class RestTest {
     protected static final int SETTL_DAY = TODAY + 2;
     protected static final int EXPIRY_DAY = TODAY + 1;
 
-    protected static final long NOW = jdToMillis(TODAY);
+    protected static final long TODAY_MILLIS = jdToMillis(TODAY);
+    protected static final long SETTL_DAY_MILLIS = jdToMillis(SETTL_DAY);
+    protected static final long EXPIRY_DAY_MILLIS = jdToMillis(EXPIRY_DAY);
+
+    protected static final @NonNull String EURUSD = "EURUSD";
+    protected static final @NonNull String USDJPY = "USDJPY";
+
+    protected static final @NonNull String EURUSD_MAR14 = "EURUSD.MAR14";
+    protected static final @NonNull String USDJPY_MAR14 = "USDJPY.MAR14";
+
+    protected static final @NonNull String MARAYL = "MARAYL";
+    protected static final @NonNull String GOSAYL = "GOSAYL";
+
+    // 20 seconds.
+    protected static final int QUOTE_EXPIRY = 20 * 1000;
 
     protected BackUnrest unrest;
 
@@ -141,7 +156,7 @@ public abstract class RestTest {
 
     protected static void assertOrder(String trader, String market, State state, Side side,
             long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
-            Order actual) {
+            long created, long modified, Order actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -156,12 +171,19 @@ public abstract class RestTest {
         assertEquals(lastLots, actual.getLastLots());
         assertEquals(lastTicks, actual.getLastTicks());
         assertEquals(1, actual.getMinLots());
-        assertEquals(NOW, actual.getCreated());
-        assertEquals(NOW, actual.getModified());
+        assertEquals(created, actual.getCreated());
+        assertEquals(modified, actual.getModified());
+    }
+
+    protected static void assertOrder(String trader, String market, State state, Side side,
+            long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
+            Order actual) {
+        assertOrder(trader, market, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
+                TODAY_MILLIS, TODAY_MILLIS, actual);
     }
 
     protected static void assertQuote(String trader, String market, Side side, long lots,
-            long ticks, Quote actual) {
+            long ticks, long created, long expiry, Quote actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -169,13 +191,19 @@ public abstract class RestTest {
         assertEquals(side, actual.getSide());
         assertEquals(lots, actual.getLots());
         assertEquals(ticks, actual.getTicks());
-        assertEquals(NOW, actual.getCreated());
-        assertEquals(NOW + 20 * 1000, actual.getExpiry());
+        assertEquals(created, actual.getCreated());
+        assertEquals(expiry, actual.getExpiry());
+    }
+
+    protected static void assertQuote(String trader, String market, Side side, long lots,
+            long ticks, Quote actual) {
+        assertQuote(trader, market, side, lots, ticks, TODAY_MILLIS, TODAY_MILLIS + QUOTE_EXPIRY,
+                actual);
     }
 
     protected static void assertExec(String trader, String market, State state, Side side,
             long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
-            String contr, int settlDay, Role role, String cpty, Exec actual) {
+            String contr, int settlDay, Role role, String cpty, long created, Exec actual) {
         assertNotNull(actual);
         assertEquals(trader, actual.getTrader());
         assertEquals(market, actual.getMarket());
@@ -194,7 +222,14 @@ public abstract class RestTest {
         assertEquals(settlDay, actual.getSettlDay());
         assertEquals(role, actual.getRole());
         assertEquals(cpty, actual.getCpty());
-        assertEquals(NOW, actual.getCreated());
+        assertEquals(created, actual.getCreated());
+    }
+
+    protected static void assertExec(String trader, String market, State state, Side side,
+            long lots, long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
+            String contr, int settlDay, Role role, String cpty, Exec actual) {
+        assertExec(trader, market, state, side, lots, ticks, resd, exec, cost, lastLots, lastTicks,
+                contr, settlDay, role, cpty, TODAY_MILLIS, actual);
     }
 
     protected static void assertPosn(String trader, String market, String contr, int settlDay,
@@ -239,80 +274,82 @@ public abstract class RestTest {
     protected final Trader postTrader(@NonNull String mnem, String display, @NonNull String email)
             throws BadRequestException, NotFoundException, ServiceUnavailableException,
             IOException {
-        return unrest.postTrader(mnem, display, email, PARAMS_NONE, NOW);
+        return unrest.postTrader(mnem, display, email, PARAMS_NONE, TODAY_MILLIS);
     }
 
     protected final Trader putTrader(@NonNull String mnem, String display, String email)
             throws BadRequestException, NotFoundException, ServiceUnavailableException,
             IOException {
-        return unrest.putTrader(mnem, display, PARAMS_NONE, NOW);
+        return unrest.putTrader(mnem, display, PARAMS_NONE, TODAY_MILLIS);
     }
 
     protected final Market postMarket(@NonNull String mnem, String display, @NonNull String contr,
             int state) throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
-        return unrest.postMarket(mnem, display, contr, 0, 0, state, PARAMS_NONE, NOW);
+        return unrest.postMarket(mnem, display, contr, 0, 0, state, PARAMS_NONE, TODAY_MILLIS);
     }
 
     protected final Market postMarket(@NonNull String mnem, String display, @NonNull String contr,
             int settlDay, int expiryDay, int state) throws BadRequestException, NotFoundException,
                     ServiceUnavailableException, IOException {
         return unrest.postMarket(mnem, display, contr, maybeJdToIso(settlDay),
-                maybeJdToIso(expiryDay), state, PARAMS_NONE, NOW);
+                maybeJdToIso(expiryDay), state, PARAMS_NONE, TODAY_MILLIS);
     }
 
     protected final Market putMarket(@NonNull String trader, @NonNull String mnem, String display,
             int state) throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
-        return unrest.putMarket(mnem, display, state, PARAMS_NONE, NOW);
+        return unrest.putMarket(mnem, display, state, PARAMS_NONE, TODAY_MILLIS);
     }
 
-    protected final void deleteOrder(@NonNull String trader, @NonNull String market, long id)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException,
-            IOException {
-        unrest.deleteOrder(trader, market, id, NOW);
+    protected final void deleteOrder(@NonNull String trader, @NonNull String market, long id,
+            long now) throws BadRequestException, NotFoundException, ServiceUnavailableException,
+                    IOException {
+        unrest.deleteOrder(trader, market, id, now);
     }
 
     protected final void deleteOrder(@NonNull String trader, @NonNull String market,
-            @NonNull JslNode first) throws BadRequestException, NotFoundException,
+            @NonNull JslNode first, long now) throws BadRequestException, NotFoundException,
                     ServiceUnavailableException, IOException {
-        unrest.deleteOrder(trader, market, first, NOW);
+        unrest.deleteOrder(trader, market, first, now);
     }
 
     protected final ResultStruct postOrder(@NonNull String trader, @NonNull String market,
-            long quoteId, @NonNull Side side, long lots, long ticks) throws BadRequestException,
-                    NotFoundException, ServiceUnavailableException, IOException {
+            long quoteId, @NonNull Side side, long lots, long ticks, long now)
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException,
+                    IOException {
         return unrest.postOrder(trader, market, null, quoteId, side, lots, ticks, 1, PARAMS_NONE,
-                NOW);
+                now);
     }
 
     protected final ResultStruct putOrder(@NonNull String trader, @NonNull String market, long id,
-            long lots) throws BadRequestException, NotFoundException, ServiceUnavailableException,
-                    IOException {
-        return unrest.putOrder(trader, market, id, lots, PARAMS_NONE, NOW);
+            long lots, long now) throws BadRequestException, NotFoundException,
+                    ServiceUnavailableException, IOException {
+        return unrest.putOrder(trader, market, id, lots, PARAMS_NONE, now);
     }
 
     protected final ResultStruct putOrder(@NonNull String trader, @NonNull String market,
-            @NonNull JslNode first, long lots) throws BadRequestException, NotFoundException,
-                    ServiceUnavailableException, IOException {
-        return unrest.putOrder(trader, market, first, lots, PARAMS_NONE, NOW);
+            @NonNull JslNode first, long lots, long now) throws BadRequestException,
+                    NotFoundException, ServiceUnavailableException, IOException {
+        return unrest.putOrder(trader, market, first, lots, PARAMS_NONE, now);
     }
 
     protected final Quote postQuote(@NonNull String trader, @NonNull String market,
-            @NonNull Side side, long lots) throws BadRequestException, NotFoundException,
+            @NonNull Side side, long lots, long now)
+                    throws BadRequestException, LiquidityUnavailableException, NotFoundException,
                     ServiceUnavailableException, IOException {
-        return unrest.postQuote(trader, market, null, side, lots, PARAMS_NONE, NOW);
+        return unrest.postQuote(trader, market, null, side, lots, PARAMS_NONE, now);
     }
 
-    protected final void deleteTrade(@NonNull String mnem, @NonNull String market, long id)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        unrest.deleteTrade(mnem, market, id, NOW);
+    protected final void deleteTrade(@NonNull String mnem, @NonNull String market, long id,
+            long now) throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        unrest.deleteTrade(mnem, market, id, now);
     }
 
     protected final void deleteTrade(@NonNull String mnem, @NonNull String market,
-            @NonNull JslNode first)
+            @NonNull JslNode first, long now)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        unrest.deleteTrade(mnem, market, first, NOW);
+        unrest.deleteTrade(mnem, market, first, now);
     }
 
     protected final @NonNull JslNode jslList(@NonNull String market, Long... ids) {
@@ -331,12 +368,13 @@ public abstract class RestTest {
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, InterruptedException, IOException {
         final Datastore datastore = new MockDatastore();
-        final BackUnrest unrest = new BackUnrest(datastore, NO_CACHE, new ServFactory(), NOW);
+        final BackUnrest unrest = new BackUnrest(datastore, NO_CACHE, new ServFactory(),
+                TODAY_MILLIS);
         this.unrest = unrest;
         boolean success = false;
         try {
-            postMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0x1);
-            postMarket("USDJPY.MAR14", "USDJPY March 14", "USDJPY", SETTL_DAY, EXPIRY_DAY, 0x1);
+            postMarket(EURUSD_MAR14, "EURUSD March 14", EURUSD, SETTL_DAY, EXPIRY_DAY, 0x1);
+            postMarket(USDJPY_MAR14, "USDJPY March 14", USDJPY, SETTL_DAY, EXPIRY_DAY, 0x1);
             success = true;
         } finally {
             if (!success) {

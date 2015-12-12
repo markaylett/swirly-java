@@ -21,6 +21,12 @@ public abstract class AbstractQueue<V> implements Sequence<V> {
         last = null;
     }
 
+    public final void clearTail() {
+        assert first != null;
+        setNext(first, null);
+        last = first;
+    }
+
     @Override
     public final void add(@NonNull V node) {
         insertBack(node);

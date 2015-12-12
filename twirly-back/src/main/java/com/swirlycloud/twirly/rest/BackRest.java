@@ -32,6 +32,7 @@ import com.swirlycloud.twirly.entity.RecType;
 import com.swirlycloud.twirly.entity.Trader;
 import com.swirlycloud.twirly.entity.TraderSess;
 import com.swirlycloud.twirly.exception.BadRequestException;
+import com.swirlycloud.twirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.twirly.exception.MarketClosedException;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.OrderNotFoundException;
@@ -594,7 +595,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             result.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clear();
+            result.clearAll();
             serv.unlock(lock);
         }
     }
@@ -616,7 +617,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             result.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clear();
+            result.clearAll();
             serv.unlock(lock);
         }
     }
@@ -638,14 +639,15 @@ public final @NonNullByDefault class BackRest implements Rest {
             result.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clear();
+            result.clearAll();
             serv.unlock(lock);
         }
     }
 
     public final void postQuote(String trader, String market, @Nullable String ref, Side side,
             long lots, Params params, long now, Appendable out)
-                    throws NotFoundException, ServiceUnavailableException, IOException {
+                    throws LiquidityUnavailableException, NotFoundException,
+                    ServiceUnavailableException, IOException {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {

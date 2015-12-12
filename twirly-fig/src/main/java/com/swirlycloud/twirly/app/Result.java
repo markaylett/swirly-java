@@ -15,6 +15,7 @@ import com.swirlycloud.twirly.entity.Posn;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.node.JslNode;
 import com.swirlycloud.twirly.node.SlNode;
+import com.swirlycloud.twirly.node.SlUtil;
 import com.swirlycloud.twirly.util.JsonUtil;
 import com.swirlycloud.twirly.util.Jsonable;
 import com.swirlycloud.twirly.util.Params;
@@ -34,10 +35,23 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
     @Nullable
     Posn posn;
 
+    private static void clearAll(SlQueue slq) {
+        SlUtil.nullify(slq.getFirst());
+        slq.clear();
+    }
+
+    private static void clearTail(SlQueue slq) {
+        final SlNode first = slq.getFirst();
+        if (first != null) {
+            SlUtil.nullify(first.slNext());
+        }
+        slq.clearTail();
+    }
+
     final void reset(String trader, MarketBook book) {
         this.trader = trader;
         this.book = book;
-        clear();
+        clearAll();
     }
 
     final void reset(String trader, MarketBook book, Order order, Exec exec) {
@@ -69,7 +83,7 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
 
     @Override
     public final void close() {
-        clear();
+        clearAll();
     }
 
     @Override
@@ -128,10 +142,17 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
         out.append('}');
     }
 
-    public final void clear() {
-        orders.clearAll();
-        matches.clear();
-        execs.clearAll();
+    public final void clearAll() {
+        clearAll(orders);
+        clearAll(matches);
+        clearAll(execs);
+        posn = null;
+    }
+
+    public final void clearMatches() {
+        clearTail(orders);
+        clearAll(matches);
+        clearTail(execs);
         posn = null;
     }
 

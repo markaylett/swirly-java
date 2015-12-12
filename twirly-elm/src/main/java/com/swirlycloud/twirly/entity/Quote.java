@@ -21,7 +21,7 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private final transient @Nullable Order order;
+    private transient @Nullable Order order;
     private final long ticks;
     private final long expiry;
 
@@ -143,6 +143,12 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"expiry\":").append(String.valueOf(expiry));
         out.append("}");
+    }
+
+    public final @Nullable Order removeOrder() {
+        final Order order = this.order;
+        this.order = null;
+        return order;
     }
 
     public final @Nullable Order getOrder() {

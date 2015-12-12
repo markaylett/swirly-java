@@ -4,25 +4,24 @@
 package com.swirlycloud.twirly.exception;
 
 /**
- * The request could not be understood by the server due to malformed syntax. The client SHOULD NOT
- * repeat the request without modifications.
- *
+ * The server encountered an unexpected condition which prevented it from fulfilling the request.
+ * 
  * @author Mark Aylett
  */
-public class BadRequestException extends ServException {
+public class InternalException extends ServException {
 
     private static final long serialVersionUID = 1L;
 
-    public BadRequestException(String msg) {
+    public InternalException(String msg) {
         super(msg);
     }
 
-    public BadRequestException(String msg, Throwable cause) {
+    public InternalException(String msg, Throwable cause) {
         super(msg, cause);
     }
 
     @Override
     public int getHttpStatus() {
-        return 400;
+        return 500;
     }
 }

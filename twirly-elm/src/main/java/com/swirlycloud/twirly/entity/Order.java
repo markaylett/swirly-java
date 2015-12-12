@@ -141,6 +141,8 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
                     lastLots = 0;
                 } else if ("lastTicks".equals(name)) {
                     lastTicks = 0;
+                } else if ("minLots".equals(name)) {
+                    minLots = 0;
                 } else {
                     throw new IOException(String.format("unexpected null field '%s'", name));
                 }
@@ -241,7 +243,12 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
         } else {
             out.append(",\"lastLots\":null,\"lastTicks\":null");
         }
-        out.append(",\"minLots\":").append(String.valueOf(minLots));
+        out.append(",\"minLots\":");
+        if (minLots != 0) {
+            out.append(String.valueOf(minLots));
+        } else {
+            out.append("null");
+        }
         out.append(",\"pecan\":").append(String.valueOf(pecan));
         out.append(",\"created\":").append(String.valueOf(created));
         out.append(",\"modified\":").append(String.valueOf(modified));
@@ -436,6 +443,10 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     @Override
     public final long getMinLots() {
         return minLots;
+    }
+
+    public final long getMinResd() {
+        return Math.max(minLots - exec, 0);
     }
 
     public final long getAvail() {

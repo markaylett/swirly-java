@@ -30,7 +30,7 @@ public final class MarketRestTest extends RestTest {
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
                 market);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x1,
-                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, TODAY_MILLIS));
     }
 
     @Test
@@ -39,7 +39,7 @@ public final class MarketRestTest extends RestTest {
         final Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0x1);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1, market);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", 0, 0, 0x1,
-                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, TODAY_MILLIS));
     }
 
     // Update Market.
@@ -49,11 +49,11 @@ public final class MarketRestTest extends RestTest {
             ServiceUnavailableException, IOException {
         Market market = postMarket("GBPUSD.MAR14", "GBPUSD March 14", "GBPUSD", SETTL_DAY,
                 EXPIRY_DAY, 0x1);
-        market = putMarket("MARAYL", "GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
+        market = putMarket(MARAYL, "GBPUSD.MAR14", "GBPUSD March 14x", 0x2);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
                 market);
         assertMarket("GBPUSD.MAR14", "GBPUSD March 14x", "GBPUSD", SETTL_DAY, EXPIRY_DAY, 0x2,
-                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, NOW));
+                (Market) unrest.getRec(RecType.MARKET, "GBPUSD.MAR14", PARAMS_NONE, TODAY_MILLIS));
     }
 
     // End-of-day.
