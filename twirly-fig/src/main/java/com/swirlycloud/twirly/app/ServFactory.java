@@ -12,7 +12,6 @@ import com.swirlycloud.twirly.entity.RequestRefMap;
 import com.swirlycloud.twirly.entity.TraderSess;
 import com.swirlycloud.twirly.tag.MarketTag;
 import com.swirlycloud.twirly.tag.TraderTag;
-import com.swirlycloud.twirly.util.Memorable;
 
 public final @NonNullByDefault class ServFactory extends BasicFactory {
 
@@ -21,7 +20,7 @@ public final @NonNullByDefault class ServFactory extends BasicFactory {
     private final RequestRefMap refIdx = new RequestRefMap(CAPACITY);
 
     @Override
-    public final MarketBook newMarket(String mnem, @Nullable String display, Memorable contr,
+    public final MarketBook newMarket(String mnem, @Nullable String display, String contr,
             int settlDay, int expiryDay, int state, long lastLots, long lastTicks, long lastTime,
             long maxOrderId, long maxExecId, long maxQuoteId) {
         return new MarketTag(mnem, display, contr, settlDay, expiryDay, state, lastLots, lastTicks,

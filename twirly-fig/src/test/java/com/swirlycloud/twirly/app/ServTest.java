@@ -6,7 +6,6 @@ package com.swirlycloud.twirly.app;
 import static com.swirlycloud.twirly.date.JulianDay.jdToMillis;
 import static com.swirlycloud.twirly.date.JulianDay.ymdToJd;
 import static com.swirlycloud.twirly.io.CacheUtil.NO_CACHE;
-import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -18,8 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.app.Result;
-import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.book.BookSide;
 import com.swirlycloud.twirly.book.Level;
 import com.swirlycloud.twirly.book.MarketBook;
@@ -59,8 +56,8 @@ public final class ServTest {
             @Override
             public final @NonNull RecTree readMarket(@NonNull Factory factory) {
                 final RecTree t = new RecTree();
-                t.insert(factory.newMarket("EURUSD.MAR14", "EURUSD March 14", newMnem("EURUSD"),
-                        SETTL_DAY, EXPIRY_DAY, STATE, 10, 12345, NOW - 2, 3, 2, 4));
+                t.insert(factory.newMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY,
+                        EXPIRY_DAY, STATE, 10, 12345, NOW - 2, 3, 2, 4));
                 return t;
             }
 

@@ -9,7 +9,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.util.Memorable;
 
 public @NonNullByDefault class BasicFactory implements Factory {
 
@@ -19,7 +18,7 @@ public @NonNullByDefault class BasicFactory implements Factory {
     }
 
     @Override
-    public Contr newContr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
+    public Contr newContr(String mnem, @Nullable String display, String asset, String ccy,
             int lotNumer, int lotDenom, int tickNumer, int tickDenom, int pipDp, long minLots,
             long maxLots) {
         return new Contr(mnem, display, asset, ccy, lotNumer, lotDenom, tickNumer, tickDenom, pipDp,
@@ -27,7 +26,7 @@ public @NonNullByDefault class BasicFactory implements Factory {
     }
 
     @Override
-    public Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
+    public Market newMarket(String mnem, @Nullable String display, String contr, int settlDay,
             int expiryDay, int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
             long maxExecId, long maxQuoteId) {
         // Note that last five arguments are unused in this base implementation.
@@ -35,8 +34,8 @@ public @NonNullByDefault class BasicFactory implements Factory {
     }
 
     @Override
-    public final Market newMarket(String mnem, @Nullable String display, Memorable contr,
-            int settlDay, int expiryDay, int state) {
+    public final Market newMarket(String mnem, @Nullable String display, String contr, int settlDay,
+            int expiryDay, int state) {
         return newMarket(mnem, display, contr, settlDay, expiryDay, state, 0L, 0L, 0L, 0L, 0L, 0L);
     }
 

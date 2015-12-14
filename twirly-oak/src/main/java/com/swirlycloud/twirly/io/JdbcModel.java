@@ -3,8 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
-import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -36,7 +34,6 @@ import com.swirlycloud.twirly.entity.TraderPosnTree;
 import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.node.SlNode;
 import com.swirlycloud.twirly.unchecked.UncheckedIOException;
-import com.swirlycloud.twirly.util.Memorable;
 
 public class JdbcModel implements Model {
     @NonNull
@@ -78,10 +75,8 @@ public class JdbcModel implements Model {
             throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
-        @SuppressWarnings("null")
-        final Memorable asset = newMnem(rs.getString("asset"));
-        @SuppressWarnings("null")
-        final Memorable ccy = newMnem(rs.getString("ccy"));
+        final String asset = rs.getString("asset");
+        final String ccy = rs.getString("ccy");
         final int lotNumer = rs.getInt("lotNumer");
         final int lotDenom = rs.getInt("lotDenom");
         final int tickNumer = rs.getInt("tickNumer");
@@ -91,6 +86,8 @@ public class JdbcModel implements Model {
         final int maxLots = rs.getInt("maxLots");
 
         assert mnem != null;
+        assert asset != null;
+        assert ccy != null;
         return factory.newContr(mnem, display, asset, ccy, lotNumer, lotDenom, tickNumer, tickDenom,
                 pipDp, minLots, maxLots);
     }
@@ -99,8 +96,7 @@ public class JdbcModel implements Model {
             throws SQLException {
         final String mnem = rs.getString("mnem");
         final String display = rs.getString("display");
-        @SuppressWarnings("null")
-        final Memorable contr = newMnem(rs.getString("contr"));
+        final String contr = rs.getString("contr");
         // getInt() returns zero if value is null.
         final int settlDay = rs.getInt("settlDay");
         // getInt() returns zero if value is null.
@@ -114,6 +110,7 @@ public class JdbcModel implements Model {
         final long maxQuoteId = rs.getLong("maxQuoteId");
 
         assert mnem != null;
+        assert contr != null;
         return factory.newMarket(mnem, display, contr, settlDay, expiryDay, state, lastLots,
                 lastTicks, lastTime, maxOrderId, maxExecId, maxQuoteId);
     }

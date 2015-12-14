@@ -19,7 +19,6 @@ import com.swirlycloud.twirly.app.Serv;
 import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.entity.Contr;
 import com.swirlycloud.twirly.entity.EntitySet;
 import com.swirlycloud.twirly.entity.Exec;
 import com.swirlycloud.twirly.entity.Factory;
@@ -512,19 +511,14 @@ public final @NonNullByDefault class BackRest implements Rest {
         }
     }
 
-    public final void postMarket(String mnem, @Nullable String display, String contrMnem,
-            int settlDate, int expiryDate, int state, Params params, long now, Appendable out)
+    public final void postMarket(String mnem, @Nullable String display, String contr, int settlDate,
+            int expiryDate, int state, Params params, long now, Appendable out)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
         final LockableServ serv = (LockableServ) this.serv;
         final int lock = serv.writeLock();
         try {
             serv.poll(now);
-            final Contr contr = (Contr) serv.findRec(RecType.CONTR, contrMnem);
-            if (contr == null) {
-                throw new NotFoundException(
-                        String.format("contract '%s' does not exist", contrMnem));
-            }
             final int settlDay = maybeIsoToJd(settlDate);
             final int expiryDay = maybeIsoToJd(expiryDate);
             final Market market = serv.createMarket(mnem, display, contr, settlDay, expiryDay,

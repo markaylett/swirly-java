@@ -24,12 +24,9 @@ import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.entity.Asset;
-import com.swirlycloud.twirly.entity.Contr;
 import com.swirlycloud.twirly.entity.Exec;
 import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.entity.Instruct;
-import com.swirlycloud.twirly.entity.Market;
 import com.swirlycloud.twirly.entity.MarketViewTree;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Posn;
@@ -175,35 +172,6 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final void enrichContr(Contr contr) {
-        final Asset asset = (Asset) assets.find(contr.getAsset());
-        final Asset ccy = (Asset) assets.find(contr.getCcy());
-        assert asset != null;
-        assert ccy != null;
-        contr.enrich(asset, ccy);
-    }
-
-    private final void enrichMarket(Market market) {
-        final Contr contr = (Contr) contrs.find(market.getContr());
-        assert contr != null;
-        market.enrich(contr);
-    }
-
-    private final void enrichContrs() {
-        for (RbNode node = contrs.getFirst(); node != null; node = node.rbNext()) {
-            final Contr contr = (Contr) node;
-            enrichContr(contr);
-        }
-    }
-
-    private final void enrichMarkets() {
-        for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
-            final MarketBook book = (MarketBook) node;
-            enrichMarket(book);
-            views.insert(book.getView());
-        }
-    }
-
     private final @Nullable Exec insertOrder(Order order, long now) {
         final TraderSess sess = (TraderSess) traders.find(order.getTrader());
         assert sess != null;
@@ -241,7 +209,7 @@ public @NonNullByDefault class Serv {
         return (TraderSess) factory.newTrader(mnem, display, email);
     }
 
-    private final MarketBook newMarket(String mnem, @Nullable String display, Contr contr,
+    private final MarketBook newMarket(String mnem, @Nullable String display, String contr,
             int settlDay, int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new InvalidException(String.format("invalid mnem '%s'", mnem));
@@ -541,12 +509,14 @@ public @NonNullByDefault class Serv {
         t = model.readContr(factory);
         assert t != null;
         this.contrs = t;
-        enrichContrs();
 
         t = model.readMarket(factory);
         assert t != null;
         this.markets = t;
-        enrichMarkets();
+        for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
+            final MarketBook book = (MarketBook) node;
+            views.insert(book.getView());
+        }
 
         t = model.readTrader(factory);
         assert t != null;
@@ -775,9 +745,12 @@ public @NonNullByDefault class Serv {
         return (TraderSess) emailIdx.find(email);
     }
 
-    public final MarketBook createMarket(String mnem, @Nullable String display, Contr contr,
+    public final MarketBook createMarket(String mnem, @Nullable String display, String contr,
             int settlDay, int expiryDay, int state, long now)
-                    throws BadRequestException, ServiceUnavailableException {
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        if (contrs.find(contr) == null) {
+            throw new NotFoundException(String.format("contr '%s' does not exist", contr));
+        }
         if (settlDay != 0) {
             // busDay <= expiryDay <= settlDay.
             final int busDay = getBusDate(now).toJd();
@@ -800,7 +773,7 @@ public @NonNullByDefault class Serv {
         book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
 
         try {
-            journ.createMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
+            journ.createMarket(mnem, display, contr, settlDay, expiryDay, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -814,16 +787,6 @@ public @NonNullByDefault class Serv {
 
         updateDirty();
         return book;
-    }
-
-    public final MarketBook createMarket(String mnem, @Nullable String display, String contrMnem,
-            int settlDay, int expiryDay, int state, long now)
-                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        final Contr contr = (Contr) contrs.find(contrMnem);
-        if (contr == null) {
-            throw new NotFoundException(String.format("contr '%s' does not exist", contrMnem));
-        }
-        return createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
     }
 
     public final MarketBook updateMarket(String mnem, @Nullable String display, int state, long now)

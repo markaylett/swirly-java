@@ -7,7 +7,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.entity.Market;
-import com.swirlycloud.twirly.util.Memorable;
 
 /**
  * A marker interface use for {@code Market} serialisation.
@@ -18,7 +17,7 @@ public final @NonNullByDefault class MarketTag extends Market {
 
     private static final long serialVersionUID = 1L;
 
-    MarketTag(String mnem, @Nullable String display, Memorable contr, int settlDay, int expiryDay,
+    MarketTag(String mnem, @Nullable String display, String contr, int settlDay, int expiryDay,
             int state) {
         super(mnem, display, contr, settlDay, expiryDay, state);
     }

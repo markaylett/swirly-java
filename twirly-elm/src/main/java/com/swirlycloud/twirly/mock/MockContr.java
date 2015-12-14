@@ -28,9 +28,8 @@ public final class MockContr {
         final UnaryFunction<Contr, Factory> fn = new UnaryFunction<Contr, Factory>() {
             @Override
             public final Contr call(Factory factory) {
-                return factory.newContr(mnem, display, MockAsset.newAsset(asset, factory),
-                        MockAsset.newAsset(ccy, factory), lotNumer, lotDenom, tickNumer, tickDenom,
-                        pipDp, minLots, maxLots);
+                return factory.newContr(mnem, display, asset, ccy, lotNumer, lotDenom, tickNumer,
+                        tickDenom, pipDp, minLots, maxLots);
             }
         };
         LIST.add(fn);

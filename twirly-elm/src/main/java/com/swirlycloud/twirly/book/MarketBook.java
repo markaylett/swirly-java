@@ -16,7 +16,6 @@ import com.swirlycloud.twirly.entity.Market;
 import com.swirlycloud.twirly.entity.MarketView;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.node.RbNode;
-import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
 /**
@@ -68,14 +67,14 @@ public @NonNullByDefault class MarketBook extends Market {
         }
     }
 
-    protected MarketBook(String mnem, @Nullable String display, Memorable contr, int settlDay,
+    protected MarketBook(String mnem, @Nullable String display, String contr, int settlDay,
             int expiryDay, int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
             long maxExecId, long maxQuoteId) {
         super(mnem, display, contr, settlDay, expiryDay, state);
         this.lastLots = lastLots;
         this.lastTicks = lastTicks;
         this.lastTime = lastTime;
-        this.view = new MarketView(mnem, contr.getMnem(), settlDay, lastLots, lastTicks, lastTime);
+        this.view = new MarketView(mnem, contr, settlDay, lastLots, lastTicks, lastTime);
         this.maxOrderId = maxOrderId;
         this.maxExecId = maxExecId;
         this.maxQuoteId = maxQuoteId;
@@ -95,7 +94,7 @@ public @NonNullByDefault class MarketBook extends Market {
         depth = Math.min(depth, DEPTH_MAX);
 
         out.append("{\"market\":\"").append(mnem);
-        out.append("\",\"contr\":\"").append(contr.getMnem());
+        out.append("\",\"contr\":\"").append(contr);
         out.append("\",\"settlDate\":");
         if (settlDay != 0) {
             out.append(String.valueOf(jdToIso(settlDay)));

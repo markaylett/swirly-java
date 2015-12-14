@@ -4,7 +4,6 @@
 package com.swirlycloud.twirly.entity;
 
 import static com.swirlycloud.twirly.date.JulianDay.jdToIso;
-import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
 import java.io.IOException;
 
@@ -15,7 +14,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.date.JulianDay;
-import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
 /**
@@ -27,12 +25,12 @@ public @NonNullByDefault class Market extends AbstractRec implements Financial {
 
     private static final long serialVersionUID = 1L;
 
-    protected Memorable contr;
+    protected final String contr;
     protected final int settlDay;
     protected final int expiryDay;
     protected int state;
 
-    protected Market(String mnem, @Nullable String display, Memorable contr, int settlDay,
+    protected Market(String mnem, @Nullable String display, String contr, int settlDay,
             int expiryDay, int state) {
         super(mnem, display);
         assert (settlDay == 0) == (expiryDay == 0);
@@ -45,7 +43,7 @@ public @NonNullByDefault class Market extends AbstractRec implements Financial {
     public static Market parse(JsonParser p) throws IOException {
         String mnem = null;
         String display = null;
-        Memorable contr = null;
+        String contr = null;
         int settlDay = 0;
         int expiryDay = 0;
         int state = 0;
@@ -89,9 +87,7 @@ public @NonNullByDefault class Market extends AbstractRec implements Financial {
                 } else if ("display".equals(name)) {
                     display = p.getString();
                 } else if ("contr".equals(name)) {
-                    final String s = p.getString();
-                    assert s != null;
-                    contr = newMnem(s);
+                    contr = p.getString();
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -107,7 +103,7 @@ public @NonNullByDefault class Market extends AbstractRec implements Financial {
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
-        out.append("\",\"contr\":\"").append(contr.getMnem());
+        out.append("\",\"contr\":\"").append(contr);
         out.append("\",\"settlDate\":");
         if (settlDay != 0) {
             out.append(String.valueOf(jdToIso(settlDay)));
@@ -122,11 +118,6 @@ public @NonNullByDefault class Market extends AbstractRec implements Financial {
         }
         out.append(",\"state\":").append(String.valueOf(state));
         out.append('}');
-    }
-
-    public final void enrich(Contr contr) {
-        assert this.contr.getMnem().equals(contr.getMnem());
-        this.contr = contr;
     }
 
     public final void setState(int state) {
@@ -145,12 +136,7 @@ public @NonNullByDefault class Market extends AbstractRec implements Financial {
 
     @Override
     public final String getContr() {
-        return contr.getMnem();
-    }
-
-    @Deprecated
-    public final Contr getContrRich() {
-        return (Contr) contr;
+        return contr;
     }
 
     @Override

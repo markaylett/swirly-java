@@ -10,12 +10,6 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.swirlycloud.twirly.entity.BasicFactory;
-import com.swirlycloud.twirly.entity.Contr;
-import com.swirlycloud.twirly.entity.Factory;
-import com.swirlycloud.twirly.entity.Market;
-import com.swirlycloud.twirly.mock.MockContr;
-
 public final class MarketTest {
 
     private static final Factory FACTORY = new BasicFactory();
@@ -24,7 +18,7 @@ public final class MarketTest {
     public final void testToJson() throws IOException {
         final String mnem = "EURUSD.MAR14";
         final String display = "EURUSD March 14";
-        final Contr contr = MockContr.newContr("EURUSD", FACTORY);
+        final String contr = "EURUSD";
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;

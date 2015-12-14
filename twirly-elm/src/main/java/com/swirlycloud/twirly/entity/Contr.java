@@ -5,7 +5,6 @@ package com.swirlycloud.twirly.entity;
 
 import static com.swirlycloud.twirly.domain.Conv.fractToReal;
 import static com.swirlycloud.twirly.domain.Conv.realToDp;
-import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
 
 import java.io.IOException;
 
@@ -15,7 +14,6 @@ import javax.json.stream.JsonParser.Event;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
 /**
@@ -26,8 +24,8 @@ import com.swirlycloud.twirly.util.Params;
 public final @NonNullByDefault class Contr extends AbstractRec {
 
     private static final long serialVersionUID = 1L;
-    private Memorable asset;
-    private Memorable ccy;
+    private final String asset;
+    private final String ccy;
     private final int lotNumer;
     private final int lotDenom;
     private final transient double qtyInc;
@@ -40,9 +38,8 @@ public final @NonNullByDefault class Contr extends AbstractRec {
     private final long minLots;
     private final long maxLots;
 
-    protected Contr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
-            int lotNumer, int lotDenom, int tickNumer, int tickDenom, int pipDp, long minLots,
-            long maxLots) {
+    protected Contr(String mnem, @Nullable String display, String asset, String ccy, int lotNumer,
+            int lotDenom, int tickNumer, int tickDenom, int pipDp, long minLots, long maxLots) {
         super(mnem, display);
         this.asset = asset;
         this.ccy = ccy;
@@ -62,8 +59,8 @@ public final @NonNullByDefault class Contr extends AbstractRec {
     public static Contr parse(JsonParser p) throws IOException {
         String mnem = null;
         String display = null;
-        Memorable asset = null;
-        Memorable ccy = null;
+        String asset = null;
+        String ccy = null;
         int lotNumer = 0;
         int lotDenom = 0;
         int tickNumer = 0;
@@ -116,13 +113,9 @@ public final @NonNullByDefault class Contr extends AbstractRec {
                 } else if ("display".equals(name)) {
                     display = p.getString();
                 } else if ("asset".equals(name)) {
-                    final String s = p.getString();
-                    assert s != null;
-                    asset = newMnem(s);
+                    asset = p.getString();
                 } else if ("ccy".equals(name)) {
-                    final String s = p.getString();
-                    assert s != null;
-                    ccy = newMnem(s);
+                    ccy = p.getString();
                 } else {
                     throw new IOException(String.format("unexpected string field '%s'", name));
                 }
@@ -138,8 +131,8 @@ public final @NonNullByDefault class Contr extends AbstractRec {
     public final void toJson(@Nullable Params params, Appendable out) throws IOException {
         out.append("{\"mnem\":\"").append(mnem);
         out.append("\",\"display\":\"").append(display);
-        out.append("\",\"asset\":\"").append(asset.getMnem());
-        out.append("\",\"ccy\":\"").append(ccy.getMnem());
+        out.append("\",\"asset\":\"").append(asset);
+        out.append("\",\"ccy\":\"").append(ccy);
         out.append("\",\"lotNumer\":").append(String.valueOf(lotNumer));
         out.append(",\"lotDenom\":").append(String.valueOf(lotDenom));
         out.append(",\"tickNumer\":").append(String.valueOf(tickNumer));
@@ -150,34 +143,17 @@ public final @NonNullByDefault class Contr extends AbstractRec {
         out.append("}");
     }
 
-    public final void enrich(Asset asset, Asset ccy) {
-        assert this.asset.getMnem().equals(asset.getMnem());
-        assert this.ccy.getMnem().equals(ccy.getMnem());
-        this.asset = asset;
-        this.ccy = ccy;
-    }
-
     @Override
     public final RecType getRecType() {
         return RecType.CONTR;
     }
 
     public final String getAsset() {
-        return asset.getMnem();
-    }
-
-    @Deprecated
-    public final Asset getAssetRich() {
-        return (Asset) asset;
+        return asset;
     }
 
     public final String getCcy() {
-        return ccy.getMnem();
-    }
-
-    @Deprecated
-    public final Asset getCcyRich() {
-        return (Asset) ccy;
+        return ccy;
     }
 
     public final int getLotNumer() {

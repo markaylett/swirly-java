@@ -3,8 +3,6 @@
  *******************************************************************************/
 package com.swirlycloud.twirly.io;
 
-import static com.swirlycloud.twirly.util.MnemUtil.newMnem;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -37,7 +35,6 @@ import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.mock.MockAsset;
 import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.node.SlNode;
-import com.swirlycloud.twirly.util.Memorable;
 
 public class AppEngineModel implements Model {
 
@@ -225,8 +222,7 @@ public class AppEngineModel implements Model {
         for (final Entity entity : pq.asIterable()) {
             final String mnem = entity.getKey().getName();
             final String display = (String) entity.getProperty("display");
-            @SuppressWarnings("null")
-            final Memorable contr = newMnem((String) entity.getProperty("contr"));
+            final String contr = (String) entity.getProperty("contr");
             final int settlDay = intOrZeroIfNull(entity.getProperty("settlDay"));
             final int expiryDay = intOrZeroIfNull(entity.getProperty("expiryDay"));
             final int state = ((Long) entity.getProperty("state")).intValue();
@@ -238,6 +234,7 @@ public class AppEngineModel implements Model {
             final long maxQuoteId = (Long) entity.getProperty("maxQuoteId");
 
             assert mnem != null;
+            assert contr != null;
             final Market market = factory.newMarket(mnem, display, contr, settlDay, expiryDay,
                     state, lastLots, lastTicks, lastTime, maxOrderId, maxExecId, maxQuoteId);
             t.insert(market);

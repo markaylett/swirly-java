@@ -11,12 +11,8 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.twirly.book.BookFactory;
-import com.swirlycloud.twirly.book.MarketBook;
 import com.swirlycloud.twirly.domain.Side;
-import com.swirlycloud.twirly.entity.Contr;
 import com.swirlycloud.twirly.entity.Factory;
-import com.swirlycloud.twirly.mock.MockContr;
 import com.swirlycloud.twirly.util.Params;
 
 public final class MarketBookTest {
@@ -32,7 +28,7 @@ public final class MarketBookTest {
     public final void testToJsonView() throws IOException {
         final String mnem = "EURUSD.MAR14";
         final String display = "EURUSD March 14";
-        final Contr contr = MockContr.newContr("EURUSD", factory);
+        final String contr = "EURUSD";
         final int settlDay = ymdToJd(2014, 2, 14);
         final int expiryDay = ymdToJd(2014, 2, 12);
         final int state = 0x01;

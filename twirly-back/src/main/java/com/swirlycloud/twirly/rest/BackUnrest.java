@@ -412,19 +412,6 @@ public final @NonNullByDefault class BackUnrest {
         }
     }
 
-    @Deprecated
-    public final RecStruct getRec(boolean withTraders, Params params, long now)
-            throws NotFoundException, ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        final EntitySet es = new EntitySet(
-                EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET | EntitySet.TRADER);
-        rest.getRec(es, params, now, sb);
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return parseRecStruct(p);
-        }
-    }
-
     public final Map<String, Rec> getRec(RecType recType, Params params, long now)
             throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
