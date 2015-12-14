@@ -52,9 +52,9 @@ public final @NonNullByDefault class Contr extends AbstractRec {
         this.tickNumer = tickNumer;
         this.tickDenom = tickDenom;
         this.priceInc = fractToReal(tickNumer, tickDenom);
-        this.priceDp = realToDp(priceInc);
         this.pipDp = pipDp;
         this.qtyDp = realToDp(qtyInc);
+        this.priceDp = realToDp(priceInc);
         this.minLots = minLots;
         this.maxLots = maxLots;
     }
@@ -166,6 +166,7 @@ public final @NonNullByDefault class Contr extends AbstractRec {
         return asset.getMnem();
     }
 
+    @Deprecated
     public final Asset getAssetRich() {
         return (Asset) asset;
     }
@@ -174,6 +175,7 @@ public final @NonNullByDefault class Contr extends AbstractRec {
         return ccy.getMnem();
     }
 
+    @Deprecated
     public final Asset getCcyRich() {
         return (Asset) ccy;
     }

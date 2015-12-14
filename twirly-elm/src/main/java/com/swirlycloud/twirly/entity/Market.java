@@ -148,6 +148,7 @@ public @NonNullByDefault class Market extends AbstractRec implements Financial {
         return contr.getMnem();
     }
 
+    @Deprecated
     public final Contr getContrRich() {
         return (Contr) contr;
     }

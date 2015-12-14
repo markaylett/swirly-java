@@ -856,7 +856,7 @@ public @NonNullByDefault class Serv {
         final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
             throw new MarketClosedException(String.format("market for '%s' on '%d' has expired",
-                    book.getContrRich().getMnem(), maybeJdToIso(book.getSettlDay())));
+                    book.getContr(), maybeJdToIso(book.getSettlDay())));
         }
         if (lots == 0 || lots < minLots) {
             throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
