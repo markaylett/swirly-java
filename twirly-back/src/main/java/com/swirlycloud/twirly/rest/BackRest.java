@@ -21,7 +21,6 @@ import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.entity.EntitySet;
 import com.swirlycloud.twirly.entity.Exec;
-import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.entity.Market;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Posn;
@@ -71,14 +70,14 @@ public final @NonNullByDefault class BackRest implements Rest {
         out.append(']');
     }
 
-    public BackRest(Model model, Journ journ, Cache cache, Factory factory, long now)
+    public BackRest(Model model, Journ journ, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(new LockableServ(model, journ, cache, factory, now));
+        this(new LockableServ(model, journ, cache, now));
     }
 
-    public BackRest(Datastore datastore, Cache cache, Factory factory, long now)
+    public BackRest(Datastore datastore, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(new LockableServ(datastore, cache, factory, now));
+        this(new LockableServ(datastore, cache, now));
     }
 
     public BackRest(LockableServ serv) {

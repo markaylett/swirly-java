@@ -19,7 +19,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.swirlycloud.twirly.app.LockableServ;
-import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.exception.AlreadyExistsException;
 import com.swirlycloud.twirly.io.Datastore;
@@ -52,7 +51,7 @@ public final class FixTest {
     public final void setUp() throws Exception {
         @SuppressWarnings("resource")
         final Datastore datastore = new MockDatastore();
-        final LockableServ serv = new LockableServ(datastore, NO_CACHE, new ServFactory(), NOW);
+        final LockableServ serv = new LockableServ(datastore, NO_CACHE, NOW);
         final int lock = serv.writeLock();
         try {
             serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0,

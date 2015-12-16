@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 
-import com.swirlycloud.twirly.app.ServFactory;
 import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
@@ -368,8 +367,7 @@ public abstract class RestTest {
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, InterruptedException, IOException {
         final Datastore datastore = new MockDatastore();
-        final BackUnrest unrest = new BackUnrest(datastore, NO_CACHE, new ServFactory(),
-                TODAY_MILLIS);
+        final BackUnrest unrest = new BackUnrest(datastore, NO_CACHE, TODAY_MILLIS);
         this.unrest = unrest;
         boolean success = false;
         try {

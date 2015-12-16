@@ -81,7 +81,7 @@ public @NonNullByDefault class Serv {
 
     private final Journ journ;
     private final Cache cache;
-    private final Factory factory;
+    private final Factory factory = new ServFactory();
     private final RecTree assets;
     private final RecTree contrs;
     private final RecTree markets;
@@ -495,11 +495,10 @@ public @NonNullByDefault class Serv {
         } while (node != null);
     }
 
-    public Serv(Model model, Journ journ, Cache cache, Factory factory, long now)
+    public Serv(Model model, Journ journ, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this.journ = journ;
         this.cache = cache;
-        this.factory = factory;
         this.dirty = DIRTY_ALL;
 
         RecTree t = model.readAsset(factory);
@@ -574,9 +573,9 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public Serv(Datastore datastore, Cache cache, Factory factory, long now)
+    public Serv(Datastore datastore, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(datastore, datastore, cache, factory, now);
+        this(datastore, datastore, cache, now);
     }
 
     public final TraderSess createTrader(String mnem, @Nullable String display, String email)

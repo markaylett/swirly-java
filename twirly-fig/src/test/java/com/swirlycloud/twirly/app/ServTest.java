@@ -94,8 +94,7 @@ public final class ServTest {
 
     @Before
     public final void setUp() throws Exception {
-        final Factory factory = new ServFactory();
-        serv = new Serv(newDatastore(), NO_CACHE, factory, NOW);
+        serv = new Serv(newDatastore(), NO_CACHE, NOW);
     }
 
     @After
