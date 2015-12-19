@@ -21,10 +21,8 @@ import com.swirlycloud.twirly.util.Jsonable;
 import com.swirlycloud.twirly.util.Params;
 
 public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
-    private @Nullable String trader;
     private @Nullable MarketBook book;
     final SlQueue orders = new SlQueue();
-    final SlQueue matches = new SlQueue();
     /**
      * All executions referenced in matches.
      */
@@ -48,14 +46,13 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
         slq.clearTail();
     }
 
-    final void reset(String trader, MarketBook book) {
-        this.trader = trader;
+    final void reset(MarketBook book) {
         this.book = book;
         clearAll();
     }
 
-    final void reset(String trader, MarketBook book, Order order, Exec exec) {
-        reset(trader, book);
+    final void reset(MarketBook book, Order order, Exec exec) {
+        reset(book);
         orders.insertBack(order);
         execs.insertBack(exec);
     }
@@ -103,25 +100,10 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
             order.toJson(params, out);
             ++i;
         }
-        for (SlNode node = matches.getFirst(); node != null; node = node.slNext()) {
-            final Match match = (Match) node;
-            // Filter-out counter-party trades.
-            if (!match.makerOrder.getTrader().equals(trader)) {
-                continue;
-            }
-            if (i > 0) {
-                out.append(',');
-            }
-            match.makerOrder.toJson(params, out);
-            ++i;
-        }
         out.append("],\"execs\":[");
         i = 0;
         for (SlNode node = execs.getFirst(); node != null; node = node.slNext()) {
             final Exec exec = (Exec) node;
-            if (!exec.getTrader().equals(trader)) {
-                continue;
-            }
             if (i > 0) {
                 out.append(',');
             }
@@ -144,14 +126,12 @@ public final @NonNullByDefault class Result implements AutoCloseable, Jsonable {
 
     public final void clearAll() {
         clearAll(orders);
-        clearAll(matches);
         clearAll(execs);
         posn = null;
     }
 
     public final void clearMatches() {
         clearTail(orders);
-        clearAll(matches);
         clearTail(execs);
         posn = null;
     }
