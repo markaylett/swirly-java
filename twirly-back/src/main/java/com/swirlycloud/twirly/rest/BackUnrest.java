@@ -26,7 +26,6 @@ import com.swirlycloud.twirly.entity.Asset;
 import com.swirlycloud.twirly.entity.Contr;
 import com.swirlycloud.twirly.entity.EntitySet;
 import com.swirlycloud.twirly.entity.Exec;
-import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.entity.Market;
 import com.swirlycloud.twirly.entity.MarketView;
 import com.swirlycloud.twirly.entity.Order;
@@ -388,14 +387,14 @@ public final @NonNullByDefault class BackUnrest {
         rest = new BackRest(serv);
     }
 
-    public BackUnrest(Model model, Journ journ, Cache cache, Factory factory, long now)
+    public BackUnrest(Model model, Journ journ, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(new LockableServ(model, journ, cache, factory, now));
+        this(new LockableServ(model, journ, cache, now));
     }
 
-    public BackUnrest(Datastore datastore, Cache cache, Factory factory, long now)
+    public BackUnrest(Datastore datastore, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(new LockableServ(datastore, cache, factory, now));
+        this(new LockableServ(datastore, cache, now));
     }
 
     public final @Nullable String findTraderByEmail(String email) {
@@ -405,19 +404,6 @@ public final @NonNullByDefault class BackUnrest {
     public final RecStruct getRec(EntitySet es, Params params, long now)
             throws NotFoundException, ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
-        rest.getRec(es, params, now, sb);
-        try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
-            parseStartObject(p);
-            return parseRecStruct(p);
-        }
-    }
-
-    @Deprecated
-    public final RecStruct getRec(boolean withTraders, Params params, long now)
-            throws NotFoundException, ServiceUnavailableException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        final EntitySet es = new EntitySet(
-                EntitySet.ASSET | EntitySet.CONTR | EntitySet.MARKET | EntitySet.TRADER);
         rest.getRec(es, params, now, sb);
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);

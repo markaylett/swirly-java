@@ -9,21 +9,19 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.util.Memorable;
 
 public @NonNullByDefault interface Factory {
 
     Asset newAsset(String mnem, @Nullable String display, AssetType type);
 
-    Contr newContr(String mnem, @Nullable String display, Memorable asset, Memorable ccy,
-            int lotNumer, int lotDenom, int tickNumer, int tickDenom, int pipDp, long minLots,
-            long maxLots);
+    Contr newContr(String mnem, @Nullable String display, String asset, String ccy, int lotNumer,
+            int lotDenom, int tickNumer, int tickDenom, int pipDp, long minLots, long maxLots);
 
-    Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
+    Market newMarket(String mnem, @Nullable String display, String contr, int settlDay,
             int expiryDay, int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
             long maxExecId, long maxQuoteId);
 
-    Market newMarket(String mnem, @Nullable String display, Memorable contr, int settlDay,
+    Market newMarket(String mnem, @Nullable String display, String contr, int settlDay,
             int expiryDay, int state);
 
     Trader newTrader(String mnem, @Nullable String display, String email);

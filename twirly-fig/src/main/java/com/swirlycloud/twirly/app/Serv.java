@@ -24,12 +24,9 @@ import com.swirlycloud.twirly.domain.MarketId;
 import com.swirlycloud.twirly.domain.Role;
 import com.swirlycloud.twirly.domain.Side;
 import com.swirlycloud.twirly.domain.State;
-import com.swirlycloud.twirly.entity.Asset;
-import com.swirlycloud.twirly.entity.Contr;
 import com.swirlycloud.twirly.entity.Exec;
 import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.entity.Instruct;
-import com.swirlycloud.twirly.entity.Market;
 import com.swirlycloud.twirly.entity.MarketViewTree;
 import com.swirlycloud.twirly.entity.Order;
 import com.swirlycloud.twirly.entity.Posn;
@@ -53,6 +50,7 @@ import com.swirlycloud.twirly.exception.QuoteNotFoundException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
 import com.swirlycloud.twirly.exception.TooLateException;
 import com.swirlycloud.twirly.exception.TraderNotFoundException;
+import com.swirlycloud.twirly.intrusive.SlQueue;
 import com.swirlycloud.twirly.io.Cache;
 import com.swirlycloud.twirly.io.Datastore;
 import com.swirlycloud.twirly.io.Journ;
@@ -84,7 +82,7 @@ public @NonNullByDefault class Serv {
 
     private final Journ journ;
     private final Cache cache;
-    private final Factory factory;
+    private final Factory factory = new ServFactory();
     private final RecTree assets;
     private final RecTree contrs;
     private final RecTree markets;
@@ -175,35 +173,6 @@ public @NonNullByDefault class Serv {
         }
     }
 
-    private final void enrichContr(Contr contr) {
-        final Asset asset = (Asset) assets.find(contr.getAsset());
-        final Asset ccy = (Asset) assets.find(contr.getCcy());
-        assert asset != null;
-        assert ccy != null;
-        contr.enrich(asset, ccy);
-    }
-
-    private final void enrichMarket(Market market) {
-        final Contr contr = (Contr) contrs.find(market.getContr());
-        assert contr != null;
-        market.enrich(contr);
-    }
-
-    private final void enrichContrs() {
-        for (RbNode node = contrs.getFirst(); node != null; node = node.rbNext()) {
-            final Contr contr = (Contr) node;
-            enrichContr(contr);
-        }
-    }
-
-    private final void enrichMarkets() {
-        for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
-            final MarketBook book = (MarketBook) node;
-            enrichMarket(book);
-            views.insert(book.getView());
-        }
-    }
-
     private final @Nullable Exec insertOrder(Order order, long now) {
         final TraderSess sess = (TraderSess) traders.find(order.getTrader());
         assert sess != null;
@@ -241,7 +210,7 @@ public @NonNullByDefault class Serv {
         return (TraderSess) factory.newTrader(mnem, display, email);
     }
 
-    private final MarketBook newMarket(String mnem, @Nullable String display, Contr contr,
+    private final MarketBook newMarket(String mnem, @Nullable String display, String contr,
             int settlDay, int expiryDay, int state) throws BadRequestException {
         if (!MNEM_PATTERN.matcher(mnem).matches()) {
             throw new InvalidException(String.format("invalid mnem '%s'", mnem));
@@ -281,18 +250,6 @@ public @NonNullByDefault class Serv {
         return match;
     }
 
-    private final void insertMatch(MarketBook book, Order takerOrder, Order makerOrder, long lots,
-            long sumLots, long sumCost, long now, Result result) {
-
-        final Match match = createMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost, now);
-        result.matches.insertBack(match);
-
-        // Maker updated first because this is consistent with last-look semantics.
-        // N.B. the reference count is not incremented here.
-        result.execs.insertBack(match.makerTrade);
-        result.execs.insertBack(match.takerTrade);
-    }
-
     private static long spread(Order takerOrder, Order makerOrder, Direct direct) {
         return direct == Direct.PAID
                 // Paid when the taker lifts the offer.
@@ -302,7 +259,7 @@ public @NonNullByDefault class Serv {
     }
 
     private final void matchOrders(TraderSess takerSess, MarketBook book, Order takerOrder,
-            BookSide side, Direct direct, long now, Result result) {
+            BookSide side, Direct direct, long now, SlQueue matches) {
 
         long sumLots = 0;
         long sumCost = 0;
@@ -326,18 +283,18 @@ public @NonNullByDefault class Serv {
             lastLots = lots;
             lastTicks = ticks;
 
-            insertMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost, now, result);
+            final Match match = createMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost,
+                    now);
+            matches.insertBack(match);
         }
 
-        if (!result.matches.isEmpty()) {
-            // Avoid allocating position when there are no matches.
-            result.posn = takerSess.getLazyPosn(book);
+        if (!matches.isEmpty()) {
             takerOrder.trade(sumLots, sumCost, lastLots, lastTicks, now);
         }
     }
 
     private final void matchOrders(TraderSess takerSess, MarketBook book, Order takerOrder,
-            long now, Result result)
+            long now, SlQueue matches)
                     throws InvalidLotsException, InvalidTicksException, QuoteNotFoundException {
         BookSide bookSide;
         Direct direct;
@@ -351,11 +308,11 @@ public @NonNullByDefault class Serv {
             bookSide = book.getBidSide();
             direct = Direct.GIVEN;
         }
-        matchOrders(takerSess, book, takerOrder, bookSide, direct, now, result);
+        matchOrders(takerSess, book, takerOrder, bookSide, direct, now, matches);
     }
 
     private final Quote matchQuote(TraderSess takerSess, MarketBook book, Order takerOrder,
-            long now, Result result)
+            long now, SlQueue matches)
                     throws InvalidLotsException, InvalidTicksException, QuoteNotFoundException {
 
         final long quoteId = takerOrder.getQuoteId();
@@ -379,10 +336,9 @@ public @NonNullByDefault class Serv {
             throw new InvalidTicksException(String.format("invalid ticks '%d'", ticks));
         }
 
-        insertMatch(book, takerOrder, makerOrder, lots, lots, cost, now, result);
+        final Match match = createMatch(book, takerOrder, makerOrder, lots, lots, cost, now);
+        matches.insertBack(match);
 
-        // Avoid allocating position when there are no matches.
-        result.posn = takerSess.getLazyPosn(book);
         takerOrder.trade(lots, cost, lots, ticks, now);
         return quote;
     }
@@ -426,6 +382,15 @@ public @NonNullByDefault class Serv {
         }
         order.subQuote(quote.getLots());
         sess.removeQuote(quote);
+    }
+
+    private static void prepareExecList(Exec newOrder, SlQueue matches) {
+        Exec last = newOrder;
+        for (Match node = (Match) matches.getFirst(); node != null; node = (Match) node.slNext()) {
+            last.setJslNext(node.makerTrade);
+            node.makerTrade.setJslNext(node.takerTrade);
+            last = node.takerTrade;
+        }
     }
 
     private final void doCancelOrders(MarketBook book, long now)
@@ -489,15 +454,11 @@ public @NonNullByDefault class Serv {
 
     // Assumes that maker lots have not been reduced since matching took place.
 
-    private final void commitMatches(TraderSess taker, MarketBook book, long now, Result result) {
-        setDirty(book);
-        SlNode node = result.matches.getFirst();
-        if (node == null) {
-            // There are no matches.
-            setDirty(taker, TraderSess.DIRTY_ORDER);
-            return;
-        }
+    private final void commitMatches(TraderSess taker, MarketBook book, SlQueue matches,
+            Posn takerPosn, long now, Result result) {
         setDirty(taker, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
+        SlNode node = matches.getFirst();
+        assert node != null;
         do {
             final Match match = (Match) node;
             final Order makerOrder = match.getMakerOrder();
@@ -517,9 +478,15 @@ public @NonNullByDefault class Serv {
             final Exec takerTrade = match.takerTrade;
             assert takerTrade != null;
             taker.insertTrade(takerTrade);
-            final Posn posn = result.posn;
-            assert posn != null;
-            posn.addTrade(takerTrade);
+            takerPosn.addTrade(takerTrade);
+            // Insert order if trade crossed with self.
+            if (makerOrder.getTrader().equals(taker.getMnem())) {
+                result.orders.insertBack(makerOrder);
+            }
+            // Maker updated first because this is consistent with last-look semantics.
+            // N.B. the reference count is not incremented here.
+            result.execs.insertBack(match.makerTrade);
+            result.execs.insertBack(match.takerTrade);
             setDirty(maker,
                     TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
             // Next match.
@@ -527,11 +494,10 @@ public @NonNullByDefault class Serv {
         } while (node != null);
     }
 
-    public Serv(Model model, Journ journ, Cache cache, Factory factory, long now)
+    public Serv(Model model, Journ journ, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this.journ = journ;
         this.cache = cache;
-        this.factory = factory;
         this.dirty = DIRTY_ALL;
 
         RecTree t = model.readAsset(factory);
@@ -541,12 +507,14 @@ public @NonNullByDefault class Serv {
         t = model.readContr(factory);
         assert t != null;
         this.contrs = t;
-        enrichContrs();
 
         t = model.readMarket(factory);
         assert t != null;
         this.markets = t;
-        enrichMarkets();
+        for (RbNode node = markets.getFirst(); node != null; node = node.rbNext()) {
+            final MarketBook book = (MarketBook) node;
+            views.insert(book.getView());
+        }
 
         t = model.readTrader(factory);
         assert t != null;
@@ -604,9 +572,9 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public Serv(Datastore datastore, Cache cache, Factory factory, long now)
+    public Serv(Datastore datastore, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(datastore, datastore, cache, factory, now);
+        this(datastore, datastore, cache, now);
     }
 
     public final TraderSess createTrader(String mnem, @Nullable String display, String email)
@@ -775,9 +743,12 @@ public @NonNullByDefault class Serv {
         return (TraderSess) emailIdx.find(email);
     }
 
-    public final MarketBook createMarket(String mnem, @Nullable String display, Contr contr,
+    public final MarketBook createMarket(String mnem, @Nullable String display, String contr,
             int settlDay, int expiryDay, int state, long now)
-                    throws BadRequestException, ServiceUnavailableException {
+                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        if (contrs.find(contr) == null) {
+            throw new NotFoundException(String.format("contr '%s' does not exist", contr));
+        }
         if (settlDay != 0) {
             // busDay <= expiryDay <= settlDay.
             final int busDay = getBusDate(now).toJd();
@@ -800,7 +771,7 @@ public @NonNullByDefault class Serv {
         book = newMarket(mnem, display, contr, settlDay, expiryDay, state);
 
         try {
-            journ.createMarket(mnem, display, contr.getMnem(), settlDay, expiryDay, state);
+            journ.createMarket(mnem, display, contr, settlDay, expiryDay, state);
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
         }
@@ -814,16 +785,6 @@ public @NonNullByDefault class Serv {
 
         updateDirty();
         return book;
-    }
-
-    public final MarketBook createMarket(String mnem, @Nullable String display, String contrMnem,
-            int settlDay, int expiryDay, int state, long now)
-                    throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        final Contr contr = (Contr) contrs.find(contrMnem);
-        if (contr == null) {
-            throw new NotFoundException(String.format("contr '%s' does not exist", contrMnem));
-        }
-        return createMarket(mnem, display, contr, settlDay, expiryDay, state, now);
     }
 
     public final MarketBook updateMarket(String mnem, @Nullable String display, int state, long now)
@@ -856,7 +817,7 @@ public @NonNullByDefault class Serv {
         final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
             throw new MarketClosedException(String.format("market for '%s' on '%d' has expired",
-                    book.getContrRich().getMnem(), maybeJdToIso(book.getSettlDay())));
+                    book.getContr(), maybeJdToIso(book.getSettlDay())));
         }
         if (lots == 0 || lots < minLots) {
             throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
@@ -866,11 +827,12 @@ public @NonNullByDefault class Serv {
                 lots, ticks, minLots, now);
 
         final Exec exec = newExec(book, order, now);
-        result.reset(sess.getMnem(), book, order, exec);
+        result.reset(book, order, exec);
+        final SlQueue matches = new SlQueue();
         // Order fields are updated on match.
         Quote quote = null;
         if (quoteId == 0) {
-            matchOrders(sess, book, order, now, result);
+            matchOrders(sess, book, order, now, matches);
             // Place incomplete order in market. N.B. isDone() is sufficient here because the order
             // cannot be pending cancellation.
             if (!order.isDone()) {
@@ -878,16 +840,15 @@ public @NonNullByDefault class Serv {
                 book.insertOrder(order);
             }
         } else {
-            quote = matchQuote(sess, book, order, now, result);
+            quote = matchQuote(sess, book, order, now, matches);
             assert order.isDone();
         }
         // TODO: IOC orders would need an additional revision for the unsolicited cancellation of
         // any unfilled quantity.
         boolean success = false;
         try {
-            final JslNode firstExec = result.prepareExecList();
-            assert firstExec != null;
-            journ.createExecList(book.getMnem(), firstExec);
+            prepareExecList(exec, matches);
+            journ.createExecList(book.getMnem(), exec);
             success = true;
         } catch (final RejectedExecutionException e) {
             throw new ServiceUnavailableException("journal is busy", e);
@@ -897,17 +858,31 @@ public @NonNullByDefault class Serv {
                 book.removeOrder(order);
             }
         }
+        // Avoid allocating position when there are no matches.
+        Posn posn = null;
+        if (!matches.isEmpty()) {
+            // Avoid allocating position when there are no matches.
+            // N.B. before commit phase, because this may fail.
+            posn = sess.getLazyPosn(book);
+        }
 
         // Commit phase.
 
+        setDirty(book);
         if (quote != null) {
             removeQuote(sess, book, quote);
         } else {
             sess.insertOrder(order);
         }
-        // Commit trans and free matches.
-        commitMatches(sess, book, now, result);
 
+        // Commit matches.
+        if (!matches.isEmpty()) {
+            assert posn != null;
+            commitMatches(sess, book, matches, posn, now, result);
+        } else {
+            // There are no matches.
+            setDirty(sess, TraderSess.DIRTY_ORDER);
+        }
         updateDirty();
     }
 
@@ -932,7 +907,7 @@ public @NonNullByDefault class Serv {
 
         final Exec exec = newExec(book, order, now);
         exec.revise(lots);
-        result.reset(sess.getMnem(), book, order, exec);
+        result.reset(book, order, exec);
         try {
             journ.createExec(exec);
         } catch (final RejectedExecutionException e) {
@@ -973,7 +948,7 @@ public @NonNullByDefault class Serv {
             long now, Result result)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
-        result.reset(sess.getMnem(), book);
+        result.reset(book);
 
         final String market = book.getMarket();
         JslNode jslNode = first;
@@ -1049,7 +1024,7 @@ public @NonNullByDefault class Serv {
 
         final Exec exec = newExec(book, order, now);
         exec.cancel(order.getQuotd());
-        result.reset(sess.getMnem(), book, order, exec);
+        result.reset(book, order, exec);
         try {
             journ.createExec(exec);
         } catch (final RejectedExecutionException e) {
@@ -1090,7 +1065,7 @@ public @NonNullByDefault class Serv {
             Result result)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
-        result.reset(sess.getMnem(), book);
+        result.reset(book);
 
         final String market = book.getMarket();
         JslNode jslNode = first;

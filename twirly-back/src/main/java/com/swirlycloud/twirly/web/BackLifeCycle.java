@@ -14,8 +14,6 @@ import javax.servlet.ServletContextListener;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.swirlycloud.twirly.app.ServFactory;
-import com.swirlycloud.twirly.entity.Factory;
 import com.swirlycloud.twirly.exception.NotFoundException;
 import com.swirlycloud.twirly.exception.ServException;
 import com.swirlycloud.twirly.exception.ServiceUnavailableException;
@@ -98,7 +96,7 @@ public final class BackLifeCycle implements ServletContextListener {
     }
 
     @SuppressWarnings("resource")
-    private final void open(ServletContext sc, @NonNull Factory factory)
+    private final void open(ServletContext sc)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
 
         Realm realm = null;
@@ -118,7 +116,7 @@ public final class BackLifeCycle implements ServletContextListener {
             } else {
                 throw new RuntimeException("unsupported servlet container");
             }
-            rest = new BackRest(datastore, cache, factory, now());
+            rest = new BackRest(datastore, cache, now());
         } finally {
             if (rest == null) {
                 try {
@@ -153,7 +151,7 @@ public final class BackLifeCycle implements ServletContextListener {
         // request was invoked.
         final ServletContext sc = event.getServletContext();
         try {
-            open(sc, new ServFactory());
+            open(sc);
         } catch (final ServException e) {
             sc.log("internal error", e);
         } catch (final InterruptedException e) {
