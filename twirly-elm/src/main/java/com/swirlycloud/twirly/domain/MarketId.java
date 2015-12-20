@@ -7,9 +7,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.twirly.node.AbstractJslNode;
-import com.swirlycloud.twirly.util.Identifiable;
 
-public final @NonNullByDefault class MarketId extends AbstractJslNode implements Identifiable {
+public final @NonNullByDefault class MarketId extends AbstractJslNode {
 
     private final String market;
     private final long id;
@@ -79,7 +78,6 @@ public final @NonNullByDefault class MarketId extends AbstractJslNode implements
         return market;
     }
 
-    @Override
     public final long getId() {
         return id;
     }
