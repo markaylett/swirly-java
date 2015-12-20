@@ -1,10 +1,10 @@
 START TRANSACTION
 ;
-DROP DATABASE IF EXISTS twirly
+DROP DATABASE IF EXISTS swirly
 ;
-CREATE DATABASE twirly
+CREATE DATABASE swirly
 ;
-USE twirly
+USE swirly
 ;
 
 SET foreign_key_checks = 1

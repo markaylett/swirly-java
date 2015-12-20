@@ -1,7 +1,7 @@
 START TRANSACTION
 ;
 
-USE twirly;
+USE swirly;
 
 INSERT INTO User_t (email, pass)
        VALUES ('mark.aylett@gmail.com', 'test')

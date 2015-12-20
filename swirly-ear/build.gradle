@@ -1,0 +1,33 @@
+// -*- conf -*-
+
+apply plugin: 'appengine'
+apply plugin: 'ear'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.google.appengine:gradle-appengine-plugin:$config.appengine.version"
+    }
+}
+
+dependencies {
+    appengineSdk "com.google.appengine:appengine-java-sdk:$config.appengine.version"
+    deploy project(path: ':swirly-front', configuration: 'archives')
+    deploy project(path: ':swirly-back', configuration: 'archives')
+}
+
+appengine {
+    downloadSdk = true
+    jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000']
+    appcfg {
+        email = config.appengine.email
+        oauth2 = true
+
+        app {
+            id = 'swirly'
+        }
+    }
+}
