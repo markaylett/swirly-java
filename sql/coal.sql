@@ -1,7 +1,7 @@
 START TRANSACTION
 ;
 
-USE twirly;
+USE swirly;
 
 INSERT INTO Asset_t (mnem, display, typeId)
        VALUES ('USD', 'United States of America, Dollars', 3)

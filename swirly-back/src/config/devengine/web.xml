@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+  <listener>
+    <listener-class>com.swirlycloud.swirly.web.BackLifeCycle</listener-class>
+  </listener>
+
+  <servlet>
+    <servlet-name>rec</servlet-name>
+    <servlet-class>com.swirlycloud.swirly.web.BackRecServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>view</servlet-name>
+    <servlet-class>com.swirlycloud.swirly.web.BackViewServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>sess</servlet-name>
+    <servlet-class>com.swirlycloud.swirly.web.BackSessServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>task</servlet-name>
+    <servlet-class>com.swirlycloud.swirly.web.BackTaskServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>rec</servlet-name>
+    <url-pattern>/back/rec/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>view</servlet-name>
+    <url-pattern>/back/view/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>sess</servlet-name>
+    <url-pattern>/back/sess/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>task</servlet-name>
+    <url-pattern>/back/task/*</url-pattern>
+  </servlet-mapping>
+
+  <error-page>
+    <exception-type>java.lang.Throwable</exception-type>
+    <location>/WEB-INF/error/error.jsp</location>
+  </error-page>
+
+  <error-page>
+    <error-code>400</error-code>
+    <location>/WEB-INF/error/error-400.json</location>
+  </error-page>
+
+  <error-page>
+    <error-code>403</error-code>
+    <location>/WEB-INF/error/error-403.json</location>
+  </error-page>
+
+  <error-page>
+    <error-code>404</error-code>
+    <location>/WEB-INF/error/error-404.json</location>
+  </error-page>
+
+  <error-page>
+    <error-code>405</error-code>
+    <location>/WEB-INF/error/error-405.json</location>
+  </error-page>
+
+  <error-page>
+    <error-code>500</error-code>
+    <location>/WEB-INF/error/error-500.json</location>
+  </error-page>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>task</web-resource-name>
+      <url-pattern>/back/task/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+</web-app>

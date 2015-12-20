@@ -14,7 +14,7 @@ Github Fork
 
 Add remote upstream to fork:
 
-    $ git remote add upstream git@github.com:swirlycloud/twirlyj.git
+    $ git remote add upstream git@github.com:swirlycloud/swirlyj.git
 
 Sync local fork:
 
@@ -51,13 +51,13 @@ Deploy to appengine:
 
 Update dispatch config:
 
-    $ ./appcfg.sh update_dispatch twirly-front/src/main/webapp
+    $ ./appcfg.sh update_dispatch swirly-front/src/main/webapp
 
 Full release:
 
-    $ ./update.sh twirly-dev
-    $ ./update.sh twirly-uat
-    $ ./update.sh twirly-prd
+    $ ./update.sh swirly-dev
+    $ ./update.sh swirly-uat
+    $ ./update.sh swirly-prd
 
 Tomcat Development
 ------------------
@@ -80,17 +80,17 @@ If no servers are configured, then the tab should report a message similar to th
 Click on this link or, alternatively, use the right-click context menu to create a new server.
 
 You should now be presented with a dialog box containing a tree-view of the supported server
-adapters. Select "Tomcat v8.0 Server" from this tree-view and set the server-name to "twirly".
+adapters. Select "Tomcat v8.0 Server" from this tree-view and set the server-name to "swirly".
 
-Click Next and add `twirly-front` and `twirly-back` to the list of configured resources.
+Click Next and add `swirly-front` and `swirly-back` to the list of configured resources.
 
 Click Finish to complete the wizard.
 
-You should now have a Servers project in your Eclipse workspace containing a `twirly-config`
+You should now have a Servers project in your Eclipse workspace containing a `swirly-config`
 folder. The `path` attributes of the following contexts in `servers.xml` should be as follows:
 
-    <Context docBase="twirly-back" path="/back" ... />
-    <Context docBase="twirly-front" path="/" ... />
+    <Context docBase="swirly-back" path="/back" ... />
+    <Context docBase="swirly-front" path="/" ... />
 
 Add the following element to the `Host` section to enable Single Sign On (SSO):
 
@@ -124,7 +124,7 @@ You can configure the `JDBCRealm` instead of the `UserDatabaseRealm` as follows:
 
     <Realm className="org.apache.catalina.realm.JDBCRealm"
            driverName="org.gjt.mm.mysql.Driver"
-           connectionURL="jdbc:mysql://localhost/twirly?user=root&amp;password="
+           connectionURL="jdbc:mysql://localhost/swirly?user=root&amp;password="
            userTable="User_t" userNameCol="email" userCredCol="pass"
            userRoleTable="UserGroup_v" roleNameCol="group_" />
 

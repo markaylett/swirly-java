@@ -20,7 +20,7 @@ task printConfig << {
 }
 
 allprojects {
-    group = 'com.swirlycloud.twirly'
+    group = 'com.swirlycloud.swirly'
     version = '0.1'
 }
 

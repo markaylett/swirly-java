@@ -1,0 +1,96 @@
+// -*- conf -*-
+
+apply plugin: 'eclipse-wtp'
+apply plugin: 'jdepend'
+apply plugin: 'war'
+
+apply plugin: "com.eriwen.gradle.js"
+apply plugin: 'net.eikehirsch.react'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.eriwen:gradle-js-plugin:1.12.1"
+        classpath 'net.eikehirsch.react:gradle-react-plugin:0.3.1'
+    }
+}
+
+task swirlyJsx(type: JSXTask) {
+    sourcesDir = "${projectDir}/src/main/react"
+    destDir = "${buildDir}/react"
+}
+
+combineJs {
+    source = [
+        "${buildDir}/react/util.js",
+        "${buildDir}/react/error.js",
+        "${buildDir}/react/conv.js",
+        "${buildDir}/react/entity.js",
+        "${buildDir}/react/table.js",
+        "${buildDir}/react/form.js",
+        "${buildDir}/react/dialog.js",
+        "${buildDir}/react/widget.js",
+        "${buildDir}/react/contr.js",
+        "${buildDir}/react/market.js",
+        "${buildDir}/react/order.js",
+        "${buildDir}/react/quote.js",
+        "${buildDir}/react/signup.js",
+        "${buildDir}/react/trader.js"
+    ]
+    dest = file("${buildDir}/js/swirly.js")
+}
+combineJs.dependsOn swirlyJsx
+
+minifyJs {
+    source = combineJs
+    dest = file("${buildDir}/js/swirly.min.js")
+    sourceMap = file("${buildDir}/js/swirly.sourcemap.json")
+    closure {
+        compilationLevel = 'WHITESPACE_ONLY'
+        warningLevel = 'QUIET'
+    }
+}
+processResources.dependsOn minifyJs
+
+dependencies {
+    compile project(':swirly-fir')
+    compile project(':swirly-oak')
+    compile group: 'com.google.appengine', name: 'appengine-api-1.0-sdk', version: config.appengine.version
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.+'
+    compile group: 'jstl', name: 'jstl', version: '1.2'
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.+'
+    compile group: 'org.eclipse.jdt', name: 'org.eclipse.jdt.annotation', version: '1.1.+'
+
+    testCompile group: 'com.google.appengine', name: 'appengine-testing', version: config.appengine.version
+    testCompile group: 'com.google.appengine', name: 'appengine-api-stubs', version: config.appengine.version
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+jdependMain.doLast {
+    File file = new File(jdepend.reportsDir, "main.xml")
+    def cycles = new XmlSlurper().parse(file).Cycles.Package.size()
+    if (cycles > 0) {
+        throw new GradleException("Detected $cycles cycles. See JDepend report at ${file}")
+    }
+}
+
+eclipse {
+    wtp {
+        component {
+            contextPath = '/'
+            resource sourcePath: "${buildDir}/js", deployPath: "/js"
+            resource sourcePath: "${webAppDirName}", deployPath: "/"
+        }
+    }
+}
+
+war {
+    duplicatesStrategy = 'EXCLUDE'
+    webInf { from config.front.webinf }
+    from("${buildDir}/js", {
+        into 'js'
+    })
+}
