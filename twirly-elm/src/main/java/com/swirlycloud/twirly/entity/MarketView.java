@@ -17,7 +17,6 @@ import com.swirlycloud.twirly.date.JulianDay;
 import com.swirlycloud.twirly.domain.MarketData;
 import com.swirlycloud.twirly.node.AbstractRbNode;
 import com.swirlycloud.twirly.util.JsonUtil;
-import com.swirlycloud.twirly.util.Memorable;
 import com.swirlycloud.twirly.util.Params;
 
 /**
@@ -25,8 +24,7 @@ import com.swirlycloud.twirly.util.Params;
  * 
  * @author Mark Aylett
  */
-public final @NonNullByDefault class MarketView extends AbstractRbNode
-        implements Memorable, Financial {
+public final @NonNullByDefault class MarketView extends AbstractRbNode implements Financial {
 
     private static final long serialVersionUID = 1L;
 
@@ -324,11 +322,6 @@ public final @NonNullByDefault class MarketView extends AbstractRbNode
 
     public final void setLastTime(long lastTime) {
         this.lastTime = lastTime;
-    }
-
-    @Override
-    public final String getMnem() {
-        return market;
     }
 
     @Override

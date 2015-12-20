@@ -6,15 +6,12 @@ package com.swirlycloud.twirly.entity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.twirly.util.Memorable;
-
-public @NonNullByDefault interface Rec extends Entity, Memorable {
+public @NonNullByDefault interface Rec extends Entity {
 
     void setDisplay(@Nullable String display);
 
     RecType getRecType();
 
-    @Override
     String getMnem();
 
     String getDisplay();

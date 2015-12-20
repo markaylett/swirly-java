@@ -69,11 +69,11 @@ public final @NonNullByDefault class MarketViewTree extends AbstractObjectTree<S
 
     @Override
     protected final int compareNode(MarketView lhs, MarketView rhs) {
-        return lhs.getMnem().compareTo(rhs.getMnem());
+        return lhs.getMarket().compareTo(rhs.getMarket());
     }
 
     @Override
     protected final int compareKey(MarketView lhs, String rhs) {
-        return lhs.getMnem().compareTo(rhs);
+        return lhs.getMarket().compareTo(rhs);
     }
 }
