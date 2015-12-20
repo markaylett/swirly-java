@@ -24,7 +24,7 @@ import com.swirlycloud.swirly.exception.InternalException;
 import com.swirlycloud.swirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.ServiceUnavailableException;
-import com.swirlycloud.swirly.rest.BackUnrest.ResultStruct;
+import com.swirlycloud.swirly.rest.BackUnrest.ResponseStruct;
 
 public final class QuoteRestTest extends RestTest {
 
@@ -98,7 +98,7 @@ public final class QuoteRestTest extends RestTest {
     @Test
     public final void testPecan() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
-        ResultStruct out = postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        ResponseStruct out = postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
         MarketView view = out.view;
         assert view != null;
         assertTrue(view.isValidOffer(0));

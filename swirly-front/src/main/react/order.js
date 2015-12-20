@@ -121,9 +121,9 @@ var OrderModuleImpl = React.createClass({
             type: 'post',
             url: '/back/sess/order/' + market,
             data: JSON.stringify(req)
-        }).done(function(result, status, xhr) {
+        }).done(function(resp, status, xhr) {
             this.resetTimeout(xhr);
-            this.applyResult(result);
+            this.applyResponse(resp);
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
         }.bind(this));
@@ -149,9 +149,9 @@ var OrderModuleImpl = React.createClass({
             type: 'put',
             url: '/back/sess/order/' + market + '/' + ids,
             data: JSON.stringify(req)
-        }).done(function(result, status, xhr) {
+        }).done(function(resp, status, xhr) {
             this.resetTimeout(xhr);
-            this.applyResult(result);
+            this.applyResponse(resp);
         }.bind(this)).fail(function(xhr) {
             this.onReportError(parseError(xhr));
         }.bind(this));
@@ -224,7 +224,7 @@ var OrderModuleImpl = React.createClass({
             this.onReportError(parseError(xhr));
         }.bind(this));
     },
-    applyResult: function(result) {
+    applyResponse: function(resp) {
         var contrMap = this.props.contrMap;
         var staging = this.staging;
 
@@ -234,7 +234,7 @@ var OrderModuleImpl = React.createClass({
         var posns = staging.posns;
         var views = staging.views;
 
-        result.orders.forEach(function(order) {
+        resp.orders.forEach(function(order) {
             enrichOrder(contrMap, order);
             if (order.isDone) {
                 working.delete(order.key);
@@ -243,18 +243,18 @@ var OrderModuleImpl = React.createClass({
                 working.set(order.key, order);
             }
         });
-        result.execs.forEach(function(exec) {
+        resp.execs.forEach(function(exec) {
             if (exec.state === 'TRADE') {
                 enrichTrade(contrMap, exec);
                 trades.set(exec.key, exec);
             }
         });
-        var posn = result.posn;
+        var posn = resp.posn;
         if (posn !== null) {
             enrichPosn(contrMap, posn);
             staging.posns.set(posn.key, posn);
         }
-        var view = result.view;
+        var view = resp.view;
         if (view !== null) {
             enrichView(contrMap, view);
             views.set(view.key, view);

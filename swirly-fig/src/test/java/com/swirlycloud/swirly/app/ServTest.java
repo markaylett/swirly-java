@@ -281,9 +281,9 @@ public final class ServTest {
         final MarketBook book = serv.getMarket("EURUSD.MAR14");
         assertNotNull(book);
 
-        try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, result);
-            final Order order = (Order) result.getFirstOrder();
+        try (final Response resp = new Response()) {
+            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, resp);
+            final Order order = (Order) resp.getFirstOrder();
             assertNotNull(order);
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());
@@ -312,11 +312,11 @@ public final class ServTest {
         final MarketBook book = serv.getMarket("EURUSD.MAR14");
         assertNotNull(book);
 
-        try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, result);
-            final Order order = (Order) result.getFirstOrder();
+        try (final Response resp = new Response()) {
+            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, resp);
+            final Order order = (Order) resp.getFirstOrder();
             assertNotNull(order);
-            serv.reviseOrder(sess, book, order, 4, NOW + 1, result);
+            serv.reviseOrder(sess, book, order, 4, NOW + 1, resp);
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());
@@ -344,11 +344,11 @@ public final class ServTest {
         final MarketBook book = serv.getMarket("EURUSD.MAR14");
         assertNotNull(book);
 
-        try (final Result result = new Result()) {
-            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, result);
-            final Order order = (Order) result.getFirstOrder();
+        try (final Response resp = new Response()) {
+            serv.createOrder(sess, book, "", 0, Side.BUY, 5, 12345, 1, NOW, resp);
+            final Order order = (Order) resp.getFirstOrder();
             assertNotNull(order);
-            serv.cancelOrder(sess, book, order, NOW + 1, result);
+            serv.cancelOrder(sess, book, order, NOW + 1, resp);
             assertEquals(sess.getMnem(), order.getTrader());
             assertEquals(book.getMnem(), order.getMarket());
             assertNull(order.getRef());

@@ -14,7 +14,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.app.LockableServ;
-import com.swirlycloud.swirly.app.Result;
+import com.swirlycloud.swirly.app.Response;
 import com.swirlycloud.swirly.app.Serv;
 import com.swirlycloud.swirly.book.MarketBook;
 import com.swirlycloud.swirly.domain.Role;
@@ -46,7 +46,7 @@ import com.swirlycloud.swirly.util.Params;
 public final @NonNullByDefault class BackRest implements Rest {
 
     private final Serv serv;
-    private final Result result = new Result();
+    private final Response resp = new Response();
     private volatile long timeout;
 
     private static void getView(@Nullable RbNode first, Params params, long now, Appendable out)
@@ -584,11 +584,11 @@ public final @NonNullByDefault class BackRest implements Rest {
             serv.poll(now);
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
-            serv.createOrder(sess, book, ref, quoteId, side, lots, ticks, minLots, now, result);
-            result.toJson(params, out);
+            serv.createOrder(sess, book, ref, quoteId, side, lots, ticks, minLots, now, resp);
+            resp.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clearAll();
+            resp.clearAll();
             serv.unlock(lock);
         }
     }
@@ -603,14 +603,14 @@ public final @NonNullByDefault class BackRest implements Rest {
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             if (lots > 0) {
-                serv.reviseOrder(sess, book, id, lots, now, result);
+                serv.reviseOrder(sess, book, id, lots, now, resp);
             } else {
-                serv.cancelOrder(sess, book, id, now, result);
+                serv.cancelOrder(sess, book, id, now, resp);
             }
-            result.toJson(params, out);
+            resp.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clearAll();
+            resp.clearAll();
             serv.unlock(lock);
         }
     }
@@ -625,14 +625,14 @@ public final @NonNullByDefault class BackRest implements Rest {
             final TraderSess sess = serv.getTrader(trader);
             final MarketBook book = serv.getMarket(market);
             if (lots > 0) {
-                serv.reviseOrder(sess, book, first, lots, now, result);
+                serv.reviseOrder(sess, book, first, lots, now, resp);
             } else {
-                serv.cancelOrder(sess, book, first, now, result);
+                serv.cancelOrder(sess, book, first, now, resp);
             }
-            result.toJson(params, out);
+            resp.toJson(params, out);
         } finally {
             timeout = serv.getTimeout();
-            result.clearAll();
+            resp.clearAll();
             serv.unlock(lock);
         }
     }

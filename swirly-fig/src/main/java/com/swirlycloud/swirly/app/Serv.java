@@ -455,7 +455,7 @@ public @NonNullByDefault class Serv {
     // Assumes that maker lots have not been reduced since matching took place.
 
     private final void commitMatches(TraderSess taker, MarketBook book, SlQueue matches,
-            Posn takerPosn, long now, Result result) {
+            Posn takerPosn, long now, Response resp) {
         setDirty(taker, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
         SlNode node = matches.getFirst();
         assert node != null;
@@ -481,12 +481,12 @@ public @NonNullByDefault class Serv {
             takerPosn.addTrade(takerTrade);
             // Insert order if trade crossed with self.
             if (makerOrder.getTrader().equals(taker.getMnem())) {
-                result.orders.insertBack(makerOrder);
+                resp.orders.insertBack(makerOrder);
             }
             // Maker updated first because this is consistent with last-look semantics.
             // N.B. the reference count is not incremented here.
-            result.execs.insertBack(match.makerTrade);
-            result.execs.insertBack(match.takerTrade);
+            resp.execs.insertBack(match.makerTrade);
+            resp.execs.insertBack(match.takerTrade);
             setDirty(maker,
                     TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
             // Next match.
@@ -812,7 +812,7 @@ public @NonNullByDefault class Serv {
     }
 
     public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref,
-            long quoteId, Side side, long lots, long ticks, long minLots, long now, Result result)
+            long quoteId, Side side, long lots, long ticks, long minLots, long now, Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final int busDay = getBusDate(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
@@ -827,7 +827,7 @@ public @NonNullByDefault class Serv {
                 lots, ticks, minLots, now);
 
         final Exec exec = newExec(book, order, now);
-        result.reset(book, order, exec);
+        resp.reset(book, order, exec);
         final SlQueue matches = new SlQueue();
         // Order fields are updated on match.
         Quote quote = null;
@@ -878,7 +878,7 @@ public @NonNullByDefault class Serv {
         // Commit matches.
         if (!matches.isEmpty()) {
             assert posn != null;
-            commitMatches(sess, book, matches, posn, now, result);
+            commitMatches(sess, book, matches, posn, now, resp);
         } else {
             // There are no matches.
             setDirty(sess, TraderSess.DIRTY_ORDER);
@@ -887,7 +887,7 @@ public @NonNullByDefault class Serv {
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, Order order, long lots,
-            long now, Result result)
+            long now, Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         if (order.isDone()) {
             throw new TooLateException(String.format("order '%d' is done", order.getId()));
@@ -907,7 +907,7 @@ public @NonNullByDefault class Serv {
 
         final Exec exec = newExec(book, order, now);
         exec.revise(lots);
-        result.reset(book, order, exec);
+        resp.reset(book, order, exec);
         try {
             journ.createExec(exec);
         } catch (final RejectedExecutionException e) {
@@ -925,30 +925,30 @@ public @NonNullByDefault class Serv {
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, long id, long lots, long now,
-            Result result)
+            Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(book.getMnem(), id);
         if (order == null) {
             throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
         }
-        reviseOrder(sess, book, order, lots, now, result);
+        reviseOrder(sess, book, order, lots, now, resp);
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, String ref, long lots, long now,
-            Result result)
+            Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new OrderNotFoundException(String.format("order '%s' does not exist", ref));
         }
-        reviseOrder(sess, book, order, lots, now, result);
+        reviseOrder(sess, book, order, lots, now, resp);
     }
 
     public final void reviseOrder(TraderSess sess, MarketBook book, JslNode first, long lots,
-            long now, Result result)
+            long now, Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
-        result.reset(book);
+        resp.reset(book);
 
         final String market = book.getMarket();
         JslNode jslNode = first;
@@ -980,13 +980,13 @@ public @NonNullByDefault class Serv {
             final Exec exec = newExec(book, order, now);
             exec.revise(lots);
 
-            result.orders.insertBack(order);
-            result.execs.insertBack(exec);
+            resp.orders.insertBack(order);
+            resp.execs.insertBack(exec);
 
         } while (jslNode != null);
 
         try {
-            final JslNode firstExec = result.prepareExecList();
+            final JslNode firstExec = resp.prepareExecList();
             assert firstExec != null;
             journ.createExecList(book.getMnem(), firstExec);
         } catch (final RejectedExecutionException e) {
@@ -998,7 +998,7 @@ public @NonNullByDefault class Serv {
         setDirty(book);
         setDirty(sess, TraderSess.DIRTY_ORDER);
 
-        SlNode node = result.getFirstExec();
+        SlNode node = resp.getFirstExec();
         assert node != null;
         do {
             final Exec exec = (Exec) node;
@@ -1015,7 +1015,7 @@ public @NonNullByDefault class Serv {
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, Order order, long now,
-            Result result)
+            Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         // Note that orders pending cancellation may be cancelled.
         if (order.isDone()) {
@@ -1024,7 +1024,7 @@ public @NonNullByDefault class Serv {
 
         final Exec exec = newExec(book, order, now);
         exec.cancel(order.getQuotd());
-        result.reset(book, order, exec);
+        resp.reset(book, order, exec);
         try {
             journ.createExec(exec);
         } catch (final RejectedExecutionException e) {
@@ -1042,30 +1042,30 @@ public @NonNullByDefault class Serv {
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, long id, long now,
-            Result result)
+            Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(book.getMnem(), id);
         if (order == null) {
             throw new OrderNotFoundException(String.format("order '%d' does not exist", id));
         }
-        cancelOrder(sess, book, order, now, result);
+        cancelOrder(sess, book, order, now, resp);
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, String ref, long now,
-            Result result)
+            Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
         final Order order = sess.findOrder(ref);
         if (order == null) {
             throw new OrderNotFoundException(String.format("order '%s' does not exist", ref));
         }
-        cancelOrder(sess, book, order, now, result);
+        cancelOrder(sess, book, order, now, resp);
     }
 
     public final void cancelOrder(TraderSess sess, MarketBook book, JslNode first, long now,
-            Result result)
+            Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
 
-        result.reset(book);
+        resp.reset(book);
 
         final String market = book.getMarket();
         JslNode jslNode = first;
@@ -1086,13 +1086,13 @@ public @NonNullByDefault class Serv {
             final Exec exec = newExec(book, order, now);
             exec.cancel(order.getQuotd());
 
-            result.orders.insertBack(order);
-            result.execs.insertBack(exec);
+            resp.orders.insertBack(order);
+            resp.execs.insertBack(exec);
 
         } while (jslNode != null);
 
         try {
-            final JslNode firstExec = result.prepareExecList();
+            final JslNode firstExec = resp.prepareExecList();
             assert firstExec != null;
             journ.createExecList(book.getMnem(), firstExec);
         } catch (final RejectedExecutionException e) {
@@ -1104,7 +1104,7 @@ public @NonNullByDefault class Serv {
         setDirty(book);
         setDirty(sess, TraderSess.DIRTY_ORDER);
 
-        SlNode node = result.getFirstExec();
+        SlNode node = resp.getFirstExec();
         assert node != null;
         do {
             final Exec exec = (Exec) node;
