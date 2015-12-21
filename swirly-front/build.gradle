@@ -19,26 +19,26 @@ buildscript {
 }
 
 task swirlyJsx(type: JSXTask) {
-    sourcesDir = "${projectDir}/src/main/react"
-    destDir = "${buildDir}/react"
+    sourcesDir = "${projectDir}/src/main/jsx"
+    destDir = "${buildDir}/tmp"
 }
 
 combineJs {
     source = [
-        "${buildDir}/react/util.js",
-        "${buildDir}/react/error.js",
-        "${buildDir}/react/conv.js",
-        "${buildDir}/react/entity.js",
-        "${buildDir}/react/table.js",
-        "${buildDir}/react/form.js",
-        "${buildDir}/react/dialog.js",
-        "${buildDir}/react/widget.js",
-        "${buildDir}/react/contr.js",
-        "${buildDir}/react/market.js",
-        "${buildDir}/react/order.js",
-        "${buildDir}/react/quote.js",
-        "${buildDir}/react/signup.js",
-        "${buildDir}/react/trader.js"
+        "${buildDir}/tmp/util.js",
+        "${buildDir}/tmp/error.js",
+        "${buildDir}/tmp/conv.js",
+        "${buildDir}/tmp/entity.js",
+        "${buildDir}/tmp/table.js",
+        "${buildDir}/tmp/form.js",
+        "${buildDir}/tmp/dialog.js",
+        "${buildDir}/tmp/widget.js",
+        "${buildDir}/tmp/contr.js",
+        "${buildDir}/tmp/market.js",
+        "${buildDir}/tmp/order.js",
+        "${buildDir}/tmp/quote.js",
+        "${buildDir}/tmp/signup.js",
+        "${buildDir}/tmp/trader.js"
     ]
     dest = file("${buildDir}/js/swirly.js")
 }
