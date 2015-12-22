@@ -6,6 +6,7 @@ package com.swirlycloud.swirly.entity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.node.AbstractRbNode;
 import com.swirlycloud.swirly.util.JsonUtil;
 

@@ -6,6 +6,7 @@ package com.swirlycloud.swirly.entity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.swirly.domain.AssetType;
 import com.swirlycloud.swirly.domain.Role;
 import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.domain.State;

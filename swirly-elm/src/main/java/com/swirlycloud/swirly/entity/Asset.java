@@ -11,6 +11,8 @@ import javax.json.stream.JsonParser.Event;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.swirly.domain.AssetType;
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.util.Params;
 
 /**

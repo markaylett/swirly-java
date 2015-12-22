@@ -13,12 +13,12 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.entity.Asset;
 import com.swirlycloud.swirly.entity.Contr;
 import com.swirlycloud.swirly.entity.EntitySet;
 import com.swirlycloud.swirly.entity.Market;
 import com.swirlycloud.swirly.entity.Rec;
-import com.swirlycloud.swirly.entity.RecType;
 import com.swirlycloud.swirly.entity.Trader;
 import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.ServiceUnavailableException;

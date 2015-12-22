@@ -10,8 +10,8 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.entity.Market;
-import com.swirlycloud.swirly.entity.RecType;
 import com.swirlycloud.swirly.exception.BadRequestException;
 import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.ServiceUnavailableException;

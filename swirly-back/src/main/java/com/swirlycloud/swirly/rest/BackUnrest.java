@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.app.LockableServ;
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.domain.Role;
 import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.entity.Asset;
@@ -32,7 +33,6 @@ import com.swirlycloud.swirly.entity.Order;
 import com.swirlycloud.swirly.entity.Posn;
 import com.swirlycloud.swirly.entity.Quote;
 import com.swirlycloud.swirly.entity.Rec;
-import com.swirlycloud.swirly.entity.RecType;
 import com.swirlycloud.swirly.entity.Trader;
 import com.swirlycloud.swirly.exception.BadRequestException;
 import com.swirlycloud.swirly.exception.LiquidityUnavailableException;
