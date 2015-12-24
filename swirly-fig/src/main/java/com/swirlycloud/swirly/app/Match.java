@@ -13,7 +13,7 @@ import com.swirlycloud.swirly.node.AbstractSlNode;
  * 
  * @author Mark Aylett
  */
-public final class Match extends AbstractSlNode {
+final class Match extends AbstractSlNode {
     long lots;
     long ticks;
     Order makerOrder;
