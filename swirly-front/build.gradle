@@ -81,8 +81,7 @@ eclipse {
     wtp {
         component {
             contextPath = '/'
-            resource sourcePath: "${buildDir}/js", deployPath: "/js"
-            resource sourcePath: "${webAppDirName}", deployPath: "/"
+            resource sourcePath: "build/js", deployPath: "/js"
         }
     }
 }
