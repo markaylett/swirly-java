@@ -11,8 +11,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.entity.EntitySet;
-import com.swirlycloud.swirly.entity.RecType;
 import com.swirlycloud.swirly.exception.ForbiddenException;
 import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.ServException;

@@ -14,6 +14,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.date.JulianDay;
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.util.Params;
 
 /**

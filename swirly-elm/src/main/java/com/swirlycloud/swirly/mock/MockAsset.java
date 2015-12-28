@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.swirlycloud.swirly.domain.AssetType;
 import com.swirlycloud.swirly.entity.Asset;
-import com.swirlycloud.swirly.entity.AssetType;
 import com.swirlycloud.swirly.entity.Factory;
 import com.swirlycloud.swirly.entity.RecTree;
 import com.swirlycloud.swirly.function.UnaryCallback;

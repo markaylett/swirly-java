@@ -12,11 +12,11 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.domain.Role;
 import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.domain.State;
 import com.swirlycloud.swirly.entity.EntitySet;
-import com.swirlycloud.swirly.entity.RecType;
 import com.swirlycloud.swirly.entity.Trader;
 import com.swirlycloud.swirly.exception.BadRequestException;
 import com.swirlycloud.swirly.exception.NotFoundException;

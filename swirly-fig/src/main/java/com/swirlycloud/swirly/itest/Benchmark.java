@@ -8,7 +8,7 @@ import static com.swirlycloud.swirly.util.TimeUtil.now;
 
 import java.io.IOException;
 
-import com.swirlycloud.swirly.app.Result;
+import com.swirlycloud.swirly.app.Response;
 import com.swirlycloud.swirly.app.Serv;
 import com.swirlycloud.swirly.book.MarketBook;
 import com.swirlycloud.swirly.domain.Side;
@@ -33,32 +33,32 @@ public final class Benchmark {
         final MarketBook book = serv.createMarket("EURUSD", "EURUSD", "EURUSD", 0, 0, 0, now());
         assert book != null;
 
-        try (final Result result = new Result()) {
+        try (final Response resp = new Response()) {
             for (int i = 0; i < 250000; ++i) {
                 final long now = now();
                 final long startNanos = System.nanoTime();
 
                 // Maker sell-side.
-                serv.createOrder(marayl, book, "", 0, Side.SELL, 5, 12348, 1, now, result);
-                serv.createOrder(gosayl, book, "", 0, Side.SELL, 5, 12348, 1, now, result);
-                serv.createOrder(marayl, book, "", 0, Side.SELL, 5, 12348, 1, now, result);
-                serv.createOrder(gosayl, book, "", 0, Side.SELL, 5, 12347, 1, now, result);
-                serv.createOrder(marayl, book, "", 0, Side.SELL, 5, 12347, 1, now, result);
-                serv.createOrder(gosayl, book, "", 0, Side.SELL, 5, 12346, 1, now, result);
+                serv.createOrder(marayl, book, "", 0, Side.SELL, 5, 12348, 1, now, resp);
+                serv.createOrder(gosayl, book, "", 0, Side.SELL, 5, 12348, 1, now, resp);
+                serv.createOrder(marayl, book, "", 0, Side.SELL, 5, 12348, 1, now, resp);
+                serv.createOrder(gosayl, book, "", 0, Side.SELL, 5, 12347, 1, now, resp);
+                serv.createOrder(marayl, book, "", 0, Side.SELL, 5, 12347, 1, now, resp);
+                serv.createOrder(gosayl, book, "", 0, Side.SELL, 5, 12346, 1, now, resp);
 
                 // Maker buy-side.
-                serv.createOrder(marayl, book, "", 0, Side.BUY, 5, 12344, 1, now, result);
-                serv.createOrder(gosayl, book, "", 0, Side.BUY, 5, 12343, 1, now, result);
-                serv.createOrder(marayl, book, "", 0, Side.BUY, 5, 12343, 1, now, result);
-                serv.createOrder(gosayl, book, "", 0, Side.BUY, 5, 12342, 1, now, result);
-                serv.createOrder(marayl, book, "", 0, Side.BUY, 5, 12342, 1, now, result);
-                serv.createOrder(gosayl, book, "", 0, Side.BUY, 5, 12342, 1, now, result);
+                serv.createOrder(marayl, book, "", 0, Side.BUY, 5, 12344, 1, now, resp);
+                serv.createOrder(gosayl, book, "", 0, Side.BUY, 5, 12343, 1, now, resp);
+                serv.createOrder(marayl, book, "", 0, Side.BUY, 5, 12343, 1, now, resp);
+                serv.createOrder(gosayl, book, "", 0, Side.BUY, 5, 12342, 1, now, resp);
+                serv.createOrder(marayl, book, "", 0, Side.BUY, 5, 12342, 1, now, resp);
+                serv.createOrder(gosayl, book, "", 0, Side.BUY, 5, 12342, 1, now, resp);
 
                 // Taker sell-side.
-                serv.createOrder(tobayl, book, "", 0, Side.SELL, 30, 12342, 1, now, result);
+                serv.createOrder(tobayl, book, "", 0, Side.SELL, 30, 12342, 1, now, resp);
 
                 // Taker buy-side.
-                serv.createOrder(emiayl, book, "", 0, Side.BUY, 30, 12348, 1, now, result);
+                serv.createOrder(emiayl, book, "", 0, Side.BUY, 30, 12348, 1, now, resp);
 
                 serv.archiveOrder(marayl, now);
                 serv.archiveTrade(marayl, now);

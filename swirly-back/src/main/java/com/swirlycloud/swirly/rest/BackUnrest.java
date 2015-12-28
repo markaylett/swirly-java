@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.app.LockableServ;
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.domain.Role;
 import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.entity.Asset;
@@ -32,7 +33,6 @@ import com.swirlycloud.swirly.entity.Order;
 import com.swirlycloud.swirly.entity.Posn;
 import com.swirlycloud.swirly.entity.Quote;
 import com.swirlycloud.swirly.entity.Rec;
-import com.swirlycloud.swirly.entity.RecType;
 import com.swirlycloud.swirly.entity.Trader;
 import com.swirlycloud.swirly.exception.BadRequestException;
 import com.swirlycloud.swirly.exception.LiquidityUnavailableException;
@@ -271,7 +271,7 @@ public final @NonNullByDefault class BackUnrest {
         public final Map<Long, Quote> quotes = new HashMap<>();
     }
 
-    public static final class ResultStruct {
+    public static final class ResponseStruct {
         public final Map<Long, Order> orders = new HashMap<>();
         public final Map<Long, Exec> execs = new HashMap<>();
         public @Nullable Posn posn;
@@ -340,8 +340,8 @@ public final @NonNullByDefault class BackUnrest {
         throw new IOException("end-of object not found");
     }
 
-    private static final ResultStruct parseResultStruct(JsonParser p) throws IOException {
-        final ResultStruct out = new ResultStruct();
+    private static final ResponseStruct parseResponseStruct(JsonParser p) throws IOException {
+        final ResponseStruct out = new ResponseStruct();
         String name = null;
         while (p.hasNext()) {
             final Event event = p.next();
@@ -708,7 +708,7 @@ public final @NonNullByDefault class BackUnrest {
         rest.deleteOrder(trader, market, first, now);
     }
 
-    public final ResultStruct postOrder(String trader, String market, @Nullable String ref,
+    public final ResponseStruct postOrder(String trader, String market, @Nullable String ref,
             long quoteId, Side side, long lots, long ticks, long minLots, Params params, long now)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException,
                     IOException {
@@ -717,11 +717,11 @@ public final @NonNullByDefault class BackUnrest {
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            return parseResultStruct(p);
+            return parseResponseStruct(p);
         }
     }
 
-    public final ResultStruct putOrder(String trader, String market, long id, long lots,
+    public final ResponseStruct putOrder(String trader, String market, long id, long lots,
             Params params, long now) throws BadRequestException, NotFoundException,
                     ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
@@ -729,11 +729,11 @@ public final @NonNullByDefault class BackUnrest {
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            return parseResultStruct(p);
+            return parseResponseStruct(p);
         }
     }
 
-    public final ResultStruct putOrder(String trader, String market, JslNode first, long lots,
+    public final ResponseStruct putOrder(String trader, String market, JslNode first, long lots,
             Params params, long now) throws BadRequestException, NotFoundException,
                     ServiceUnavailableException, IOException {
         final StringBuilder sb = new StringBuilder();
@@ -741,7 +741,7 @@ public final @NonNullByDefault class BackUnrest {
 
         try (JsonParser p = Json.createParser(new StringReader(sb.toString()))) {
             parseStartObject(p);
-            return parseResultStruct(p);
+            return parseResponseStruct(p);
         }
     }
 

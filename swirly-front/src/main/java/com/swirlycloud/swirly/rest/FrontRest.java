@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.swirlycloud.swirly.domain.RecType;
 import com.swirlycloud.swirly.entity.EntitySet;
 import com.swirlycloud.swirly.entity.Exec;
 import com.swirlycloud.swirly.entity.Factory;
@@ -25,7 +26,6 @@ import com.swirlycloud.swirly.entity.Order;
 import com.swirlycloud.swirly.entity.Posn;
 import com.swirlycloud.swirly.entity.Rec;
 import com.swirlycloud.swirly.entity.RecTree;
-import com.swirlycloud.swirly.entity.RecType;
 import com.swirlycloud.swirly.entity.RequestIdTree;
 import com.swirlycloud.swirly.entity.TraderPosnTree;
 import com.swirlycloud.swirly.exception.NotFoundException;

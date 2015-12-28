@@ -14,11 +14,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.collection.Sequence;
+import com.swirlycloud.swirly.domain.AssetType;
 import com.swirlycloud.swirly.domain.Role;
 import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.domain.State;
 import com.swirlycloud.swirly.entity.Asset;
-import com.swirlycloud.swirly.entity.AssetType;
 import com.swirlycloud.swirly.entity.Contr;
 import com.swirlycloud.swirly.entity.Exec;
 import com.swirlycloud.swirly.entity.Factory;
