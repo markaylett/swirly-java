@@ -52,7 +52,6 @@ import com.swirlycloud.swirly.exception.TooLateException;
 import com.swirlycloud.swirly.exception.TraderNotFoundException;
 import com.swirlycloud.swirly.intrusive.SlQueue;
 import com.swirlycloud.swirly.io.Cache;
-import com.swirlycloud.swirly.io.Datastore;
 import com.swirlycloud.swirly.io.Journ;
 import com.swirlycloud.swirly.io.Model;
 import com.swirlycloud.swirly.node.DlNode;
@@ -570,11 +569,6 @@ public @NonNullByDefault class Serv {
         }
 
         updateDirty();
-    }
-
-    public Serv(Datastore datastore, Cache cache, long now)
-            throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(datastore, datastore, cache, now);
     }
 
     public final TraderSess createTrader(String mnem, @Nullable String display, String email)

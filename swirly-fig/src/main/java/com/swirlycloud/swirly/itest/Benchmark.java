@@ -79,7 +79,7 @@ public final class Benchmark {
 
     public static void main(String[] args) throws Exception {
         try (final Datastore datastore = new MockDatastore()) {
-            final Serv serv = new Serv(datastore, NO_CACHE, now());
+            final Serv serv = new Serv(datastore, datastore, NO_CACHE, now());
             run(serv);
         }
     }

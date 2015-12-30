@@ -36,7 +36,6 @@ import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.OrderNotFoundException;
 import com.swirlycloud.swirly.exception.ServiceUnavailableException;
 import com.swirlycloud.swirly.io.Cache;
-import com.swirlycloud.swirly.io.Datastore;
 import com.swirlycloud.swirly.io.Journ;
 import com.swirlycloud.swirly.io.Model;
 import com.swirlycloud.swirly.node.JslNode;
@@ -73,11 +72,6 @@ public final @NonNullByDefault class BackRest implements Rest {
     public BackRest(Model model, Journ journ, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(model, journ, cache, now));
-    }
-
-    public BackRest(Datastore datastore, Cache cache, long now)
-            throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(new LockableServ(datastore, cache, now));
     }
 
     public BackRest(LockableServ serv) {

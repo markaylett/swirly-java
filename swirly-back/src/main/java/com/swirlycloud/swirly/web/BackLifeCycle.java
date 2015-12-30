@@ -116,7 +116,7 @@ public final class BackLifeCycle implements ServletContextListener {
             } else {
                 throw new RuntimeException("unsupported servlet container");
             }
-            rest = new BackRest(datastore, cache, now());
+            rest = new BackRest(datastore, datastore, cache, now());
         } finally {
             if (rest == null) {
                 try {

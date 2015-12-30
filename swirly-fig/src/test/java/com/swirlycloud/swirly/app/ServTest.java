@@ -94,7 +94,9 @@ public final class ServTest {
 
     @Before
     public final void setUp() throws Exception {
-        serv = new Serv(newDatastore(), NO_CACHE, NOW);
+        @SuppressWarnings("resource")
+        final Datastore datastore = newDatastore();
+        serv = new Serv(datastore, datastore, NO_CACHE, NOW);
     }
 
     @After

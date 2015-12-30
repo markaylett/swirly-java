@@ -367,7 +367,7 @@ public abstract class RestTest {
     public final void setUp() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, InterruptedException, IOException {
         final Datastore datastore = new MockDatastore();
-        final BackUnrest unrest = new BackUnrest(datastore, NO_CACHE, TODAY_MILLIS);
+        final BackUnrest unrest = new BackUnrest(datastore, datastore, NO_CACHE, TODAY_MILLIS);
         this.unrest = unrest;
         boolean success = false;
         try {
