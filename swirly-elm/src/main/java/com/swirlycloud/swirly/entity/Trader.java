@@ -12,15 +12,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.domain.RecType;
-import com.swirlycloud.swirly.node.SlNode;
 import com.swirlycloud.swirly.util.Params;
 
-public @NonNullByDefault class Trader extends AbstractRec implements SlNode {
+public @NonNullByDefault class Trader extends AbstractRec {
 
     private static final long serialVersionUID = 1L;
-
-    // Used by EmailIdx.
-    private transient @Nullable SlNode slNext;
 
     protected final String email;
 
@@ -65,16 +61,6 @@ public @NonNullByDefault class Trader extends AbstractRec implements SlNode {
             }
         }
         throw new IOException("end-of object not found");
-    }
-
-    @Override
-    public final void setSlNext(@Nullable SlNode next) {
-        this.slNext = next;
-    }
-
-    @Override
-    public final @Nullable SlNode slNext() {
-        return slNext;
     }
 
     @Override

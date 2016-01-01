@@ -5,34 +5,37 @@ package com.swirlycloud.swirly.entity;
 
 import com.swirlycloud.swirly.intrusive.AbstractObjectMap;
 
-public final class TraderEmailMap extends AbstractObjectMap<String, Trader> {
+/**
+ * Unordered TraderSess map keyed by email.
+ */
+public final class TraderSessMap extends AbstractObjectMap<String, TraderSess> {
 
     @Override
-    protected final void setNext(Trader node, Trader next) {
+    protected final void setNext(TraderSess node, TraderSess next) {
         node.setSlNext(next);
     }
 
     @Override
-    protected final Trader next(Trader node) {
-        return (Trader) node.slNext();
+    protected final TraderSess next(TraderSess node) {
+        return (TraderSess) node.slNext();
     }
 
     @Override
-    protected final int hashNode(Trader node) {
+    protected final int hashNode(TraderSess node) {
         return node.getEmail().hashCode();
     }
 
     @Override
-    protected final boolean equalNode(Trader lhs, Trader rhs) {
+    protected final boolean equalNode(TraderSess lhs, TraderSess rhs) {
         return lhs.getEmail().equals(rhs.getEmail());
     }
 
     @Override
-    protected final boolean equalKey(Trader lhs, String rhs) {
+    protected final boolean equalKey(TraderSess lhs, String rhs) {
         return lhs.getEmail().equals(rhs);
     }
 
-    public TraderEmailMap(int capacity) {
+    public TraderSessMap(int capacity) {
         super(capacity);
     }
 }

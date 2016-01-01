@@ -19,8 +19,9 @@ import com.swirlycloud.swirly.entity.Trader;
 import com.swirlycloud.swirly.entity.TraderPosnTree;
 import com.swirlycloud.swirly.io.Cache;
 import com.swirlycloud.swirly.node.RbNode;
+import com.swirlycloud.swirly.node.SlNode;
 
-public @NonNullByDefault class TraderSess extends Trader {
+public @NonNullByDefault class TraderSess extends Trader implements SlNode {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,6 +33,9 @@ public @NonNullByDefault class TraderSess extends Trader {
     public static final int DIRTY_QUOTE = 1 << 4;
     public static final int DIRTY_ALL = DIRTY_EMAIL | DIRTY_ORDER | DIRTY_TRADE | DIRTY_POSN
             | DIRTY_QUOTE;
+
+    // Used by EmailIdx.
+    private transient @Nullable SlNode slNext;
 
     private final transient RequestRefMap refIdx;
     private final transient Factory factory;
@@ -48,6 +52,16 @@ public @NonNullByDefault class TraderSess extends Trader {
         super(mnem, display, email);
         this.refIdx = refIdx;
         this.factory = factory;
+    }
+
+    @Override
+    public final void setSlNext(@Nullable SlNode next) {
+        this.slNext = next;
+    }
+
+    @Override
+    public final @Nullable SlNode slNext() {
+        return slNext;
     }
 
     public final void insertOrder(Order order) {

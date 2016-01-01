@@ -34,7 +34,7 @@ import com.swirlycloud.swirly.entity.Posn;
 import com.swirlycloud.swirly.entity.Quote;
 import com.swirlycloud.swirly.entity.Rec;
 import com.swirlycloud.swirly.entity.RecTree;
-import com.swirlycloud.swirly.entity.TraderEmailMap;
+import com.swirlycloud.swirly.entity.TraderSessMap;
 import com.swirlycloud.swirly.entity.TraderSess;
 import com.swirlycloud.swirly.exception.AlreadyExistsException;
 import com.swirlycloud.swirly.exception.BadRequestException;
@@ -87,7 +87,7 @@ public @NonNullByDefault class Serv {
     private final RecTree markets;
     private final RecTree traders;
     private final MarketViewTree views = new MarketViewTree();
-    private final TraderEmailMap emailIdx = new TraderEmailMap(CAPACITY);
+    private final TraderSessMap emailIdx = new TraderSessMap(CAPACITY);
     private final PriorityQueue<Quote> quotes = new PriorityQueue<>(new Comparator<Quote>() {
         @Override
         public final int compare(@Nullable Quote lhs, @Nullable Quote rhs) {
@@ -734,7 +734,7 @@ public @NonNullByDefault class Serv {
     }
 
     public final @Nullable TraderSess findTraderByEmail(String email) {
-        return (TraderSess) emailIdx.find(email);
+        return emailIdx.find(email);
     }
 
     public final MarketBook createMarket(String mnem, @Nullable String display, String contr,
