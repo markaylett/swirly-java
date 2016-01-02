@@ -571,57 +571,6 @@ public @NonNullByDefault class Serv {
         updateDirty();
     }
 
-    public final TraderSess createTrader(String mnem, @Nullable String display, String email)
-            throws BadRequestException, ServiceUnavailableException {
-        if (traders.find(mnem) != null) {
-            throw new AlreadyExistsException(String.format("trader '%s' already exists", mnem));
-        }
-        if (emailIdx.find(email) != null) {
-            throw new AlreadyExistsException(String.format("email '%s' is already in use", email));
-        }
-        final TraderSess sess = newTrader(mnem, display, email);
-
-        try {
-            journ.createTrader(mnem, display, email);
-        } catch (final RejectedExecutionException e) {
-            throw new ServiceUnavailableException("journal is busy", e);
-        }
-
-        // Commit phase.
-
-        setDirty(DIRTY_TRADER);
-        setDirty(sess, TraderSess.DIRTY_ALL);
-
-        traders.insert(sess);
-        emailIdx.insert(sess);
-
-        updateDirty();
-        return sess;
-    }
-
-    public final TraderSess updateTrader(String mnem, @Nullable String display)
-            throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        final TraderSess sess = (TraderSess) traders.find(mnem);
-        if (sess == null) {
-            throw new TraderNotFoundException(String.format("trader '%s' does not exist", mnem));
-        }
-
-        try {
-            journ.updateTrader(mnem, display);
-        } catch (final RejectedExecutionException e) {
-            throw new ServiceUnavailableException("journal is busy", e);
-        }
-
-        // Commit phase.
-
-        setDirty(DIRTY_TRADER);
-
-        sess.setDisplay(display);
-
-        updateDirty();
-        return sess;
-    }
-
     public final @Nullable Rec findRec(RecType recType, String mnem) {
         Rec rec = null;
         switch (recType) {
@@ -717,26 +666,6 @@ public @NonNullByDefault class Serv {
         return result;
     }
 
-    public final MarketBook getMarket(String mnem) throws NotFoundException {
-        final MarketBook book = (MarketBook) markets.find(mnem);
-        if (book == null) {
-            throw new MarketNotFoundException(String.format("market '%s' does not exist", mnem));
-        }
-        return book;
-    }
-
-    public final TraderSess getTrader(String mnem) throws NotFoundException {
-        final TraderSess sess = (TraderSess) traders.find(mnem);
-        if (sess == null) {
-            throw new TraderNotFoundException(String.format("trader '%s' does not exist", mnem));
-        }
-        return sess;
-    }
-
-    public final @Nullable TraderSess findTraderByEmail(String email) {
-        return emailIdx.find(email);
-    }
-
     public final MarketBook createMarket(String mnem, @Nullable String display, String contr,
             int settlDay, int expiryDay, int state, long now)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
@@ -803,6 +732,77 @@ public @NonNullByDefault class Serv {
 
         updateDirty();
         return book;
+    }
+
+    public final MarketBook getMarket(String mnem) throws NotFoundException {
+        final MarketBook book = (MarketBook) markets.find(mnem);
+        if (book == null) {
+            throw new MarketNotFoundException(String.format("market '%s' does not exist", mnem));
+        }
+        return book;
+    }
+
+    public final TraderSess createTrader(String mnem, @Nullable String display, String email)
+            throws BadRequestException, ServiceUnavailableException {
+        if (traders.find(mnem) != null) {
+            throw new AlreadyExistsException(String.format("trader '%s' already exists", mnem));
+        }
+        if (emailIdx.find(email) != null) {
+            throw new AlreadyExistsException(String.format("email '%s' is already in use", email));
+        }
+        final TraderSess sess = newTrader(mnem, display, email);
+
+        try {
+            journ.createTrader(mnem, display, email);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(DIRTY_TRADER);
+        setDirty(sess, TraderSess.DIRTY_ALL);
+
+        traders.insert(sess);
+        emailIdx.insert(sess);
+
+        updateDirty();
+        return sess;
+    }
+
+    public final TraderSess updateTrader(String mnem, @Nullable String display)
+            throws BadRequestException, NotFoundException, ServiceUnavailableException {
+        final TraderSess sess = (TraderSess) traders.find(mnem);
+        if (sess == null) {
+            throw new TraderNotFoundException(String.format("trader '%s' does not exist", mnem));
+        }
+
+        try {
+            journ.updateTrader(mnem, display);
+        } catch (final RejectedExecutionException e) {
+            throw new ServiceUnavailableException("journal is busy", e);
+        }
+
+        // Commit phase.
+
+        setDirty(DIRTY_TRADER);
+
+        sess.setDisplay(display);
+
+        updateDirty();
+        return sess;
+    }
+
+    public final TraderSess getTrader(String mnem) throws NotFoundException {
+        final TraderSess sess = (TraderSess) traders.find(mnem);
+        if (sess == null) {
+            throw new TraderNotFoundException(String.format("trader '%s' does not exist", mnem));
+        }
+        return sess;
+    }
+
+    public final @Nullable TraderSess findTraderByEmail(String email) {
+        return emailIdx.find(email);
     }
 
     public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref,

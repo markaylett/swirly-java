@@ -30,7 +30,7 @@ public @NonNullByDefault class BasicFactory implements Factory {
     public Market newMarket(String mnem, @Nullable String display, String contr, int settlDay,
             int expiryDay, int state, long lastLots, long lastTicks, long lastTime, long maxOrderId,
             long maxExecId, long maxQuoteId) {
-        // Note that last five arguments are unused in this base implementation.
+        // Note that the last six arguments are unused in this base implementation.
         return new Market(mnem, display, contr, settlDay, expiryDay, state);
     }
 
