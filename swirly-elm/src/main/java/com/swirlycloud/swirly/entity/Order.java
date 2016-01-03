@@ -53,7 +53,7 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     private long lastLots;
     private long lastTicks;
     /**
-     * Minimum to be filled by this
+     * Minimum to be filled by this order.
      */
     private final long minLots;
     private boolean pecan;
