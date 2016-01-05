@@ -73,13 +73,12 @@ public @NonNullByDefault class BasicFactory implements Factory {
     }
 
     @Override
-    public final Exec newExec(Instruct instruct, long id, long created) {
-        return newExec(instruct.getTrader(), instruct.getMarket(), instruct.getContr(),
-                instruct.getSettlDay(), id, instruct.getRef(), instruct.getOrderId(),
-                instruct.getQuoteId(), instruct.getState(), instruct.getSide(), instruct.getLots(),
-                instruct.getTicks(), instruct.getResd(), instruct.getExec(), instruct.getCost(),
-                instruct.getLastLots(), instruct.getLastTicks(), instruct.getMinLots(), 0, null,
-                null, created);
+    public final Exec newExec(Order order, long id, long created) {
+        return newExec(order.getTrader(), order.getMarket(), order.getContr(), order.getSettlDay(),
+                id, order.getRef(), order.getOrderId(), order.getQuoteId(), order.getState(),
+                order.getSide(), order.getLots(), order.getTicks(), order.getResd(),
+                order.getExec(), order.getCost(), order.getLastLots(), order.getLastTicks(),
+                order.getMinLots(), 0, null, null, created);
     }
 
     @Override

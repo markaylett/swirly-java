@@ -27,15 +27,14 @@ import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.domain.State;
 import com.swirlycloud.swirly.entity.Exec;
 import com.swirlycloud.swirly.entity.Factory;
-import com.swirlycloud.swirly.entity.Instruct;
 import com.swirlycloud.swirly.entity.MarketViewTree;
 import com.swirlycloud.swirly.entity.Order;
 import com.swirlycloud.swirly.entity.Posn;
 import com.swirlycloud.swirly.entity.Quote;
 import com.swirlycloud.swirly.entity.Rec;
 import com.swirlycloud.swirly.entity.RecTree;
-import com.swirlycloud.swirly.entity.TraderSessMap;
 import com.swirlycloud.swirly.entity.TraderSess;
+import com.swirlycloud.swirly.entity.TraderSessMap;
 import com.swirlycloud.swirly.exception.AlreadyExistsException;
 import com.swirlycloud.swirly.exception.BadRequestException;
 import com.swirlycloud.swirly.exception.InvalidException;
@@ -217,8 +216,8 @@ public @NonNullByDefault class Serv {
         return (MarketBook) factory.newMarket(mnem, display, contr, settlDay, expiryDay, state);
     }
 
-    private final Exec newExec(MarketBook book, Instruct instruct, long now) {
-        return factory.newExec(instruct, book.allocExecId(), now);
+    private final Exec newExec(MarketBook book, Order order, long now) {
+        return factory.newExec(order, book.allocExecId(), now);
     }
 
     private final Match createMatch(MarketBook book, Order takerOrder, Order makerOrder, long lots,

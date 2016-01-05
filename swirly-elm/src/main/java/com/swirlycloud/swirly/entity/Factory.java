@@ -41,7 +41,7 @@ public @NonNullByDefault interface Factory {
             long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
             long minLots, long matchId, @Nullable Role role, @Nullable String cpty, long created);
 
-    Exec newExec(Instruct instruct, long id, long created);
+    Exec newExec(Order order, long id, long created);
 
     Posn newPosn(String trader, String contr, int settlDay, long buyLots, long buyCost,
             long sellLots, long sellCost);
