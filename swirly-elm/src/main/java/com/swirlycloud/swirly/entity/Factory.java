@@ -32,27 +32,14 @@ public @NonNullByDefault interface Factory {
             long resd, long exec, long cost, long lastLots, long lastTicks, long minLots,
             boolean pecan, long created, long modified);
 
-    Order newOrder(String trader, Financial fin, long id, @Nullable String ref, long quoteId,
-            State state, Side side, long lots, long ticks, long resd, long exec, long cost,
-            long lastLots, long lastTicks, long minLots, boolean pecan, long created,
-            long modified);
-
     Order newOrder(String trader, String market, String contr, int settlDay, long id,
             @Nullable String ref, long quoteId, Side side, long lots, long ticks, long minLots,
             long created);
-
-    Order newOrder(String trader, Financial fin, long id, @Nullable String ref, long quoteId,
-            Side side, long lots, long ticks, long minLots, long created);
 
     Exec newExec(String trader, String market, String contr, int settlDay, long id,
             @Nullable String ref, long orderId, long quoteId, State state, Side side, long lots,
             long ticks, long resd, long exec, long cost, long lastLots, long lastTicks,
             long minLots, long matchId, @Nullable Role role, @Nullable String cpty, long created);
-
-    Exec newExec(String trader, Financial fin, long id, @Nullable String ref, long orderId,
-            long quoteId, State state, Side side, long lots, long ticks, long resd, long exec,
-            long cost, long lastLots, long lastTicks, long minLots, long matchId,
-            @Nullable Role role, @Nullable String cpty, long created);
 
     Exec newExec(Instruct instruct, long id, long created);
 
@@ -64,7 +51,4 @@ public @NonNullByDefault interface Factory {
     Quote newQuote(String trader, String market, String contr, int settlDay, long id,
             @Nullable String ref, @Nullable Order order, Side side, long lots, long ticks,
             long created, long expiry);
-
-    Quote newQuote(String trader, Financial fin, long id, @Nullable String ref,
-            @Nullable Order order, Side side, long lots, long ticks, long created, long expiry);
 }
