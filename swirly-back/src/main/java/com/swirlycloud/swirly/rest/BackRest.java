@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.rest;
 
-import static com.swirlycloud.swirly.date.DateUtil.getBusDate;
+import static com.swirlycloud.swirly.date.DateUtil.getBusDay;
 import static com.swirlycloud.swirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.swirly.rest.RestUtil.getExpiredParam;
 import static com.swirlycloud.swirly.util.JsonUtil.toJsonArray;
@@ -51,7 +51,7 @@ public final @NonNullByDefault class BackRest implements Rest {
     private static void getView(@Nullable RbNode first, Params params, long now, Appendable out)
             throws IOException {
         final boolean withExpired = getExpiredParam(params);
-        final int busDay = getBusDate(now).toJd();
+        final int busDay = getBusDay(now).toJd();
         out.append('[');
         int i = 0;
         for (RbNode node = first; node != null; node = node.rbNext()) {
@@ -457,7 +457,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             lock = serv.demoteLock();
             final MarketBook book = serv.getMarket(market);
             final boolean withExpired = getExpiredParam(params);
-            final int busDay = getBusDate(now).toJd();
+            final int busDay = getBusDay(now).toJd();
             if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
                 throw new MarketClosedException(
                         String.format("market '%s' has expired", book.getMnem()));

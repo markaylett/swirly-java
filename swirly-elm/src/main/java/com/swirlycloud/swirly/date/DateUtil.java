@@ -15,16 +15,16 @@ public final class DateUtil {
     public static final DateTimeZone NY = DateTimeZone.forID("America/New_York");
 
     /**
-     * Get the business date from a transaction time.
+     * Get the business day from a transaction time.
      * 
-     * Business dates roll at 5pm New York.
+     * Business day rolls at 5pm New York.
      * 
      * @param ms
-     *            The milliseconds since epoch.
-     * @return the business date.
+     *            Milliseconds since epoch.
+     * @return the business day.
      */
     @NonNull
-    public static GregDate getBusDate(long ms) {
+    public static GregDate getBusDay(long ms) {
         // Add 7 hours to 17.00 will effectively roll the date.
         return GregDate.valueOf(new DateTime(ms, NY).plusHours(7));
     }

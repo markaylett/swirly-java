@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.rest;
 
-import static com.swirlycloud.swirly.date.DateUtil.getBusDate;
+import static com.swirlycloud.swirly.date.DateUtil.getBusDay;
 import static com.swirlycloud.swirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.swirly.util.JsonUtil.toJsonArray;
 
@@ -374,7 +374,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
                     out.append(',');
                 }
                 out.append("\"posns\":");
-                final int busDay = getBusDate(now).toJd();
+                final int busDay = getBusDay(now).toJd();
                 final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
                 toJsonArray(posns.getFirst(), params, out);
                 ++i;
@@ -556,7 +556,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             timeout = readTimeout(map.get("timeout"));
-            final int busDay = getBusDate(now).toJd();
+            final int busDay = getBusDay(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
 
             toJsonArray(posns.getFirst(), params, out);
@@ -579,7 +579,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             timeout = readTimeout(map.get("timeout"));
-            final int busDay = getBusDate(now).toJd();
+            final int busDay = getBusDay(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
 
             RestUtil.filterPosn(posns.getFirst(), contr, params, out);
@@ -602,7 +602,7 @@ public final @NonNullByDefault class FrontRest implements Rest {
         try {
             final Map<String, Object> map = cache.read(keys).get();
             timeout = readTimeout(map.get("timeout"));
-            final int busDay = getBusDate(now).toJd();
+            final int busDay = getBusDay(now).toJd();
             final TraderPosnTree posns = readPosn(trader, busDay, map.get(posnKey));
 
             final Posn posn = posns.find(contr, maybeIsoToJd(settlDate));

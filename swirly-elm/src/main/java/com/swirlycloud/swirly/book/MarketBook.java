@@ -18,11 +18,6 @@ import com.swirlycloud.swirly.entity.Order;
 import com.swirlycloud.swirly.node.RbNode;
 import com.swirlycloud.swirly.util.Params;
 
-/**
- * A place where buyers and sellers come together to exchange goods or services.
- * 
- * @author Mark Aylett
- */
 public @NonNullByDefault class MarketBook extends Market {
 
     private static final long serialVersionUID = 1L;

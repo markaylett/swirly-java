@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.app;
 
-import static com.swirlycloud.swirly.date.DateUtil.getBusDate;
+import static com.swirlycloud.swirly.date.DateUtil.getBusDay;
 import static com.swirlycloud.swirly.date.JulianDay.maybeJdToIso;
 import static com.swirlycloud.swirly.node.SlUtil.popNext;
 import static com.swirlycloud.swirly.util.CollectionUtil.compareLong;
@@ -543,7 +543,7 @@ public @NonNullByDefault class Serv {
             sess.insertTrade(trade);
         }
 
-        final SlNode firstPosn = model.readPosn(getBusDate(now).toJd(), factory);
+        final SlNode firstPosn = model.readPosn(getBusDay(now).toJd(), factory);
         for (SlNode node = firstPosn; node != null;) {
             final Posn posn = (Posn) node;
             node = popNext(node);
@@ -673,7 +673,7 @@ public @NonNullByDefault class Serv {
         }
         if (settlDay != 0) {
             // busDay <= expiryDay <= settlDay.
-            final int busDay = getBusDate(now).toJd();
+            final int busDay = getBusDay(now).toJd();
             if (settlDay < expiryDay) {
                 throw new InvalidException("settl-day before expiry-day");
             }
@@ -807,7 +807,7 @@ public @NonNullByDefault class Serv {
     public final void createOrder(TraderSess sess, MarketBook book, @Nullable String ref,
             long quoteId, Side side, long lots, long ticks, long minLots, long now, Response resp)
                     throws BadRequestException, NotFoundException, ServiceUnavailableException {
-        final int busDay = getBusDate(now).toJd();
+        final int busDay = getBusDay(now).toJd();
         if (book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
             throw new MarketClosedException(String.format("market for '%s' on '%d' has expired",
                     book.getContr(), maybeJdToIso(book.getSettlDay())));
@@ -1516,7 +1516,7 @@ public @NonNullByDefault class Serv {
      */
     public final void expireEndOfDay(long now)
             throws NotFoundException, ServiceUnavailableException {
-        final int busDay = getBusDate(now).toJd();
+        final int busDay = getBusDay(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final MarketBook book = (MarketBook) node;
             node = node.rbNext();
@@ -1528,7 +1528,7 @@ public @NonNullByDefault class Serv {
     }
 
     public final void settlEndOfDay(long now) {
-        final int busDay = getBusDate(now).toJd();
+        final int busDay = getBusDay(now).toJd();
         for (RbNode node = markets.getFirst(); node != null;) {
             final MarketBook book = (MarketBook) node;
             node = node.rbNext();
