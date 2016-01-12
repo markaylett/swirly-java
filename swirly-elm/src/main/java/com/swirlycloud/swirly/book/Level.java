@@ -36,13 +36,13 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
      */
     int count;
 
-    Level(Order order) {
-        final long ticks = order.getTicks();
-        this.firstOrder = order;
-        this.key = composeKey(order.getSide(), ticks);
+    Level(Order firstOrder) {
+        final long ticks = firstOrder.getTicks();
+        this.firstOrder = firstOrder;
+        this.key = composeKey(firstOrder.getSide(), ticks);
         this.ticks = ticks;
-        this.resd = order.getResd();
-        this.quotd = order.getQuotd();
+        this.resd = firstOrder.getResd();
+        this.quotd = firstOrder.getQuotd();
         this.count = 1;
     }
 
