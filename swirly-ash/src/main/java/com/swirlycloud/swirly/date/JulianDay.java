@@ -94,12 +94,12 @@ public final class JulianDay {
     /**
      * Julian day to milliseconds since Unix epoch.
      */
-    public static long jdToMillis(int jd) {
+    public static long jdToMs(int jd) {
         // Julian day for January 1st, 1970.
         final int JD_UNIX_EPOC = 2440588;
-        final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
+        final long MS_IN_DAY = 24 * 60 * 60 * 1000;
         // Add half day for 12pm.
-        return (jd - JD_UNIX_EPOC) * MILLIS_IN_DAY + (MILLIS_IN_DAY >> 1);
+        return (jd - JD_UNIX_EPOC) * MS_IN_DAY + (MS_IN_DAY >> 1);
     }
 
     /**

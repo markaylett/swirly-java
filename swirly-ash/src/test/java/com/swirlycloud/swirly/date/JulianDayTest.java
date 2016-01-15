@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.date;
 
-import static com.swirlycloud.swirly.date.JulianDay.jdToMillis;
+import static com.swirlycloud.swirly.date.JulianDay.jdToMs;
 import static com.swirlycloud.swirly.date.JulianDay.ymdToIso;
 import static com.swirlycloud.swirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
@@ -25,7 +25,7 @@ public final class JulianDayTest {
     }
 
     @Test
-    public final void testJdToMillis() {
-        assertEquals(1394798400000L, jdToMillis(ymdToJd(2014, 2, 14)));
+    public final void testJdToMs() {
+        assertEquals(1394798400000L, jdToMs(ymdToJd(2014, 2, 14)));
     }
 }

@@ -43,10 +43,10 @@ public final class TraderRestTest extends RestTest {
     @Test
     public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postOrder(MARAYL, EURUSD_MAR14, 0, Side.BUY, 10, 12345, TODAY_MILLIS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.BUY, 10, 12345, TODAY_MS);
         EntitySet es = new EntitySet(EntitySet.ORDER | EntitySet.TRADE | EntitySet.POSN);
-        final SessStruct out = unrest.getSess(MARAYL, es, PARAMS_NONE, TODAY_MILLIS);
+        final SessStruct out = unrest.getSess(MARAYL, es, PARAMS_NONE, TODAY_MS);
         assertOrder(MARAYL, EURUSD_MAR14, State.TRADE, Side.SELL, 10, 12345, 0, 10, 123450, 10,
                 12345, out.orders.get(Long.valueOf(1)));
         assertOrder(MARAYL, EURUSD_MAR14, State.TRADE, Side.BUY, 10, 12345, 0, 10, 123450, 10,
@@ -71,7 +71,7 @@ public final class TraderRestTest extends RestTest {
             assertEquals("MARAYL2", trader.getMnem());
             assertEquals("Mark Aylett", trader.getDisplay());
             assertEquals("mark.aylett@swirlycloud.com", trader.getEmail());
-            trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL2", PARAMS_NONE, TODAY_MILLIS);
+            trader = (Trader) unrest.getRec(RecType.TRADER, "MARAYL2", PARAMS_NONE, TODAY_MS);
         }
     }
 
