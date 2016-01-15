@@ -816,7 +816,7 @@ public @NonNullByDefault class Serv {
             throw new InvalidLotsException(String.format("invalid lots '%d'", lots));
         }
         final long orderId = book.allocOrderId();
-        final Order order = factory.newOrder(sess.getMnem(), book.getMarket(), book.getContr(),
+        final Order order = factory.newOrder(sess.getMnem(), book.getMnem(), book.getContr(),
                 book.getSettlDay(), orderId, ref, quoteId, side, lots, ticks, minLots, now);
 
         final Exec exec = newExec(book, order, now);
