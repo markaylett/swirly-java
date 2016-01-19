@@ -3,6 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.book;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.entity.Order;
@@ -10,12 +11,15 @@ import com.swirlycloud.swirly.intrusive.DlList;
 import com.swirlycloud.swirly.node.DlNode;
 import com.swirlycloud.swirly.node.RbNode;
 
-public final class BookSide {
+public final @NonNullByDefault class BookSide {
 
     private final LevelTree levels = new LevelTree();
     private final DlList orders = new DlList();
 
-    private final Level getLazyLevel(Order order) {
+    /**
+     * Insert level. This function will only throw if a new level cannot be allocated.
+     */
+    private final Level insertLevel(Order order) {
         final long key = Level.composeKey(order.getSide(), order.getTicks());
         Level level = levels.pfind(key);
         if (level == null || level.getKey() != key) {
@@ -29,63 +33,13 @@ public final class BookSide {
         return level;
     }
 
-    private final void reduceLevel(Order order, long delta) {
-        assert order != null;
-        assert order.getLevel() != null;
-        assert delta >= 0 && delta <= order.getResd();
+    private final void removeOrder(Level level, Order order) {
 
-        if (delta < order.getResd()) {
-            // Reduce level and order by lots.
-            final Level level = (Level) order.getLevel();
-            assert level != null;
-            level.resd -= delta;
-        } else {
-            assert delta == order.getResd();
-            removeOrder(order);
-        }
-    }
-
-    /**
-     * Insert order into side. Assumes that the order does not already belong to a side. I.e. it
-     * assumes that level member is null. Assumes that order-id and reference are unique.
-     */
-    public final void insertOrder(Order order) {
-
-        assert order != null;
-        assert order.getLevel() == null;
-        assert order.getTicks() != 0;
-        assert order.getResd() > 0;
-        assert order.getExec() <= order.getLots();
-        assert order.getLots() > 0;
-        assert order.getMinLots() >= 0;
-
-        final Level level = getLazyLevel(order);
-        final Level nextLevel = (Level) level.rbNext();
-
-        if (nextLevel != null) {
-            // Insert order after the level's last order.
-            // I.e. insert order before the next level's first order.
-            order.insertBefore(nextLevel.firstOrder);
-        } else {
-            orders.insertBack(order);
-        }
-    }
-
-    /**
-     * Internal housekeeping aside, the state of the order is not affected by this function.
-     */
-    public final void removeOrder(Order order) {
-        assert order != null;
-
-        final Level level = (Level) order.getLevel();
-        if (level == null) {
-            return;
-        }
         level.subOrder(order);
 
         if (level.count == 0) {
             // Remove level.
-            assert level.resd == 0;
+            assert level.getResd() == 0;
             levels.remove(level);
         } else if (level.firstOrder == order) {
             // First order at this level is being removed.
@@ -98,26 +52,80 @@ public final class BookSide {
         order.setLevel(null);
     }
 
+    private final void reduceLevel(Level level, Order order, long delta) {
+        assert delta >= 0;
+        assert delta <= order.getResd();
+
+        if (delta < order.getResd()) {
+            // Reduce level's resd by delta.
+            level.reduce(delta);
+        } else {
+            assert delta == order.getResd();
+            removeOrder(level, order);
+        }
+    }
+
+    /**
+     * Insert order into side. Assumes that the order does not already belong to a side. I.e. it
+     * assumes that level member is null. Assumes that order-id and reference are unique. This
+     * function will only throw if a new level cannot be allocated.
+     */
+    public final void insertOrder(Order order) {
+
+        assert order.getLevel() == null;
+        assert order.getTicks() != 0;
+        assert order.getResd() > 0;
+        assert order.getExec() <= order.getLots();
+        assert order.getLots() > 0;
+        assert order.getMinLots() >= 0;
+
+        final Level level = insertLevel(order);
+        final Level nextLevel = (Level) level.rbNext();
+
+        if (nextLevel != null) {
+            // Insert order after the level's last order.
+            // I.e. insert order before the next level's first order.
+            order.insertBefore(nextLevel.firstOrder);
+        } else {
+            orders.insertBack(order);
+        }
+    }
+
+    /**
+     * Remove order from side. Internal housekeeping aside, the state of the order is not affected
+     * by this function.
+     */
+    public final void removeOrder(Order order) {
+        final Level level = (Level) order.getLevel();
+        if (level != null) {
+            removeOrder(level, order);
+        }
+    }
+
     public final void createOrder(Order order, long now) {
         order.create(now);
         insertOrder(order);
     }
 
     public final void reviseOrder(Order order, long lots, long now) {
-        assert order != null;
-        assert order.getLevel() != null;
         assert lots > 0;
-        assert lots >= order.getExec() && lots >= order.getMinLots() && lots <= order.getLots();
+        assert lots <= order.getLots();
+        assert lots >= order.getExec();
+        assert lots >= order.getMinLots();
 
-        final long delta = order.getLots() - lots;
-
-        // This will increase order revision.
-        reduceLevel(order, delta);
+        final Level level = (Level) order.getLevel();
+        if (level != null) {
+            final long delta = order.getLots() - lots;
+            reduceLevel(level, order, delta);
+        }
         order.revise(lots, now);
     }
 
     public final void cancelOrder(Order order, long now) {
-        removeOrder(order);
+        final Level level = (Level) order.getLevel();
+        if (level != null) {
+            removeOrder(level, order);
+        }
         order.cancel(now);
     }
 
@@ -126,19 +134,23 @@ public final class BookSide {
      * from the side.
      */
     public final void takeOrder(Order order, long lots, long now) {
-        assert order != null;
-        assert order.getLevel() != null;
-
-        reduceLevel(order, lots);
+        final Level level = (Level) order.getLevel();
+        if (level != null) {
+            reduceLevel(level, order, lots);
+        }
         order.trade(lots, order.getTicks(), now);
     }
 
     public final DlNode getFirstOrder() {
-        return orders.getFirst();
+        final DlNode node = orders.getFirst();
+        assert node != null;
+        return node;
     }
 
     public final DlNode getLastOrder() {
-        return orders.getLast();
+        final DlNode node = orders.getLast();
+        assert node != null;
+        return node;
     }
 
     public final boolean isEmptyOrder() {

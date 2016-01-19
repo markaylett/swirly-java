@@ -7,7 +7,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.entity.Order;
-import com.swirlycloud.swirly.entity.Quote;
 import com.swirlycloud.swirly.node.AbstractRbNode;
 import com.swirlycloud.swirly.node.DlNode;
 
@@ -29,8 +28,7 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
     /**
      * Must be greater than zero.
      */
-    long resd;
-    private long quotd;
+    private long resd;
     /**
      * Must be greater than zero.
      */
@@ -42,7 +40,6 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
         this.key = composeKey(firstOrder.getSide(), ticks);
         this.ticks = ticks;
         this.resd = firstOrder.getResd();
-        this.quotd = firstOrder.getQuotd();
         this.count = 1;
     }
 
@@ -53,24 +50,18 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
         return side == Side.BUY ? -ticks : ticks;
     }
 
+    final void reduce(long delta) {
+        this.resd -= delta;
+    }
+
     final void addOrder(Order order) {
         resd += order.getResd();
-        quotd += order.getQuotd();
         ++count;
     }
 
     final void subOrder(Order order) {
         resd -= order.getResd();
-        quotd -= order.getQuotd();
         --count;
-    }
-
-    public final void addQuote(Quote quote) {
-        quotd += quote.getLots();
-    }
-
-    public final void subQuote(Quote quote) {
-        quotd -= quote.getLots();
     }
 
     final DlNode getFirstOrder() {
@@ -89,15 +80,7 @@ public final @NonNullByDefault class Level extends AbstractRbNode {
         return resd;
     }
 
-    public final long getQuotd() {
-        return quotd;
-    }
-
     public final int getCount() {
         return count;
-    }
-
-    public final long getAvail() {
-        return resd - quotd;
     }
 }

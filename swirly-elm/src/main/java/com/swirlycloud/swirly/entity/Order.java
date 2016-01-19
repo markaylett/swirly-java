@@ -64,7 +64,8 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
             long resd, long exec, long cost, long lastLots, long lastTicks, long minLots,
             boolean pecan, long created, long modified) {
         super(trader, market, contr, settlDay, id, ref, side, lots, created);
-        assert lots > 0 && lots >= minLots;
+        assert lots > 0;
+        assert lots >= minLots;
         this.quoteId = quoteId;
         this.state = state;
         this.ticks = ticks;
@@ -331,7 +332,8 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
     }
 
     public final void create(long now) {
-        assert lots > 0 && lots >= minLots;
+        assert lots > 0;
+        assert lots >= minLots;
         state = State.NEW;
         resd = lots;
         exec = 0;
@@ -341,7 +343,9 @@ public final @NonNullByDefault class Order extends AbstractRequest implements Dl
 
     public final void revise(long lots, long now) {
         assert lots > 0;
-        assert lots >= exec && lots >= minLots && lots <= this.lots;
+        assert lots >= exec;
+        assert lots >= minLots;
+        assert lots <= this.lots;
         final long delta = this.lots - lots;
         assert delta >= 0;
         state = State.REVISE;

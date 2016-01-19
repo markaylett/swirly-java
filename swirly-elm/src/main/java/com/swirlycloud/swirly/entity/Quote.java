@@ -145,10 +145,8 @@ public final @NonNullByDefault class Quote extends AbstractRequest {
         out.append("}");
     }
 
-    public final @Nullable Order removeOrder() {
-        final Order order = this.order;
+    public final void clearOrder() {
         this.order = null;
-        return order;
     }
 
     public final @Nullable Order getOrder() {

@@ -214,8 +214,7 @@ public @NonNullByDefault class MarketBook extends Market {
     }
 
     public final void takeOrder(Order order, long lots, long now) {
-        final BookSide side = getSide(order.getSide());
-        side.takeOrder(order, lots, now);
+        getSide(order.getSide()).takeOrder(order, lots, now);
         lastLots = lots;
         lastTicks = order.getTicks();
         lastTime = now;

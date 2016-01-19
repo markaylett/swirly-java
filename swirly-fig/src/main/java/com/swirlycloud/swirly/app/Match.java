@@ -14,34 +14,18 @@ import com.swirlycloud.swirly.node.AbstractSlNode;
  * @author Mark Aylett
  */
 final class Match extends AbstractSlNode {
-    long lots;
-    long ticks;
-    Order makerOrder;
-    Exec makerTrade;
-    Posn makerPosn;
-    Exec takerTrade;
+    final long lots;
+    final Order makerOrder;
+    final Exec makerTrade;
+    final Posn makerPosn;
+    final Exec takerTrade;
 
-    public final long getLots() {
-        return lots;
-    }
-
-    public final long getTicks() {
-        return ticks;
-    }
-
-    public final Order getMakerOrder() {
-        return makerOrder;
-    }
-
-    public final Exec getMakerExec() {
-        return makerTrade;
-    }
-
-    public final Posn getMakerPosn() {
-        return makerPosn;
-    }
-
-    public final Exec getTakerExec() {
-        return takerTrade;
+    Match(long lots, Order makerOrder, Exec makerTrade, Posn makerPosn,
+            Exec takerTrade) {
+        this.lots = lots;
+        this.makerOrder = makerOrder;
+        this.makerTrade = makerTrade;
+        this.makerPosn = makerPosn;
+        this.takerTrade = takerTrade;
     }
 }

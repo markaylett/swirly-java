@@ -6,17 +6,6 @@ package com.swirlycloud.swirly.entity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.swirlycloud.swirly.entity.Exec;
-import com.swirlycloud.swirly.entity.Factory;
-import com.swirlycloud.swirly.entity.Market;
-import com.swirlycloud.swirly.entity.Order;
-import com.swirlycloud.swirly.entity.Posn;
-import com.swirlycloud.swirly.entity.Quote;
-import com.swirlycloud.swirly.entity.Request;
-import com.swirlycloud.swirly.entity.RequestIdTree;
-import com.swirlycloud.swirly.entity.RequestRefMap;
-import com.swirlycloud.swirly.entity.Trader;
-import com.swirlycloud.swirly.entity.TraderPosnTree;
 import com.swirlycloud.swirly.io.Cache;
 import com.swirlycloud.swirly.node.RbNode;
 import com.swirlycloud.swirly.node.SlNode;
@@ -65,6 +54,7 @@ public @NonNullByDefault class TraderSess extends Trader implements SlNode {
     }
 
     public final void insertOrder(Order order) {
+        assert order.getTrader().equals(mnem);
         final RbNode unused = orders.insert(order);
         assert unused == null;
         if (order.getRef() != null) {
@@ -78,24 +68,6 @@ public @NonNullByDefault class TraderSess extends Trader implements SlNode {
         if (order.getRef() != null) {
             refIdx.remove(mnem, order.getRef());
         }
-    }
-
-    public final @Nullable Order removeOrder(String market, long id) {
-        final RbNode node = orders.find(market, id);
-        if (node == null) {
-            return null;
-        }
-        final Order order = (Order) node;
-        removeOrder(order);
-        return order;
-    }
-
-    public final @Nullable Order removeOrder(String ref) {
-        final Order order = (Order) refIdx.remove(mnem, ref);
-        if (order != null) {
-            orders.remove(order);
-        }
-        return order;
     }
 
     public final @Nullable Order findOrder(String market, long id) {
@@ -129,15 +101,6 @@ public @NonNullByDefault class TraderSess extends Trader implements SlNode {
 
     public final void removeTrade(Exec trade) {
         trades.remove(trade);
-    }
-
-    public final boolean removeTrade(String market, long id) {
-        final Request node = trades.find(market, id);
-        if (node == null) {
-            return false;
-        }
-        trades.remove(node);
-        return true;
     }
 
     public final @Nullable Exec findTrade(String market, long id) {
@@ -180,12 +143,11 @@ public @NonNullByDefault class TraderSess extends Trader implements SlNode {
         return posn;
     }
 
-    public final Posn getLazyPosn(Market market) {
-        Posn posn = posns.pfind(market.getContr(), market.getSettlDay());
-        if (posn == null || !posn.getContr().equals(market.getContr())
-                || posn.getSettlDay() != market.getSettlDay()) {
+    public final Posn getLazyPosn(String contr, int settlDay) {
+        Posn posn = posns.pfind(contr, settlDay);
+        if (posn == null || !posn.getContr().equals(contr) || posn.getSettlDay() != settlDay) {
             final Posn parent = posn;
-            posn = factory.newPosn(mnem, market.getContr(), market.getSettlDay());
+            posn = factory.newPosn(mnem, contr, settlDay);
             posns.pinsert(posn, parent);
         }
         return posn;
@@ -218,15 +180,6 @@ public @NonNullByDefault class TraderSess extends Trader implements SlNode {
 
     public final void removeQuote(Quote quote) {
         quotes.remove(quote);
-    }
-
-    public final boolean removeQuote(String market, long id) {
-        final Request node = quotes.find(market, id);
-        if (node == null) {
-            return false;
-        }
-        quotes.remove(node);
-        return true;
     }
 
     public final @Nullable Quote findQuote(String market, long id) {
