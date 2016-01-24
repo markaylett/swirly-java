@@ -889,6 +889,10 @@ public @NonNullByDefault class Serv {
             throw new TooLateException(
                     String.format("order '%d' is pending cancellation", order.getId()));
         }
+        if (lots < order.getQuotd()) {
+            throw new TooLateException(
+                    String.format("lots '%d' lower than quoted '%d'", lots, order.getQuotd()));
+        }
         // Revised lots must not be:
         // 1. less than min lots;
         // 2. less than executed lots;
@@ -960,6 +964,10 @@ public @NonNullByDefault class Serv {
             }
             if (order.isPecan()) {
                 throw new TooLateException(String.format("order '%d' is pending cancellation", id));
+            }
+            if (lots < order.getQuotd()) {
+                throw new TooLateException(
+                        String.format("lots '%d' lower than quoted '%d'", lots, order.getQuotd()));
             }
             // Revised lots must not be:
             // 1. less than min lots;
