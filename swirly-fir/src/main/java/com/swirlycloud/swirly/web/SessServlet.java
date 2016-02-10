@@ -138,11 +138,7 @@ public class SessServlet extends RestServlet {
                 throw new NotFoundException("resource does not exist");
             }
             sendJsonResponse(resp);
-        } catch (
-
-        final ServException e)
-
-        {
+        } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
     }
