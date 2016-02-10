@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.web;
 
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -116,7 +116,7 @@ public final class BackLifeCycle implements ServletContextListener {
             } else {
                 throw new RuntimeException("unsupported servlet container");
             }
-            rest = new BackRest(datastore, datastore, cache, now());
+            rest = new BackRest(datastore, datastore, cache, getTimeOfDay());
         } finally {
             if (rest == null) {
                 try {

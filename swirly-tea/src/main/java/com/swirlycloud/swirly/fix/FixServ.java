@@ -5,7 +5,7 @@ package com.swirlycloud.swirly.fix;
 
 import static com.swirlycloud.swirly.fix.FixUtility.fixToSide;
 import static com.swirlycloud.swirly.fix.FixUtility.readSettings;
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -99,7 +99,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     private final long getNow(@NonNull Message message) throws FieldNotFound {
-        return nowFromTransactTime ? message.getUtcTimeStamp(TransactTime.FIELD).getTime() : now();
+        return nowFromTransactTime ? message.getUtcTimeStamp(TransactTime.FIELD).getTime() : getTimeOfDay();
     }
 
     @SuppressWarnings("null")

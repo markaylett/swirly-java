@@ -4,7 +4,7 @@
 package com.swirlycloud.swirly.web;
 
 import static com.swirlycloud.swirly.util.StringUtil.splitPath;
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 
@@ -36,7 +36,7 @@ public class ViewServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
-            final long now = now();
+            final long now = getTimeOfDay();
             if (parts.length == 0) {
                 rest.getView(params, now, resp.getWriter());
             } else if (parts.length == 1) {
