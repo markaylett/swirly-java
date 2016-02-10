@@ -81,37 +81,37 @@ public final class RestRequest {
                 break;
             case VALUE_NULL:
                 if ("mnem".equals(name)) {
-                    fields |= MNEM;
+                    fields &= ~MNEM;
                     mnem = null;
                 } else if ("display".equals(name)) {
-                    fields |= DISPLAY;
+                    fields &= ~DISPLAY;
                     display = null;
                 } else if ("email".equals(name)) {
-                    fields |= EMAIL;
+                    fields &= ~EMAIL;
                     email = null;
                 } else if ("trader".equals(name)) {
-                    fields |= TRADER;
+                    fields &= ~TRADER;
                     trader = null;
                 } else if ("contr".equals(name)) {
-                    fields |= CONTR;
+                    fields &= ~CONTR;
                     contr = null;
                 } else if ("settlDate".equals(name)) {
-                    fields |= SETTL_DATE;
+                    fields &= ~SETTL_DATE;
                     settlDate = 0;
                 } else if ("expiryDate".equals(name)) {
-                    fields |= EXPIRY_DATE;
+                    fields &= ~EXPIRY_DATE;
                     expiryDate = 0;
                 } else if ("ref".equals(name)) {
-                    fields |= REF;
+                    fields &= ~REF;
                     ref = null;
                 } else if ("side".equals(name)) {
-                    fields |= SIDE;
+                    fields &= ~SIDE;
                     side = null;
                 } else if ("role".equals(name)) {
-                    fields |= ROLE;
+                    fields &= ~ROLE;
                     role = null;
                 } else if ("cpty".equals(name)) {
-                    fields |= CPTY;
+                    fields &= ~CPTY;
                     cpty = null;
                 } else {
                     throw new IOException(String.format("unexpected nullable field '%s'", name));
