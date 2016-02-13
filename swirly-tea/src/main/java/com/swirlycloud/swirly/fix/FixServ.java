@@ -24,6 +24,7 @@ import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.entity.Exec;
 import com.swirlycloud.swirly.entity.Order;
 import com.swirlycloud.swirly.entity.TraderSess;
+import com.swirlycloud.swirly.exception.InternalException;
 import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.OrderNotFoundException;
 import com.swirlycloud.swirly.exception.ServException;
@@ -234,7 +235,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new ServException("session misconfigured");
+                throw new InternalException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             try (final Response resp = new Response()) {
@@ -275,7 +276,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new ServException("session misconfigured");
+                throw new InternalException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             if (orderId != null) {
@@ -334,7 +335,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new ServException("session misconfigured");
+                throw new InternalException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             if (orderId != null) {

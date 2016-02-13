@@ -14,7 +14,7 @@ import com.swirlycloud.swirly.fix.OrderRejectReason;
 import com.swirlycloud.swirly.util.Jsonable;
 import com.swirlycloud.swirly.util.Params;
 
-public class ServException extends Exception implements Jsonable {
+public abstract class ServException extends Exception implements Jsonable {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,10 +35,7 @@ public class ServException extends Exception implements Jsonable {
         out.append("\"}");
     }
 
-    public int getHttpStatus() {
-        // Internal Server Error.
-        return 500;
-    }
+    public abstract int getHttpStatus();
 
     public int getBusinessRejectReason() {
         return BusinessRejectReason.OTHER;

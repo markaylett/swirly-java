@@ -31,4 +31,22 @@ public final class MarketTest {
                 "{\"mnem\":\"EURUSD.MAR14\",\"display\":\"EURUSD March 14\",\"contr\":\"EURUSD\",\"settlDate\":20140314,\"expiryDate\":20140312,\"state\":1}",
                 sb.toString());
     }
+
+    @Test
+    public final void testToJsonNull() throws IOException {
+        final String mnem = "EURUSD.MAR14";
+        final String display = "EURUSD March 14";
+        final String contr = "EURUSD";
+        final int settlDay = 0;
+        final int expiryDay = 0;
+        final int state = 0x01;
+        final Market market = FACTORY.newMarket(mnem, display, contr, settlDay, expiryDay, state);
+
+        final StringBuilder sb = new StringBuilder();
+
+        market.toJson(null, sb);
+        assertEquals(
+                "{\"mnem\":\"EURUSD.MAR14\",\"display\":\"EURUSD March 14\",\"contr\":\"EURUSD\",\"settlDate\":null,\"expiryDate\":null,\"state\":1}",
+                sb.toString());
+    }
 }
