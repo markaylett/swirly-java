@@ -3,6 +3,8 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.entity;
 
+import java.io.IOException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 public final @NonNullByDefault class EntitySet {
@@ -21,7 +23,7 @@ public final @NonNullByDefault class EntitySet {
 
     private int bs;
 
-    private static int bit(String name) {
+    private static int bit(String name) throws IOException {
         int n = 0;
         switch (name.charAt(0)) {
         case 'a':
@@ -66,6 +68,8 @@ public final @NonNullByDefault class EntitySet {
                 n = VIEW;
             }
             break;
+        default:
+            throw new IOException(String.format("unknown entity '%s'", name));
         }
         return n;
     }
@@ -74,7 +78,7 @@ public final @NonNullByDefault class EntitySet {
         this.bs = bs;
     }
 
-    public static EntitySet parse(String ls) {
+    public static EntitySet parse(String ls) throws IOException {
         int bs = 0;
         int i = 0, j = 0;
         for (; j < ls.length(); ++j) {
