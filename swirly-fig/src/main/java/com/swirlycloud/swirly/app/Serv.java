@@ -219,7 +219,7 @@ public @NonNullByDefault class Serv {
         return factory.newExec(order, book.allocExecId(), now);
     }
 
-    private final Match createMatch(MarketBook book, Order takerOrder, Order makerOrder, long lots,
+    private final Match newMatch(MarketBook book, Order takerOrder, Order makerOrder, long lots,
             long sumLots, long sumCost, long now) {
 
         final long makerId = book.allocExecId();
@@ -274,7 +274,7 @@ public @NonNullByDefault class Serv {
             lastLots = lots;
             lastTicks = ticks;
 
-            final Match match = createMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost,
+            final Match match = newMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost,
                     now);
             matches.insertBack(match);
         }
@@ -330,7 +330,7 @@ public @NonNullByDefault class Serv {
             throw new InvalidTicksException(String.format("invalid ticks '%d'", ticks));
         }
 
-        final Match match = createMatch(book, takerOrder, makerOrder, lots, lots, cost, now);
+        final Match match = newMatch(book, takerOrder, makerOrder, lots, lots, cost, now);
         matches.insertBack(match);
 
         takerOrder.trade(lots, cost, lots, ticks, now);
