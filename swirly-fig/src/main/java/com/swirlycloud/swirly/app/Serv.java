@@ -468,10 +468,10 @@ public @NonNullByDefault class Serv {
             // Insert order if trade crossed with self.
             if (makerOrder.getTrader().equals(taker.getMnem())) {
                 resp.orders.insertBack(makerOrder);
+                // Maker updated first because this is consistent with last-look semantics.
+                // N.B. the reference count is not incremented here.
+                resp.execs.insertBack(match.makerTrade);
             }
-            // Maker updated first because this is consistent with last-look semantics.
-            // N.B. the reference count is not incremented here.
-            resp.execs.insertBack(match.makerTrade);
             resp.execs.insertBack(match.takerTrade);
             setDirty(maker,
                     TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
