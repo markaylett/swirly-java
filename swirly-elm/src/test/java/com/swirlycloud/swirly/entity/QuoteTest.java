@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.entity;
 
-import static com.swirlycloud.swirly.date.JulianDay.jdToMillis;
+import static com.swirlycloud.swirly.date.JulianDay.jdToMs;
 import static com.swirlycloud.swirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -20,7 +20,7 @@ public final class QuoteTest {
 
     private static final int TODAY = ymdToJd(2014, 2, 12);
     private static final int SETTL_DAY = TODAY + 2;
-    private static final long NOW = jdToMillis(TODAY);
+    private static final long NOW = jdToMs(TODAY);
     private static final long EXPIRY = NOW + 60 * 1000;
 
     private static Quote newQuote() {

@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.rest;
 
-import static com.swirlycloud.swirly.date.JulianDay.jdToMillis;
+import static com.swirlycloud.swirly.date.JulianDay.jdToMs;
 import static com.swirlycloud.swirly.util.JsonUtil.PARAMS_EXPIRED;
 import static com.swirlycloud.swirly.util.JsonUtil.PARAMS_NONE;
 import static org.junit.Assert.assertEquals;
@@ -28,7 +28,7 @@ public final class ViewRestTest extends RestTest {
     public final void testGetAll() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
 
-        long now = TODAY_MILLIS;
+        long now = TODAY_MS;
 
         Map<String, MarketView> views = unrest.getView(PARAMS_NONE, now);
         for (int i = 0; i < 2; ++i) {
@@ -38,7 +38,7 @@ public final class ViewRestTest extends RestTest {
             view = views.get(USDJPY_MAR14);
             assertView(USDJPY_MAR14, USDJPY, SETTL_DAY, view);
             // Use now beyond expiry.
-            now = jdToMillis(EXPIRY_DAY + 1);
+            now = jdToMs(EXPIRY_DAY + 1);
             views = unrest.getView(PARAMS_EXPIRED, now);
         }
 
@@ -50,7 +50,7 @@ public final class ViewRestTest extends RestTest {
     public final void testGetByMarket() throws BadRequestException, NotFoundException,
             ServiceUnavailableException, IOException {
 
-        long now = TODAY_MILLIS;
+        long now = TODAY_MS;
 
         try {
             unrest.getView("USDCHF.MAR14", PARAMS_NONE, now);
@@ -62,7 +62,7 @@ public final class ViewRestTest extends RestTest {
         for (int i = 0; i < 2; ++i) {
             assertView(EURUSD_MAR14, EURUSD, SETTL_DAY, view);
             // Use now beyond expiry.
-            now = jdToMillis(EXPIRY_DAY + 1);
+            now = jdToMs(EXPIRY_DAY + 1);
             view = unrest.getView(EURUSD_MAR14, PARAMS_EXPIRED, now);
         }
     }

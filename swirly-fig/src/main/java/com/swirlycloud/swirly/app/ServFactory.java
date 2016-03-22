@@ -13,7 +13,7 @@ import com.swirlycloud.swirly.entity.TraderSess;
 import com.swirlycloud.swirly.tag.MarketTag;
 import com.swirlycloud.swirly.tag.TraderTag;
 
-public final @NonNullByDefault class ServFactory extends BasicFactory {
+final @NonNullByDefault class ServFactory extends BasicFactory {
 
     private static final int CAPACITY = 1 << 5; // 64
 

@@ -5,7 +5,7 @@ package com.swirlycloud.swirly.fix;
 
 import static com.swirlycloud.swirly.fix.FixUtility.fixToSide;
 import static com.swirlycloud.swirly.fix.FixUtility.readSettings;
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,6 +24,7 @@ import com.swirlycloud.swirly.domain.Side;
 import com.swirlycloud.swirly.entity.Exec;
 import com.swirlycloud.swirly.entity.Order;
 import com.swirlycloud.swirly.entity.TraderSess;
+import com.swirlycloud.swirly.exception.InternalException;
 import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.OrderNotFoundException;
 import com.swirlycloud.swirly.exception.ServException;
@@ -99,7 +100,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
     }
 
     private final long getNow(@NonNull Message message) throws FieldNotFound {
-        return nowFromTransactTime ? message.getUtcTimeStamp(TransactTime.FIELD).getTime() : now();
+        return nowFromTransactTime ? message.getUtcTimeStamp(TransactTime.FIELD).getTime() : getTimeOfDay();
     }
 
     @SuppressWarnings("null")
@@ -234,7 +235,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new ServException("session misconfigured");
+                throw new InternalException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             try (final Response resp = new Response()) {
@@ -275,7 +276,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new ServException("session misconfigured");
+                throw new InternalException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             if (orderId != null) {
@@ -334,7 +335,7 @@ public final class FixServ extends MessageCracker implements AutoCloseable, Appl
         try {
             final TraderSess sess = getTraderLocked(sessionId);
             if (sess == null) {
-                throw new ServException("session misconfigured");
+                throw new InternalException("session misconfigured");
             }
             final MarketBook book = serv.getMarket(market);
             if (orderId != null) {

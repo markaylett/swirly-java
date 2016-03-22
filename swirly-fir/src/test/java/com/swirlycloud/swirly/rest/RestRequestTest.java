@@ -30,7 +30,7 @@ public final class RestRequestTest {
     @Test
     public final void testNull() throws IOException {
         final RestRequest r = parse("{\"mnem\":null}");
-        assertEquals(RestRequest.MNEM, r.getFields());
+        assertEquals(0, r.getFields());
         assertNull(r.getMnem());
     }
 

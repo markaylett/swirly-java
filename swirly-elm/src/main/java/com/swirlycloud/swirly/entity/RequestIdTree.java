@@ -10,6 +10,13 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.intrusive.AbstractTree;
 
+/**
+ * Request tree keyed by market and id. Requests are identified by market and id only, so instances
+ * should not be used as heterogeneous Request containers, where Requests of different types may
+ * share the same identity.
+ * 
+ * @author Mark Aylett
+ */
 public final @NonNullByDefault class RequestIdTree extends AbstractTree<Request> {
 
     private static final long serialVersionUID = 1L;

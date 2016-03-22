@@ -10,7 +10,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.ServiceUnavailableException;
 import com.swirlycloud.swirly.io.Cache;
-import com.swirlycloud.swirly.io.Datastore;
 import com.swirlycloud.swirly.io.Journ;
 import com.swirlycloud.swirly.io.Model;
 
@@ -27,11 +26,6 @@ public final @NonNullByDefault class LockableServ extends Serv {
     public LockableServ(Model model, Journ journ, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
         super(model, journ, cache, now);
-    }
-
-    public LockableServ(Datastore datastore, Cache cache, long now)
-            throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        super(datastore, cache, now);
     }
 
     public final int readLock() {

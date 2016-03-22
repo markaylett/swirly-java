@@ -5,7 +5,7 @@ package com.swirlycloud.swirly.web;
 
 import static com.swirlycloud.swirly.util.JsonUtil.PARAMS_NONE;
 import static com.swirlycloud.swirly.util.StringUtil.splitPath;
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 
@@ -49,7 +49,7 @@ public final class BackSessServlet extends SessServlet {
             if (ids == null) {
                 throw new InvalidException("id not specified");
             }
-            final long now = now();
+            final long now = getTimeOfDay();
             if (ids.jslNext() != null) {
                 if ("order".equals(parts[TYPE_PART])) {
                     rest.deleteOrder(trader, market, ids, now);
@@ -96,7 +96,7 @@ public final class BackSessServlet extends SessServlet {
             }
             final String market = parts[MARKET_PART];
             final RestRequest r = parseRequest(req);
-            final long now = now();
+            final long now = getTimeOfDay();
             if ("order".equals(parts[TYPE_PART])) {
 
                 final int required = RestRequest.SIDE | RestRequest.LOTS | RestRequest.TICKS;
@@ -108,8 +108,8 @@ public final class BackSessServlet extends SessServlet {
                         r.getTicks(), r.getMinLots(), PARAMS_NONE, now, resp.getWriter());
             } else if ("trade".equals(parts[TYPE_PART])) {
 
-                final int required = RestRequest.TRADER | RestRequest.SIDE | RestRequest.TICKS
-                        | RestRequest.LOTS;
+                final int required = RestRequest.TRADER | RestRequest.SIDE | RestRequest.LOTS
+                        | RestRequest.TICKS;
                 final int optional = RestRequest.REF | RestRequest.ROLE | RestRequest.CPTY;
                 if (!r.isValid(required, optional)) {
                     throw new InvalidException("request fields are invalid");
@@ -167,7 +167,7 @@ public final class BackSessServlet extends SessServlet {
             if (!r.isLotsSet()) {
                 throw new InvalidException("request fields are invalid");
             }
-            final long now = now();
+            final long now = getTimeOfDay();
             if (ids.jslNext() != null) {
                 rest.putOrder(trader, market, ids, r.getLots(), PARAMS_NONE, now, resp.getWriter());
             } else {

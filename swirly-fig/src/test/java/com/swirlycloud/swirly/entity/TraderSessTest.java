@@ -7,10 +7,11 @@ import static com.swirlycloud.swirly.date.JulianDay.ymdToJd;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.swirlycloud.swirly.app.ServFactory;
 import com.swirlycloud.swirly.entity.Factory;
 import com.swirlycloud.swirly.entity.Posn;
 import com.swirlycloud.swirly.entity.TraderSess;
@@ -25,7 +26,18 @@ public final class TraderSessTest {
 
     @Before
     public final void setUp() {
-        factory = new ServFactory();
+        factory = new BasicFactory() {
+
+            private static final int CAPACITY = 1 << 5; // 64
+
+            private final @NonNull RequestRefMap refIdx = new RequestRefMap(CAPACITY);
+
+            @Override
+            public final @NonNull TraderSess newTrader(@NonNull String mnem,
+                    @Nullable String display, @NonNull String email) {
+                return new TraderSess(mnem, display, email, refIdx, this);
+            }
+        };
     }
 
     @Test

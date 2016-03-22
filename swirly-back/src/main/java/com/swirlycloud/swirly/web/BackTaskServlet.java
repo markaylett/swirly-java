@@ -4,7 +4,7 @@
 package com.swirlycloud.swirly.web;
 
 import static com.swirlycloud.swirly.util.StringUtil.splitPath;
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public final class BackTaskServlet extends RestServlet {
             if (parts.length != 1) {
                 throw new MethodNotAllowedException("not allowed on this resource");
             }
-            final long now = now();
+            final long now = getTimeOfDay();
             if ("endofday".equals(parts[TASK_PART])) {
                 log("processing end-of-day");
                 rest.endOfDay(now);

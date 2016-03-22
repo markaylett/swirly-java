@@ -4,7 +4,7 @@
 package com.swirlycloud.swirly.web;
 
 import static com.swirlycloud.swirly.util.StringUtil.splitPath;
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 
@@ -42,7 +42,7 @@ public class SessServlet extends RestServlet {
             final String pathInfo = req.getPathInfo();
             final String[] parts = splitPath(pathInfo);
             final Params params = newParams(req);
-            final long now = now();
+            final long now = getTimeOfDay();
             boolean match = false;
             if (parts.length == 0) {
                 int bs = EntitySet.ORDER | EntitySet.TRADE | EntitySet.POSN | EntitySet.QUOTE
@@ -138,11 +138,7 @@ public class SessServlet extends RestServlet {
                 throw new NotFoundException("resource does not exist");
             }
             sendJsonResponse(resp);
-        } catch (
-
-        final ServException e)
-
-        {
+        } catch (final ServException e) {
             sendJsonResponse(resp, e);
         }
     }

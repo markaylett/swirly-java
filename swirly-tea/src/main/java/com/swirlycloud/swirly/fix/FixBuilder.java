@@ -273,8 +273,8 @@ public final class FixBuilder {
 
     // TransactTime(60)
 
-    public final void setTransactTime(long millis) {
-        message.setUtcTimeStamp(TransactTime.FIELD, new Date(millis), true);
+    public final void setTransactTime(long ms) {
+        message.setUtcTimeStamp(TransactTime.FIELD, new Date(ms), true);
     }
 
     public final long getTransactTime() throws FieldNotFound {

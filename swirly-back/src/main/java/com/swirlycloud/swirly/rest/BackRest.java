@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.rest;
 
-import static com.swirlycloud.swirly.date.DateUtil.getBusDate;
+import static com.swirlycloud.swirly.date.DateUtil.getBusDay;
 import static com.swirlycloud.swirly.date.JulianDay.maybeIsoToJd;
 import static com.swirlycloud.swirly.rest.RestUtil.getExpiredParam;
 import static com.swirlycloud.swirly.util.JsonUtil.toJsonArray;
@@ -36,7 +36,6 @@ import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.OrderNotFoundException;
 import com.swirlycloud.swirly.exception.ServiceUnavailableException;
 import com.swirlycloud.swirly.io.Cache;
-import com.swirlycloud.swirly.io.Datastore;
 import com.swirlycloud.swirly.io.Journ;
 import com.swirlycloud.swirly.io.Model;
 import com.swirlycloud.swirly.node.JslNode;
@@ -52,7 +51,7 @@ public final @NonNullByDefault class BackRest implements Rest {
     private static void getView(@Nullable RbNode first, Params params, long now, Appendable out)
             throws IOException {
         final boolean withExpired = getExpiredParam(params);
-        final int busDay = getBusDate(now).toJd();
+        final int busDay = getBusDay(now).toJd();
         out.append('[');
         int i = 0;
         for (RbNode node = first; node != null; node = node.rbNext()) {
@@ -73,11 +72,6 @@ public final @NonNullByDefault class BackRest implements Rest {
     public BackRest(Model model, Journ journ, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(model, journ, cache, now));
-    }
-
-    public BackRest(Datastore datastore, Cache cache, long now)
-            throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(new LockableServ(datastore, cache, now));
     }
 
     public BackRest(LockableServ serv) {
@@ -463,7 +457,7 @@ public final @NonNullByDefault class BackRest implements Rest {
             lock = serv.demoteLock();
             final MarketBook book = serv.getMarket(market);
             final boolean withExpired = getExpiredParam(params);
-            final int busDay = getBusDate(now).toJd();
+            final int busDay = getBusDay(now).toJd();
             if (!withExpired && book.isExpiryDaySet() && book.getExpiryDay() < busDay) {
                 throw new MarketClosedException(
                         String.format("market '%s' has expired", book.getMnem()));

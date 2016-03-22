@@ -4,7 +4,7 @@
 package com.swirlycloud.swirly.itest;
 
 import static com.swirlycloud.swirly.io.CacheUtil.NO_CACHE;
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 
@@ -30,12 +30,12 @@ public final class Benchmark {
         final TraderSess tobayl = serv.getTrader("TOBAYL");
         final TraderSess emiayl = serv.getTrader("EMIAYL");
 
-        final MarketBook book = serv.createMarket("EURUSD", "EURUSD", "EURUSD", 0, 0, 0, now());
+        final MarketBook book = serv.createMarket("EURUSD", "EURUSD", "EURUSD", 0, 0, 0, getTimeOfDay());
         assert book != null;
 
         try (final Response resp = new Response()) {
             for (int i = 0; i < 250000; ++i) {
-                final long now = now();
+                final long now = getTimeOfDay();
                 final long startNanos = System.nanoTime();
 
                 // Maker sell-side.
@@ -79,7 +79,7 @@ public final class Benchmark {
 
     public static void main(String[] args) throws Exception {
         try (final Datastore datastore = new MockDatastore()) {
-            final Serv serv = new Serv(datastore, NO_CACHE, now());
+            final Serv serv = new Serv(datastore, datastore, NO_CACHE, getTimeOfDay());
             run(serv);
         }
     }

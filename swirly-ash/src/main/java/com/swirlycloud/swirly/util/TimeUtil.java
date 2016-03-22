@@ -15,7 +15,7 @@ public final @NonNullByDefault class TimeUtil {
     private TimeUtil() {
     }
 
-    public static long now() {
+    public static long getTimeOfDay() {
         return System.currentTimeMillis();
     }
 }

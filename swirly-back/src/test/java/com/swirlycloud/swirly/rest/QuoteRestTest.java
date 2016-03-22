@@ -33,35 +33,35 @@ public final class QuoteRestTest extends RestTest {
     @Test
     public final void testGetAll() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
-        final Map<Long, Quote> out = unrest.getQuote(MARAYL, PARAMS_NONE, TODAY_MILLIS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MS);
+        final Map<Long, Quote> out = unrest.getQuote(MARAYL, PARAMS_NONE, TODAY_MS);
         assertEquals(1, out.size());
         assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, out.get(Long.valueOf(1)));
-        assertTrue(unrest.getQuote(GOSAYL, PARAMS_NONE, TODAY_MILLIS).isEmpty());
+        assertTrue(unrest.getQuote(GOSAYL, PARAMS_NONE, TODAY_MS).isEmpty());
     }
 
     @Test
     public final void testGetByMarket() throws BadRequestException, InternalException,
             NotFoundException, ServiceUnavailableException, IOException {
-        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MS);
         final Map<Long, Quote> out = unrest.getQuote(MARAYL, EURUSD_MAR14, PARAMS_NONE,
-                TODAY_MILLIS);
+                TODAY_MS);
         assertEquals(1, out.size());
         assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, out.get(Long.valueOf(1)));
-        assertTrue(unrest.getQuote(MARAYL, USDJPY_MAR14, PARAMS_NONE, TODAY_MILLIS).isEmpty());
+        assertTrue(unrest.getQuote(MARAYL, USDJPY_MAR14, PARAMS_NONE, TODAY_MS).isEmpty());
     }
 
     @Test
     public final void testGetByMarketId() throws BadRequestException, InternalException,
             NotFoundException, ServiceUnavailableException, IOException {
-        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
-        final Quote out = unrest.getQuote(MARAYL, EURUSD_MAR14, 1, PARAMS_NONE, TODAY_MILLIS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MS);
+        final Quote out = unrest.getQuote(MARAYL, EURUSD_MAR14, 1, PARAMS_NONE, TODAY_MS);
         assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, out);
         try {
-            unrest.getQuote(MARAYL, EURUSD_MAR14, 2, PARAMS_NONE, TODAY_MILLIS);
+            unrest.getQuote(MARAYL, EURUSD_MAR14, 2, PARAMS_NONE, TODAY_MS);
             fail("Expected exception");
         } catch (final NotFoundException e) {
         }
@@ -72,41 +72,41 @@ public final class QuoteRestTest extends RestTest {
     @Test
     public final void testCreate() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        final Quote quote = postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MS);
+        final Quote quote = postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MS);
         assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, quote);
     }
 
     @Test
     public final void testExpiry() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
-        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MS);
         final Map<Long, Quote> out = unrest.getQuote("MARAYL", PARAMS_NONE,
-                TODAY_MILLIS + QUOTE_EXPIRY);
+                TODAY_MS + QUOTE_EXPIRY);
         assertTrue(out.isEmpty());
     }
 
     @Test(expected = LiquidityUnavailableException.class)
     public final void testNoLiquidity() throws BadRequestException, InternalException,
             NotFoundException, ServiceUnavailableException, IOException {
-        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
-        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
-        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 1, TODAY_MILLIS);
+        postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MS);
+        postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 1, TODAY_MS);
     }
 
     @Test
     public final void testPecan() throws BadRequestException, InternalException, NotFoundException,
             ServiceUnavailableException, IOException {
-        ResponseStruct out = postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MILLIS);
+        ResponseStruct out = postOrder(MARAYL, EURUSD_MAR14, 0, Side.SELL, 10, 12345, TODAY_MS);
         MarketView view = out.view;
         assert view != null;
         assertTrue(view.isValidOffer(0));
 
-        final Quote quote = postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MILLIS);
+        final Quote quote = postQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, TODAY_MS);
         assertQuote(MARAYL, EURUSD_MAR14, Side.BUY, 10, 12345, quote);
 
-        out = putOrder(MARAYL, EURUSD_MAR14, 1, 0, TODAY_MILLIS);
+        out = putOrder(MARAYL, EURUSD_MAR14, 1, 0, TODAY_MS);
         assertOrder(MARAYL, EURUSD_MAR14, State.PECAN, Side.SELL, 10, 12345, 10, 0, 0, 0, 0,
                 out.orders.get(Long.valueOf(1)));
         view = out.view;
@@ -114,8 +114,8 @@ public final class QuoteRestTest extends RestTest {
         assertFalse(view.isValidOffer(0));
 
         final Order order = unrest.getOrder(MARAYL, EURUSD_MAR14, 1, PARAMS_NONE,
-                TODAY_MILLIS + QUOTE_EXPIRY);
+                TODAY_MS + QUOTE_EXPIRY);
         assertOrder(MARAYL, EURUSD_MAR14, State.CANCEL, Side.SELL, 10, 12345, 0, 0, 0, 0, 0,
-                TODAY_MILLIS, TODAY_MILLIS + QUOTE_EXPIRY, order);
+                TODAY_MS, TODAY_MS + QUOTE_EXPIRY, order);
     }
 }

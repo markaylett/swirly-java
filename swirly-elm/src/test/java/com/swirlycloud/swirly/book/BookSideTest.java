@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.book;
 
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -40,7 +40,7 @@ public final class BookSideTest {
 
     @Test
     public final void testOrders() {
-        long now = now();
+        long now = getTimeOfDay();
         // Two orders at the same price level.
         final Order apple = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
                 1, "apple", 0, Side.BUY, 10, 12345, 0, now);
@@ -136,7 +136,7 @@ public final class BookSideTest {
 
     @Test
     public final void testLevels() {
-        final long now = now();
+        final long now = getTimeOfDay();
         // Two orders at the same price level.
         final Order apple = FACTORY.newOrder("MARAYL", "EURUSD.MAR14", "EURUSD", JulianDay.isoToJd(20140314),
                 1, "apple", 0, Side.BUY, 10, 12345, 0, now);

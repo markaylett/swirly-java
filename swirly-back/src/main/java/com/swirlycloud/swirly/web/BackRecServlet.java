@@ -5,7 +5,7 @@ package com.swirlycloud.swirly.web;
 
 import static com.swirlycloud.swirly.util.JsonUtil.PARAMS_NONE;
 import static com.swirlycloud.swirly.util.StringUtil.splitPath;
-import static com.swirlycloud.swirly.util.TimeUtil.now;
+import static com.swirlycloud.swirly.util.TimeUtil.getTimeOfDay;
 
 import java.io.IOException;
 
@@ -44,7 +44,7 @@ public final class BackRecServlet extends RecServlet {
             }
 
             final RestRequest r = parseRequest(req);
-            final long now = now();
+            final long now = getTimeOfDay();
             if ("market".equals(parts[TYPE_PART])) {
 
                 final int required = RestRequest.MNEM | RestRequest.DISPLAY | RestRequest.CONTR;
@@ -108,7 +108,7 @@ public final class BackRecServlet extends RecServlet {
             }
 
             final RestRequest r = parseRequest(req);
-            final long now = now();
+            final long now = getTimeOfDay();
             if ("market".equals(parts[TYPE_PART])) {
 
                 final int required = RestRequest.MNEM | RestRequest.DISPLAY | RestRequest.STATE;

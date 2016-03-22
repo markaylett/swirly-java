@@ -39,7 +39,6 @@ import com.swirlycloud.swirly.exception.LiquidityUnavailableException;
 import com.swirlycloud.swirly.exception.NotFoundException;
 import com.swirlycloud.swirly.exception.ServiceUnavailableException;
 import com.swirlycloud.swirly.io.Cache;
-import com.swirlycloud.swirly.io.Datastore;
 import com.swirlycloud.swirly.io.Journ;
 import com.swirlycloud.swirly.io.Model;
 import com.swirlycloud.swirly.node.JslNode;
@@ -390,11 +389,6 @@ public final @NonNullByDefault class BackUnrest {
     public BackUnrest(Model model, Journ journ, Cache cache, long now)
             throws NotFoundException, ServiceUnavailableException, InterruptedException {
         this(new LockableServ(model, journ, cache, now));
-    }
-
-    public BackUnrest(Datastore datastore, Cache cache, long now)
-            throws NotFoundException, ServiceUnavailableException, InterruptedException {
-        this(new LockableServ(datastore, cache, now));
     }
 
     public final @Nullable String findTraderByEmail(String email) {

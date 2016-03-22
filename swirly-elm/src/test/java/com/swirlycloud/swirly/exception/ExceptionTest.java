@@ -142,7 +142,7 @@ public final class ExceptionTest {
     @Test
     public final void testUnauthorizedException() {
         final ServException e = new UnauthorizedException("");
-        assertEquals(403, e.getHttpStatus());
+        assertEquals(401, e.getHttpStatus());
         assertEquals(BusinessRejectReason.NOT_AUTHORIZED, e.getBusinessRejectReason());
         assertEquals(CancelRejectReason.OTHER, e.getCancelRejectReason());
         assertEquals(OrderRejectReason.OTHER, e.getOrderRejectReason());

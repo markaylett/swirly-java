@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.fix;
 
-import static com.swirlycloud.swirly.date.JulianDay.jdToMillis;
+import static com.swirlycloud.swirly.date.JulianDay.jdToMs;
 import static com.swirlycloud.swirly.date.JulianDay.ymdToJd;
 import static com.swirlycloud.swirly.fix.FixUtility.readProperties;
 import static com.swirlycloud.swirly.io.CacheUtil.NO_CACHE;
@@ -37,7 +37,7 @@ public final class FixTest {
     private static final int SETTL_DAY = TODAY + 2;
     private static final int EXPIRY_DAY = TODAY + 1;
 
-    private static final long NOW = jdToMillis(TODAY);
+    private static final long NOW = jdToMs(TODAY);
 
     private FixServ fixServ;
     private FixClnt fixClnt;
@@ -51,7 +51,7 @@ public final class FixTest {
     public final void setUp() throws Exception {
         @SuppressWarnings("resource")
         final Datastore datastore = new MockDatastore();
-        final LockableServ serv = new LockableServ(datastore, NO_CACHE, NOW);
+        final LockableServ serv = new LockableServ(datastore, datastore, NO_CACHE, NOW);
         final int lock = serv.writeLock();
         try {
             serv.createMarket("EURUSD.MAR14", "EURUSD March 14", "EURUSD", SETTL_DAY, EXPIRY_DAY, 0,

@@ -8,6 +8,13 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.swirlycloud.swirly.intrusive.AbstractObjectTree;
 
+/**
+ * Record tree keyed by mnemonic. Records are identified by mnemonic only, so instances should not
+ * be used as heterogeneous Record containers, where Records of different types may share the same
+ * identity.
+ *
+ * @author Mark Aylett
+ */
 public final @NonNullByDefault class RecTree extends AbstractObjectTree<String, Rec> {
 
     private static final long serialVersionUID = 1L;

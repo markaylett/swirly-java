@@ -3,7 +3,7 @@
  *******************************************************************************/
 package com.swirlycloud.swirly.app;
 
-import static com.swirlycloud.swirly.date.JulianDay.jdToMillis;
+import static com.swirlycloud.swirly.date.JulianDay.jdToMs;
 import static com.swirlycloud.swirly.date.JulianDay.ymdToJd;
 import static com.swirlycloud.swirly.io.CacheUtil.NO_CACHE;
 import static org.junit.Assert.assertEquals;
@@ -46,7 +46,7 @@ public final class ServTest {
     private static final int EXPIRY_DAY = TODAY + 1;
     private static final int STATE = 0x01;
 
-    private static final long NOW = jdToMillis(TODAY);
+    private static final long NOW = jdToMs(TODAY);
 
     private Serv serv;
 
@@ -94,7 +94,9 @@ public final class ServTest {
 
     @Before
     public final void setUp() throws Exception {
-        serv = new Serv(newDatastore(), NO_CACHE, NOW);
+        @SuppressWarnings("resource")
+        final Datastore datastore = newDatastore();
+        serv = new Serv(datastore, datastore, NO_CACHE, NOW);
     }
 
     @After
