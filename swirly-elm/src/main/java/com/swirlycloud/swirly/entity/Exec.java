@@ -278,7 +278,12 @@ public final @NonNullByDefault class Exec extends AbstractRequest implements Jsl
         } else {
             out.append(",\"lastLots\":null,\"lastTicks\":null");
         }
-        out.append(",\"minLots\":").append(String.valueOf(minLots));
+        out.append(",\"minLots\":");
+        if (minLots != 0) {
+            out.append(String.valueOf(minLots));
+        } else {
+            out.append("null");
+        }
         out.append(",\"matchId\":");
         if (matchId != 0) {
             out.append(String.valueOf(matchId));
