@@ -274,8 +274,7 @@ public @NonNullByDefault class Serv {
             lastLots = lots;
             lastTicks = ticks;
 
-            final Match match = newMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost,
-                    now);
+            final Match match = newMatch(book, takerOrder, makerOrder, lots, sumLots, sumCost, now);
             matches.insertBack(match);
         }
 
@@ -440,8 +439,11 @@ public @NonNullByDefault class Serv {
 
     // Assumes that maker lots have not been reduced since matching took place.
 
-    private final void commitMatches(TraderSess taker, MarketBook book, SlQueue matches,
-            Posn takerPosn, long now, Response resp) {
+    private final void commitMatches(TraderSess taker, SlQueue matches, long now, Response resp) {
+        final MarketBook book = resp.book;
+        assert book != null;
+        final Posn takerPosn = resp.posn;
+        assert takerPosn != null;
         setDirty(taker, TraderSess.DIRTY_ORDER | TraderSess.DIRTY_TRADE | TraderSess.DIRTY_POSN);
         SlNode node = matches.getFirst();
         assert node != null;
@@ -841,11 +843,10 @@ public @NonNullByDefault class Serv {
             }
         }
         // Avoid allocating position when there are no matches.
-        Posn posn = null;
         if (!matches.isEmpty()) {
             // Avoid allocating position when there are no matches.
             // N.B. before commit phase, because this may fail.
-            posn = sess.getLazyPosn(book.getContr(), book.getSettlDay());
+            resp.posn = sess.getLazyPosn(book.getContr(), book.getSettlDay());
         }
 
         // Commit phase.
@@ -861,8 +862,8 @@ public @NonNullByDefault class Serv {
 
         // Commit matches.
         if (!matches.isEmpty()) {
-            assert posn != null;
-            commitMatches(sess, book, matches, posn, now, resp);
+            assert resp.posn != null;
+            commitMatches(sess, matches, now, resp);
         } else {
             // There are no matches.
             setDirty(sess, TraderSess.DIRTY_ORDER);

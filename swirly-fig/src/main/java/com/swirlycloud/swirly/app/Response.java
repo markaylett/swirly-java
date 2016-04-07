@@ -21,7 +21,7 @@ import com.swirlycloud.swirly.util.Jsonable;
 import com.swirlycloud.swirly.util.Params;
 
 public final @NonNullByDefault class Response implements AutoCloseable, Jsonable {
-    private @Nullable MarketBook book;
+    @Nullable MarketBook book;
     final SlQueue orders = new SlQueue();
     /**
      * All executions referenced in matches.
